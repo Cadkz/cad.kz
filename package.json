@@ -21,7 +21,7 @@
     "generate:types": "payload generate:types",
     "seed:demo": "payload run scripts/seed-demo.mjs",
     "migrate": "payload migrate",
-    "migrate:create": "payload migrate:create",
+    "migrate:create": "node scripts/migrate-create.mjs",
     "demo:setup": "node scripts/demo-setup.mjs",
     "vercel-build": "node scripts/vercel-build.mjs"
   },

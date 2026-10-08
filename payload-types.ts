@@ -249,6 +249,7 @@ export interface Media {
   alt: string;
   legacyKey?: string | null;
   legacyUrl?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -694,6 +695,7 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   legacyKey?: T;
   legacyUrl?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
