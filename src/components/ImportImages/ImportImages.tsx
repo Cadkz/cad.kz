@@ -11,8 +11,15 @@ function Totals({ totals }: { totals: ImagesTotals }) {
     <>
       <p className={styles.line}>
         Скачано {totals.downloaded}, уже были {totals.reused}, галерей заполнено {totals.galleries},
-        не скачалось {totals.failed.length}.
+        не скачалось {totals.failed.length}
+        {totals.hadGallery > 0 && `, пропущено с готовой галереей ${totals.hadGallery}`}.
       </p>
+      {totals.notInBase > 0 && (
+        <p className={styles.error} role="alert">
+          {totals.notInBase} товаров с картинками не найдены в базе: картинки им не поставлены.
+          Сначала запишите каталог (шаг 3), потом скачайте картинки ещё раз.
+        </p>
+      )}
       {totals.failed.length > 0 && (
         <details>
           <summary>Какие картинки не скачались</summary>
@@ -56,7 +63,7 @@ export function ImportImages({ plan }: { plan: Plan }) {
           «Докачать картинки», чтобы продолжить.
         </p>
       )}
-      {state.phase === 'done' && (
+      {state.phase === 'done' && state.totals.notInBase === 0 && (
         <p className={styles.done} role="status">
           Готово: обработаны все {state.total} товаров с картинками.
         </p>

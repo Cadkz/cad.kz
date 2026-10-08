@@ -356,12 +356,40 @@ export async function finishImport(payload, plannedKeys) {
   const result = emptyResult()
   const keys = new Set(plannedKeys)
   for (const collection of ['products', 'offers'])
-    for (const doc of await findAll(payload, collection))
+    for (const doc of (
+      await payload.find({
+        collection,
+        pagination: false,
+        select: { legacyKey: true, status: true },
+        ...OPTS,
+      })
+    ).docs)
       if (isBitrix(doc) && !keys.has(doc.legacyKey) && doc.status === 'published') {
         await payload.update({ collection, id: doc.id, data: { status: 'draft' }, ...OPTS })
         result[collection].unpublished++
       }
   return result
+}
+
+/**
+ * Ключи плана, которых нет в базе: товары (bitrix:product:…) ищутся среди товаров, остальное —
+ * среди вариантов. Конец запуска снимает с публикации пропавшее только когда пусто: проверка
+ * по самой базе, а не по счётчикам запуска.
+ * @param {object} payload
+ * @param {string[]} keys
+ * @returns {Promise<string[]>}
+ */
+export async function missingKeys(payload, keys) {
+  const found = new Set()
+  for (const collection of ['products', 'offers']) {
+    const wanted = keys.filter(
+      (k) => k.startsWith('bitrix:product:') === (collection === 'products'),
+    )
+    for (let i = 0; i < wanted.length; i += 500)
+      for (const doc of await findIn(payload, collection, 'legacyKey', wanted.slice(i, i + 500)))
+        found.add(doc.legacyKey)
+  }
+  return keys.filter((k) => !found.has(k))
 }
 
 /** Все ключи плана: по ним конец запуска понимает, что пропало из выгрузки. */

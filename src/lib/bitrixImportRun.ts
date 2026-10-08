@@ -4,6 +4,7 @@ import {
   addResult,
   emptyResult,
   finishImport,
+  missingKeys,
   startImport,
   writeOffers,
   writeProducts,
@@ -19,7 +20,7 @@ import { readItems, readKeys, readManufacturers } from '@/domain/bitrixImportInp
 /** Сколько секунд один запрос пишет в базу, прежде чем вернуть управление браузеру. */
 const WRITE_SECONDS = 20
 /** Если запуск не продвигался столько минут, страницу закрыли: можно начинать новый. */
-const STALE_MINUTES = 5
+const STALE_MINUTES = 2
 /** В журнале храним не больше стольких замечаний и ошибок картинок. */
 const KEEP_ISSUES = 500
 
@@ -41,6 +42,8 @@ type ImageResult = {
   products: number
   failed: ImageFailure[]
   postponed: number
+  notInBase: number
+  hadGallery: number
 }
 
 export type RunSnapshot = {
@@ -54,7 +57,13 @@ export type RunSnapshot = {
 }
 
 export type RunReply =
-  | { ok: true; runId: number | string; processed?: number; snapshot: RunSnapshot }
+  | {
+      ok: true
+      runId: number | string
+      processed?: number
+      missing?: string[]
+      snapshot: RunSnapshot
+    }
   | { ok: true; images: ImageResult }
   | { ok: false; status: number; error: string }
 
@@ -63,7 +72,15 @@ const fail = (status: number, error: string): RunReply => ({ ok: false, status, 
 const OPTS = { overrideAccess: true, depth: 0 } as const
 
 function emptyImages(): ImageResult {
-  return { downloaded: 0, reused: 0, products: 0, failed: [], postponed: 0 }
+  return {
+    downloaded: 0,
+    reused: 0,
+    products: 0,
+    failed: [],
+    postponed: 0,
+    notInBase: 0,
+    hadGallery: 0,
+  }
 }
 
 function count(value: unknown): number | null {
@@ -114,7 +131,7 @@ export async function startRun(payload: Payload, body: Record<string, unknown>, 
     ...OPTS,
   })
   if (busy.docs.length)
-    return fail(409, 'Импорт уже идёт в другой вкладке. Подождите его окончания или 5 минут.')
+    return fail(409, 'Импорт уже идёт в другой вкладке. Подождите его окончания или 2 минуты.')
 
   const snapshot: RunSnapshot = {
     source: 'admin-page',
@@ -173,11 +190,12 @@ export async function finishRun(payload: Payload, body: Record<string, unknown>)
   const keys = readKeys(body.keys)
   if ('error' in keys) return fail(400, keys.error ?? 'Неверные данные')
   const { snapshot } = run
-  const { planned, done } = snapshot
-  if (done.products < planned.products || done.offers < planned.offers)
-    return fail(409, 'Записано не всё: завершить запуск пока нельзя.')
+  const { planned } = snapshot
   if (keys.items.length !== planned.products + planned.offers)
     return fail(400, 'Список ключей не совпадает с планом запуска.')
+  // Проверка по самой базе: чего из плана в ней нет, то браузер допишет и спросит снова.
+  const missing = await missingKeys(payload, keys.items)
+  if (missing.length) return { ok: true, runId: run.id, missing, snapshot } satisfies RunReply
 
   keepIssues(addResult(snapshot.result, await finishImport(payload, keys.items)))
   await saveRun(payload, run.id, snapshot, 'done')
@@ -220,6 +238,8 @@ async function addImagesToLatestRun(payload: Payload, part: ImageResult) {
   images.reused += part.reused
   images.products += part.products
   images.postponed = part.postponed
+  images.notInBase = (images.notInBase ?? 0) + part.notInBase
+  images.hadGallery = (images.hadGallery ?? 0) + part.hadGallery
   images.failed = [...images.failed, ...part.failed].slice(0, KEEP_ISSUES)
   await payload.update({
     collection: 'import-runs',

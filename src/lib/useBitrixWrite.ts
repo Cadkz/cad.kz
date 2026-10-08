@@ -9,7 +9,12 @@ const PART = { products: 40, offers: 120 }
 
 type Stage = 'products' | 'offers' | 'finish'
 type Cursor = { runId: number | string; stage: Stage; part: number }
-type RunAnswer = { runId: number | string; processed?: number; snapshot: RunSnapshot }
+type RunAnswer = {
+  runId: number | string
+  processed?: number
+  missing?: string[]
+  snapshot: RunSnapshot
+}
 
 export type WriteState =
   | { phase: 'idle' }
@@ -40,6 +45,30 @@ async function sendPart<T>(
   }
 }
 
+/**
+ * Конец запуска. Сервер сверяет план с базой и возвращает, чего в ней нет; это дописываем
+ * и спрашиваем снова. Если и после двух дописок чего-то нет — запись не сохраняется.
+ */
+async function finishRun(plan: Plan, runId: number | string, show: (label: string) => void) {
+  const keys = [...plan.products, ...plan.offers].map((item) => item.legacyKey)
+  for (let round = 0; ; round++) {
+    show('Сверяем базу с выгрузкой и снимаем с публикации то, чего в выгрузке больше нет')
+    const answer = await step<RunAnswer>({ action: 'finish', runId, keys })
+    const missing = new Set(answer.missing ?? [])
+    if (!missing.size) return answer.snapshot
+    const products = plan.products.filter((p) => missing.has(p.legacyKey))
+    const offers = plan.offers.filter((o) => missing.has(o.legacyKey))
+    if (round >= 2)
+      throw new StepError(
+        `в базе не нашлось ${products.length} товаров из ${plan.products.length} и ${offers.length} вариантов из ${plan.offers.length}, хотя сайт ответил, что записал их. Перешлите это сообщение разработчику.`,
+      )
+    show(`Дописываем недостающее: ${missing.size}`)
+    for (const part of chunk(products, PART.products))
+      await sendPart('products', runId, part, () => {})
+    for (const part of chunk(offers, PART.offers)) await sendPart('offers', runId, part, () => {})
+  }
+}
+
 /** Запись плана в базу частями. После ошибки можно продолжить с того же места. */
 export function useBitrixWrite(plan: Plan | null) {
   const [state, setState] = useState<WriteState>({ phase: 'idle' })
@@ -66,7 +95,11 @@ export function useBitrixWrite(plan: Plan | null) {
     const show = (label: string) => setState({ phase: 'writing', label, done, total })
     try {
       show('Подготовка: производители, курсы, демотовары')
-      if (!resume || !cursor.current) cursor.current = await begin(plan, hideDemo)
+      if (!resume || !cursor.current) {
+        // Новый запуск: старый курсор не должен ожить, если начало не удалось.
+        cursor.current = null
+        cursor.current = await begin(plan, hideDemo)
+      }
       const at = cursor.current
       for (const stage of ['products', 'offers'] as const) {
         // Курсор идёт только вперёд: другой этап в нём — значит, этот уже записан.
@@ -85,11 +118,9 @@ export function useBitrixWrite(plan: Plan | null) {
         at.stage = NEXT[stage]
         at.part = 0
       }
-      show('Снимаем с публикации то, чего больше нет в выгрузке')
-      const keys = [...plan.products, ...plan.offers].map((item) => item.legacyKey)
-      const finished = await step<RunAnswer>({ action: 'finish', runId: at.runId, keys })
+      const snapshot = await finishRun(plan, at.runId, show)
       cursor.current = null
-      setState({ phase: 'written', snapshot: finished.snapshot })
+      setState({ phase: 'written', snapshot })
     } catch (error) {
       setState({ phase: 'stopped', error: message(error), done, total })
     }

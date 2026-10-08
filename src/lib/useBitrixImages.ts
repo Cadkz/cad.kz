@@ -14,6 +14,8 @@ type ImageAnswer = {
     products: number
     failed: ImageFailure[]
     postponed: number
+    notInBase: number
+    hadGallery: number
   }
 }
 
@@ -21,6 +23,8 @@ export type ImagesTotals = {
   downloaded: number
   reused: number
   galleries: number
+  notInBase: number
+  hadGallery: number
   failed: ImageFailure[]
 }
 
@@ -30,7 +34,14 @@ export type ImagesState =
   | { phase: 'stopped'; error: string; done: number; total: number; totals: ImagesTotals }
   | { phase: 'done'; total: number; totals: ImagesTotals }
 
-const emptyTotals = (): ImagesTotals => ({ downloaded: 0, reused: 0, galleries: 0, failed: [] })
+const emptyTotals = (): ImagesTotals => ({
+  downloaded: 0,
+  reused: 0,
+  galleries: 0,
+  notInBase: 0,
+  hadGallery: 0,
+  failed: [],
+})
 
 type Item = { legacyKey: string; title: string; images: string[] }
 
@@ -45,7 +56,11 @@ async function sendPart(part: Item[], failedPaths: Set<string>, totals: ImagesTo
     const { images } = await step<ImageAnswer>({ action: 'images', items: part, skip })
     totals.downloaded += images.downloaded
     totals.galleries += images.products
-    if (pass === 0) totals.reused += images.reused
+    if (pass === 0) {
+      totals.reused += images.reused
+      totals.notInBase += images.notInBase
+      totals.hadGallery += images.hadGallery
+    }
     for (const failure of images.failed) {
       failedPaths.add(failure.path)
       totals.failed.push(failure)

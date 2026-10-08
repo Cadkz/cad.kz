@@ -101,8 +101,19 @@ export async function importImages(
     ).map((p) => [p.legacyKey, p]),
   )
   const skipped = new Set(skip)
-  /** @type {{ downloaded: number, reused: number, products: number, failed: { product: string, path: string, reason: string }[], postponed: number }} */
-  const result = { downloaded: 0, reused: 0, products: 0, failed: [], postponed: 0 }
+  /**
+   * notInBase — товаров ещё нет в базе (сначала запись каталога), hadGallery — галерея уже есть.
+   * @type {{ downloaded: number, reused: number, products: number, failed: { product: string, path: string, reason: string }[], postponed: number, notInBase: number, hadGallery: number }}
+   */
+  const result = {
+    downloaded: 0,
+    reused: 0,
+    products: 0,
+    failed: [],
+    postponed: 0,
+    notInBase: 0,
+    hadGallery: 0,
+  }
   let started = 0
 
   async function download(item, imagePath) {
@@ -152,7 +163,14 @@ export async function importImages(
 
   async function oneProduct(item) {
     const product = productByKey.get(item.legacyKey)
-    if (!product || product.gallery?.length) return
+    if (!product) {
+      result.notInBase++
+      return
+    }
+    if (product.gallery?.length) {
+      result.hadGallery++
+      return
+    }
     const found = []
     for (const imagePath of item.images) found.push(await oneImage(item, imagePath))
     // Галерея ставится, когда скачано всё, что можно: иначе следующий запуск её не дополнит.

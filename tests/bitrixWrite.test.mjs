@@ -4,6 +4,7 @@ import { imageUrl, importImages } from '../src/domain/bitrixImages.mjs'
 import {
   addResult,
   finishImport,
+  missingKeys,
   planImport,
   plannedKeys,
   productSlug,
@@ -327,4 +328,26 @@ test('проверка частей со страницы: принимает п
   assert.match(readItems('product', [], 60).error, /Пустая/)
   assert.deepEqual(readKeys(plannedKeys(plan)).items, plannedKeys(plan))
   assert.ok(readKeys(['demo:products:x']).error)
+})
+
+test('сверка с базой: находит товары и варианты плана, которых нет в базе', async () => {
+  const plan = planImport(catalog())
+  const payload = fakePayload()
+  assert.deepEqual(await missingKeys(payload, plannedKeys(plan)), plannedKeys(plan))
+  await writeImport(payload, plan)
+  assert.deepEqual(await missingKeys(payload, plannedKeys(plan)), [])
+  payload.db.set(
+    'offers',
+    payload.db.get('offers').filter((o) => o.legacyKey !== 'bitrix:offer:10'),
+  )
+  assert.deepEqual(await missingKeys(payload, plannedKeys(plan)), ['bitrix:offer:10'])
+})
+
+test('картинки: товара нет в базе — считается отдельно, а не как готовый', async () => {
+  const plan = planImport(catalog())
+  const result = await importImages(fakePayload(), plan, {
+    fetch: async () => ({ data: Buffer.from('png'), mimetype: 'image/png' }),
+  })
+  assert.equal(result.notInBase, 1)
+  assert.equal(result.downloaded, 0)
 })
