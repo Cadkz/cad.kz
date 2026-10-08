@@ -31,7 +31,7 @@ const env = {
   ...process.env,
   APP_MODE: 'demo',
   DB_SCHEMA_MODE: 'migrate',
-  ...(firstTime ? { SEED_ONLY_IF_EMPTY: '1' } : {}),
+  ...(firstTime ? { SEED_ONLY_IF_EMPTY: '1', FIRST_TIME: '1' } : {}),
 }
 
 function run(title, args, { required = true } = {}) {
