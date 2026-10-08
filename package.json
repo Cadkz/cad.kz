@@ -19,11 +19,15 @@
     "check:styles": "node scripts/check-styles.mjs",
     "check": "pnpm lint && pnpm check:styles && pnpm typecheck && pnpm test",
     "generate:types": "payload generate:types",
-    "seed:demo": "payload run scripts/seed-demo.mjs"
+    "seed:demo": "payload run scripts/seed-demo.mjs",
+    "migrate": "payload migrate",
+    "migrate:create": "payload migrate:create",
+    "demo:setup": "node scripts/demo-setup.mjs"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.90.2",
     "@payloadcms/next": "3.90.2",
+    "@payloadcms/storage-vercel-blob": "3.90.2",
     "@payloadcms/translations": "3.90.2",
     "graphql": "16.11.0",
     "lucide-react": "1.52.0",
