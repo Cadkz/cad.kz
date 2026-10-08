@@ -63,6 +63,14 @@ export function TelegramIcon(props: IconProps) {
   )
 }
 
+export function FacebookIcon(props: IconProps) {
+  return (
+    <Base {...props}>
+      <path d="M14.5 21v-7.5H17l.5-3h-3V8.75c0-.9.4-1.75 1.75-1.75H17.5V4.4A15 15 0 0 0 15 4.2c-2.6 0-4 1.55-4 4.3v2H8.5v3H11V21" />
+    </Base>
+  )
+}
+
 export function WhatsappIcon(props: IconProps) {
   return (
     <Base {...props}>
@@ -74,6 +82,7 @@ export function WhatsappIcon(props: IconProps) {
 
 export const socialIcons = {
   instagram: InstagramIcon,
+  facebook: FacebookIcon,
   youtube: YoutubeIcon,
   telegram: TelegramIcon,
   linkedin: LinkedinIcon,
@@ -81,6 +90,7 @@ export const socialIcons = {
 
 export const socialNames = {
   instagram: 'Instagram',
+  facebook: 'Facebook',
   youtube: 'YouTube',
   telegram: 'Telegram',
   linkedin: 'LinkedIn',

@@ -1,6 +1,6 @@
 import { Mail } from 'lucide-react'
 import type { Contacts } from '@/lib/navigation'
-import { socialIcons, socialNames, WhatsappIcon } from '../icons/icons'
+import { socialIcons, socialNames, TelegramIcon, WhatsappIcon } from '../icons/icons'
 import styles from './ContactList.module.css'
 
 type Props = { contacts: Contacts; socials?: boolean }
@@ -18,6 +18,12 @@ export function ContactList({ contacts, socials = true }: Props) {
         <a href={contacts.whatsappHref} className={styles.line} target="_blank" rel="noreferrer">
           <WhatsappIcon size={16} />
           Написать в WhatsApp
+        </a>
+      )}
+      {contacts.telegramHref && (
+        <a href={contacts.telegramHref} className={styles.line} target="_blank" rel="noreferrer">
+          <TelegramIcon size={16} />
+          Написать в Telegram
         </a>
       )}
       {contacts.email && (

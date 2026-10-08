@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import type { Slide } from '@/lib/home'
 import styles from './HeroSlider.module.css'
 
-const INTERVAL = 7000
+const INTERVAL = 4000
 
 /**
  * Баннер с акциями из CMS. Листается стрелками и точками; автопрокрутка останавливается

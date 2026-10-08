@@ -33,6 +33,7 @@ export const siteSettings: GlobalConfig = {
           required: true,
           options: [
             { label: 'Instagram', value: 'instagram' },
+            { label: 'Facebook', value: 'facebook' },
             { label: 'YouTube', value: 'youtube' },
             { label: 'Telegram', value: 'telegram' },
             { label: 'LinkedIn', value: 'linkedin' },

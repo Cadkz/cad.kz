@@ -842,7 +842,7 @@ export interface SiteSetting {
   email?: string | null;
   socials?:
     | {
-        network: 'instagram' | 'youtube' | 'telegram' | 'linkedin';
+        network: 'instagram' | 'facebook' | 'youtube' | 'telegram' | 'linkedin';
         url: string;
         id?: string | null;
       }[]

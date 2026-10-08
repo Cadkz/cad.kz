@@ -545,7 +545,14 @@ export const demoSettings = {
     { label: '+7 (771) 936-50-20', tel: '+77719365020' },
   ],
   whatsapp: '77015501893',
+  telegram: 'https://t.me/cadkz',
   email: 'office@cad.kz',
+  socials: [
+    { network: 'instagram' as const, url: 'https://www.instagram.com/cad.kz_inst' },
+    { network: 'youtube' as const, url: 'https://www.youtube.com/@CADkz-gc2rp' },
+    { network: 'telegram' as const, url: 'https://t.me/cadkz' },
+    { network: 'facebook' as const, url: 'https://www.facebook.com/CADkz.old.page' },
+  ],
   footerText:
     'Комплексные решения для проектировщиков: софт, оборудование, обучение и консалтинг по BIM в Казахстане.',
 }
