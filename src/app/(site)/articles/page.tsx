@@ -1,0 +1,1 @@
+export default function Articles() { return <main><section><p className="eyebrow">БАЗА ЗНАНИЙ</p><h1>Статьи и практика</h1><p>Материалы появятся после импорта и проверки редактором.</p></section></main> }

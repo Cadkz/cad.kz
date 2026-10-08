@@ -1,0 +1,4 @@
+import Link from 'next/link'
+import './styles.css'
+export const metadata = { title: 'CAD.kz — инженерные решения', description: 'Прототип нового сайта CAD.kz', robots: { index: false, follow: false } }
+export default function Layout({ children }: { children: React.ReactNode }) { return <html lang="ru"><body><div className="demo">Демонстрационный прототип · товары и цены учебные · заявки не отправляются</div><header><Link className="logo" href="/">CAD<span>.kz</span></Link><nav><Link href="/#catalog">Каталог решений</Link><Link href="/articles">База знаний</Link><a href="/#consultant">Подобрать решение ↗</a></nav></header>{children}<footer><Link className="logo" href="/">CAD.kz</Link><p>Программное обеспечение · Оборудование · Обучение · Услуги</p><small>Отдельный демонстрационный сайт. Интеграции отключены.</small></footer></body></html> }
