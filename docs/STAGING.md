@@ -21,7 +21,8 @@
 ## Шаг 3. Сайт на Vercel (10 минут)
 1. Откройте vercel.com, «Sign Up» → «Continue with GitHub», тариф Hobby.
 2. «Add New…» → «Project», найдите `cad.kz`, нажмите «Import». Если репозитория нет в списке, нажмите «Adjust GitHub App Permissions» и разрешите доступ к нему.
-3. Не нажимая Deploy, раскройте блок «Environment Variables» и добавьте переменные. Имя пишется слева, значение справа, после каждой нажимайте «Add»:
+3. Раскройте «Build and Output Settings», у строки «Build Command» включите «Override» и впишите `pnpm run vercel-build`.
+4. Не нажимая Deploy, раскройте блок «Environment Variables» и добавьте переменные. Имя пишется слева, значение справа, после каждой нажимайте «Add»:
 
    | Имя | Значение |
    | --- | --- |
@@ -33,10 +34,10 @@
    | `BOOTSTRAP_ADMIN_EMAIL` | ваша почта для входа в админку |
    | `BOOTSTRAP_ADMIN_PASSWORD` | пароль для админки, не короче 16 символов |
 
-4. Нажмите «Deploy» и подождите 3–5 минут. При первой сборке сайт сам создаст таблицы, загрузит демоданные и заведёт вас как администратора. Повторные сборки данные не трогают.
-5. Подключите хранилище картинок: в проекте вкладка «Storage» → «Create Database» → «Blob» → создать → «Connect Project», выберите этот проект. Vercel сам добавит ключ `BLOB_READ_WRITE_TOKEN`.
-6. Вкладка «Deployments» → у верхней записи три точки → «Redeploy», чтобы сайт увидел ключ.
-7. Когда всё работает, в «Settings» → «Environment Variables» удалите `BOOTSTRAP_ADMIN_EMAIL` и `BOOTSTRAP_ADMIN_PASSWORD`: они нужны только для первой сборки.
+5. Нажмите «Deploy» и подождите 3–5 минут. При первой сборке сайт сам создаст таблицы, загрузит демоданные и заведёт вас как администратора. Повторные сборки данные не трогают.
+6. Подключите хранилище картинок: в проекте вкладка «Storage» → «Create Database» → «Blob». В окне выберите доступ «Public» (не Private, сайт отдаёт картинки по ссылке) и поставьте галочку «Add a read-write token env var to this connection», затем «Create» и подключите к проекту `cad-kz`. В «Settings» → «Environment Variables» должна появиться `BLOB_READ_WRITE_TOKEN`.
+7. Вкладка «Deployments» → у верхней записи три точки → «Redeploy», чтобы сайт увидел ключ.
+8. Когда всё работает, в «Settings» → «Environment Variables» удалите `BOOTSTRAP_ADMIN_EMAIL` и `BOOTSTRAP_ADMIN_PASSWORD`: они нужны только для первой сборки.
 
 ## Шаг 4. Проверка
 Откройте адрес проекта (вида `cad-kz-….vercel.app`) и пройдите список:
