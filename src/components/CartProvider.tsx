@@ -1,7 +1,7 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import Link from 'next/link'
+import { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
 import { normalizeCart } from '@/domain/cart.mjs'
 
 export type CartItem = { offerId: string; quantity: number }
@@ -19,11 +19,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [ready, setReady] = useState(false)
   useEffect(() => {
-    try { setItems(normalizeCart(JSON.parse(localStorage.getItem(storageKey) || '[]'))) } catch { setItems([]) }
+    try {
+      setItems(normalizeCart(JSON.parse(localStorage.getItem(storageKey) || '[]')))
+    } catch {
+      setItems([])
+    }
     setReady(true)
   }, [])
   useEffect(() => {
-    if (ready) { try { localStorage.setItem(storageKey, JSON.stringify(items)) } catch { /* Session remains usable if storage is unavailable. */ } }
+    if (ready) {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(items))
+      } catch {
+        /* Session remains usable if storage is unavailable. */
+      }
+    }
   }, [items, ready])
   function add(item: CartItem) {
     // Validate synchronously so the configurator can display a useful error.
@@ -31,9 +41,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems(next)
   }
   function setQuantity(offerId: string, quantity: number) {
-    setItems(normalizeCart(items.map(item => item.offerId === offerId ? { ...item, quantity } : item)))
+    setItems(
+      normalizeCart(items.map((item) => (item.offerId === offerId ? { ...item, quantity } : item))),
+    )
   }
-  return <Context.Provider value={{ items, ready, add, setQuantity, remove: offerId => setItems(items.filter(item => item.offerId !== offerId)) }}>{children}</Context.Provider>
+  return (
+    <Context.Provider
+      value={{
+        items,
+        ready,
+        add,
+        setQuantity,
+        remove: (offerId) => setItems(items.filter((item) => item.offerId !== offerId)),
+      }}
+    >
+      {children}
+    </Context.Provider>
+  )
 }
 
 export function useCart() {
@@ -45,5 +69,9 @@ export function useCart() {
 export function CartLink() {
   const { items } = useCart()
   const quantity = items.reduce((sum, item) => sum + item.quantity, 0)
-  return <Link href="/cart" aria-label={`Корзина, ${quantity} товаров`}>Корзина <span className="cart-badge">{quantity}</span></Link>
+  return (
+    <Link href="/cart" aria-label={`Корзина, ${quantity} товаров`}>
+      Корзина <span className="cart-badge">{quantity}</span>
+    </Link>
+  )
 }

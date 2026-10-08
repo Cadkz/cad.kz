@@ -1,0 +1,122 @@
+/*
+ * Дизайн-токены CAD.kz — единственный источник цветов, шрифтов, размеров и отступов.
+ * Значения сведены из четырёх макетов в /Макеты (см. docs/DESIGN.md).
+ * В компонентах использовать только var(--…). Новые значения добавлять сюда, а не в компонент.
+ */
+
+:root {
+  /* ---------- Цвета: бренд ---------- */
+  --color-navy: #112174; /* основной фирменный: заголовки, тёмные блоки */
+  --color-navy-deep: #0b154a; /* градиенты и самые тёмные поверхности */
+  --color-blue: #1f3da8; /* кнопки, ссылки, акцент, цвет логотипа */
+  --color-blue-hover: #18318a;
+  --color-blue-soft: #e4ecf7; /* фон плашек, вторичные кнопки, чипы */
+  --color-blue-mid: #d2dff3; /* рамки и hover на светлом */
+
+  /* Акцент на тёмном фоне (только поверх navy/navy-deep) */
+  --color-sky: #8ac4ff;
+  --color-sky-strong: #5fa8ff;
+
+  /* ---------- Цвета: нейтральные ---------- */
+  --color-bg: #f6f8fb; /* фон страницы */
+  --color-surface: #ffffff; /* карточки, панели */
+  --color-text: #1a2036; /* основной текст */
+  --color-text-muted: #6b7280; /* вторичный текст, подписи */
+  --color-text-inverse: #ffffff;
+  --color-border: #e7e9ee;
+  --color-gray-300: #cccccc;
+  --color-gray-500: #878787;
+  --color-gray-700: #464646;
+
+  /* ---------- Цвета: состояния ---------- */
+  --color-success: #1e8e5a;
+  --color-error: #c0392b;
+  --color-whatsapp: #25d366;
+  --color-focus: var(--color-blue);
+
+  /* ---------- Шрифты ---------- */
+  --font-heading: "Manrope", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-heavy: 800;
+
+  /* Шкала кеглей. Других размеров шрифта в проекте нет. */
+  --text-display: clamp(28px, 2.2vw + 18px, 36px); /* h1 страницы */
+  --text-h2: clamp(22px, 1.2vw + 16px, 28px); /* заголовок секции */
+  --text-h3: 20px; /* заголовок карточки, крупный подзаголовок */
+  --text-h4: 17px; /* заголовок модалки, панели, подзаголовок статьи */
+  --text-lead: 17px; /* вводный абзац */
+  --text-body: 15px; /* основной текст */
+  --text-sm: 13px; /* описания в карточках, подписи, мета */
+  --text-xs: 12px; /* бейджи, служебные пометки */
+  --text-overline: 11px; /* надзаголовок КАПСОМ */
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7; /* длинные тексты статей */
+
+  --tracking-tight: -0.02em;
+  --tracking-overline: 0.12em;
+
+  /* ---------- Отступы (шаг 4px) ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  --section-gap: var(--space-12); /* вертикальный отступ между секциями (на ≥640px — 64px) */
+
+  /* ---------- Скругления ---------- */
+  --radius-lg: 24px; /* баннеры, крупные карточки, секции */
+  --radius-md: 12px; /* кнопки, поля, малые карточки, чипы */
+  --radius-sm: 8px; /* бейджи, миниатюры, теги */
+  --radius-pill: 999px;
+  --radius-round: 50%;
+
+  /* ---------- Тени ---------- */
+  --shadow-sm: 0 4px 12px rgba(17, 33, 116, 0.08); /* hover карточки */
+  --shadow-md: 0 16px 40px rgba(17, 33, 116, 0.12); /* выпадающие меню, плавающие кнопки */
+  --shadow-lg: 0 24px 60px rgba(9, 15, 45, 0.22); /* модальные окна, корзина, чат */
+
+  /* ---------- Контейнеры ---------- */
+  --container: 1200px;
+  --container-narrow: 840px; /* статьи и новости */
+  --gutter: var(--space-5); /* боковой отступ контейнера (на ≥640px — 32px) */
+  --header-height: 64px;
+
+  /* ---------- Анимация ---------- */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ---------- Слои ---------- */
+  --z-header: 100;
+  --z-dropdown: 200;
+  --z-drawer: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+}
+
+/* Брейкпоинты (в media нельзя использовать переменные — только эти три значения):
+ *   sm: 640px   md: 960px   lg: 1200px
+ * Писать mobile-first: базовые стили для телефона, @media (min-width: …) для больших экранов.
+ */
+@media (min-width: 640px) {
+  :root {
+    --gutter: var(--space-8);
+    --section-gap: var(--space-16);
+    --header-height: 72px;
+  }
+}

@@ -1,5 +1,61 @@
 export const demoProducts = [
-  { id: 'demo-geo', title: 'Геотехнические расчёты', direction: 'Строительство', manufacturer: 'Демо-производитель A', task: 'Расчёт оснований', description: 'Учебный пример подбора ПО для расчёта оснований. Не является коммерческим предложением.', offers: [{ id: 'geo-standard', title: 'Базовая комплектация', amount: '100', currency: 'USD', rate: '500' }, { id: 'geo-pro', title: 'Расширенная комплектация', amount: '200', currency: 'USD', rate: '500' }] },
-  { id: 'demo-mech', title: 'Проектирование деталей', direction: 'Машиностроение', manufacturer: 'Демо-производитель B', task: '3D-моделирование', description: 'Учебный пример инженерного ПО для машиностроения.', offers: [{ id: 'mech-standard', title: 'Годовая лицензия', amount: '150', currency: 'EUR', rate: '550' }] },
-  { id: 'demo-survey', title: 'Обработка геоданных', direction: 'Геодезия', manufacturer: 'Демо-производитель A', task: 'Обработка измерений', description: 'Учебный пример решения для обработки геодезических измерений.', offers: [{ id: 'survey-standard', title: 'Рабочее место', amount: '80000', currency: 'KZT', rate: '1' }] },
+  {
+    id: 'demo-geo',
+    title: 'Геотехнические расчёты',
+    direction: 'Строительство',
+    manufacturer: 'Демо-производитель A',
+    task: 'Расчёт оснований',
+    description:
+      'Учебный пример подбора ПО для расчёта оснований. Не является коммерческим предложением.',
+    offers: [
+      {
+        id: 'geo-standard',
+        title: 'Базовая комплектация',
+        amount: '100',
+        currency: 'USD',
+        rate: '500',
+      },
+      {
+        id: 'geo-pro',
+        title: 'Расширенная комплектация',
+        amount: '200',
+        currency: 'USD',
+        rate: '500',
+      },
+    ],
+  },
+  {
+    id: 'demo-mech',
+    title: 'Проектирование деталей',
+    direction: 'Машиностроение',
+    manufacturer: 'Демо-производитель B',
+    task: '3D-моделирование',
+    description: 'Учебный пример инженерного ПО для машиностроения.',
+    offers: [
+      {
+        id: 'mech-standard',
+        title: 'Годовая лицензия',
+        amount: '150',
+        currency: 'EUR',
+        rate: '550',
+      },
+    ],
+  },
+  {
+    id: 'demo-survey',
+    title: 'Обработка геоданных',
+    direction: 'Геодезия',
+    manufacturer: 'Демо-производитель A',
+    task: 'Обработка измерений',
+    description: 'Учебный пример решения для обработки геодезических измерений.',
+    offers: [
+      {
+        id: 'survey-standard',
+        title: 'Рабочее место',
+        amount: '80000',
+        currency: 'KZT',
+        rate: '1',
+      },
+    ],
+  },
 ]
