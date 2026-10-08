@@ -2,10 +2,32 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { demoProducts } from '@/domain/demo'
+import { useCart } from './CartProvider'
 export function Configurator({ product }: { product: typeof demoProducts[number] }) {
   const [offerId, setOffer] = useState(product.offers[0].id), [quantity, setQuantity] = useState(1), [result, setResult] = useState(''), [busy, setBusy] = useState(false)
-  async function calculate() { setBusy(true); setResult(''); try { const response = await fetch('/api/quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offerId, quantity }) }); const data = await response.json(); setResult(response.ok ? `${new Intl.NumberFormat('ru-KZ').format(BigInt(data.totalKzt))} ₸ · учебная цена, с НДС 16%` : data.error) } catch { setResult('Не удалось рассчитать цену. Попробуйте ещё раз.') } finally { setBusy(false) } }
-  return <div className="config"><label>Комплектация<select value={offerId} onChange={e => { setOffer(e.target.value); setResult('') }}>{product.offers.map(o => <option key={o.id} value={o.id}>{o.title}</option>)}</select></label><label>Количество<input type="number" min="1" max="999" value={quantity} onChange={e => { setQuantity(Number(e.target.value)); setResult('') }}/></label><button disabled={busy} onClick={calculate}>{busy ? 'Расчёт…' : 'Рассчитать цену'}</button><p role="status">{result}</p></div>
+  const [calculated, setCalculated] = useState(false)
+  const { add, ready } = useCart()
+  async function calculate() {
+    setBusy(true); setResult(''); setCalculated(false)
+    try {
+      const response = await fetch('/api/quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offerId, quantity }) })
+      const data = await response.json()
+      setResult(response.ok ? `${new Intl.NumberFormat('ru-KZ').format(BigInt(data.totalKzt))} ₸ · учебная цена, с НДС 16%` : data.error)
+      setCalculated(response.ok)
+    } catch { setResult('Не удалось рассчитать цену. Попробуйте ещё раз.') }
+    finally { setBusy(false) }
+  }
+  function addToCart() {
+    try { add({ offerId, quantity }); setResult('Комплектация добавлена в корзину. При открытии корзины цена будет пересчитана сервером.') }
+    catch (error) { setResult(error instanceof Error ? error.message : 'Не удалось добавить товар') }
+  }
+  return <div className="config">
+    <label>Комплектация<select disabled={busy} value={offerId} onChange={e => { setOffer(e.target.value); setResult(''); setCalculated(false) }}>{product.offers.map(o => <option key={o.id} value={o.id}>{o.title}</option>)}</select></label>
+    <label>Количество<input disabled={busy} type="number" min="1" max="999" value={quantity} onChange={e => { setQuantity(Number(e.target.value)); setResult(''); setCalculated(false) }}/></label>
+    <button disabled={busy} onClick={calculate}>{busy ? 'Расчёт…' : 'Рассчитать цену'}</button>
+    {calculated && <button className="secondary" disabled={busy || !ready} onClick={addToCart}>В корзину</button>}
+    <p role="status">{result} {calculated && <Link href="/cart">Открыть корзину →</Link>}</p>
+  </div>
 }
 export default function Catalog() {
   const [direction, setDirection] = useState(''), [manufacturer, setManufacturer] = useState(''), [task, setTask] = useState(''), [selected, setSelected] = useState<typeof demoProducts[number] | null>(null)
