@@ -25,6 +25,35 @@ const AD = 'Autodesk'
 const CS = 'Csoft Development'
 const NTP = 'НТП Трубопровод'
 
+/**
+ * Программы, снятые производителем с продажи (09.10.2026, решение владельца: убрать с сайта).
+ * Источник — список Autodesk retired products и страница SketchBook на autodesk.com.
+ * @type {{ label: string, vendor: string, title: RegExp }[]}
+ */
+export const RETIRED = [
+  { label: 'Lustre (снят с продажи 07.05.2024)', vendor: AD, title: /lustre/i },
+  { label: 'Smoke (снят 07.09.2022)', vendor: AD, title: /smoke/i },
+  { label: 'Mudbox (снят 07.08.2026)', vendor: AD, title: /mudbox/i },
+  { label: 'Maya LT (снят 07.12.2022)', vendor: AD, title: /maya lt/i },
+  { label: 'SketchBook Pro (Autodesk прекратил 30.06.2021)', vendor: AD, title: /sketchbook/i },
+  { label: 'Helius (снят 07.02.2022)', vendor: AD, title: /helius/i },
+  {
+    label: 'TruComposites и TruNest (сняты 06.05.2021)',
+    vendor: AD,
+    title: /trucomposite|trunest/i,
+  },
+  { label: 'Character Generator (снят 07.08.2021)', vendor: AD, title: /character/i },
+]
+
+/**
+ * Снят ли товар с продажи: такие товары скрываются, а не привязываются к разделам.
+ * @param {{ title: string, vendor: string }} product
+ * @returns {boolean}
+ */
+export function isRetired(product) {
+  return RETIRED.some((item) => item.vendor === product.vendor && item.title.test(product.title))
+}
+
 /** @type {DirectionRule[]} */
 export const DIRECTION_RULES = [
   // Оборудование
@@ -150,7 +179,6 @@ export const DIRECTION_RULES = [
     vendor: 'SCAD',
     title: /запрос|кросс|откос/i,
     sections: ['geotech', 'structural'],
-    exceptions: [{ label: 'ОТКОС', title: /откос/i, sections: ['geotech'] }],
   },
   {
     key: 'scad',
