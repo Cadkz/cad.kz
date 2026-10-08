@@ -7,10 +7,6 @@ export const isAdmin: Access = ({ req }) => req.user?.role === 'admin'
 export const isEditor: Access = ({ req }) =>
   req.user?.role === 'admin' || req.user?.role === 'editor'
 
-/** Администратор или менеджер по продажам: видят заказы, только чтение. */
-export const canReadOrders: Access = ({ req }) =>
-  req.user?.role === 'admin' || req.user?.role === 'manager'
-
 /** Гости видят только опубликованное, вошедшие пользователи — всё. */
 export const publishedOrSignedIn: Access = ({ req }) =>
   req.user ? true : { status: { equals: 'published' } }

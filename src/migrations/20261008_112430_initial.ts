@@ -14,7 +14,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TYPE "public"."enum_publications_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum_publications_kind" AS ENUM('article', 'news', 'promotion');
   CREATE TYPE "public"."enum_exchange_rates_currency" AS ENUM('USD', 'EUR', 'RUB');
-  CREATE TYPE "public"."enum_users_role" AS ENUM('admin', 'editor', 'manager');
+  CREATE TYPE "public"."enum_users_role" AS ENUM('admin', 'editor');
   CREATE TYPE "public"."enum_orders_mode" AS ENUM('demo', 'live');
   CREATE TYPE "public"."enum_orders_buyer_type" AS ENUM('individual', 'company');
   CREATE TYPE "public"."enum_crm_deliveries_state" AS ENUM('pending', 'processing', 'not-sent-demo', 'sent', 'failed', 'dead');

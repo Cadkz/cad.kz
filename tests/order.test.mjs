@@ -232,7 +232,11 @@ test('данные для CRM берутся из сохранённого за�
   }
   const lead = toCrmLead(order)
   assert.deepEqual(lead.buyer, { type: 'company', companyName: 'ТОО Проект-Сервис', bin: BIN })
-  assert.deepEqual(lead.items, [{ offerId: '11', quantity: 2, totalKzt: '5846400' }])
+  assert.equal(lead.items.length, 1)
+  assert.equal(lead.items[0].offerId, '11')
+  assert.equal(lead.items[0].quantity, 2)
+  assert.equal(lead.items[0].totalKzt, '5846400')
+  assert.ok(lead.items[0].title && lead.items[0].unitKzt, 'название и цена за единицу в лиде есть')
   assert.equal(lead.totalKzt, '5846400')
   assert.equal(lead.idempotencyKey, KEY)
   assert.equal(lead.consent.accepted, true)

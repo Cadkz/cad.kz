@@ -261,9 +261,14 @@ export function toCrmLead(order) {
         ? { type: 'company', companyName: buyer.companyName, bin: buyer.bin }
         : { type: 'individual' },
     comment: order.comment || undefined,
+    // Лид должен быть понятен менеджеру без CMS: названия, комплектация, лицензия и цены.
     items: order.snapshot.lines.map((line) => ({
       offerId: line.offerId,
+      title: line.productTitle,
+      configuration: line.configuration,
+      license: line.license,
       quantity: line.quantity,
+      unitKzt: line.unitKzt,
       totalKzt: line.totalKzt,
     })),
     totalKzt: order.snapshot.totalKzt,

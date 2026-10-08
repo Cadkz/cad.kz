@@ -8,23 +8,30 @@ function kzt(value) {
   return `${money.format(BigInt(value))} ₸`
 }
 
-/** Состав заявки текстом для комментария лида. */
-function describe(lead, lines) {
-  const rows = lines.map((line) => `${line.title}, ${line.configuration}: ${line.quantity} шт.`)
-  const parts = [...rows, `Итого: ${kzt(lead.totalKzt)}`]
+/** Состав заявки текстом для комментария лида: менеджер видит всё, не открывая CMS. */
+function describe(lead) {
+  const rows = lead.items.map((item) => {
+    const options = [item.configuration, item.license].filter(Boolean).join(', ')
+    const what = options ? `${item.title}, ${options}` : item.title
+    return `${what}: ${item.quantity} шт. × ${kzt(item.unitKzt)} = ${kzt(item.totalKzt)}`
+  })
+  const parts = [...rows, `Итого с НДС: ${kzt(lead.totalKzt)}`]
   if (lead.buyer.type === 'company') parts.push(`БИН: ${lead.buyer.bin}`)
   if (lead.comment) parts.push(`Комментарий покупателя: ${lead.comment}`)
+  if (lead.messages.length) {
+    parts.push('', 'Диалог с консультантом на сайте:')
+    for (const message of lead.messages) {
+      const who = message.role === 'user' ? 'Клиент' : 'Консультант'
+      parts.push(`${who}: ${message.content}`)
+    }
+  }
   return parts.join('\n')
 }
 
 /**
  * @param {object} lead Данные из toCrmLead.
- * @param {Array<{ offerId: string, title: string, configuration: string, quantity: number }>} [lines]
- *   Названия строк. Если не переданы, в комментарии остаются только идентификаторы предложений.
  */
-export function toBitrix24Lead(lead, lines) {
-  const rows =
-    lines ?? lead.items.map((item) => ({ ...item, title: item.offerId, configuration: '' }))
+export function toBitrix24Lead(lead) {
   return {
     method: 'crm.lead.add',
     params: {
@@ -36,7 +43,7 @@ export function toBitrix24Lead(lead, lines) {
         EMAIL: lead.contact.email ? [{ VALUE: lead.contact.email, VALUE_TYPE: 'WORK' }] : undefined,
         OPPORTUNITY: lead.totalKzt,
         CURRENCY_ID: 'KZT',
-        COMMENTS: describe(lead, rows),
+        COMMENTS: describe(lead),
         SOURCE_ID: 'WEB',
         // По этим двум полям при неясном ответе ищем уже созданный лид, а не создаём второй.
         ORIGINATOR_ID: 'cad.kz',

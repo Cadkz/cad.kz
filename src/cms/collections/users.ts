@@ -17,7 +17,6 @@ export const users: CollectionConfig = {
       options: [
         { label: 'Администратор', value: 'admin' },
         { label: 'Редактор (маркетолог)', value: 'editor' },
-        { label: 'Менеджер по продажам (только заказы, чтение)', value: 'manager' },
       ],
       access: {
         create: ({ req }) => req.user?.role === 'admin',

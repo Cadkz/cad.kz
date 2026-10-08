@@ -19,6 +19,17 @@ if (process.env.APP_MODE !== 'demo') {
 }
 
 const payload = await getPayload({ config })
+
+// При первом запуске на хостинге (--first-time) данные грузятся, только если каталог пуст,
+// чтобы повторная сборка не затирала правки в админке.
+if (process.env.SEED_ONLY_IF_EMPTY === '1') {
+  const existing = await payload.count({ collection: 'products', overrideAccess: true })
+  if (existing.totalDocs > 0) {
+    console.log('В каталоге уже есть товары: демоданные не трогаем.')
+    await payload.destroy()
+    process.exit(0)
+  }
+}
 const opts = { overrideAccess: true, depth: 0 }
 const count = { created: 0, updated: 0 }
 

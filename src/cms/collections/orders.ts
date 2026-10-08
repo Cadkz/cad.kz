@@ -1,5 +1,5 @@
 import { APIError, type CollectionBeforeDeleteHook, type CollectionConfig } from 'payload'
-import { canReadOrders, isAdmin, nobody } from '../access'
+import { isAdmin, nobody } from '../access'
 import { relationField, textField } from '../fields'
 
 /**
@@ -22,7 +22,7 @@ const forbidChange: CollectionConfig['hooks'] = {
 
 const readOnly = { readOnly: true } as const
 
-/** Заказы с сайта. Менеджер видит список и состав снимка, только чтение. */
+/** Заказы с сайта: администратор видит список и состав снимка, только чтение. Менеджеры работают в Битрикс24. */
 export const orders: CollectionConfig = {
   slug: 'orders',
   labels: { singular: 'Заказ', plural: 'Заказы' },
@@ -32,7 +32,7 @@ export const orders: CollectionConfig = {
     defaultColumns: ['number', 'createdAt', 'contactName', 'buyerType', 'totalKzt', 'mode'],
   },
   defaultSort: '-createdAt',
-  access: { read: canReadOrders, create: nobody, update: nobody, delete: nobody },
+  access: { read: isAdmin, create: nobody, update: nobody, delete: nobody },
   hooks: forbidChange,
   fields: [
     {

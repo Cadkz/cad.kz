@@ -1,5 +1,6 @@
 // Одна команда для демо-базы: применяет миграции, загружает демоданные и создаёт первого администратора.
 // Запуск: pnpm demo:setup
+// С ключом --first-time демоданные грузятся только в пустую базу (так вызывает сборка на Vercel).
 // Строка подключения берётся из файла .env (или из окружения) и нигде не печатается.
 
 import { spawnSync } from 'node:child_process'
@@ -25,7 +26,13 @@ try {
 console.log(`База: ${host}`)
 
 // Схему меняют только миграции, автоподгонка таблиц отключена.
-const env = { ...process.env, APP_MODE: 'demo', DB_SCHEMA_MODE: 'migrate' }
+const firstTime = process.argv.includes('--first-time')
+const env = {
+  ...process.env,
+  APP_MODE: 'demo',
+  DB_SCHEMA_MODE: 'migrate',
+  ...(firstTime ? { SEED_ONLY_IF_EMPTY: '1' } : {}),
+}
 
 function run(title, args, { required = true } = {}) {
   console.log(`\n== ${title}`)

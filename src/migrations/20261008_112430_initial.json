@@ -4221,7 +4221,7 @@
     "public.enum_users_role": {
       "name": "enum_users_role",
       "schema": "public",
-      "values": ["admin", "editor", "manager"]
+      "values": ["admin", "editor"]
     },
     "public.enum_orders_mode": {
       "name": "enum_orders_mode",
@@ -4254,6 +4254,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "ac2cf4fe-ec2c-4d21-9de5-fe965782fb41",
+  "id": "e6355e05-f96a-4692-aaeb-226f6c747478",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

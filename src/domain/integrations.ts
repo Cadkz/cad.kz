@@ -27,7 +27,15 @@ export type CrmLead = {
   contact: { name: string; email?: string; phone?: string }
   buyer: { type: 'individual' } | { type: 'company'; companyName: string; bin: string }
   comment?: string
-  items: { offerId: string; quantity: number; totalKzt: string }[]
+  items: {
+    offerId: string
+    title: string
+    configuration: string
+    license: string
+    quantity: number
+    unitKzt: string
+    totalKzt: string
+  }[]
   totalKzt: string
   messages: Message[]
 }

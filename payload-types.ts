@@ -319,7 +319,7 @@ export interface ExchangeRate {
  */
 export interface User {
   id: number;
-  role: 'admin' | 'editor' | 'manager';
+  role: 'admin' | 'editor';
   updatedAt: string;
   createdAt: string;
   email: string;

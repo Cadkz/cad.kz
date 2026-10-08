@@ -22,7 +22,8 @@
     "seed:demo": "payload run scripts/seed-demo.mjs",
     "migrate": "payload migrate",
     "migrate:create": "payload migrate:create",
-    "demo:setup": "node scripts/demo-setup.mjs"
+    "demo:setup": "node scripts/demo-setup.mjs",
+    "vercel-build": "node scripts/vercel-build.mjs"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.90.2",

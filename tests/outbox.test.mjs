@@ -34,9 +34,8 @@ async function lead() {
 const demoGateway = { deliver: async () => ({ status: 'not-sent-demo' }) }
 
 test('лид Битрикс24 собирается из заявки и содержит ключ для сверки', async () => {
-  const { method, params } = toBitrix24Lead(await lead(), [
-    { offerId: '11', title: 'GEO5', configuration: 'Стандарт', quantity: 2 },
-  ])
+  const source = await lead()
+  const { method, params } = toBitrix24Lead(source)
   const { fields } = params
   assert.equal(method, 'crm.lead.add')
   assert.equal(fields.TITLE, 'Заявка с сайта CAD-20261008-AAAAA')
@@ -45,7 +44,8 @@ test('лид Битрикс24 собирается из заявки и соде
   assert.equal(fields.OPPORTUNITY, '5846400')
   assert.equal(fields.CURRENCY_ID, 'KZT')
   assert.equal(fields.ORIGIN_ID, KEY)
-  assert.match(fields.COMMENTS, /GEO5, Стандарт: 2 шт\./)
+  assert.match(fields.COMMENTS, /: 2 шт\. × .*₸ = .*₸/)
+  assert.match(fields.COMMENTS, new RegExp(source.items[0].title))
   assert.match(fields.COMMENTS, new RegExp(`БИН: ${BIN}`))
   assert.match(fields.COMMENTS, /Нужен счёт/)
 })
@@ -143,4 +143,18 @@ test('ограничитель не растёт без предела', () => {
   // Самые давние ключи забыты, значит ip-0 снова может обратиться.
   assert.equal(limiter.check('ip-0', 1001).allowed, true)
   assert.equal(limiter.check('ip-9', 1002).allowed, false)
+})
+
+test('диалог с консультантом попадает в комментарий лида целиком', async () => {
+  const source = await lead()
+  const { fields } = toBitrix24Lead({
+    ...source,
+    messages: [
+      { role: 'user', content: 'Подойдёт ли GEO5 для подпорных стен?' },
+      { role: 'assistant', content: 'Да, есть модуль для подпорных стен.' },
+    ],
+  }).params
+  assert.match(fields.COMMENTS, /Диалог с консультантом на сайте:/)
+  assert.match(fields.COMMENTS, /Клиент: Подойдёт ли GEO5/)
+  assert.match(fields.COMMENTS, /Консультант: Да, есть модуль/)
 })
