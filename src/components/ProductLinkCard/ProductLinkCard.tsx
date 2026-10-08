@@ -1,9 +1,8 @@
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { productHref } from '@/lib/navigationHrefs'
 import styles from './ProductLinkCard.module.css'
 
-type Props = { slug: string; title: string; vendor: string | null }
+type Props = { href: string; title: string; vendor: string | null }
 
 const initials = (title: string) =>
   title
@@ -16,9 +15,9 @@ const initials = (title: string) =>
     .toUpperCase()
 
 /** Компактная карточка-ссылка для блоков «С этим покупают» и «Похожие товары». */
-export function ProductLinkCard({ slug, title, vendor }: Props) {
+export function ProductLinkCard({ href, title, vendor }: Props) {
   return (
-    <Link href={productHref(slug)} className={styles.card}>
+    <Link href={href} className={styles.card}>
       <span className={styles.mark} aria-hidden="true">
         {initials(title)}
       </span>

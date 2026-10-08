@@ -1,7 +1,9 @@
+import type { Metadata } from 'next'
 import type { Product, Section } from '../../payload-types'
 import { formatKzt } from './format'
 import { cms } from './payload'
 import { loadPricingContext, quoteOffer } from './pricing'
+import { productPath } from './productPath'
 
 export type ProductOffer = {
   id: string
@@ -11,11 +13,13 @@ export type ProductOffer = {
   price: string | null
 }
 
-export type RelatedProduct = { slug: string; title: string; vendor: string | null }
+export type RelatedProduct = { slug: string; href: string; title: string; vendor: string | null }
 
 export type ProductPage = {
   id: number
   slug: string
+  /** Адрес страницы: прежний адрес cad.kz, если товар там был. */
+  path: string
   title: string
   kind: Product['kind']
   summary: string | null
@@ -35,6 +39,7 @@ function related(value: Product['recommended']): RelatedProduct[] {
     .filter((item): item is Product => typeof item !== 'number' && item.status === 'published')
     .map((item) => ({
       slug: item.slug,
+      href: productPath(item),
       title: item.title,
       vendor:
         item.manufacturer && typeof item.manufacturer !== 'number' ? item.manufacturer.title : null,
@@ -76,6 +81,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
   return {
     id: product.id,
     slug: product.slug,
+    path: productPath(product),
     title: product.title,
     kind: product.kind,
     summary: product.summary ?? null,
@@ -131,4 +137,13 @@ export async function getSimilar(product: ProductPage, limit = 3): Promise<Relat
     depth: 1,
   })
   return related(docs)
+}
+
+/** Заголовок, описание и канонический адрес страницы товара. */
+export function productMetadata(product: ProductPage): Metadata {
+  return {
+    title: `${product.title} — купить в CAD.kz`,
+    description: product.summary ?? undefined,
+    alternates: { canonical: product.path },
+  }
 }

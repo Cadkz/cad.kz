@@ -6,6 +6,8 @@ const noIndexHeaders = [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarch
 
 export default withPayload({
   poweredByHeader: false,
+  // Слеш в конце адреса обрабатывает src/proxy.ts: старые адреса товаров cad.kz сохраняются со слешем.
+  skipTrailingSlashRedirect: true,
   images: {
     // Картинки CMS при хранении в Vercel Blob.
     remotePatterns: [{ protocol: 'https', hostname: '*.public.blob.vercel-storage.com' }],

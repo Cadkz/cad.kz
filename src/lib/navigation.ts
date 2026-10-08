@@ -1,6 +1,7 @@
 import type { Product, Section, SiteSetting } from '../../payload-types'
-import { catalogHref, productHref } from './navigationHrefs'
+import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
+import { productPath } from './productPath'
 
 export type MenuLink = { title: string; href: string }
 export type MenuColumn = { title: string; links: MenuLink[] }
@@ -35,7 +36,7 @@ export async function getMenu(): Promise<MenuTab[]> {
       sort: 'title',
       limit: 500,
       depth: 0,
-      select: { title: true, slug: true, sections: true },
+      select: { title: true, slug: true, legacyUrl: true, sections: true },
     }),
   ])
 
@@ -49,7 +50,7 @@ export async function getMenu(): Promise<MenuTab[]> {
         title: section.title,
         links: products.docs
           .filter((product) => sectionIds(product as Product).includes(section.id))
-          .map((product) => ({ title: product.title, href: productHref(product.slug) })),
+          .map((product) => ({ title: product.title, href: productPath(product) })),
       }))
       .filter((column) => column.links.length > 0),
   }))

@@ -1,9 +1,9 @@
 import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
 import { formatKzt } from './format'
-import { productHref } from './navigationHrefs'
 import { cms } from './payload'
 import { loadPricingContext, type PricingContext, quoteOffer } from './pricing'
+import { productPath } from './productPath'
 
 export type CatalogGroup = 'software' | 'hardware' | 'service'
 
@@ -117,7 +117,7 @@ export async function getCatalog(): Promise<{ items: CatalogItem[]; facets: Face
     const only = productOffers.length === 1 ? productOffers[0] : null
     return {
       id: product.id,
-      href: productHref(product.slug),
+      href: productPath(product),
       title: product.title,
       manufacturer: vendor,
       vendor,
