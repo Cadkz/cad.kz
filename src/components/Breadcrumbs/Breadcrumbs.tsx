@@ -10,7 +10,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
     <nav aria-label="Хлебные крошки" className={styles.nav}>
       <ol className={styles.list}>
         {items.map((item, i) => (
-          <li key={`${item.title}-${i}`} className={styles.item}>
+          <li key={item.href ?? item.title} className={styles.item}>
             {i > 0 && (
               <ChevronRight
                 size={16}
