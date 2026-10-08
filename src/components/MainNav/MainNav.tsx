@@ -23,6 +23,8 @@ export function MainNav({ menu, whatsappHref, aboutExtra }: Props) {
   const [open, setOpen] = useState<Key | null>(null)
   const root = useRef<HTMLDivElement>(null)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  // Когда меню только что открылось наведением, клик по той же кнопке не должен его закрыть.
+  const hoveredAt = useRef(0)
   const close = useCallback(() => setOpen(null), [])
 
   useEffect(() => {
@@ -47,8 +49,10 @@ export function MainNav({ menu, whatsappHref, aboutExtra }: Props) {
     return (event: ReactPointerEvent) => {
       if (event.pointerType !== 'mouse') return
       clearTimeout(timer.current)
-      if (key) setOpen(key)
-      else timer.current = setTimeout(() => setOpen(null), 200)
+      if (key) {
+        if (open !== key) hoveredAt.current = Date.now()
+        setOpen(key)
+      } else timer.current = setTimeout(() => setOpen(null), 200)
     }
   }
 
@@ -60,7 +64,10 @@ export function MainNav({ menu, whatsappHref, aboutExtra }: Props) {
         className={styles.item}
         aria-expanded={open === key}
         aria-controls={`nav-${key}`}
-        onClick={() => setOpen(open === key ? null : key)}
+        onClick={() => {
+          if (open === key && Date.now() - hoveredAt.current < 600) return
+          setOpen(open === key ? null : key)
+        }}
       >
         {label}
         <ChevronDown size={16} strokeWidth={1.75} className={styles.chevron} aria-hidden="true" />

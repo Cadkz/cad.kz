@@ -1,0 +1,105 @@
+.slider {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-8);
+  height: 100%;
+  min-height: calc(var(--control-height) * 8);
+  padding: var(--space-8) var(--space-6);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background:
+    url("/images/patterns/facets-light.svg") right top / var(--pattern-tile) auto repeat-y,
+    var(--gradient-navy);
+  color: var(--color-text-inverse);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  max-width: var(--measure);
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-heavy);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+}
+
+.text {
+  color: var(--color-text-on-dark);
+  font-size: var(--text-body);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  height: var(--control-height);
+  margin-top: var(--space-3);
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-navy);
+  font-weight: var(--weight-semibold);
+  transition: background var(--duration-fast) var(--ease);
+}
+
+.cta:hover {
+  background: var(--color-blue-soft);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-on-dark-soft);
+  color: var(--color-text-inverse);
+}
+
+.arrow:hover {
+  background: var(--color-on-dark-hover);
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.dot {
+  width: var(--space-2);
+  height: var(--space-2);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-on-dark-line);
+  transition:
+    width var(--duration-base) var(--ease),
+    background var(--duration-base) var(--ease);
+}
+
+.dot[aria-current="true"] {
+  width: var(--space-5);
+  background: var(--color-surface);
+}
+
+@media (min-width: 640px) {
+  .slider {
+    padding: var(--space-10);
+  }
+}

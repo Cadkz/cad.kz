@@ -1,0 +1,39 @@
+.section {
+  padding-top: var(--section-gap);
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6) var(--space-8);
+  padding: var(--space-8) var(--space-6);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background:
+    url("/images/patterns/facets-light.svg") right top / var(--pattern-tile) auto repeat-y,
+    var(--color-navy);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: var(--measure);
+}
+
+.title {
+  color: var(--color-text-inverse);
+}
+
+.lead {
+  color: var(--color-text-on-dark);
+  font-size: var(--text-body);
+}
+
+@media (min-width: 640px) {
+  .banner {
+    padding: var(--space-12);
+  }
+}

@@ -60,9 +60,9 @@ export function Drawer({ open, onClose, title, children, side = 'right' }: Props
     }
   }, [open, onClose])
 
-  if (!mounted) return null
+  if (!mounted || !open) return null
   return createPortal(
-    <div className={styles.root} data-open={open} data-side={side} hidden={!open}>
+    <div className={styles.root} data-side={side}>
       <button
         type="button"
         className={styles.backdrop}

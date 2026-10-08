@@ -4,10 +4,6 @@
   z-index: var(--z-drawer);
 }
 
-.root[hidden] {
-  display: none;
-}
-
 .backdrop {
   position: absolute;
   inset: 0;

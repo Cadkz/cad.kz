@@ -1,0 +1,86 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  height: 100%;
+  min-height: calc(var(--control-height) * 4);
+  padding: var(--space-6);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  color: var(--color-text-inverse);
+  isolation: isolate;
+  transition: box-shadow var(--duration-base) var(--ease);
+}
+
+.card::before {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background: var(--gradient-card-shade);
+  content: "";
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.navy {
+  background: var(--gradient-deep);
+}
+
+.blue {
+  background: var(--gradient-navy);
+}
+
+.graphite {
+  background: var(--gradient-graphite);
+}
+
+/* Крупная полупрозрачная иконка в углу — фирменный декор карточек направлений. */
+.big {
+  position: absolute;
+  right: calc(-1 * var(--space-4));
+  bottom: calc(-1 * var(--space-4));
+  z-index: var(--z-below);
+  opacity: 0.14;
+  transition:
+    opacity var(--duration-base) var(--ease),
+    transform var(--duration-base) var(--ease);
+}
+
+.big svg {
+  width: calc(var(--icon-box) * 3);
+  height: calc(var(--icon-box) * 3);
+  stroke-width: 1;
+}
+
+.card:hover .big {
+  opacity: 0.22;
+  transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1)));
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-box);
+  height: var(--icon-box);
+  margin-bottom: auto;
+  border-radius: var(--radius-md);
+  background: var(--color-on-dark-soft);
+}
+
+.title {
+  margin-top: var(--space-6);
+  font-family: var(--font-heading);
+  font-size: var(--text-h4);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-snug);
+}
+
+.summary {
+  color: var(--color-text-on-dark);
+  font-size: var(--text-sm);
+}

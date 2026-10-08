@@ -129,6 +129,7 @@
   --ease: cubic-bezier(0.2, 0, 0, 1);
 
   /* ---------- Слои ---------- */
+  --z-below: -1; /* декор под содержимым внутри блока с isolation: isolate */
   --z-header: 100;
   --z-dropdown: 200;
   --z-drawer: 300;
