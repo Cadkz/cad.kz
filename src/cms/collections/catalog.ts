@@ -87,7 +87,15 @@ export const products = contentCollection({
       ],
     },
     { name: 'summary', label: 'Коротко для карточки (1–2 предложения)', type: 'textarea' },
-    { name: 'description', label: 'Описание', type: 'textarea' },
+    {
+      name: 'description',
+      label: 'Описание',
+      type: 'textarea',
+      admin: {
+        description:
+          'Пустая строка — новый абзац, «## » в начале — подзаголовок, «- » — пункт списка.',
+      },
+    },
     relationField('manufacturer', 'Производитель', 'manufacturers'),
     relationField('sections', 'Разделы', 'sections', true),
     { name: 'tasks', label: 'Задачи', type: 'array', fields: [textField('title', 'Задача', true)] },

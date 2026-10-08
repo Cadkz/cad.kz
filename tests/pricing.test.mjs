@@ -15,8 +15,11 @@ test('different source and target rates', () =>
     quote({ amount: '120', rate: '1', includesVat: true, sourceVat: '20' }).unitKzt,
     '116',
   ))
-test('half up then multiply', () =>
-  assert.equal(quote({ amount: '0.5', rate: '1', targetVat: '0', quantity: 3 }).totalKzt, '3'))
+test('round unit up to whole tenge, then multiply', () => {
+  assert.equal(quote({ amount: '0.5', rate: '1', targetVat: '0', quantity: 3 }).totalKzt, '3')
+  assert.equal(quote({ amount: '0.01', rate: '1', targetVat: '0', quantity: 3 }).totalKzt, '3')
+  assert.equal(quote({ amount: '10', rate: '1', targetVat: '0' }).unitKzt, '10')
+})
 test('reject malformed prices, rates, quantities', () => {
   for (const bad of [
     { amount: '-1' },

@@ -13,6 +13,7 @@ export const ISSUE_TITLES = {
     'Разные артикулы с одинаковым описанием (на сайте подписаны названием из Битрикса)',
   noSlug: 'Товары без символьного кода (адреса)',
   duplicateSlug: 'Повторяющийся символьный код',
+  slugTaken: 'Адрес уже занят другим товаром (новому дан адрес с номером из Битрикса)',
 }
 
 const KIND_TITLES = {
@@ -68,6 +69,43 @@ export function renderReport({ products, offers, issues, stats }, { limit = Infi
     for (const issue of list.slice(0, limit))
       lines.push(`- [${issue.id}] ${issue.title}${issue.detail ? ` — ${issue.detail}` : ''}`)
     if (list.length > limit) lines.push(`- …и ещё ${list.length - limit}`)
+  }
+  return `${lines.join('\n')}\n`
+}
+
+const line = (title, c) =>
+  `- ${title}: новых ${c.created}, обновлено ${c.updated}, без изменений ${c.unchanged}` +
+  (c.unpublished ? `, снято с публикации ${c.unpublished}` : '')
+
+/** Итог записи в базу: что создано, обновлено, снято с публикации; курсы и картинки. */
+export function renderWriteResult(result, images = null) {
+  const lines = [
+    '# Импорт из Битрикса: запись в базу',
+    '',
+    line('Товары', result.products),
+    line('Варианты с ценой', result.offers),
+    `- Производители: новых ${result.manufacturers.created}, уже были ${result.manufacturers.unchanged}`,
+  ]
+  if (result.demoHidden) lines.push(`- Демотоваров снято с публикации: ${result.demoHidden}`)
+  lines.push(
+    result.rates.length
+      ? `- Курсы: ${result.rates.map((r) => `${r.currency} ${r.from ?? 'нет'} → ${r.to}`).join(', ')}`
+      : '- Курсы: без изменений',
+  )
+  if (images) {
+    lines.push(
+      `- Картинки: скачано ${images.downloaded}, уже были ${images.reused}, галерей заполнено ${images.products}, не скачалось ${images.failed.length}` +
+        (images.postponed ? `, отложено до следующего запуска ${images.postponed}` : ''),
+    )
+    for (const f of images.failed.slice(0, 50))
+      lines.push(`  - ${f.product}: ${f.path} (${f.reason})`)
+  }
+  if (result.issues.length) {
+    lines.push('', '## Обратить внимание')
+    for (const issue of result.issues)
+      lines.push(
+        `- ${ISSUE_TITLES[issue.type] ?? issue.type}: [${issue.id}] ${issue.title} — ${issue.detail}`,
+      )
   }
   return `${lines.join('\n')}\n`
 }

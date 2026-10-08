@@ -5,8 +5,13 @@ function decimal(value) {
   const [whole, fraction = ''] = value.split('.')
   return [BigInt(whole + fraction), 10n ** BigInt(fraction.length)]
 }
+/** Половина и больше — вверх (HALF_UP): для НДС, выделяемого до 0,01 тенге. */
 function round(n, d) {
   return (n * 2n + d) / (2n * d)
+}
+/** Вверх до целого (решение владельца 08.10.2026, как на старом сайте cad.kz). */
+function ceil(n, d) {
+  return (n + d - 1n) / d
 }
 export function quote({
   amount,
@@ -30,7 +35,7 @@ export function quote({
     n *= 100n * sd
     d *= 100n * sd + s
   }
-  const unit = round(n, d),
+  const unit = ceil(n, d),
     total = unit * BigInt(quantity)
   const vatMinor = round(total * t * 100n, 100n * td + t)
   return {
@@ -43,6 +48,6 @@ export function quote({
     targetVat,
     includesVat,
     quantity,
-    rule: 'KZT-unit-half-up-v1',
+    rule: 'KZT-unit-ceil-v1',
   }
 }

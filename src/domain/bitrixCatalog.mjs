@@ -1,6 +1,7 @@
 // Сведение выгрузок Битрикса в товары и предложения нового сайта. Ничего не пишет:
 // возвращает данные для импорта и список проблем для отчёта проверочного прогона.
 import { isYes, parseBitrixPrice, parseVatRate, priceProblem } from './bitrixPrice.mjs'
+import { htmlToMarkup } from './bitrixText.mjs'
 
 /** Колонки списка предложений, которые не являются вариантом комплектации. */
 const OFFER_SERVICE_COLUMNS = new Set([
@@ -132,7 +133,7 @@ function toProduct(id, { row, images, related }, priceRow) {
     manufacturer: clean(row.IP_PROP10) || clean(priceRow?.Производитель) || groups[1] || null,
     oldSections: groups,
     summary: stripHtml(row.IE_PREVIEW_TEXT) || null,
-    descriptionHtml: String(row.IE_DETAIL_TEXT ?? '').trim() || null,
+    description: htmlToMarkup(row.IE_DETAIL_TEXT) || null,
     images: [...images],
     relatedBitrixIds: [...related],
     properties: Object.entries(PRODUCT_PROPERTIES)

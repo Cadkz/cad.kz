@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { ArticleBody } from '@/components/ArticleBody/ArticleBody'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { BuyBox } from '@/components/BuyBox/BuyBox'
 import { Configurator } from '@/components/Configurator/Configurator'
@@ -17,6 +18,7 @@ import { getHome } from '@/lib/home'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { getProduct, getSimilar, type RelatedProduct } from '@/lib/product'
+import { parseBody } from '@/lib/richText'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -106,7 +108,7 @@ export default async function ProductPage({ params }: Props) {
         >
           {product.description && (
             <ProductSection title="О программе" id="about">
-              <p>{product.description}</p>
+              <ArticleBody blocks={parseBody(product.description)} />
             </ProductSection>
           )}
           <ProductSection

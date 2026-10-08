@@ -145,7 +145,7 @@ test('снимок содержит всё, что нужно для прове�
   const snapshot = buildOrderSnapshot({ lines: priced.lines, quotedAt: priced.quotedAt })
 
   assert.equal(snapshot.version, SNAPSHOT_VERSION)
-  assert.equal(snapshot.rule, 'KZT-unit-half-up-v1')
+  assert.equal(snapshot.rule, 'KZT-unit-ceil-v1')
   assert.equal(snapshot.currency, 'KZT')
   assert.equal(snapshot.quotedAt, NOW.toISOString())
   assert.equal(snapshot.targetVat, '16')

@@ -158,6 +158,9 @@ export interface Product {
   slug: string;
   kind: 'software' | 'hardware' | 'course' | 'service';
   summary?: string | null;
+  /**
+   * Пустая строка — новый абзац, «## » в начале — подзаголовок, «- » — пункт списка.
+   */
   description?: string | null;
   manufacturer?: (number | null) | Manufacturer;
   sections?: (number | Section)[] | null;

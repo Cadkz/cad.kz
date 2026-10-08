@@ -24,6 +24,7 @@
     "migrate:create": "node scripts/migrate-create.mjs",
     "demo:setup": "node scripts/demo-setup.mjs",
     "import:bitrix": "node scripts/import-bitrix.mjs",
+    "import:bitrix:write": "payload run scripts/import-bitrix-write.mjs",
     "vercel-build": "node scripts/vercel-build.mjs"
   },
   "dependencies": {
