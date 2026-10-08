@@ -119,7 +119,6 @@
       url("/images/patterns/facets-light.svg") right calc(-1 * var(--space-10)) top
       calc(-1 * var(--space-16)) / var(--pattern-tile) auto no-repeat,
       var(--gradient-navy);
-    background-blend-mode: soft-light, normal;
     color: var(--color-text-inverse);
   }
 }
