@@ -1,7 +1,7 @@
 import Catalog from '@/components/Catalog'
 export default function Home() {
   return (
-    <main>
+    <main className="legacy">
       <section className="hero">
         <div>
           <p className="eyebrow">ИНЖЕНЕРНЫЕ РЕШЕНИЯ В КАЗАХСТАНЕ</p>

@@ -1,6 +1,23 @@
 import type { CollectionConfig } from 'payload'
 import { contentCollection, relationField, slugField, textField } from '../fields'
 
+/** Иконки разделов: ключ из этого списка сопоставляется с иконкой lucide в компоненте. */
+export const sectionIcons = [
+  'building',
+  'columns',
+  'layers',
+  'route',
+  'wrench',
+  'droplet',
+  'cog',
+  'image',
+  'file',
+  'scan',
+  'printer',
+  'monitor',
+  'graduation',
+] as const
+
 export const manufacturers = contentCollection({
   slug: 'manufacturers',
   singular: 'Производитель',
@@ -16,6 +33,38 @@ export const sections = contentCollection({
     slugField(),
     relationField('parent', 'Родительский раздел', 'sections'),
     { name: 'isDirection', label: 'Направление', type: 'checkbox' },
+    {
+      name: 'menuGroup',
+      label: 'Группа в меню и фильтре',
+      type: 'select',
+      defaultValue: 'software',
+      required: true,
+      options: [
+        { label: 'Программное обеспечение', value: 'software' },
+        { label: 'Оборудование', value: 'hardware' },
+        { label: 'Услуги и обучение', value: 'service' },
+      ],
+    },
+    { name: 'summary', label: 'Короткое описание для карточки', type: 'textarea' },
+    {
+      name: 'icon',
+      label: 'Иконка',
+      type: 'select',
+      defaultValue: 'building',
+      options: sectionIcons.map((value) => ({ label: value, value })),
+    },
+    {
+      name: 'tone',
+      label: 'Фон карточки',
+      type: 'select',
+      defaultValue: 'navy',
+      options: [
+        { label: 'Тёмно-синий', value: 'navy' },
+        { label: 'Синий', value: 'blue' },
+        { label: 'Графит', value: 'graphite' },
+      ],
+    },
+    { name: 'order', label: 'Порядок вывода', type: 'number', defaultValue: 100 },
   ],
 })
 
@@ -37,6 +86,7 @@ export const products = contentCollection({
         { label: 'Услуга', value: 'service' },
       ],
     },
+    { name: 'summary', label: 'Коротко для карточки (1–2 предложения)', type: 'textarea' },
     { name: 'description', label: 'Описание', type: 'textarea' },
     relationField('manufacturer', 'Производитель', 'manufacturers'),
     relationField('sections', 'Разделы', 'sections', true),
@@ -49,6 +99,15 @@ export const products = contentCollection({
       label: 'Характеристики',
       type: 'array',
       fields: [textField('name', 'Название', true), textField('value', 'Значение', true)],
+    },
+    {
+      name: 'faq',
+      label: 'Частые вопросы',
+      type: 'array',
+      fields: [
+        textField('question', 'Вопрос', true),
+        { name: 'answer', label: 'Ответ', type: 'textarea', required: true },
+      ],
     },
   ],
 })

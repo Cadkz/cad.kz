@@ -12,6 +12,7 @@ import {
   redirects,
 } from './cms/collections/system'
 import { users } from './cms/collections/users'
+import { siteSettings } from './cms/globals/siteSettings'
 
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
@@ -36,5 +37,5 @@ export default buildConfig({
     importRuns,
     redirects,
   ],
-  globals: [pricingSettings],
+  globals: [pricingSettings, siteSettings],
 })

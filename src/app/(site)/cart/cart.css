@@ -1,19 +1,10 @@
-.cart-badge {
-  display: inline-block;
-  min-width: 24px;
-  text-align: center;
-  padding: 1px 7px;
-  background: var(--light);
-  border-radius: 12px;
-  color: var(--navy);
-}
-.cart-layout {
+.legacy .cart-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 32px;
   align-items: start;
 }
-.cart-line {
+.legacy .cart-line {
   background: white;
   border: 1px solid #e0e6f1;
   border-radius: 24px;
@@ -24,30 +15,30 @@
   align-items: center;
   gap: 20px;
 }
-.cart-line h3 {
+.legacy .cart-line h3 {
   font-size: 20px;
   margin: 0 0 10px;
 }
-.cart-line p {
+.legacy .cart-line p {
   margin: 0 0 6px;
 }
-.cart-line input {
+.legacy .cart-line input {
   width: 100%;
 }
-.cart-line strong {
+.legacy .cart-line strong {
   white-space: nowrap;
 }
-.cart-line small {
+.legacy .cart-line small {
   color: #65708a;
 }
-.text-button {
+.legacy .text-button {
   display: block;
   background: none;
   color: var(--blue);
   padding: 6px 0;
   font-size: 13px;
 }
-.cart-summary {
+.legacy .cart-summary {
   position: sticky;
   top: 24px;
   border-radius: 24px;
@@ -55,40 +46,40 @@
   padding: 28px;
   margin-top: 16px;
 }
-.cart-summary h2 {
+.legacy .cart-summary h2 {
   font-size: 26px;
 }
-.cart-summary > p[role="status"] {
+.legacy .cart-summary > p[role="status"] {
   font-size: 28px;
   font-weight: 700;
   color: var(--navy);
 }
-.cart-summary hr {
+.legacy .cart-summary hr {
   border: 0;
   border-top: 1px solid #c3cee5;
   margin: 24px 0;
 }
-.cart-summary p,
-.cart-summary small {
+.legacy .cart-summary p,
+.legacy .cart-summary small {
   font-size: 14px;
 }
-.empty-cart {
+.legacy .empty-cart {
   padding: 40px;
   background: var(--light);
   border-radius: 24px;
   margin: 30px 0;
 }
 @media (max-width: 900px) {
-  .cart-layout {
+  .legacy .cart-layout {
     grid-template-columns: 1fr;
   }
-  .cart-summary {
+  .legacy .cart-summary {
     position: static;
   }
-  .cart-line {
+  .legacy .cart-line {
     grid-template-columns: minmax(0, 1fr) 90px;
   }
-  .cart-line > div:last-child {
+  .legacy .cart-line > div:last-child {
     grid-column: 1 / -1;
     display: flex;
     align-items: center;
@@ -96,7 +87,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  html {
+  .legacy html {
     scroll-behavior: auto;
   }
 }

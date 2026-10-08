@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { demoProducts } from '@/domain/demo'
-import { useCart } from './CartProvider'
+import { useCart } from './CartProvider/CartProvider'
 export function Configurator({ product }: { product: (typeof demoProducts)[number] }) {
   const [offerId, setOffer] = useState(product.offers[0].id),
     [quantity, setQuantity] = useState(1),

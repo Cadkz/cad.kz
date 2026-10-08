@@ -34,6 +34,21 @@
   --color-whatsapp: #25d366;
   --color-focus: var(--color-blue);
 
+  /* ---------- Цвета: поверх тёмного фона и подложки ---------- */
+  --color-text-on-dark: #c7d2ef; /* вторичный текст на navy/blue */
+  --color-on-dark-soft: rgba(255, 255, 255, 0.14); /* кнопка-призрак, иконка на тёмном */
+  --color-on-dark-hover: rgba(255, 255, 255, 0.24);
+  --color-on-dark-line: rgba(255, 255, 255, 0.2); /* линии и рамки на тёмном */
+  --color-header-bg: rgba(246, 248, 251, 0.94); /* липкая шапка поверх контента */
+  --color-overlay: rgba(10, 16, 40, 0.55); /* затемнение под модалкой и панелью */
+
+  /* ---------- Градиенты (только из цветов палитры) ---------- */
+  --gradient-navy: linear-gradient(135deg, var(--color-navy), var(--color-blue));
+  --gradient-deep: linear-gradient(120deg, var(--color-navy-deep), var(--color-navy));
+  --gradient-graphite: linear-gradient(135deg, var(--color-gray-700), var(--color-gray-500));
+  --gradient-soft: linear-gradient(135deg, var(--color-blue-soft), var(--color-blue-mid));
+  --gradient-card-shade: linear-gradient(165deg, rgba(10, 16, 48, 0.35), rgba(8, 13, 38, 0.88));
+
   /* ---------- Шрифты ---------- */
   --font-heading: "Manrope", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
@@ -99,6 +114,14 @@
   --sidebar: 280px; /* боковая колонка: оглавление статьи, фильтр каталога */
   --gutter: var(--space-5); /* боковой отступ контейнера (на ≥640px — 32px) */
   --header-height: 64px;
+
+  /* ---------- Размеры элементов управления ---------- */
+  --control-height: 44px; /* кнопка, поле ввода */
+  --control-height-sm: 36px; /* малая кнопка, чип, стрелки слайдера */
+  --icon-box: 40px; /* квадрат под иконку в карточке, кнопки соцсетей */
+  --drawer-width: 360px; /* выдвижная панель: мобильное меню, фильтр, корзина */
+  --logo-height: 28px;
+  --pattern-tile: 212px; /* плитка фирменного узора из граней (public/images/patterns) */
 
   /* ---------- Анимация ---------- */
   --duration-fast: 150ms;

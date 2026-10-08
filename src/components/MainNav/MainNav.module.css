@@ -1,0 +1,122 @@
+.root {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .root {
+    display: contents;
+  }
+}
+
+.nav {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--control-height-sm);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  transition: background var(--duration-fast) var(--ease);
+}
+
+.item:hover,
+.item[aria-expanded="true"] {
+  background: var(--color-blue-soft);
+}
+
+.chevron {
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.item[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}
+
+.dropWrap {
+  position: relative;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-3));
+  left: 0;
+  z-index: var(--z-dropdown);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: var(--sidebar);
+  margin: 0;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  list-style: none;
+  animation: open var(--duration-base) var(--ease);
+}
+
+.dropLink {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-gray-700);
+  font-size: var(--text-sm);
+}
+
+.dropLink:hover {
+  background: var(--color-blue-soft);
+  color: var(--color-navy);
+}
+
+.flyout {
+  right: 0;
+  left: auto;
+  flex-direction: row;
+  gap: var(--space-6);
+  padding: var(--space-5);
+}
+
+.flyoutCol {
+  display: flex;
+  flex-direction: column;
+  min-width: max-content;
+}
+
+.flyoutTitle {
+  margin-bottom: var(--space-2);
+  padding: 0 var(--space-3);
+  color: var(--color-blue);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.flyoutContacts {
+  padding-left: var(--space-6);
+  border-left: 1px solid var(--color-border);
+}
+
+.flyoutContacts > div {
+  padding: 0 var(--space-3);
+}
+
+@keyframes open {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--space-2)));
+  }
+}

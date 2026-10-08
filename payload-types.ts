@@ -111,9 +111,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'pricing-settings': PricingSetting;
+    'site-settings': SiteSetting;
   };
   globalsSelect: {
     'pricing-settings': PricingSettingsSelect<false> | PricingSettingsSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -153,6 +155,7 @@ export interface Product {
   status: 'draft' | 'published';
   slug: string;
   kind: 'software' | 'hardware' | 'course' | 'service';
+  summary?: string | null;
   description?: string | null;
   manufacturer?: (number | null) | Manufacturer;
   sections?: (number | Section)[] | null;
@@ -169,6 +172,13 @@ export interface Product {
     | {
         name: string;
         value: string;
+        id?: string | null;
+      }[]
+    | null;
+  faq?:
+    | {
+        question: string;
+        answer: string;
         id?: string | null;
       }[]
     | null;
@@ -202,6 +212,27 @@ export interface Section {
   slug: string;
   parent?: (number | null) | Section;
   isDirection?: boolean | null;
+  menuGroup: 'software' | 'hardware' | 'service';
+  summary?: string | null;
+  icon?:
+    | (
+        | 'building'
+        | 'columns'
+        | 'layers'
+        | 'route'
+        | 'wrench'
+        | 'droplet'
+        | 'cog'
+        | 'image'
+        | 'file'
+        | 'scan'
+        | 'printer'
+        | 'monitor'
+        | 'graduation'
+      )
+    | null;
+  tone?: ('navy' | 'blue' | 'graphite') | null;
+  order?: number | null;
   legacyKey?: string | null;
   legacyUrl?: string | null;
   updatedAt: string;
@@ -258,6 +289,8 @@ export interface Publication {
   status: 'draft' | 'published';
   slug: string;
   kind: 'article' | 'news' | 'promotion';
+  excerpt?: string | null;
+  topic?: string | null;
   body?: string | null;
   cover?: (number | null) | Media;
   publishedAt?: string | null;
@@ -525,6 +558,7 @@ export interface ProductsSelect<T extends boolean = true> {
   status?: T;
   slug?: T;
   kind?: T;
+  summary?: T;
   description?: T;
   manufacturer?: T;
   sections?: T;
@@ -542,6 +576,13 @@ export interface ProductsSelect<T extends boolean = true> {
     | {
         name?: T;
         value?: T;
+        id?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
         id?: T;
       };
   legacyKey?: T;
@@ -578,6 +619,11 @@ export interface SectionsSelect<T extends boolean = true> {
   slug?: T;
   parent?: T;
   isDirection?: T;
+  menuGroup?: T;
+  summary?: T;
+  icon?: T;
+  tone?: T;
+  order?: T;
   legacyKey?: T;
   legacyUrl?: T;
   updatedAt?: T;
@@ -605,6 +651,8 @@ export interface PublicationsSelect<T extends boolean = true> {
   status?: T;
   slug?: T;
   kind?: T;
+  excerpt?: T;
+  topic?: T;
   body?: T;
   cover?: T;
   publishedAt?: T;
@@ -776,10 +824,64 @@ export interface PricingSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  phones?:
+    | {
+        label: string;
+        tel: string;
+        id?: string | null;
+      }[]
+    | null;
+  whatsapp?: string | null;
+  telegram?: string | null;
+  email?: string | null;
+  socials?:
+    | {
+        network: 'instagram' | 'youtube' | 'telegram' | 'linkedin';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  footerText?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pricing-settings_select".
  */
 export interface PricingSettingsSelect<T extends boolean = true> {
   vat?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  phones?:
+    | T
+    | {
+        label?: T;
+        tel?: T;
+        id?: T;
+      };
+  whatsapp?: T;
+  telegram?: T;
+  email?: T;
+  socials?:
+    | T
+    | {
+        network?: T;
+        url?: T;
+        id?: T;
+      };
+  footerText?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { useCart } from './CartProvider'
+import { useCart } from './CartProvider/CartProvider'
 
 type Quote = {
   totalKzt: string

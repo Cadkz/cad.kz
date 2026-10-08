@@ -19,6 +19,8 @@ export const publications = contentCollection({
         { label: 'Акция', value: 'promotion' },
       ],
     },
+    { name: 'excerpt', label: 'Анонс для карточки', type: 'textarea' },
+    textField('topic', 'Тематика'),
     { name: 'body', label: 'Текст', type: 'textarea' },
     relationField('cover', 'Обложка', 'media'),
     { name: 'publishedAt', label: 'Дата публикации', type: 'date' },

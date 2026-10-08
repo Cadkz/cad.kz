@@ -6,7 +6,7 @@ export default async function Product({ params }: { params: Promise<{ slug: stri
   const product = demoProducts.find((p) => p.id === slug)
   if (!product) notFound()
   return (
-    <main>
+    <main className="legacy">
       <section>
         <p className="eyebrow">
           {product.direction} / {product.manufacturer}

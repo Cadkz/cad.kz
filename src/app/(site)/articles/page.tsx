@@ -1,6 +1,6 @@
 export default function Articles() {
   return (
-    <main>
+    <main className="legacy">
       <section>
         <p className="eyebrow">БАЗА ЗНАНИЙ</p>
         <h1>Статьи и практика</h1>
