@@ -1,11 +1,17 @@
-export default function Articles() {
+import { PublicationIndex } from '@/components/PublicationIndex/PublicationIndex'
+
+type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
+
+export const metadata = { title: 'Статьи — CAD.kz' }
+
+export default async function ArticlesPage({ searchParams }: Props) {
   return (
-    <main className="legacy">
-      <section>
-        <p className="eyebrow">БАЗА ЗНАНИЙ</p>
-        <h1>Статьи и практика</h1>
-        <p>Материалы появятся после импорта и проверки редактором.</p>
-      </section>
-    </main>
+    <PublicationIndex
+      path="/articles"
+      kind="article"
+      title="Статьи"
+      lead="Разборы, инструкции и практика по BIM, инженерным расчётам и проектированию — от специалистов CAD.kz."
+      params={await searchParams}
+    />
   )
 }

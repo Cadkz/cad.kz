@@ -5,8 +5,6 @@ import { SiteHeader } from '@/components/SiteHeader/SiteHeader'
 import '@/styles/fonts.css'
 import '@/styles/tokens.css'
 import '@/styles/base.css'
-import './styles.css'
-import './cart/cart.css'
 
 export const metadata = {
   title: 'CAD.kz — софт, оборудование и обучение для проектировщиков',

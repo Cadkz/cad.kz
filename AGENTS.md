@@ -41,7 +41,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Новая зависимость — только если без неё никак; точная версия в `package.json`, причина в описании коммита.
 - Имена: компоненты PascalCase, файлы утилит camelCase, CSS-классы camelCase в модулях. Комментарии и тексты интерфейса — на русском.
 
-Старые файлы прототипа (`src/components/*.tsx`, `src/app/(site)/styles.css`, `cart.css`) этим правилам ещё не соответствуют. Их переносим по правилам при вёрстке страниц по макетам и удаляем из `LEGACY_FILES` в `scripts/check-styles.mjs`.
+Старая вёрстка прототипа перенесена и удалена (08.10.2026), `LEGACY_FILES` в `scripts/check-styles.mjs` пуст — новых исключений не добавлять.
 
 ## Скорость
 

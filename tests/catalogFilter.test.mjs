@@ -78,3 +78,16 @@ test('state survives a round trip through the address bar', () => {
   assert.equal(fromParams({ group: 'evil', page: '-3' }).group, null)
   assert.equal(fromParams({ page: '-3' }).page, 1)
 })
+
+test('article body markup: headings with anchors, lists, notes', async () => {
+  const { parseBody } = await import('../src/lib/richText.ts')
+  const blocks = parseBody(
+    'Вступление\n\n## Что нового\n\n- раз\n- два\n\n> Важно\n\n## Что нового',
+  )
+  assert.deepEqual(
+    blocks.map((b) => b.type),
+    ['paragraph', 'heading', 'list', 'note', 'heading'],
+  )
+  assert.equal(blocks[1].id, 'chto-novogo')
+  assert.equal(blocks[4].id, 'chto-novogo-2')
+})

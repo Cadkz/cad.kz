@@ -11,7 +11,7 @@ const SRC = join(ROOT, 'src')
 const TOKEN_FILES = new Set(['src/styles/tokens.css', 'src/styles/fonts.css'])
 
 // Старая вёрстка прототипа. Удалить из списка вместе с файлом при переносе страницы на макет.
-const LEGACY_FILES = new Set(['src/app/(site)/styles.css', 'src/app/(site)/cart/cart.css'])
+const LEGACY_FILES = new Set([])
 
 const ALLOWED_BREAKPOINTS = new Set(['640px', '960px', '1200px'])
 
