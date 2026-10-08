@@ -2,9 +2,24 @@
 
 import { AdminButton } from '@/components/AdminButton/AdminButton'
 import { ImportProgress } from '@/components/ImportProgress/ImportProgress'
-import type { Plan } from '@/lib/bitrixImportClient'
+import { downloadText, type Plan, toCsv } from '@/lib/bitrixImportClient'
 import { type ImagesTotals, useBitrixImages } from '@/lib/useBitrixImages'
 import styles from './ImportImages.module.css'
+
+const OLD_SITE = 'https://cad.kz'
+
+/** Список не скачавшихся картинок таблицей: товар, ссылка на файл на старом сайте, причина. */
+function downloadFailed(failed: ImagesTotals['failed']) {
+  const rows = [
+    ['Товар', 'Картинка на старом сайте', 'Причина'],
+    ...failed.map((f) => [
+      f.product,
+      f.path.startsWith('/') ? OLD_SITE + f.path : f.path,
+      f.reason,
+    ]),
+  ]
+  downloadText('kartinki-ne-skachalis.csv', toCsv(rows), 'text/csv')
+}
 
 function Totals({ totals }: { totals: ImagesTotals }) {
   return (
@@ -30,6 +45,9 @@ function Totals({ totals }: { totals: ImagesTotals }) {
               </li>
             ))}
           </ul>
+          <AdminButton secondary onClick={() => downloadFailed(totals.failed)}>
+            Скачать список таблицей
+          </AdminButton>
         </details>
       )}
     </>

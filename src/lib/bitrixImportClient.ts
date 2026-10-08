@@ -122,12 +122,18 @@ export async function step<T>(body: Record<string, unknown>): Promise<T> {
   throw new StepError(lastError)
 }
 
-/** Отчёт проверочного прогона одним файлом, чтобы сохранить или переслать. */
-export function downloadText(name: string, text: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown;charset=utf-8' }))
+/** Отчёт одним файлом, чтобы сохранить или переслать. */
+export function downloadText(name: string, text: string, type = 'text/markdown') {
+  const url = URL.createObjectURL(new Blob([text], { type: `${type};charset=utf-8` }))
   const link = document.createElement('a')
   link.href = url
   link.download = name
   link.click()
   URL.revokeObjectURL(url)
+}
+
+/** Таблица для Excel: разделитель «;», метка UTF-8 в начале, кавычки вокруг каждой ячейки. */
+export function toCsv(rows: string[][]): string {
+  const cell = (value: string) => `"${value.replaceAll('"', '""')}"`
+  return `\uFEFF${rows.map((row) => row.map(cell).join(';')).join('\r\n')}\r\n`
 }

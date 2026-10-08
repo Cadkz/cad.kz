@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { imageUrl, importImages } from '../src/domain/bitrixImages.mjs'
+import { failureReason, imageUrl, importImages } from '../src/domain/bitrixImages.mjs'
 import {
   addResult,
   finishImport,
@@ -350,4 +350,28 @@ test('картинки: товара нет в базе — считается �
   })
   assert.equal(result.notInBase, 1)
   assert.equal(result.downloaded, 0)
+})
+
+test('картинки: GIF принимается, неподходящий формат и 404 — с понятной причиной', async () => {
+  const payload = fakePayload()
+  const plan = planImport(catalog())
+  await writeImport(payload, plan)
+  const fetch = async (url) => {
+    if (url.endsWith('a.png')) return { data: Buffer.from('gif'), mimetype: 'image/gif' }
+    return { data: Buffer.from('bmp'), mimetype: 'image/bmp' }
+  }
+  const result = await importImages(payload, plan, { fetch })
+  assert.equal(result.downloaded, 1, 'GIF скачан')
+  assert.deepEqual(
+    result.failed.map((f) => f.reason),
+    ['формат image/bmp не принимается в «Медиа»'],
+  )
+  assert.equal(
+    failureReason(new Error('ответ 404')),
+    'на старом сайте нет такого файла (ответ 404)',
+  )
+  assert.equal(failureReason(new Error('ответ 503')), 'старый сайт ответил ошибкой 503')
+  const timeout = new Error('timeout')
+  timeout.name = 'TimeoutError'
+  assert.equal(failureReason(timeout), 'старый сайт не ответил за 30 секунд')
 })

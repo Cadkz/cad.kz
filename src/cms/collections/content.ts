@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { MEDIA_MIME_TYPES } from '../../domain/mediaTypes.mjs'
 import { everyone, isAdmin, isEditor } from '../access'
 import { contentCollection, legacyFields, relationField, slugField, textField } from '../fields'
 
@@ -32,7 +33,7 @@ export const media: CollectionConfig = {
   labels: { singular: 'Изображение', plural: 'Медиа' },
   upload: {
     staticDir: 'media',
-    mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml'],
+    mimeTypes: MEDIA_MIME_TYPES,
   },
   access: { read: everyone, create: isEditor, update: isEditor, delete: isAdmin },
   fields: [textField('alt', 'Описание изображения', true), ...legacyFields],

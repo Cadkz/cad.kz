@@ -3,14 +3,21 @@
 // заново. Галерею, в которой уже что-то есть, не трогает: её мог собрать редактор.
 import path from 'node:path'
 import { OLD_SITE } from './bitrixImport.mjs'
+import { MEDIA_MIME_TYPES, MEDIA_TYPE_BY_EXT } from './mediaTypes.mjs'
 
-const MIME_BY_EXT = {
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.png': 'image/png',
-  '.webp': 'image/webp',
-  '.avif': 'image/avif',
-  '.svg': 'image/svg+xml',
+/**
+ * Причина, понятная редактору: «нет файла», «не ответил», «формат», а не текст исключения.
+ * @param {unknown} error
+ */
+export function failureReason(error) {
+  const message = error instanceof Error ? error.message : String(error)
+  const name = error instanceof Error ? error.name : ''
+  const status = /^ответ (\d+)$/.exec(message)?.[1]
+  if (status === '404') return 'на старом сайте нет такого файла (ответ 404)'
+  if (status) return `старый сайт ответил ошибкой ${status}`
+  if (name === 'TimeoutError' || name === 'AbortError') return 'старый сайт не ответил за 30 секунд'
+  if (message.startsWith('формат') || message.startsWith('адрес')) return message
+  return `не сохранилась в «Медиа»: ${message}`
 }
 
 /**
@@ -118,14 +125,15 @@ export async function importImages(
 
   async function download(item, imagePath) {
     const url = imageUrl(imagePath, base)
-    if (!url) throw new Error('адрес не на старом сайте')
+    if (!url) throw new Error('адрес не на старом сайте cad.kz')
     const file = await fetch(url.toString())
     const name = path.posix.basename(url.pathname)
     const mimetype =
       file.mimetype && file.mimetype !== 'application/octet-stream'
         ? file.mimetype
-        : MIME_BY_EXT[path.posix.extname(name).toLowerCase()]
-    if (!mimetype?.startsWith('image/')) throw new Error(`не картинка (${file.mimetype})`)
+        : MEDIA_TYPE_BY_EXT[path.posix.extname(name).toLowerCase()]
+    if (!mimetype || !MEDIA_MIME_TYPES.includes(mimetype))
+      throw new Error(`формат ${mimetype ?? 'неизвестен'} не принимается в «Медиа»`)
     const doc = await payload.create({
       collection: 'media',
       data: { alt: item.data.title, legacyKey: keyOf(imagePath), legacyUrl: imagePath },
@@ -155,8 +163,11 @@ export async function importImages(
       if (result.downloaded % 50 === 0) log(`Картинки: скачано ${result.downloaded}`)
       return id
     } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error)
-      result.failed.push({ product: item.data.title, path: imagePath, reason })
+      result.failed.push({
+        product: item.data.title,
+        path: imagePath,
+        reason: failureReason(error),
+      })
       return null
     }
   }
