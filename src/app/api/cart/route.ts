@@ -1,6 +1,7 @@
+import config from '@payload-config'
+import { getPayload } from 'payload'
 import { normalizeCart } from '@/domain/cart.mjs'
-import { demoProducts } from '@/domain/demo'
-import { quote } from '@/domain/pricing.mjs'
+import { findPublicOffer, loadPricingContext, quoteOffer } from '@/lib/pricing'
 
 export async function POST(request: Request) {
   if (process.env.APP_MODE !== 'demo')
@@ -9,21 +10,22 @@ export async function POST(request: Request) {
     const raw = await request.text()
     if (raw.length > 16000)
       return Response.json({ error: 'Слишком большой запрос' }, { status: 413 })
-    const lines = normalizeCart(JSON.parse(raw).items).map(({ offerId, quantity }) => {
-      const product = demoProducts.find((product) =>
-        product.offers.some((offer) => offer.id === offerId),
-      )
-      const offer = product?.offers.find((offer) => offer.id === offerId)
-      if (!product || !offer) throw new Error('Предложение недоступно. Удалите его из корзины.')
-      return {
-        offerId,
-        productId: product.id,
-        title: product.title,
-        configuration: offer.title,
-        sourceCurrency: offer.currency,
-        ...quote({ amount: offer.amount, rate: offer.rate, quantity }),
-      }
-    })
+    const items = normalizeCart(JSON.parse(raw).items)
+    const payload = await getPayload({ config })
+    const context = await loadPricingContext(payload)
+    const lines = await Promise.all(
+      items.map(async ({ offerId, quantity }) => {
+        const found = await findPublicOffer(payload, offerId)
+        if (!found) throw new Error('Предложение недоступно. Удалите его из корзины.')
+        return {
+          offerId,
+          productId: found.product.slug,
+          title: found.product.title,
+          configuration: found.offer.configuration,
+          ...quoteOffer(found.offer, context, quantity),
+        }
+      }),
+    )
     const totalKzt = lines.reduce((sum, line) => sum + BigInt(line.totalKzt), 0n).toString()
     return Response.json(
       { mode: 'demo', lines, totalKzt, quotedAt: new Date().toISOString() },

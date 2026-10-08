@@ -112,10 +112,12 @@ export interface Config {
   globals: {
     'pricing-settings': PricingSetting;
     'site-settings': SiteSetting;
+    'home-page': HomePage;
   };
   globalsSelect: {
     'pricing-settings': PricingSettingsSelect<false> | PricingSettingsSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'home-page': HomePageSelect<false> | HomePageSelect<true>;
   };
   locale: null;
   widgets: {
@@ -851,6 +853,68 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page".
+ */
+export interface HomePage {
+  id: number;
+  eyebrow?: string | null;
+  title: string;
+  sideCards?:
+    | {
+        title: string;
+        text?: string | null;
+        linkLabel?: string | null;
+        linkHref?: string | null;
+        dark?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  bim?: {
+    eyebrow?: string | null;
+    title?: string | null;
+    lead?: string | null;
+    stages?:
+      | {
+          title: string;
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    stats?:
+      | {
+          value: string;
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+    linkLabel?: string | null;
+    linkHref?: string | null;
+  };
+  process?:
+    | {
+        title: string;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  cta?: {
+    title?: string | null;
+    text?: string | null;
+    linkLabel?: string | null;
+    linkHref?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pricing-settings_select".
  */
 export interface PricingSettingsSelect<T extends boolean = true> {
@@ -882,6 +946,72 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         id?: T;
       };
   footerText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page_select".
+ */
+export interface HomePageSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  sideCards?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        linkLabel?: T;
+        linkHref?: T;
+        dark?: T;
+        id?: T;
+      };
+  bim?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        lead?: T;
+        stages?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              id?: T;
+            };
+        stats?:
+          | T
+          | {
+              value?: T;
+              label?: T;
+              id?: T;
+            };
+        linkLabel?: T;
+        linkHref?: T;
+      };
+  process?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  cta?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        linkLabel?: T;
+        linkHref?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

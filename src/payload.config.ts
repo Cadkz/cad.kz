@@ -12,6 +12,7 @@ import {
   redirects,
 } from './cms/collections/system'
 import { users } from './cms/collections/users'
+import { homePage } from './cms/globals/homePage'
 import { siteSettings } from './cms/globals/siteSettings'
 
 export default buildConfig({
@@ -37,5 +38,5 @@ export default buildConfig({
     importRuns,
     redirects,
   ],
-  globals: [pricingSettings, siteSettings],
+  globals: [pricingSettings, siteSettings, homePage],
 })

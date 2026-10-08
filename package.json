@@ -18,7 +18,8 @@
     "format": "biome check --write .",
     "check:styles": "node scripts/check-styles.mjs",
     "check": "pnpm lint && pnpm check:styles && pnpm typecheck && pnpm test",
-    "generate:types": "payload generate:types"
+    "generate:types": "payload generate:types",
+    "seed:demo": "payload run scripts/seed-demo.mjs"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.90.2",
