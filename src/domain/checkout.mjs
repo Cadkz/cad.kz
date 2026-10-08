@@ -1,3 +1,4 @@
+// @ts-check
 // Оформление заказа от проверки формы до сохранения. Работает только через переданные зависимости
 // (цена корзины, хранилище, время), поэтому проверяется тестами без базы данных.
 
@@ -20,6 +21,7 @@ const NUMBER_ATTEMPTS = 3
 /** Предложение из корзины недоступно (снято с публикации, удалено). Покупателю показываем текст как есть. */
 export class CartUnavailableError extends Error {}
 
+/** @param {import('./order.mjs').CheckoutRequest} request */
 export function fingerprintOf(request) {
   return createHash('sha256').update(canonicalRequest(request)).digest('hex')
 }
@@ -37,6 +39,17 @@ export function fingerprintOf(request) {
  * @property {string} savedAt
  * @property {string} mode
  *
+ * @typedef {object} NewOrder
+ * @property {string} number
+ * @property {string} idempotencyKey
+ * @property {string} fingerprint
+ * @property {string} mode
+ * @property {import('./order.mjs').CheckoutRequest['buyer']} buyer
+ * @property {string} comment
+ * @property {{ accepted: true, at: string, version: string, text: string }} consent
+ * @property {import('./order.mjs').OrderSnapshot} snapshot
+ * @property {string} clientHash
+ *
  * @typedef {object} CheckoutDeps
  * @property {string} mode  Режим сайта: в демо заявка не уходит менеджерам.
  * @property {() => Date} now
@@ -44,30 +57,62 @@ export function fingerprintOf(request) {
  * @property {(items: Array<{ offerId: string, quantity: number }>) => Promise<PricedCart>} priceCart
  * @property {(key: string) => Promise<StoredOrder | null>} findOrderByKey
  * @property {(filter: { phone: string, clientHash: string, since: Date }) => Promise<{ phone: number, client: number }>} countRecent
- * @property {(entry: { order: object, crmLead: object }) => Promise<StoredOrder>} saveOrder  Заказ и запись очереди CRM одной транзакцией.
+ * @property {(entry: { order: NewOrder, crmLead: Record<string, unknown> }) => Promise<StoredOrder>} saveOrder  Заказ и запись очереди CRM одной транзакцией.
  * @property {(error: unknown) => boolean} isDuplicate  Нарушение уникальности ключа или номера.
+ *
+ * @typedef {{ status: 'invalid', errors: Record<string, string> }
+ *   | { status: 'created', order: StoredOrder, idempotencyKey: string }
+ *   | { status: 'repeated', order: StoredOrder }
+ *   | { status: 'key_conflict' }
+ *   | { status: 'cart_unavailable', error: string }
+ *   | { status: 'price_changed', quote: PricedCart }
+ *   | { status: 'rate_limited', retryAfterSeconds: number }} CheckoutResult
  */
 
+/**
+ * @param {StoredOrder} stored
+ * @param {string} fingerprint
+ * @returns {CheckoutResult}
+ */
 function replay(stored, fingerprint) {
   return stored.fingerprint === fingerprint
     ? { status: 'repeated', order: stored }
     : { status: 'key_conflict' }
 }
 
-/** Цену присылает не клиент: сервер заново считает корзину по предложениям, курсу и НДС. */
+/**
+ * Цену присылает не клиент: сервер заново считает корзину по предложениям, курсу и НДС.
+ * @param {CheckoutDeps} deps
+ * @param {import('./order.mjs').CheckoutRequest} request
+ * @returns {Promise<{ ok: true, priced: PricedCart } | { ok: false, result: CheckoutResult }>}
+ */
 async function priceRequest(deps, request) {
   try {
     const priced = await deps.priceCart(request.items)
-    return priced.totalKzt === request.expectedTotalKzt
-      ? { priced }
-      : { stop: { status: 'price_changed', quote: priced } }
+    if (priced.totalKzt !== request.expectedTotalKzt)
+      return { ok: false, result: { status: 'price_changed', quote: priced } }
+    return { ok: true, priced }
   } catch (error) {
     if (error instanceof CartUnavailableError)
-      return { stop: { status: 'cart_unavailable', error: error.message } }
+      return { ok: false, result: { status: 'cart_unavailable', error: error.message } }
     throw error
   }
 }
 
+/**
+ * @typedef {object} SaveContext
+ * @property {CheckoutDeps} deps
+ * @property {import('./order.mjs').CheckoutRequest} request
+ * @property {string} fingerprint
+ * @property {import('./order.mjs').OrderSnapshot} snapshot
+ * @property {Date} now
+ * @property {{ clientHash: string }} meta
+ */
+
+/**
+ * @param {SaveContext} context
+ * @returns {NewOrder}
+ */
 function buildOrder({ request, fingerprint, snapshot, now, deps, meta }) {
   return {
     number: makeOrderNumber(now, deps.randomIndex),
@@ -87,16 +132,18 @@ function buildOrder({ request, fingerprint, snapshot, now, deps, meta }) {
   }
 }
 
-/** Сохраняет заказ. Занятый ключ — это параллельный повтор, занятый номер — просто берём другой. */
+/**
+ * Сохраняет заказ. Занятый ключ — это параллельный повтор, занятый номер — просто берём другой.
+ * @param {SaveContext} context
+ * @returns {Promise<CheckoutResult>}
+ */
 async function save(context) {
   const { deps, request, fingerprint } = context
   for (let attempt = 0; attempt < NUMBER_ATTEMPTS; attempt++) {
     const order = buildOrder(context)
     try {
-      return {
-        status: 'created',
-        order: await deps.saveOrder({ order, crmLead: toCrmLead(order) }),
-      }
+      const saved = await deps.saveOrder({ order, crmLead: toCrmLead(order) })
+      return { status: 'created', order: saved, idempotencyKey: request.idempotencyKey }
     } catch (error) {
       if (!deps.isDuplicate(error)) throw error
       const winner = await deps.findOrderByKey(request.idempotencyKey)
@@ -110,6 +157,7 @@ async function save(context) {
  * @param {unknown} raw Тело запроса.
  * @param {CheckoutDeps} deps
  * @param {{ clientHash: string }} meta
+ * @returns {Promise<CheckoutResult>}
  */
 export async function submitCheckout(raw, deps, meta) {
   const parsed = validateCheckout(raw)
@@ -130,9 +178,10 @@ export async function submitCheckout(raw, deps, meta) {
   if (recent.phone >= HOURLY_LIMIT.phone || recent.client >= HOURLY_LIMIT.client)
     return { status: 'rate_limited', retryAfterSeconds: 3600 }
 
-  const { priced, stop } = await priceRequest(deps, request)
-  if (stop) return stop
+  const pricing = await priceRequest(deps, request)
+  if (!pricing.ok) return pricing.result
 
+  const { priced } = pricing
   const snapshot = buildOrderSnapshot({ lines: priced.lines, quotedAt: priced.quotedAt })
   return save({ deps, request, fingerprint, snapshot, now, meta })
 }

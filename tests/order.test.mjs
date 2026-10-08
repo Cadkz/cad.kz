@@ -9,6 +9,7 @@ import {
   SNAPSHOT_VERSION,
   toCrmLead,
   validateCheckout,
+  validateForm,
 } from '../src/domain/order.mjs'
 import { BIN, createWorld, formRequest, KEY, NOW } from './fixtures.mjs'
 
@@ -238,4 +239,22 @@ test('данные для CRM берутся из сохранённого за�
   assert.deepEqual(toCrmLead({ ...order, buyer: { ...company, type: 'individual' } }).buyer, {
     type: 'individual',
   })
+})
+
+test('форма в браузере проверяется теми же правилами, без корзины и ключа', () => {
+  const ok = validateForm({ buyer: company, comment: ' привет ', consent: true })
+  assert.equal(ok.ok, true)
+  assert.equal(ok.value.comment, 'привет')
+  assert.equal(ok.value.buyer.bin, BIN)
+
+  const bad = validateForm({ buyer: { type: 'company', name: '' }, consent: false })
+  assert.deepEqual(Object.keys(bad.errors).sort(), [
+    'bin',
+    'companyName',
+    'consent',
+    'email',
+    'name',
+    'phone',
+  ])
+  assert.equal(validateForm(null).ok, false)
 })

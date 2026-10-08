@@ -22,15 +22,21 @@ export const demoConsultant: ConsultantProvider = {
 }
 export type CrmLead = {
   idempotencyKey: string
+  orderNumber: string
   consent: { accepted: true; at: string; version: string }
   contact: { name: string; email?: string; phone?: string }
+  buyer: { type: 'individual' } | { type: 'company'; companyName: string; bin: string }
+  comment?: string
   items: { offerId: string; quantity: number; totalKzt: string }[]
+  totalKzt: string
   messages: Message[]
 }
 export interface CrmGateway {
   deliver(lead: CrmLead): Promise<{ status: 'not-sent-demo' | 'sent'; externalId?: string }>
+  /** Ищет уже созданный лид по ключу заявки. Нужен после неясного итога, чтобы не создать дубль. */
+  find?(idempotencyKey: string): Promise<{ externalId: string } | null>
 }
-/** No network call and no success claim. Durable outbox is a separate implementation step. */
+/** Без сети и без обещаний: используется, пока реальная интеграция не согласована. */
 export const demoCrm: CrmGateway = {
   async deliver() {
     return { status: 'not-sent-demo' }

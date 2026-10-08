@@ -1,0 +1,75 @@
+/*
+ * Блок живёт в админке Payload, где токены сайта не подключены, поэтому здесь переменные самой админки.
+ * Размеры шрифта не задаём: берутся из окружения админки.
+ */
+.root {
+  margin-bottom: calc(var(--base) * 1.5);
+  padding: var(--base);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-m);
+  background: var(--theme-elevation-50);
+}
+
+.title {
+  margin: 0 0 var(--base);
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: calc(var(--base) / 2) calc(var(--base) / 2) calc(var(--base) / 2) 0;
+  border-bottom: 1px solid var(--theme-elevation-150);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  color: var(--theme-elevation-600);
+  font-weight: bold;
+}
+
+.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table th.num,
+.table td.num {
+  padding-right: 0;
+  padding-left: calc(var(--base) / 2);
+  text-align: right;
+}
+
+.muted {
+  color: var(--theme-elevation-600);
+}
+
+.totals {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  gap: calc(var(--base) / 4) var(--base);
+  justify-content: end;
+  margin: var(--base) 0 0;
+}
+
+.totals dt {
+  color: var(--theme-elevation-600);
+  text-align: right;
+}
+
+.totals dd {
+  margin: 0;
+  text-align: right;
+}
+
+.total {
+  font-weight: bold;
+}

@@ -11,6 +11,7 @@ type CartContextValue = {
   add: (item: CartItem) => void
   remove: (offerId: string) => void
   setQuantity: (offerId: string, quantity: number) => void
+  clear: () => void
 }
 const Context = createContext<CartContextValue | null>(null)
 const storageKey = 'cad.kz.demo-cart.v1'
@@ -52,6 +53,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ready,
         add,
         setQuantity,
+        clear: () => setItems([]),
         remove: (offerId) => setItems(items.filter((item) => item.offerId !== offerId)),
       }}
     >

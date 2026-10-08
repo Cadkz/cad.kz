@@ -107,14 +107,40 @@ function checkCompany(input, errors) {
   return { companyName, bin }
 }
 
+/** Поля формы: контакты, покупатель, комментарий, согласие. Ключи и корзина проверяются отдельно. */
+function checkForm(input, errors) {
+  const buyerInput = input.buyer && typeof input.buyer === 'object' ? input.buyer : {}
+  const contact = checkContact(buyerInput, errors)
+  const type = checkBuyerType(buyerInput, errors)
+  const company = type === 'company' ? checkCompany(buyerInput, errors) : null
+  const comment = multiline(input.comment)
+  if (comment.length > 1000 || hasControl(comment))
+    errors.comment = 'Комментарий не длиннее 1000 символов'
+  if (input.consent !== true)
+    errors.consent = 'Без согласия на обработку данных заявку отправить нельзя'
+  return { buyer: type ? { ...contact, type, ...(company ?? {}) } : null, comment }
+}
+
 /**
- * Проверка данных формы оформления. Возвращает нормализованное значение либо ошибки по полям.
- * Те же правила работают в браузере (мгновенные подсказки) и на сервере (окончательная проверка).
+ * Проверка только полей формы (без корзины и ключа): мгновенные подсказки в браузере.
+ * Те же правила, что и на сервере, потому что это тот же код.
+ * @returns {{ ok: true, value: { buyer: CheckoutRequest['buyer'], comment: string } } | { ok: false, errors: Record<string, string> }}
+ */
+export function validateForm(raw) {
+  /** @type {Record<string, string>} */
+  const errors = {}
+  const { buyer, comment } = checkForm(raw && typeof raw === 'object' ? raw : {}, errors)
+  if (Object.keys(errors).length || !buyer) return { ok: false, errors }
+  return { ok: true, value: { buyer, comment } }
+}
+
+/**
+ * Полная проверка запроса на оформление: форма, ключ повтора, корзина, ожидаемая сумма.
+ * Возвращает нормализованное значение либо ошибки по полям.
  * @returns {{ ok: true, value: CheckoutRequest } | { ok: false, errors: Record<string, string> }}
  */
 export function validateCheckout(raw) {
   const input = raw && typeof raw === 'object' ? raw : {}
-  const buyerInput = input.buyer && typeof input.buyer === 'object' ? input.buyer : {}
   /** @type {Record<string, string>} */
   const errors = {}
 
@@ -124,26 +150,17 @@ export function validateCheckout(raw) {
   const expectedTotalKzt = typeof input.expectedTotalKzt === 'string' ? input.expectedTotalKzt : ''
   if (!/^\d{1,15}$/.test(expectedTotalKzt))
     errors.expectedTotalKzt = 'Не удалось сверить сумму. Обновите страницу.'
-
   const items = checkItems(input.items, errors)
-  const contact = checkContact(buyerInput, errors)
-  const type = checkBuyerType(buyerInput, errors)
-  const company = type === 'company' ? checkCompany(buyerInput, errors) : null
+  const { buyer, comment } = checkForm(input, errors)
 
-  const comment = multiline(input.comment)
-  if (comment.length > 1000 || hasControl(comment))
-    errors.comment = 'Комментарий не длиннее 1000 символов'
-  if (input.consent !== true)
-    errors.consent = 'Без согласия на обработку данных заявку отправить нельзя'
-
-  if (Object.keys(errors).length || !type) return { ok: false, errors }
+  if (Object.keys(errors).length || !buyer) return { ok: false, errors }
   return {
     ok: true,
     value: {
       idempotencyKey: idempotencyKey.toLowerCase(),
       items,
       expectedTotalKzt,
-      buyer: { ...contact, type, ...(company ?? {}) },
+      buyer,
       comment,
     },
   }
@@ -181,6 +198,7 @@ function freeze(value) {
 /**
  * Неизменяемый снимок заказа. Берёт уже рассчитанные сервером строки корзины и ничего не пересчитывает:
  * исходная цена и валюта, курс и его дата, ставки НДС, итог за единицу и за строку, версия правила.
+ * @returns {OrderSnapshot}
  */
 export function buildOrderSnapshot({ lines, quotedAt }) {
   if (!Array.isArray(lines) || !lines.length) throw new Error('В заказе нет строк')
@@ -260,4 +278,29 @@ export function toCrmLead(order) {
  * @property {string} expectedTotalKzt
  * @property {{ name: string, phone: string, email: string, type: 'individual' | 'company', companyName?: string, bin?: string }} buyer
  * @property {string} comment
+ */
+
+/**
+ * @typedef {object} SnapshotLine
+ * @property {string} offerId
+ * @property {string} productSlug
+ * @property {string} productTitle
+ * @property {string} configuration
+ * @property {string} license
+ * @property {number} quantity
+ * @property {{ amount: string, currency: string, includesVat: boolean, vat: string }} source
+ * @property {{ kztPerUnit: string, date: string | null }} rate
+ * @property {string} unitKzt
+ * @property {string} totalKzt
+ * @property {string} vatMinor
+ *
+ * @typedef {object} OrderSnapshot
+ * @property {number} version
+ * @property {string} rule
+ * @property {'KZT'} currency
+ * @property {string} quotedAt
+ * @property {string} targetVat
+ * @property {SnapshotLine[]} lines
+ * @property {string} totalKzt
+ * @property {string} vatMinor
  */

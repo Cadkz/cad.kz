@@ -1,0 +1,64 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+  color: var(--color-gray-700);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.option {
+  position: relative;
+  cursor: pointer;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: var(--control-height);
+  padding: 0 var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-navy);
+  font-weight: var(--weight-semibold);
+  transition:
+    background var(--duration-fast) var(--ease),
+    border-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
+}
+
+.option:hover .chip {
+  border-color: var(--color-blue-mid);
+  background: var(--color-blue-soft);
+}
+
+.option input:checked + .chip {
+  border-color: var(--color-navy);
+  background: var(--color-navy);
+  color: var(--color-text-inverse);
+}
+
+.option input:focus-visible + .chip {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.error {
+  color: var(--color-error);
+  font-size: var(--text-xs);
+}

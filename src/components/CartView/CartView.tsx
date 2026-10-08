@@ -2,67 +2,21 @@
 
 import { Trash2 } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import { formatKzt } from '@/lib/format'
 import { catalogHref, productHref } from '@/lib/navigationHrefs'
+import { useCartQuote } from '@/lib/useCartQuote'
 import { Button, ButtonLink } from '../Button/Button'
 import { useCart } from '../CartProvider/CartProvider'
+import { EmptyCart } from '../EmptyCart/EmptyCart'
 import styles from './CartView.module.css'
-
-type Line = {
-  offerId: string
-  productId: string
-  title: string
-  configuration: string
-  unitKzt: string
-  totalKzt: string
-}
-type Quote = { totalKzt: string; lines: Line[] }
 
 /** Корзина: строки — это комплектации (ID предложения), итог каждый раз пересчитывает сервер. */
 export function CartView() {
   const { items, ready, remove, setQuantity } = useCart()
-  const [quote, setQuote] = useState<Quote | null>(null)
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [retry, setRetry] = useState(0)
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: retry намеренно перезапускает пересчёт по кнопке
-  useEffect(() => {
-    if (!ready || !items.length) return
-    const controller = new AbortController()
-    setBusy(true)
-    setError('')
-    fetch('/api/cart', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items }),
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        const data = await response.json()
-        if (!response.ok) throw new Error(data.error || 'Не удалось пересчитать корзину')
-        setQuote(data)
-      })
-      .catch((reason: unknown) => {
-        if (!controller.signal.aborted)
-          setError(reason instanceof Error ? reason.message : 'Ошибка соединения')
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setBusy(false)
-      })
-    return () => controller.abort()
-  }, [items, ready, retry])
+  const { quote, error, busy, retry } = useCartQuote(items, ready)
 
   if (!ready) return <p role="status">Загружаем корзину…</p>
-  if (!items.length)
-    return (
-      <div className={styles.empty}>
-        <h2>В корзине пока пусто</h2>
-        <p>Выберите решение и подходящую комплектацию в каталоге.</p>
-        <ButtonLink href={catalogHref()}>Перейти в каталог</ButtonLink>
-      </div>
-    )
+  if (!items.length) return <EmptyCart />
 
   return (
     <div className={styles.layout}>
@@ -117,13 +71,16 @@ export function CartView() {
         {error && (
           <div role="alert" className={styles.error}>
             <p>{error}</p>
-            <Button variant="secondary" size="sm" onClick={() => setRetry(retry + 1)}>
+            <Button variant="secondary" size="sm" onClick={retry}>
               Повторить расчёт
             </Button>
           </div>
         )}
+        <ButtonLink href="/checkout" block>
+          Оформить заказ
+        </ButtonLink>
         <p className={styles.note}>
-          Демоверсия: оформление заказа ещё не подключено, данные менеджерам не передаются. Разные
+          Демоверсия: заявка сохранится в учебной базе и менеджерам не передаётся. Разные
           комплектации одного товара хранятся отдельными строками.
         </p>
         <ButtonLink href={catalogHref()} variant="outline" block>

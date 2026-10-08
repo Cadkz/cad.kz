@@ -10,6 +10,7 @@ test('успешное оформление: заказ со снимком и �
   const result = await submitCheckout(formRequest(), world.deps, meta)
 
   assert.equal(result.status, 'created')
+  assert.equal(result.idempotencyKey, KEY, 'по ключу заявку находит очередь CRM')
   assert.match(result.order.number, /^CAD-20261008-[A-Z0-9]{5}$/)
   assert.equal(result.order.totalKzt, '5846400')
   assert.equal(result.order.mode, 'demo')

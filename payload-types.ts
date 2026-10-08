@@ -346,7 +346,22 @@ export interface User {
  */
 export interface Order {
   id: number;
-  idempotencyKey: string;
+  number: string;
+  mode: 'demo' | 'live';
+  buyerType: 'individual' | 'company';
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
+  companyName?: string | null;
+  bin?: string | null;
+  comment?: string | null;
+  totalKzt: string;
+  consent?: {
+    accepted?: boolean | null;
+    at?: string | null;
+    version?: string | null;
+    text?: string | null;
+  };
   snapshot:
     | {
         [k: string]: unknown;
@@ -356,7 +371,9 @@ export interface Order {
     | number
     | boolean
     | null;
-  state: string;
+  idempotencyKey: string;
+  fingerprint: string;
+  clientHash?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -387,6 +404,13 @@ export interface Conversation {
 export interface CrmDelivery {
   id: number;
   idempotencyKey: string;
+  order?: (number | null) | Order;
+  state: 'pending' | 'processing' | 'not-sent-demo' | 'sent' | 'failed' | 'dead';
+  attempts?: number | null;
+  nextAttemptAt?: string | null;
+  ambiguous?: boolean | null;
+  lastError?: string | null;
+  externalId?: string | null;
   snapshot:
     | {
         [k: string]: unknown;
@@ -396,7 +420,6 @@ export interface CrmDelivery {
     | number
     | boolean
     | null;
-  state: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -723,9 +746,28 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "orders_select".
  */
 export interface OrdersSelect<T extends boolean = true> {
-  idempotencyKey?: T;
+  number?: T;
+  mode?: T;
+  buyerType?: T;
+  contactName?: T;
+  contactPhone?: T;
+  contactEmail?: T;
+  companyName?: T;
+  bin?: T;
+  comment?: T;
+  totalKzt?: T;
+  consent?:
+    | T
+    | {
+        accepted?: T;
+        at?: T;
+        version?: T;
+        text?: T;
+      };
   snapshot?: T;
-  state?: T;
+  idempotencyKey?: T;
+  fingerprint?: T;
+  clientHash?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -746,8 +788,14 @@ export interface ConversationsSelect<T extends boolean = true> {
  */
 export interface CrmDeliveriesSelect<T extends boolean = true> {
   idempotencyKey?: T;
-  snapshot?: T;
+  order?: T;
   state?: T;
+  attempts?: T;
+  nextAttemptAt?: T;
+  ambiguous?: T;
+  lastError?: T;
+  externalId?: T;
+  snapshot?: T;
   updatedAt?: T;
   createdAt?: T;
 }

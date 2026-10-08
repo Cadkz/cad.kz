@@ -17,9 +17,7 @@ function journal(slug: CollectionSlug, plural: string): CollectionConfig {
   }
 }
 
-export const orders = journal('orders', 'Заказы')
 export const conversations = journal('conversations', 'Диалоги консультанта')
-export const crmDeliveries = journal('crm-deliveries', 'Передача в CRM')
 export const importRuns = journal('import-runs', 'Запуски импорта')
 
 export const redirects: CollectionConfig = {
