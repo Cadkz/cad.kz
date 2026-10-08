@@ -1,5 +1,5 @@
 import { APIError, type CollectionBeforeDeleteHook, type CollectionConfig } from 'payload'
-import { isAdmin, nobody } from '../access'
+import { canReadOrders, isAdmin, nobody } from '../access'
 import { relationField, textField } from '../fields'
 
 /**
@@ -32,9 +32,16 @@ export const orders: CollectionConfig = {
     defaultColumns: ['number', 'createdAt', 'contactName', 'buyerType', 'totalKzt', 'mode'],
   },
   defaultSort: '-createdAt',
-  access: { read: isAdmin, create: nobody, update: nobody, delete: nobody },
+  access: { read: canReadOrders, create: nobody, update: nobody, delete: nobody },
   hooks: forbidChange,
   fields: [
+    {
+      name: 'snapshotView',
+      type: 'ui',
+      admin: {
+        components: { Field: '/components/OrderSnapshotView/OrderSnapshotView#OrderSnapshotView' },
+      },
+    },
     { name: 'number', label: 'Номер', type: 'text', unique: true, required: true, index: true },
     {
       name: 'mode',
@@ -64,13 +71,6 @@ export const orders: CollectionConfig = {
     { name: 'comment', label: 'Комментарий покупателя', type: 'textarea' },
     textField('totalKzt', 'Итого с НДС, ₸', true),
     {
-      name: 'snapshotView',
-      type: 'ui',
-      admin: {
-        components: { Field: '/components/OrderSnapshotView/OrderSnapshotView#OrderSnapshotView' },
-      },
-    },
-    {
       name: 'consent',
       label: 'Согласие на обработку данных',
       type: 'group',
@@ -82,15 +82,28 @@ export const orders: CollectionConfig = {
       ],
     },
     {
-      name: 'snapshot',
-      label: 'Снимок заказа (данные как сохранены)',
-      type: 'json',
-      required: true,
-      admin: readOnly,
+      type: 'collapsible',
+      label: 'Служебные данные',
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: 'snapshot',
+          label: 'Снимок заказа (данные как сохранены)',
+          type: 'json',
+          required: true,
+          admin: readOnly,
+        },
+        {
+          name: 'idempotencyKey',
+          label: 'Ключ повтора',
+          type: 'text',
+          unique: true,
+          required: true,
+        },
+        textField('fingerprint', 'Отпечаток заявки', true),
+        textField('clientHash', 'Отметка адреса (для лимита частоты)'),
+      ],
     },
-    { name: 'idempotencyKey', label: 'Ключ повтора', type: 'text', unique: true, required: true },
-    textField('fingerprint', 'Отпечаток заявки', true),
-    textField('clientHash', 'Отметка адреса (для лимита частоты)'),
   ],
 }
 
