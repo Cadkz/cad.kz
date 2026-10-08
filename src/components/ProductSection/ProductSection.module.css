@@ -1,0 +1,26 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
+}
+
+.standalone {
+  padding-top: var(--section-gap);
+}
+
+.sub {
+  max-width: var(--measure);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.body {
+  margin-top: var(--space-3);
+  color: var(--color-gray-700);
+  line-height: var(--leading-relaxed);
+}
+
+.body > p {
+  max-width: var(--measure);
+}
