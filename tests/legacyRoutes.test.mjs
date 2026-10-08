@@ -76,7 +76,9 @@ test('manufacturer names come from old addresses, numeric IDs are ignored', () =
 
 test('section hints only for known sections', () => {
   assert.deepEqual(sectionHint('hardware'), { group: 'hardware' })
+  assert.deepEqual(sectionHint('magicad'), { vendor: 'MagiCAD', group: 'software' })
   assert.deepEqual(sectionHint('constructor'), {})
+  assert.deepEqual(sectionHint('toString'), {})
   assert.deepEqual(sectionHint(null), {})
 })
 

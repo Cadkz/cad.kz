@@ -44,32 +44,72 @@ async function byLegacyUrl(payload: Payload, path: string) {
     : catalogHref({ group: section.menuGroup, type: section.slug })
 }
 
+/** Подсказка для раздела, проверенная по базе: фильтр каталога, который не окажется пустым. */
+async function hintTarget(payload: Payload, section: string | null) {
+  const hint: { group?: string; vendor?: string; direction?: string } = sectionHint(section)
+  const published: Where = { status: { equals: 'published' } }
+  if (hint.vendor) {
+    const vendors = await payload.find({
+      collection: 'manufacturers',
+      where: { title: { equals: hint.vendor } },
+      limit: 1,
+      depth: 0,
+    })
+    const vendor = vendors.docs[0]
+    const products = vendor
+      ? await payload.count({
+          collection: 'products',
+          where: { and: [published, { manufacturer: { equals: vendor.id } }] },
+        })
+      : { totalDocs: 0 }
+    if (products.totalDocs > 0) return catalogHref({ vendor: hint.vendor })
+  }
+  if (hint.direction) {
+    const sections = await payload.find({
+      collection: 'sections',
+      where: { and: [published, { slug: { equals: hint.direction } }] },
+      limit: 1,
+      depth: 0,
+    })
+    const direction = sections.docs[0]
+    const products = direction
+      ? await payload.count({
+          collection: 'products',
+          where: { and: [published, { sections: { in: [direction.id] } }] },
+        })
+      : { totalDocs: 0 }
+    if (products.totalDocs > 0) return catalogHref({ direction: hint.direction })
+  }
+  return hint.group ? catalogHref({ group: hint.group }) : null
+}
+
 /** Старый раздел каталога: его товары на новом сайте, их производитель или вкладка каталога. */
 async function sectionTarget(payload: Payload, section: string | null) {
   const codes = Object.entries(legacySections)
     .filter(([, value]) => value === section)
     .map(([code]) => code)
-  if (codes.length) {
-    const { docs } = await payload.find({
-      collection: 'products',
-      where: { and: [{ status: { equals: 'published' } }, { slug: { in: codes } }] },
-      limit: 200,
-      depth: 1,
-      select: { slug: true, legacyUrl: true, kind: true, manufacturer: true },
-    })
-    if (docs.length === 1) return productPath(docs[0])
-    const vendors = new Set(
-      docs.map((doc) =>
-        doc.manufacturer && typeof doc.manufacturer !== 'number' ? doc.manufacturer.title : '',
-      ),
-    )
-    const [vendor] = [...vendors]
-    if (docs.length > 1 && vendors.size === 1 && vendor) return catalogHref({ vendor })
-    const groups = new Set(docs.map((doc) => kindGroup[doc.kind]))
-    const [group] = [...groups]
-    if (docs.length > 1 && groups.size === 1 && group) return catalogHref({ group })
-  }
-  return catalogHref(sectionHint(section))
+  const { docs } = codes.length
+    ? await payload.find({
+        collection: 'products',
+        where: { and: [{ status: { equals: 'published' } }, { slug: { in: codes } }] },
+        limit: 200,
+        depth: 1,
+        select: { slug: true, legacyUrl: true, kind: true, manufacturer: true },
+      })
+    : { docs: [] }
+  if (docs.length === 1) return productPath(docs[0])
+  const vendors = new Set(
+    docs.map((doc) =>
+      doc.manufacturer && typeof doc.manufacturer !== 'number' ? doc.manufacturer.title : '',
+    ),
+  )
+  const [vendor] = [...vendors]
+  if (docs.length > 1 && vendors.size === 1 && vendor) return catalogHref({ vendor })
+  const hinted = await hintTarget(payload, section)
+  if (hinted) return hinted
+  const groups = new Set(docs.map((doc) => kindGroup[doc.kind]))
+  const [group] = [...groups]
+  return catalogHref(docs.length > 1 && groups.size === 1 && group ? { group } : {})
 }
 
 /** Старый адрес товара или раздела каталога. */

@@ -51,16 +51,50 @@ export function parseCatalogPath(pathname) {
   return { section: parts[1] ?? null, code: parts[2] ?? null }
 }
 
-/** Разделы, у которых на новом сайте есть очевидная вкладка каталога. */
+/**
+ * Подсказки для старых разделов, у которых в картах сайта нет своих товаров (это родительские
+ * разделы: товары лежат в подразделах) или товары разных производителей. Производитель
+ * и направление проверяются по базе: если на сайте их нет, берётся группа, затем весь каталог.
+ * @type {Record<string, CatalogQuery>}
+ */
+const ntp = { vendor: 'НТП Трубопровод', group: 'software' }
 const sectionHints = {
   software: { group: 'software' },
   hardware: { group: 'hardware' },
   services: { group: 'service' },
   cad_training: { group: 'service' },
   uchebnye_versii: { group: 'software' },
+  novye_versii9: { group: 'software' },
+  novye_versii10: { group: 'software' },
+  novye_versii11: { group: 'software' },
+  '3d_skanery_artec': { vendor: 'Artec 3D', group: 'hardware' },
+  WideTek: { vendor: 'Image Access', group: 'hardware' },
+  ars_ps: { vendor: 'АРС-ПС', group: 'software' },
+  chaos_group: { vendor: 'Chaos Group', group: 'software' },
+  csoft_development: { vendor: 'Csoft Development', group: 'software' },
+  project_studio_cs: { vendor: 'Csoft Development', group: 'software' },
+  fine_software: { vendor: 'Fine Software', group: 'software' },
+  lira_sapr: { vendor: 'ЛИРА-FEM', group: 'software' },
+  magicad: { vendor: 'MagiCAD', group: 'software' },
+  scad_soft: { vendor: 'SCAD', group: 'software' },
+  ntp_truboprovod: ntp,
+  izolyatsiya: ntp,
+  passat: ntp,
+  predklapan: ntp,
+  shtutser_mke: ntp,
+  the_scope_of: { group: 'software' },
+  basic_cad: { group: 'software' },
+  architectural_cad: { direction: 'arch', group: 'software' },
+  bim_design: { direction: 'arch', group: 'software' },
+  Structural_cad: { direction: 'structural', group: 'software' },
+  engineering_cad: { direction: 'mep', group: 'software' },
+  infrastructure_cad: { direction: 'infra', group: 'software' },
+  design_and_visualization: { direction: 'viz', group: 'software' },
+  mechanical_engineering: { direction: 'machine', group: 'software' },
+  process_design_and_calculations: { direction: 'pipes', group: 'software' },
 }
 
-/** Подсказка для раздела, если в базе не нашлось ни его, ни его товаров. */
+/** Подсказка для старого раздела (производитель, направление, группа каталога) или пустая. */
 export function sectionHint(section) {
   return (section && Object.hasOwn(sectionHints, section) && sectionHints[section]) || {}
 }
