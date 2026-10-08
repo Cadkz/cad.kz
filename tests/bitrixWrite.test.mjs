@@ -1,7 +1,18 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { importImages } from '../src/domain/bitrixImages.mjs'
-import { planImport, productSlug, writeImport } from '../src/domain/bitrixImport.mjs'
+import { imageUrl, importImages } from '../src/domain/bitrixImages.mjs'
+import {
+  addResult,
+  finishImport,
+  planImport,
+  plannedKeys,
+  productSlug,
+  startImport,
+  writeImport,
+  writeOffers,
+  writeProducts,
+} from '../src/domain/bitrixImport.mjs'
+import { readItems, readKeys } from '../src/domain/bitrixImportInput.mjs'
 import { htmlToMarkup } from '../src/domain/bitrixText.mjs'
 import { parseBody } from '../src/lib/richText.ts'
 
@@ -20,6 +31,8 @@ function fakePayload(seed = {}) {
       let docs = [...table(collection)]
       const before = where?.effectiveAt?.less_than_equal
       if (before) docs = docs.filter((d) => d.effectiveAt <= before)
+      for (const [field, condition] of Object.entries(where ?? {}))
+        if (condition.in) docs = docs.filter((d) => condition.in.includes(d[field]))
       if (sort === '-effectiveAt') docs.sort((a, b) => b.effectiveAt.localeCompare(a.effectiveAt))
       return { docs: structuredClone(docs) }
     },
@@ -226,4 +239,92 @@ test('картинки: по частям, повтор не качает зан
 
   const third = await importImages(payload, plan, { fetch })
   assert.equal(third.downloaded + third.reused, 0, 'заполненная галерея не трогается')
+})
+
+test('запись частями: как за один раз, время вышло — остаток следующим вызовом', async () => {
+  const plan = planImport(catalog())
+  const whole = fakePayload()
+  const once = await writeImport(whole, plan, { now: new Date('2026-10-08T12:00:00Z') })
+
+  const parts = fakePayload()
+  const total = await startImport(parts, plan.manufacturers, {
+    now: new Date('2026-10-08T12:00:00Z'),
+  })
+  const late = await writeProducts(parts, plan.products, { deadline: Date.now() - 1 })
+  assert.equal(late.processed, 0, 'после отметки времени не пишет ничего')
+  for (const product of plan.products)
+    addResult(total, (await writeProducts(parts, [product])).result)
+  for (const offer of plan.offers) addResult(total, (await writeOffers(parts, [offer])).result)
+  addResult(total, await finishImport(parts, plannedKeys(plan)))
+
+  assert.deepEqual(total, once)
+  const strip = (docs) => docs.map(({ id: _id, manufacturer: _m, product: _p, ...rest }) => rest)
+  assert.deepEqual(strip(parts.db.get('products')), strip(whole.db.get('products')))
+  assert.deepEqual(strip(parts.db.get('offers')), strip(whole.db.get('offers')))
+})
+
+test('запись частями: повтор той же части ничего не меняет', async () => {
+  const plan = planImport(catalog())
+  const payload = fakePayload()
+  await startImport(payload, plan.manufacturers)
+  await writeProducts(payload, plan.products)
+  const writes = payload.calls.create + payload.calls.update
+  const again = await writeProducts(payload, plan.products)
+  assert.equal(again.processed, 2)
+  assert.equal(again.result.products.unchanged, 2)
+  assert.equal(payload.calls.create + payload.calls.update, writes)
+})
+
+test('картинки: только со старого сайта; не скачавшиеся раньше пропускаются', async () => {
+  assert.equal(imageUrl('/upload/a.png').toString(), 'https://cad.kz/upload/a.png')
+  assert.equal(imageUrl('https://evil.example/a.png'), null)
+  assert.equal(imageUrl('//evil.example/a.png'), null)
+  assert.equal(imageUrl('upload/a.png'), null)
+
+  const payload = fakePayload()
+  const plan = planImport(catalog())
+  await writeImport(payload, plan)
+  const downloads = []
+  const fetch = async (url) => {
+    downloads.push(url)
+    return { data: Buffer.from('png'), mimetype: 'image/png' }
+  }
+  const result = await importImages(payload, plan, { fetch, skip: ['/upload/b.png'] })
+  assert.deepEqual(downloads, ['https://cad.kz/upload/a.png'])
+  assert.equal(result.products, 1, 'галерея из того, что скачалось')
+  const late = await importImages(fakePayload(), plan, { fetch, deadline: Date.now() - 1 })
+  assert.equal(late.downloaded, 0)
+})
+
+test('проверка частей со страницы: принимает план, отклоняет лишнее и чужое', () => {
+  const plan = planImport(catalog())
+  const products = readItems('product', plan.products, 60)
+  assert.deepEqual(products.items, plan.products)
+  assert.deepEqual(readItems('offer', plan.offers, 150).items, plan.offers)
+
+  const withExtra = structuredClone(plan.products[0])
+  withExtra.data.status = 'published'
+  withExtra.data.price = '1'
+  assert.deepEqual(Object.keys(readItems('product', [withExtra], 60).items[0].data).sort(), [
+    'description',
+    'kind',
+    'properties',
+    'summary',
+    'title',
+  ])
+
+  const badKey = { ...plan.products[0], legacyKey: 'demo:products:autocad' }
+  assert.match(readItems('product', [badKey], 60).error, /Товар №1.*неверный ключ/)
+  const badImage = { ...plan.products[0], images: ['http://169.254.169.254/latest'] }
+  assert.match(readItems('product', [badImage], 60).error, /не со старого сайта/)
+  const badPrice = structuredClone(plan.offers[0])
+  badPrice.data.amount = '-5'
+  assert.match(readItems('offer', [badPrice], 150).error, /Вариант №1.*цена/)
+  const badCurrency = structuredClone(plan.offers[0])
+  badCurrency.data.currency = 'GBP'
+  assert.match(readItems('offer', [badCurrency], 150).error, /валюта/)
+  assert.match(readItems('offer', plan.offers, 1).error, /Слишком большая часть/)
+  assert.match(readItems('product', [], 60).error, /Пустая/)
+  assert.deepEqual(readKeys(plannedKeys(plan)).items, plannedKeys(plan))
+  assert.ok(readKeys(['demo:products:x']).error)
 })

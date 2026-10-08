@@ -1,0 +1,60 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.root {
+  display: grid;
+  gap: var(--base);
+}
+
+.summary {
+  display: grid;
+  gap: calc(var(--base) / 4);
+  margin: 0;
+  padding-left: var(--base);
+}
+
+.columns {
+  display: grid;
+  gap: var(--base);
+}
+
+@media (min-width: 960px) {
+  .columns {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.heading {
+  margin: 0 0 calc(var(--base) / 2);
+}
+
+.counts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.counts li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--base);
+  padding: calc(var(--base) / 4) 0;
+  border-bottom: 1px solid var(--theme-elevation-100);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.issue {
+  padding: calc(var(--base) / 2) 0;
+  border-bottom: 1px solid var(--theme-elevation-100);
+}
+
+.issue summary {
+  cursor: pointer;
+}
+
+.items {
+  margin: calc(var(--base) / 2) 0 0;
+  padding-left: var(--base);
+  color: var(--theme-elevation-800);
+}

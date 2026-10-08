@@ -23,6 +23,12 @@ const KIND_TITLES = {
   service: 'Услуги',
 }
 
+/**
+ * @template T
+ * @param {T[]} items
+ * @param {(item: T) => string} key
+ * @returns {[string, number][]}
+ */
 function count(items, key) {
   const result = new Map()
   for (const item of items) {
@@ -32,43 +38,70 @@ function count(items, key) {
   return [...result].sort((a, b) => b[1] - a[1])
 }
 
-export function renderReport({ products, offers, issues, stats }, { limit = Infinity } = {}) {
+/**
+ * Цифры проверочного прогона: для отчёта файлом и для страницы импорта в админке.
+ * @param {import('./bitrixCatalog.mjs').Catalog} catalog
+ */
+export function summarizeCatalog({ products, offers, issues, stats }) {
   const priced = offers.filter((o) => o.price)
   const simplePriced = products.filter((p) => p.price)
   const productsWithOffers = new Set(offers.map((o) => o.productLegacyKey))
+  const pricedProducts = new Set(priced.map((o) => o.productLegacyKey))
+  return {
+    stats,
+    products: products.length,
+    offers: offers.length,
+    pricedOffers: priced.length,
+    productsWithOffers: productsWithOffers.size,
+    simplePriced: simplePriced.length,
+    noPrice: products.filter((p) => !p.price && !pricedProducts.has(p.legacyKey)).length,
+    withImages: products.filter((p) => p.images.length).length,
+    images: new Set(products.flatMap((p) => p.images)).size,
+    kinds: count(products, (p) => KIND_TITLES[p.kind]),
+    currencies: count(
+      [...priced, ...simplePriced],
+      (x) => `${x.price.currency}, НДС ${x.price.includesVat ? 'включён' : 'сверху'}`,
+    ),
+    manufacturers: count(products, (p) => p.manufacturer ?? 'не указан'),
+    issues: count(issues, (i) => i.type).map(([type, total]) => ({
+      type,
+      title: ISSUE_TITLES[type] ?? type,
+      total,
+      items: issues.filter((i) => i.type === type),
+    })),
+  }
+}
+
+export function renderReport(catalog, { limit = Infinity } = {}) {
+  const s = summarizeCatalog(catalog)
   const lines = [
     '# Проверочный прогон импорта из Битрикса',
     '',
     'В базу ничего не записано.',
     '',
     '## Итог',
-    `- Товаров в выгрузке: ${stats.productsTotal}, включённых: ${stats.productsActive}, к переносу: ${products.length}.`,
-    `- Предложений в выгрузке: ${stats.offersTotal}, включённых: ${stats.offersActive}, к переносу: ${offers.length}, из них с ценой: ${priced.length}.`,
-    `- Товаров с вариантами: ${productsWithOffers.size}. Простых товаров с ценой в карточке: ${simplePriced.length}.`,
-    `- Товаров без цены (кнопка «Запросить цену»): ${products.filter((p) => !p.price && !offers.some((o) => o.productLegacyKey === p.legacyKey && o.price)).length}.`,
+    `- Товаров в выгрузке: ${s.stats.productsTotal}, включённых: ${s.stats.productsActive}, к переносу: ${s.products}.`,
+    `- Предложений в выгрузке: ${s.stats.offersTotal}, включённых: ${s.stats.offersActive}, к переносу: ${s.offers}, из них с ценой: ${s.pricedOffers}.`,
+    `- Товаров с вариантами: ${s.productsWithOffers}. Простых товаров с ценой в карточке: ${s.simplePriced}.`,
+    `- Товаров без цены (кнопка «Запросить цену»): ${s.noPrice}.`,
     '',
     '## Типы товаров',
-    ...count(products, (p) => KIND_TITLES[p.kind]).map(([k, n]) => `- ${k}: ${n}`),
+    ...s.kinds.map(([k, n]) => `- ${k}: ${n}`),
     '',
     '## Валюты цен',
-    ...count(
-      [...priced, ...simplePriced],
-      (x) => `${x.price.currency}, НДС ${x.price.includesVat ? 'включён' : 'сверху'}`,
-    ).map(([k, n]) => `- ${k}: ${n}`),
+    ...s.currencies.map(([k, n]) => `- ${k}: ${n}`),
     '',
     '## Производители',
-    ...count(products, (p) => p.manufacturer ?? 'не указан').map(([k, n]) => `- ${k}: ${n}`),
+    ...s.manufacturers.map(([k, n]) => `- ${k}: ${n}`),
     '',
     '## Проблемы',
   ]
-  const byType = count(issues, (i) => i.type)
-  if (!byType.length) lines.push('Нет.')
-  for (const [type, total] of byType) {
-    lines.push('', `### ${ISSUE_TITLES[type] ?? type}: ${total}`)
-    const list = issues.filter((i) => i.type === type)
-    for (const issue of list.slice(0, limit))
+  if (!s.issues.length) lines.push('Нет.')
+  for (const group of s.issues) {
+    lines.push('', `### ${group.title}: ${group.total}`)
+    for (const issue of group.items.slice(0, limit))
       lines.push(`- [${issue.id}] ${issue.title}${issue.detail ? ` — ${issue.detail}` : ''}`)
-    if (list.length > limit) lines.push(`- …и ещё ${list.length - limit}`)
+    if (group.items.length > limit) lines.push(`- …и ещё ${group.items.length - limit}`)
   }
   return `${lines.join('\n')}\n`
 }

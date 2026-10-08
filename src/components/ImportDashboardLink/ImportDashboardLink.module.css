@@ -1,0 +1,27 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--base);
+  margin-bottom: calc(var(--base) * 1.5);
+  padding: var(--base);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-m);
+  background: var(--theme-elevation-50);
+  color: var(--theme-elevation-800);
+  text-decoration: none;
+}
+
+.card:hover {
+  border-color: var(--theme-elevation-500);
+}
+
+.title {
+  display: block;
+  font-weight: bold;
+}
+
+.text {
+  display: block;
+  color: var(--theme-elevation-500);
+}

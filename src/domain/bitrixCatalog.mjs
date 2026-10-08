@@ -3,6 +3,40 @@
 import { isYes, parseBitrixPrice, parseVatRate, priceProblem } from './bitrixPrice.mjs'
 import { htmlToMarkup } from './bitrixText.mjs'
 
+/**
+ * @typedef {Record<string, string>[]} Rows
+ * @typedef {{ type: string, id: string, title: string, detail?: string }} CatalogIssue
+ * @typedef {{ amount: string, currency: string, includesVat: boolean, sourceVat: string }} CatalogPrice
+ * @typedef {object} CatalogProduct
+ * @property {string} legacyKey
+ * @property {string} bitrixId
+ * @property {string} title
+ * @property {string} slug
+ * @property {'software' | 'hardware' | 'course' | 'service'} kind
+ * @property {string | null} manufacturer
+ * @property {string[]} oldSections
+ * @property {string | null} summary
+ * @property {string | null} description
+ * @property {string[]} images
+ * @property {string[]} relatedBitrixIds
+ * @property {{ name: string, value: string }[]} properties
+ * @property {CatalogPrice | null} price
+ * @typedef {object} CatalogOffer
+ * @property {string} legacyKey
+ * @property {string} bitrixId
+ * @property {string} productLegacyKey
+ * @property {string} title
+ * @property {string} configuration
+ * @property {string} license
+ * @property {string | null} sku
+ * @property {CatalogPrice | null} price
+ * @typedef {object} Catalog
+ * @property {CatalogProduct[]} products
+ * @property {CatalogOffer[]} offers
+ * @property {CatalogIssue[]} issues
+ * @property {{ productsTotal: number, productsActive: number, offersTotal: number, offersActive: number }} stats
+ */
+
 /** Колонки списка предложений, которые не являются вариантом комплектации. */
 const OFFER_SERVICE_COLUMNS = new Set([
   'ID',
@@ -260,6 +294,10 @@ function dedupeOffers(candidates, issues) {
   })
 }
 
+/**
+ * @param {{ productsCsv: Rows, offersCsv: Rows, offerPrices?: Rows, productPrices?: Rows }} input
+ * @returns {Catalog}
+ */
 export function buildCatalog({ productsCsv, offersCsv, offerPrices = [], productPrices = [] }) {
   const issues = []
   const productPriceById = new Map(productPrices.map((r) => [clean(r.ID), r]))

@@ -42,6 +42,17 @@ export default buildConfig({
       baseDir: dirname,
       importMapFile: path.resolve(dirname, 'app/(payload)/admin/importMap.ts'),
     },
+    components: {
+      afterNavLinks: ['/components/ImportNavLink/ImportNavLink#ImportNavLink'],
+      beforeDashboard: ['/components/ImportDashboardLink/ImportDashboardLink#ImportDashboardLink'],
+      views: {
+        bitrixImport: {
+          Component: '/components/BitrixImportView/BitrixImportView#BitrixImportView',
+          path: '/import-bitrix',
+          meta: { title: 'Импорт из Битрикса' },
+        },
+      },
+    },
   },
   i18n: { supportedLanguages: { ru }, fallbackLanguage: 'ru' },
   collections: [
