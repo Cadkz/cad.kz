@@ -3,10 +3,13 @@ import type { Product } from '../../payload-types'
 import {
   AUTOCAD_NO_PAGE_SLUGS,
   AUTOCAD_PICKER,
+  FULL_OFFER,
+  NO_EXTRAS_OFFER,
   SCAD_FAMILY,
   SCAD_NO_PAGE_SLUGS,
   SCAD_NO_PAGE_TITLES,
   SCAD_OFFICE_EDITION,
+  SCAD_OFFICE_OFFERS,
   SCAD_PICKER,
   type SeedStep,
   scadEdition,
@@ -38,14 +41,15 @@ async function allProducts(payload: Payload): Promise<Brief[]> {
   return docs
 }
 
-async function offerId(payload: Payload, productId: number, pattern: RegExp) {
+/** Предложения товара, чья комплектация подходит под образец (например, полная конфигурация S392 и SPro). */
+async function offerIds(payload: Payload, productId: number, pattern: RegExp) {
   const { docs } = await payload.find({
     collection: 'offers',
     where: { product: { equals: productId } },
     pagination: false,
     ...opts,
   })
-  return docs.find((offer) => pattern.test(offer.configuration))?.id ?? null
+  return docs.filter((offer) => pattern.test(offer.configuration)).map((offer) => offer.id)
 }
 
 /** Шаги из черновика: варианты по slug, началу названия или линейке. Не найденное — в отчёт. */
@@ -77,11 +81,12 @@ async function buildSteps(
         report.missing.push(`${step.title}: ${seed.label}`)
         continue
       }
-      const offer = seed.offer ? await offerId(payload, product.id, seed.offer) : null
-      if (seed.offer && !offer) report.missing.push(`${step.title}: ${seed.label} (предложение)`)
+      const offers = seed.offer ? await offerIds(payload, product.id, seed.offer) : []
+      if (seed.offer && !offers.length)
+        report.missing.push(`${step.title}: ${seed.label} (предложение)`)
       items.push({
         product: product.id,
-        offer,
+        offers,
         label: seed.label,
         note: seed.note ?? null,
         preselect: Boolean(seed.preselect),
@@ -228,6 +233,104 @@ export async function setupPicker(payload: Payload): Promise<Report | null> {
   await payload.create({
     collection: 'import-runs',
     data: { idempotencyKey: PICKER_SETUP_KEY, state: 'done', snapshot: report },
+    ...opts,
+  })
+  return report
+}
+
+export const PICKER_SETUP_V2_KEY = 'catalog-setup:picker-v2'
+
+/**
+ * Вторая настройка (10.10.2026): у полных конфигураций SCAD Office появляются предложения S392
+ * (цены владельца), SPro переименовываются, пункты «Готовые комплекты» берут оба предложения —
+ * цена зависит от выбранной редакции. Один раз (отметка в журнале).
+ */
+export async function setupPickerV2(payload: Payload): Promise<string[] | null> {
+  const done = await payload.find({
+    collection: 'import-runs',
+    where: { idempotencyKey: { equals: PICKER_SETUP_V2_KEY } },
+    limit: 1,
+    ...opts,
+  })
+  if (done.docs.length) return null
+  const report: string[] = []
+  const found = await payload.find({
+    collection: 'products',
+    where: { slug: { equals: SCAD_PICKER.slug } },
+    limit: 1,
+    ...opts,
+  })
+  const office = found.docs[0]
+  if (office) {
+    const { docs: offers } = await payload.find({
+      collection: 'offers',
+      where: { product: { equals: office.id } },
+      pagination: false,
+      ...opts,
+    })
+    const template = offers[0]
+    for (const seed of SCAD_OFFICE_OFFERS) {
+      const existing = offers.find(
+        (o) =>
+          o.configuration === seed.configuration ||
+          (seed.match?.test(o.configuration) && !o.configuration.includes('S392')),
+      )
+      const data = {
+        configuration: seed.configuration,
+        variants: [seed.edition],
+        amount: seed.amount,
+        currency: 'EUR' as const,
+      }
+      if (existing) {
+        await payload.update({ collection: 'offers', id: existing.id, data, ...opts })
+        report.push(`обновлено: ${seed.configuration}`)
+      } else {
+        await payload.create({
+          collection: 'offers',
+          data: {
+            ...data,
+            title: `${office.title} — ${seed.configuration}`,
+            status: 'published',
+            product: office.id,
+            license: template?.license ?? '—',
+            includesVat: false,
+            sourceVat: template?.sourceVat ?? '16',
+          },
+          ...opts,
+        })
+        report.push(`создано: ${seed.configuration}`)
+      }
+    }
+    const bundleSeed = SCAD_PICKER.steps.flatMap((step) => step.items ?? [])
+    const full = await offerIds(payload, office.id, FULL_OFFER)
+    const noExtras = await offerIds(payload, office.id, NO_EXTRAS_OFFER)
+    const steps = (office.picker?.steps ?? []).map((step) => ({
+      ...step,
+      items: (step.items ?? []).map((item) => {
+        if (relId(item.product) !== office.id) return item
+        const bare = /без/i.test(item.label ?? '')
+        const seed = bundleSeed.find(
+          (entry) => entry.offer === (bare ? NO_EXTRAS_OFFER : FULL_OFFER),
+        )
+        return {
+          ...item,
+          offers: bare ? noExtras : full,
+          label: seed?.label ?? item.label,
+          note: seed?.note ?? item.note,
+        }
+      }),
+    }))
+    if (office.pageView === 'picker')
+      await payload.update({
+        collection: 'products',
+        id: office.id,
+        data: { picker: { ...office.picker, steps } },
+        ...opts,
+      })
+  }
+  await payload.create({
+    collection: 'import-runs',
+    data: { idempotencyKey: PICKER_SETUP_V2_KEY, state: 'done', snapshot: { report } },
     ...opts,
   })
   return report

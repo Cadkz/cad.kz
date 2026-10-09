@@ -236,9 +236,9 @@ export interface Product {
             | {
                 product: number | Product;
                 /**
-                 * Пусто — предложение выбирается по переключателям.
+                 * Пусто — все предложения товара. Например, «Полная конфигурация» — её предложения S392 и SPro: из них по переключателю берётся подходящее.
                  */
-                offer?: (number | null) | Offer;
+                offers?: (number | Offer)[] | null;
                 /**
                  * Пусто — название товара.
                  */
@@ -935,7 +935,7 @@ export interface ProductsSelect<T extends boolean = true> {
                 | T
                 | {
                     product?: T;
-                    offer?: T;
+                    offers?: T;
                     label?: T;
                     note?: T;
                     preselect?: T;

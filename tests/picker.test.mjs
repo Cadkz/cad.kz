@@ -17,7 +17,7 @@ const item = (key, productId, offers, extra = {}) => ({
   label: key,
   note: null,
   offers,
-  fixedOffer: null,
+  fixedOffers: [],
   preselect: false,
   ...extra,
 })
@@ -68,9 +68,18 @@ const scad = {
       mode: 'bundle',
       collapsed: false,
       items: [
-        item('full', 593, [offer('826', ['SPro']), offer('825', ['SPro'])], {
-          fixedOffer: '826',
-        }),
+        item(
+          'full',
+          593,
+          [offer('826', ['SPro']), offer('825', ['SPro']), offer('900', ['S392'])],
+          { fixedOffers: ['826'] },
+        ),
+        item(
+          'nofx',
+          593,
+          [offer('826', ['SPro']), offer('825', ['SPro']), offer('901', ['S392'])],
+          { fixedOffers: ['825', '901'] },
+        ),
       ],
     },
   ],
@@ -93,6 +102,12 @@ test('конкретное предложение комплекта: есть �
   const full = scad.steps[3].items[0]
   assert.equal(offerFor(full, scad.switches, { ed: 'SPro' })?.id, '826')
   assert.equal(itemUnavailable(full, scad.switches, { ed: 'S392' }), true)
+})
+
+test('комплект из двух предложений берёт цену выбранной редакции', () => {
+  const nofx = scad.steps[3].items[1]
+  assert.equal(offerFor(nofx, scad.switches, { ed: 'S392' })?.id, '901')
+  assert.equal(offerFor(nofx, scad.switches, { ed: 'SPro' })?.id, '825')
 })
 
 test('начальный выбор: основа и отмеченные галочки, первая редакция', () => {

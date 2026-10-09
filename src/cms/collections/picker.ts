@@ -79,16 +79,19 @@ const itemFields: Field[] = [
     required: true,
   },
   {
-    name: 'offer',
-    label: 'Конкретное предложение',
+    name: 'offers',
+    label: 'Только эти предложения',
     type: 'relationship',
     relationTo: 'offers',
+    hasMany: true,
     filterOptions: ({ siblingData }) => {
       const product = (siblingData as { product?: unknown } | undefined)?.product
       return typeof product === 'number' ? { product: { equals: product } } : true
     },
     admin: {
-      description: 'Пусто — предложение выбирается по переключателям.',
+      description:
+        'Пусто — все предложения товара. Например, «Полная конфигурация» — её предложения S392 и SPro: ' +
+        'из них по переключателю берётся подходящее.',
     },
   },
   {

@@ -95,7 +95,7 @@ export async function loadPicker(payload: Payload, product: Product): Promise<Pi
             label: entry.label || title,
             note: entry.note || null,
             offers: pickerOffers(offers.get(productId) ?? [], context),
-            fixedOffer: entry.offer == null ? null : String(relId(entry.offer)),
+            fixedOffers: (entry.offers ?? []).map((offer) => String(relId(offer))),
             preselect: Boolean(entry.preselect),
           },
         ]

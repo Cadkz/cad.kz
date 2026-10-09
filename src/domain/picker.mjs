@@ -30,7 +30,7 @@
  * @property {string} label
  * @property {string | null} note
  * @property {PickerOffer[]} offers
- * @property {string | null} fixedOffer  Конкретное предложение, если задано в подборе.
+ * @property {string[]} fixedOffers  Только эти предложения (например, полная конфигурация S392 и SPro); пусто — все.
  * @property {boolean} preselect
  * @property {string} [anchor]  Якорь строки: адрес старой страницы товара ведёт прямо к ней.
  *
@@ -90,15 +90,17 @@ function same(a, b) {
 }
 
 /**
- * Предложение варианта при выбранных переключателях. Если задано конкретное — оно (если подходит),
- * иначе самое точное: больше совпавших значений, при равенстве — первое по порядку (дешевле).
+ * Предложение варианта при выбранных переключателях: из заданных у варианта (или всех предложений
+ * товара) — подходящее и самое точное: больше совпавших значений, при равенстве — первое по порядку (дешевле).
  * @param {PickerItem} item
  * @param {PickerSwitch[]} switches
  * @param {Record<string, string>} selected
  * @returns {PickerOffer | null}
  */
 export function offerFor(item, switches, selected) {
-  const pool = item.fixedOffer ? item.offers.filter((o) => o.id === item.fixedOffer) : item.offers
+  const pool = item.fixedOffers.length
+    ? item.offers.filter((o) => item.fixedOffers.includes(o.id))
+    : item.offers
   let best = /** @type {PickerOffer | null} */ (null)
   let bestScore = -1
   for (const offer of pool) {
@@ -277,7 +279,7 @@ export function offersAsPicker(productId, offers, licenses) {
           label: offer.configuration,
           note: licenses[offer.id] && licenses[offer.id] !== '—' ? licenses[offer.id] : null,
           offers: [offer],
-          fixedOffer: offer.id,
+          fixedOffers: [offer.id],
           preselect: false,
         })),
       },

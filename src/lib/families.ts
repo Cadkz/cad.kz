@@ -89,7 +89,7 @@ export async function getFamily(slug: string): Promise<FamilyPage | null> {
                 label,
                 note,
                 offers: pickerOffers(offers.get(m.id) ?? [], context),
-                fixedOffer: null,
+                fixedOffers: [],
                 preselect: false,
                 anchor: m.slug,
               }

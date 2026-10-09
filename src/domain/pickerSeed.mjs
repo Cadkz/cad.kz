@@ -30,6 +30,38 @@ export function scadEdition(configuration) {
   return null
 }
 
+/** Предложения полных конфигураций SCAD Office: на демо пришли как «С доп. функциями» / «Без доп. функций». */
+export const FULL_OFFER = /^(С доп|Полная)/i
+export const NO_EXTRAS_OFFER = /^Без доп/i
+
+/**
+ * Вторая настройка (picker-v2), цены владельца 10.10.2026 в евро без НДС (курс 550, НДС 16%):
+ * полная конфигурация S392 — 7 273 200 ₸ = 11 400 €, SPro — 7 783 600 ₸ = 12 200 €;
+ * без доп. функций и справочников S392 — 5 104 000 ₸ = 8 000 €, SPro — 5 614 400 ₸ = 8 800 €.
+ * Предложения SPro уже есть (их переименовываем), S392 — создаём.
+ */
+export const SCAD_OFFICE_OFFERS = [
+  {
+    match: FULL_OFFER,
+    edition: 'SPro',
+    configuration: 'Полная конфигурация, SPro',
+    amount: '12200',
+  },
+  {
+    match: NO_EXTRAS_OFFER,
+    edition: 'SPro',
+    configuration: 'Без доп. функций и справочников, SPro',
+    amount: '8800',
+  },
+  { match: null, edition: 'S392', configuration: 'Полная конфигурация, S392', amount: '11400' },
+  {
+    match: null,
+    edition: 'S392',
+    configuration: 'Без доп. функций и справочников, S392',
+    amount: '8000',
+  },
+]
+
 const SCAD_EXTRAS = [
   [/^Нелинейный процессор \(расчет физически/i, 'Нелинейный процессор: физическая нелинейность'],
   [
@@ -116,15 +148,15 @@ export const SCAD_PICKER = {
         },
         {
           slug: 'scad_v23',
-          offer: /^С доп/i,
+          offer: FULL_OFFER,
           label: 'Полная конфигурация SCAD Office',
-          note: 'Все пакеты, дополнительные функции и все сателлиты',
+          note: 'Все пакеты, дополнительные функции, сателлиты и электронные справочники',
         },
         {
           slug: 'scad_v23',
-          offer: /^Без доп/i,
-          label: 'SCAD Office без дополнительных функций',
-          note: 'Все пакеты и сателлиты, без доп. функций SCAD++',
+          offer: NO_EXTRAS_OFFER,
+          label: 'SCAD Office без доп. функций',
+          note: 'Все пакеты и сателлиты, без доп. функций SCAD++ и справочников',
         },
       ],
     },
