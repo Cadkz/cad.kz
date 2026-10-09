@@ -78,7 +78,11 @@ test('pages of the new site are not treated as old addresses', () => {
   for (const path of ['/', '/news', '/news/', '/articles', '/articles/', '/cart', '/products/geo5'])
     assert.equal(isLegacyPath(path), false, path)
   assert.equal(isLegacyPath('/catalog/geo5/geo5/'), true)
-  assert.equal(isLegacyPath('/catalog/'), true)
+  // Весь каталог: старый /catalog/ ведёт на новую страницу /catalog (её обрабатывает proxy).
+  assert.equal(isLegacyPath('/catalog/'), false)
+  assert.equal(isLegacyPath('/catalog'), false)
+  assert.equal(newPagePath('/catalog/'), '/catalog')
+  assert.equal(newPagePath('/Catalog'), '/catalog')
 })
 
 test('manufacturer names come from old addresses, numeric IDs are ignored', () => {

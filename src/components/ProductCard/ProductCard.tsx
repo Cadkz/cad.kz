@@ -1,8 +1,7 @@
-import { ArrowRight, SlidersHorizontal } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Picture } from '@/lib/pictures'
-import { AddToCartButton } from '../AddToCartButton/AddToCartButton'
 import { Badge } from '../Badge/Badge'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './ProductCard.module.css'
@@ -19,12 +18,13 @@ export type ProductCardData = {
   /** Цена самой доступной комплектации, рассчитанная сервером, или null — «по запросу». */
   priceFrom: string | null
   offersCount: number
-  /** Единственная комплектация: её можно положить в корзину прямо из карточки. */
-  singleOffer: { id: string; configuration: string } | null
   badge: string | null
 }
 
-/** Карточка товара в каталоге. Цена — только серверная, из CMS-предложений. */
+/**
+ * Карточка товара в каталоге: одна кнопка «Подробнее» — на странице товара выбор комплекта
+ * и заявка. Цена — только серверная, из CMS-предложений.
+ */
 export function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <article className={styles.card}>
@@ -64,26 +64,12 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         </div>
       )}
       {product.summary && <p className={styles.summary}>{product.summary}</p>}
-      <div className={styles.actions}>
-        <Link href={product.href} className={styles.more}>
+      {/* Та же ссылка, что у названия: для клавиатуры и экранного диктора достаточно одной. */}
+      <div className={styles.foot}>
+        <Link href={product.href} className={styles.more} tabIndex={-1} aria-hidden="true">
           Подробнее
           <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
         </Link>
-        {product.singleOffer ? (
-          <AddToCartButton
-            offerId={product.singleOffer.id}
-            productTitle={product.title}
-            configuration={product.singleOffer.configuration}
-          />
-        ) : (
-          <Link
-            href={`${product.href}#config`}
-            className={styles.configure}
-            aria-label={`Выбрать комплектацию: ${product.title}`}
-          >
-            <SlidersHorizontal size={20} strokeWidth={1.75} aria-hidden="true" />
-          </Link>
-        )}
       </div>
     </article>
   )

@@ -145,7 +145,6 @@ export async function getCatalog(): Promise<{
       .filter(Boolean)
     const vendorId = relId(product.manufacturer) ?? -1
     const vendor = vendorById.get(vendorId) ?? null
-    const only = productOffers.length === 1 ? productOffers[0] : null
     return {
       id: product.id,
       href: productPath(product),
@@ -157,7 +156,6 @@ export async function getCatalog(): Promise<{
       picture: pictures.get(product.id) ?? null,
       priceFrom: cheapest(productOffers, context),
       offersCount: productOffers.length,
-      singleOffer: only ? { id: String(only.id), configuration: only.configuration } : null,
       badge: requires.length ? `Плагин для ${requires.join(' / ')}` : null,
       group: kindGroup[product.kind],
       // Направления — разделы программ: курсы и оборудование в них не показываются, их направление

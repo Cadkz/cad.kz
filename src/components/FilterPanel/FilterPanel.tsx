@@ -53,7 +53,11 @@ function Checks({
   )
 }
 
-/** Панель условий фильтра: группа, направление или тип, вендор, задачи. */
+/**
+ * Панель условий фильтра: группа, направление или тип, производитель, задачи.
+ * Когда выбрано направление или тип, производителя выбирают карточками над товарами
+ * (CatalogSteps), поэтому здесь его списка нет. Задачи свёрнуты: это уточнение, а не основной путь.
+ */
 export function FilterPanel({ state, options, onChange, onReset }: Props) {
   return (
     <div className={styles.panel}>
@@ -102,18 +106,25 @@ export function FilterPanel({ state, options, onChange, onReset }: Props) {
           ))}
         </fieldset>
       )}
-      <Checks
-        title="Вендор"
-        options={options.vendors}
-        selected={state.vendors}
-        onToggle={(value) => onChange({ vendors: toggle(state.vendors, value) })}
-      />
-      <Checks
-        title="Задачи"
-        options={options.tasks}
-        selected={state.tasks}
-        onToggle={(value) => onChange({ tasks: toggle(state.tasks, value) })}
-      />
+      {(!(state.direction || state.type) || state.vendors.length > 1) && (
+        <Checks
+          title="Производитель"
+          options={options.vendors}
+          selected={state.vendors}
+          onToggle={(value) => onChange({ vendors: toggle(state.vendors, value) })}
+        />
+      )}
+      {options.tasks.length > 0 && (
+        <details className={styles.more} open={state.tasks.length > 0}>
+          <summary className={styles.summary}>Уточнить по задачам</summary>
+          <Checks
+            title="Задачи"
+            options={options.tasks}
+            selected={state.tasks}
+            onToggle={(value) => onChange({ tasks: toggle(state.tasks, value) })}
+          />
+        </details>
+      )}
       <button type="button" className={styles.reset} onClick={onReset}>
         Сбросить фильтр
       </button>

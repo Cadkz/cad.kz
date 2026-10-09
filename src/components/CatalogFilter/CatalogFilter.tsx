@@ -42,11 +42,7 @@ export function CatalogFilter({ items, facets, lines, initial }: Props) {
   const commit = useCallback((next: FilterState, scroll = false) => {
     setState(next)
     const query = toQuery(next)
-    window.history.replaceState(
-      null,
-      '',
-      `${window.location.pathname}${query ? `?${query}` : ''}#catalog`,
-    )
+    window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`)
     if (scroll) top.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [])
 

@@ -28,6 +28,8 @@ export async function getHome() {
   const wa = contacts.whatsappHref
   return {
     eyebrow: page.eyebrow ?? null,
+    /** Номер WhatsApp из контактов: главная кнопка первого экрана. */
+    whatsappHref: wa,
     title: page.title,
     slides: promotions.docs.map(
       (item): Slide => ({

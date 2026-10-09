@@ -1,5 +1,6 @@
+import { permanentRedirect } from 'next/navigation'
 import { BimBand } from '@/components/BimBand/BimBand'
-import { CatalogFilter } from '@/components/CatalogFilter/CatalogFilter'
+import { CatalogHashRedirect } from '@/components/CatalogHashRedirect/CatalogHashRedirect'
 import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
 import { DirectionCard } from '@/components/DirectionCard/DirectionCard'
 import { Faq } from '@/components/Faq/Faq'
@@ -7,37 +8,43 @@ import { Col, Grid } from '@/components/Grid/Grid'
 import { Hero } from '@/components/Hero/Hero'
 import { NewsCard } from '@/components/NewsCard/NewsCard'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
+import { PromoBand } from '@/components/PromoBand/PromoBand'
 import { Section } from '@/components/Section/Section'
-import { getCatalog, getDirections } from '@/lib/catalog'
-import { fromParams } from '@/lib/catalogFilter'
+import { getDirections } from '@/lib/catalog'
+import { fromParams, toQuery } from '@/lib/catalogFilter'
 import { getHome } from '@/lib/home'
+import { CATALOG_PATH, catalogHref } from '@/lib/navigationHrefs'
 import { getPublications, toCard } from '@/lib/publications'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
 const newsTones = ['navy', 'graphite', 'deep'] as const
 
-/** Подборки фильтра (?group=…) — та же главная: канонический адрес один. */
 export const metadata = { alternates: { canonical: '/' } }
 
-/** Главная — шаблон «Витрина»: секции во всю рамку, внутри 12-колоночная сетка. */
+/**
+ * Главная — шаблон «Витрина»: первый экран с двумя действиями, направления, акции, BIM,
+ * как мы работаем, новости, вопросы. Каталог — отдельная страница /catalog.
+ */
 export default async function Home({ searchParams }: Props) {
-  const [home, directions, catalog, news, params] = await Promise.all([
+  // Старые ссылки на каталог с условиями (/?direction=…#catalog) ведут на /catalog с теми же условиями.
+  const query = toQuery(fromParams(await searchParams))
+  if (query) permanentRedirect(`${CATALOG_PATH}?${query}`)
+
+  const [home, directions, news] = await Promise.all([
     getHome(),
     getDirections(),
-    getCatalog(),
     getPublications({ limit: 3 }),
-    searchParams,
   ])
-  const initial = fromParams(params)
   return (
     <main>
+      <CatalogHashRedirect />
       <Hero home={home} />
-      <BimBand bim={home.bim} />
       <Section
         id="directions"
         title="Выберите направление"
-        sub="Разные задачи — разный софт. Карточка сразу открывает каталог с нужным набором вендоров и задач."
+        sub="Карточка открывает каталог с программами этого направления."
+        action={{ href: catalogHref(), label: 'Весь каталог' }}
       >
         <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
           {directions.map((direction) => (
@@ -47,19 +54,8 @@ export default async function Home({ searchParams }: Props) {
           ))}
         </Grid>
       </Section>
-      <Section
-        id="catalog"
-        title="Подбор по каталогу"
-        sub="Выберите направление, затем производителя и линейку программ."
-      >
-        <CatalogFilter
-          key={JSON.stringify(initial)}
-          items={catalog.items}
-          facets={catalog.facets}
-          lines={catalog.lines}
-          initial={initial}
-        />
-      </Section>
+      <PromoBand home={home} />
+      <BimBand bim={home.bim} />
       {home.process.length > 0 && (
         <Section
           id="process"

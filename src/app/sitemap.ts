@@ -55,6 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   })
   return [
     entry('/', undefined, 1),
+    entry('/catalog', undefined, 0.9),
     entry('/news', undefined, 0.6),
     entry('/articles', undefined, 0.6),
     ...(pageSlugs.has('about') ? [entry('/about', undefined, 0.4)] : []),

@@ -9,7 +9,7 @@ import { isLegacyPath, LEGACY_PATH_HEADER, newPagePath } from './domain/legacyRo
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-  // Текстовые страницы: старый адрес со слешем (/about/) ведёт на новый без слеша (/about).
+  // Текстовые страницы и каталог: старый адрес со слешем (/about/, /catalog/) ведёт на новый без слеша.
   const page = newPagePath(pathname)
   if (page && page !== pathname) {
     const target = new URL(page, request.url)

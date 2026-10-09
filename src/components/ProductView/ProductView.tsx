@@ -1,6 +1,5 @@
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
-import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
 import { Faq } from '@/components/Faq/Faq'
 import { Grid } from '@/components/Grid/Grid'
 import { PickerBar } from '@/components/PickerBar/PickerBar'
@@ -14,7 +13,6 @@ import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
 import { ProductLinkCard } from '@/components/ProductLinkCard/ProductLinkCard'
 import { ProductSection } from '@/components/ProductSection/ProductSection'
 import { PropertyList } from '@/components/PropertyList/PropertyList'
-import { getHome } from '@/lib/home'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
@@ -62,10 +60,9 @@ export async function ProductView({
   product: ProductPage
   pick: number | null
 }) {
-  const [{ cross, similar }, contacts, home] = await Promise.all([
+  const [{ cross, similar }, contacts] = await Promise.all([
     cms().then((payload) => getRecommendations(payload, product.id)),
     getContacts(),
-    getHome(),
   ])
   const direction = product.sections.find((s) => s.isDirection)
   const guided = product.pageView === 'picker'
@@ -142,7 +139,6 @@ export async function ProductView({
         <Related title="С этим покупают" items={cross} />
         <Related title="Похожие товары" items={similar} />
       </Container>
-      <CtaBanner cta={home.cta} />
     </main>
   )
 }

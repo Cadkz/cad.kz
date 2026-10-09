@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { MENU_LINKS, menuColumns, menuTitle, sectionFilter } from '../src/domain/menu.mjs'
 
-const href = (filter) => `/?${new URLSearchParams(filter)}#catalog`
+const href = (filter) => `/catalog?${new URLSearchParams(filter)}`
 const sections = [
   {
     id: 1,
@@ -56,8 +56,8 @@ test('раздел → производители по «Первыми в ра�
     scad.lines[0].links.map((l) => l.title),
     ['SCAD Office v. 25.1', 'SCAD комплект RC'],
   )
-  assert.equal(scad.allHref, '/?direction=arch&vendor=SCAD+Soft#catalog')
-  assert.equal(scad.lines[0].allHref, '/?direction=arch&vendor=SCAD+Soft&line=11#catalog')
+  assert.equal(scad.allHref, '/catalog?direction=arch&vendor=SCAD+Soft')
+  assert.equal(scad.lines[0].allHref, '/catalog?direction=arch&vendor=SCAD+Soft&line=11')
   // У производителя без линеек одна группа с его названием.
   assert.deepEqual(
     column.vendors[1].lines.map((l) => l.title),
@@ -79,7 +79,7 @@ test('пустые разделы не показываются, тип — с �
     ['Плоттеры'],
   )
   assert.deepEqual(sectionFilter(sections[0]), { direction: 'arch' })
-  assert.equal(columns[0].allHref, '/?group=hardware&type=plotters#catalog')
+  assert.equal(columns[0].allHref, '/catalog?group=hardware&type=plotters')
 })
 
 test('в меню без канцелярского начала названия', () => {
