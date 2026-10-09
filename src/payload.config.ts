@@ -83,6 +83,9 @@ export default buildConfig({
     vercelBlobStorage({
       enabled: useBlob,
       collections: { media: true },
+      // Файл из админки браузер грузит сразу в Blob: через сервер Vercel не пропускает больше 4,5 МБ.
+      // Ключ на загрузку выдаётся только тому, кто вошёл и может добавлять в «Медиа».
+      clientUploads: true,
       token: process.env.BLOB_READ_WRITE_TOKEN ?? '',
     }),
   ],
