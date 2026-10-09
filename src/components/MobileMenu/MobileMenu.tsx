@@ -55,9 +55,19 @@ export function MobileMenu({ menu, contacts }: Props) {
             {menu.map((tab) => (
               <div key={tab.key} className={styles.tab}>
                 <p className={styles.tabTitle}>{tab.label}</p>
-                {tab.columns
-                  .flatMap((column) => column.links)
-                  .map((item) => link(item.href, item.title))}
+                {tab.columns.map((column) => (
+                  <div key={column.title} className={styles.section}>
+                    {tab.columns.length > 1 && (
+                      <p className={styles.sectionTitle}>{column.title}</p>
+                    )}
+                    {column.links.map((item) => link(item.href, item.title))}
+                    {column.allHref && column.total && column.total > column.links.length ? (
+                      <Link href={column.allHref} className={styles.all} onClick={close}>
+                        Все {column.total}
+                      </Link>
+                    ) : null}
+                  </div>
+                ))}
                 <Link href={tab.allHref} className={styles.all} onClick={close}>
                   Весь список
                 </Link>

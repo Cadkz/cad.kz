@@ -1,10 +1,12 @@
-import type { Product, Section, SiteSetting } from '../../payload-types'
+import type { Section, SiteSetting } from '../../payload-types'
+import { menuColumns } from '../domain/menu.mjs'
 import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
 import { productPath } from './productPath'
 
 export type MenuLink = { title: string; href: string }
-export type MenuColumn = { title: string; links: MenuLink[] }
+/** Колонка раздела: несколько товаров, сколько их всего и адрес каталога с этим разделом. */
+export type MenuColumn = { title: string; links: MenuLink[]; total?: number; allHref?: string }
 export type MenuTab = { key: string; label: string; columns: MenuColumn[]; allHref: string }
 
 const groupLabels: Record<Section['menuGroup'], string> = {
@@ -13,13 +15,14 @@ const groupLabels: Record<Section['menuGroup'], string> = {
   service: 'Услуги',
 }
 
-function sectionIds(product: Product) {
-  return (product.sections ?? []).map((section) =>
-    typeof section === 'number' ? section : section.id,
-  )
-}
+const relId = (value: number | { id: number } | null | undefined) =>
+  value == null ? null : typeof value === 'number' ? value : value.id
 
-/** Мегаменю строится из разделов и товаров CMS: новый товар сам появляется в меню. */
+/**
+ * Мегаменю строится из разделов и товаров CMS: новый товар сам появляется в меню.
+ * Берутся все опубликованные товары (без предела в 500), в колонке показывается несколько,
+ * остальные — по ссылке «Все N».
+ */
 export async function getMenu(): Promise<MenuTab[]> {
   const payload = await cms()
   const [sections, products] = await Promise.all([
@@ -27,32 +30,44 @@ export async function getMenu(): Promise<MenuTab[]> {
       collection: 'sections',
       where: { status: { equals: 'published' } },
       sort: ['order', 'title'],
-      limit: 200,
+      pagination: false,
       depth: 0,
     }),
     payload.find({
       collection: 'products',
       where: { status: { equals: 'published' } },
       sort: 'title',
-      limit: 500,
+      pagination: false,
       depth: 0,
-      select: { title: true, slug: true, legacyUrl: true, sections: true },
+      select: { title: true, slug: true, legacyUrl: true, sections: true, mainSection: true },
     }),
   ])
+
+  const items = products.docs.map((product) => ({
+    id: product.id,
+    title: product.title,
+    main: relId(product.mainSection),
+    sections: (product.sections ?? []).map((section) => relId(section) ?? 0),
+    href: productPath(product),
+  }))
 
   const tabs: MenuTab[] = (Object.keys(groupLabels) as Section['menuGroup'][]).map((group) => ({
     key: group,
     label: groupLabels[group],
     allHref: catalogHref({ group }),
-    columns: sections.docs
-      .filter((section) => section.menuGroup === group)
-      .map((section) => ({
-        title: section.title,
-        links: products.docs
-          .filter((product) => sectionIds(product as Product).includes(section.id))
-          .map((product) => ({ title: product.title, href: productPath(product) })),
-      }))
-      .filter((column) => column.links.length > 0),
+    columns: menuColumns(
+      sections.docs
+        .filter((section) => section.menuGroup === group)
+        .map(({ id, slug, title, menuGroup, isDirection }) => ({
+          id,
+          slug,
+          title,
+          menuGroup,
+          isDirection: Boolean(isDirection),
+        })),
+      items,
+      catalogHref,
+    ),
   }))
 
   const directions = sections.docs.filter((section) => section.isDirection)

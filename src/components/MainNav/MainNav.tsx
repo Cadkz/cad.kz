@@ -125,10 +125,17 @@ export function MainNav({ menu, whatsappHref, aboutExtra }: Props) {
           )}
         </div>
       </nav>
+      {/* Мегаменю без обёртки: оно позиционировано абсолютно и не встаёт в ряд шапки.
+          Обёртка-блок становилась лишним элементом ряда, пункты сдвигались и меню мигало. */}
       {open === 'catalog' && (
-        <div onPointerEnter={hover('catalog')} onPointerLeave={hover(null)}>
-          <MegaMenu id="nav-catalog" tabs={menu} onNavigate={close} whatsappHref={whatsappHref} />
-        </div>
+        <MegaMenu
+          id="nav-catalog"
+          tabs={menu}
+          onNavigate={close}
+          whatsappHref={whatsappHref}
+          onPointerEnter={hover('catalog')}
+          onPointerLeave={hover(null)}
+        />
       )}
     </div>
   )

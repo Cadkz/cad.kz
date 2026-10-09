@@ -2,7 +2,7 @@
 
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { type PointerEventHandler, useState } from 'react'
 import type { MenuTab } from '@/lib/navigation'
 import styles from './MegaMenu.module.css'
 
@@ -11,15 +11,32 @@ type Props = {
   tabs: MenuTab[]
   onNavigate: () => void
   whatsappHref: string | null
+  onPointerEnter: PointerEventHandler
+  onPointerLeave: PointerEventHandler
 }
 
-/** Мегаменю каталога: группы слева, товары по разделам в центре, предложение подбора справа. */
-export function MegaMenu({ id, tabs, onNavigate, whatsappHref }: Props) {
+/**
+ * Мегаменю каталога: группы слева, товары по разделам в центре, предложение подбора справа.
+ * Не выше экрана: центральная колонка прокручивается сама, страница под ней — нет.
+ */
+export function MegaMenu({
+  id,
+  tabs,
+  onNavigate,
+  whatsappHref,
+  onPointerEnter,
+  onPointerLeave,
+}: Props) {
   const [active, setActive] = useState(tabs[0]?.key ?? '')
   const tab = tabs.find((item) => item.key === active) ?? tabs[0]
   if (!tab) return null
   return (
-    <div id={id} className={styles.menu}>
+    <div
+      id={id}
+      className={styles.menu}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
+    >
       <div className={styles.segments} role="tablist" aria-label="Группы каталога">
         {tabs.map((item) => (
           <button
@@ -38,6 +55,7 @@ export function MegaMenu({ id, tabs, onNavigate, whatsappHref }: Props) {
         ))}
       </div>
       <div
+        key={tab.key}
         id={`${id}-panel`}
         role="tabpanel"
         aria-labelledby={`${id}-tab-${tab.key}`}
@@ -56,6 +74,12 @@ export function MegaMenu({ id, tabs, onNavigate, whatsappHref }: Props) {
                   </li>
                 ))}
               </ul>
+              {column.allHref && column.total && column.total > column.links.length ? (
+                <Link href={column.allHref} className={styles.more} onClick={onNavigate}>
+                  Все {column.total}
+                  <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
+                </Link>
+              ) : null}
             </div>
           ))}
         </div>
