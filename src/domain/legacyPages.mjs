@@ -136,6 +136,8 @@ function decodeURISafe(value) {
 
 const IMAGE_MARK = '\u0000IMG'
 const HEADING_MARK = '\u0003'
+/** Ссылка ведёт на файл картинки, а не на страницу. */
+const IMAGE_FILE = /\.(jpe?g|png|gif|webp)$/i
 
 /** Скобки и пробелы в адресе ломают разметку «[текст](адрес)» — кодируем их. */
 function escapeParens(href) {
@@ -154,6 +156,13 @@ export function htmlToMarkup(html, base = OLD_SITE) {
   let text = String(html ?? '')
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/<(script|style|noindex|noscript|iframe|form|object)\b[\s\S]*?<\/\1\s*>/gi, ' ')
+    // Превью в ссылке на полную картинку (сертификаты в «О компании»): берём полную картинку.
+    .replace(/<a\b([^>]*)>\s*(<img\b[^>]*>)\s*<\/a\s*>/gi, (_, attrs, img) => {
+      const full = resolveUrl(attr(` ${attrs}`, 'href'), base)
+      return full?.path && IMAGE_FILE.test(full.path)
+        ? img.replace(/\ssrc\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/i, ` src="${full.path}"`)
+        : img
+    })
     .replace(/<img\b[^>]*>/gi, (tag) => {
       const target = resolveUrl(attr(tag, 'src'), base)
       if (!target?.path) return ' '
@@ -162,6 +171,8 @@ export function htmlToMarkup(html, base = OLD_SITE) {
       return `\n\n${IMAGE_MARK}${alt}\u0001${target.path}\u0002\n\n`
     })
     .replace(/<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi, (_, attrs, inner) => {
+      // Ссылка вокруг картинки с подписью: картинку оставляем отдельным блоком, ссылку убираем.
+      if (inner.includes(IMAGE_MARK)) return inner
       const label = plainText(inner).replace(/[[\]]/g, '')
       if (!label) return inner
       const target = resolveUrl(attr(` ${attrs}`, 'href'), base)
@@ -169,6 +180,7 @@ export function htmlToMarkup(html, base = OLD_SITE) {
       return href ? `[${label}](${escapeParens(href)})` : label
     })
     .replace(/<h[1-6]\b[^>]*>([\s\S]*?)<\/h[1-6]\s*>/gi, (_, inner) => {
+      if (inner.includes(IMAGE_MARK)) return inner
       const heading = plainText(inner)
       return heading ? `\n\n${HEADING_MARK}${heading}\n\n` : '\n\n'
     })
@@ -204,7 +216,20 @@ export function htmlToMarkup(html, base = OLD_SITE) {
       return lines.join(' ').replace(/^(#+|>|-)\s+/, '')
     })
     .filter(Boolean)
-  return { body: blocks.join('\n\n'), images }
+  return { body: withoutServiceMarks(blocks.join('\n\n')), images }
+}
+
+/**
+ * Остатки служебных меток и управляющие символы (кроме переноса строки и табуляции) убираются:
+ * при любой вёрстке старой страницы они не должны попасть в базу — PostgreSQL не принимает \u0000.
+ */
+function withoutServiceMarks(text) {
+  let rest = text
+  for (let start = rest.indexOf(IMAGE_MARK); start >= 0; start = rest.indexOf(IMAGE_MARK)) {
+    const end = rest.indexOf('\u0002', start)
+    rest = rest.slice(0, start) + (end < 0 ? '' : rest.slice(end + 1))
+  }
+  return [...rest].filter((char) => char >= ' ' || char === '\n' || char === '\t').join('')
 }
 
 /** Дата «26.07.2017» → ISO (полдень по Астане, чтобы день не съехал). null, если не дата. */

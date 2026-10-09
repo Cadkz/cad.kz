@@ -166,3 +166,26 @@ test('pagination shows the first, last and nearby pages', async () => {
   assert.deepEqual(pageWindow(1, 4), [1, 2, 3, 4])
   assert.deepEqual(pageWindow(2, 10), [1, 2, 3, 4, null, 10])
 })
+
+test('preview inside a link to the full picture keeps the full picture, no service marks', () => {
+  const { body, images } = htmlToMarkup(`
+    <h2>Сертификаты компании</h2>
+    <a href="/upload/medialibrary/ce7/full.jpg"><img src="/upload/resize_cache/medialibrary/ce7/0_400_1/full.jpg"></a>
+    <a href="/about/"><img src="/upload/logo.png" alt="Лого"> подпись</a>
+    <h3><img src="/upload/icon.png"> Заголовок</h3>
+  `)
+  assert.deepEqual(body.split('\n\n'), [
+    '## Сертификаты компании',
+    '![](https://cad.kz/upload/medialibrary/ce7/full.jpg)',
+    '![Лого](https://cad.kz/upload/logo.png)',
+    'подпись',
+    '![](https://cad.kz/upload/icon.png)',
+    'Заголовок',
+  ])
+  assert.deepEqual(images, [
+    '/upload/medialibrary/ce7/full.jpg',
+    '/upload/logo.png',
+    '/upload/icon.png',
+  ])
+  assert.ok([...body].every((char) => char >= ' ' || char === '\n'))
+})

@@ -100,12 +100,18 @@ async function infoPages(payload: Payload, reply: PagesReply) {
         reply.existing++
         return
       }
+      let parsed: ReturnType<typeof parseInfoPage>
       try {
-        const parsed = parseInfoPage(await fetchPage(`${oldSite()}${oldPath}`), oldSite())
-        if (!parsed) {
-          reply.failed.push({ path: oldPath, reason: 'на странице нет текста' })
-          return
-        }
+        parsed = parseInfoPage(await fetchPage(`${oldSite()}${oldPath}`), oldSite())
+      } catch (error) {
+        reply.failed.push({ path: oldPath, reason: pageFailure(error) })
+        return
+      }
+      if (!parsed) {
+        reply.failed.push({ path: oldPath, reason: 'на странице нет текста' })
+        return
+      }
+      try {
         await payload.create({
           collection: 'pages',
           data: {
@@ -121,7 +127,8 @@ async function infoPages(payload: Payload, reply: PagesReply) {
         })
         reply.created++
       } catch (error) {
-        reply.failed.push({ path: oldPath, reason: pageFailure(error) })
+        console.error('Перенос страницы', oldPath, error)
+        reply.failed.push({ path: oldPath, reason: 'не сохранилась в базе' })
       }
     }),
   )
