@@ -1,16 +1,24 @@
 import { redirect } from 'next/navigation'
 import { ArticleBody } from '@/components/ArticleBody/ArticleBody'
+import { AskManager } from '@/components/AskManager/AskManager'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
 import { ReadingLayout } from '@/components/ReadingLayout/ReadingLayout'
 import { RelatedList } from '@/components/RelatedList/RelatedList'
 import { pagePath } from '@/domain/legacyPages.mjs'
+import { getContacts } from '@/lib/navigation'
 import { getInfoLinks, getPage } from '@/lib/pages'
 import { cms } from '@/lib/payload'
 import { bodyPictures } from '@/lib/pictures'
 import { imageSources, parseBody } from '@/lib/richText'
 import { pageMetadata } from '@/lib/seo'
+
+/** Страницы, под текстом которых стоит блок «Задать вопрос менеджеру». */
+const QUESTIONS: Record<string, { title: string; message: string }> = {
+  howto: { title: 'Вопросы по покупке', message: 'Здравствуйте! У меня вопрос по покупке.' },
+  delivery: { title: 'Вопросы по доставке', message: 'Здравствуйте! У меня вопрос по доставке.' },
+}
 
 /** Метаданные текстовой страницы: перенесённые title и description или название. */
 export async function infoPageMetadata(slug: string) {
@@ -32,9 +40,11 @@ export async function InfoPageView({ slug }: { slug: string }) {
   const page = await getPage(slug)
   if (!page) redirect(slug === 'about' ? '/' : '/about')
   const blocks = parseBody(page.body)
-  const [links, pictures] = await Promise.all([
+  const questions = QUESTIONS[slug]
+  const [links, pictures, contacts] = await Promise.all([
     getInfoLinks(),
     cms().then((payload) => bodyPictures(payload, imageSources(blocks))),
+    questions ? getContacts() : null,
   ])
   const crumbs =
     slug === 'about'
@@ -69,6 +79,7 @@ export async function InfoPageView({ slug }: { slug: string }) {
         >
           <PageIntro title={page.title} lead={page.lead} />
           <ArticleBody blocks={blocks} pictures={pictures} />
+          {questions && contacts && <AskManager contacts={contacts} {...questions} />}
         </ReadingLayout>
       </Container>
     </main>
