@@ -51,7 +51,7 @@ export function CatalogFilter({ items, facets, initial }: Props) {
   }, [])
 
   const options = useMemo(() => facetOptions(items, facets, state), [items, facets, state])
-  const found = useMemo(() => results(items, state), [items, state])
+  const found = useMemo(() => results(items, state, facets), [items, state, facets])
   const active = activeCount(state)
   const change = (patch: Partial<FilterState>) => commit(update(state, patch))
   const reset = () => commit(emptyFilter)

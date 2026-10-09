@@ -52,6 +52,11 @@ export default buildConfig({
           path: '/import-bitrix',
           meta: { title: 'Импорт из Битрикса' },
         },
+        priceList: {
+          Component: '/components/PriceListView/PriceListView#PriceListView',
+          path: '/price-list',
+          meta: { title: 'Загрузить прайс' },
+        },
         legacyContent: {
           Component: '/components/LegacyContentView/LegacyContentView#LegacyContentView',
           path: '/legacy-content',

@@ -1,5 +1,6 @@
 import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
+import { compareInSection, priorityRank } from '../domain/priority.mjs'
 import { formatKzt } from './format'
 import { cms } from './payload'
 import { cardPictures } from './pictures'
@@ -16,9 +17,20 @@ export type CatalogItem = ProductCardData & {
   types: string[]
   vendor: string | null
   tasks: string[]
+  /** Приоритет показа (src/domain/priority.mjs): больше — выше в списке. */
+  rank: number
+  /** Основной раздел (slug): в своём разделе товар стоит выше, чем в чужом. */
+  main: string | null
 }
 
-export type Facet = { slug: string; title: string; group: CatalogGroup; isDirection: boolean }
+export type Facet = {
+  slug: string
+  title: string
+  group: CatalogGroup
+  isDirection: boolean
+  /** Производители, которые в этом разделе показываются первыми, по порядку. */
+  pins?: string[]
+}
 
 export type Direction = {
   slug: string
@@ -95,6 +107,7 @@ export async function getCatalog(): Promise<{ items: CatalogItem[]; facets: Face
   const pictures = await cardPictures(payload, products.docs, manufacturers.docs)
   const sectionById = new Map(sections.docs.map((section) => [section.id, section]))
   const vendorById = new Map(manufacturers.docs.map((m: Manufacturer) => [m.id, m.title]))
+  const vendorLevel = new Map(manufacturers.docs.map((m: Manufacturer) => [m.id, m.priority]))
   const titleById = new Map(products.docs.map((product) => [product.id, product.title]))
   const offersByProduct = new Map<number, Offer[]>()
   for (const offer of offers.docs) {
@@ -111,7 +124,8 @@ export async function getCatalog(): Promise<{ items: CatalogItem[]; facets: Face
     const requires = (product.requiresProducts ?? [])
       .map((item) => titleById.get(relId(item) ?? -1))
       .filter(Boolean)
-    const vendor = vendorById.get(relId(product.manufacturer) ?? -1) ?? null
+    const vendorId = relId(product.manufacturer) ?? -1
+    const vendor = vendorById.get(vendorId) ?? null
     const only = productOffers.length === 1 ? productOffers[0] : null
     return {
       id: product.id,
@@ -130,14 +144,21 @@ export async function getCatalog(): Promise<{ items: CatalogItem[]; facets: Face
       directions: productSections.filter((s) => s.isDirection).map((s) => s.slug),
       types: productSections.filter((s) => !s.isDirection).map((s) => s.slug),
       tasks: (product.tasks ?? []).map((task) => task.title),
+      rank: priorityRank(product.priority, vendorLevel.get(vendorId)),
+      main: sectionById.get(relId(product.mainSection) ?? -1)?.slug ?? null,
     }
   })
+  // Без выбранного раздела: топы продаж первыми, дальше по названию.
+  items.sort(compareInSection())
 
   const facets = sections.docs.map((section) => ({
     slug: section.slug,
     title: section.title,
     group: section.menuGroup,
     isDirection: Boolean(section.isDirection),
+    pins: (section.pinnedManufacturers ?? [])
+      .map((m) => vendorById.get(relId(m) ?? -1))
+      .filter((title): title is string => Boolean(title)),
   }))
   return { items, facets }
 }

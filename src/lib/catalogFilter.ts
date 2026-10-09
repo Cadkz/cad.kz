@@ -3,6 +3,7 @@
  * Счётчик у значения показывает, сколько товаров останется, если его выбрать
  * при всех остальных выбранных условиях (как в фасетном фильтре shop.kz).
  */
+import { compareInSection } from '../domain/priority.mjs'
 import type { CatalogGroup, CatalogItem, Facet } from './catalog'
 
 export type FilterState = {
@@ -114,8 +115,17 @@ export function update(state: FilterState, change: Partial<FilterState>): Filter
   return next
 }
 
-export function results(items: CatalogItem[], state: FilterState) {
+/**
+ * Найденные товары страницы. Список с сервера уже упорядочен по приоритету; если выбран раздел,
+ * порядок уточняется под него: производители раздела по порядку, товары с этим основным разделом выше.
+ */
+export function results(items: CatalogItem[], state: FilterState, facets: Facet[] = []) {
   const list = items.filter((item) => matches(item, state))
+  const section = state.type ?? state.direction
+  if (section) {
+    const pins = facets.find((facet) => facet.slug === section)?.pins ?? []
+    list.sort(compareInSection(section, pins))
+  }
   const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE))
   const page = Math.min(state.page, pages)
   return {

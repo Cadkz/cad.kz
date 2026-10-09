@@ -18,21 +18,36 @@ export function sameOrigin(request: Request) {
   }
 }
 
+type Role = 'admin' | 'editor'
+type AdminUser = { id: number | string; role?: string | null }
+
 /**
- * Проверка запроса служебной страницы админки: JSON, со своей страницы, от администратора.
- * Возвращает Payload и тело запроса или готовый ответ с ошибкой.
+ * Проверка запроса служебной страницы админки: JSON, со своей страницы, от пользователя с нужной
+ * ролью (по умолчанию только администратор). Возвращает Payload, тело запроса и пользователя
+ * или готовый ответ с ошибкой.
  */
 export async function adminRequest(
   request: Request,
   maxBody: number,
-): Promise<{ payload: Payload; data: Record<string, unknown> } | { error: Response }> {
+  roles: Role[] = ['admin'],
+): Promise<
+  { payload: Payload; data: Record<string, unknown>; user: AdminUser } | { error: Response }
+> {
   if (!request.headers.get('content-type')?.startsWith('application/json') || !sameOrigin(request))
     return { error: reply({ error: 'Некорректный запрос' }, 400) }
   const payload = await getPayload({ config })
   const { user } = await payload.auth({ headers: request.headers })
-  if (user?.role !== 'admin')
+  if (!user || !roles.some((role) => role === user.role))
     return {
-      error: reply({ error: 'Доступно только администратору. Войдите в админку заново.' }, 403),
+      error: reply(
+        {
+          error:
+            roles.length > 1
+              ? 'Нет доступа. Войдите в админку заново.'
+              : 'Доступно только администратору. Войдите в админку заново.',
+        },
+        403,
+      ),
     }
   const text = await request.text()
   if (text.length > maxBody) return { error: reply({ error: 'Слишком большой запрос' }, 413) }
@@ -40,7 +55,7 @@ export async function adminRequest(
     const body: unknown = JSON.parse(text)
     if (!body || typeof body !== 'object' || Array.isArray(body))
       return { error: reply({ error: 'Некорректный запрос' }, 400) }
-    return { payload, data: body as Record<string, unknown> }
+    return { payload, data: body as Record<string, unknown>, user }
   } catch {
     return { error: reply({ error: 'Некорректный запрос' }, 400) }
   }

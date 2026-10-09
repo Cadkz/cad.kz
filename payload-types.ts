@@ -160,6 +160,10 @@ export interface Product {
   title: string;
   status: 'draft' | 'published';
   slug: string;
+  /**
+   * Пусто — как у производителя. Флагман — главный товар линейки (AutoCAD, SCAD Office, GEO5): первым в меню и каталоге. Топ продаж — сразу после флагманов.
+   */
+  priority?: ('flagship' | 'top' | 'normal' | 'low') | null;
   kind: 'software' | 'hardware' | 'course' | 'service';
   summary?: string | null;
   /**
@@ -226,6 +230,10 @@ export interface Manufacturer {
   id: number;
   title: string;
   status: 'draft' | 'published';
+  /**
+   * Уровень для всех товаров производителя, если у товара свой не выбран. Топы продаж показываются первыми в меню, каталоге и подборках.
+   */
+  priority?: ('flagship' | 'top' | 'normal' | 'low') | null;
   website?: string | null;
   /**
    * Логотип или коробка программы. Показывается в каталоге и на странице товара, если у товара пустая галерея.
@@ -290,6 +298,10 @@ export interface Section {
   tone?: ('navy' | 'blue' | 'graphite') | null;
   order?: number | null;
   /**
+   * Например, в «Геотехнике»: Fine Software (GEO5), ЛИРА-FEM, SCAD. Порядок можно менять перетаскиванием. Работает внутри одного уровня приоритета: топ продаж всё равно выше обычного товара.
+   */
+  pinnedManufacturers?: (number | Manufacturer)[] | null;
+  /**
    * Например, к плоттерам — расходные материалы, к программам — курсы и внедрение. Курсы и программы с направлением предлагаются, только если направление совпадает.
    */
   crossSections?: (number | Section)[] | null;
@@ -313,6 +325,10 @@ export interface Offer {
   currency: 'KZT' | 'USD' | 'EUR' | 'RUB';
   includesVat?: boolean | null;
   sourceVat: string;
+  /**
+   * Заполняется само при загрузке прайса: по этим названиям строка прайса в следующий раз сразу найдёт это предложение. Неверное название можно удалить.
+   */
+  priceNames?: string[] | null;
   legacyKey?: string | null;
   legacyUrl?: string | null;
   updatedAt: string;
@@ -697,6 +713,7 @@ export interface ProductsSelect<T extends boolean = true> {
   title?: T;
   status?: T;
   slug?: T;
+  priority?: T;
   kind?: T;
   summary?: T;
   description?: T;
@@ -756,6 +773,7 @@ export interface OffersSelect<T extends boolean = true> {
   currency?: T;
   includesVat?: T;
   sourceVat?: T;
+  priceNames?: T;
   legacyKey?: T;
   legacyUrl?: T;
   updatedAt?: T;
@@ -776,6 +794,7 @@ export interface SectionsSelect<T extends boolean = true> {
   icon?: T;
   tone?: T;
   order?: T;
+  pinnedManufacturers?: T;
   crossSections?: T;
   legacyKey?: T;
   legacyUrl?: T;
@@ -805,6 +824,7 @@ export interface SectionRulesSelect<T extends boolean = true> {
 export interface ManufacturersSelect<T extends boolean = true> {
   title?: T;
   status?: T;
+  priority?: T;
   website?: T;
   image?: T;
   legacyKey?: T;

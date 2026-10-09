@@ -1,0 +1,62 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.root {
+  display: grid;
+  gap: calc(var(--base) / 2);
+}
+
+.summary {
+  margin: 0;
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--base) / 2);
+  cursor: pointer;
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: calc(var(--base) / 3) calc(var(--base) / 2);
+  border-bottom: 1px solid var(--theme-elevation-100);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  color: var(--theme-elevation-500);
+  white-space: nowrap;
+}
+
+.warn {
+  background: var(--theme-warning-100);
+}
+
+.name {
+  display: block;
+}
+
+.muted {
+  display: block;
+  color: var(--theme-elevation-500);
+}
+
+.big {
+  display: block;
+  color: var(--theme-error-750);
+  font-weight: bold;
+}
+
+.offer {
+  width: calc(var(--base) * 22);
+  max-width: 100%;
+}

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
 import { contentCollection, relationField, seoField, slugField, textField } from '../fields'
 import { productSections } from '../hooks/productSections'
 
@@ -19,11 +19,41 @@ export const sectionIcons = [
   'graduation',
 ] as const
 
+const levelOptions = [
+  { label: 'Флагман — самым первым', value: 'flagship' },
+  { label: 'Топ продаж — выше остальных', value: 'top' },
+  { label: 'Обычный', value: 'normal' },
+  { label: 'В конце списка', value: 'low' },
+]
+
+/**
+ * Приоритет показа в меню, каталоге и подборках (src/domain/priority.mjs). У товара пусто —
+ * берётся уровень производителя.
+ */
+function priorityField(forProduct: boolean): Field {
+  return {
+    name: 'priority',
+    label: 'Приоритет показа',
+    type: 'select',
+    ...(forProduct ? {} : { defaultValue: 'normal' }),
+    options: levelOptions,
+    admin: {
+      position: 'sidebar',
+      description: forProduct
+        ? 'Пусто — как у производителя. Флагман — главный товар линейки (AutoCAD, SCAD Office, ' +
+          'GEO5): первым в меню и каталоге. Топ продаж — сразу после флагманов.'
+        : 'Уровень для всех товаров производителя, если у товара свой не выбран. ' +
+          'Топы продаж показываются первыми в меню, каталоге и подборках.',
+    },
+  }
+}
+
 export const manufacturers = contentCollection({
   slug: 'manufacturers',
   singular: 'Производитель',
   plural: 'Производители',
   fields: [
+    priorityField(false),
     textField('website', 'Сайт'),
     {
       name: 'image',
@@ -80,6 +110,19 @@ export const sections = contentCollection({
     },
     { name: 'order', label: 'Порядок вывода', type: 'number', defaultValue: 100 },
     {
+      name: 'pinnedManufacturers',
+      label: 'Первыми в разделе: производители по порядку',
+      type: 'relationship',
+      relationTo: 'manufacturers',
+      hasMany: true,
+      admin: {
+        description:
+          'Например, в «Геотехнике»: Fine Software (GEO5), ЛИРА-FEM, SCAD. Порядок можно менять ' +
+          'перетаскиванием. Работает внутри одного уровня приоритета: топ продаж всё равно выше ' +
+          'обычного товара.',
+      },
+    },
+    {
       name: 'crossSections',
       label: '«С этим покупают»: предлагать товары из разделов',
       type: 'relationship',
@@ -100,6 +143,7 @@ const productCollection = contentCollection({
   plural: 'Товары',
   fields: [
     slugField(),
+    priorityField(true),
     {
       name: 'kind',
       label: 'Тип',
@@ -230,7 +274,7 @@ export const products: CollectionConfig = {
   ...productCollection,
   admin: {
     ...productCollection.admin,
-    defaultColumns: ['title', 'manufacturer', 'mainSection', 'status', 'updatedAt'],
+    defaultColumns: ['title', 'manufacturer', 'mainSection', 'priority', 'status', 'updatedAt'],
   },
   hooks: { beforeChange: [productSections] },
 }
@@ -253,5 +297,16 @@ export const offers: CollectionConfig = contentCollection({
     },
     { name: 'includesVat', label: 'Исходный НДС включён', type: 'checkbox' },
     textField('sourceVat', 'Исходная ставка НДС, %', true),
+    {
+      name: 'priceNames',
+      label: 'Названия в прайсах производителя',
+      type: 'text',
+      hasMany: true,
+      admin: {
+        description:
+          'Заполняется само при загрузке прайса: по этим названиям строка прайса в следующий раз ' +
+          'сразу найдёт это предложение. Неверное название можно удалить.',
+      },
+    },
   ],
 })

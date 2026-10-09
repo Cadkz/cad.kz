@@ -1,5 +1,6 @@
 import type { Section, SiteSetting } from '../../payload-types'
 import { menuColumns } from '../domain/menu.mjs'
+import { priorityRank } from '../domain/priority.mjs'
 import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
 import { productPath } from './productPath'
@@ -25,7 +26,7 @@ const relId = (value: number | { id: number } | null | undefined) =>
  */
 export async function getMenu(): Promise<MenuTab[]> {
   const payload = await cms()
-  const [sections, products] = await Promise.all([
+  const [sections, products, manufacturers] = await Promise.all([
     payload.find({
       collection: 'sections',
       where: { status: { equals: 'published' } },
@@ -39,17 +40,37 @@ export async function getMenu(): Promise<MenuTab[]> {
       sort: 'title',
       pagination: false,
       depth: 0,
-      select: { title: true, slug: true, legacyUrl: true, sections: true, mainSection: true },
+      select: {
+        title: true,
+        slug: true,
+        legacyUrl: true,
+        sections: true,
+        mainSection: true,
+        manufacturer: true,
+        priority: true,
+      },
+    }),
+    payload.find({
+      collection: 'manufacturers',
+      pagination: false,
+      depth: 0,
+      select: { priority: true },
     }),
   ])
 
-  const items = products.docs.map((product) => ({
-    id: product.id,
-    title: product.title,
-    main: relId(product.mainSection),
-    sections: (product.sections ?? []).map((section) => relId(section) ?? 0),
-    href: productPath(product),
-  }))
+  const vendorLevel = new Map(manufacturers.docs.map((m) => [m.id, m.priority]))
+  const items = products.docs.map((product) => {
+    const vendor = relId(product.manufacturer)
+    return {
+      id: product.id,
+      title: product.title,
+      main: relId(product.mainSection),
+      sections: (product.sections ?? []).map((section) => relId(section) ?? 0),
+      href: productPath(product),
+      vendor,
+      rank: priorityRank(product.priority, vendor == null ? null : vendorLevel.get(vendor)),
+    }
+  })
 
   const tabs: MenuTab[] = (Object.keys(groupLabels) as Section['menuGroup'][]).map((group) => ({
     key: group,
@@ -58,12 +79,13 @@ export async function getMenu(): Promise<MenuTab[]> {
     columns: menuColumns(
       sections.docs
         .filter((section) => section.menuGroup === group)
-        .map(({ id, slug, title, menuGroup, isDirection }) => ({
+        .map(({ id, slug, title, menuGroup, isDirection, pinnedManufacturers }) => ({
           id,
           slug,
           title,
           menuGroup,
           isDirection: Boolean(isDirection),
+          pins: (pinnedManufacturers ?? []).map((m) => relId(m) ?? 0),
         })),
       items,
       catalogHref,

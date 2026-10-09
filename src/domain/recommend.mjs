@@ -12,7 +12,7 @@
  * @typedef {{ id: number, title: string, vendor: string | null, kind: string,
  *   main: number | null, sections: number[], requires: number[],
  *   manualSimilar: number[], manualCross: number[],
- *   suggestSimilar: boolean, suggestCross: boolean }} RecItem
+ *   suggestSimilar: boolean, suggestCross: boolean, rank?: number }} RecItem
  * @typedef {'name' | 'model'} MatchMode
  * @typedef {Map<number, { isDirection: boolean, cross: number[], match?: MatchMode }>} SectionInfo
  */
@@ -90,10 +90,21 @@ function directions(item, info) {
   return item.sections.filter((id) => info.get(id)?.isDirection)
 }
 
-/** Отсортированные по баллам ID; seed разносит равные баллы по-разному для разных товаров. */
-function top(scores, limit, seed) {
+/**
+ * Отсортированные по баллам ID. При равных баллах выше приоритет показа (топы продаж), дальше
+ * seed разносит равные по-разному для разных товаров.
+ * @param {Map<number, number>} scores
+ * @param {number} limit
+ * @param {string | number} seed
+ * @param {RecItem[]} items
+ */
+function top(scores, limit, seed, items) {
+  const rank = new Map(items.map((item) => [item.id, item.rank ?? 1]))
   return [...scores]
-    .sort(([a, sa], [b, sb]) => sb - sa || spread(seed, a) - spread(seed, b))
+    .sort(
+      ([a, sa], [b, sb]) =>
+        sb - sa || (rank.get(b) ?? 1) - (rank.get(a) ?? 1) || spread(seed, a) - spread(seed, b),
+    )
     .slice(0, limit)
     .map(([id]) => id)
 }
@@ -125,7 +136,7 @@ export function similarFor(target, items, { limit = 3, exclude = [] } = {}) {
       (item.kind === target.kind ? 1 : 0)
     scores.set(item.id, score)
   }
-  return top(scores, limit, target.id)
+  return top(scores, limit, target.id, items)
 }
 
 /**
@@ -196,5 +207,5 @@ export function crossFor(targets, items, info, { limit = 3, exclude = [] } = {})
   for (const target of targets)
     for (const [id, score] of crossScores(target, items, info, skip))
       total.set(id, (total.get(id) ?? 0) + score)
-  return top(total, limit, targets.map((t) => t.id).join(','))
+  return top(total, limit, targets.map((t) => t.id).join(','), items)
 }

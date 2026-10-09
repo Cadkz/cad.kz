@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { priorityRank } from '../domain/priority.mjs'
 import {
   crossFor,
   type RecItem,
@@ -35,6 +36,7 @@ async function loadRecData(payload: Payload): Promise<RecData> {
         recommended: true,
         suggestSimilar: true,
         suggestCross: true,
+        priority: true,
       },
     }),
     payload.find({
@@ -50,10 +52,11 @@ async function loadRecData(payload: Payload): Promise<RecData> {
       limit: 500,
       pagination: false,
       depth: 0,
-      select: { title: true },
+      select: { title: true, priority: true },
     }),
   ])
   const vendors = new Map(manufacturers.docs.map((m) => [m.id, m.title]))
+  const vendorLevel = new Map(manufacturers.docs.map((m) => [m.id, m.priority]))
   const info: SectionInfo = new Map(
     sections.docs.map((s) => [
       s.id,
@@ -81,6 +84,7 @@ async function loadRecData(payload: Payload): Promise<RecData> {
       manualCross: relIds(product.recommended),
       suggestSimilar: product.suggestSimilar !== false,
       suggestCross: product.suggestCross !== false,
+      rank: priorityRank(product.priority, vendorLevel.get(relId(product.manufacturer) ?? -1)),
     })
     cards.set(product.id, {
       slug: product.slug,

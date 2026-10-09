@@ -1,15 +1,20 @@
 /**
  * Колонки мегаменю каталога: чистые функции без базы.
  * В колонке раздела — не больше MENU_LINKS товаров и ссылка «Все N» на каталог с этим разделом,
- * иначе при сотнях товаров меню не помещается в экран. Сначала товары, у которых раздел основной,
- * потом остальные; внутри — по названию.
+ * иначе при сотнях товаров меню не помещается в экран. Порядок — по приоритету показа
+ * (src/domain/priority.mjs): флагманы и топы продаж первыми, производители в порядке раздела,
+ * потом товары с этим основным разделом, потом по названию. От одного производителя в колонке
+ * сначала не больше двух товаров, чтобы после GEO5 были видны ЛИРА и SCAD.
  */
+import { compareInSection, pickVaried } from './priority.mjs'
 
 export const MENU_LINKS = 5
 
 /**
- * @typedef {{ id: number, slug: string, title: string, menuGroup: string, isDirection: boolean }} MenuSection
- * @typedef {{ id: number, title: string, main: number | null, sections: number[], href: string }} MenuProduct
+ * @typedef {{ id: number, slug: string, title: string, menuGroup: string, isDirection: boolean,
+ *   pins?: number[] }} MenuSection
+ * @typedef {{ id: number, title: string, main: number | null, sections: number[], href: string,
+ *   rank?: number, vendor?: number | null }} MenuProduct
  * @typedef {{ title: string, links: { title: string, href: string }[], total: number, allHref: string }} MenuColumnData
  */
 
@@ -37,14 +42,11 @@ export function menuColumns(sections, products, hrefFor, limit = MENU_LINKS) {
     .map((section) => {
       const inSection = products
         .filter((product) => product.sections.includes(section.id))
-        .sort(
-          (a, b) =>
-            Number(b.main === section.id) - Number(a.main === section.id) ||
-            a.title.localeCompare(b.title, 'ru', { numeric: true }),
-        )
+        .map((product) => ({ ...product, rank: product.rank ?? 1, vendor: product.vendor ?? null }))
+        .sort(compareInSection(section.id, section.pins ?? []))
       return {
         title: section.title,
-        links: inSection.slice(0, limit).map(({ title, href }) => ({ title, href })),
+        links: pickVaried(inSection, limit).map(({ title, href }) => ({ title, href })),
         total: inSection.length,
         allHref: hrefFor(sectionFilter(section)),
       }
