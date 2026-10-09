@@ -36,3 +36,18 @@
 .sample th {
   color: var(--theme-elevation-500);
 }
+
+.sets {
+  display: grid;
+  gap: calc(var(--base) / 4);
+  margin: 0;
+  padding: calc(var(--base) / 2) calc(var(--base) * 0.75);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-s);
+}
+
+.set {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--base) / 2);
+}

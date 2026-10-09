@@ -7,8 +7,16 @@
  *    потом запомненное название из прошлых загрузок, потом похожесть названий.
  */
 
-/** @typedef {{ headerRow: number, nameCol: number, priceCol: number, idCol: number }} Columns */
-/** @typedef {{ index: number, name: string, id: string, price: string | null }} PriceRow */
+/**
+ * Колонки прайса. prices — несколько цен в одной строке (прайс SCAD: S392 и S Pro): каждая цена
+ * становится своей строкой с подписью колонки, пусто — одна цена из priceCol. groupCol — колонка
+ * группы слева от названия (объединённые ячейки «Ж/Б конструкции (RC)»).
+ * @typedef {{ col: number, label: string }} PriceColumn
+ * @typedef {{ headerRow: number, nameCol: number, priceCol: number, idCol: number,
+ *   groupCol?: number, prices?: PriceColumn[] }} Columns
+ * @typedef {{ title: string, prices: PriceColumn[], kzt: boolean }} PriceSet
+ */
+/** @typedef {{ index: number, name: string, id: string, price: string | null, alt?: string[] }} PriceRow */
 /** @typedef {{ id: number, label: string, names: string[] }} OfferCandidate */
 /**
  * @typedef {'id' | 'saved' | 'auto' | 'check' | 'none' | 'noPrice'} MatchStatus
@@ -29,6 +37,15 @@ const MAX_ID = 10_000_000
  * @returns {Columns}
  */
 export function guessColumns(rows) {
+  const base = guessBase(rows)
+  if (base.headerRow < 0) return base
+  const groupCol = guessGroup(rows, base)
+  const sets = priceSets(rows, base)
+  return { ...base, groupCol, prices: sets[0]?.prices ?? [] }
+}
+
+/** @param {string[][]} rows @returns {Columns} */
+function guessBase(rows) {
   for (let r = 0; r < Math.min(rows.length, 30); r++) {
     const cells = rows[r] ?? []
     const nameCol = cells.findIndex((cell) => NAME_HEAD.test(cell) && !PRICE_HEAD.test(cell))
@@ -44,6 +61,23 @@ export function guessColumns(rows) {
       return { headerRow: r, nameCol, priceCol, idCol: cells.findIndex((c) => ID_HEAD.test(c)) }
     }
   }
+  // Заголовок только у цены («Пакет | SCAD++ | Цена в тг. с НДС»): название — ближайшая слева
+  // колонка с длинным текстом.
+  for (let r = 0; r < Math.min(rows.length, 30); r++) {
+    const cells = rows[r] ?? []
+    const body = rows.slice(r + 1, r + 200)
+    const priceCol = cells.findIndex(
+      (cell, i) => PRICE_HEAD.test(cell) && countPrices(body, i) >= 3,
+    )
+    if (priceCol <= 0) continue
+    const scores = Array.from({ length: priceCol }, (_, col) =>
+      body.reduce((sum, row) => sum + textScore(row[col]), 0),
+    )
+    const top = Math.max(...scores)
+    if (top <= 0) continue
+    const nameCol = scores.findLastIndex((score) => score >= top * 0.3)
+    return { headerRow: r, nameCol, priceCol, idCol: -1 }
+  }
   const width = Math.max(0, ...rows.slice(0, 200).map((row) => row.length))
   let nameCol = 0
   let priceCol = width > 1 ? 1 : 0
@@ -57,6 +91,84 @@ export function guessColumns(rows) {
   }
   return { headerRow: -1, nameCol, priceCol, idCol: -1 }
 }
+
+/**
+ * Колонка группы: текстовая колонка левее названия, где одно значение идёт несколько строк подряд
+ * (так выглядят объединённые ячейки после чтения таблицы).
+ * @param {string[][]} rows
+ * @param {Columns} columns
+ */
+function guessGroup(rows, columns) {
+  const body = rows.slice(columns.headerRow + 1, columns.headerRow + 300)
+  for (let col = columns.nameCol - 1; col >= 0; col--) {
+    let repeats = 0
+    for (let i = 1; i < body.length; i++) {
+      const value = body[i][col] ?? ''
+      if (value && parsePrice(value) == null && value === (body[i - 1][col] ?? '')) repeats++
+    }
+    if (repeats >= 2) return col
+  }
+  return -1
+}
+
+/** Короткая подпись колонки под заголовком цены: «S392», «S Рго». */
+const isLabel = (/** @type {string | undefined} */ cell) =>
+  !!cell && cell.length <= 24 && parsePrice(cell) == null
+
+/**
+ * Наборы колонок цены. Под заголовком цены — подписи (S392, S Pro): каждая подписанная колонка —
+ * своя цена. Правее может быть такой же набор в другой валюте без заголовка (евро в прайсе SCAD):
+ * колонки, где цены стоят в тех же строках.
+ * @param {string[][]} rows
+ * @param {Columns} columns
+ * @returns {PriceSet[]}
+ */
+export function priceSets(rows, columns) {
+  if (columns.headerRow < 0) return []
+  const header = rows[columns.headerRow] ?? []
+  const sub = rows[columns.headerRow + 1] ?? []
+  const prices = []
+  for (let col = columns.priceCol; isLabel(sub[col]); col++) prices.push({ col, label: sub[col] })
+  if (prices.length < 2) return []
+  const headTitle = header[columns.priceCol] ?? ''
+  const letters = (/** @type {PriceColumn[]} */ list) =>
+    list.map((p) => columnLetter(p.col)).join(', ')
+  /** @type {PriceSet[]} */
+  const sets = [
+    {
+      title: `${letters(prices)}${headTitle ? ` — ${headTitle}` : ''}`,
+      prices,
+      kzt: /тг|тенге|₸|kzt/i.test(headTitle),
+    },
+  ]
+  // Такой же набор правее: колонки, где цены в тех же строках, что у первой цены набора.
+  const body = rows.slice(columns.headerRow + 2, columns.headerRow + 200)
+  const filled = (/** @type {number} */ col) =>
+    body.map((row) => parsePrice(row[col] ?? '') != null)
+  const pattern = filled(prices[0].col)
+  const width = Math.max(0, ...body.map((row) => row.length))
+  const last = prices[prices.length - 1].col
+  for (let col = last + 1; col + prices.length - 1 < width; col++) {
+    const same = filled(col)
+    const hits = same.filter((value, i) => value && pattern[i]).length
+    if (hits < Math.max(3, pattern.filter(Boolean).length * 0.8)) continue
+    const alt = prices.map((price, k) => ({ col: col + k, label: price.label }))
+    const title = header[col] ?? ''
+    sets.push({
+      title: `${letters(alt)}${title ? ` — ${title}` : ' — другая валюта'}`,
+      prices: alt,
+      kzt: /тг|тенге|₸|kzt/i.test(title),
+    })
+    break
+  }
+  return sets
+}
+
+/** Буква колонки: 0 → A, 26 → AA. */
+export const columnLetter = (/** @type {number} */ index) =>
+  index < 26
+    ? String.fromCharCode(65 + index)
+    : `${String.fromCharCode(64 + Math.floor(index / 26))}${String.fromCharCode(65 + (index % 26))}`
 
 const textScore = (/** @type {string | undefined} */ cell) =>
   cell && parsePrice(cell) == null ? Math.min(cell.length, 80) : 0
@@ -181,11 +293,16 @@ export function matchRows(rows, offers) {
     const id = Number(row.id)
     if (row.id && Number.isSafeInteger(id) && id > 0 && id < MAX_ID && byId.has(id))
       return { ...base, offerId: id, status: 'id', score: 1 }
-    const remembered = saved.get(nameKey(row.name))
+    const names = [row.name, ...(row.alt ?? [])]
+    const remembered = names.map((name) => saved.get(nameKey(name))).find((id) => id != null)
     if (remembered != null) return { ...base, offerId: remembered, status: 'saved', score: 1 }
-    const words = nameTokens(row.name)
+    // Строка с группой сравнивается и целиком, и по частям: лучшее совпадение из вариантов.
+    const variants = names.map(nameTokens)
     const ranked = tokens
-      .map((offer) => ({ id: offer.id, score: similarity(words, offer.words) }))
+      .map((offer) => ({
+        id: offer.id,
+        score: Math.max(...variants.map((words) => similarity(words, offer.words))),
+      }))
       .sort((a, b) => b.score - a.score)
     const [best, next] = ranked
     if (!best || best.score < CHECK_SCORE)
@@ -220,26 +337,94 @@ export function matchRows(rows, offers) {
 
 const round = (/** @type {number} */ value) => Math.round(value * 100) / 100
 
+/** Кириллица, похожая на латиницу, в подписях колонок: «S Рго» → «SPro». */
+const LABEL_LOOKALIKE = {
+  А: 'A',
+  В: 'B',
+  Е: 'E',
+  К: 'K',
+  М: 'M',
+  Н: 'H',
+  О: 'O',
+  Р: 'P',
+  С: 'C',
+  Т: 'T',
+  Х: 'X',
+  а: 'a',
+  г: 'r',
+  е: 'e',
+  к: 'k',
+  м: 'm',
+  о: 'o',
+  р: 'p',
+  с: 'c',
+  у: 'y',
+  х: 'x',
+}
+
+/**
+ * Подпись колонки цены для названия строки: без пробелов, с латиницей вместо похожей кириллицы,
+ * если в подписи есть латиница или цифры («S Рго» → «SPro», «S392» без изменений).
+ * @param {string} label
+ */
+export function priceLabel(label) {
+  const text = label.trim()
+  if (!/[a-z0-9]/i.test(text)) return text
+  return text
+    .replace(/[А-Яа-я]/g, (ch) => LABEL_LOOKALIKE[/** @type {keyof LABEL_LOOKALIKE} */ (ch)] ?? ch)
+    .replace(/\s+/g, '')
+}
+
 /**
  * Строки прайса по выбранным колонкам. Пустые строки и строки без названия пропускаются,
- * строка заголовка — тоже.
+ * строка заголовка — тоже. С группой (groupCol) название строки — «группа — название», для
+ * сравнения есть и части по отдельности. С несколькими ценами (prices) каждая цена — своя строка
+ * с подписью колонки («… · S392», «… · SPro»), строки без цены пропускаются; если цена в строке
+ * одна, подпись не добавляется (одна цена для всех вариантов).
  * @param {string[][]} rows
  * @param {Columns} columns
  * @returns {PriceRow[]}
  */
 export function priceRows(rows, columns) {
+  const prices = columns.prices?.length ? columns.prices : null
+  const groupCol = columns.groupCol ?? -1
   /** @type {PriceRow[]} */
   const result = []
   rows.forEach((cells, index) => {
     if (index <= columns.headerRow) return
-    const name = (cells[columns.nameCol] ?? '').trim()
+    const clean = (/** @type {string | undefined} */ text) =>
+      (text ?? '').replace(/\s+/g, ' ').trim()
+    let name = clean(cells[columns.nameCol])
+    let group = groupCol >= 0 ? clean(cells[groupCol]) : ''
+    if (!name && group && parsePrice(group) == null) [name, group] = [group, '']
     if (!name || parsePrice(name) != null) return
-    result.push({
-      index,
-      name,
-      id: columns.idCol >= 0 ? (cells[columns.idCol] ?? '').trim() : '',
-      price: parsePrice(cells[columns.priceCol] ?? ''),
-    })
+    if (group === name || parsePrice(group) != null) group = ''
+    const id = columns.idCol >= 0 ? (cells[columns.idCol] ?? '').trim() : ''
+    const full = group ? `${group} — ${name}` : name
+    const parts = group ? [group, name] : []
+    if (!prices) {
+      const price = parsePrice(cells[columns.priceCol] ?? '')
+      result.push({ index, name: full, id, price, ...(parts.length ? { alt: parts } : {}) })
+      return
+    }
+    const values = prices
+      .map((column, k) => ({
+        k,
+        label: priceLabel(column.label),
+        price: parsePrice(cells[column.col] ?? ''),
+      }))
+      .filter((value) => value.price != null)
+    for (const value of values) {
+      const label = values.length > 1 ? value.label : ''
+      const withLabel = (/** @type {string} */ text) => (label ? `${text} ${label}` : text)
+      result.push({
+        index: index * 10 + value.k,
+        name: label ? `${full} · ${label}` : full,
+        id,
+        price: value.price,
+        ...(parts.length ? { alt: parts.map(withLabel) } : {}),
+      })
+    }
   })
   return result
 }

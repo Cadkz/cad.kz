@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { deflateRawSync } from 'node:zlib'
-import { guessColumns, matchRows, parsePrice, priceRows } from '../src/domain/priceList.mjs'
+import {
+  guessColumns,
+  matchRows,
+  parsePrice,
+  priceLabel,
+  priceRows,
+  priceSets,
+} from '../src/domain/priceList.mjs'
 import { readSpreadsheet, SpreadsheetError } from '../src/domain/spreadsheet.mjs'
 
 /** Минимальный .xlsx: zip с книгой, одним листом и общими строками (часть файлов сжата). */
@@ -88,7 +95,14 @@ test('колонки по заголовкам; из двух цен — та, �
     ['1', 'А', '', '100'],
     ['2', 'Б', '', '200'],
   ]
-  assert.deepEqual(guessColumns(rows), { headerRow: 1, nameCol: 1, priceCol: 3, idCol: -1 })
+  assert.deepEqual(guessColumns(rows), {
+    headerRow: 1,
+    nameCol: 1,
+    priceCol: 3,
+    idCol: -1,
+    groupCol: -1,
+    prices: [],
+  })
 })
 
 const offers = [
@@ -158,5 +172,92 @@ test('строки прайса: без заголовка, без пустых 
   assert.deepEqual(priceRows(rows, { headerRow: 0, nameCol: 0, priceCol: 1, idCol: -1 }), [
     { index: 1, name: 'А', id: '', price: '1000' },
     { index: 4, name: 'Б', id: '', price: null },
+  ])
+})
+
+test('прайс SCAD: группа слева, две цены в строке (S392 и S Pro), евро правее', () => {
+  const rows = [
+    ['CAD.kz — прайс'],
+    ['Пакет', 'SCAD++', 'Цена в тг. с НДС', '', '', ''],
+    ['', '', 'S392', 'S Рго', '', ''],
+    ['Ж/Б конструкции (RC)', 'Проверка и подбор арматуры', '382800', '382800', '600', '600'],
+    [
+      'Напряженно-деформированное состояние (SSВ)',
+      'Линейный процессор',
+      '2762540',
+      '3604700',
+      '4330',
+      '5650',
+    ],
+    ['Напряженно-деформированное состояние (SSВ)', 'Комбинации загружений', '', '', '', ''],
+    ['', '', '3145340', '3987500', '4930', '6250'],
+    ['Сателлиты', 'КРИСТАЛЛ - экспертиза', '574200', '', '900', ''],
+    ['Сателлиты', 'АРБАТ - подбор арматуры', '574200', '', '900', ''],
+  ]
+  const columns = guessColumns(rows)
+  assert.equal(columns.headerRow, 1)
+  assert.equal(columns.nameCol, 1)
+  assert.equal(columns.groupCol, 0)
+  const sets = priceSets(rows, columns)
+  assert.deepEqual(
+    sets.map((set) => [set.prices.map((p) => p.col), set.kzt]),
+    [
+      [[2, 3], true],
+      [[4, 5], false],
+    ],
+  )
+  const found = priceRows(rows, { ...columns, prices: sets[1].prices })
+  assert.deepEqual(
+    found.map((row) => [row.name, row.price]),
+    [
+      ['Ж/Б конструкции (RC) — Проверка и подбор арматуры · S392', '600'],
+      ['Ж/Б конструкции (RC) — Проверка и подбор арматуры · SPro', '600'],
+      ['Напряженно-деформированное состояние (SSВ) — Линейный процессор · S392', '4330'],
+      ['Напряженно-деформированное состояние (SSВ) — Линейный процессор · SPro', '5650'],
+      ['Сателлиты — КРИСТАЛЛ - экспертиза', '900'],
+      ['Сателлиты — АРБАТ - подбор арматуры', '900'],
+    ],
+  )
+  assert.deepEqual(found[0].alt, ['Ж/Б конструкции (RC) S392', 'Проверка и подбор арматуры S392'])
+  const offers = [
+    {
+      id: 1,
+      label: 'SCAD комплект RC (Ж/Б конструкции) · SCAD++ Ж/Б конструкции (RC) S392',
+      names: [],
+    },
+    {
+      id: 2,
+      label: 'SCAD комплект RC (Ж/Б конструкции) · SCAD++ Ж/Б конструкции (RC) SPRO',
+      names: [],
+    },
+    { id: 3, label: 'КРИСТАЛЛ - экспертиза и расчет элементов стальных конструкций', names: [] },
+  ]
+  const matched = matchRows(found, offers)
+  assert.deepEqual(
+    matched.slice(0, 2).map((m) => [m.offerId, m.status]),
+    [
+      [1, 'auto'],
+      [2, 'auto'],
+    ],
+  )
+  assert.deepEqual([matched[4].offerId, matched[4].status], [3, 'auto'])
+})
+
+test('подпись колонки: похожая кириллица → латиница', () => {
+  assert.equal(priceLabel('S Рго'), 'SPro')
+  assert.equal(priceLabel('S Ргоmax'), 'SPromax')
+  assert.equal(priceLabel('S392'), 'S392')
+  assert.equal(priceLabel('Цена'), 'Цена')
+})
+
+test('xlsx: объединённая по вертикали группа повторяется в строках, цена — нет', async () => {
+  const sheet = `<worksheet><sheetData>
+    <row r="1"><c r="A1" t="inlineStr"><is><t>Сателлиты</t></is></c><c r="B1" t="inlineStr"><is><t>КРИСТАЛЛ</t></is></c><c r="C1"><v>900</v></c></row>
+    <row r="2"><c r="B2" t="inlineStr"><is><t>АРБАТ</t></is></c></row>
+  </sheetData><mergeCells count="2"><mergeCell ref="A1:A2"/><mergeCell ref="C1:C2"/></mergeCells></worksheet>`
+  const [first] = await readSpreadsheet(xlsx(sheet, []))
+  assert.deepEqual(first.rows, [
+    ['Сателлиты', 'КРИСТАЛЛ', '900'],
+    ['Сателлиты', 'АРБАТ'],
   ])
 })

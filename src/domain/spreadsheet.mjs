@@ -135,7 +135,34 @@ function sheetRows(xml, strings) {
     }
     rows[number - 1] = Array.from(cells, (value) => value ?? '')
   }
-  return Array.from(rows, (row) => row ?? [])
+  const result = Array.from(rows, (row) => row ?? [])
+  fillVerticalMerges(result, xml)
+  return result
+}
+
+/**
+ * Объединённые по вертикали ячейки (группа «Ж/Б конструкции (RC)» на несколько строк): значение
+ * верхней ячейки повторяется в строках ниже, чтобы у каждой строки была своя группа.
+ * Объединения по горизонтали и числа не трогаем: цена на две колонки или на несколько строк —
+ * одна цена, а не несколько.
+ * @param {string[][]} rows
+ * @param {string} xml
+ */
+function fillVerticalMerges(rows, xml) {
+  for (const merge of xml.matchAll(/<mergeCell\b[^>]*\bref="([A-Z]+)(\d+):([A-Z]+)(\d+)"/g)) {
+    const [, fromCol, fromRow, toCol, toRow] = merge
+    if (fromCol !== toCol) continue
+    const col = columnIndex(fromCol)
+    const top = Number(fromRow) - 1
+    const value = rows[top]?.[col] ?? ''
+    // Числа не размножаем: цена пакета на несколько строк состава — одна цена.
+    if (!value || /^-?\d+(\.\d+)?$/.test(value)) continue
+    for (let r = top + 1; r < Number(toRow) && r < rows.length; r++) {
+      const row = rows[r]
+      while (row.length < col) row.push('')
+      if (!row[col]) row[col] = value
+    }
+  }
 }
 
 /** @param {Uint8Array} bytes @returns {Promise<Sheet[]>} */

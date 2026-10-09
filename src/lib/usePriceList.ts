@@ -1,7 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { type Columns, guessColumns, priceRows } from '@/domain/priceList.mjs'
+import {
+  type Columns,
+  guessColumns,
+  type PriceSet,
+  priceRows,
+  priceSets,
+} from '@/domain/priceList.mjs'
 import { readSpreadsheet, type Sheet, SpreadsheetError } from '@/domain/spreadsheet.mjs'
 
 /** Производитель для выбора «Чей прайс» и его обычные валюта и НДС. */
@@ -77,6 +83,44 @@ export function usePriceList(vendors: PriceVendor[]) {
   const [done, setDone] = useState<string | null>(null)
 
   const rows = file?.sheets[sheet]?.rows ?? []
+  const sets: PriceSet[] = columns ? priceSets(rows, columns) : []
+
+  /** Валюта и НДС для набора цен: «Цена в тг. с НДС» — тенге с НДС, иначе как у производителя. */
+  function settingsFor(set: PriceSet, base: Settings): Settings {
+    if (set.kzt)
+      return { ...base, currency: 'KZT', includesVat: /ндс/i.test(set.title), sourceVat: '16' }
+    const vendor = vendors.find((v) => v.id === base.vendor)
+    return vendor
+      ? {
+          ...base,
+          currency: vendor.currency,
+          includesVat: vendor.includesVat,
+          sourceVat: vendor.sourceVat,
+        }
+      : base
+  }
+
+  /**
+   * Колонки по листу. Если цен два набора (тенге с НДС и евро), по умолчанию — тот, что в валюте
+   * нынешних цен производителя на сайте: так цены остаются привязаны к тем же курсам.
+   */
+  function setupColumns(sheetRows: string[][]) {
+    const guessed = guessColumns(sheetRows)
+    const found = priceSets(sheetRows, guessed)
+    const vendor = vendors.find((v) => v.id === settings.vendor)
+    const preferred =
+      found.find((set) => (vendor?.currency === 'KZT') === set.kzt) ?? found[0] ?? null
+    setColumns(preferred ? { ...guessed, prices: preferred.prices } : guessed)
+    if (preferred && found.length > 1) setSettings(settingsFor(preferred, settings))
+  }
+
+  function chooseSet(index: number) {
+    const set = sets[index]
+    if (!set || !columns) return
+    setColumns({ ...columns, prices: set.prices })
+    setSettings(settingsFor(set, settings))
+    setPreview(null)
+  }
 
   function chooseVendor(id: number | null) {
     const vendor = vendors.find((v) => v.id === id)
@@ -95,13 +139,10 @@ export function usePriceList(vendors: PriceVendor[]) {
     setPreview(null)
     try {
       const sheets = await readSpreadsheet(new Uint8Array(await picked.arrayBuffer()))
-      const best = sheets.reduce(
-        (top, s, i) => (s.rows.length > sheets[top].rows.length ? i : top),
-        0,
-      )
+      // Актуальный лист прайса — первый (в прайсе SCAD остальные — история по старым курсам).
       setFile({ name: picked.name, sheets })
-      setSheet(best)
-      setColumns(guessColumns(sheets[best]?.rows ?? []))
+      setSheet(0)
+      setupColumns(sheets[0]?.rows ?? [])
     } catch (problem) {
       setFile(null)
       setError(
@@ -114,7 +155,7 @@ export function usePriceList(vendors: PriceVendor[]) {
 
   function chooseSheet(index: number) {
     setSheet(index)
-    setColumns(guessColumns(file?.sheets[index]?.rows ?? []))
+    setupColumns(file?.sheets[index]?.rows ?? [])
     setPreview(null)
   }
 
@@ -215,6 +256,8 @@ export function usePriceList(vendors: PriceVendor[]) {
     chooseFile,
     rows,
     columns,
+    sets,
+    chooseSet,
     setColumns: (next: Columns) => {
       setColumns(next)
       setPreview(null)

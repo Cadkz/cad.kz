@@ -101,7 +101,7 @@ export function PriceUpload({ vendors }: { vendors: PriceVendor[] }) {
         </p>
         {list.file && list.file.sheets.length > 1 && (
           <label className={styles.field}>
-            <span>Лист</span>
+            <span>Лист (по умолчанию первый — актуальный)</span>
             <select value={list.sheet} onChange={(e) => list.chooseSheet(Number(e.target.value))}>
               {list.file.sheets.map((s, i) => (
                 <option key={s.name} value={i}>
@@ -112,7 +112,13 @@ export function PriceUpload({ vendors }: { vendors: PriceVendor[] }) {
           </label>
         )}
         {list.file && list.columns && (
-          <PriceColumns rows={list.rows} columns={list.columns} onChange={list.setColumns} />
+          <PriceColumns
+            rows={list.rows}
+            columns={list.columns}
+            sets={list.sets}
+            onChange={list.setColumns}
+            onChooseSet={list.chooseSet}
+          />
         )}
         {list.file && (
           <div>

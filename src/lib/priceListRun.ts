@@ -134,11 +134,15 @@ function readRows(raw: unknown): PriceRow[] | string {
     const row = item as Record<string, unknown>
     const price = row.price == null ? null : String(row.price)
     if (price != null && !AMOUNT.test(price)) return 'Некорректная цена в прайсе'
+    const alt = Array.isArray(row.alt)
+      ? row.alt.slice(0, 3).map((name) => String(name ?? '').slice(0, 300))
+      : []
     rows.push({
       index: Number(row.index) || 0,
       name: String(row.name ?? '').slice(0, 300),
       id: String(row.id ?? '').slice(0, 20),
       price,
+      ...(alt.length ? { alt } : {}),
     })
   }
   return rows
