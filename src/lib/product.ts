@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import type { Product, Section } from '../../payload-types'
+import type { PickerView } from '../domain/picker.mjs'
 import { formatKzt } from './format'
 import { cms } from './payload'
+import { loadPicker } from './picker'
 import { type Picture, productPictures } from './pictures'
 import { loadPricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
+import { relId } from './rel'
 import { pageMetadata } from './seo'
 
 export type ProductOffer = {
@@ -33,6 +36,14 @@ export type ProductPage = {
   faq: { question: string; answer: string }[]
   requires: RelatedProduct[]
   offers: ProductOffer[]
+  /** Вид страницы: обычная, с подбором или без своей страницы (тогда адрес перенаправляется). */
+  pageView: Product['pageView']
+  /** Подбор комплекта; у обычной страницы — один шаг из своих предложений. */
+  picker: PickerView
+  renewLabel: string | null
+  /** Линейка и производитель: куда вести адрес товара без своей страницы. */
+  lineId: number | null
+  vendorId: number | null
   /** Своя галерея или картинка производителя; пусто — блока картинок нет. */
   pictures: Picture[]
   seo: Product['seo']
@@ -61,7 +72,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
   })
   const product = docs[0]
   if (!product) return null
-  const [offers, context] = await Promise.all([
+  const [offers, context, picker] = await Promise.all([
     payload.find({
       collection: 'offers',
       where: { and: [{ status: { equals: 'published' } }, { product: { equals: product.id } }] },
@@ -69,6 +80,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
       depth: 0,
     }),
     loadPricingContext(payload),
+    loadPicker(payload, product),
   ])
   const priced = offers.docs
     .map((offer) => {
@@ -112,6 +124,11 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
       license: offer.license,
       price: unit ? formatKzt(unit) : null,
     })),
+    pageView: product.pageView ?? 'standard',
+    picker,
+    renewLabel: product.renewLabel || null,
+    lineId: relId(product.line),
+    vendorId: relId(product.manufacturer),
     pictures: productPictures(product),
     seo: product.seo,
   }
@@ -126,4 +143,10 @@ export function productMetadata(product: ProductPage): Metadata {
     path: product.path,
     image: product.pictures[0]?.url,
   })
+}
+
+/** Товар из адреса ?pick=ID: старый адрес варианта ведёт на подбор с уже выбранным вариантом. */
+export function pickParam(value: string | string[] | undefined): number | null {
+  const id = Number(Array.isArray(value) ? value[0] : value)
+  return Number.isSafeInteger(id) && id > 0 ? id : null
 }

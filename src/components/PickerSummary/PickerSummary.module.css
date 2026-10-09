@@ -1,22 +1,15 @@
-.configurator {
+.box {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
 }
 
-.options {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.legend {
-  margin-bottom: var(--space-2);
-  padding: 0;
+.label {
   color: var(--color-text-muted);
   font-size: var(--text-overline);
   font-weight: var(--weight-semibold);
@@ -24,66 +17,30 @@
   text-transform: uppercase;
 }
 
-.option {
+.lines {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  cursor: pointer;
-  transition: border-color var(--duration-fast) var(--ease);
-}
-
-.option:hover {
-  border-color: var(--color-blue-mid);
-}
-
-.option[data-selected="true"] {
-  border-color: var(--color-navy);
-  background: var(--color-blue-soft);
-}
-
-.option:has(:focus-visible) {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
-.radio {
-  flex-shrink: 0;
-  accent-color: var(--color-navy);
-}
-
-.optionText {
-  display: flex;
-  flex: 1;
   flex-direction: column;
-  min-width: 0;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 0 var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  list-style: none;
 }
 
-.optionTitle {
-  color: var(--color-navy);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-}
-
-.optionLicense {
-  color: var(--color-text-muted);
-  font-size: var(--text-xs);
-}
-
-/* На голубом фоне выбранной строки серый не дотягивает до контраста 4,5:1 — темнее. */
-.option[data-selected="true"] .optionLicense {
+.line {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
   color: var(--color-gray-700);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
 }
 
-.optionPrice {
+.price {
   flex-shrink: 0;
   color: var(--color-navy);
-  font-family: var(--font-heading);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-heavy);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
 }
 
 .row,
@@ -92,11 +49,6 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-}
-
-.row .legend,
-.total .legend {
-  margin: 0;
 }
 
 .stepper {
@@ -143,6 +95,7 @@
   font-family: var(--font-heading);
   font-size: var(--text-h3);
   font-weight: var(--weight-heavy);
+  text-align: right;
 }
 
 .sum[data-state="busy"] {
@@ -154,13 +107,6 @@
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
-}
-
-.cartLink {
-  align-self: center;
-  color: var(--color-blue);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
 }
 
 .note {

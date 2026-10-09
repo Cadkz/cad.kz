@@ -1,12 +1,14 @@
 // Разделы каталога по утверждённым направлениям: новые разделы, «Правила разделов»,
 // «С этим покупают» у разделов, разделы у товаров; затем приоритет показа (топы продаж первыми);
-// затем вторая настройка: дубли производителей, линейки, приложения в конец, темы новостей. Выполняется один раз (отметка в журнале
+// затем вторая настройка: дубли производителей, линейки, приложения в конец, темы новостей;
+// затем подбор AutoCAD и SCAD Office и семейство сателлитов SCAD. Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
+import { setupPicker } from '../src/lib/pickerSetup.ts'
 import { setupPriorities } from '../src/lib/prioritySetup.ts'
 import { setupVendors } from '../src/lib/vendorsSetup.ts'
 
@@ -42,6 +44,16 @@ try {
     console.log(`Порядок производителей: ${vendors.sections.join(', ') || '—'}`)
     console.log(`Линейки: ${vendors.lines.join('; ')}; товаров в линейках ${vendors.lineProducts}`)
     console.log(`Темы публикаций: ${JSON.stringify(vendors.topics)}`)
+  }
+  const picker = await setupPicker(payload)
+  if (!picker) console.log('Подбор AutoCAD и SCAD уже настроен, ничего не меняем.')
+  else {
+    console.log(
+      `Подбор: ${picker.pickers.join(', ') || '—'}; редакций у предложений ${picker.variants}`,
+    )
+    console.log(`Семейства: ${picker.families.join('; ') || '—'}`)
+    console.log(`Без своей страницы: ${picker.noPage.length}`)
+    for (const line of picker.missing) console.log(`  не найдено — ${line}`)
   }
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)

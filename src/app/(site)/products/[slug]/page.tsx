@@ -1,9 +1,14 @@
 import type { Metadata } from 'next'
 import { notFound, permanentRedirect } from 'next/navigation'
 import { ProductView } from '@/components/ProductView/ProductView'
-import { getProduct, productMetadata } from '@/lib/product'
+import { noPageTarget } from '@/lib/pageTarget'
+import { cms } from '@/lib/payload'
+import { getProduct, pickParam, productMetadata } from '@/lib/product'
 
-type Props = { params: Promise<{ slug: string }> }
+type Props = {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProduct((await params).slug)
@@ -11,9 +16,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /** Товар по новому адресу. Если товар был на старом сайте, ведём на прежний адрес. */
-export default async function ProductPage({ params }: Props) {
+export default async function ProductPage({ params, searchParams }: Props) {
   const product = await getProduct((await params).slug)
   if (!product) notFound()
+  if (product.pageView === 'none') permanentRedirect(await noPageTarget(await cms(), product))
   if (product.path !== `/products/${product.slug}`) permanentRedirect(product.path)
-  return <ProductView product={product} />
+  return <ProductView product={product} pick={pickParam((await searchParams).pick)} />
 }

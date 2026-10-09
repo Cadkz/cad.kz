@@ -6,6 +6,7 @@ import * as migration_20261009_062507_seo_pages_contacts from './20261009_062507
 import * as migration_20261009_113041_priority from './20261009_113041_priority'
 import * as migration_20261009_113901_price_names from './20261009_113901_price_names'
 import * as migration_20261009_122905_lines_topics from './20261009_122905_lines_topics'
+import * as migration_20261009_200050_picker_families from './20261009_200050_picker_families'
 
 export const migrations = [
   {
@@ -47,5 +48,10 @@ export const migrations = [
     up: migration_20261009_122905_lines_topics.up,
     down: migration_20261009_122905_lines_topics.down,
     name: '20261009_122905_lines_topics',
+  },
+  {
+    up: migration_20261009_200050_picker_families.up,
+    down: migration_20261009_200050_picker_families.down,
+    name: '20261009_200050_picker_families',
   },
 ]

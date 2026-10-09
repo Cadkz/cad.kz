@@ -23,6 +23,11 @@ export const demoConsultant: ConsultantProvider = {
 export type CrmLead = {
   idempotencyKey: string
   orderNumber: string
+  /** Заявка без корзины (src/domain/siteRequest.mjs): тип, подпись типа и страница. У заказа нет. */
+  kind?: string
+  kindLabel?: string
+  pageTitle?: string
+  contactWay?: 'callback'
   consent: { accepted: true; at: string; version: string }
   contact: { name: string; email?: string; phone?: string }
   buyer: { type: 'individual' } | { type: 'company'; companyName: string; bin: string }
@@ -33,6 +38,7 @@ export type CrmLead = {
     configuration: string
     license: string
     quantity: number
+    /** Пусто — цена по запросу (заявка без корзины). */
     unitKzt: string
     totalKzt: string
   }[]

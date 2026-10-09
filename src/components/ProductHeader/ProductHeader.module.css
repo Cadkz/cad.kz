@@ -32,9 +32,14 @@
 }
 
 .summary {
+  display: -webkit-box;
   max-width: var(--measure);
+  overflow: hidden;
   color: var(--color-text-muted);
   font-size: var(--text-lead);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
 }
 
 .requires {
@@ -53,6 +58,14 @@
   margin: var(--space-2) 0 0;
   padding: 0;
   list-style: none;
+}
+
+@media (min-width: 960px) {
+  /* Длинный анонс из старого сайта не растягивает первый экран: подробности — в «О программе». */
+  .summary {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
 }
 
 @media (min-width: 640px) {

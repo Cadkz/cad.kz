@@ -37,9 +37,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, ready])
   function add(item: CartItem) {
-    // Validate synchronously so the configurator can display a useful error.
-    const next = normalizeCart([...items, item])
-    setItems(next)
+    // Проверка сразу, чтобы конфигуратор мог показать понятную ошибку.
+    normalizeCart([...items, item])
+    // Через предыдущее состояние: подбор кладёт несколько позиций подряд в одном нажатии.
+    setItems((current) => {
+      try {
+        return normalizeCart([...current, item])
+      } catch {
+        return current
+      }
+    })
   }
   function setQuantity(offerId: string, quantity: number) {
     setItems(

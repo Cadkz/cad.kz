@@ -10,6 +10,16 @@ type Props = {
   pictures?: Map<string, Picture>
 }
 
+/** Пункты из старого сайта бывают одинаковыми: ключ — текст и номер повтора. */
+function uniqueKeys(items: string[]): [string, string][] {
+  const seen = new Map<string, number>()
+  return items.map((item) => {
+    const count = (seen.get(item) ?? 0) + 1
+    seen.set(item, count)
+    return [`${item}#${count}`, item]
+  })
+}
+
 /** Ссылка на файл (PDF, картинка в «Медиа»), а не на страницу сайта. */
 const isFile = (href: string) =>
   href.startsWith('/api/media/') || /\.(pdf|jpe?g|png|gif|webp)$/i.test(href)
@@ -54,8 +64,8 @@ export function ArticleBody({ blocks, pictures }: Props) {
           case 'list':
             return (
               <ul key={key} className={styles.list}>
-                {block.items.map((item) => (
-                  <li key={item}>
+                {uniqueKeys(block.items).map(([itemKey, item]) => (
+                  <li key={itemKey}>
                     <Text text={item} />
                   </li>
                 ))}

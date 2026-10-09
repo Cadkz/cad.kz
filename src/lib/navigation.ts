@@ -1,6 +1,7 @@
 import type { Section, SiteSetting } from '../../payload-types'
 import { menuColumns } from '../domain/menu.mjs'
 import { priorityRank } from '../domain/priority.mjs'
+import { familyLines } from './families'
 import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
 import { productPath } from './productPath'
@@ -63,6 +64,7 @@ export async function getMenu(): Promise<MenuTab[]> {
         priority: true,
         line: true,
         lineOrder: true,
+        pageView: true,
       },
     }),
     payload.find({
@@ -97,6 +99,27 @@ export async function getMenu(): Promise<MenuTab[]> {
     }
   })
 
+  // Товары без своей страницы в меню не показываются, их семейство — одной строкой в линейке.
+  const families = await familyLines()
+  const hidden = new Set(products.docs.filter((p) => p.pageView === 'none').map((p) => p.id))
+  const familyItems = [...families].flatMap(([lineId, family]) => {
+    const members = items.filter((item) => item.line === lineId)
+    const [first] = members
+    if (!first) return []
+    return [
+      {
+        ...first,
+        id: -lineId,
+        title: family.title,
+        href: family.href,
+        sections: [...new Set(members.flatMap((m) => m.sections))],
+        lineOrder: 0,
+        rank: Math.max(...members.map((m) => m.rank)),
+      },
+    ]
+  })
+  const menuItems = [...items.filter((item) => !hidden.has(item.id)), ...familyItems]
+
   const lineData = lines.docs.map((line) => ({
     id: line.id,
     title: line.title,
@@ -120,7 +143,7 @@ export async function getMenu(): Promise<MenuTab[]> {
           isDirection: Boolean(isDirection),
           pins: (pinnedManufacturers ?? []).map((m) => relId(m) ?? 0),
         })),
-      items,
+      menuItems,
       lineData,
       vendorTitle,
       catalogHref,

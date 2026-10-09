@@ -1,6 +1,8 @@
 import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
 import { compareInSection, priorityRank } from '../domain/priority.mjs'
+import { familyLines } from './families'
+import { withFamilies } from './familyCards'
 import { formatKzt } from './format'
 import { cms } from './payload'
 import { cardPictures } from './pictures'
@@ -167,8 +169,13 @@ export async function getCatalog(): Promise<{
       lineOrder: product.lineOrder ?? null,
     }
   })
+  const hidden = new Set(products.docs.filter((p) => p.pageView === 'none').map((p) => p.id))
+  const listed = withFamilies(items, hidden, await familyLines(), (ids) => {
+    const list = ids.flatMap((id) => offersByProduct.get(id) ?? [])
+    return { priceFrom: cheapest(list, context), offers: list.length }
+  })
   // Без выбранного раздела: топы продаж первыми, дальше по названию.
-  items.sort(compareInSection())
+  listed.sort(compareInSection())
 
   const facets = sections.docs.map((section) => ({
     slug: section.slug,
@@ -185,5 +192,5 @@ export async function getCatalog(): Promise<{
       ? [{ id: String(line.id), title: line.title, vendor, order: line.order ?? 100 }]
       : []
   })
-  return { items, facets, lines }
+  return { items: listed, facets, lines }
 }

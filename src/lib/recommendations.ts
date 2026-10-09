@@ -19,7 +19,8 @@ async function loadRecData(payload: Payload): Promise<RecData> {
   const [products, sections, manufacturers] = await Promise.all([
     payload.find({
       collection: 'products',
-      where: published,
+      // Товары без своей страницы в подборки не попадают: их адрес ведёт на подбор или семейство.
+      where: { and: [published, { pageView: { not_equals: 'none' } }] },
       limit: 5000,
       pagination: false,
       depth: 0,

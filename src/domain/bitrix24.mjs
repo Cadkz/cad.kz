@@ -11,11 +11,16 @@ function kzt(value) {
 /** Состав заявки текстом для комментария лида: менеджер видит всё, не открывая CMS. */
 function describe(lead) {
   const rows = lead.items.map((item) => {
-    const options = [item.configuration, item.license].filter(Boolean).join(', ')
+    const options = [item.configuration, item.license].filter((v) => v && v !== '—').join(', ')
     const what = options ? `${item.title}, ${options}` : item.title
+    if (!item.unitKzt) return `${what}: ${item.quantity} шт., цена по запросу`
     return `${what}: ${item.quantity} шт. × ${kzt(item.unitKzt)} = ${kzt(item.totalKzt)}`
   })
-  const parts = [...rows, `Итого с НДС: ${kzt(lead.totalKzt)}`]
+  const head = lead.kindLabel
+    ? [`${lead.kindLabel}. Страница: ${lead.pageTitle}. Клиент просит перезвонить.`, '']
+    : []
+  const total = BigInt(lead.totalKzt || '0') > 0n ? [`Итого с НДС: ${kzt(lead.totalKzt)}`] : []
+  const parts = [...head, ...rows, ...total]
   if (lead.buyer.type === 'company') parts.push(`БИН: ${lead.buyer.bin}`)
   if (lead.comment) parts.push(`Комментарий покупателя: ${lead.comment}`)
   if (lead.messages.length) {
@@ -36,12 +41,14 @@ export function toBitrix24Lead(lead) {
     method: 'crm.lead.add',
     params: {
       fields: {
-        TITLE: `Заявка с сайта ${lead.orderNumber}`,
+        TITLE: lead.kindLabel
+          ? `${lead.kindLabel}: ${lead.pageTitle} (${lead.orderNumber})`
+          : `Заявка с сайта ${lead.orderNumber}`,
         NAME: lead.contact.name,
         COMPANY_TITLE: lead.buyer.type === 'company' ? lead.buyer.companyName : undefined,
         PHONE: lead.contact.phone ? [{ VALUE: lead.contact.phone, VALUE_TYPE: 'WORK' }] : undefined,
         EMAIL: lead.contact.email ? [{ VALUE: lead.contact.email, VALUE_TYPE: 'WORK' }] : undefined,
-        OPPORTUNITY: lead.totalKzt,
+        OPPORTUNITY: BigInt(lead.totalKzt || '0') > 0n ? lead.totalKzt : undefined,
         CURRENCY_ID: 'KZT',
         COMMENTS: describe(lead),
         SOURCE_ID: 'WEB',

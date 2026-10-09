@@ -114,13 +114,14 @@ export const crmDeliveries: CollectionConfig = {
   admin: {
     group: 'Система',
     useAsTitle: 'idempotencyKey',
-    defaultColumns: ['order', 'state', 'attempts', 'updatedAt'],
+    defaultColumns: ['order', 'request', 'state', 'attempts', 'updatedAt'],
   },
   defaultSort: '-createdAt',
   access: { read: isAdmin, create: nobody, update: nobody, delete: nobody },
   fields: [
     { name: 'idempotencyKey', label: 'Ключ повтора', type: 'text', unique: true, required: true },
     relationField('order', 'Заказ', 'orders'),
+    relationField('request', 'Заявка без корзины', 'site-requests'),
     {
       name: 'state',
       label: 'Состояние',
@@ -143,5 +144,86 @@ export const crmDeliveries: CollectionConfig = {
     textField('lastError', 'Последняя ошибка'),
     textField('externalId', 'Номер в CRM'),
     { name: 'snapshot', label: 'Данные для CRM', type: 'json', required: true },
+  ],
+}
+
+/**
+ * Заявки без корзины: запрос цены, продление, помощь с выбором, КП по семейству. Клиент выбрал
+ * «Перезвоните мне». Создаёт только сервер (/api/request), изменить и удалить нельзя.
+ */
+export const siteRequests: CollectionConfig = {
+  slug: 'site-requests',
+  labels: { singular: 'Заявка без корзины', plural: 'Заявки без корзины' },
+  admin: {
+    group: 'Продажи',
+    useAsTitle: 'number',
+    defaultColumns: ['number', 'createdAt', 'kind', 'productTitle', 'contactName', 'mode'],
+  },
+  defaultSort: '-createdAt',
+  access: { read: isAdmin, create: nobody, update: nobody, delete: nobody },
+  hooks: forbidChange,
+  fields: [
+    { name: 'number', label: 'Номер', type: 'text', unique: true, required: true, index: true },
+    {
+      name: 'kind',
+      label: 'Что нужно',
+      type: 'select',
+      required: true,
+      options: [
+        { label: 'Запрос цены', value: 'price' },
+        { label: 'Продление', value: 'renew' },
+        { label: 'Помощь с выбором', value: 'help' },
+        { label: 'Коммерческое предложение', value: 'quote' },
+      ],
+    },
+    {
+      name: 'mode',
+      label: 'Режим сайта',
+      type: 'select',
+      required: true,
+      options: [
+        { label: 'Демо: менеджерам не передана', value: 'demo' },
+        { label: 'Рабочий', value: 'live' },
+      ],
+    },
+    textField('productTitle', 'Страница', true),
+    textField('page', 'Адрес страницы'),
+    textField('contactName', 'Имя', true),
+    textField('contactPhone', 'Телефон', true),
+    { name: 'comment', label: 'Комментарий', type: 'textarea' },
+    {
+      name: 'items',
+      label: 'Выбор клиента (как сохранён)',
+      type: 'json',
+      required: true,
+      admin: readOnly,
+    },
+    textField('totalKzt', 'Итого с НДС, ₸ (если цена известна)'),
+    {
+      name: 'consent',
+      label: 'Согласие на обработку данных',
+      type: 'group',
+      fields: [
+        { name: 'accepted', label: 'Дано', type: 'checkbox' },
+        { name: 'at', label: 'Когда', type: 'date' },
+        textField('version', 'Версия текста'),
+        { name: 'text', label: 'Текст, который видел клиент', type: 'textarea' },
+      ],
+    },
+    {
+      type: 'collapsible',
+      label: 'Служебные данные',
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: 'idempotencyKey',
+          label: 'Ключ повтора',
+          type: 'text',
+          unique: true,
+          required: true,
+        },
+        textField('clientHash', 'Отметка адреса (для лимита частоты)'),
+      ],
+    },
   ],
 }

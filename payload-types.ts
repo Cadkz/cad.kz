@@ -80,6 +80,7 @@ export interface Config {
     'exchange-rates': ExchangeRate;
     users: User;
     orders: Order;
+    'site-requests': SiteRequest;
     conversations: Conversation;
     'crm-deliveries': CrmDelivery;
     'import-runs': ImportRun;
@@ -104,6 +105,7 @@ export interface Config {
     'exchange-rates': ExchangeRatesSelect<false> | ExchangeRatesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
+    'site-requests': SiteRequestsSelect<false> | SiteRequestsSelect<true>;
     conversations: ConversationsSelect<false> | ConversationsSelect<true>;
     'crm-deliveries': CrmDeliveriesSelect<false> | CrmDeliveriesSelect<true>;
     'import-runs': ImportRunsSelect<false> | ImportRunsSelect<true>;
@@ -168,6 +170,14 @@ export interface Product {
    * Пусто — как у производителя. Флагман — главный товар линейки (AutoCAD, SCAD Office, GEO5): первым в меню и каталоге. Топ продаж — сразу после флагманов.
    */
   priority?: ('flagship' | 'top' | 'normal' | 'low') | null;
+  /**
+   * Без своей страницы: прежний адрес ведёт на товар с подбором, где этот товар — вариант, или на страницу семейства (линейки с галочкой «Своя страница семейства»). В каталоге и меню такой товар не показывается отдельно.
+   */
+  pageView: 'standard' | 'picker' | 'none';
+  /**
+   * Например, «Продлить подписку» или «Обновить версию». Пусто — кнопки нет. Продление — заявка менеджеру, без корзины.
+   */
+  renewLabel?: string | null;
   kind: 'software' | 'hardware' | 'course' | 'service';
   summary?: string | null;
   /**
@@ -196,6 +206,55 @@ export interface Product {
    */
   extraSections?: (number | Section)[] | null;
   sections?: (number | Section)[] | null;
+  /**
+   * Например, SCAD Office: переключатель «Редакция», шаги «Основа», «Что будете проверять», «Дополнительные функции», «Готовые комплекты». Цена считается сервером.
+   */
+  picker?: {
+    /**
+     * Общий выбор для всех шагов: редакция (S392 / SPro) или срок (1 год / 3 года). У предложения значение пишется в поле «Значения переключателей» точно так же.
+     */
+    switches?:
+      | {
+          title: string;
+          options?:
+            | {
+                value: string;
+                note?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    steps?:
+      | {
+          title: string;
+          mode: 'base' | 'one' | 'many' | 'bundle';
+          hint?: string | null;
+          collapsed?: boolean | null;
+          items?:
+            | {
+                product: number | Product;
+                /**
+                 * Пусто — предложение выбирается по переключателям.
+                 */
+                offer?: (number | null) | Offer;
+                /**
+                 * Пусто — название товара.
+                 */
+                label?: string | null;
+                note?: string | null;
+                preselect?: boolean | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * 3–4 коротких пункта: показываются в шапке страницы товара.
+   */
   tasks?:
     | {
         title: string;
@@ -296,6 +355,19 @@ export interface ProductLine {
    * Одна строка под названием линейки. Можно не заполнять.
    */
   summary?: string | null;
+  /**
+   * Редкие товары линейки собираются на одной странице списком с галочками и кнопкой «Запросить КП». Товары с видом «Без своей страницы» ведут сюда.
+   */
+  familyPage?: boolean | null;
+  /**
+   * Латиницей через дефис: /families/<адрес>.
+   */
+  slug?: string | null;
+  intro?: string | null;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
   legacyKey?: string | null;
   legacyUrl?: string | null;
   updatedAt: string;
@@ -361,6 +433,10 @@ export interface Offer {
   currency: 'KZT' | 'USD' | 'EUR' | 'RUB';
   includesVat?: boolean | null;
   sourceVat: string;
+  /**
+   * Для подбора: редакция или срок этого предложения, например S392 или «1 год», так же, как в переключателе у товара. Пусто — подходит при любом выборе.
+   */
+  variants?: string[] | null;
   /**
    * Заполняется само при загрузке прайса: по этим названиям строка прайса в следующий раз сразу найдёт это предложение. Неверное название можно удалить.
    */
@@ -560,6 +636,41 @@ export interface Order {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-requests".
+ */
+export interface SiteRequest {
+  id: number;
+  number: string;
+  kind: 'price' | 'renew' | 'help' | 'quote';
+  mode: 'demo' | 'live';
+  productTitle: string;
+  page?: string | null;
+  contactName: string;
+  contactPhone: string;
+  comment?: string | null;
+  items:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  totalKzt?: string | null;
+  consent?: {
+    accepted?: boolean | null;
+    at?: string | null;
+    version?: string | null;
+    text?: string | null;
+  };
+  idempotencyKey: string;
+  clientHash?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "conversations".
  */
 export interface Conversation {
@@ -586,6 +697,7 @@ export interface CrmDelivery {
   id: number;
   idempotencyKey: string;
   order?: (number | null) | Order;
+  request?: (number | null) | SiteRequest;
   state: 'pending' | 'processing' | 'not-sent-demo' | 'sent' | 'failed' | 'dead';
   attempts?: number | null;
   nextAttemptAt?: string | null;
@@ -714,6 +826,10 @@ export interface PayloadLockedDocument {
         value: number | Order;
       } | null)
     | ({
+        relationTo: 'site-requests';
+        value: number | SiteRequest;
+      } | null)
+    | ({
         relationTo: 'conversations';
         value: number | Conversation;
       } | null)
@@ -780,6 +896,8 @@ export interface ProductsSelect<T extends boolean = true> {
   status?: T;
   slug?: T;
   priority?: T;
+  pageView?: T;
+  renewLabel?: T;
   kind?: T;
   summary?: T;
   description?: T;
@@ -790,6 +908,42 @@ export interface ProductsSelect<T extends boolean = true> {
   mainSection?: T;
   extraSections?: T;
   sections?: T;
+  picker?:
+    | T
+    | {
+        switches?:
+          | T
+          | {
+              title?: T;
+              options?:
+                | T
+                | {
+                    value?: T;
+                    note?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        steps?:
+          | T
+          | {
+              title?: T;
+              mode?: T;
+              hint?: T;
+              collapsed?: T;
+              items?:
+                | T
+                | {
+                    product?: T;
+                    offer?: T;
+                    label?: T;
+                    note?: T;
+                    preselect?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
   tasks?:
     | T
     | {
@@ -841,6 +995,7 @@ export interface OffersSelect<T extends boolean = true> {
   currency?: T;
   includesVat?: T;
   sourceVat?: T;
+  variants?: T;
   priceNames?: T;
   legacyKey?: T;
   legacyUrl?: T;
@@ -910,6 +1065,15 @@ export interface ProductLinesSelect<T extends boolean = true> {
   manufacturer?: T;
   order?: T;
   summary?: T;
+  familyPage?: T;
+  slug?: T;
+  intro?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   legacyKey?: T;
   legacyUrl?: T;
   updatedAt?: T;
@@ -1063,6 +1227,34 @@ export interface OrdersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-requests_select".
+ */
+export interface SiteRequestsSelect<T extends boolean = true> {
+  number?: T;
+  kind?: T;
+  mode?: T;
+  productTitle?: T;
+  page?: T;
+  contactName?: T;
+  contactPhone?: T;
+  comment?: T;
+  items?: T;
+  totalKzt?: T;
+  consent?:
+    | T
+    | {
+        accepted?: T;
+        at?: T;
+        version?: T;
+        text?: T;
+      };
+  idempotencyKey?: T;
+  clientHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "conversations_select".
  */
 export interface ConversationsSelect<T extends boolean = true> {
@@ -1079,6 +1271,7 @@ export interface ConversationsSelect<T extends boolean = true> {
 export interface CrmDeliveriesSelect<T extends boolean = true> {
   idempotencyKey?: T;
   order?: T;
+  request?: T;
   state?: T;
   attempts?: T;
   nextAttemptAt?: T;

@@ -1,6 +1,7 @@
 import type { CollectionConfig, Field } from 'payload'
 import { contentCollection, relationField, seoField, slugField, textField } from '../fields'
 import { productSections } from '../hooks/productSections'
+import { pageViewFields, pickerField } from './picker'
 
 /** Иконки разделов: ключ из этого списка сопоставляется с иконкой lucide в компоненте. */
 export const sectionIcons = [
@@ -100,6 +101,49 @@ export const productLines: CollectionConfig = {
         type: 'textarea',
         admin: { description: 'Одна строка под названием линейки. Можно не заполнять.' },
       },
+      {
+        type: 'collapsible',
+        label: 'Страница семейства',
+        fields: [
+          {
+            name: 'familyPage',
+            label: 'Своя страница семейства',
+            type: 'checkbox',
+            admin: {
+              description:
+                'Редкие товары линейки собираются на одной странице списком с галочками и кнопкой ' +
+                '«Запросить КП». Товары с видом «Без своей страницы» ведут сюда.',
+            },
+          },
+          {
+            name: 'slug',
+            label: 'Адрес страницы',
+            type: 'text',
+            unique: true,
+            index: true,
+            admin: {
+              condition: (data) => Boolean(data?.familyPage),
+              description: 'Латиницей через дефис: /families/<адрес>.',
+            },
+          },
+          {
+            name: 'intro',
+            label: 'Текст вверху страницы',
+            type: 'textarea',
+            admin: { condition: (data) => Boolean(data?.familyPage) },
+          },
+          {
+            name: 'seo',
+            label: 'Для поисковиков',
+            type: 'group',
+            admin: { condition: (data) => Boolean(data?.familyPage) },
+            fields: [
+              textField('title', 'Заголовок вкладки (title)'),
+              { name: 'description', label: 'Описание в поиске (description)', type: 'textarea' },
+            ],
+          },
+        ],
+      },
     ],
   }),
   admin: {
@@ -186,6 +230,7 @@ const productCollection = contentCollection({
   fields: [
     slugField(),
     priorityField(true),
+    ...pageViewFields,
     {
       name: 'kind',
       label: 'Тип',
@@ -280,7 +325,15 @@ const productCollection = contentCollection({
         },
       ],
     },
-    { name: 'tasks', label: 'Задачи', type: 'array', fields: [textField('title', 'Задача', true)] },
+    pickerField,
+    {
+      name: 'tasks',
+      label: 'Для каких задач',
+      type: 'array',
+      labels: { singular: 'Задача', plural: 'Задачи' },
+      admin: { description: '3–4 коротких пункта: показываются в шапке страницы товара.' },
+      fields: [textField('title', 'Задача', true)],
+    },
     relationField('requiresProducts', 'Требуется базовое ПО', 'products', true),
     {
       type: 'collapsible',
@@ -366,6 +419,17 @@ export const offers: CollectionConfig = contentCollection({
     },
     { name: 'includesVat', label: 'Исходный НДС включён', type: 'checkbox' },
     textField('sourceVat', 'Исходная ставка НДС, %', true),
+    {
+      name: 'variants',
+      label: 'Значения переключателей',
+      type: 'text',
+      hasMany: true,
+      admin: {
+        description:
+          'Для подбора: редакция или срок этого предложения, например S392 или «1 год», так же, ' +
+          'как в переключателе у товара. Пусто — подходит при любом выборе.',
+      },
+    },
     {
       name: 'priceNames',
       label: 'Названия в прайсах производителя',

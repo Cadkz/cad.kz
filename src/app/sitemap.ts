@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { familyLines } from '@/lib/families'
 import { newsHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
 import { productPath } from '@/lib/productPath'
@@ -19,7 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, publications, pages] = await Promise.all([
     payload.find({
       collection: 'products',
-      where: published,
+      where: { and: [published, { pageView: { not_equals: 'none' } }] },
       limit: 5000,
       depth: 0,
       pagination: false,
@@ -59,6 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(pageSlugs.has('about') ? [entry('/about', undefined, 0.4)] : []),
     entry('/contacts', undefined, 0.4),
     ...products.docs.map((product) => entry(productPath(product), product.updatedAt, 0.8)),
+    ...[...(await familyLines()).values()].map((family) => entry(family.href, undefined, 0.7)),
     ...publications.docs.map((doc) =>
       entry(newsHref(doc.slug), doc.updatedAt, doc.kind === 'article' ? 0.6 : 0.4),
     ),

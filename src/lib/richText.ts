@@ -95,3 +95,30 @@ export function parseBody(body: string | null | undefined): Block[] {
 export function imageSources(blocks: Block[]) {
   return blocks.flatMap((block) => (block.type === 'image' ? [block.src] : []))
 }
+
+/** Длина блока в знаках: для решения, сколько текста показать сразу. */
+function blockLength(block: Block) {
+  if (block.type === 'list') return block.items.join(' ').length
+  if (block.type === 'image') return 0
+  return block.text.length
+}
+
+/**
+ * Начало текста для показа сразу и остаток под «Читать полностью». Сразу — не больше двух блоков
+ * и примерно budget знаков (первый абзац показывается всегда). Длинное описание из старого сайта
+ * остаётся на странице для поисковиков, но не заставляет листать.
+ */
+export function splitPreview(blocks: Block[], budget = 420): { lead: Block[]; rest: Block[] } {
+  const lead: Block[] = []
+  let used = 0
+  for (const block of blocks) {
+    const length = blockLength(block)
+    if (lead.length && (lead.length >= 2 || used + length > budget)) break
+    lead.push(block)
+    used += length
+  }
+  // Начало не обрывается на подводке к списку («Доп. функции:»): она уходит в свёрнутую часть.
+  const last = lead.at(-1)
+  if (lead.length > 1 && last?.type === 'paragraph' && last.text.trim().endsWith(':')) lead.pop()
+  return { lead, rest: blocks.slice(lead.length) }
+}

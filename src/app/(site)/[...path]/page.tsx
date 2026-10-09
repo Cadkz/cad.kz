@@ -5,9 +5,14 @@ import { cache } from 'react'
 import { ProductView } from '@/components/ProductView/ProductView'
 import { LEGACY_PATH_HEADER } from '@/domain/legacyRoutes.mjs'
 import { resolveLegacy } from '@/lib/legacy'
-import { getProduct, productMetadata } from '@/lib/product'
+import { noPageTarget } from '@/lib/pageTarget'
+import { cms } from '@/lib/payload'
+import { getProduct, pickParam, productMetadata } from '@/lib/product'
 
-type Props = { params: Promise<{ path: string[] }> }
+type Props = {
+  params: Promise<{ path: string[] }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
 
 /** Адрес запроса как есть, со слешем в конце, если он был (его передаёт src/proxy.ts). */
 async function requestPath(params: Props['params']) {
@@ -33,9 +38,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * Старые адреса cad.kz. Товар, который был на старом сайте, открывается по прежнему адресу;
  * остальные старые адреса постоянно перенаправляются (308) на ближайшую страницу нового сайта.
  */
-export default async function LegacyPage({ params }: Props) {
+export default async function LegacyPage({ params, searchParams }: Props) {
   const resolution = await resolve(await requestPath(params))
   if (!resolution) notFound()
   if ('redirect' in resolution) permanentRedirect(resolution.redirect)
-  return <ProductView product={resolution.product} />
+  const { product } = resolution
+  if (product.pageView === 'none') permanentRedirect(await noPageTarget(await cms(), product))
+  return <ProductView product={product} pick={pickParam((await searchParams).pick)} />
 }

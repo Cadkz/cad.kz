@@ -8,6 +8,13 @@
   gap: var(--space-8) var(--grid-gap);
 }
 
+.layout[data-aside-last="true"] {
+  grid-template-areas:
+    "header header header header header header header header header header header header"
+    "body body body body body body body body body body body body"
+    "aside aside aside aside aside aside aside aside aside aside aside aside";
+}
+
 .header {
   grid-area: header;
   min-width: 0;
@@ -27,7 +34,8 @@
 }
 
 @media (min-width: 960px) {
-  .layout {
+  .layout,
+  .layout[data-aside-last="true"] {
     grid-template-areas:
       "header header header header header header header header aside aside aside aside"
       "body body body body body body body body aside aside aside aside";

@@ -6,7 +6,7 @@ import { ru } from '@payloadcms/translations/languages/ru'
 import { buildConfig } from 'payload'
 import { manufacturers, offers, productLines, products, sections } from './cms/collections/catalog'
 import { media, pages, publications, topics } from './cms/collections/content'
-import { crmDeliveries, orders } from './cms/collections/orders'
+import { crmDeliveries, orders, siteRequests } from './cms/collections/orders'
 import { exchangeRates, pricingSettings } from './cms/collections/pricing'
 import { sectionRules } from './cms/collections/sectionRules'
 import { conversations, importRuns, redirects } from './cms/collections/system'
@@ -80,6 +80,7 @@ export default buildConfig({
     exchangeRates,
     users,
     orders,
+    siteRequests,
     conversations,
     crmDeliveries,
     importRuns,
