@@ -10,6 +10,9 @@ import {
   textField,
 } from '../fields'
 
+/** Длинная статья с таблицами — до ~70 000 знаков; запас на редкие большие тексты. */
+const BODY_MAX_LENGTH = 300_000
+
 export const publications = contentCollection({
   slug: 'publications',
   singular: 'Публикация',
@@ -33,6 +36,8 @@ export const publications = contentCollection({
       name: 'body',
       label: 'Текст',
       type: 'textarea',
+      // Payload по умолчанию режет текст на 40 000 знаков, а длинные статьи старого сайта больше.
+      maxLength: BODY_MAX_LENGTH,
       admin: {
         description:
           'Пустая строка — новый абзац, «## » — подзаголовок, «- » — пункт списка, «> » — выноска, ' +
@@ -57,6 +62,8 @@ export const pages = contentCollection({
       name: 'body',
       label: 'Текст',
       type: 'textarea',
+      // Payload по умолчанию режет текст на 40 000 знаков, а длинные статьи старого сайта больше.
+      maxLength: BODY_MAX_LENGTH,
       admin: {
         description:
           'Пустая строка — новый абзац, «## » — подзаголовок, «- » — пункт списка, «> » — выноска, ' +
