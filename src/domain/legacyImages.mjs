@@ -1,3 +1,6 @@
+import { OLD_SITE } from './bitrixImport.mjs'
+import { FILE_TYPE_BY_EXT } from './mediaTypes.mjs'
+
 // Картинки в текстах, перенесённых со старого cad.kz: сравнение текста без картинок и возврат
 // картинок, которые шаг «Картинки в текстах» убрал по ошибке (сбой сохранения, таймаут), а не
 // потому что файла на старом сайте нет.
@@ -64,4 +67,47 @@ export function restoredBody(current, fresh, mediaUrl) {
 export function isPermanentImageFailure(error) {
   const message = error instanceof Error ? error.message : String(error)
   return message === 'ответ 404' || message === 'ответ 410' || message.startsWith('формат')
+}
+
+/** Ссылка старого Битрикса на переход «/bitrix/redirect.php?…goto=адрес» → сам адрес. */
+export function withoutRedirects(body) {
+  return String(body ?? '').replace(
+    /\]\(((?:https?:\/\/(?:www\.)?cad\.kz)?\/bitrix\/redirect\.php\?[^)\s]*)\)/g,
+    (whole, href) => {
+      const goto = /[?&]goto=([^&]+)/.exec(href)?.[1]
+      if (!goto) return whole
+      try {
+        return `](${decodeURIComponent(goto).replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/\s/g, '%20')})`
+      } catch {
+        return whole
+      }
+    },
+  )
+}
+
+/**
+ * Ссылки на файлы старого сайта (PDF, полная картинка): «[текст](/upload/…pdf)» или полным
+ * адресом cad.kz. После переключения домена они перестанут открываться, поэтому файлы
+ * переносятся в «Медиа». url — полный адрес для скачивания.
+ * @returns {{ whole: string, label: string, url: string }[]}
+ */
+export function oldFileLinks(body, base = OLD_SITE) {
+  const found = []
+  for (const m of String(body ?? '').matchAll(/(?<!!)\[([^\]]*)\]\(([^)\s]+)\)/g)) {
+    const [whole, label = '', href = ''] = m
+    let url
+    try {
+      url = new URL(href, `${base}/`)
+    } catch {
+      continue
+    }
+    const own = url.hostname.replace(/^www\./, '') === new URL(base).hostname
+    if (!own || !/^\/(upload|files)\//.test(url.pathname)) continue
+    const ext = /\.[a-z0-9]+$/i.exec(url.pathname)?.[0]?.toLowerCase() ?? ''
+    if (!FILE_TYPE_BY_EXT[ext]) continue
+    url.protocol = new URL(base).protocol
+    url.hostname = new URL(base).hostname
+    found.push({ whole, label, url: url.toString() })
+  }
+  return found
 }

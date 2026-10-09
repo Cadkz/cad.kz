@@ -6,7 +6,9 @@ import {
   imageUrls,
   isPermanentImageFailure,
   legacyFileKey,
+  oldFileLinks,
   restoredBody,
+  withoutRedirects,
 } from '@/domain/legacyImages.mjs'
 import {
   INFO_PAGES,
@@ -16,7 +18,7 @@ import {
   publicationTarget,
 } from '@/domain/legacyPages.mjs'
 import legacyPublications from '@/domain/legacyPublications.json'
-import { MEDIA_MIME_TYPES, MEDIA_TYPE_BY_EXT } from '@/domain/mediaTypes.mjs'
+import { FILE_TYPE_BY_EXT, UPLOAD_MIME_TYPES } from '@/domain/mediaTypes.mjs'
 import { productPath } from './productPath'
 
 /**
@@ -321,9 +323,21 @@ const OLD_IMAGE = () =>
     'g',
   )
 
-const pendingImages = (): Where => ({ body: { contains: `](${oldSite()}/` } })
+/**
+ * Тексты, где ещё есть что переносить: картинки и файлы старого сайта, переходы через
+ * /bitrix/redirect.php.
+ */
+const pendingImages = (): Where => ({
+  or: [
+    `](${oldSite()}/`,
+    '](https://www.cad.kz/',
+    '](/upload/',
+    '](/files/',
+    '](/bitrix/redirect.php',
+  ].map((part) => ({ body: { contains: part } })),
+})
 
-/** Картинка со старого сайта → запись «Медиа» (одна на файл, повтор берёт готовую). */
+/** Картинка или PDF со старого сайта → запись «Медиа» (одна на файл, повтор берёт готовую). */
 async function mediaFor(payload: Payload, url: string, alt: string) {
   const pathname = decodeURIComponent(new URL(url).pathname)
   const legacyKey = `legacy:file:${pathname}`
@@ -336,10 +350,10 @@ async function mediaFor(payload: Payload, url: string, alt: string) {
   if (docs[0]?.url) return { media: docs[0], reused: true }
   const file = await fetchFile(url, { timeoutMs: 15_000 })
   const name = path.posix.basename(pathname)
-  const byExt = MEDIA_TYPE_BY_EXT[path.posix.extname(name).toLowerCase()]
+  const byExt = FILE_TYPE_BY_EXT[path.posix.extname(name).toLowerCase()]
   const mimetype =
     file.mimetype && file.mimetype !== 'application/octet-stream' ? file.mimetype : byExt
-  if (!mimetype || !MEDIA_MIME_TYPES.includes(mimetype))
+  if (!mimetype || !UPLOAD_MIME_TYPES.includes(mimetype))
     throw new Error(`формат ${mimetype ?? 'неизвестен'} не принимается в «Медиа»`)
   try {
     const media = await payload.create({
@@ -369,7 +383,7 @@ async function replaceImages(
   reply: ImagesReply,
   setCover: (id: number) => void,
 ) {
-  let body = doc.body ?? ''
+  let body = withoutRedirects(doc.body ?? '')
   for (const match of [...body.matchAll(OLD_IMAGE())]) {
     const [whole, alt = '', url = ''] = match
     try {
@@ -388,6 +402,24 @@ async function replaceImages(
         reason: permanent
           ? failureReason(error)
           : `${failureReason(error)} — картинка оставлена, запустите шаг ещё раз`,
+      })
+    }
+  }
+  for (const link of oldFileLinks(body, oldSite())) {
+    try {
+      const { media, reused } = await mediaFor(payload, link.url, link.label || doc.title)
+      body = body.replace(link.whole, `[${link.label}](${media.url})`)
+      if (reused) reply.reused++
+      else reply.downloaded++
+    } catch (error) {
+      const permanent = isPermanentImageFailure(error)
+      // Файла нет и на старом сайте — оставляем текст ссылки без неё.
+      if (permanent) body = body.replace(link.whole, link.label)
+      reply.failed.push({
+        path: `${doc.legacyUrl ?? doc.title}: ${decodeURIComponent(new URL(link.url).pathname)}`,
+        reason: permanent
+          ? failureReason(error)
+          : `${failureReason(error)} — ссылка оставлена, запустите шаг ещё раз`,
       })
     }
   }

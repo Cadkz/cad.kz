@@ -10,14 +10,21 @@ type Props = {
   pictures?: Map<string, Picture>
 }
 
-/** Строка со ссылками: свои адреса — через Link, внешние открываются в новой вкладке. */
+/** Ссылка на файл (PDF, картинка в «Медиа»), а не на страницу сайта. */
+const isFile = (href: string) =>
+  href.startsWith('/api/media/') || /\.(pdf|jpe?g|png|gif|webp)$/i.test(href)
+
+/**
+ * Строка со ссылками: свои страницы — через Link, внешние адреса и файлы открываются в новой
+ * вкладке.
+ */
 function Text({ text }: { text: string }) {
   return (
     <>
       {parseInline(text).map((part, i) => {
         const key = `${i}-${part.text}`
         if (!part.href) return <span key={key}>{part.text}</span>
-        return part.href.startsWith('/') ? (
+        return part.href.startsWith('/') && !isFile(part.href) ? (
           <Link key={key} href={part.href} className={styles.link}>
             {part.text}
           </Link>
