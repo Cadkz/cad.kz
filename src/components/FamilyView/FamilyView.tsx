@@ -17,7 +17,7 @@ import styles from './FamilyView.module.css'
 
 /**
  * Страница семейства — шаблон «Товар»: слева список программ с галочками и их описания
- * (свёрнуты), справа итог с «Запросить КП». Адреса старых страниц ведут к строке программы.
+ * (свёрнуты), справа итог с «Получить КП». Адреса старых страниц ведут к строке программы.
  */
 export async function FamilyView({ family, pick }: { family: FamilyPage; pick: number | null }) {
   const contacts = await getContacts()

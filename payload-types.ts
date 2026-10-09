@@ -356,7 +356,7 @@ export interface ProductLine {
    */
   summary?: string | null;
   /**
-   * Редкие товары линейки собираются на одной странице списком с галочками и кнопкой «Запросить КП». Товары с видом «Без своей страницы» ведут сюда.
+   * Редкие товары линейки собираются на одной странице списком с галочками и кнопкой «Получить КП». Товары с видом «Без своей страницы» ведут сюда.
    */
   familyPage?: boolean | null;
   /**
@@ -608,7 +608,7 @@ export interface Order {
   buyerType: 'individual' | 'company';
   contactName: string;
   contactPhone: string;
-  contactEmail: string;
+  contactEmail?: string | null;
   companyName?: string | null;
   bin?: string | null;
   comment?: string | null;

@@ -12,7 +12,7 @@ export type PickerMeta = {
   productTitle: string
   /** Подпись кнопки продления; пусто — кнопки нет. */
   renewLabel: string | null
-  /** Страница семейства: главное действие — «Запросить КП», а не «Купить». */
+  /** Страница семейства: корзины нет, только «Получить КП». */
   familySlug?: string | null
   contacts: Pick<Contacts, 'phones' | 'whatsappHref' | 'hours'>
 }

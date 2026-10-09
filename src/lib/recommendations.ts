@@ -109,12 +109,3 @@ export async function getRecommendations(payload: Payload, productId: number) {
   const similar = similarFor(target, items, { exclude: cross })
   return { cross: toCards(cross, cards), similar: toCards(similar, cards) }
 }
-
-/** «С этим покупают» для корзины: по всем её товарам сразу, без самих товаров корзины. */
-export async function getCartSuggestions(payload: Payload, productSlugs: string[], limit = 3) {
-  const { items, info, cards } = await loadRecData(payload)
-  const slugs = new Set(productSlugs)
-  const targets = items.filter((item) => slugs.has(cards.get(item.id)?.slug ?? ''))
-  if (!targets.length) return []
-  return toCards(crossFor(targets, items, info, { limit }), cards)
-}

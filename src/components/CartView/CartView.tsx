@@ -1,20 +1,40 @@
 'use client'
 
-import { Trash2 } from 'lucide-react'
+import { Copy, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
 import { formatKzt } from '@/lib/format'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { useCartQuote } from '@/lib/useCartQuote'
 import { Button, ButtonLink } from '../Button/Button'
 import { useCart } from '../CartProvider/CartProvider'
-import { CartSuggestions } from '../CartSuggestions/CartSuggestions'
 import { EmptyCart } from '../EmptyCart/EmptyCart'
 import styles from './CartView.module.css'
 
-/** Корзина: строки — это комплектации (ID предложения), итог каждый раз пересчитывает сервер. */
+/**
+ * Корзина: строки — это комплектации (ID предложения), итог каждый раз пересчитывает сервер.
+ * Без подборок: только проверка состава и отправка заявки. Состав можно скопировать текстом —
+ * для согласования внутри компании.
+ */
 export function CartView() {
   const { items, ready, remove, setQuantity } = useCart()
   const { quote, error, busy, retry } = useCartQuote(items, ready)
+  const [copied, setCopied] = useState(false)
+
+  async function copy() {
+    if (!quote) return
+    const rows = quote.lines.map(
+      (l) =>
+        `${l.title} — ${l.configuration}: ${l.quantity} × ${formatKzt(l.unitKzt)} = ${formatKzt(l.totalKzt)}`,
+    )
+    const text = [...rows, `Итого с НДС: ${formatKzt(quote.totalKzt)}`].join('\n')
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+    } catch {
+      setCopied(false)
+    }
+  }
 
   if (!ready) return <EmptyCart loading />
   if (!items.length) return <EmptyCart />
@@ -75,8 +95,12 @@ export function CartView() {
             </div>
           )}
           <ButtonLink href="/checkout" block>
-            Оформить заказ
+            Оформить заявку
           </ButtonLink>
+          <Button variant="text" size="sm" onClick={copy} disabled={!quote || busy}>
+            <Copy size={16} strokeWidth={1.75} aria-hidden="true" />
+            {copied ? 'Состав скопирован' : 'Скопировать состав'}
+          </Button>
           <p className={styles.note}>
             Демоверсия: заявка сохранится в учебной базе и менеджерам не передаётся. Разные
             комплектации одного товара хранятся отдельными строками.
@@ -86,7 +110,6 @@ export function CartView() {
           </ButtonLink>
         </aside>
       </div>
-      <CartSuggestions items={quote?.suggestions ?? []} />
     </>
   )
 }

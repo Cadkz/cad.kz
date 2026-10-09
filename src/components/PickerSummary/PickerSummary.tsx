@@ -1,29 +1,32 @@
 'use client'
 
 import { Minus, Plus } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { lineLabel } from '@/domain/picker.mjs'
-import { Button } from '../Button/Button'
+import { mainAction } from '@/lib/pickerAction'
+import { Button, ButtonLink } from '../Button/Button'
 import { useCart } from '../CartProvider/CartProvider'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
 import styles from './PickerSummary.module.css'
 
 /**
- * Итог подбора в боковой колонке: что выбрано, количество, сумма с сервера и три действия —
- * купить (или запросить цену, если цены нет), продлить, помочь с выбором.
+ * Итог подбора в боковой колонке: что выбрано, количество, сумма с сервера. Одно главное
+ * действие (`mainAction`), ниже — «В корзину» для закупки нескольких программ, продление и
+ * помощь с выбором ссылками.
  */
 export function PickerSummary() {
   const picker = usePickerContext()
   const { lines, total, quantity, setQuantity, openRequest, meta, view, state } = picker
   const { add, ready } = useCart()
-  const router = useRouter()
+  const [added, setAdded] = useState(false)
+  const action = mainAction(total)
 
-  function buy() {
+  function toCart() {
     for (const line of lines) if (line.offer) add({ offerId: line.offer.id, quantity })
-    router.push('/cart')
+    setAdded(true)
   }
 
-  const canBuy = total.state === 'done' && ready
+  const canBuy = !meta.familySlug && total.state === 'done' && ready
   return (
     <div className={styles.box} id="summary">
       <p className={styles.label}>Ваш выбор</p>
@@ -76,27 +79,29 @@ export function PickerSummary() {
                 : '—'}
         </output>
       </div>
-      {meta.familySlug ? (
-        <Button block disabled={!lines.length} onClick={() => openRequest('quote')}>
-          Запросить КП
-        </Button>
-      ) : total.state === 'request' ? (
-        <Button block onClick={() => openRequest('price')}>
-          Запросить цену
-        </Button>
-      ) : (
-        <Button block disabled={!canBuy} onClick={buy}>
-          Купить
-        </Button>
-      )}
-      {meta.renewLabel && (
-        <Button block variant="outline" onClick={() => openRequest('renew')}>
-          {meta.renewLabel}
-        </Button>
-      )}
-      <Button block variant="secondary" onClick={() => openRequest('help')}>
-        Помочь с выбором
+      <Button block disabled={!lines.length} onClick={() => openRequest(action.kind)}>
+        {action.label}
       </Button>
+      {canBuy &&
+        (added ? (
+          <ButtonLink href="/cart" block variant="outline">
+            Добавлено — перейти в корзину
+          </ButtonLink>
+        ) : (
+          <Button block variant="outline" onClick={toCart}>
+            В корзину
+          </Button>
+        ))}
+      <div className={styles.links}>
+        {meta.renewLabel && (
+          <Button variant="text" size="sm" onClick={() => openRequest('renew')}>
+            {meta.renewLabel}
+          </Button>
+        )}
+        <Button variant="text" size="sm" onClick={() => openRequest('help')}>
+          Помочь с выбором
+        </Button>
+      </div>
       <p className={styles.note}>
         Учебные цены демоверсии. Точную стоимость и сроки подтвердит менеджер.
       </p>

@@ -31,11 +31,13 @@ test('форма физлица принимается и приводится �
   assert.equal(result.value.buyer.bin, undefined)
 })
 
-test('у юрлица обязательны название и БИН, у физлица они отбрасываются', () => {
+test('у юрлица обязательно название, БИН — если введён; у физлица реквизиты отбрасываются', () => {
   const missing = validateCheckout(formRequest({ buyer: { ...company, companyName: '', bin: '' } }))
   assert.equal(missing.ok, false)
   assert.match(missing.errors.companyName, /название организации/)
-  assert.match(missing.errors.bin, /12 цифр/)
+  assert.equal(missing.errors.bin, undefined)
+  const short = validateCheckout(formRequest({ buyer: { ...company, bin: '123' } }))
+  assert.match(short.ok ? '' : short.errors.bin, /12 цифр/)
 
   const full = validateCheckout(formRequest({ buyer: company }))
   assert.equal(full.ok, true)
@@ -252,13 +254,13 @@ test('форма в браузере проверяется теми же пра
   assert.equal(ok.value.buyer.bin, BIN)
 
   const bad = validateForm({ buyer: { type: 'company', name: '' }, consent: false })
-  assert.deepEqual(Object.keys(bad.errors).sort(), [
-    'bin',
-    'companyName',
-    'consent',
-    'email',
-    'name',
-    'phone',
-  ])
+  assert.deepEqual(Object.keys(bad.errors).sort(), ['companyName', 'consent', 'name', 'phone'])
   assert.equal(validateForm(null).ok, false)
+})
+
+test('обязательны только имя и телефон: без почты и типа покупатель — частное лицо', () => {
+  const result = validateForm({ buyer: { name: 'Алия', phone: '+7 701 123 45 67' }, consent: true })
+  assert.equal(result.ok, true)
+  assert.equal(result.ok && result.value.buyer.type, 'individual')
+  assert.equal(result.ok && result.value.buyer.email, '')
 })

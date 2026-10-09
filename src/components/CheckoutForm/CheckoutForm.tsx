@@ -6,7 +6,6 @@ import { CONSENT_TEXT, validateForm } from '@/domain/order.mjs'
 import { Button } from '../Button/Button'
 import { CheckboxField } from '../CheckboxField/CheckboxField'
 import { TextAreaField, TextField } from '../Field/Field'
-import { RadioChips } from '../RadioChips/RadioChips'
 import styles from './CheckoutForm.module.css'
 
 export type FormValues = {
@@ -32,11 +31,6 @@ type Props = {
   onSubmit: (values: FormValues) => void
 }
 
-const buyerTypes = [
-  { value: 'company', label: 'Юридическое лицо' },
-  { value: 'individual', label: 'Физическое лицо' },
-]
-
 function readForm(form: HTMLFormElement, type: string) {
   const data = new FormData(form)
   const get = (name: string) => String(data.get(name) ?? '')
@@ -54,7 +48,10 @@ function readForm(form: HTMLFormElement, type: string) {
   }
 }
 
-/** Форма оформления. Подсказки по полям мгновенные, окончательная проверка всё равно на сервере. */
+/**
+ * Форма оформления. Обязательны только имя и телефон; реквизиты организации — по галочке
+ * «Нужен счёт на организацию». Подсказки мгновенные, окончательная проверка на сервере.
+ */
 export function CheckoutForm({
   sending,
   canSubmit,
@@ -65,7 +62,8 @@ export function CheckoutForm({
   onSubmit,
 }: Props) {
   const form = useRef<HTMLFormElement>(null)
-  const [type, setType] = useState('company')
+  const [company, setCompany] = useState(false)
+  const type = company ? 'company' : 'individual'
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => setErrors(serverErrors), [serverErrors])
@@ -108,7 +106,7 @@ export function CheckoutForm({
           <TextField
             name="email"
             type="email"
-            label="Электронная почта"
+            label="Электронная почта (необязательно)"
             autoComplete="email"
             placeholder="name@company.kz"
             error={errors.email}
@@ -117,16 +115,15 @@ export function CheckoutForm({
       </fieldset>
 
       <fieldset className={styles.group}>
-        <legend className={styles.legend}>Покупатель</legend>
-        <RadioChips
-          legend="Кто покупает"
-          name="type"
-          value={type}
-          options={buyerTypes}
-          onChange={setType}
+        <legend className="visually-hidden">Организация</legend>
+        <CheckboxField
+          name="needInvoice"
+          label="Нужен счёт на организацию"
+          checked={company}
+          onChange={(event) => setCompany(event.target.checked)}
           error={errors.type}
         />
-        {type === 'company' && (
+        {company && (
           <div className={styles.grid}>
             <TextField
               name="companyName"
@@ -136,9 +133,9 @@ export function CheckoutForm({
             />
             <TextField
               name="bin"
-              label="БИН"
+              label="БИН (необязательно)"
               inputMode="numeric"
-              hint="12 цифр. Для ИП укажите ИИН"
+              hint="12 цифр, для ИП — ИИН. Можно сообщить менеджеру позже"
               error={errors.bin}
             />
           </div>
@@ -147,8 +144,8 @@ export function CheckoutForm({
 
       <TextAreaField
         name="comment"
-        label="Комментарий"
-        hint="Например, нужен счёт на оплату или консультация по комплектации"
+        label="Комментарий (необязательно)"
+        hint="Например, сроки или вопросы по комплектации"
         error={errors.comment}
       />
       <CheckboxField name="consent" label={CONSENT_TEXT} error={errors.consent} />

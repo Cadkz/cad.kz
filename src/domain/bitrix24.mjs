@@ -21,7 +21,7 @@ function describe(lead) {
     : []
   const total = BigInt(lead.totalKzt || '0') > 0n ? [`Итого с НДС: ${kzt(lead.totalKzt)}`] : []
   const parts = [...head, ...rows, ...total]
-  if (lead.buyer.type === 'company') parts.push(`БИН: ${lead.buyer.bin}`)
+  if (lead.buyer.type === 'company' && lead.buyer.bin) parts.push(`БИН: ${lead.buyer.bin}`)
   if (lead.comment) parts.push(`Комментарий покупателя: ${lead.comment}`)
   if (lead.messages.length) {
     parts.push('', 'Диалог с консультантом на сайте:')

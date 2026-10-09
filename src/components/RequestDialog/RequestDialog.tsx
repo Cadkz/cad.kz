@@ -35,21 +35,22 @@ const titles: Record<RequestKind, string> = {
   price: 'Запросить цену',
   renew: 'Продление',
   help: 'Помочь с выбором',
-  quote: 'Запросить КП',
+  quote: 'Получить КП',
 }
 
 const intro: Record<RequestKind, string> = {
   price: 'Менеджер пришлёт расчёт на выбранный комплект.',
   renew: 'Менеджер сам уточнит данные вашей лицензии и подготовит продление.',
   help: 'Расскажите менеджеру о задачах — он подскажет комплект и редакцию.',
-  quote: 'Менеджер подготовит коммерческое предложение на отмеченные программы.',
+  quote: 'Менеджер подготовит коммерческое предложение на выбранный комплект.',
 }
 
 type Way = 'callback' | 'call' | 'whatsapp'
+/** WhatsApp первым: так быстрее всего, состав уже набран в сообщении. Звонок — запасной путь. */
 const ways = [
+  { value: 'whatsapp', label: 'Напишу в WhatsApp' },
   { value: 'callback', label: 'Перезвоните мне' },
   { value: 'call', label: 'Позвоню сам' },
-  { value: 'whatsapp', label: 'Напишу в WhatsApp' },
 ]
 
 /** Текст для WhatsApp и для разговора: страница и выбранное. */
@@ -67,12 +68,12 @@ function messageText(
 }
 
 /**
- * Окно «Как связаться»: перезвонить (заявка сохраняется на сервере), позвонить самому
- * (номера и часы работы) или написать в WhatsApp с уже набранным текстом.
+ * Окно «Как связаться»: сразу кнопка WhatsApp с уже набранным составом, по выбору — перезвонить
+ * (заявка сохраняется на сервере) или позвонить самому (номера и часы работы).
  */
 export function RequestDialog(props: Props) {
   const { kind, onClose, pageTitle, lines, choices, quantity, contacts } = props
-  const [way, setWay] = useState<Way>('callback')
+  const [way, setWay] = useState<Way>(contacts.whatsappHref ? 'whatsapp' : 'callback')
   if (!kind) return null
   const text = messageText(kind, pageTitle, lines, choices, quantity)
   return (
@@ -102,7 +103,7 @@ export function RequestDialog(props: Props) {
           legend="Как удобнее связаться"
           name="contact-way"
           value={way}
-          options={ways}
+          options={contacts.whatsappHref ? ways : ways.filter((w) => w.value !== 'whatsapp')}
           onChange={(value) => setWay(value as Way)}
         />
         {way === 'callback' && <CallbackForm {...props} kind={kind} />}

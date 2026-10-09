@@ -65,7 +65,7 @@ export const orders: CollectionConfig = {
     },
     textField('contactName', 'Имя', true),
     textField('contactPhone', 'Телефон', true),
-    textField('contactEmail', 'Почта', true),
+    textField('contactEmail', 'Почта'),
     textField('companyName', 'Организация'),
     textField('bin', 'БИН или ИИН'),
     { name: 'comment', label: 'Комментарий покупателя', type: 'textarea' },

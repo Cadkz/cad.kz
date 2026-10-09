@@ -26,6 +26,7 @@
   align-items: center;
   height: var(--control-height);
   padding: 0 var(--space-6);
+  border: 0;
   border-radius: var(--radius-md);
   background: var(--color-navy);
   color: var(--color-text-inverse);

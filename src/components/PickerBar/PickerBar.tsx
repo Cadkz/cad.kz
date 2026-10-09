@@ -1,11 +1,16 @@
 'use client'
 
+import { mainAction } from '@/lib/pickerAction'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
 import styles from './PickerBar.module.css'
 
-/** Закреплённая внизу экрана строка на телефоне: итог подбора и переход к нему. */
+/**
+ * Закреплённая внизу экрана строка на телефоне: сумма (или «Цена по запросу») и то же главное
+ * действие, что в итоге справа. Пока ничего не выбрано — переход к выбору комплекта.
+ */
 export function PickerBar() {
-  const { total } = usePickerContext()
+  const { total, lines, openRequest } = usePickerContext()
+  const action = mainAction(total)
   const text =
     total.state === 'done'
       ? total.text
@@ -19,9 +24,15 @@ export function PickerBar() {
       <div className={styles.spacer} aria-hidden="true" />
       <div className={styles.bar}>
         <span className={styles.price}>{text}</span>
-        <a href="#summary" className={styles.button}>
-          {total.state === 'request' ? 'Запросить' : 'К итогу'}
-        </a>
+        {lines.length ? (
+          <button type="button" className={styles.button} onClick={() => openRequest(action.kind)}>
+            {action.label}
+          </button>
+        ) : (
+          <a href="#config" className={styles.button}>
+            Выбрать
+          </a>
+        )}
       </div>
     </>
   )

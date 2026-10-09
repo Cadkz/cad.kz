@@ -18,7 +18,6 @@ export type Quote = {
   totalKzt: string
   lines: QuoteLine[]
   /** «С этим покупают» по всем товарам корзины. */
-  suggestions?: { href: string; title: string; vendor: string | null }[]
 }
 
 /**

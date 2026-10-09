@@ -85,15 +85,18 @@ function checkContact(input, errors) {
     errors.name = 'Укажите имя: от 2 до 100 символов'
   const phone = normalizePhone(input.phone)
   if (!phone) errors.phone = 'Укажите телефон, например +7 701 123-45-67'
+  // Почта необязательна (решение владельца 10.10.2026: обязательны только имя и телефон).
   const email = text(input.email).toLowerCase()
-  if (email.length > 254 || !EMAIL.test(email))
-    errors.email = 'Укажите электронную почту, например name@company.kz'
+  if (email && (email.length > 254 || !EMAIL.test(email)))
+    errors.email = 'Проверьте почту, например name@company.kz'
   return { name, phone, email }
 }
 
+/** Без отметки «Нужен счёт на организацию» покупатель — частное лицо. */
 function checkBuyerType(input, errors) {
+  if (input.type === undefined || input.type === null || input.type === '') return 'individual'
   const type = BUYER_TYPES.find((candidate) => candidate === input.type)
-  if (!type) errors.type = 'Выберите, кто покупает: физическое или юридическое лицо'
+  if (!type) errors.type = 'Не удалось понять, кто покупает. Обновите страницу.'
   return type
 }
 
@@ -101,9 +104,10 @@ function checkCompany(input, errors) {
   const companyName = text(input.companyName)
   if (companyName.length < 2 || companyName.length > 200 || hasControl(companyName))
     errors.companyName = 'Укажите название организации'
+  // БИН необязателен: менеджер уточнит при подготовке счёта. Введённый — проверяется.
   const bin = text(input.bin).replace(/\s/g, '')
-  if (!/^\d{12}$/.test(bin)) errors.bin = 'БИН состоит из 12 цифр. Для ИП укажите ИИН'
-  else if (!isValidBin(bin)) errors.bin = 'БИН не прошёл проверку. Проверьте цифры'
+  if (bin && !/^\d{12}$/.test(bin)) errors.bin = 'БИН состоит из 12 цифр. Для ИП укажите ИИН'
+  else if (bin && !isValidBin(bin)) errors.bin = 'БИН не прошёл проверку. Проверьте цифры'
   return { companyName, bin }
 }
 
