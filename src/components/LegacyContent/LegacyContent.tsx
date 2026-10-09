@@ -19,6 +19,7 @@ type PagesAnswer = {
   failed: Failure[]
 }
 type ImagesAnswer = {
+  after: number
   publications: number
   downloaded: number
   reused: number
@@ -97,9 +98,11 @@ function useImages() {
       failed: [],
     }
     setState(current)
+    let after = 0
     try {
       for (;;) {
-        const answer = await step<ImagesAnswer>({ action: 'images' }, ENDPOINT)
+        const answer = await step<ImagesAnswer>({ action: 'images', after }, ENDPOINT)
+        after = answer.after
         current.done += answer.publications
         current.total = current.done + answer.remaining
         current.totals.downloaded += answer.downloaded
@@ -203,7 +206,7 @@ export function LegacyContent({ publications, news, promotion, article }: Props)
       />
       <Step
         title="2. Картинки в текстах"
-        text="Картинки из перенесённых текстов скачиваются в «Медиа», первая становится обложкой. Картинку, которой на старом сайте уже нет, убираем из текста и показываем в списке."
+        text="Картинки из перенесённых текстов скачиваются в «Медиа», первая становится обложкой. Картинку, которой на старом сайте уже нет, убираем из текста и показываем в списке. Если картинка не скачалась из-за сбоя, она остаётся в тексте — запустите шаг ещё раз."
         button="Скачать картинки"
         label="Публикации с картинками"
         summary={(s) =>

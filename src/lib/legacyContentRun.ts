@@ -3,6 +3,12 @@ import type { Payload, Where } from 'payload'
 import { failureReason, fetchFile } from '@/domain/bitrixImages.mjs'
 import { OLD_SITE } from '@/domain/bitrixImport.mjs'
 import {
+  imageUrls,
+  isPermanentImageFailure,
+  legacyFileKey,
+  restoredBody,
+} from '@/domain/legacyImages.mjs'
+import {
   INFO_PAGES,
   parseInfoPage,
   parseProductPage,
@@ -26,6 +32,7 @@ const PARALLEL = 6
 const OPTS = { overrideAccess: true, depth: 0 } as const
 /** Новости, акции и статьи старого сайта (scripts/legacy-sitemap.mjs). */
 const PUBLICATION_PATHS: string[] = legacyPublications
+const PUBLICATION_SET = new Set(PUBLICATION_PATHS)
 
 /** Адрес старого сайта; для проверки на тестовом сервере — IMPORT_IMAGES_FROM. */
 const oldSite = () => (process.env.IMPORT_IMAGES_FROM || OLD_SITE).replace(/\/+$/, '')
@@ -42,10 +49,22 @@ export type PagesReply = {
 }
 export type ImagesReply = {
   ok: true
+  /** Последняя обработанная публикация: следующий запрос продолжает после неё. */
+  after: number
   publications: number
   downloaded: number
   reused: number
+  /** Сколько публикаций со старыми картинками осталось после `after`. */
   remaining: number
+  failed: Failure[]
+}
+export type RestoreReply = {
+  ok: true
+  next: number
+  total: number
+  restored: number
+  images: number
+  skipped: number
   failed: Failure[]
 }
 
@@ -322,93 +341,211 @@ async function mediaFor(payload: Payload, url: string, alt: string) {
     file.mimetype && file.mimetype !== 'application/octet-stream' ? file.mimetype : byExt
   if (!mimetype || !MEDIA_MIME_TYPES.includes(mimetype))
     throw new Error(`формат ${mimetype ?? 'неизвестен'} не принимается в «Медиа»`)
-  const media = await payload.create({
-    collection: 'media',
-    data: { alt: alt || 'Картинка из статьи', legacyKey, legacyUrl: pathname },
-    file: { data: file.data, mimetype, name, size: file.data.length },
-    ...OPTS,
-  })
-  return { media, reused: false }
+  try {
+    const media = await payload.create({
+      collection: 'media',
+      data: { alt: alt || 'Картинка из статьи', legacyKey, legacyUrl: pathname },
+      file: { data: file.data, mimetype, name, size: file.data.length },
+      ...OPTS,
+    })
+    return { media, reused: false }
+  } catch (error) {
+    // Ту же картинку только что сохранил другой запрос (ключ занят) — берём готовую.
+    const again = await payload.find({
+      collection: 'media',
+      where: { legacyKey: { equals: legacyKey } },
+      limit: 1,
+      ...OPTS,
+    })
+    if (again.docs[0]?.url) return { media: again.docs[0], reused: true }
+    throw error
+  }
+}
+
+/** Одна публикация или страница: старые картинки → «Медиа». Меняет reply, возвращает текст. */
+async function replaceImages(
+  payload: Payload,
+  doc: { title: string; body?: string | null; legacyUrl?: string | null },
+  reply: ImagesReply,
+  setCover: (id: number) => void,
+) {
+  let body = doc.body ?? ''
+  for (const match of [...body.matchAll(OLD_IMAGE())]) {
+    const [whole, alt = '', url = ''] = match
+    try {
+      const { media, reused } = await mediaFor(payload, url, alt || doc.title)
+      body = body.replace(whole, `![${alt}](${media.url})`)
+      setCover(media.id)
+      if (reused) reply.reused++
+      else reply.downloaded++
+    } catch (error) {
+      const permanent = isPermanentImageFailure(error)
+      // Файла нет на старом сайте — убираем из текста. Сбой сети или сохранения — оставляем
+      // ссылку как есть: повторный запуск шага докачает.
+      if (permanent) body = body.replace(whole, '').replace(/\n{3,}/g, '\n\n')
+      reply.failed.push({
+        path: `${doc.legacyUrl ?? doc.title}: ${decodeURIComponent(new URL(url).pathname)}`,
+        reason: permanent
+          ? failureReason(error)
+          : `${failureReason(error)} — картинка оставлена, запустите шаг ещё раз`,
+      })
+    }
+  }
+  return body.trim()
 }
 
 /**
  * Картинки в текстах перенесённых публикаций: скачать в «Медиа» и заменить адрес в тексте.
- * Не скачавшаяся картинка убирается из текста (и попадает в список). Первая картинка
- * становится обложкой, если обложки нет.
+ * Идёт по публикациям по порядку ID после `after`, поэтому картинка, которая не скачалась из-за
+ * сбоя, не задерживает остальные. Убирается из текста только картинка, которой на старом сайте
+ * нет. Первая картинка становится обложкой, если обложки нет. Страницы — в первом запросе.
  */
-export async function textImagesPart(payload: Payload) {
+export async function textImagesPart(payload: Payload, body: Record<string, unknown>) {
   const deadline = Date.now() + WORK_SECONDS * 1000
+  let after = readOffset(body.after)
   const reply: ImagesReply = {
     ok: true,
+    after,
     publications: 0,
     downloaded: 0,
     reused: 0,
     remaining: 0,
     failed: [],
   }
-  const [publications, pages] = await Promise.all([
-    payload.find({
-      collection: 'publications',
-      where: pendingImages(),
-      sort: 'id',
-      limit: 10,
-      select: { body: true, title: true, cover: true, legacyUrl: true },
-      ...OPTS,
-    }),
-    payload.find({
+  if (after === 0) {
+    const pages = await payload.find({
       collection: 'pages',
       where: pendingImages(),
       sort: 'id',
-      limit: 10,
+      limit: 20,
       select: { body: true, title: true, legacyUrl: true },
       ...OPTS,
-    }),
-  ])
-  const docs = [
-    ...publications.docs.map((doc) => ({ ...doc, collection: 'publications' as const })),
-    ...pages.docs.map((doc) => ({ ...doc, collection: 'pages' as const, cover: null })),
-  ]
+    })
+    for (const page of pages.docs) {
+      const text = await replaceImages(payload, page, reply, () => {})
+      if (text !== page.body)
+        await payload.update({ collection: 'pages', id: page.id, data: { body: text }, ...OPTS })
+    }
+  }
+  const pendingAfter = (id: number): Where => ({
+    and: [pendingImages(), { id: { greater_than: id } }],
+  })
+  const { docs } = await payload.find({
+    collection: 'publications',
+    where: pendingAfter(after),
+    sort: 'id',
+    limit: 10,
+    select: { body: true, title: true, cover: true, legacyUrl: true },
+    ...OPTS,
+  })
   for (const doc of docs) {
     if (Date.now() > deadline) break
-    let body = doc.body ?? ''
     let cover = doc.cover ?? null
-    for (const match of [...body.matchAll(OLD_IMAGE())]) {
-      const [whole, alt = '', url = ''] = match
-      try {
-        const { media, reused } = await mediaFor(payload, url, alt || doc.title)
-        body = body.replace(whole, `![${alt}](${media.url})`)
-        cover ??= media.id
-        if (reused) reply.reused++
-        else reply.downloaded++
-      } catch (error) {
-        body = body.replace(whole, '').replace(/\n{3,}/g, '\n\n')
-        reply.failed.push({
-          path: `${doc.legacyUrl ?? doc.title}: ${decodeURIComponent(new URL(url).pathname)}`,
-          reason: failureReason(error),
-        })
-      }
-    }
-    if (doc.collection === 'pages')
-      await payload.update({
-        collection: 'pages',
-        id: doc.id,
-        data: { body: body.trim() },
-        ...OPTS,
-      })
-    else
+    const text = await replaceImages(payload, doc, reply, (id) => {
+      cover ??= id
+    })
+    if (text !== doc.body || cover !== (doc.cover ?? null))
       await payload.update({
         collection: 'publications',
         id: doc.id,
-        data: { body: body.trim(), cover },
+        data: { body: text, cover },
         ...OPTS,
       })
+    after = doc.id
     reply.publications++
   }
-  const [leftPublications, leftPages] = await Promise.all([
-    payload.count({ collection: 'publications', where: pendingImages(), overrideAccess: true }),
-    payload.count({ collection: 'pages', where: pendingImages(), overrideAccess: true }),
-  ])
-  reply.remaining = leftPublications.totalDocs + leftPages.totalDocs
+  reply.after = after
+  const left = await payload.count({
+    collection: 'publications',
+    where: pendingAfter(after),
+    overrideAccess: true,
+  })
+  reply.remaining = left.totalDocs
+  return reply
+}
+
+/**
+ * Возврат картинок, которые шаг 2 раньше убрал из текста по ошибке (сбой, а не отсутствие
+ * файла). Заново читает старую страницу публикации и, если текст без картинок совпадает с
+ * сохранённым, а картинок на старой странице больше, возвращает их: уже скачанные — адресом
+ * «Медиа», остальные — старым адресом (их скачает шаг 2). Правленные в админке тексты не трогает.
+ */
+export async function restoreImagesPart(payload: Payload, body: Record<string, unknown>) {
+  const deadline = Date.now() + WORK_SECONDS * 1000
+  const { docs: all } = await payload.find({
+    collection: 'publications',
+    where: { legacyUrl: { exists: true } },
+    sort: 'id',
+    limit: 5000,
+    pagination: false,
+    select: { legacyUrl: true },
+    ...OPTS,
+  })
+  const items = all.filter((doc) => doc.legacyUrl && PUBLICATION_SET.has(doc.legacyUrl))
+  const total = items.length
+  let next = Math.min(readOffset(body.offset), total)
+  const reply: RestoreReply = {
+    ok: true,
+    next,
+    total,
+    restored: 0,
+    images: 0,
+    skipped: 0,
+    failed: [],
+  }
+  while (next < total && Date.now() < deadline) {
+    const group = items.slice(next, next + PARALLEL)
+    await Promise.all(
+      group.map(async ({ id, legacyUrl }) => {
+        const oldPath = String(legacyUrl)
+        try {
+          const parsed = await fetchPublication(oldPath)
+          if (!parsed) return
+          const doc = await payload.findByID({
+            collection: 'publications',
+            id,
+            select: { body: true, cover: true },
+            ...OPTS,
+          })
+          const urls = imageUrls(parsed.body)
+          if (urls.length <= imageUrls(doc.body).length) return
+          const keys = urls.map(legacyFileKey).filter((k): k is string => Boolean(k))
+          const { docs: media } = await payload.find({
+            collection: 'media',
+            where: { legacyKey: { in: keys } },
+            limit: keys.length,
+            pagination: false,
+            select: { legacyKey: true, url: true },
+            ...OPTS,
+          })
+          const byKey = new Map(media.map((m) => [m.legacyKey, m]))
+          const text = restoredBody(doc.body ?? '', parsed.body, (url) => {
+            const key = legacyFileKey(url)
+            return (key && byKey.get(key)?.url) || null
+          })
+          if (text == null) {
+            reply.skipped++
+            return
+          }
+          const firstMedia = urls
+            .map((url) => byKey.get(legacyFileKey(url) ?? ''))
+            .find((m) => m?.id)
+          await payload.update({
+            collection: 'publications',
+            id,
+            data: { body: text, cover: doc.cover ?? firstMedia?.id ?? null },
+            ...OPTS,
+          })
+          reply.restored++
+          reply.images += urls.length - imageUrls(doc.body).length
+        } catch (error) {
+          reply.failed.push({ path: oldPath, reason: pageFailure(error) })
+        }
+      }),
+    )
+    next += group.length
+  }
+  reply.next = next
   return reply
 }
 
