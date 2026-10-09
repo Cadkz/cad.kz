@@ -1,11 +1,13 @@
 import { PublicationIndex } from '@/components/PublicationIndex/PublicationIndex'
+import { pageMetadata } from '@/lib/seo'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: 'Статьи — CAD.kz',
   description: 'Статьи CAD.kz о BIM, САПР, расчётах и оборудовании для проектировщиков.',
-}
+  path: '/articles',
+})
 
 export default async function ArticlesPage({ searchParams }: Props) {
   return (

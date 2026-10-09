@@ -7,3 +7,8 @@
   border-radius: var(--radius-lg);
   background: var(--color-blue-soft);
 }
+
+/* Место занято, но не видно и не нажимается (на время загрузки корзины). */
+.reserve {
+  visibility: hidden;
+}

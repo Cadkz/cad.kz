@@ -16,7 +16,7 @@ export function CartView() {
   const { items, ready, remove, setQuantity } = useCart()
   const { quote, error, busy, retry } = useCartQuote(items, ready)
 
-  if (!ready) return <p role="status">Загружаем корзину…</p>
+  if (!ready) return <EmptyCart loading />
   if (!items.length) return <EmptyCart />
 
   return (

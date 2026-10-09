@@ -15,7 +15,7 @@ export function CheckoutView() {
   const { quote, setQuote, error, busy, retry } = useCartQuote(items, ready)
   const checkout = useCheckout(quote, setQuote)
 
-  if (!ready) return <p role="status">Загружаем корзину…</p>
+  if (!ready) return <EmptyCart loading />
   if (checkout.done) return <CheckoutDone order={checkout.done} />
   if (!items.length) return <EmptyCart />
 

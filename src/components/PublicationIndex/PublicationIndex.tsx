@@ -46,7 +46,7 @@ export async function PublicationIndex({ path, title, lead, kind, params }: Prop
           <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
             {result.docs.map((doc, i) => (
               <li key={doc.id}>
-                <NewsCard news={toCard(doc)} tone={tones[i % tones.length]} withExcerpt />
+                <NewsCard news={toCard(doc)} tone={tones[i % tones.length]} withExcerpt level={2} />
               </li>
             ))}
           </Grid>

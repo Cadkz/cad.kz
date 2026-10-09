@@ -61,9 +61,9 @@ export function CatalogFilter({ items, facets, initial }: Props) {
 
   return (
     <div className={styles.shell}>
-      <aside className={styles.sidebar} aria-label="Фильтр каталога">
+      <section className={styles.sidebar} aria-label="Фильтр каталога">
         {panel}
-      </aside>
+      </section>
       <div ref={top} className={styles.results}>
         <div className={styles.head}>
           <p className={styles.count} aria-live="polite">

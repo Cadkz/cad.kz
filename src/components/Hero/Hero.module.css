@@ -55,7 +55,8 @@
 
 .cardText {
   margin-bottom: var(--space-1);
-  color: var(--color-text-muted);
+  /* Не --color-text-muted: на голубой карточке он не дотягивает до контраста 4,5:1. */
+  color: var(--color-gray-700);
   font-size: var(--text-sm);
 }
 

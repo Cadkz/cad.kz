@@ -64,7 +64,9 @@
 
 .title {
   font-size: var(--text-h4);
+  font-weight: var(--weight-bold);
   line-height: var(--leading-snug);
+  letter-spacing: normal;
 }
 
 /* Вся карточка кликабельна, но в ссылке остаётся только заголовок. */

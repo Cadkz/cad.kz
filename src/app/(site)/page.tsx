@@ -17,6 +17,9 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 
 const newsTones = ['navy', 'graphite', 'deep'] as const
 
+/** Подборки фильтра (?group=…) — та же главная: канонический адрес один. */
+export const metadata = { alternates: { canonical: '/' } }
+
 /** Главная — шаблон «Витрина»: секции во всю рамку, внутри 12-колоночная сетка. */
 export default async function Home({ searchParams }: Props) {
   const [home, directions, catalog, news, params] = await Promise.all([

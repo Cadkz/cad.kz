@@ -21,6 +21,9 @@ export function siteUrl() {
   return 'https://cad.kz'
 }
 
+/** Картинка для соцсетей по умолчанию (1200×630): у страниц без своей обложки. */
+export const DEFAULT_SHARE_IMAGE = '/images/brand/og-default.png'
+
 /** Текст для description: без лишних пробелов и не длиннее 160 знаков (обрезка по слову). */
 export function shortDescription(text: string | null | undefined, max = 160) {
   const clean = (text ?? '')
@@ -65,7 +68,7 @@ export function pageMetadata({
       siteName: 'CAD.kz',
       locale: 'ru_KZ',
       type: 'website',
-      ...(image ? { images: [image] } : {}),
+      images: [image || DEFAULT_SHARE_IMAGE],
     },
   }
 }

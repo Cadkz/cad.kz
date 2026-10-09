@@ -78,10 +78,12 @@
 .dots {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-4);
 }
 
+/* Точка маленькая, но нажимается область 24×24: невидимая рамка вокруг (удобно пальцем). */
 .dot {
+  position: relative;
   width: var(--space-2);
   height: var(--space-2);
   padding: 0;
@@ -91,6 +93,12 @@
   transition:
     width var(--duration-base) var(--ease),
     background var(--duration-base) var(--ease);
+}
+
+.dot::after {
+  position: absolute;
+  inset: calc(-1 * var(--space-2));
+  content: "";
 }
 
 .dot[aria-current="true"] {

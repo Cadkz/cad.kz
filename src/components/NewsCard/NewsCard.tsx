@@ -20,10 +20,13 @@ type Props = {
   tone?: 'navy' | 'graphite' | 'deep'
   /** Показывать анонс: в списке новостей да, на главной — только дата и заголовок. */
   withExcerpt?: boolean
+  /** Уровень заголовка: h2 в списке под h1 страницы, h3 в секции главной под её h2. */
+  level?: 2 | 3
 }
 
 /** Карточка новости или статьи: обложка, дата, тематика, заголовок, анонс. */
-export function NewsCard({ news, tone = 'navy', withExcerpt = false }: Props) {
+export function NewsCard({ news, tone = 'navy', withExcerpt = false, level = 3 }: Props) {
+  const Heading = level === 2 ? 'h2' : 'h3'
   return (
     <article className={styles.card}>
       <div className={`${styles.thumb} ${styles[tone]}`}>
@@ -44,11 +47,11 @@ export function NewsCard({ news, tone = 'navy', withExcerpt = false }: Props) {
           {news.date && <time dateTime={news.date}>{news.date}</time>}
           {news.topic && <Badge>{news.topic}</Badge>}
         </div>
-        <h3 className={styles.title}>
+        <Heading className={styles.title}>
           <Link href={news.href} className={styles.link}>
             {news.title}
           </Link>
-        </h3>
+        </Heading>
         {withExcerpt && news.excerpt && <p className={styles.excerpt}>{news.excerpt}</p>}
       </div>
     </article>

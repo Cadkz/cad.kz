@@ -63,9 +63,10 @@ export function ArticleBody({ blocks, pictures }: Props) {
             )
           case 'note':
             return (
-              <aside key={key} className={styles.note}>
+              // Выноска в тексте — примечание, а не отдельная область страницы.
+              <div key={key} role="note" className={styles.note}>
                 <Text text={block.text} />
-              </aside>
+              </div>
             )
           case 'image': {
             const picture = pictures?.get(block.src)

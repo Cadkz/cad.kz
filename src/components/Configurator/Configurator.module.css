@@ -73,6 +73,11 @@
   font-size: var(--text-xs);
 }
 
+/* На голубом фоне выбранной строки серый не дотягивает до контраста 4,5:1 — темнее. */
+.option[data-selected="true"] .optionLicense {
+  color: var(--color-gray-700);
+}
+
 .optionPrice {
   flex-shrink: 0;
   color: var(--color-navy);

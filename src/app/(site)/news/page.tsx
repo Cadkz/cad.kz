@@ -1,10 +1,23 @@
+import type { Metadata } from 'next'
 import { PublicationIndex } from '@/components/PublicationIndex/PublicationIndex'
+import { pageMetadata } from '@/lib/seo'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
-export const metadata = {
-  title: 'Новости и акции — CAD.kz',
-  description: 'Новости, акции, вебинары и мероприятия CAD.kz.',
+/** У новостей и акций свои заголовок и канонический адрес: это разные страницы для поиска. */
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { kind } = await searchParams
+  return kind === 'promotion'
+    ? pageMetadata({
+        title: 'Акции — CAD.kz',
+        description: 'Действующие акции CAD.kz на программы, оборудование и обучение.',
+        path: '/news?kind=promotion',
+      })
+    : pageMetadata({
+        title: 'Новости — CAD.kz',
+        description: 'Новости, вебинары и мероприятия CAD.kz.',
+        path: '/news',
+      })
 }
 
 export default async function NewsPage({ searchParams }: Props) {
