@@ -48,7 +48,7 @@ export type Direction = {
   tone: NonNullable<Section['tone']>
 }
 
-const kindGroup: Record<Product['kind'], CatalogGroup> = {
+export const kindGroup: Record<Product['kind'], CatalogGroup> = {
   software: 'software',
   hardware: 'hardware',
   course: 'service',
@@ -160,7 +160,12 @@ export async function getCatalog(): Promise<{
       singleOffer: only ? { id: String(only.id), configuration: only.configuration } : null,
       badge: requires.length ? `Плагин для ${requires.join(' / ')}` : null,
       group: kindGroup[product.kind],
-      directions: productSections.filter((s) => s.isDirection).map((s) => s.slug),
+      // Направления — разделы программ: курсы и оборудование в них не показываются, их направление
+      // нужно только подборкам «С этим покупают».
+      directions:
+        kindGroup[product.kind] === 'software'
+          ? productSections.filter((s) => s.isDirection).map((s) => s.slug)
+          : [],
       types: productSections.filter((s) => !s.isDirection).map((s) => s.slug),
       tasks: (product.tasks ?? []).map((task) => task.title),
       rank: priorityRank(product.priority, vendorLevel.get(vendorId)),

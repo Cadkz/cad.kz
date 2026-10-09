@@ -1,6 +1,7 @@
 import type { Section, SiteSetting } from '../../payload-types'
 import { menuColumns } from '../domain/menu.mjs'
 import { priorityRank } from '../domain/priority.mjs'
+import { kindGroup } from './catalog'
 import { familyLines } from './families'
 import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
@@ -65,6 +66,7 @@ export async function getMenu(): Promise<MenuTab[]> {
         line: true,
         lineOrder: true,
         pageView: true,
+        kind: true,
       },
     }),
     payload.find({
@@ -96,6 +98,7 @@ export async function getMenu(): Promise<MenuTab[]> {
       line: relId(product.line),
       lineOrder: product.lineOrder ?? null,
       rank: priorityRank(product.priority, vendor == null ? null : vendorLevel.get(vendor)),
+      group: kindGroup[product.kind],
     }
   })
 

@@ -85,3 +85,13 @@ test('пустые разделы не показываются, тип — с �
 test('в меню без канцелярского начала названия', () => {
   assert.equal(menuTitle('Право на использование программного обеспечения V-Ray 5'), 'V-Ray 5')
 })
+
+test('курс с направлением не попадает в раздел программ', () => {
+  const products = [
+    product(1, 'Civil 3D', 1, { group: 'software' }),
+    product(2, 'Онлайн курс Civil 3D', 9, { group: 'service', sections: [9, 1] }),
+  ]
+  const [column] = menuColumns(sections, products, lines, vendors, href)
+  const titles = column.vendors.flatMap((v) => v.lines.flatMap((l) => l.links.map((x) => x.title)))
+  assert.deepEqual(titles, ['Civil 3D'])
+})

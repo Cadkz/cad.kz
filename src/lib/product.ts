@@ -10,6 +10,9 @@ import { productPath } from './productPath'
 import { relId } from './rel'
 import { pageMetadata } from './seo'
 
+/** Служебные характеристики: в базе нужны для прайсов и 1С, покупателю не показываются. */
+const HIDDEN_PROPERTIES = new Set(['артикул'])
+
 export type ProductOffer = {
   id: string
   configuration: string
@@ -115,7 +118,9 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
         icon: section.icon ?? null,
       })),
     tasks: (product.tasks ?? []).map((task) => task.title),
-    properties: (product.properties ?? []).map(({ name, value }) => ({ name, value })),
+    properties: (product.properties ?? [])
+      .filter(({ name }) => !HIDDEN_PROPERTIES.has(name.trim().toLowerCase()))
+      .map(({ name, value }) => ({ name, value })),
     faq: (product.faq ?? []).map(({ question, answer }) => ({ question, answer })),
     requires: related(product.requiresProducts),
     offers: priced.map(({ offer, unit }) => ({

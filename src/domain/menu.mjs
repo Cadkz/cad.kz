@@ -26,7 +26,8 @@ export function menuTitle(title) {
  * @typedef {{ id: number, slug: string, title: string, menuGroup: string, isDirection: boolean,
  *   pins?: number[], icon?: string | null }} MenuSection
  * @typedef {{ id: number, title: string, main: number | null, sections: number[], href: string,
- *   rank?: number, vendor?: number | null, line?: number | null, lineOrder?: number | null }} MenuProduct
+ *   rank?: number, vendor?: number | null, line?: number | null, lineOrder?: number | null,
+ *   group?: string }} MenuProduct
  * @typedef {{ title: string, href: string }} MenuLinkData
  * @typedef {{ key: string, title: string, links: MenuLinkData[], more: boolean, allHref: string }} MenuLineData
  * @typedef {{ key: string, title: string, allHref: string, lines: MenuLineData[] }} MenuVendorData
@@ -35,7 +36,7 @@ export function menuTitle(title) {
 
 /**
  * Фильтр каталога для раздела: направление у программ, тип у оборудования и услуг.
- * Направление без группы: в него входят и сканеры, и курсы этой отрасли.
+ * Направление — раздел программ: курсы и техника этой отрасли в нём не показываются.
  * @param {MenuSection} section
  * @returns {Record<string, string>}
  */
@@ -60,7 +61,13 @@ export function menuColumns(sections, products, lines, vendorTitles, hrefFor, li
     .map((section) => {
       const filter = sectionFilter(section)
       const inSection = products
-        .filter((product) => product.sections.includes(section.id))
+        // Только товары группы раздела: курс с направлением «Инженерные сети» — в «Обучении»,
+        // а не среди программ (направление у курса нужно подборкам).
+        .filter(
+          (product) =>
+            product.sections.includes(section.id) &&
+            (!product.group || product.group === section.menuGroup),
+        )
         .map((product) => ({
           ...product,
           rank: product.rank ?? 1,
