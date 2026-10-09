@@ -80,6 +80,9 @@ export type Contacts = {
   email: string | null
   socials: { network: string; url: string }[]
   footerText: string
+  address: string | null
+  hours: string | null
+  mapUrl: string | null
 }
 
 export async function getContacts(): Promise<Contacts> {
@@ -93,5 +96,8 @@ export async function getContacts(): Promise<Contacts> {
     email: settings.email || null,
     socials: (settings.socials ?? []).map(({ network, url }) => ({ network, url })),
     footerText: settings.footerText ?? '',
+    address: settings.address || null,
+    hours: settings.hours || null,
+    mapUrl: settings.mapUrl || null,
   }
 }

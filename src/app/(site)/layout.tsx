@@ -1,15 +1,23 @@
+import type { Metadata } from 'next'
 import { preload } from 'react-dom'
 import { CartProvider } from '@/components/CartProvider/CartProvider'
 import { SiteFooter } from '@/components/SiteFooter/SiteFooter'
 import { SiteHeader } from '@/components/SiteHeader/SiteHeader'
+import { isProduction, siteUrl } from '@/lib/seo'
 import '@/styles/fonts.css'
 import '@/styles/tokens.css'
 import '@/styles/base.css'
 
-export const metadata = {
-  title: 'CAD.kz — софт, оборудование и обучение для проектировщиков',
-  description: 'Прототип нового сайта CAD.kz',
-  robots: { index: false, follow: false },
+/** Общие метаданные. В демо поисковикам закрыто всё (и заголовком в next.config.mjs). */
+export function generateMetadata(): Metadata {
+  return {
+    metadataBase: new URL(siteUrl()),
+    title: 'CAD.kz — софт, оборудование и обучение для проектировщиков',
+    description:
+      'Программы для проектирования, широкоформатные принтеры и сканеры, 3D-сканеры, обучение ' +
+      'и внедрение для проектных организаций в Казахстане.',
+    robots: isProduction() ? { index: true, follow: true } : { index: false, follow: false },
+  }
 }
 
 const criticalFonts = [

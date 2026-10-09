@@ -24,3 +24,12 @@
   background: var(--color-navy);
   color: var(--color-text-inverse);
 }
+
+.gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--space-6);
+  height: var(--control-height-sm);
+  color: var(--color-text-muted);
+}

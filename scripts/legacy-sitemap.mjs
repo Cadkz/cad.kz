@@ -1,9 +1,10 @@
 // Собирает из карт сайта старого cad.kz таблицу «код товара → код раздела» для старых адресов
 // вида /catalog/<раздел>/<код>/. Запуск: node scripts/legacy-sitemap.mjs <карта.xml> [ещё карты…]
-// Результат — src/domain/legacyCatalog.json и полный список старых адресов scripts/legacy-paths.txt
+// Результат — src/domain/legacyCatalog.json, список публикаций src/domain/legacyPublications.json и полный список старых адресов scripts/legacy-paths.txt
 // для проверки (карты сайта публичны, их можно хранить в репозитории).
 
 import { readFileSync, writeFileSync } from 'node:fs'
+import { publicationTarget } from '../src/domain/legacyPages.mjs'
 
 const files = process.argv.slice(2)
 if (!files.length) {
@@ -42,8 +43,12 @@ const sorted = Object.fromEntries(Object.entries(products).sort(([a], [b]) => a.
 const result = { products: sorted, sections: [...sections].sort() }
 writeFileSync('src/domain/legacyCatalog.json', `${JSON.stringify(result, null, 2)}\n`)
 writeFileSync('scripts/legacy-paths.txt', `${[...paths].sort().join('\n')}\n`)
+// Новости, акции и статьи для переноса со старого сайта (админка → «Перенос со старого сайта»).
+const publications = [...paths].filter((path) => publicationTarget(path)).sort()
+writeFileSync('src/domain/legacyPublications.json', `${JSON.stringify(publications, null, 1)}\n`)
 
 console.log(`Адресов в картах: ${paths.size}`)
 console.log(`Товаров со старым адресом: ${Object.keys(sorted).length}, разделов: ${sections.size}`)
+console.log(`Новостей, акций и статей: ${publications.length}`)
 if (conflicts.length)
   console.log(`Один код в разных разделах (взят первый):\n${conflicts.join('\n')}`)

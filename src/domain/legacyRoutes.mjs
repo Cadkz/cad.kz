@@ -106,6 +106,14 @@ const home = { to: '/' }
  * @type {[RegExp, StaticTarget][]}
  */
 const rules = [
+  // Текстовые страницы перенесены на новый сайт (src/domain/legacyPages.mjs, INFO_PAGES).
+  [/^\/about\/?$/i, { to: '/about' }],
+  [/^\/about\/(team|vacancies)(\/|$)/i, { to: '/about' }],
+  [/^\/about\/howto\/?$/i, { to: '/about/howto' }],
+  [/^\/about\/delivery\/?$/i, { to: '/about/delivery' }],
+  [/^\/about\/guaranty\/?$/i, { to: '/about/guaranty' }],
+  [/^\/about\/essentials\.php$/i, { to: '/about/requisites' }],
+  [/^\/contacts\/?$/i, { to: '/contacts' }],
   [/^\/about\/news(\/|$)/i, { to: '/news' }],
   [/^\/about\/actions(\/|$)/i, { to: '/news?kind=promotion' }],
   [/^\/articles\/.+/i, { to: '/articles' }],
@@ -128,8 +136,28 @@ export function staticLegacyTarget(pathname) {
   return null
 }
 
+/** Адреса текстовых страниц нового сайта (без слеша в конце). */
+const NEW_PAGES = new Set([
+  '/about',
+  '/about/howto',
+  '/about/delivery',
+  '/about/guaranty',
+  '/about/requisites',
+  '/contacts',
+])
+
+/**
+ * Текстовая страница нового сайта по адресу с любым регистром и слешем в конце: её точный адрес
+ * или null. Старый /about/ и новый /about совпадают, поэтому их различает только слеш.
+ */
+export function newPagePath(pathname) {
+  const path = cleanPath(pathname).replace(/\/+$/, '').toLowerCase()
+  return NEW_PAGES.has(path) ? path : null
+}
+
 /** Адрес обрабатывается страницей старых адресов (а не обычной страницей нового сайта). */
 export function isLegacyPath(pathname) {
+  if (newPagePath(pathname)) return false
   return parseCatalogPath(pathname) !== null || staticLegacyTarget(pathname) !== null
 }
 

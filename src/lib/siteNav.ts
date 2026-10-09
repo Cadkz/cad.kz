@@ -2,7 +2,8 @@ import { catalogHref } from './navigationHrefs'
 
 /**
  * Постоянная структура меню сайта (разделы, а не контент).
- * Ссылки «О компании» пока ведут на действующий cad.kz: этих страниц в новом сайте ещё нет.
+ * Тексты страниц «О компании» — в «Страницах», переносятся со старого сайта (админка →
+ * «Перенос со старого сайта»).
  */
 export const newsLinks = [
   { title: 'Новости', href: '/news' },
@@ -14,18 +15,17 @@ export const aboutColumns = [
   {
     title: 'Покупателям',
     links: [
-      { title: 'Как купить', href: 'https://cad.kz/about/howto/' },
-      { title: 'Доставка', href: 'https://cad.kz/about/delivery/' },
-      { title: 'Гарантии', href: 'https://cad.kz/about/guaranty/' },
+      { title: 'Как купить', href: '/about/howto' },
+      { title: 'Доставка', href: '/about/delivery' },
+      { title: 'Гарантии', href: '/about/guaranty' },
     ],
   },
   {
     title: 'О компании',
     links: [
-      { title: 'Реквизиты', href: 'https://cad.kz/about/essentials.php' },
-      { title: 'Производители', href: 'https://cad.kz/about/manufacturer/' },
-      { title: 'Наша команда', href: 'https://cad.kz/about/team/' },
-      { title: 'Вакансии', href: 'https://cad.kz/about/vacancies/' },
+      { title: 'О компании', href: '/about' },
+      { title: 'Реквизиты', href: '/about/requisites' },
+      { title: 'Контакты', href: '/contacts' },
     ],
   },
 ]
@@ -41,8 +41,9 @@ export const footerColumns = [
     links: [
       { title: 'Новости', href: '/news' },
       { title: 'Акции', href: '/news?kind=promotion' },
-      { title: 'Как купить', href: 'https://cad.kz/about/howto/' },
-      { title: 'Реквизиты', href: 'https://cad.kz/about/essentials.php' },
+      { title: 'Как купить', href: '/about/howto' },
+      { title: 'О компании', href: '/about' },
+      { title: 'Контакты', href: '/contacts' },
     ],
   },
   {

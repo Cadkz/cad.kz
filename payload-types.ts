@@ -73,6 +73,7 @@ export interface Config {
     'section-rules': SectionRule;
     manufacturers: Manufacturer;
     publications: Publication;
+    pages: Page;
     media: Media;
     'exchange-rates': ExchangeRate;
     users: User;
@@ -94,6 +95,7 @@ export interface Config {
     'section-rules': SectionRulesSelect<false> | SectionRulesSelect<true>;
     manufacturers: ManufacturersSelect<false> | ManufacturersSelect<true>;
     publications: PublicationsSelect<false> | PublicationsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'exchange-rates': ExchangeRatesSelect<false> | ExchangeRatesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -204,6 +206,13 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
   legacyKey?: string | null;
   legacyUrl?: string | null;
   updatedAt: string;
@@ -355,9 +364,45 @@ export interface Publication {
   kind: 'article' | 'news' | 'promotion';
   excerpt?: string | null;
   topic?: string | null;
+  /**
+   * Пустая строка — новый абзац, «## » — подзаголовок, «- » — пункт списка, «> » — выноска, [текст](адрес) — ссылка, ![описание](адрес картинки) — картинка отдельной строкой.
+   */
   body?: string | null;
   cover?: (number | null) | Media;
   publishedAt?: string | null;
+  /**
+   * Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  legacyKey?: string | null;
+  legacyUrl?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  status: 'draft' | 'published';
+  slug: string;
+  lead?: string | null;
+  /**
+   * Пустая строка — новый абзац, «## » — подзаголовок, «- » — пункт списка, «> » — выноска, [текст](адрес) — ссылка, ![описание](адрес картинки) — картинка отдельной строкой.
+   */
+  body?: string | null;
+  /**
+   * Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
   legacyKey?: string | null;
   legacyUrl?: string | null;
   updatedAt: string;
@@ -567,6 +612,10 @@ export interface PayloadLockedDocument {
         value: number | Publication;
       } | null)
     | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -682,6 +731,12 @@ export interface ProductsSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   legacyKey?: T;
   legacyUrl?: T;
   updatedAt?: T;
@@ -771,6 +826,33 @@ export interface PublicationsSelect<T extends boolean = true> {
   body?: T;
   cover?: T;
   publishedAt?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  legacyKey?: T;
+  legacyUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  slug?: T;
+  lead?: T;
+  body?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   legacyKey?: T;
   legacyUrl?: T;
   updatedAt?: T;
@@ -978,6 +1060,12 @@ export interface SiteSetting {
   whatsapp?: string | null;
   telegram?: string | null;
   email?: string | null;
+  /**
+   * Показывается на странице «Контакты».
+   */
+  address?: string | null;
+  hours?: string | null;
+  mapUrl?: string | null;
   socials?:
     | {
         network: 'instagram' | 'facebook' | 'youtube' | 'telegram' | 'linkedin';
@@ -1076,6 +1164,9 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   whatsapp?: T;
   telegram?: T;
   email?: T;
+  address?: T;
+  hours?: T;
+  mapUrl?: T;
   socials?:
     | T
     | {

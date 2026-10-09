@@ -12,8 +12,12 @@ import { RelatedList } from '@/components/RelatedList/RelatedList'
 import { Toc } from '@/components/Toc/Toc'
 import { formatDate } from '@/lib/format'
 import { getHome } from '@/lib/home'
+import { newsHref } from '@/lib/navigationHrefs'
+import { cms } from '@/lib/payload'
+import { bodyPictures, toPicture } from '@/lib/pictures'
 import { getNeighbors, getPublication, getPublications, toCard } from '@/lib/publications'
-import { parseBody } from '@/lib/richText'
+import { imageSources, parseBody } from '@/lib/richText'
+import { pageMetadata } from '@/lib/seo'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -25,21 +29,27 @@ const sections = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const publication = await getPublication((await params).slug)
-  return publication
-    ? { title: `${publication.title} — CAD.kz`, description: publication.excerpt ?? undefined }
-    : {}
+  if (!publication) return {}
+  return pageMetadata({
+    seo: publication.seo,
+    title: `${publication.title} — CAD.kz`,
+    description: publication.excerpt,
+    path: newsHref(publication.slug),
+    image: toPicture(publication.cover)?.url,
+  })
 }
 
 /** Новость, статья или акция — шаблон «Чтение». */
 export default async function PublicationPage({ params }: Props) {
   const publication = await getPublication((await params).slug)
   if (!publication) notFound()
-  const [neighbors, latest, home] = await Promise.all([
+  const blocks = parseBody(publication.body)
+  const [neighbors, latest, home, pictures] = await Promise.all([
     getNeighbors(publication),
     getPublications({ kinds: [publication.kind], limit: 4 }),
     getHome(),
+    cms().then((payload) => bodyPictures(payload, imageSources(blocks))),
   ])
-  const blocks = parseBody(publication.body)
   const toc = blocks.flatMap((b) => (b.type === 'heading' ? [{ id: b.id, text: b.text }] : []))
   const section = sections[publication.kind]
   const related = latest.docs
@@ -82,7 +92,7 @@ export default async function PublicationPage({ params }: Props) {
             {publication.topic && <Badge>{publication.topic}</Badge>}
           </PageIntro>
           <Toc items={toc} collapsed />
-          <ArticleBody blocks={blocks} />
+          <ArticleBody blocks={blocks} pictures={pictures} />
           <PrevNext previous={neighbors.previous} next={neighbors.next} />
         </ReadingLayout>
       </Container>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { pageWindow } from '@/lib/pagination'
 import styles from './PageLinks.module.css'
 
 type Props = { page: number; pages: number; hrefFor: (page: number) => string }
@@ -8,16 +9,23 @@ export function PageLinks({ page, pages, hrefFor }: Props) {
   if (pages < 2) return null
   return (
     <nav aria-label="Страницы" className={styles.list}>
-      {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
-        <Link
-          key={n}
-          href={hrefFor(n)}
-          className={styles.page}
-          aria-current={n === page ? 'page' : undefined}
-        >
-          {n}
-        </Link>
-      ))}
+      {pageWindow(page, pages).map((n, i) =>
+        n === null ? (
+          // biome-ignore lint/suspicious/noArrayIndexKey: пропуски не имеют своего номера, позиция стабильна
+          <span key={`gap-${i}`} className={styles.gap} aria-hidden="true">
+            …
+          </span>
+        ) : (
+          <Link
+            key={n}
+            href={hrefFor(n)}
+            className={styles.page}
+            aria-current={n === page ? 'page' : undefined}
+          >
+            {n}
+          </Link>
+        ),
+      )}
     </nav>
   )
 }

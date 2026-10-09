@@ -1,9 +1,20 @@
 /* Переменные админки Payload: токены сайта в админке не подключены. */
+.row {
+  display: grid;
+  gap: var(--base);
+  margin-bottom: calc(var(--base) * 1.5);
+}
+
+@media (min-width: 960px) {
+  .row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .card {
   display: flex;
   align-items: flex-start;
   gap: var(--base);
-  margin-bottom: calc(var(--base) * 1.5);
   padding: var(--base);
   border: 1px solid var(--theme-elevation-150);
   border-radius: var(--style-radius-m);

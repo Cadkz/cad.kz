@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { isLegacyPath, LEGACY_PATH_HEADER } from './domain/legacyRoutes.mjs'
+import { isLegacyPath, LEGACY_PATH_HEADER, newPagePath } from './domain/legacyRoutes.mjs'
 
 /**
  * Слеш в конце адреса. Старые адреса cad.kz заканчиваются слешем, и товары открываются по ним
@@ -9,6 +9,13 @@ import { isLegacyPath, LEGACY_PATH_HEADER } from './domain/legacyRoutes.mjs'
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+  // Текстовые страницы: старый адрес со слешем (/about/) ведёт на новый без слеша (/about).
+  const page = newPagePath(pathname)
+  if (page && page !== pathname) {
+    const target = new URL(page, request.url)
+    target.search = request.nextUrl.search
+    return NextResponse.redirect(target, 308)
+  }
   if (isLegacyPath(pathname)) {
     const headers = new Headers(request.headers)
     headers.set(LEGACY_PATH_HEADER, pathname)
@@ -25,5 +32,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // Служебные адреса, админка, API и файлы сайта сюда не попадают.
-  matcher: ['/((?!_next/|api/|admin|fonts/|images/|icon\\.png|apple-icon\\.png|robots\\.txt).*)'],
+  matcher: [
+    '/((?!_next/|api/|admin|fonts/|images/|icon\\.png|apple-icon\\.png|robots\\.txt|sitemap\\.xml).*)',
+  ],
 }

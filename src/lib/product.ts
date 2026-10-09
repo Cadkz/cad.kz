@@ -5,6 +5,7 @@ import { cms } from './payload'
 import { type Picture, productPictures } from './pictures'
 import { loadPricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
+import { pageMetadata } from './seo'
 
 export type ProductOffer = {
   id: string
@@ -34,6 +35,7 @@ export type ProductPage = {
   offers: ProductOffer[]
   /** Своя галерея или картинка производителя; пусто — блока картинок нет. */
   pictures: Picture[]
+  seo: Product['seo']
 }
 
 function related(value: Product['recommended']): RelatedProduct[] {
@@ -111,15 +113,17 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
       price: unit ? formatKzt(unit) : null,
     })),
     pictures: productPictures(product),
+    seo: product.seo,
   }
 }
 
-/** Заголовок, описание и канонический адрес страницы товара. */
+/** Заголовок, описание и канонический адрес страницы товара. Перенесённые со старого сайта — первыми. */
 export function productMetadata(product: ProductPage): Metadata {
-  return {
+  return pageMetadata({
+    seo: product.seo,
     title: `${product.title} — купить в CAD.kz`,
-    description: product.summary ?? undefined,
-    alternates: { canonical: product.path },
-    openGraph: product.pictures[0] ? { images: [product.pictures[0].url] } : undefined,
-  }
+    description: product.summary ?? product.description,
+    path: product.path,
+    image: product.pictures[0]?.url,
+  })
 }

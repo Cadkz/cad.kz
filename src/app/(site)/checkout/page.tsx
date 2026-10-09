@@ -3,7 +3,10 @@ import { CheckoutView } from '@/components/CheckoutView/CheckoutView'
 import { Container } from '@/components/Container/Container'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
 
-export const metadata = { title: 'Оформление заказа — CAD.kz' }
+export const metadata = {
+  title: 'Оформление заказа — CAD.kz',
+  robots: { index: false, follow: false },
+}
 
 export default function CheckoutPage() {
   return (

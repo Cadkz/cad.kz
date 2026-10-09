@@ -62,3 +62,41 @@ export async function cardPictures(
   }
   return result
 }
+
+/** Адрес файла «Медиа» (/api/media/file/<имя>) → имя файла, иначе null. */
+function mediaFilename(src: string) {
+  const match = /^\/api\/media\/file\/([^/?#]+)/.exec(src)
+  if (!match?.[1]) return null
+  try {
+    return decodeURIComponent(match[1])
+  } catch {
+    return null
+  }
+}
+
+/** Картинки из текста публикации: размеры берутся из «Медиа» одним запросом. */
+export async function bodyPictures(
+  payload: Payload,
+  sources: string[],
+): Promise<Map<string, Picture>> {
+  const byName = new Map<string, string>()
+  for (const src of sources) {
+    const name = mediaFilename(src)
+    if (name) byName.set(name, src)
+  }
+  if (!byName.size) return new Map()
+  const { docs } = await payload.find({
+    collection: 'media',
+    where: { filename: { in: [...byName.keys()] } },
+    limit: byName.size,
+    depth: 0,
+    pagination: false,
+  })
+  const result = new Map<string, Picture>()
+  for (const media of docs) {
+    const src = media.filename ? byName.get(media.filename) : undefined
+    const picture = toPicture(media)
+    if (src && picture) result.set(src, picture)
+  }
+  return result
+}

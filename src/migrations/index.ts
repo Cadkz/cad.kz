@@ -2,6 +2,7 @@ import * as migration_20261008_112430_initial from './20261008_112430_initial'
 import * as migration_20261008_122508_blob_object_key from './20261008_122508_blob_object_key'
 import * as migration_20261009_053715_catalog_sections from './20261009_053715_catalog_sections'
 import * as migration_20261009_061254_manufacturer_image from './20261009_061254_manufacturer_image'
+import * as migration_20261009_062507_seo_pages_contacts from './20261009_062507_seo_pages_contacts'
 
 export const migrations = [
   {
@@ -23,5 +24,10 @@ export const migrations = [
     up: migration_20261009_061254_manufacturer_image.up,
     down: migration_20261009_061254_manufacturer_image.down,
     name: '20261009_061254_manufacturer_image',
+  },
+  {
+    up: migration_20261009_062507_seo_pages_contacts.up,
+    down: migration_20261009_062507_seo_pages_contacts.down,
+    name: '20261009_062507_seo_pages_contacts',
   },
 ]

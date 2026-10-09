@@ -33,3 +33,24 @@
   background: var(--color-blue-soft);
   color: var(--color-navy);
 }
+
+.link {
+  color: var(--color-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.link:hover {
+  color: var(--color-blue-hover);
+}
+
+.figure {
+  margin: 0;
+}
+
+.image {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}

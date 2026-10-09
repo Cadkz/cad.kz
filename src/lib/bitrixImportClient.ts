@@ -95,13 +95,16 @@ export function chunk<T>(items: T[], count: number, bytes = 1_500_000): T[][] {
 export class StepError extends Error {}
 
 /** Один шаг импорта. При сбое сети или сервера пробует ещё раз через пару секунд. */
-export async function step<T>(body: Record<string, unknown>): Promise<T> {
+export async function step<T>(
+  body: Record<string, unknown>,
+  endpoint = '/api/admin/bitrix-import',
+): Promise<T> {
   let lastError = 'Нет связи с сайтом.'
   for (let attempt = 0; attempt < 3; attempt++) {
     if (attempt) await new Promise((resolve) => setTimeout(resolve, 2000 * attempt))
     let response: Response
     try {
-      response = await fetch('/api/admin/bitrix-import', {
+      response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

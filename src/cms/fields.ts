@@ -20,6 +20,24 @@ export function slugField(label = 'Адрес'): Field {
   return { name: 'slug', label, type: 'text', unique: true, required: true, index: true }
 }
 
+/**
+ * Заголовок и описание для поисковиков. Пусто — подставляются название и анонс.
+ * При переносе со старого cad.kz сюда попадают его title и description, чтобы не терять позиции.
+ */
+export const seoField: Field = {
+  name: 'seo',
+  label: 'Для поисковиков',
+  type: 'group',
+  admin: {
+    description:
+      'Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.',
+  },
+  fields: [
+    textField('title', 'Заголовок вкладки (title)'),
+    { name: 'description', label: 'Описание в поиске (description)', type: 'textarea' },
+  ],
+}
+
 /** Поля для повторяемого импорта со старого сайта на 1С-Битрикс. */
 export const legacyFields: Field[] = [
   { name: 'legacyKey', label: 'Уникальный ключ импорта', type: 'text', unique: true, index: true },

@@ -3,7 +3,7 @@ import { CartView } from '@/components/CartView/CartView'
 import { Container } from '@/components/Container/Container'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
 
-export const metadata = { title: 'Корзина — CAD.kz' }
+export const metadata = { title: 'Корзина — CAD.kz', robots: { index: false, follow: false } }
 
 export default function CartPage() {
   return (

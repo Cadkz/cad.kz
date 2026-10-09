@@ -6,6 +6,7 @@ import {
   cleanPath,
   isLegacyPath,
   manufacturerName,
+  newPagePath,
   parseCatalogPath,
   pathVariants,
   sectionHint,
@@ -50,15 +51,27 @@ test('old pages outside the catalog lead to the nearest new page', () => {
   for (const path of [
     '/users/2536.php',
     '/webstat/usage_201702.html',
-    '/contacts/',
-    '/about/team/elena_shulyak',
-    '/about/essentials.php',
     '/oferta.php',
     '/index%281%29.php',
     '/404catalog.php',
     '/forum/topic/1/',
   ])
     assert.deepEqual(staticLegacyTarget(path), { to: '/' }, path)
+})
+
+test('old text pages lead to the new text pages', () => {
+  assert.deepEqual(staticLegacyTarget('/contacts/'), { to: '/contacts' })
+  assert.deepEqual(staticLegacyTarget('/about/'), { to: '/about' })
+  assert.deepEqual(staticLegacyTarget('/about/howto/'), { to: '/about/howto' })
+  assert.deepEqual(staticLegacyTarget('/about/essentials.php'), { to: '/about/requisites' })
+  assert.deepEqual(staticLegacyTarget('/about/team/elena_shulyak'), { to: '/about' })
+  assert.deepEqual(staticLegacyTarget('/about/vacancies/'), { to: '/about' })
+  assert.equal(newPagePath('/about/'), '/about')
+  assert.equal(newPagePath('/About/Delivery/'), '/about/delivery')
+  assert.equal(newPagePath('/contacts'), '/contacts')
+  assert.equal(newPagePath('/about/news/'), null)
+  for (const path of ['/about', '/about/howto', '/contacts'])
+    assert.equal(isLegacyPath(path), false, path)
 })
 
 test('pages of the new site are not treated as old addresses', () => {
@@ -86,8 +99,10 @@ test('every address from the old sitemaps goes to the old-address page', () => {
   const paths = readFileSync('scripts/legacy-paths.txt', 'utf8').split('\n').filter(Boolean)
   assert.ok(paths.length > 2000)
   // Главная и список статей — страницы нового сайта, у них слеш в конце просто убирается.
+  // Текстовые страницы (/about/, /contacts/) ведёт на новый адрес сам proxy (newPagePath).
   for (const path of paths)
-    if (!['/', '/articles/'].includes(path)) assert.equal(isLegacyPath(path), true, path)
+    if (!['/', '/articles/'].includes(path))
+      assert.ok(isLegacyPath(path) || newPagePath(path), path)
 })
 
 test('the product map matches the sitemaps', () => {

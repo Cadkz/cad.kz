@@ -5,7 +5,7 @@ import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { ru } from '@payloadcms/translations/languages/ru'
 import { buildConfig } from 'payload'
 import { manufacturers, offers, products, sections } from './cms/collections/catalog'
-import { media, publications } from './cms/collections/content'
+import { media, pages, publications } from './cms/collections/content'
 import { crmDeliveries, orders } from './cms/collections/orders'
 import { exchangeRates, pricingSettings } from './cms/collections/pricing'
 import { sectionRules } from './cms/collections/sectionRules'
@@ -52,6 +52,11 @@ export default buildConfig({
           path: '/import-bitrix',
           meta: { title: 'Импорт из Битрикса' },
         },
+        legacyContent: {
+          Component: '/components/LegacyContentView/LegacyContentView#LegacyContentView',
+          path: '/legacy-content',
+          meta: { title: 'Перенос со старого сайта' },
+        },
       },
     },
   },
@@ -63,6 +68,7 @@ export default buildConfig({
     sectionRules,
     manufacturers,
     publications,
+    pages,
     media,
     exchangeRates,
     users,

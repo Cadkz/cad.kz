@@ -2,7 +2,10 @@ import { PublicationIndex } from '@/components/PublicationIndex/PublicationIndex
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
-export const metadata = { title: 'Новости и акции — CAD.kz' }
+export const metadata = {
+  title: 'Новости и акции — CAD.kz',
+  description: 'Новости, акции, вебинары и мероприятия CAD.kz.',
+}
 
 export default async function NewsPage({ searchParams }: Props) {
   const params = await searchParams

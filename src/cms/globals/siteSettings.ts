@@ -22,6 +22,14 @@ export const siteSettings: GlobalConfig = {
     textField('telegram', 'Ссылка на Telegram'),
     textField('email', 'Электронная почта'),
     {
+      name: 'address',
+      label: 'Адрес офиса',
+      type: 'textarea',
+      admin: { description: 'Показывается на странице «Контакты».' },
+    },
+    textField('hours', 'Часы работы (например, Пн–Пт 9:00–18:00)'),
+    textField('mapUrl', 'Ссылка на офис в 2ГИС или на картах'),
+    {
       name: 'socials',
       label: 'Соцсети',
       type: 'array',

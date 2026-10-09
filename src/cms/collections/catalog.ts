@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { contentCollection, relationField, slugField, textField } from '../fields'
+import { contentCollection, relationField, seoField, slugField, textField } from '../fields'
 import { productSections } from '../hooks/productSections'
 
 /** Иконки разделов: ключ из этого списка сопоставляется с иконкой lucide в компоненте. */
@@ -222,6 +222,7 @@ const productCollection = contentCollection({
         { name: 'answer', label: 'Ответ', type: 'textarea', required: true },
       ],
     },
+    seoField,
   ],
 })
 
