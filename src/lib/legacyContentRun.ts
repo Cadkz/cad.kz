@@ -135,6 +135,18 @@ async function infoPages(payload: Payload, reply: PagesReply) {
 }
 
 /**
+ * Новость со старого сайта. Часть новостей cad.kz по своему адресу отдаёт общий список (испорчен
+ * кэш старого сайта, так открывается и ссылка из его же списка), а версия для печати — саму
+ * новость. Поэтому при пустом разборе пробуем ?print=Y.
+ */
+async function fetchPublication(oldPath: string) {
+  const url = `${oldSite()}${encodeURI(oldPath)}`
+  const parsed = parsePublicationPage(await fetchPage(url), oldPath, oldSite())
+  if (parsed) return parsed
+  return parsePublicationPage(await fetchPage(`${url}?print=Y`), oldPath, oldSite())
+}
+
+/**
  * Новости, акции и статьи: скачать страницу, разобрать, создать публикацию. Первый запрос
  * (offset 0) ещё переносит текстовые страницы. Уже перенесённое пропускается.
  */
@@ -169,8 +181,7 @@ export async function publicationsPart(payload: Payload, body: Record<string, un
       group.map(async (oldPath) => {
         if (done.has(`legacy:page:${oldPath}`)) return { oldPath, existing: true as const }
         try {
-          const html = await fetchPage(`${oldSite()}${encodeURI(oldPath)}`)
-          return { oldPath, parsed: parsePublicationPage(html, oldPath, oldSite()) }
+          return { oldPath, parsed: await fetchPublication(oldPath) }
         } catch (error) {
           return { oldPath, error: pageFailure(error) }
         }
