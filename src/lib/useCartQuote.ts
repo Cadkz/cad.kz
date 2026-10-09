@@ -6,13 +6,20 @@ import type { CartItem } from '@/components/CartProvider/CartProvider'
 export type QuoteLine = {
   offerId: string
   productId: string
+  /** Адрес страницы товара (прежний адрес cad.kz, если товар там был). */
+  href: string
   title: string
   configuration: string
   quantity: number
   unitKzt: string
   totalKzt: string
 }
-export type Quote = { totalKzt: string; lines: QuoteLine[] }
+export type Quote = {
+  totalKzt: string
+  lines: QuoteLine[]
+  /** «С этим покупают» по всем товарам корзины. */
+  suggestions?: { href: string; title: string; vendor: string | null }[]
+}
 
 /**
  * Серверный пересчёт корзины. Клиент отправляет только ID комплектаций и количество,

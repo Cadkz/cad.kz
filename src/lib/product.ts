@@ -30,7 +30,6 @@ export type ProductPage = {
   properties: { name: string; value: string }[]
   faq: { question: string; answer: string }[]
   requires: RelatedProduct[]
-  recommended: RelatedProduct[]
   offers: ProductOffer[]
 }
 
@@ -102,7 +101,6 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     properties: (product.properties ?? []).map(({ name, value }) => ({ name, value })),
     faq: (product.faq ?? []).map(({ question, answer }) => ({ question, answer })),
     requires: related(product.requiresProducts),
-    recommended: related(product.recommended),
     offers: priced.map(({ offer, unit }) => ({
       id: String(offer.id),
       configuration: offer.configuration,
@@ -110,33 +108,6 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
       price: unit ? formatKzt(unit) : null,
     })),
   }
-}
-
-/** Похожие товары — из тех же направлений, без самого товара и уже рекомендованных. */
-export async function getSimilar(product: ProductPage, limit = 3): Promise<RelatedProduct[]> {
-  const directions = product.sections.filter((s) => s.isDirection).map((s) => s.slug)
-  if (!directions.length) return []
-  const payload = await cms()
-  const sections = await payload.find({
-    collection: 'sections',
-    where: { slug: { in: directions } },
-    limit: 50,
-    depth: 0,
-  })
-  const exclude = [product.slug, ...product.recommended.map((r) => r.slug)]
-  const { docs } = await payload.find({
-    collection: 'products',
-    where: {
-      and: [
-        { status: { equals: 'published' } },
-        { sections: { in: sections.docs.map((s) => s.id) } },
-        { slug: { not_in: exclude } },
-      ],
-    },
-    limit,
-    depth: 1,
-  })
-  return related(docs)
 }
 
 /** Заголовок, описание и канонический адрес страницы товара. */

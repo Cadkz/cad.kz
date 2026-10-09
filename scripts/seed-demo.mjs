@@ -80,7 +80,10 @@ try {
       summary: product.summary,
       description: product.description,
       manufacturer: manufacturers.get(product.manufacturer),
-      sections: product.sections.map((key) => sections.get(key)),
+      // Демотовары размечены вручную: правила разделов их не трогают.
+      autoSections: false,
+      mainSection: sections.get(product.sections[0]),
+      extraSections: product.sections.slice(1).map((key) => sections.get(key)),
       tasks: product.tasks.map((title) => ({ title })),
       properties: product.properties ?? [],
       faq: product.faq ?? [],

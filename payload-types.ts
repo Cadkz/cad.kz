@@ -70,6 +70,7 @@ export interface Config {
     products: Product;
     offers: Offer;
     sections: Section;
+    'section-rules': SectionRule;
     manufacturers: Manufacturer;
     publications: Publication;
     media: Media;
@@ -90,6 +91,7 @@ export interface Config {
     products: ProductsSelect<false> | ProductsSelect<true>;
     offers: OffersSelect<false> | OffersSelect<true>;
     sections: SectionsSelect<false> | SectionsSelect<true>;
+    'section-rules': SectionRulesSelect<false> | SectionRulesSelect<true>;
     manufacturers: ManufacturersSelect<false> | ManufacturersSelect<true>;
     publications: PublicationsSelect<false> | PublicationsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -163,6 +165,18 @@ export interface Product {
    */
   description?: string | null;
   manufacturer?: (number | null) | Manufacturer;
+  /**
+   * Разделы ставятся сами по «Правилам разделов». Если поменять разделы вручную, галочка снимется, и правила этот товар больше не трогают. Поставьте её снова, чтобы вернуть разделы по правилам.
+   */
+  autoSections?: boolean | null;
+  /**
+   * Главное направление или тип товара: от него значок, хлебные крошки и «Похожие».
+   */
+  mainSection?: (number | null) | Section;
+  /**
+   * Товар виден и в этих разделах каталога.
+   */
+  extraSections?: (number | Section)[] | null;
   sections?: (number | Section)[] | null;
   tasks?:
     | {
@@ -171,6 +185,9 @@ export interface Product {
       }[]
     | null;
   requiresProducts?: (number | Product)[] | null;
+  suggestSimilar?: boolean | null;
+  suggestCross?: boolean | null;
+  similarProducts?: (number | Product)[] | null;
   recommended?: (number | Product)[] | null;
   gallery?: (number | Media)[] | null;
   properties?:
@@ -238,6 +255,10 @@ export interface Section {
     | null;
   tone?: ('navy' | 'blue' | 'graphite') | null;
   order?: number | null;
+  /**
+   * Например, к плоттерам — расходные материалы, к программам — курсы и внедрение. Курсы и программы с направлением предлагаются, только если направление совпадает.
+   */
+  crossSections?: (number | Section)[] | null;
   legacyKey?: string | null;
   legacyUrl?: string | null;
   updatedAt: string;
@@ -252,7 +273,6 @@ export interface Media {
   alt: string;
   legacyKey?: string | null;
   legacyUrl?: string | null;
-  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -282,6 +302,40 @@ export interface Offer {
   sourceVat: string;
   legacyKey?: string | null;
   legacyUrl?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Новый товар (из импорта или созданный вручную) получает разделы по первому подходящему правилу. Правила проверяются по порядку — от меньшего числа к большему. Товары, у которых разделы поменяли вручную, правила не трогают.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "section-rules".
+ */
+export interface SectionRule {
+  id: number;
+  title: string;
+  /**
+   * Меньше — проверяется раньше. Узкое правило (по словам в названии) ставьте раньше общего правила того же производителя.
+   */
+  order: number;
+  /**
+   * Пусто — любой производитель.
+   */
+  manufacturer?: (number | null) | Manufacturer;
+  /**
+   * Пусто — любой тип.
+   */
+  kind?: ('software' | 'hardware' | 'course' | 'service') | null;
+  /**
+   * Через запятую — подходит любое из слов: «revit, autocad». Плюс — нужны все части: «project studio+фундамент». Можно писать начало слова: «геолог». Пусто — подходит любой товар.
+   */
+  words?: string | null;
+  mainSection?: (number | null) | Section;
+  extraSections?: (number | Section)[] | null;
+  /**
+   * Подходящие товары снимаются с публикации. Старые ссылки на них ведут на товары производителя.
+   */
+  retire?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -497,6 +551,10 @@ export interface PayloadLockedDocument {
         value: number | Section;
       } | null)
     | ({
+        relationTo: 'section-rules';
+        value: number | SectionRule;
+      } | null)
+    | ({
         relationTo: 'manufacturers';
         value: number | Manufacturer;
       } | null)
@@ -590,6 +648,9 @@ export interface ProductsSelect<T extends boolean = true> {
   summary?: T;
   description?: T;
   manufacturer?: T;
+  autoSections?: T;
+  mainSection?: T;
+  extraSections?: T;
   sections?: T;
   tasks?:
     | T
@@ -598,6 +659,9 @@ export interface ProductsSelect<T extends boolean = true> {
         id?: T;
       };
   requiresProducts?: T;
+  suggestSimilar?: T;
+  suggestCross?: T;
+  similarProducts?: T;
   recommended?: T;
   gallery?: T;
   properties?:
@@ -653,8 +717,25 @@ export interface SectionsSelect<T extends boolean = true> {
   icon?: T;
   tone?: T;
   order?: T;
+  crossSections?: T;
   legacyKey?: T;
   legacyUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "section-rules_select".
+ */
+export interface SectionRulesSelect<T extends boolean = true> {
+  title?: T;
+  order?: T;
+  manufacturer?: T;
+  kind?: T;
+  words?: T;
+  mainSection?: T;
+  extraSections?: T;
+  retire?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -698,7 +779,6 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   legacyKey?: T;
   legacyUrl?: T;
-  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

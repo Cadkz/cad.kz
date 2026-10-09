@@ -61,10 +61,8 @@ export const DIRECTION_RULES = [
     key: 'artec',
     label: 'Artec: сканеры, Studio, Cloud, метрология',
     vendor: 'Artec 3D',
-    sections: ['scanners'],
-    exceptions: [
-      { label: 'Artec Studio', title: /artec studio/i, sections: ['scanners', 'machine'] },
-    ],
+    // 09.10.2026, решение владельца: вся линейка Artec вторым разделом в «Машиностроении».
+    sections: ['scanners', 'machine'],
   },
   {
     key: 'widetek',

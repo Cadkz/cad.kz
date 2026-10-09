@@ -15,7 +15,9 @@ import { PropertyList } from '@/components/PropertyList/PropertyList'
 import { getHome } from '@/lib/home'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
-import { getSimilar, type ProductPage, type RelatedProduct } from '@/lib/product'
+import { cms } from '@/lib/payload'
+import type { ProductPage, RelatedProduct } from '@/lib/product'
+import { getRecommendations } from '@/lib/recommendations'
 import { parseBody } from '@/lib/richText'
 
 const groupLabels = {
@@ -48,8 +50,8 @@ function Related({ title, items }: { title: string; items: RelatedProduct[] }) {
 
 /** Страница товара — шаблон «Товар». Все данные и цены из CMS, итог считает сервер. */
 export async function ProductView({ product }: { product: ProductPage }) {
-  const [similar, contacts, home] = await Promise.all([
-    getSimilar(product),
+  const [{ cross, similar }, contacts, home] = await Promise.all([
+    cms().then((payload) => getRecommendations(payload, product.id)),
     getContacts(),
     getHome(),
   ])
@@ -116,7 +118,7 @@ export async function ProductView({ product }: { product: ProductPage }) {
             </ProductSection>
           )}
         </ProductLayout>
-        <Related title="С этим покупают" items={product.recommended} />
+        <Related title="С этим покупают" items={cross} />
         <Related title="Похожие товары" items={similar} />
       </Container>
       <CtaBanner cta={home.cta} />

@@ -1,5 +1,6 @@
 import * as migration_20261008_112430_initial from './20261008_112430_initial'
 import * as migration_20261008_122508_blob_object_key from './20261008_122508_blob_object_key'
+import * as migration_20261009_053715_catalog_sections from './20261009_053715_catalog_sections'
 
 export const migrations = [
   {
@@ -11,5 +12,10 @@ export const migrations = [
     up: migration_20261008_122508_blob_object_key.up,
     down: migration_20261008_122508_blob_object_key.down,
     name: '20261008_122508_blob_object_key',
+  },
+  {
+    up: migration_20261009_053715_catalog_sections.up,
+    down: migration_20261009_053715_catalog_sections.down,
+    name: '20261009_053715_catalog_sections',
   },
 ]

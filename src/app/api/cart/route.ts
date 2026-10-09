@@ -2,6 +2,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { normalizeCart } from '@/domain/cart.mjs'
 import { quoteCart } from '@/lib/cartQuote'
+import { getCartSuggestions } from '@/lib/recommendations'
 
 export async function POST(request: Request) {
   if (process.env.APP_MODE !== 'demo')
@@ -13,7 +14,15 @@ export async function POST(request: Request) {
     const items = normalizeCart(JSON.parse(raw).items)
     const payload = await getPayload({ config })
     const quoted = await quoteCart(payload, items)
-    return Response.json({ mode: 'demo', ...quoted }, { headers: { 'Cache-Control': 'no-store' } })
+    // Подборка не должна ломать расчёт корзины: при сбое корзина просто без неё.
+    const suggestions = await getCartSuggestions(
+      payload,
+      quoted.lines.map((line) => line.productId),
+    ).catch(() => [])
+    return Response.json(
+      { mode: 'demo', ...quoted, suggestions },
+      { headers: { 'Cache-Control': 'no-store' } },
+    )
   } catch (error) {
     return Response.json(
       {

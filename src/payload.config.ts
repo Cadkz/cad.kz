@@ -8,6 +8,7 @@ import { manufacturers, offers, products, sections } from './cms/collections/cat
 import { media, publications } from './cms/collections/content'
 import { crmDeliveries, orders } from './cms/collections/orders'
 import { exchangeRates, pricingSettings } from './cms/collections/pricing'
+import { sectionRules } from './cms/collections/sectionRules'
 import { conversations, importRuns, redirects } from './cms/collections/system'
 import { users } from './cms/collections/users'
 import { homePage } from './cms/globals/homePage'
@@ -59,6 +60,7 @@ export default buildConfig({
     products,
     offers,
     sections,
+    sectionRules,
     manufacturers,
     publications,
     media,

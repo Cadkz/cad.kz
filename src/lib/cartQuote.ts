@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 import { CartUnavailableError } from '@/domain/checkout.mjs'
 import { findPublicOffer, loadPricingContext, quoteOffer } from './pricing'
+import { productPath } from './productPath'
 
 /**
  * Серверный расчёт корзины: единственное место, где строки корзины превращаются в цены.
@@ -15,6 +16,7 @@ export async function quoteCart(payload: Payload, items: { offerId: string; quan
       return {
         offerId,
         productId: found.product.slug,
+        href: productPath(found.product),
         title: found.product.title,
         configuration: found.offer.configuration,
         license: found.offer.license,

@@ -4,6 +4,7 @@ import { formatKzt } from './format'
 import { cms } from './payload'
 import { loadPricingContext, type PricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
+import { relId } from './rel'
 
 export type CatalogGroup = 'software' | 'hardware' | 'service'
 
@@ -34,11 +35,6 @@ const kindGroup: Record<Product['kind'], CatalogGroup> = {
 }
 
 const published = { status: { equals: 'published' } } as const
-
-function relId(value: number | { id: number } | null | undefined) {
-  if (value == null) return null
-  return typeof value === 'number' ? value : value.id
-}
 
 /** Самая доступная комплектация, цена посчитана сервером. Ошибка курса не роняет каталог. */
 function cheapest(offers: Offer[], context: PricingContext) {

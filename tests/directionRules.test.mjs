@@ -5,7 +5,7 @@ import { directionSections, isRetired } from '../src/domain/directionRules.mjs'
 const sw = (vendor, title, kind = 'software') => directionSections({ vendor, title, kind })
 
 test('товар без исключения получает разделы группы', () => {
-  assert.deepEqual(sw('Artec 3D', 'Artec Leo', 'hardware'), ['scanners'])
+  assert.deepEqual(sw('Artec 3D', 'Artec Leo', 'hardware'), ['scanners', 'machine'])
   assert.deepEqual(sw('Image Access', 'WideTEK 36CL', 'hardware'), ['wide-scanners'])
   assert.deepEqual(sw('Canon', 'Тонер colorWAVE T60 голубой', 'hardware'), ['consumables'])
 })

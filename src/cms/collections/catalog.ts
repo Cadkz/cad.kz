@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { contentCollection, relationField, slugField, textField } from '../fields'
+import { productSections } from '../hooks/productSections'
 
 /** Иконки разделов: ключ из этого списка сопоставляется с иконкой lucide в компоненте. */
 export const sectionIcons = [
@@ -65,10 +66,22 @@ export const sections = contentCollection({
       ],
     },
     { name: 'order', label: 'Порядок вывода', type: 'number', defaultValue: 100 },
+    {
+      name: 'crossSections',
+      label: '«С этим покупают»: предлагать товары из разделов',
+      type: 'relationship',
+      relationTo: 'sections',
+      hasMany: true,
+      admin: {
+        description:
+          'Например, к плоттерам — расходные материалы, к программам — курсы и внедрение. ' +
+          'Курсы и программы с направлением предлагаются, только если направление совпадает.',
+      },
+    },
   ],
 })
 
-export const products = contentCollection({
+const productCollection = contentCollection({
   slug: 'products',
   singular: 'Товар',
   plural: 'Товары',
@@ -97,10 +110,89 @@ export const products = contentCollection({
       },
     },
     relationField('manufacturer', 'Производитель', 'manufacturers'),
-    relationField('sections', 'Разделы', 'sections', true),
+    {
+      type: 'collapsible',
+      label: 'Разделы каталога',
+      fields: [
+        {
+          name: 'autoSections',
+          label: 'Подбирать разделы по правилам',
+          type: 'checkbox',
+          defaultValue: true,
+          admin: {
+            description:
+              'Разделы ставятся сами по «Правилам разделов». Если поменять разделы вручную, галочка ' +
+              'снимется, и правила этот товар больше не трогают. Поставьте её снова, чтобы вернуть ' +
+              'разделы по правилам.',
+          },
+        },
+        {
+          name: 'mainSection',
+          label: 'Основной раздел',
+          type: 'relationship',
+          relationTo: 'sections',
+          admin: {
+            description:
+              'Главное направление или тип товара: от него значок, хлебные крошки и «Похожие».',
+          },
+        },
+        {
+          name: 'extraSections',
+          label: 'Дополнительные разделы',
+          type: 'relationship',
+          relationTo: 'sections',
+          hasMany: true,
+          admin: { description: 'Товар виден и в этих разделах каталога.' },
+        },
+        {
+          // Основной + дополнительные одним списком, заполняется сам (хук productSections).
+          name: 'sections',
+          type: 'relationship',
+          relationTo: 'sections',
+          hasMany: true,
+          admin: { hidden: true },
+        },
+      ],
+    },
     { name: 'tasks', label: 'Задачи', type: 'array', fields: [textField('title', 'Задача', true)] },
     relationField('requiresProducts', 'Требуется базовое ПО', 'products', true),
-    relationField('recommended', 'Рекомендации', 'products', true),
+    {
+      type: 'collapsible',
+      label: 'Похожие и «С этим покупают»',
+      admin: {
+        description:
+          'Сайт подбирает товары сам по разделам. Ручные списки показываются первыми, ' +
+          'галочки разрешают или запрещают предлагать этот товар в чужих подборках.',
+      },
+      fields: [
+        {
+          name: 'suggestSimilar',
+          label: 'Сайт может предлагать этот товар в «Похожих»',
+          type: 'checkbox',
+          defaultValue: true,
+        },
+        {
+          name: 'suggestCross',
+          label: 'Сайт может предлагать этот товар в «С этим покупают» (и в корзине)',
+          type: 'checkbox',
+          defaultValue: true,
+        },
+        {
+          name: 'similarProducts',
+          label: 'Похожие — вручную',
+          type: 'relationship',
+          relationTo: 'products',
+          hasMany: true,
+        },
+        {
+          name: 'recommended',
+          label: '«С этим покупают» — вручную',
+          type: 'relationship',
+          relationTo: 'products',
+          hasMany: true,
+        },
+      ],
+    },
     relationField('gallery', 'Галерея', 'media', true),
     {
       name: 'properties',
@@ -119,6 +211,15 @@ export const products = contentCollection({
     },
   ],
 })
+
+export const products: CollectionConfig = {
+  ...productCollection,
+  admin: {
+    ...productCollection.admin,
+    defaultColumns: ['title', 'manufacturer', 'mainSection', 'status', 'updatedAt'],
+  },
+  hooks: { beforeChange: [productSections] },
+}
 
 export const offers: CollectionConfig = contentCollection({
   slug: 'offers',

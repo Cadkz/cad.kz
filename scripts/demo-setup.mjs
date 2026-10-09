@@ -51,6 +51,7 @@ function run(title, args, { required = true } = {}) {
 
 run('1 из 3. Создание таблиц (миграции)', ['migrate'])
 run('2 из 3. Загрузка демоданных', ['run', 'scripts/seed-demo.mjs'])
+run('2 из 3. Разделы каталога и правила', ['run', 'scripts/catalog-setup.mjs'])
 
 if (process.env.BOOTSTRAP_ADMIN_EMAIL && process.env.BOOTSTRAP_ADMIN_PASSWORD) {
   const created = run('3 из 3. Первый администратор', ['run', 'scripts/bootstrap-admin.mjs'], {
