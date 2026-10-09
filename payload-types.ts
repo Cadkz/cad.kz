@@ -218,10 +218,35 @@ export interface Manufacturer {
   title: string;
   status: 'draft' | 'published';
   website?: string | null;
+  /**
+   * Логотип или коробка программы. Показывается в каталоге и на странице товара, если у товара пустая галерея.
+   */
+  image?: (number | null) | Media;
   legacyKey?: string | null;
   legacyUrl?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  alt: string;
+  legacyKey?: string | null;
+  legacyUrl?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -263,27 +288,6 @@ export interface Section {
   legacyUrl?: string | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  alt: string;
-  legacyKey?: string | null;
-  legacyUrl?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -747,6 +751,7 @@ export interface ManufacturersSelect<T extends boolean = true> {
   title?: T;
   status?: T;
   website?: T;
+  image?: T;
   legacyKey?: T;
   legacyUrl?: T;
   updatedAt?: T;

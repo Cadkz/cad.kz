@@ -23,7 +23,20 @@ export const manufacturers = contentCollection({
   slug: 'manufacturers',
   singular: 'Производитель',
   plural: 'Производители',
-  fields: [textField('website', 'Сайт')],
+  fields: [
+    textField('website', 'Сайт'),
+    {
+      name: 'image',
+      label: 'Картинка для товаров без своей',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description:
+          'Логотип или коробка программы. Показывается в каталоге и на странице товара, ' +
+          'если у товара пустая галерея.',
+      },
+    },
+  ],
 })
 
 export const sections = contentCollection({

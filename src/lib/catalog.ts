@@ -2,6 +2,7 @@ import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
 import { formatKzt } from './format'
 import { cms } from './payload'
+import { cardPictures } from './pictures'
 import { loadPricingContext, type PricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
 import { relId } from './rel'
@@ -91,6 +92,7 @@ export async function getCatalog(): Promise<{ items: CatalogItem[]; facets: Face
     loadPricingContext(payload),
   ])
 
+  const pictures = await cardPictures(payload, products.docs, manufacturers.docs)
   const sectionById = new Map(sections.docs.map((section) => [section.id, section]))
   const vendorById = new Map(manufacturers.docs.map((m: Manufacturer) => [m.id, m.title]))
   const titleById = new Map(products.docs.map((product) => [product.id, product.title]))
@@ -119,6 +121,7 @@ export async function getCatalog(): Promise<{ items: CatalogItem[]; facets: Face
       vendor,
       summary: product.summary ?? null,
       icon: productSections[0]?.icon ?? null,
+      picture: pictures.get(product.id) ?? null,
       priceFrom: cheapest(productOffers, context),
       offersCount: productOffers.length,
       singleOffer: only ? { id: String(only.id), configuration: only.configuration } : null,

@@ -15,9 +15,11 @@ type Props = {
 export function ProductHeader({ title, vendor, summary, icon, tasks, requires }: Props) {
   return (
     <header className={styles.header}>
-      <span className={styles.icon} aria-hidden="true">
-        <SectionIcon name={icon} size={24} />
-      </span>
+      {icon && (
+        <span className={styles.icon} aria-hidden="true">
+          <SectionIcon name={icon} size={24} />
+        </span>
+      )}
       <div className={styles.text}>
         {vendor && <p className={styles.vendor}>{vendor}</p>}
         <h1>{title}</h1>

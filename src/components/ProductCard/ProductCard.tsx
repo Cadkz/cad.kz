@@ -1,5 +1,7 @@
 import { ArrowRight, SlidersHorizontal } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
+import type { Picture } from '@/lib/pictures'
 import { AddToCartButton } from '../AddToCartButton/AddToCartButton'
 import { Badge } from '../Badge/Badge'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
@@ -12,6 +14,8 @@ export type ProductCardData = {
   manufacturer: string | null
   summary: string | null
   icon: string | null
+  /** Своя картинка товара или картинка производителя; нет — подложка со значком раздела. */
+  picture: Picture | null
   /** Цена самой доступной комплектации, рассчитанная сервером, или null — «по запросу». */
   priceFrom: string | null
   offersCount: number
@@ -24,9 +28,25 @@ export type ProductCardData = {
 export function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <article className={styles.card}>
-      <span className={styles.icon}>
-        <SectionIcon name={product.icon} size={20} />
-      </span>
+      <Link
+        href={product.href}
+        className={product.picture ? styles.media : `${styles.media} ${styles.placeholder}`}
+        tabIndex={-1}
+        aria-hidden="true"
+      >
+        {product.picture ? (
+          <Image
+            src={product.picture.url}
+            alt=""
+            width={product.picture.width}
+            height={product.picture.height}
+            sizes="(min-width: 1200px) 300px, (min-width: 960px) 25vw, (min-width: 640px) 50vw, 100vw"
+            className={styles.image}
+          />
+        ) : (
+          <SectionIcon name={product.icon} size={24} />
+        )}
+      </Link>
       <h3 className={styles.title}>
         <Link href={product.href} className={styles.titleLink}>
           {product.title}

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { Product, Section } from '../../payload-types'
 import { formatKzt } from './format'
 import { cms } from './payload'
+import { type Picture, productPictures } from './pictures'
 import { loadPricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
 
@@ -31,6 +32,8 @@ export type ProductPage = {
   faq: { question: string; answer: string }[]
   requires: RelatedProduct[]
   offers: ProductOffer[]
+  /** Своя галерея или картинка производителя; пусто — блока картинок нет. */
+  pictures: Picture[]
 }
 
 function related(value: Product['recommended']): RelatedProduct[] {
@@ -107,6 +110,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
       license: offer.license,
       price: unit ? formatKzt(unit) : null,
     })),
+    pictures: productPictures(product),
   }
 }
 
@@ -116,5 +120,6 @@ export function productMetadata(product: ProductPage): Metadata {
     title: `${product.title} — купить в CAD.kz`,
     description: product.summary ?? undefined,
     alternates: { canonical: product.path },
+    openGraph: product.pictures[0] ? { images: [product.pictures[0].url] } : undefined,
   }
 }

@@ -7,6 +7,7 @@ import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
 import { Faq } from '@/components/Faq/Faq'
 import { Grid } from '@/components/Grid/Grid'
 import { MobileBuyBar } from '@/components/MobileBuyBar/MobileBuyBar'
+import { ProductGallery } from '@/components/ProductGallery/ProductGallery'
 import { ProductHeader } from '@/components/ProductHeader/ProductHeader'
 import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
 import { ProductLinkCard } from '@/components/ProductLinkCard/ProductLinkCard'
@@ -81,7 +82,7 @@ export async function ProductView({ product }: { product: ProductPage }) {
               title={product.title}
               vendor={product.vendor}
               summary={product.summary}
-              icon={product.sections[0]?.icon ?? null}
+              icon={product.pictures.length ? null : (product.sections[0]?.icon ?? 'building')}
               tasks={product.tasks}
               requires={product.requires.map((r) => r.title)}
             />
@@ -95,6 +96,9 @@ export async function ProductView({ product }: { product: ProductPage }) {
             />
           }
         >
+          {product.pictures.length > 0 && (
+            <ProductGallery pictures={product.pictures} title={product.title} />
+          )}
           {product.description && (
             <ProductSection title="О программе" id="about">
               <ArticleBody blocks={parseBody(product.description)} />
