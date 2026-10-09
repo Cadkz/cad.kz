@@ -6,6 +6,7 @@ import {
   type PickerView,
 } from '@/domain/picker.mjs'
 import type { Offer, Product } from '../../payload-types'
+import { kindProfile } from '../domain/productKind.mjs'
 import { formatKzt } from './format'
 import { loadPricingContext, type PricingContext, quoteOffer } from './pricing'
 import { relId } from './rel'
@@ -73,7 +74,12 @@ export async function loadPicker(payload: Payload, product: Product): Promise<Pi
   if (!steps.length) {
     const own = offers.get(product.id) ?? []
     const licenses = Object.fromEntries(own.map((o) => [String(o.id), o.license]))
-    return offersAsPicker(product.id, pickerOffers(own, context), licenses)
+    return offersAsPicker(
+      product.id,
+      pickerOffers(own, context),
+      licenses,
+      kindProfile(product.kind).stepTitle,
+    )
   }
 
   const titles = new Map(products.docs.map((p) => [p.id, p.title]))

@@ -9,8 +9,8 @@ import styles from './PickerBar.module.css'
  * действие, что в итоге справа. Пока ничего не выбрано — переход к выбору комплекта.
  */
 export function PickerBar() {
-  const { total, lines, openRequest } = usePickerContext()
-  const action = mainAction(total)
+  const { total, lines, openRequest, profile } = usePickerContext()
+  const action = mainAction(total, profile)
   const text =
     total.state === 'done'
       ? total.text

@@ -267,16 +267,17 @@ export function lineLabel(line) {
  * @param {number} productId
  * @param {PickerOffer[]} offers
  * @param {Record<string, string>} licenses  ID предложения → условия лицензии (пояснение).
+ * @param {string} [title]  Название шага по типу товара: «Вариант поставки», «Формат обучения».
  * @returns {PickerView}
  */
-export function offersAsPicker(productId, offers, licenses) {
+export function offersAsPicker(productId, offers, licenses, title = 'Комплектация') {
   if (!offers.length) return { switches: [], steps: [] }
   return {
     switches: [],
     steps: [
       {
         key: 'offers',
-        title: 'Комплектация',
+        title,
         hint: null,
         mode: offers.length > 1 ? 'one' : 'base',
         collapsed: false,

@@ -66,7 +66,7 @@ export function MobileMenu({ menu, contacts }: Props) {
                     <div className={styles.sectionBody}>
                       <MobileVendors column={column} onNavigate={close} />
                       <Link href={column.allHref} className={styles.all} onClick={close}>
-                        Смотреть весь раздел
+                        Все товары раздела
                       </Link>
                     </div>
                   </details>

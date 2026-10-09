@@ -2,6 +2,7 @@
 
 import { createContext, type ReactNode, useContext, useState } from 'react'
 import type { PickerView } from '@/domain/picker.mjs'
+import { type KindProfile, kindProfile } from '@/domain/productKind.mjs'
 import type { RequestKind } from '@/domain/siteRequest.mjs'
 import type { Contacts } from '@/lib/navigation'
 import { type PickerApi, usePicker } from '@/lib/usePicker'
@@ -12,6 +13,8 @@ export type PickerMeta = {
   productTitle: string
   /** Подпись кнопки продления; пусто — кнопки нет. */
   renewLabel: string | null
+  /** Тип товара: от него зависят подписи (лицензии, участники) и главное действие. */
+  kind?: string | null
   /** Страница семейства: корзины нет, только «Получить КП». */
   familySlug?: string | null
   contacts: Pick<Contacts, 'phones' | 'whatsappHref' | 'hours'>
@@ -20,6 +23,7 @@ export type PickerMeta = {
 type ContextValue = PickerApi & {
   view: PickerView
   meta: PickerMeta
+  profile: KindProfile
   openRequest: (kind: RequestKind) => void
 }
 
@@ -35,7 +39,9 @@ export function PickerProvider({ view, meta, pick, children }: Props) {
   const api = usePicker(view, pick)
   const [request, setRequest] = useState<RequestKind | null>(null)
   return (
-    <Context.Provider value={{ ...api, view, meta, openRequest: setRequest }}>
+    <Context.Provider
+      value={{ ...api, view, meta, profile: kindProfile(meta.kind), openRequest: setRequest }}
+    >
       {children}
       <RequestDialog
         kind={request}

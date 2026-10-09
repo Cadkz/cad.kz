@@ -16,10 +16,10 @@ import styles from './PickerSummary.module.css'
  */
 export function PickerSummary() {
   const picker = usePickerContext()
-  const { lines, total, quantity, setQuantity, openRequest, meta, view, state } = picker
+  const { lines, total, quantity, setQuantity, openRequest, meta, view, state, profile } = picker
   const { add, ready } = useCart()
   const [added, setAdded] = useState(false)
-  const action = mainAction(total)
+  const action = mainAction(total, profile)
 
   function toCart() {
     for (const line of lines) if (line.offer) add({ offerId: line.offer.id, quantity })
@@ -49,7 +49,7 @@ export function PickerSummary() {
         <p className={styles.note}>Отметьте, что нужно, — итог посчитается сразу.</p>
       )}
       <div className={styles.row}>
-        <span className={styles.label}>Количество</span>
+        <span className={styles.label}>{profile.quantity}</span>
         <div className={styles.stepper}>
           <button type="button" onClick={() => setQuantity(quantity - 1)} aria-label="Меньше">
             <Minus size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -59,7 +59,7 @@ export function PickerSummary() {
             min={1}
             max={999}
             value={quantity}
-            aria-label="Количество рабочих мест"
+            aria-label={profile.quantityAria}
             onChange={(event) => setQuantity(Number(event.target.value))}
           />
           <button type="button" onClick={() => setQuantity(quantity + 1)} aria-label="Больше">

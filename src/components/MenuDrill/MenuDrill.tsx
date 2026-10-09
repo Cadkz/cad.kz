@@ -55,11 +55,17 @@ export function MenuDrill({ column, onNavigate }: Props) {
     ...(line && !singleLine ? [{ title: line.title, back: null }] : []),
   ]
 
-  const all = line
-    ? { href: line.allHref, label: 'Смотреть все' }
-    : vendor
-      ? { href: vendor.allHref, label: `Все товары ${vendor.title} в разделе` }
-      : { href: column.allHref, label: 'Смотреть весь раздел' }
+  // Ссылки «все товары» на каждом шаге: текущий уровень и, глубже, весь раздел — чтобы
+  // из любого места меню одним нажатием попасть ко всем товарам направления.
+  const all = [
+    ...(line && !singleLine
+      ? [{ href: line.allHref, label: `Все товары линейки ${line.title}` }]
+      : []),
+    ...(vendor && !singleVendor
+      ? [{ href: vendor.allHref, label: `Все товары ${vendor.title} в разделе` }]
+      : []),
+    { href: column.allHref, label: `Все товары раздела «${column.title}»` },
+  ]
 
   return (
     <div className={styles.root}>
@@ -120,10 +126,14 @@ export function MenuDrill({ column, onNavigate }: Props) {
         </ul>
       )}
 
-      <Link href={all.href} className={styles.all} onClick={onNavigate}>
-        {all.label}
-        <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
-      </Link>
+      <div className={styles.allLinks}>
+        {all.map((item) => (
+          <Link key={item.href} href={item.href} className={styles.all} onClick={onNavigate}>
+            {item.label}
+            <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
+          </Link>
+        ))}
+      </div>
     </div>
   )
 }

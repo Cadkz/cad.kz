@@ -13,6 +13,7 @@ import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
 import { ProductLinkCard } from '@/components/ProductLinkCard/ProductLinkCard'
 import { ProductSection } from '@/components/ProductSection/ProductSection'
 import { PropertyList } from '@/components/PropertyList/PropertyList'
+import { kindProfile } from '@/domain/productKind.mjs'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
@@ -49,7 +50,8 @@ function Related({ title, items }: { title: string; items: RelatedProduct[] }) {
 }
 
 /**
- * Страница товара — шаблон «Товар», один для всех товаров. Первый экран: название, коротко,
+ * Страница товара — шаблон «Товар», один для всех товаров; подписи блоков и главное действие
+ * зависят от типа (src/domain/productKind.mjs). Первый экран: название, коротко,
  * задачи; справа итог выбора с тремя действиями. Ниже подбор по шагам (у обычной страницы —
  * один шаг из комплектаций), описание (начало сразу, остальное свёрнуто), характеристики, вопросы.
  */
@@ -66,8 +68,10 @@ export async function ProductView({
   ])
   const direction = product.sections.find((s) => s.isDirection)
   const guided = product.pageView === 'picker'
+  const profile = kindProfile(product.kind)
   const meta = {
     productId: product.id,
+    kind: product.kind,
     productTitle: product.title,
     renewLabel: product.renewLabel,
     contacts: {
@@ -109,7 +113,7 @@ export async function ProductView({
             aside={<PickerSummary />}
           >
             <ProductSection
-              title={guided ? 'Подберите комплект' : 'Комплектация и цена'}
+              title={guided ? 'Подберите комплект' : profile.configTitle}
               id="config"
               sub={guided ? 'Отметьте нужное — итог справа пересчитается сразу.' : undefined}
             >
@@ -119,12 +123,12 @@ export async function ProductView({
               <ProductGallery pictures={product.pictures} title={product.title} />
             )}
             {product.description && (
-              <ProductSection title="О программе" id="about">
+              <ProductSection title={profile.about} id="about">
                 <ProductAbout blocks={parseBody(product.description)} />
               </ProductSection>
             )}
             {product.properties.length > 0 && (
-              <ProductSection title="Характеристики" id="specs">
+              <ProductSection title={profile.specs} id="specs">
                 <PropertyList items={product.properties} />
               </ProductSection>
             )}
@@ -137,7 +141,7 @@ export async function ProductView({
           <PickerBar />
         </PickerProvider>
         <Related title="С этим покупают" items={cross} />
-        <Related title="Похожие товары" items={similar} />
+        <Related title={profile.similar} items={similar} />
       </Container>
     </main>
   )
