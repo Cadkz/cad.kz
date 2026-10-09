@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { ArticleBody } from '@/components/ArticleBody/ArticleBody'
+import { AsideContacts } from '@/components/AsideContacts/AsideContacts'
 import { AskManager } from '@/components/AskManager/AskManager'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
@@ -44,7 +45,7 @@ export async function InfoPageView({ slug }: { slug: string }) {
   const [links, pictures, contacts] = await Promise.all([
     getInfoLinks(),
     cms().then((payload) => bodyPictures(payload, imageSources(blocks))),
-    questions ? getContacts() : null,
+    getContacts(),
   ])
   const crumbs =
     slug === 'about'
@@ -58,26 +59,31 @@ export async function InfoPageView({ slug }: { slug: string }) {
     <main>
       <Container>
         <Breadcrumbs items={crumbs} />
-        <ReadingLayout>
+        <ReadingLayout
+          aside={
+            <>
+              <RelatedList
+                title="О компании"
+                items={[
+                  ...links.filter((link) => link.href !== pagePath(slug)),
+                  {
+                    id: 0,
+                    href: '/contacts',
+                    title: 'Контакты',
+                    date: null,
+                    topic: null,
+                    excerpt: null,
+                    cover: null,
+                  },
+                ]}
+              />
+              <AsideContacts contacts={contacts} />
+            </>
+          }
+        >
           <PageIntro title={page.title} lead={page.lead} />
           <ArticleBody blocks={blocks} pictures={pictures} />
-          {questions && contacts && <AskManager contacts={contacts} {...questions} />}
-
-          <RelatedList
-            title="О компании"
-            items={[
-              ...links.filter((link) => link.href !== pagePath(slug)),
-              {
-                id: 0,
-                href: '/contacts',
-                title: 'Контакты',
-                date: null,
-                topic: null,
-                excerpt: null,
-                cover: null,
-              },
-            ]}
-          />
+          {questions && <AskManager contacts={contacts} {...questions} />}
         </ReadingLayout>
       </Container>
     </main>

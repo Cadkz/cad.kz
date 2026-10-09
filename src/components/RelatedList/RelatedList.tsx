@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { NewsCardData } from '../NewsCard/NewsCard'
 import styles from './RelatedList.module.css'
 
-/** Короткий список ссылок под текстом шаблона «Чтение» (страницы «О компании»). */
+/** Связанные материалы в правой колонке шаблона «Чтение». */
 export function RelatedList({ title, items }: { title: string; items: NewsCardData[] }) {
   if (!items.length) return null
   return (

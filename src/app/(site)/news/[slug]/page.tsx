@@ -6,12 +6,10 @@ import { Badge } from '@/components/Badge/Badge'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
 import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
-import { Grid } from '@/components/Grid/Grid'
-import { NewsCard } from '@/components/NewsCard/NewsCard'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
 import { PrevNext } from '@/components/PrevNext/PrevNext'
 import { ReadingLayout } from '@/components/ReadingLayout/ReadingLayout'
-import { Section } from '@/components/Section/Section'
+import { RelatedList } from '@/components/RelatedList/RelatedList'
 import { Toc } from '@/components/Toc/Toc'
 import { formatDate } from '@/lib/format'
 import { getHome } from '@/lib/home'
@@ -23,8 +21,6 @@ import { imageSources, parseBody } from '@/lib/richText'
 import { pageMetadata } from '@/lib/seo'
 
 type Props = { params: Promise<{ slug: string }> }
-
-const tones = ['navy', 'graphite', 'deep'] as const
 
 const sections = {
   news: { title: 'Новости', href: '/news' },
@@ -44,7 +40,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   })
 }
 
-/** Новость, статья или акция — шаблон «Чтение»: текст по центру, «Читайте также» под ним. */
+/**
+ * Новость, статья или акция — шаблон «Чтение»: текст слева, справа липкая колонка
+ * с оглавлением и списком «Читайте также».
+ */
 export default async function PublicationPage({ params }: Props) {
   const publication = await getPublication((await params).slug)
   if (!publication) notFound()
@@ -53,9 +52,9 @@ export default async function PublicationPage({ params }: Props) {
   const [neighbors, sameTopic, latest, home, pictures] = await Promise.all([
     getNeighbors(publication),
     theme?.slug
-      ? getPublications({ kinds: [publication.kind], topic: theme.slug, limit: 4 })
+      ? getPublications({ kinds: [publication.kind], topic: theme.slug, limit: 6 })
       : null,
-    getPublications({ kinds: [publication.kind], limit: 4 }),
+    getPublications({ kinds: [publication.kind], limit: 6 }),
     getHome(),
     cms().then((payload) => bodyPictures(payload, imageSources(blocks))),
   ])
@@ -65,7 +64,7 @@ export default async function PublicationPage({ params }: Props) {
   const seen = new Set([publication.id])
   const related = [...(sameTopic?.docs ?? []), ...latest.docs]
     .filter((doc) => !seen.has(doc.id) && seen.add(doc.id))
-    .slice(0, 3)
+    .slice(0, 5)
     .map(toCard)
   const topicHref = (slug: string) =>
     publication.kind === 'article' ? `/articles?topic=${slug}` : `/news?topic=${slug}`
@@ -80,7 +79,14 @@ export default async function PublicationPage({ params }: Props) {
             { title: publication.title },
           ]}
         />
-        <ReadingLayout>
+        <ReadingLayout
+          aside={
+            <>
+              <Toc items={toc} />
+              <RelatedList title="Читайте также" items={related} />
+            </>
+          }
+        >
           <PageIntro
             title={publication.title}
             lead={publication.excerpt}
@@ -104,22 +110,11 @@ export default async function PublicationPage({ params }: Props) {
                 <Badge>{theme.title}</Badge>
               ))}
           </PageIntro>
-          <Toc items={toc} />
+          <Toc items={toc} collapsed />
           <ArticleBody blocks={blocks} pictures={pictures} />
           <PrevNext previous={neighbors.previous} next={neighbors.next} />
         </ReadingLayout>
       </Container>
-      {related.length > 0 && (
-        <Section title="Читайте также">
-          <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
-            {related.map((item, i) => (
-              <li key={item.id}>
-                <NewsCard news={item} tone={tones[i % tones.length]} />
-              </li>
-            ))}
-          </Grid>
-        </Section>
-      )}
       <CtaBanner cta={home.cta} />
     </main>
   )
