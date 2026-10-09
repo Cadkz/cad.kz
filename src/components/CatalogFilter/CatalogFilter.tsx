@@ -2,9 +2,8 @@
 
 import { SlidersHorizontal } from 'lucide-react'
 import { useCallback, useMemo, useRef, useState } from 'react'
-import type { CatalogItem, Facet } from '@/lib/catalog'
+import type { CatalogItem, CatalogLine, Facet } from '@/lib/catalog'
 import {
-  activeCount,
   emptyFilter,
   type FilterState,
   facetOptions,
@@ -13,13 +12,14 @@ import {
   update,
 } from '@/lib/catalogFilter'
 import { Button } from '../Button/Button'
+import { CatalogSteps } from '../CatalogSteps/CatalogSteps'
 import { Drawer } from '../Drawer/Drawer'
 import { FilterPanel } from '../FilterPanel/FilterPanel'
 import { Pagination } from '../Pagination/Pagination'
 import { ProductCard } from '../ProductCard/ProductCard'
 import styles from './CatalogFilter.module.css'
 
-type Props = { items: CatalogItem[]; facets: Facet[]; initial: FilterState }
+type Props = { items: CatalogItem[]; facets: Facet[]; lines: CatalogLine[]; initial: FilterState }
 
 const plural = (n: number) => {
   const mod10 = n % 10
@@ -34,7 +34,7 @@ const plural = (n: number) => {
  * фильтрация мгновенная в браузере, выбор сохраняется в адресе страницы.
  * От 960 px фильтр слева, на телефоне — в выдвижной панели.
  */
-export function CatalogFilter({ items, facets, initial }: Props) {
+export function CatalogFilter({ items, facets, lines, initial }: Props) {
   const [state, setState] = useState(initial)
   const [panelOpen, setPanelOpen] = useState(false)
   const top = useRef<HTMLDivElement>(null)
@@ -52,7 +52,6 @@ export function CatalogFilter({ items, facets, initial }: Props) {
 
   const options = useMemo(() => facetOptions(items, facets, state), [items, facets, state])
   const found = useMemo(() => results(items, state, facets), [items, state, facets])
-  const active = activeCount(state)
   const change = (patch: Partial<FilterState>) => commit(update(state, patch))
   const reset = () => commit(emptyFilter)
   const closePanel = useCallback(() => setPanelOpen(false), [])
@@ -72,10 +71,11 @@ export function CatalogFilter({ items, facets, initial }: Props) {
           <span className={styles.mobileOnly}>
             <Button variant="outline" size="sm" onClick={() => setPanelOpen(true)}>
               <SlidersHorizontal size={16} strokeWidth={1.75} aria-hidden="true" />
-              Фильтры{active ? ` · ${active}` : ''}
+              Фильтры
             </Button>
           </span>
         </div>
+        <CatalogSteps items={items} facets={facets} lines={lines} state={state} onChange={change} />
         {found.items.length ? (
           <ul className={styles.grid}>
             {found.items.map((item) => (
@@ -102,7 +102,7 @@ export function CatalogFilter({ items, facets, initial }: Props) {
         {panel}
         <div className={styles.drawerFoot}>
           <Button block onClick={closePanel}>
-            Показать товары ({found.total})
+            Показать товары
           </Button>
         </div>
       </Drawer>

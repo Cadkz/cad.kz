@@ -72,7 +72,9 @@ export interface Config {
     sections: Section;
     'section-rules': SectionRule;
     manufacturers: Manufacturer;
+    'product-lines': ProductLine;
     publications: Publication;
+    topics: Topic;
     pages: Page;
     media: Media;
     'exchange-rates': ExchangeRate;
@@ -94,7 +96,9 @@ export interface Config {
     sections: SectionsSelect<false> | SectionsSelect<true>;
     'section-rules': SectionRulesSelect<false> | SectionRulesSelect<true>;
     manufacturers: ManufacturersSelect<false> | ManufacturersSelect<true>;
+    'product-lines': ProductLinesSelect<false> | ProductLinesSelect<true>;
     publications: PublicationsSelect<false> | PublicationsSelect<true>;
+    topics: TopicsSelect<false> | TopicsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'exchange-rates': ExchangeRatesSelect<false> | ExchangeRatesSelect<true>;
@@ -171,6 +175,14 @@ export interface Product {
    */
   description?: string | null;
   manufacturer?: (number | null) | Manufacturer;
+  /**
+   * Например, у SCAD Soft: «Программный комплекс», «Сателлиты».
+   */
+  line?: (number | null) | ProductLine;
+  /**
+   * Меньше — выше. Основа линейки (SCAD Office) — 1, пакеты — 2, модули — 3.
+   */
+  lineOrder?: number | null;
   /**
    * Разделы ставятся сами по «Правилам разделов». Если поменять разделы вручную, галочка снимется, и правила этот товар больше не трогают. Поставьте её снова, чтобы вернуть разделы по правилам.
    */
@@ -264,6 +276,30 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * Группы товаров внутри производителя. Товар попадает в линейку полем «Линейка» в карточке товара. Линейка без опубликованных товаров на сайте не показывается.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-lines".
+ */
+export interface ProductLine {
+  id: number;
+  title: string;
+  status: 'draft' | 'published';
+  manufacturer: number | Manufacturer;
+  /**
+   * Меньше — выше в меню и каталоге.
+   */
+  order?: number | null;
+  /**
+   * Одна строка под названием линейки. Можно не заполнять.
+   */
+  summary?: string | null;
+  legacyKey?: string | null;
+  legacyUrl?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -379,6 +415,10 @@ export interface Publication {
   slug: string;
   kind: 'article' | 'news' | 'promotion';
   excerpt?: string | null;
+  /**
+   * Выберите из списка. Новая тема добавляется в «Темы новостей и статей».
+   */
+  theme?: (number | null) | Topic;
   topic?: string | null;
   /**
    * Пустая строка — новый абзац, «## » — подзаголовок, «- » — пункт списка, «> » — выноска, [текст](адрес) — ссылка, ![описание](адрес картинки) — картинка отдельной строкой.
@@ -393,6 +433,24 @@ export interface Publication {
     title?: string | null;
     description?: string | null;
   };
+  legacyKey?: string | null;
+  legacyUrl?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "topics".
+ */
+export interface Topic {
+  id: number;
+  title: string;
+  status: 'draft' | 'published';
+  slug: string;
+  /**
+   * Меньше — левее в списке тем над новостями.
+   */
+  order?: number | null;
   legacyKey?: string | null;
   legacyUrl?: string | null;
   updatedAt: string;
@@ -624,8 +682,16 @@ export interface PayloadLockedDocument {
         value: number | Manufacturer;
       } | null)
     | ({
+        relationTo: 'product-lines';
+        value: number | ProductLine;
+      } | null)
+    | ({
         relationTo: 'publications';
         value: number | Publication;
+      } | null)
+    | ({
+        relationTo: 'topics';
+        value: number | Topic;
       } | null)
     | ({
         relationTo: 'pages';
@@ -718,6 +784,8 @@ export interface ProductsSelect<T extends boolean = true> {
   summary?: T;
   description?: T;
   manufacturer?: T;
+  line?: T;
+  lineOrder?: T;
   autoSections?: T;
   mainSection?: T;
   extraSections?: T;
@@ -834,6 +902,21 @@ export interface ManufacturersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-lines_select".
+ */
+export interface ProductLinesSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  manufacturer?: T;
+  order?: T;
+  summary?: T;
+  legacyKey?: T;
+  legacyUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "publications_select".
  */
 export interface PublicationsSelect<T extends boolean = true> {
@@ -842,6 +925,7 @@ export interface PublicationsSelect<T extends boolean = true> {
   slug?: T;
   kind?: T;
   excerpt?: T;
+  theme?: T;
   topic?: T;
   body?: T;
   cover?: T;
@@ -852,6 +936,20 @@ export interface PublicationsSelect<T extends boolean = true> {
         title?: T;
         description?: T;
       };
+  legacyKey?: T;
+  legacyUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "topics_select".
+ */
+export interface TopicsSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  slug?: T;
+  order?: T;
   legacyKey?: T;
   legacyUrl?: T;
   updatedAt?: T;

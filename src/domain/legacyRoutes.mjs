@@ -76,7 +76,7 @@ const sectionHints = {
   fine_software: { vendor: 'Fine Software', group: 'software' },
   lira_sapr: { vendor: 'ЛИРА-FEM', group: 'software' },
   magicad: { vendor: 'MagiCAD', group: 'software' },
-  scad_soft: { vendor: 'SCAD', group: 'software' },
+  scad_soft: { vendor: 'SCAD Soft', group: 'software' },
   ntp_truboprovod: ntp,
   izolyatsiya: ntp,
   passat: ntp,

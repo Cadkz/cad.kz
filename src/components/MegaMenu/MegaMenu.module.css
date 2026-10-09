@@ -129,6 +129,5 @@
 @keyframes open {
   from {
     opacity: 0;
-    transform: translateY(calc(-1 * var(--space-2))) scale(0.99);
   }
 }

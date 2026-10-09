@@ -5,14 +5,22 @@ import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
 import { productPath } from './productPath'
 
-export type MenuLink = { title: string; href: string; vendor?: string | null }
-/** Раздел в мегаменю: популярные товары, сколько их всего и адрес каталога с этим разделом. */
+export type MenuLink = { title: string; href: string }
+/** Линейка производителя в меню: первые товары и адрес каталога с этой линейкой. */
+export type MenuLine = {
+  key: string
+  title: string
+  links: MenuLink[]
+  more: boolean
+  allHref: string
+}
+export type MenuVendor = { key: string; title: string; allHref: string; lines: MenuLine[] }
+/** Раздел в мегаменю: производители раздела по порядку и адрес каталога с этим разделом. */
 export type MenuColumn = {
   title: string
-  icon?: string | null
-  links: MenuLink[]
-  total?: number
-  allHref?: string
+  icon: string | null
+  allHref: string
+  vendors: MenuVendor[]
 }
 export type MenuTab = { key: string; label: string; columns: MenuColumn[]; allHref: string }
 
@@ -26,13 +34,12 @@ const relId = (value: number | { id: number } | null | undefined) =>
   value == null ? null : typeof value === 'number' ? value : value.id
 
 /**
- * Мегаменю строится из разделов и товаров CMS: новый товар сам появляется в меню.
- * Берутся все опубликованные товары (без предела в 500), в колонке показывается несколько,
- * остальные — по ссылке «Все N».
+ * Мегаменю строится из разделов, производителей, линеек и товаров CMS: новый товар сам появляется
+ * в меню. Путь: раздел → производитель → линейка → товары (src/domain/menu.mjs).
  */
 export async function getMenu(): Promise<MenuTab[]> {
   const payload = await cms()
-  const [sections, products, manufacturers] = await Promise.all([
+  const [sections, products, manufacturers, lines] = await Promise.all([
     payload.find({
       collection: 'sections',
       where: { status: { equals: 'published' } },
@@ -54,6 +61,8 @@ export async function getMenu(): Promise<MenuTab[]> {
         mainSection: true,
         manufacturer: true,
         priority: true,
+        line: true,
+        lineOrder: true,
       },
     }),
     payload.find({
@@ -61,6 +70,13 @@ export async function getMenu(): Promise<MenuTab[]> {
       pagination: false,
       depth: 0,
       select: { priority: true, title: true },
+    }),
+    payload.find({
+      collection: 'product-lines',
+      where: { status: { equals: 'published' } },
+      pagination: false,
+      depth: 0,
+      select: { title: true, manufacturer: true, order: true },
     }),
   ])
 
@@ -75,10 +91,18 @@ export async function getMenu(): Promise<MenuTab[]> {
       sections: (product.sections ?? []).map((section) => relId(section) ?? 0),
       href: productPath(product),
       vendor,
-      vendorTitle: vendor == null ? null : (vendorTitle.get(vendor) ?? null),
+      line: relId(product.line),
+      lineOrder: product.lineOrder ?? null,
       rank: priorityRank(product.priority, vendor == null ? null : vendorLevel.get(vendor)),
     }
   })
+
+  const lineData = lines.docs.map((line) => ({
+    id: line.id,
+    title: line.title,
+    vendor: relId(line.manufacturer) ?? 0,
+    order: line.order ?? 100,
+  }))
 
   const tabs: MenuTab[] = (Object.keys(groupLabels) as Section['menuGroup'][]).map((group) => ({
     key: group,
@@ -97,12 +121,14 @@ export async function getMenu(): Promise<MenuTab[]> {
           pins: (pinnedManufacturers ?? []).map((m) => relId(m) ?? 0),
         })),
       items,
+      lineData,
+      vendorTitle,
       catalogHref,
     ),
   }))
 
   // Отдельной вкладки «По отраслям» нет: направления и есть разделы программ.
-  return tabs.filter((tab) => tab.columns.some((column) => column.links.length > 0))
+  return tabs.filter((tab) => tab.columns.length > 0)
 }
 
 export type Contacts = {

@@ -1,8 +1,9 @@
 /**
  * Каскадный фильтр каталога: чистые функции без React и сервера.
- * Счётчик у значения показывает, сколько товаров останется, если его выбрать
- * при всех остальных выбранных условиях (как в фасетном фильтре shop.kz).
+ * Счётчик у значения (на сайте не показывается) — сколько товаров останется, если его выбрать
+ * при всех остальных выбранных условиях: по нему скрываются пустые варианты.
  */
+import { compareInLine } from '../domain/catalogTree.mjs'
 import { compareInSection } from '../domain/priority.mjs'
 import type { CatalogGroup, CatalogItem, Facet } from './catalog'
 
@@ -11,11 +12,13 @@ export type FilterState = {
   direction: string | null
   type: string | null
   vendors: string[]
+  /** Линейка производителя (id строкой): шаг после выбора одного производителя. */
+  line: string | null
   tasks: string[]
   page: number
 }
 
-type Key = 'group' | 'direction' | 'type' | 'vendors' | 'tasks'
+type Key = 'group' | 'direction' | 'type' | 'vendors' | 'line' | 'tasks'
 
 export const PAGE_SIZE = 9
 export const emptyFilter: FilterState = {
@@ -23,6 +26,7 @@ export const emptyFilter: FilterState = {
   direction: null,
   type: null,
   vendors: [],
+  line: null,
   tasks: [],
   page: 1,
 }
@@ -35,6 +39,9 @@ export function matches(item: CatalogItem, state: FilterState, ignore?: Key) {
     return false
   if (ignore !== 'type' && state.type && !item.types.includes(state.type)) return false
   if (ignore !== 'vendors' && state.vendors.length && !state.vendors.includes(item.vendor ?? ''))
+    return false
+  // «other» — товары производителя без линейки (группа «Другие программы»).
+  if (ignore !== 'line' && state.line && item.line !== (state.line === 'other' ? null : state.line))
     return false
   if (ignore !== 'tasks' && state.tasks.length && !item.tasks.some((t) => state.tasks.includes(t)))
     return false
@@ -112,6 +119,8 @@ export function update(state: FilterState, change: Partial<FilterState>): Filter
     next.tasks = []
   }
   if ('direction' in change || 'type' in change) next.tasks = []
+  // Линейка принадлежит одному производителю: другой выбор производителя её сбрасывает.
+  if (('group' in change || 'vendors' in change) && !('line' in change)) next.line = null
   return next
 }
 
@@ -126,6 +135,8 @@ export function results(items: CatalogItem[], state: FilterState, facets: Facet[
     const pins = facets.find((facet) => facet.slug === section)?.pins ?? []
     list.sort(compareInSection(section, pins))
   }
+  // В линейке основа первой, потом пакеты и модули («Порядок в линейке»).
+  if (state.line) list.sort(compareInLine)
   const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE))
   const page = Math.min(state.page, pages)
   return {
@@ -134,16 +145,6 @@ export function results(items: CatalogItem[], state: FilterState, facets: Facet[
     page,
     items: list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
   }
-}
-
-export function activeCount(state: FilterState) {
-  return (
-    Number(Boolean(state.group)) +
-    Number(Boolean(state.direction)) +
-    Number(Boolean(state.type)) +
-    state.vendors.length +
-    state.tasks.length
-  )
 }
 
 /** Состояние ↔ адрес страницы: ссылку на подборку можно отправить коллеге. */
@@ -163,6 +164,7 @@ export function fromParams(params: Record<string, string | string[] | undefined>
     direction: one('direction'),
     type: one('type'),
     vendors: many('vendor'),
+    line: one('line'),
     tasks: many('task'),
     page: Number.isInteger(page) && page > 0 ? page : 1,
   }
@@ -174,6 +176,7 @@ export function toQuery(state: FilterState) {
   if (state.direction) query.set('direction', state.direction)
   if (state.type) query.set('type', state.type)
   for (const vendor of state.vendors) query.append('vendor', vendor)
+  if (state.line) query.set('line', state.line)
   for (const task of state.tasks) query.append('task', task)
   if (state.page > 1) query.set('page', String(state.page))
   return query.toString()

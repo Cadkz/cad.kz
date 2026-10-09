@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import type { MenuTab } from '@/lib/navigation'
+import { MenuDrill } from '../MenuDrill/MenuDrill'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './MenuSections.module.css'
 
@@ -13,8 +14,9 @@ type Props = { tab: MenuTab; onNavigate: () => void }
 const HOVER_DELAY = 90
 
 /**
- * Разделы группы и популярные товары выбранного раздела (сначала флагманы и топы продаж).
- * Раздел — ссылка в каталог: наведение или фокус показывают его товары, клик открывает каталог.
+ * Разделы группы и путь по выбранному разделу: производители → линейки → товары (MenuDrill).
+ * Раздел — ссылка в каталог: наведение или фокус показывают его производителей, клик открывает
+ * каталог.
  */
 export function MenuSections({ tab, onNavigate }: Props) {
   const [active, setActive] = useState(0)
@@ -35,7 +37,7 @@ export function MenuSections({ tab, onNavigate }: Props) {
         {tab.columns.map((item, index) => (
           <li key={item.title}>
             <Link
-              href={item.allHref ?? tab.allHref}
+              href={item.allHref}
               className={styles.section}
               aria-current={index === active ? 'true' : undefined}
               onClick={onNavigate}
@@ -49,7 +51,6 @@ export function MenuSections({ tab, onNavigate }: Props) {
                 <SectionIcon name={item.icon} size={16} />
               </span>
               <span className={styles.sectionTitle}>{item.title}</span>
-              <span className={styles.count}>{item.total}</span>
             </Link>
           </li>
         ))}
@@ -60,28 +61,7 @@ export function MenuSections({ tab, onNavigate }: Props) {
           </Link>
         </li>
       </ul>
-      <div key={column.title} className={styles.products}>
-        <p className={styles.heading}>
-          {column.title}
-          <span className={styles.note}>Сначала то, что чаще покупают</span>
-        </p>
-        <ul className={styles.list}>
-          {column.links.map((link) => (
-            <li key={link.href}>
-              <Link href={link.href} className={styles.product} onClick={onNavigate}>
-                <span className={styles.productTitle}>{link.title}</span>
-                {link.vendor && <span className={styles.vendor}>{link.vendor}</span>}
-              </Link>
-            </li>
-          ))}
-        </ul>
-        {column.allHref && (
-          <Link href={column.allHref} className={styles.all} onClick={onNavigate}>
-            Все {column.total} в каталоге
-            <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
-          </Link>
-        )}
-      </div>
+      <MenuDrill key={column.title} column={column} onNavigate={onNavigate} />
     </div>
   )
 }

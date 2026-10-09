@@ -1,9 +1,11 @@
-// Только для локальной проверки: копия каталога демо (названия, производители, разделы) в ЛОКАЛЬНУЮ базу,
-// чтобы проверять меню, каталог и загрузку прайса на настоящих названиях.
-// Снимок берётся с демо через браузер (/api/products, /api/manufacturers, /api/sections) и кладётся
-// вне репозитория. Формат: { m: [производители], p: [[название, тип, №производителя, основной, доп.]],
-// o: [[id товара на демо, комплектация, цена EUR]] }.
-// Запуск: pnpm exec payload run scripts/audit/mirror-catalog.mjs <путь к снимку.json>
+// Только для локальной проверки: копия каталога демо (производители, товары, разделы, приоритеты,
+// комплектации) в ЛОКАЛЬНУЮ базу, чтобы проверять меню, каталог, первые настройки и загрузку прайса
+// на настоящих названиях. Снимок берётся с демо через браузер (/api/manufacturers, /api/products,
+// /api/offers, /api/sections) и кладётся вне репозитория. Формат:
+// { m: [[название, приоритет]], p: [[название, тип, №производителя, основной, доп. через пробел,
+//   id на демо, приоритет, статус, адрес]], o: [[id товара на демо, комплектация, сумма, валюта]] }.
+// Запуск (после миграций и seed-demo, до catalog-setup):
+// pnpm exec payload run scripts/audit/mirror-catalog.mjs <путь к снимку.json>
 import { readFileSync } from 'node:fs'
 import config from '@payload-config'
 import { getPayload } from 'payload'
@@ -24,35 +26,31 @@ const opts = { overrideAccess: true, depth: 0 }
 const kinds = { s: 'software', h: 'hardware', c: 'course' }
 const kind = (letter) => kinds[letter] ?? 'service'
 
-const sections = await payload.find({ collection: 'sections', limit: 100, ...opts })
+const sections = await payload.find({ collection: 'sections', pagination: false, ...opts })
 const sectionBySlug = new Map(sections.docs.map((s) => [s.slug, s.id]))
 const makers = []
-for (const title of snap.m) {
+for (const [title, priority] of snap.m) {
   const found = await payload.find({
     collection: 'manufacturers',
     where: { title: { equals: title } },
     limit: 1,
     ...opts,
   })
+  const data = { title, status: 'published', priority: priority ?? 'normal' }
   makers.push(
-    found.docs[0]?.id ??
-      (
-        await payload.create({
-          collection: 'manufacturers',
-          data: { title, status: 'published' },
-          ...opts,
-        })
-      ).id,
+    found.docs[0]
+      ? (await payload.update({ collection: 'manufacturers', id: found.docs[0].id, data, ...opts }))
+          .id
+      : (await payload.create({ collection: 'manufacturers', data, ...opts })).id,
   )
 }
 
 const offersBy = new Map()
-for (const [productId, configuration, amount] of snap.o)
-  offersBy.set(productId, [...(offersBy.get(productId) ?? []), { configuration, amount }])
+for (const [productId, configuration, amount, currency] of snap.o)
+  offersBy.set(productId, [...(offersBy.get(productId) ?? []), { configuration, amount, currency }])
 
 let created = 0
-for (const [index, [title, letter, maker, main, extra, demoId]] of snap.p.entries()) {
-  const slug = `mirror-${index}`
+for (const [title, letter, maker, main, extra, demoId, priority, status, slug] of snap.p) {
   const found = await payload.find({
     collection: 'products',
     where: { slug: { equals: slug } },
@@ -65,20 +63,20 @@ for (const [index, [title, letter, maker, main, extra, demoId]] of snap.p.entrie
     data: {
       title,
       slug,
-      status: 'published',
+      status,
+      priority: priority ?? undefined,
       kind: kind(letter),
-      manufacturer: makers[maker] ?? null,
+      manufacturer: maker == null ? null : makers[maker],
       autoSections: false,
       mainSection: sectionBySlug.get(main) ?? null,
-      extraSections: extra
+      extraSections: (extra ?? '')
         .split(' ')
         .map((s) => sectionBySlug.get(s))
         .filter(Boolean),
     },
     ...opts,
   })
-  const offers = offersBy.get(demoId) ?? [{ configuration: 'Базовая', amount: String(100 + index) }]
-  for (const offer of offers)
+  for (const offer of offersBy.get(demoId) ?? [])
     await payload.create({
       collection: 'offers',
       data: {
@@ -88,7 +86,7 @@ for (const [index, [title, letter, maker, main, extra, demoId]] of snap.p.entrie
         configuration: offer.configuration,
         license: '—',
         amount: offer.amount,
-        currency: 'EUR',
+        currency: offer.currency,
         includesVat: false,
         sourceVat: '16',
       },

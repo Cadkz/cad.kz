@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import styles from './TopicLinks.module.css'
 
-type Props = { topics: string[]; active: string | null; hrefFor: (topic: string | null) => string }
+type Topic = { slug: string; title: string }
+type Props = { topics: Topic[]; active: string | null; hrefFor: (slug: string | null) => string }
 
-/** Фильтр по тематике ссылками: работает без JavaScript, адрес можно отправить. */
+/** Фильтр по теме ссылками (?topic=адрес темы): работает без JavaScript, адрес можно отправить. */
 export function TopicLinks({ topics, active, hrefFor }: Props) {
   if (topics.length < 2) return null
   return (
@@ -17,12 +18,12 @@ export function TopicLinks({ topics, active, hrefFor }: Props) {
       </Link>
       {topics.map((topic) => (
         <Link
-          key={topic}
-          href={hrefFor(topic)}
+          key={topic.slug}
+          href={hrefFor(topic.slug)}
           className={styles.chip}
-          aria-current={active === topic ? 'page' : undefined}
+          aria-current={active === topic.slug ? 'page' : undefined}
         >
-          {topic}
+          {topic.title}
         </Link>
       ))}
     </nav>

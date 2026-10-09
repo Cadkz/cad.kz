@@ -50,12 +50,13 @@ export default async function Home({ searchParams }: Props) {
       <Section
         id="catalog"
         title="Подбор по каталогу"
-        sub="Выберите направление — фильтр подскажет вендоров и задачи внутри него."
+        sub="Выберите направление, затем производителя и линейку программ."
       >
         <CatalogFilter
           key={JSON.stringify(initial)}
           items={catalog.items}
           facets={catalog.facets}
+          lines={catalog.lines}
           initial={initial}
         />
       </Section>

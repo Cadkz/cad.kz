@@ -1,5 +1,6 @@
 // Разделы каталога по утверждённым направлениям: новые разделы, «Правила разделов»,
-// «С этим покупают» у разделов, разделы у товаров; затем приоритет показа (топы продаж первыми). Выполняется один раз (отметка в журнале
+// «С этим покупают» у разделов, разделы у товаров; затем приоритет показа (топы продаж первыми);
+// затем вторая настройка: дубли производителей, линейки, приложения в конец, темы новостей. Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -7,6 +8,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPriorities } from '../src/lib/prioritySetup.ts'
+import { setupVendors } from '../src/lib/vendorsSetup.ts'
 
 const payload = await getPayload({ config })
 try {
@@ -31,6 +33,16 @@ try {
     console.log(
       `Приоритет показа: производители ${priority.vendors.join(', ') || '—'}; товаров ${priority.products}; разделы ${priority.sections.join(', ') || '—'}`,
     )
+  const vendors = await setupVendors(payload)
+  if (!vendors) console.log('Производители, линейки и темы уже настроены, ничего не меняем.')
+  else {
+    console.log(`Дубли производителей: ${vendors.merged.join('; ') || '—'}`)
+    console.log(`Топ у производителей: ${vendors.vendorLevels.join(', ') || '—'}`)
+    console.log(`Приложения в конец: ${vendors.apps.length} ${vendors.apps.join('; ')}`)
+    console.log(`Порядок производителей: ${vendors.sections.join(', ') || '—'}`)
+    console.log(`Линейки: ${vendors.lines.join('; ')}; товаров в линейках ${vendors.lineProducts}`)
+    console.log(`Темы публикаций: ${JSON.stringify(vendors.topics)}`)
+  }
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1

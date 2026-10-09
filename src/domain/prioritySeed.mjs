@@ -1,12 +1,13 @@
 /**
  * Первая настройка приоритета показа (решение владельца 09.10.2026): топы продаж — AutoCAD, Revit,
- * АВС, SCAD, ЛИРА, GEO5, Artec — всегда первыми. Дальше всё правится в админке: «Приоритет показа»
+ * АВС, SCAD, ЛИРА, GEO5, Artec, CSoft — всегда первыми. Дальше всё правится в админке: «Приоритет показа»
  * у товара и производителя, «Первыми в разделе» у раздела.
  */
 
 /** Уровень всем товарам производителя. */
 export const VENDOR_LEVELS = {
-  SCAD: 'top',
+  'SCAD Soft': 'top',
+  'Csoft Development': 'top',
   'ЛИРА-FEM': 'top',
   АВС: 'top',
   'Artec 3D': 'top',
@@ -21,12 +22,14 @@ export const VENDOR_LEVELS = {
  */
 export const PRODUCT_LEVELS = [
   { vendor: null, title: /^(обновление для|ключ|подписка на обновления)/i, level: 'low' },
+  // Приложения и дополнения: мобильные приложения, Premium, пакеты облачных кредитов.
+  { vendor: null, title: /\bmobile app\b|\bpremium\b|cloud credits, pack/i, level: 'low' },
   { vendor: 'Fine Software', title: /^GEO5$/i, level: 'flagship' },
   { vendor: 'Fine Software', title: /^GEO5\b/i, level: 'top' },
   { vendor: 'Autodesk', title: /^AutoCAD$/i, level: 'flagship' },
   { vendor: 'Autodesk', title: /^Revit\b/i, level: 'flagship' },
   { vendor: 'Autodesk', title: /^AutoCAD\b|\bRevit\b/i, level: 'top' },
-  { vendor: 'SCAD', title: /^SCAD Office\b|универсальный комплект/i, level: 'flagship' },
+  { vendor: 'SCAD Soft', title: /^SCAD Office\b|универсальный комплект/i, level: 'flagship' },
   { vendor: 'ЛИРА-FEM', title: /^ЛИРА\s*-\s*FEM\b/i, level: 'flagship' },
   { vendor: 'АВС', title: /^Программный комплекс АВС/i, level: 'flagship' },
   { vendor: 'Artec 3D', title: /^Artec (Leo|Eva)$/i, level: 'flagship' },
@@ -34,8 +37,8 @@ export const PRODUCT_LEVELS = [
 
 /** Производители, которые в разделе идут первыми, по порядку (slug раздела → названия). */
 export const SECTION_PINS = {
-  geotech: ['Fine Software', 'ЛИРА-FEM', 'SCAD'],
-  structural: ['SCAD', 'ЛИРА-FEM'],
+  geotech: ['Fine Software', 'ЛИРА-FEM', 'SCAD Soft'],
+  structural: ['SCAD Soft', 'ЛИРА-FEM', 'Base', 'Autodesk'],
   arch: ['Autodesk'],
   mep: ['Autodesk'],
   estimate: ['АВС'],

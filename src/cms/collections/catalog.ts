@@ -69,6 +69,48 @@ export const manufacturers = contentCollection({
   ],
 })
 
+/**
+ * Линейка производителя: путь в меню и каталоге «раздел → производитель → линейка → товары».
+ * Например, у SCAD Soft — «Программный комплекс», «Сателлиты», «Справочники».
+ */
+export const productLines: CollectionConfig = {
+  ...contentCollection({
+    slug: 'product-lines',
+    singular: 'Линейка',
+    plural: 'Линейки производителей',
+    fields: [
+      {
+        name: 'manufacturer',
+        label: 'Производитель',
+        type: 'relationship',
+        relationTo: 'manufacturers',
+        required: true,
+        index: true,
+      },
+      {
+        name: 'order',
+        label: 'Порядок',
+        type: 'number',
+        defaultValue: 100,
+        admin: { description: 'Меньше — выше в меню и каталоге.' },
+      },
+      {
+        name: 'summary',
+        label: 'Коротко для карточки',
+        type: 'textarea',
+        admin: { description: 'Одна строка под названием линейки. Можно не заполнять.' },
+      },
+    ],
+  }),
+  admin: {
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'manufacturer', 'order', 'status'],
+    description:
+      'Группы товаров внутри производителя. Товар попадает в линейку полем «Линейка» в карточке ' +
+      'товара. Линейка без опубликованных товаров на сайте не показывается.',
+  },
+}
+
 export const sections = contentCollection({
   slug: 'sections',
   singular: 'Раздел',
@@ -167,6 +209,33 @@ const productCollection = contentCollection({
       },
     },
     relationField('manufacturer', 'Производитель', 'manufacturers'),
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'line',
+          label: 'Линейка',
+          type: 'relationship',
+          relationTo: 'product-lines',
+          // Только линейки производителя этого товара.
+          filterOptions: ({ data }) =>
+            data?.manufacturer ? { manufacturer: { equals: data.manufacturer } } : true,
+          admin: {
+            width: '60%',
+            description: 'Например, у SCAD Soft: «Программный комплекс», «Сателлиты».',
+          },
+        },
+        {
+          name: 'lineOrder',
+          label: 'Порядок в линейке',
+          type: 'number',
+          admin: {
+            width: '40%',
+            description: 'Меньше — выше. Основа линейки (SCAD Office) — 1, пакеты — 2, модули — 3.',
+          },
+        },
+      ],
+    },
     {
       type: 'collapsible',
       label: 'Разделы каталога',
@@ -274,7 +343,7 @@ export const products: CollectionConfig = {
   ...productCollection,
   admin: {
     ...productCollection.admin,
-    defaultColumns: ['title', 'manufacturer', 'mainSection', 'priority', 'status', 'updatedAt'],
+    defaultColumns: ['title', 'manufacturer', 'line', 'mainSection', 'priority', 'status'],
   },
   hooks: { beforeChange: [productSections] },
 }

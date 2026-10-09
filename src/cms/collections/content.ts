@@ -13,6 +13,26 @@ import {
 /** Длинная статья с таблицами — до ~70 000 знаков; запас на редкие большие тексты. */
 const BODY_MAX_LENGTH = 300_000
 
+/** Темы новостей и статей: выбираются в публикации, по ним фильтруется список на сайте. */
+export const topics: CollectionConfig = {
+  ...contentCollection({
+    slug: 'topics',
+    singular: 'Тема',
+    plural: 'Темы новостей и статей',
+    fields: [
+      slugField('Адрес (латиницей, для ссылки ?topic=…)'),
+      {
+        name: 'order',
+        label: 'Порядок',
+        type: 'number',
+        defaultValue: 100,
+        admin: { description: 'Меньше — левее в списке тем над новостями.' },
+      },
+    ],
+  }),
+  admin: { useAsTitle: 'title', defaultColumns: ['title', 'slug', 'order', 'status'] },
+}
+
 export const publications = contentCollection({
   slug: 'publications',
   singular: 'Публикация',
@@ -31,7 +51,19 @@ export const publications = contentCollection({
       ],
     },
     { name: 'excerpt', label: 'Анонс для карточки', type: 'textarea' },
-    textField('topic', 'Тематика'),
+    {
+      name: 'theme',
+      label: 'Тема',
+      type: 'relationship',
+      relationTo: 'topics',
+      index: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Выберите из списка. Новая тема добавляется в «Темы новостей и статей».',
+      },
+    },
+    // Прежняя тема текстом: перенесена в «Тему», оставлена только для истории.
+    { name: 'topic', label: 'Тематика (старое поле)', type: 'text', admin: { hidden: true } },
     {
       name: 'body',
       label: 'Текст',

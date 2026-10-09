@@ -4,8 +4,8 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { ru } from '@payloadcms/translations/languages/ru'
 import { buildConfig } from 'payload'
-import { manufacturers, offers, products, sections } from './cms/collections/catalog'
-import { media, pages, publications } from './cms/collections/content'
+import { manufacturers, offers, productLines, products, sections } from './cms/collections/catalog'
+import { media, pages, publications, topics } from './cms/collections/content'
 import { crmDeliveries, orders } from './cms/collections/orders'
 import { exchangeRates, pricingSettings } from './cms/collections/pricing'
 import { sectionRules } from './cms/collections/sectionRules'
@@ -72,7 +72,9 @@ export default buildConfig({
     sections,
     sectionRules,
     manufacturers,
+    productLines,
     publications,
+    topics,
     pages,
     media,
     exchangeRates,

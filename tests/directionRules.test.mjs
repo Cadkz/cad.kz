@@ -12,8 +12,8 @@ test('товар без исключения получает разделы г�
 
 test('исключение внутри группы важнее разделов группы', () => {
   assert.deepEqual(sw('Artec 3D', 'Artec Studio 19'), ['scanners', 'machine'])
-  assert.deepEqual(sw('SCAD', 'ОТКОС'), ['geotech', 'structural'])
-  assert.deepEqual(sw('SCAD', 'ЗАПРОС'), ['geotech', 'structural'])
+  assert.deepEqual(sw('SCAD Soft', 'ОТКОС'), ['geotech', 'structural'])
+  assert.deepEqual(sw('SCAD Soft', 'ЗАПРОС'), ['geotech', 'structural'])
   assert.deepEqual(sw('НТП Трубопровод', 'ПАССАТ Колонны'), ['pipes', 'machine'])
   assert.deepEqual(sw('НТП Трубопровод', 'СТАРТ-Проф'), ['pipes', 'mep'])
   assert.deepEqual(sw('Autodesk', 'Autodesk Docs'), ['estimate'])

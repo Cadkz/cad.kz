@@ -91,7 +91,7 @@
 
 .sectionSummary {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3);
   min-height: var(--control-height);
@@ -120,23 +120,10 @@
   font-weight: var(--weight-semibold);
 }
 
-.count {
-  color: var(--color-text-muted);
-  font-size: var(--text-xs);
-}
-
 .sectionBody {
   display: flex;
   flex-direction: column;
   padding: 0 var(--space-2) var(--space-3) calc(var(--space-2) + var(--space-4) + var(--space-3));
-  animation: reveal var(--duration-base) var(--ease);
-}
-
-@keyframes reveal {
-  from {
-    opacity: 0;
-    transform: translateY(calc(-1 * var(--space-1)));
-  }
 }
 
 .link {

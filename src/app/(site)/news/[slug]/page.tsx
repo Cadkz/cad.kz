@@ -1,25 +1,30 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArticleBody } from '@/components/ArticleBody/ArticleBody'
 import { Badge } from '@/components/Badge/Badge'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
 import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
+import { Grid } from '@/components/Grid/Grid'
+import { NewsCard } from '@/components/NewsCard/NewsCard'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
 import { PrevNext } from '@/components/PrevNext/PrevNext'
 import { ReadingLayout } from '@/components/ReadingLayout/ReadingLayout'
-import { RelatedList } from '@/components/RelatedList/RelatedList'
+import { Section } from '@/components/Section/Section'
 import { Toc } from '@/components/Toc/Toc'
 import { formatDate } from '@/lib/format'
 import { getHome } from '@/lib/home'
 import { newsHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
 import { bodyPictures, toPicture } from '@/lib/pictures'
-import { getNeighbors, getPublication, getPublications, toCard } from '@/lib/publications'
+import { getNeighbors, getPublication, getPublications, themeOf, toCard } from '@/lib/publications'
 import { imageSources, parseBody } from '@/lib/richText'
 import { pageMetadata } from '@/lib/seo'
 
 type Props = { params: Promise<{ slug: string }> }
+
+const tones = ['navy', 'graphite', 'deep'] as const
 
 const sections = {
   news: { title: 'Новости', href: '/news' },
@@ -39,23 +44,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   })
 }
 
-/** Новость, статья или акция — шаблон «Чтение». */
+/** Новость, статья или акция — шаблон «Чтение»: текст по центру, «Читайте также» под ним. */
 export default async function PublicationPage({ params }: Props) {
   const publication = await getPublication((await params).slug)
   if (!publication) notFound()
   const blocks = parseBody(publication.body)
-  const [neighbors, latest, home, pictures] = await Promise.all([
+  const theme = themeOf(publication)
+  const [neighbors, sameTopic, latest, home, pictures] = await Promise.all([
     getNeighbors(publication),
+    theme?.slug
+      ? getPublications({ kinds: [publication.kind], topic: theme.slug, limit: 4 })
+      : null,
     getPublications({ kinds: [publication.kind], limit: 4 }),
     getHome(),
     cms().then((payload) => bodyPictures(payload, imageSources(blocks))),
   ])
   const toc = blocks.flatMap((b) => (b.type === 'heading' ? [{ id: b.id, text: b.text }] : []))
   const section = sections[publication.kind]
-  const related = latest.docs
-    .filter((doc) => doc.id !== publication.id)
+  // «Читайте также»: сначала та же тема, остальное — свежие материалы того же типа.
+  const seen = new Set([publication.id])
+  const related = [...(sameTopic?.docs ?? []), ...latest.docs]
+    .filter((doc) => !seen.has(doc.id) && seen.add(doc.id))
     .slice(0, 3)
     .map(toCard)
+  const topicHref = (slug: string) =>
+    publication.kind === 'article' ? `/articles?topic=${slug}` : `/news?topic=${slug}`
 
   return (
     <main>
@@ -67,14 +80,7 @@ export default async function PublicationPage({ params }: Props) {
             { title: publication.title },
           ]}
         />
-        <ReadingLayout
-          aside={
-            <>
-              <Toc items={toc} />
-              <RelatedList title="Читайте также" items={related} />
-            </>
-          }
-        >
+        <ReadingLayout>
           <PageIntro
             title={publication.title}
             lead={publication.excerpt}
@@ -89,13 +95,31 @@ export default async function PublicationPage({ params }: Props) {
               ) : null
             }
           >
-            {publication.topic && <Badge>{publication.topic}</Badge>}
+            {theme &&
+              (theme.slug ? (
+                <Link href={topicHref(theme.slug)}>
+                  <Badge>{theme.title}</Badge>
+                </Link>
+              ) : (
+                <Badge>{theme.title}</Badge>
+              ))}
           </PageIntro>
-          <Toc items={toc} collapsed />
+          <Toc items={toc} />
           <ArticleBody blocks={blocks} pictures={pictures} />
           <PrevNext previous={neighbors.previous} next={neighbors.next} />
         </ReadingLayout>
       </Container>
+      {related.length > 0 && (
+        <Section title="Читайте также">
+          <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
+            {related.map((item, i) => (
+              <li key={item.id}>
+                <NewsCard news={item} tone={tones[i % tones.length]} />
+              </li>
+            ))}
+          </Grid>
+        </Section>
+      )}
       <CtaBanner cta={home.cta} />
     </main>
   )

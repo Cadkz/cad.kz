@@ -5,6 +5,7 @@ import * as migration_20261009_061254_manufacturer_image from './20261009_061254
 import * as migration_20261009_062507_seo_pages_contacts from './20261009_062507_seo_pages_contacts'
 import * as migration_20261009_113041_priority from './20261009_113041_priority'
 import * as migration_20261009_113901_price_names from './20261009_113901_price_names'
+import * as migration_20261009_122905_lines_topics from './20261009_122905_lines_topics'
 
 export const migrations = [
   {
@@ -41,5 +42,10 @@ export const migrations = [
     up: migration_20261009_113901_price_names.up,
     down: migration_20261009_113901_price_names.down,
     name: '20261009_113901_price_names',
+  },
+  {
+    up: migration_20261009_122905_lines_topics.up,
+    down: migration_20261009_122905_lines_topics.down,
+    name: '20261009_122905_lines_topics',
   },
 ]

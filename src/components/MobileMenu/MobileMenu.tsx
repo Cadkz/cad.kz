@@ -8,6 +8,7 @@ import type { MenuTab } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { aboutColumns, newsLinks, plainLinks } from '@/lib/siteNav'
 import { Drawer } from '../Drawer/Drawer'
+import { MobileVendors } from '../MobileVendors/MobileVendors'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './MobileMenu.module.css'
 
@@ -61,15 +62,12 @@ export function MobileMenu({ menu, contacts }: Props) {
                     <summary className={styles.sectionSummary}>
                       <SectionIcon name={column.icon} size={16} className={styles.sectionIcon} />
                       <span className={styles.sectionTitle}>{column.title}</span>
-                      <span className={styles.count}>{column.total}</span>
                     </summary>
                     <div className={styles.sectionBody}>
-                      {column.links.map((item) => link(item.href, item.title))}
-                      {column.allHref && (
-                        <Link href={column.allHref} className={styles.all} onClick={close}>
-                          Все {column.total} в каталоге
-                        </Link>
-                      )}
+                      <MobileVendors column={column} onNavigate={close} />
+                      <Link href={column.allHref} className={styles.all} onClick={close}>
+                        Смотреть весь раздел
+                      </Link>
                     </div>
                   </details>
                 ))}

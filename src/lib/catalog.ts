@@ -21,7 +21,13 @@ export type CatalogItem = ProductCardData & {
   rank: number
   /** Основной раздел (slug): в своём разделе товар стоит выше, чем в чужом. */
   main: string | null
+  /** Линейка производителя (id строкой) и порядок в ней: путь «производитель → линейка». */
+  line: string | null
+  lineOrder: number | null
 }
+
+/** Линейка производителя для шага каталога. */
+export type CatalogLine = { id: string; title: string; vendor: string; order: number }
 
 export type Facet = {
   slug: string
@@ -82,9 +88,13 @@ export async function getDirections(): Promise<Direction[]> {
 }
 
 /** Все опубликованные товары с ценой «от» и признаками фильтра. Один набор запросов на страницу. */
-export async function getCatalog(): Promise<{ items: CatalogItem[]; facets: Facet[] }> {
+export async function getCatalog(): Promise<{
+  items: CatalogItem[]
+  facets: Facet[]
+  lines: CatalogLine[]
+}> {
   const payload = await cms()
-  const [sections, products, offers, manufacturers, context] = await Promise.all([
+  const [sections, products, offers, manufacturers, context, productLines] = await Promise.all([
     payload.find({
       collection: 'sections',
       where: published,
@@ -102,6 +112,13 @@ export async function getCatalog(): Promise<{ items: CatalogItem[]; facets: Face
     payload.find({ collection: 'offers', where: published, limit: 5000, depth: 0 }),
     payload.find({ collection: 'manufacturers', limit: 300, depth: 0 }),
     loadPricingContext(payload),
+    payload.find({
+      collection: 'product-lines',
+      where: published,
+      pagination: false,
+      depth: 0,
+      select: { title: true, manufacturer: true, order: true },
+    }),
   ])
 
   const pictures = await cardPictures(payload, products.docs, manufacturers.docs)
@@ -146,6 +163,8 @@ export async function getCatalog(): Promise<{ items: CatalogItem[]; facets: Face
       tasks: (product.tasks ?? []).map((task) => task.title),
       rank: priorityRank(product.priority, vendorLevel.get(vendorId)),
       main: sectionById.get(relId(product.mainSection) ?? -1)?.slug ?? null,
+      line: product.line == null ? null : String(relId(product.line)),
+      lineOrder: product.lineOrder ?? null,
     }
   })
   // Без выбранного раздела: топы продаж первыми, дальше по названию.
@@ -160,5 +179,11 @@ export async function getCatalog(): Promise<{ items: CatalogItem[]; facets: Face
       .map((m) => vendorById.get(relId(m) ?? -1))
       .filter((title): title is string => Boolean(title)),
   }))
-  return { items, facets }
+  const lines = productLines.docs.flatMap((line) => {
+    const vendor = vendorById.get(relId(line.manufacturer) ?? -1)
+    return vendor
+      ? [{ id: String(line.id), title: line.title, vendor, order: line.order ?? 100 }]
+      : []
+  })
+  return { items, facets, lines }
 }

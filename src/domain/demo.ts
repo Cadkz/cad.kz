@@ -304,7 +304,7 @@ export const demoProducts: DemoProduct[] = [
     key: 'magicad',
     title: 'MagiCAD',
     kind: 'software',
-    manufacturer: 'MagiCAD Group',
+    manufacturer: 'MagiCAD',
     sections: ['mep'],
     tasks: ['ОВ и вентиляция', 'Водопровод и канализация', 'Электроснабжение'],
     summary: 'Надстройка для Revit — проектирование ОВ, ВК и электрики с базой оборудования.',

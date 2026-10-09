@@ -41,7 +41,7 @@ export async function PublicationIndex({ path, title, lead, kind, params }: Prop
       <Container>
         <Breadcrumbs items={[{ title: 'Главная', href: '/' }, { title }]} />
         <PageIntro title={title} lead={lead} />
-        <TopicLinks topics={topics} active={topic} hrefFor={(t) => query({ topic: t })} />
+        <TopicLinks topics={topics} active={topic} hrefFor={(slug) => query({ topic: slug })} />
         {result.docs.length ? (
           <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
             {result.docs.map((doc, i) => (

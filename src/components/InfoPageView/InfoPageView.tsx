@@ -58,28 +58,26 @@ export async function InfoPageView({ slug }: { slug: string }) {
     <main>
       <Container>
         <Breadcrumbs items={crumbs} />
-        <ReadingLayout
-          aside={
-            <RelatedList
-              title="О компании"
-              items={[
-                ...links.filter((link) => link.href !== pagePath(slug)),
-                {
-                  id: 0,
-                  href: '/contacts',
-                  title: 'Контакты',
-                  date: null,
-                  topic: null,
-                  excerpt: null,
-                  cover: null,
-                },
-              ]}
-            />
-          }
-        >
+        <ReadingLayout>
           <PageIntro title={page.title} lead={page.lead} />
           <ArticleBody blocks={blocks} pictures={pictures} />
           {questions && contacts && <AskManager contacts={contacts} {...questions} />}
+
+          <RelatedList
+            title="О компании"
+            items={[
+              ...links.filter((link) => link.href !== pagePath(slug)),
+              {
+                id: 0,
+                href: '/contacts',
+                title: 'Контакты',
+                date: null,
+                topic: null,
+                excerpt: null,
+                cover: null,
+              },
+            ]}
+          />
         </ReadingLayout>
       </Container>
     </main>

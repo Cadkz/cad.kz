@@ -174,14 +174,14 @@ export const DIRECTION_RULES = [
   {
     key: 'scad-soil',
     label: 'SCAD: ЗАПРОС, КРОСС, ОТКОС (основания и грунт)',
-    vendor: 'SCAD',
+    vendor: 'SCAD Soft',
     title: /запрос|кросс|откос/i,
     sections: ['geotech', 'structural'],
   },
   {
     key: 'scad',
     label: 'SCAD Office и программы-сателлиты',
-    vendor: 'SCAD',
+    vendor: 'SCAD Soft',
     sections: ['structural'],
   },
   {

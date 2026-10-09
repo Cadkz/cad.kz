@@ -47,7 +47,6 @@ function Checks({
             onChange={() => onToggle(option.value)}
           />
           <span className={styles.checkLabel}>{option.label}</span>
-          <span className={styles.count}>{option.count}</span>
         </label>
       ))}
     </fieldset>
@@ -76,7 +75,6 @@ export function FilterPanel({ state, options, onChange, onReset }: Props) {
             <Chip
               key={option.value}
               look="option"
-              count={option.count}
               selected={state.direction === option.value}
               onClick={() =>
                 onChange({ direction: state.direction === option.value ? null : option.value })
@@ -96,7 +94,6 @@ export function FilterPanel({ state, options, onChange, onReset }: Props) {
             <Chip
               key={option.value}
               look="option"
-              count={option.count}
               selected={state.type === option.value}
               onClick={() => onChange({ type: state.type === option.value ? null : option.value })}
             >

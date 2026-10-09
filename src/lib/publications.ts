@@ -1,6 +1,6 @@
 import type { Where } from 'payload'
 import type { NewsCardData } from '@/components/NewsCard/NewsCard'
-import type { Media, Publication } from '../../payload-types'
+import type { Media, Publication, Topic } from '../../payload-types'
 import { formatDate } from './format'
 import { newsHref } from './navigationHrefs'
 import { cms } from './payload'
@@ -14,13 +14,20 @@ function cover(value: Publication['cover']): NewsCardData['cover'] {
   return { url: media.url, alt: media.alt, width: media.width, height: media.height }
 }
 
+/** Тема публикации из связи (при depth ≥ 1), прежнее текстовое поле — запасной вариант. */
+export function themeOf(publication: Publication): { slug: string | null; title: string } | null {
+  const theme = publication.theme
+  if (theme && typeof theme === 'object') return { slug: (theme as Topic).slug, title: theme.title }
+  return publication.topic ? { slug: null, title: publication.topic } : null
+}
+
 export function toCard(publication: Publication): NewsCardData {
   return {
     id: publication.id,
     href: newsHref(publication.slug),
     title: publication.title,
     date: publication.publishedAt ? formatDate(publication.publishedAt) : null,
-    topic: publication.topic ?? null,
+    topic: themeOf(publication)?.title ?? null,
     excerpt: publication.excerpt ?? null,
     cover: cover(publication.cover),
   }
@@ -36,6 +43,7 @@ export async function getPublications({
   kinds?: PublicationKind[]
   limit?: number
   page?: number
+  /** Адрес темы (slug из «Тем новостей и статей»). */
   topic?: string | null
 } = {}) {
   const payload = await cms()
@@ -45,7 +53,7 @@ export async function getPublications({
       and: [
         { status: { equals: 'published' } },
         { kind: { in: kinds } },
-        ...(topic ? [{ topic: { equals: topic } }] : []),
+        ...(topic ? [{ 'theme.slug': { equals: topic } }] : []),
       ],
     },
     sort: '-publishedAt',
@@ -67,19 +75,33 @@ export async function getPublication(slug: string) {
   return docs[0] ?? null
 }
 
-/** Тематики опубликованных материалов этого типа — для фильтра над списком. */
+/** Темы, в которых есть опубликованные материалы этого типа, — для ссылок над списком. */
 export async function getTopics(kinds: PublicationKind[]) {
   const payload = await cms()
-  const { docs } = await payload.find({
-    collection: 'publications',
-    where: { and: [{ status: { equals: 'published' } }, { kind: { in: kinds } }] },
-    limit: 1000,
+  const topics = await payload.find({
+    collection: 'topics',
+    where: { status: { equals: 'published' } },
+    sort: ['order', 'title'],
+    pagination: false,
     depth: 0,
-    select: { topic: true },
   })
-  return [...new Set(docs.map((doc) => doc.topic).filter((t): t is string => Boolean(t)))].sort(
-    (a, b) => a.localeCompare(b, 'ru'),
+  const counts = await Promise.all(
+    topics.docs.map((topic) =>
+      payload.count({
+        collection: 'publications',
+        where: {
+          and: [
+            { status: { equals: 'published' } },
+            { kind: { in: kinds } },
+            { theme: { equals: topic.id } },
+          ],
+        },
+      }),
+    ),
   )
+  return topics.docs
+    .filter((_, index) => counts[index].totalDocs > 0)
+    .map((topic) => ({ slug: topic.slug, title: topic.title }))
 }
 
 /** Соседние материалы того же типа по дате: «предыдущая» старше, «следующая» новее. */
