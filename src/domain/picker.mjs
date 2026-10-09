@@ -151,7 +151,7 @@ export function initialState(view, pick = null) {
     if (step.mode === 'many')
       state.many.push(...step.items.filter((i) => i.preselect).map((i) => i.key))
     if (step.mode === 'bundle') {
-      const chosen = step.items.find((i) => i.preselect)
+      const chosen = available.find((i) => i.preselect)
       if (chosen && !state.bundle) state.bundle = chosen.key
     }
   }
@@ -178,8 +178,8 @@ function applyPick(view, state, productId) {
 }
 
 /**
- * Переключить значение переключателя. Выбранный в шаге «один вариант» вариант, который стал
- * недоступен, меняется на первый доступный; недоступные галочки и комплект снимаются.
+ * Переключить значение переключателя. Выбранный в шаге «один вариант» вариант или комплект,
+ * который стал недоступен, меняется на первый доступный; недоступные галочки снимаются.
  * @param {PickerView} view
  * @param {PickerState} state
  * @param {string} switchKey
@@ -203,8 +203,15 @@ export function setSwitch(view, state, switchKey, value) {
     const item = all.find((i) => i.key === key)
     return item ? ok(item) : false
   })
-  const bundleItem = all.find((i) => i.key === state.bundle)
-  const bundle = bundleItem && ok(bundleItem) ? state.bundle : null
+  // Выбранного комплекта нет в новой редакции — берём другой доступный комплект того же шага,
+  // чтобы человек остался среди готовых комплектов; нет ни одного — переходим к ручной сборке.
+  let bundle = null
+  if (state.bundle) {
+    const step = view.steps.find((s) => s.items.some((i) => i.key === state.bundle))
+    const current = step?.items.find((i) => i.key === state.bundle)
+    const next = current && ok(current) ? current : step?.items.find(ok)
+    bundle = next ? next.key : null
+  }
   return { switches, one, many, bundle }
 }
 

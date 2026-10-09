@@ -9,6 +9,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
+import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
 import { setupPriorities } from '../src/lib/prioritySetup.ts'
 import { setupVendors } from '../src/lib/vendorsSetup.ts'
 
@@ -58,6 +59,9 @@ try {
   const pickerV2 = await setupPickerV2(payload)
   if (!pickerV2) console.log('Полные конфигурации SCAD Office S392 уже добавлены.')
   else console.log(`SCAD Office, полные конфигурации: ${pickerV2.join('; ') || '—'}`)
+  const pickerV3 = await setupPickerV3(payload)
+  if (!pickerV3) console.log('Названия в подборе SCAD и AutoCAD уже обновлены.')
+  else console.log(`Подбор, понятные названия: ${pickerV3.join('; ') || '—'}`)
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1

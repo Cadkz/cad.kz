@@ -11,6 +11,7 @@ import {
   toQuery,
   update,
 } from '@/lib/catalogFilter'
+import { positions } from '@/lib/plural'
 import { Button } from '../Button/Button'
 import { CatalogSteps } from '../CatalogSteps/CatalogSteps'
 import { Drawer } from '../Drawer/Drawer'
@@ -20,14 +21,6 @@ import { ProductCard } from '../ProductCard/ProductCard'
 import styles from './CatalogFilter.module.css'
 
 type Props = { items: CatalogItem[]; facets: Facet[]; lines: CatalogLine[]; initial: FilterState }
-
-const plural = (n: number) => {
-  const mod10 = n % 10
-  const mod100 = n % 100
-  if (mod10 === 1 && mod100 !== 11) return 'позиция'
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'позиции'
-  return 'позиций'
-}
 
 /**
  * Каскадный фильтр каталога по данным CMS. Все товары приходят с сервера одним списком,
@@ -62,7 +55,7 @@ export function CatalogFilter({ items, facets, lines, initial }: Props) {
       <div ref={top} className={styles.results}>
         <div className={styles.head}>
           <p className={styles.count} aria-live="polite">
-            Найдено: {found.total} {plural(found.total)}
+            Найдено: {positions(found.total)}
           </p>
           <span className={styles.mobileOnly}>
             <Button variant="outline" size="sm" onClick={() => setPanelOpen(true)}>

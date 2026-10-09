@@ -4,6 +4,7 @@ import { ChevronLeft } from 'lucide-react'
 import { useMemo } from 'react'
 import type { CatalogItem, CatalogLine, Facet } from '@/lib/catalog'
 import { type FilterState, matches } from '@/lib/catalogFilter'
+import { positions } from '@/lib/plural'
 import { OTHER, vendorTree } from '../../domain/catalogTree.mjs'
 import styles from './CatalogSteps.module.css'
 
@@ -55,9 +56,11 @@ export function CatalogSteps({ items, facets, lines, state, onChange }: Props) {
                 onClick={() => onChange({ vendors: [item.title] })}
               >
                 <span className={styles.title}>{item.title}</span>
-                {item.lines.length > 1 && (
-                  <span className={styles.hint}>{item.lines.map((l) => l.title).join(' · ')}</span>
-                )}
+                <span className={styles.hint}>
+                  {item.lines.length > 1
+                    ? item.lines.map((l) => l.title).join(' · ')
+                    : positions(item.lines.reduce((sum, l) => sum + l.items.length, 0))}
+                </span>
               </button>
             </li>
           ))}

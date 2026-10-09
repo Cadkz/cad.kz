@@ -126,7 +126,7 @@ test('адрес ?pick=ID отмечает вариант: старый адре
   assert.equal(bundle.bundle, 'full')
 })
 
-test('смена редакции меняет предложения и снимает недоступный комплект', () => {
+test('смена редакции меняет предложения, недоступный комплект меняется на доступный', () => {
   let state = initialState(scad)
   state = setSwitch(scad, state, 'ed', 'SPro')
   state = { ...state, bundle: 'full' }
@@ -135,11 +135,34 @@ test('смена редакции меняет предложения и сни�
     ['826'],
   )
   state = setSwitch(scad, state, 'ed', 'S392')
+  assert.equal(state.bundle, 'nofx')
+  assert.deepEqual(
+    pickedLines(scad, state).map((l) => l.offer?.id),
+    ['901'],
+  )
+})
+
+test('ручная сборка: без комплекта смена редакции меняет предложения шагов', () => {
+  let state = initialState(scad)
+  state = setSwitch(scad, state, 'ed', 'SPro')
   assert.equal(state.bundle, null)
   assert.deepEqual(
     pickedLines(scad, state).map((l) => l.offer?.id),
-    ['750', '751'],
+    ['755', '756'],
   )
+})
+
+test('комплект, отмеченный «Выбран сразу», выбирается при открытии страницы', () => {
+  const view = {
+    ...scad,
+    steps: scad.steps.map((step) =>
+      step.mode === 'bundle'
+        ? { ...step, items: [step.items[0], { ...step.items[1], preselect: true }] }
+        : step,
+    ),
+  }
+  assert.equal(initialState(view).bundle, 'nofx')
+  assert.deepEqual(initialState(view, 589).many.sort(), ['rc', 'ss'])
 })
 
 test('вариант без предложений — по запросу, а не недоступен', () => {

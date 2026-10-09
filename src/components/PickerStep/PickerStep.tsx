@@ -7,14 +7,19 @@ import { PickerOption } from '../PickerOption/PickerOption'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
 import styles from './PickerStep.module.css'
 
-const controls = { base: 'base', one: 'radio', many: 'checkbox', bundle: 'checkbox' } as const
+const controls = { base: 'base', one: 'radio', many: 'checkbox', bundle: 'radio' } as const
 
-/** Один шаг подбора: заголовок с номером, подсказка и варианты. Длинный список свёрнут. */
-export function PickerStep({ step, number }: { step: Step; number: number | null }) {
+type Props = { step: Step; number: number | null; titled?: boolean }
+
+/**
+ * Один шаг подбора: заголовок с номером, подсказка и варианты. Длинный список свёрнут.
+ * titled — заголовок без номера (готовые комплекты над ручной сборкой).
+ */
+export function PickerStep({ step, number, titled = false }: Props) {
   const picker = usePickerContext()
   const { view, state } = picker
   const switchText = view.switches.map((sw) => state.switches[sw.key]).join(', ')
-  const muted = Boolean(state.bundle) && step.mode !== 'bundle'
+  const showTitle = number != null || titled
 
   const isChecked = (key: string) => {
     if (step.mode === 'base') return !state.bundle
@@ -25,7 +30,8 @@ export function PickerStep({ step, number }: { step: Step; number: number | null
   const change = (key: string) => {
     if (step.mode === 'one') picker.chooseOne(step.key, key)
     if (step.mode === 'many') picker.toggle(key)
-    if (step.mode === 'bundle') picker.chooseBundle(key)
+    // Комплект выбирается как радиокнопка: повторный щелчок не снимает выбор.
+    if (step.mode === 'bundle' && state.bundle !== key) picker.chooseBundle(key)
   }
 
   const options = step.items.map((item) => (
@@ -48,21 +54,13 @@ export function PickerStep({ step, number }: { step: Step; number: number | null
   const [openAtStart] = useState(chosen > 0)
 
   return (
-    <fieldset className={styles.step} data-muted={muted}>
+    <fieldset className={styles.step}>
       {/* Единственный шаг не подписываем заново: заголовок секции уже говорит, что выбирать. */}
-      <legend className={number == null ? 'visually-hidden' : styles.head}>
+      <legend className={showTitle ? styles.head : 'visually-hidden'}>
         {number != null && <span className={styles.number}>{number}</span>}
         {step.title}
       </legend>
       {step.hint && <p className={styles.hint}>{step.hint}</p>}
-      {muted && (
-        <p className={styles.notice}>
-          Сейчас выбран готовый комплект.{' '}
-          <button type="button" className={styles.reset} onClick={() => picker.chooseBundle(null)}>
-            Собрать самому
-          </button>
-        </p>
-      )}
       {step.collapsed ? (
         <details className={styles.more} open={openAtStart || undefined}>
           <summary className={styles.summary}>
