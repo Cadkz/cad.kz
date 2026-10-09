@@ -122,6 +122,12 @@ export async function importImages(
     hadGallery: 0,
   }
   let started = 0
+  /**
+   * Скачивания в работе. Одна картинка бывает у нескольких товаров (вся линейка MagiCAD), и без
+   * этого параллельные потоки сохраняли её дважды, второй получал отказ «legacyKey недействителен».
+   * @type {Map<string, Promise<number | null>>}
+   */
+  const inFlight = new Map()
 
   async function download(item, imagePath) {
     const url = imageUrl(imagePath, base)
@@ -151,24 +157,38 @@ export async function importImages(
       return known
     }
     if (skipped.has(imagePath)) return null
+    const pending = inFlight.get(imagePath)
+    if (pending) {
+      const id = await pending
+      if (id !== null) result.reused++
+      return id
+    }
     if (started >= limit || (deadline !== undefined && Date.now() >= deadline)) {
       result.postponed++
       return 'later'
     }
     started++
+    const job = download(item, imagePath).then(
+      (id) => {
+        mediaByKey.set(keyOf(imagePath), id)
+        result.downloaded++
+        if (result.downloaded % 50 === 0) log(`Картинки: скачано ${result.downloaded}`)
+        return id
+      },
+      (error) => {
+        result.failed.push({
+          product: item.data.title,
+          path: imagePath,
+          reason: failureReason(error),
+        })
+        return null
+      },
+    )
+    inFlight.set(imagePath, job)
     try {
-      const id = await download(item, imagePath)
-      mediaByKey.set(keyOf(imagePath), id)
-      result.downloaded++
-      if (result.downloaded % 50 === 0) log(`Картинки: скачано ${result.downloaded}`)
-      return id
-    } catch (error) {
-      result.failed.push({
-        product: item.data.title,
-        path: imagePath,
-        reason: failureReason(error),
-      })
-      return null
+      return await job
+    } finally {
+      inFlight.delete(imagePath)
     }
   }
 

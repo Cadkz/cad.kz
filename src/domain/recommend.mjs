@@ -13,8 +13,67 @@
  *   main: number | null, sections: number[], requires: number[],
  *   manualSimilar: number[], manualCross: number[],
  *   suggestSimilar: boolean, suggestCross: boolean }} RecItem
- * @typedef {Map<number, { isDirection: boolean, cross: number[] }>} SectionInfo
+ * @typedef {'name' | 'model'} MatchMode
+ * @typedef {Map<number, { isDirection: boolean, cross: number[], match?: MatchMode }>} SectionInfo
  */
+
+/**
+ * Разделы, товары которых в «С этим покупают» сверяются по названию с товаром страницы.
+ * name — курс по Civil 3D не предлагаем к GEO5, а курс по LIRA-FEM к SCAD: если в названии курса
+ * есть программа, она должна быть и в названии товара. Курс без программы в названии — общий.
+ * model — тонер для colorWAVE T60 предлагаем только к T60: модель из названия расходника должна
+ * быть в названии устройства. Расходник без модели в названии — общий.
+ * Ручной список и плагины (поле «Требуется базовое ПО») эту проверку не проходят — им верим.
+ */
+/** @type {Readonly<Record<string, MatchMode>>} */
+export const SECTION_MATCH = { training: 'name', consumables: 'model' }
+
+/** Слова, которые не указывают на конкретную программу. */
+const GENERIC_WORDS = new Set(
+  'pro lt suite office professional online subscription academic bim cad cs for and the plus demo line new'.split(
+    ' ',
+  ),
+)
+
+/** Латинские слова названия (там названия программ и моделей), без общих слов. */
+function latinWords(text) {
+  const words = (text ?? '').toLowerCase().match(/[a-z0-9][a-z0-9-]*/g) ?? []
+  return words
+    .map((word) => word.replace(/-+$/, ''))
+    .filter((word) => word.length >= 3 && /[a-z]/.test(word) && !GENERIC_WORDS.has(word))
+}
+
+/**
+ * Модели из названия: латинские слова с цифрами (TX-3200 → tx3200, T60) и числа от трёх
+ * цифр (ColorWave 650 → 650).
+ */
+function modelWords(text) {
+  const words = (text ?? '').toLowerCase().match(/[a-z0-9][a-z0-9-]*/g) ?? []
+  return words
+    .map((word) => word.replaceAll('-', ''))
+    .filter((word) => /\d/.test(word) && (/[a-z]/.test(word) ? word.length >= 2 : word.length >= 3))
+}
+
+/**
+ * Подходит ли кандидат товару по названию.
+ * @param {MatchMode} mode
+ * @param {RecItem} target
+ * @param {RecItem} item
+ */
+export function matchesByName(mode, target, item) {
+  if (mode === 'model') {
+    const models = modelWords(item.title)
+    return !models.length || intersects(models, modelWords(target.title))
+  }
+  const vendor = new Set(latinWords(target.vendor))
+  const mentioned = latinWords(item.title)
+  if (!mentioned.length) return true
+  const programs = mentioned.filter((word) => !vendor.has(word))
+  // «Курс Autodesk» без программы — к любому товару этого производителя.
+  if (!programs.length) return true
+  const own = latinWords(target.title).filter((word) => !vendor.has(word))
+  return intersects(programs, own)
+}
 
 const MANUAL = 100
 
@@ -83,6 +142,12 @@ function crossScore(target, item, { crossSections, targetDirections, info }) {
   const sameDirection = intersects(itemDirections, targetDirections)
   // Курс по ЛИРА не предлагаем к GEO5: у обоих есть направление, и оно разное.
   if (!plugin && itemDirections.length && targetDirections.length && !sameDirection) return null
+  if (!plugin) {
+    for (const id of item.sections) {
+      const mode = info.get(id)?.match
+      if (mode && !matchesByName(mode, target, item)) return null
+    }
+  }
   return (
     (plugin ? 6 : 0) +
     (inCross ? 3 : 0) +

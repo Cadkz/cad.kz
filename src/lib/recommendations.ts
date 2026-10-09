@@ -1,5 +1,11 @@
 import type { Payload } from 'payload'
-import { crossFor, type RecItem, type SectionInfo, similarFor } from '../domain/recommend.mjs'
+import {
+  crossFor,
+  type RecItem,
+  SECTION_MATCH,
+  type SectionInfo,
+  similarFor,
+} from '../domain/recommend.mjs'
 import type { RelatedProduct } from './product'
 import { productPath } from './productPath'
 import { relId, relIds } from './rel'
@@ -37,7 +43,7 @@ async function loadRecData(payload: Payload): Promise<RecData> {
       limit: 500,
       pagination: false,
       depth: 0,
-      select: { isDirection: true, crossSections: true },
+      select: { slug: true, isDirection: true, crossSections: true },
     }),
     payload.find({
       collection: 'manufacturers',
@@ -51,7 +57,11 @@ async function loadRecData(payload: Payload): Promise<RecData> {
   const info: SectionInfo = new Map(
     sections.docs.map((s) => [
       s.id,
-      { isDirection: Boolean(s.isDirection), cross: relIds(s.crossSections) },
+      {
+        isDirection: Boolean(s.isDirection),
+        cross: relIds(s.crossSections),
+        match: Object.hasOwn(SECTION_MATCH, s.slug) ? SECTION_MATCH[s.slug] : undefined,
+      },
     ]),
   )
   const items: RecItem[] = []

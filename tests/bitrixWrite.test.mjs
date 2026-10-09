@@ -375,3 +375,30 @@ test('картинки: GIF принимается, неподходящий ф�
   timeout.name = 'TimeoutError'
   assert.equal(failureReason(timeout), 'старый сайт не ответил за 30 секунд')
 })
+
+test('картинки: одна картинка у нескольких товаров скачивается один раз', async () => {
+  const payload = fakePayload({
+    products: [
+      { id: 1, legacyKey: 'bitrix:product:1' },
+      { id: 2, legacyKey: 'bitrix:product:2' },
+    ],
+  })
+  const plan = {
+    products: [1, 2].map((n) => ({
+      legacyKey: `bitrix:product:${n}`,
+      images: ['/upload/shared.png'],
+      data: { title: `MagiCAD ${n}` },
+    })),
+  }
+  const downloads = []
+  const fetch = async (url) => {
+    downloads.push(url)
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    return { data: Buffer.from('png'), mimetype: 'image/png' }
+  }
+  const result = await importImages(payload, plan, { fetch })
+  assert.equal(downloads.length, 1)
+  assert.equal(payload.db.get('media').length, 1)
+  assert.equal(result.failed.length, 0)
+  assert.equal(result.products, 2)
+})

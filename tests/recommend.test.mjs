@@ -94,3 +94,44 @@ test('запрет «предлагать в С этим покупают» и �
   assert.deepEqual(crossFor([plotter], noToner, info), [])
   assert.equal(crossFor([{ ...plotter, manualCross: [scad.id] }], all, info)[0], scad.id)
 })
+
+test('по названию: курс по другой программе не предлагаем, по своей — первым', () => {
+  const sections = new Map([
+    [1, { isDirection: true, cross: [3] }],
+    [2, { isDirection: true, cross: [3] }],
+    [3, { isDirection: false, cross: [], match: 'name' }],
+  ])
+  const scadOffice = item(21, 'SCAD Office v. 25.1', 'SCAD', 2)
+  const lira = item(22, 'Курс «Расчет в ПК LIRA-FEM согласно Евронормам СП РК EN»', null, 3, [2])
+  const robot = item(23, 'Курс Autodesk Robot Structural Analysis', null, 3, [2])
+  const common = item(24, 'Корпоративное обучение', null, 3)
+  const magicad = item(25, 'MagiCAD Вентиляция для Revit', 'MagiCAD', 1)
+  const revitCourse = item(26, 'Autodesk Revit MEP: слаботочные сети', null, 3, [1])
+  const civilCourse = item(27, 'Онлайн курс Civil 3D. Проектирование наружных сетей', null, 3, [1])
+  const pool = [scadOffice, lira, robot, common, magicad, revitCourse, civilCourse]
+  assert.deepEqual(crossFor([scadOffice], pool, sections), [common.id])
+  const forMagicad = crossFor([magicad], pool, sections)
+  assert.ok(forMagicad.includes(revitCourse.id) && !forMagicad.includes(civilCourse.id))
+  // Слово производителя совпадения не даёт: курс Civil 3D не подходит к Autodesk Revit.
+  const revit = item(28, 'Autodesk Revit', 'Autodesk', 1)
+  const civilAutodesk = item(29, 'Курс Autodesk Civil 3D', null, 3, [1])
+  assert.ok(!crossFor([revit], [revit, civilAutodesk], sections).includes(civilAutodesk.id))
+})
+
+test('по модели: тонер только к своему плоттеру, сканер — к любому', () => {
+  const sections = new Map([
+    [5, { isDirection: false, cross: [6, 7] }],
+    [6, { isDirection: false, cross: [], match: 'model' }],
+    [7, { isDirection: false, cross: [] }],
+  ])
+  const hw = { kind: 'hardware' }
+  const t60 = item(31, 'Canon colorWAVE T60', 'Canon', 5, [], hw)
+  const tx = item(32, 'imagePROGRAF TX-3200', 'Canon', 5, [], hw)
+  const toner = item(33, 'Тонер Canon/6692C004AA/colorWAVE T60 Toner BK', 'Canon', 6, [], hw)
+  const scanner = item(34, 'WideTEK 36CL', 'Image Access', 7, [], hw)
+  const cartridge = item(35, 'картридж Océ ColorWave 650 Black', 'Canon', 6, [], hw)
+  const pool = [t60, tx, toner, scanner, cartridge]
+  assert.equal(crossFor([t60], pool, sections)[0], toner.id)
+  assert.ok(!crossFor([t60], pool, sections).includes(cartridge.id))
+  assert.deepEqual(crossFor([tx], pool, sections), [scanner.id])
+})
