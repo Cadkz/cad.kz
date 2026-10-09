@@ -1,0 +1,57 @@
+.drawing {
+  display: block;
+  width: 100%;
+  height: auto;
+  stroke-linecap: round;
+}
+
+.frame,
+.ground,
+.bracing,
+.dimension {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: draw var(--duration-draw) var(--ease) both;
+}
+
+.frame {
+  stroke: var(--color-sky);
+  stroke-width: 1.5;
+  animation-delay: var(--duration-fast);
+}
+
+.ground {
+  stroke: var(--color-on-dark-line);
+  stroke-width: 1;
+}
+
+.bracing {
+  stroke: var(--color-sky-strong);
+  stroke-width: 1.5;
+  animation-delay: var(--duration-draw);
+}
+
+.dimension {
+  stroke: var(--color-text-on-dark);
+  stroke-width: 1;
+  animation-delay: var(--duration-draw);
+}
+
+.label {
+  fill: var(--color-text-on-dark);
+  font-family: var(--font-body);
+  font-size: var(--text-overline);
+  animation: appear var(--duration-base) var(--ease) var(--duration-draw) both;
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}

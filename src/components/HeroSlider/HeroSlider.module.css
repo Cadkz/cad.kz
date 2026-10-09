@@ -9,13 +9,52 @@
   padding: var(--space-8) var(--space-6);
   overflow: hidden;
   border-radius: var(--radius-lg);
-  background:
-    url("/images/patterns/facets-light.svg") right top / var(--pattern-tile) auto repeat-y,
-    var(--gradient-navy);
+  isolation: isolate;
+  background: var(--gradient-navy);
   color: var(--color-text-inverse);
 }
 
+/* Фон кодом: чертёжная сетка, растворяющаяся к левому краю, и мягкое свечение справа. */
+.slider::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--blueprint-dark);
+  background-size: var(--blueprint-size);
+  mask-image: var(--blueprint-fade);
+}
+
+.slider::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background: radial-gradient(circle at 85% 20%, var(--color-glow), transparent 45%);
+}
+
+.drawing {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .drawing {
+    position: absolute;
+    right: var(--space-8);
+    bottom: var(--space-6);
+    z-index: var(--z-below);
+    display: block;
+    width: calc(var(--control-height) * 5);
+  }
+
+  /* Текст не заходит на чертёж. */
+  .content {
+    max-width: min(var(--measure), calc(100% - var(--control-height) * 5 - var(--space-8)));
+  }
+}
+
 .content {
+  animation: swap var(--duration-base) var(--ease);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -109,5 +148,12 @@
 @media (min-width: 640px) {
   .slider {
     padding: var(--space-10);
+  }
+}
+
+@keyframes swap {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
   }
 }

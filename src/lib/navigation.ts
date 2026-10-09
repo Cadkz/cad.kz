@@ -5,9 +5,15 @@ import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
 import { productPath } from './productPath'
 
-export type MenuLink = { title: string; href: string }
-/** Колонка раздела: несколько товаров, сколько их всего и адрес каталога с этим разделом. */
-export type MenuColumn = { title: string; links: MenuLink[]; total?: number; allHref?: string }
+export type MenuLink = { title: string; href: string; vendor?: string | null }
+/** Раздел в мегаменю: популярные товары, сколько их всего и адрес каталога с этим разделом. */
+export type MenuColumn = {
+  title: string
+  icon?: string | null
+  links: MenuLink[]
+  total?: number
+  allHref?: string
+}
 export type MenuTab = { key: string; label: string; columns: MenuColumn[]; allHref: string }
 
 const groupLabels: Record<Section['menuGroup'], string> = {
@@ -54,11 +60,12 @@ export async function getMenu(): Promise<MenuTab[]> {
       collection: 'manufacturers',
       pagination: false,
       depth: 0,
-      select: { priority: true },
+      select: { priority: true, title: true },
     }),
   ])
 
   const vendorLevel = new Map(manufacturers.docs.map((m) => [m.id, m.priority]))
+  const vendorTitle = new Map(manufacturers.docs.map((m) => [m.id, m.title]))
   const items = products.docs.map((product) => {
     const vendor = relId(product.manufacturer)
     return {
@@ -68,6 +75,7 @@ export async function getMenu(): Promise<MenuTab[]> {
       sections: (product.sections ?? []).map((section) => relId(section) ?? 0),
       href: productPath(product),
       vendor,
+      vendorTitle: vendor == null ? null : (vendorTitle.get(vendor) ?? null),
       rank: priorityRank(product.priority, vendor == null ? null : vendorLevel.get(vendor)),
     }
   })
@@ -79,8 +87,9 @@ export async function getMenu(): Promise<MenuTab[]> {
     columns: menuColumns(
       sections.docs
         .filter((section) => section.menuGroup === group)
-        .map(({ id, slug, title, menuGroup, isDirection, pinnedManufacturers }) => ({
+        .map(({ id, slug, title, menuGroup, isDirection, pinnedManufacturers, icon }) => ({
           id,
+          icon: icon ?? null,
           slug,
           title,
           menuGroup,
@@ -92,21 +101,7 @@ export async function getMenu(): Promise<MenuTab[]> {
     ),
   }))
 
-  const directions = sections.docs.filter((section) => section.isDirection)
-  tabs.push({
-    key: 'directions',
-    label: 'По отраслям',
-    allHref: catalogHref(),
-    columns: [
-      {
-        title: 'Направления',
-        links: directions.map((section) => ({
-          title: section.title,
-          href: catalogHref({ direction: section.slug }),
-        })),
-      },
-    ],
-  })
+  // Отдельной вкладки «По отраслям» нет: направления и есть разделы программ.
   return tabs.filter((tab) => tab.columns.some((column) => column.links.length > 0))
 }
 

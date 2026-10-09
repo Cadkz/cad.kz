@@ -49,6 +49,31 @@
   --gradient-soft: linear-gradient(135deg, var(--color-blue-soft), var(--color-blue-mid));
   --gradient-card-shade: linear-gradient(165deg, rgba(10, 16, 48, 0.35), rgba(8, 13, 38, 0.88));
 
+  /* ---------- Чертёжная сетка: фон кодом вместо картинок ---------- */
+  /* Мелкая клетка 24 px и крупная 120 px, как на листе в CAD. Тёмная — на navy, светлая — на фоне. */
+  --color-grid-dark: rgba(255, 255, 255, 0.05);
+  --color-grid-dark-major: rgba(255, 255, 255, 0.1);
+  --color-grid-light: rgba(17, 33, 116, 0.045);
+  --color-grid-light-major: rgba(17, 33, 116, 0.085);
+  --color-glow: rgba(138, 196, 255, 0.3); /* мягкое свечение sky поверх navy */
+  --grid-cell: 24px;
+  --grid-major: 120px;
+  --blueprint-dark:
+    linear-gradient(var(--color-grid-dark-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid-dark-major) 1px, transparent 1px),
+    linear-gradient(var(--color-grid-dark) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid-dark) 1px, transparent 1px);
+  --blueprint-light:
+    linear-gradient(var(--color-grid-light-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid-light-major) 1px, transparent 1px),
+    linear-gradient(var(--color-grid-light) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid-light) 1px, transparent 1px);
+  --blueprint-size:
+    var(--grid-major) var(--grid-major), var(--grid-major) var(--grid-major),
+    var(--grid-cell) var(--grid-cell), var(--grid-cell) var(--grid-cell);
+  /* Сетка растворяется к краям блока: маска, а не цвет. */
+  --blueprint-fade: radial-gradient(ellipse at 70% 30%, black, transparent 75%);
+
   /* ---------- Шрифты ---------- */
   --font-heading: "Manrope", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
@@ -129,10 +154,13 @@
   --drawer-width: 360px; /* выдвижная панель: мобильное меню, фильтр, корзина */
   --logo-height: 28px;
   --pattern-tile: 212px; /* плитка фирменного узора из граней (public/images/patterns) */
+  --menu-rail: 240px; /* мегаменю: колонка групп каталога */
+  --menu-sections: 300px; /* мегаменю: колонка разделов */
 
   /* ---------- Анимация ---------- */
   --duration-fast: 150ms;
   --duration-base: 250ms;
+  --duration-draw: 1200ms; /* прорисовка чертежа в баннере, один раз при загрузке */
   --ease: cubic-bezier(0.2, 0, 0, 1);
 
   /* ---------- Слои ---------- */

@@ -5,9 +5,21 @@
 .tint {
   margin-top: var(--section-gap);
   padding-bottom: var(--section-gap);
-  background:
-    url("/images/patterns/facets-blue.svg") 0 0 / var(--pattern-tile) auto repeat,
-    var(--color-blue-soft);
+  position: relative;
+  isolation: isolate;
+  background: var(--color-blue-soft);
+}
+
+/* Фон кодом: светлая чертёжная сетка, к краям растворяется. */
+.tint::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--blueprint-light);
+  background-size: var(--blueprint-size);
+  background-position: center top;
+  mask-image: radial-gradient(ellipse at 50% 0%, black, transparent 70%);
 }
 
 .head {

@@ -10,10 +10,29 @@
   padding: var(--space-8) var(--space-6);
   overflow: hidden;
   border-radius: var(--radius-lg);
-  background:
-    url("/images/patterns/facets-light.svg") right top / var(--pattern-tile) auto repeat-y,
-    var(--gradient-deep);
+  position: relative;
+  isolation: isolate;
+  background: var(--gradient-deep);
   color: var(--color-text-inverse);
+}
+
+/* Фон кодом: чертёжная сетка вместо картинки-узора. */
+.band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--blueprint-dark);
+  background-size: var(--blueprint-size);
+  mask-image: linear-gradient(to left, black, transparent 70%);
+}
+
+.band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background: radial-gradient(circle at 100% 0%, var(--color-glow), transparent 40%);
 }
 
 .title {

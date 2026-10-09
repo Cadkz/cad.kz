@@ -8,14 +8,31 @@
  */
 import { compareInSection, pickVaried } from './priority.mjs'
 
-export const MENU_LINKS = 5
+/** Товаров раздела в мегаменю: показывается один раздел за раз, места на две колонки. */
+export const MENU_LINKS = 8
+/** От одного производителя в разделе меню сначала не больше стольких товаров. */
+export const MENU_PER_VENDOR = 3
+
+/**
+ * Короткое название для меню: без канцелярского «Право на использование программного
+ * обеспечения», с которого в Битриксе начинаются сотни товаров CSoft и Chaos.
+ * @param {string} title
+ */
+export function menuTitle(title) {
+  const short = title
+    .replace(/^право на использование (программного обеспечения|ПО)\s*/i, '')
+    .trim()
+  return short ? short[0].toUpperCase() + short.slice(1) : title
+}
 
 /**
  * @typedef {{ id: number, slug: string, title: string, menuGroup: string, isDirection: boolean,
- *   pins?: number[] }} MenuSection
+ *   pins?: number[], icon?: string | null }} MenuSection
  * @typedef {{ id: number, title: string, main: number | null, sections: number[], href: string,
- *   rank?: number, vendor?: number | null }} MenuProduct
- * @typedef {{ title: string, links: { title: string, href: string }[], total: number, allHref: string }} MenuColumnData
+ *   rank?: number, vendor?: number | null, vendorTitle?: string | null }} MenuProduct
+ * @typedef {{ title: string, href: string, vendor: string | null }} MenuLinkData
+ * @typedef {{ title: string, icon: string | null, links: MenuLinkData[], total: number,
+ *   allHref: string }} MenuColumnData
  */
 
 /**
@@ -46,7 +63,12 @@ export function menuColumns(sections, products, hrefFor, limit = MENU_LINKS) {
         .sort(compareInSection(section.id, section.pins ?? []))
       return {
         title: section.title,
-        links: pickVaried(inSection, limit).map(({ title, href }) => ({ title, href })),
+        icon: section.icon ?? null,
+        links: pickVaried(inSection, limit, MENU_PER_VENDOR).map((product) => ({
+          title: menuTitle(product.title),
+          href: product.href,
+          vendor: product.vendorTitle ?? null,
+        })),
         total: inSection.length,
         allHref: hrefFor(sectionFilter(section)),
       }

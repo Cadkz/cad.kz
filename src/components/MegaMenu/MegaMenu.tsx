@@ -1,9 +1,9 @@
 'use client'
 
-import { ArrowRight } from 'lucide-react'
-import Link from 'next/link'
+import { MessageCircle } from 'lucide-react'
 import { type PointerEventHandler, useState } from 'react'
 import type { MenuTab } from '@/lib/navigation'
+import { MenuSections } from '../MenuSections/MenuSections'
 import styles from './MegaMenu.module.css'
 
 type Props = {
@@ -16,8 +16,9 @@ type Props = {
 }
 
 /**
- * Мегаменю каталога: группы слева, товары по разделам в центре, предложение подбора справа.
- * Не выше экрана: центральная колонка прокручивается сама, страница под ней — нет.
+ * Мегаменю каталога. Слева на тёмной чертёжной сетке — группы (программы, оборудование, услуги)
+ * и предложение подбора; дальше разделы группы и популярные товары раздела под курсором.
+ * Показывается один раздел за раз, поэтому меню всегда помещается в экран.
  */
 export function MegaMenu({
   id,
@@ -37,22 +38,36 @@ export function MegaMenu({
       onPointerEnter={onPointerEnter}
       onPointerLeave={onPointerLeave}
     >
-      <div className={styles.segments} role="tablist" aria-label="Группы каталога">
-        {tabs.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            role="tab"
-            id={`${id}-tab-${item.key}`}
-            aria-selected={item.key === tab.key}
-            aria-controls={`${id}-panel`}
-            className={styles.segment}
-            onClick={() => setActive(item.key)}
-            onPointerEnter={(event) => event.pointerType === 'mouse' && setActive(item.key)}
-          >
-            {item.label}
-          </button>
-        ))}
+      <div className={styles.rail}>
+        <div className={styles.segments} role="tablist" aria-label="Группы каталога">
+          {tabs.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              role="tab"
+              id={`${id}-tab-${item.key}`}
+              aria-selected={item.key === tab.key}
+              aria-controls={`${id}-panel`}
+              className={styles.segment}
+              onClick={() => setActive(item.key)}
+              onPointerEnter={(event) => event.pointerType === 'mouse' && setActive(item.key)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+        <div className={styles.offer}>
+          <p className={styles.offerTitle}>Не знаете, что выбрать?</p>
+          <p className={styles.offerText}>
+            Пришлите задачи — инженер подберёт программы и технику.
+          </p>
+          {whatsappHref && (
+            <a href={whatsappHref} className={styles.offerLink} target="_blank" rel="noreferrer">
+              <MessageCircle size={16} strokeWidth={1.75} aria-hidden="true" />
+              Написать в WhatsApp
+            </a>
+          )}
+        </div>
       </div>
       <div
         key={tab.key}
@@ -61,43 +76,7 @@ export function MegaMenu({
         aria-labelledby={`${id}-tab-${tab.key}`}
         className={styles.panel}
       >
-        <div className={styles.columns}>
-          {tab.columns.map((column) => (
-            <div key={column.title} className={styles.column}>
-              <p className={styles.columnTitle}>{column.title}</p>
-              <ul className={styles.links}>
-                {column.links.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className={styles.link} onClick={onNavigate}>
-                      {link.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              {column.allHref && column.total && column.total > column.links.length ? (
-                <Link href={column.allHref} className={styles.more} onClick={onNavigate}>
-                  Все {column.total}
-                  <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
-                </Link>
-              ) : null}
-            </div>
-          ))}
-        </div>
-        <Link href={tab.allHref} className={styles.all} onClick={onNavigate}>
-          Весь список
-          <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
-        </Link>
-      </div>
-      <div className={styles.visual}>
-        <p className={styles.visualTitle}>Подберём комплект под ваши задачи</p>
-        <p className={styles.visualText}>
-          Пришлите список задач — инженер предложит софт и технику.
-        </p>
-        {whatsappHref && (
-          <a href={whatsappHref} className={styles.visualLink} target="_blank" rel="noreferrer">
-            Написать в WhatsApp
-          </a>
-        )}
+        <MenuSections tab={tab} onNavigate={onNavigate} />
       </div>
     </div>
   )

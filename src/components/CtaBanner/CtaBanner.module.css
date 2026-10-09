@@ -11,9 +11,28 @@
   padding: var(--space-8) var(--space-6);
   overflow: hidden;
   border-radius: var(--radius-lg);
-  background:
-    url("/images/patterns/facets-light.svg") right top / var(--pattern-tile) auto repeat-y,
-    var(--color-navy);
+  position: relative;
+  isolation: isolate;
+  background: var(--color-navy);
+}
+
+/* Фон кодом: чертёжная сетка вместо картинки-узора. */
+.banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--blueprint-dark);
+  background-size: var(--blueprint-size);
+  mask-image: linear-gradient(to left, black, transparent 60%);
+}
+
+.banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background: radial-gradient(circle at 0% 100%, var(--color-glow), transparent 40%);
 }
 
 .text {
