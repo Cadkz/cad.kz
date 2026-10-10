@@ -6,6 +6,7 @@ import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
 import { productPath } from './productPath'
 import { relId } from './rel'
+import { getSearchExtras } from './searchText'
 import { searchPages } from './siteNav'
 
 /**
@@ -44,7 +45,7 @@ export function getSearchIndex(): Promise<SuggestIndex> {
 
 async function buildIndex(): Promise<SuggestIndex> {
   const payload = await cms()
-  const [products, manufacturers, sections, families] = await Promise.all([
+  const [products, manufacturers, sections, families, extras] = await Promise.all([
     payload.find({
       collection: 'products',
       where: published,
@@ -80,6 +81,7 @@ async function buildIndex(): Promise<SuggestIndex> {
       select: { title: true, slug: true, menuGroup: true, isDirection: true, summary: true },
     }),
     familyLines(),
+    getSearchExtras(),
   ])
 
   const vendorTitle = new Map(manufacturers.docs.map((m) => [m.id, m.title]))
@@ -117,15 +119,20 @@ async function buildIndex(): Promise<SuggestIndex> {
       aliases: product.searchAliases ?? null,
       summary: product.summary ?? null,
       tasks: (product.tasks ?? []).map((task) => task.title),
+      ...extras.products.get(product.id),
     }
     const rank = priorityRank(product.priority, vendorId == null ? null : vendorLevel.get(vendorId))
-    return [{ entry, rank, vendor, main: null, title: product.title }]
+    const hidden = product.pageView === 'none'
+    return [{ entry, rank, vendor, main: null, title: product.title, hidden }]
   })
-  // Топы продаж выше: при равном совпадении поиск сохраняет этот порядок.
-  ranked.sort(compareInSection())
+  // Топы продаж выше, товары со своей страницей выше модулей и продлений без неё: при равном
+  // совпадении поиск сохраняет этот порядок.
+  const byPriority = compareInSection()
+  ranked.sort((a, b) => Number(a.hidden) - Number(b.hidden) || byPriority(a, b))
   const productEntries = ranked.map((item) => item.entry)
 
-  const familyEntries: SuggestEntry[] = [...families.values()].map((family) => ({
+  const familyEntries: SuggestEntry[] = [...families].map(([lineId, family]) => ({
+    ...extras.families.get(lineId),
     type: 'family',
     title: family.title,
     href: family.href,

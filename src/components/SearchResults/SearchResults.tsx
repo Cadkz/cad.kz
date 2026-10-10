@@ -7,13 +7,19 @@ import { WhatsappIcon } from '../icons/icons'
 import { ProductCard } from '../ProductCard/ProductCard'
 import styles from './SearchResults.module.css'
 
-type Props = { query: string; items: CatalogItem[]; whatsappHref: string | null }
+type Props = {
+  query: string
+  items: CatalogItem[]
+  /** Нашлись не все слова запроса: показываем похожее и говорим об этом. */
+  partial?: boolean
+  whatsappHref: string | null
+}
 
 /**
  * Результаты поиска карточками каталога. Ничего не нашлось — не тупик: написать, что ищете,
  * в WhatsApp (текст уже набран) или перейти в каталог.
  */
-export function SearchResults({ query, items, whatsappHref }: Props) {
+export function SearchResults({ query, items, partial = false, whatsappHref }: Props) {
   if (!query.trim()) return null
   if (!items.length) {
     const text = `Здравствуйте! Ищу на сайте: ${query}. Подскажите, пожалуйста.`
@@ -45,7 +51,9 @@ export function SearchResults({ query, items, whatsappHref }: Props) {
   return (
     <section className={styles.results} aria-label="Результаты поиска">
       <p className={styles.count} aria-live="polite">
-        Найдено: {positions(items.length)}
+        {partial
+          ? `Точно по запросу ничего нет — похожее: ${positions(items.length)}`
+          : `Найдено: ${positions(items.length)}`}
       </p>
       <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }} className={styles.list}>
         {items.map((item) => (

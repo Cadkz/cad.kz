@@ -5,8 +5,8 @@
  *
  * Источник — индекс сайта (src/lib/searchIndex.ts): товары и семейства, производители, разделы
  * каталога, страницы сайта. Совпадения ищет src/domain/search.mjs (регистр, кириллица, опечатки).
- * Это обычный поиск по словам: задачу вида «программа для подпорной стены» он не понимает —
- * такое будет делать ИИ-помощник.
+ * Это поиск по словам: «программа для вентиляции» он находит по слову «вентиляции» (служебные
+ * слова не мешают), но задачу своими словами не понимает — такое будет делать ИИ-помощник.
  */
 import { normalize, searchItems } from './search.mjs'
 
@@ -14,7 +14,7 @@ import { normalize, searchItems } from './search.mjs'
  * @typedef {'product' | 'family' | 'vendor' | 'section' | 'page'} SuggestType
  * @typedef {{ type: SuggestType, title: string, href: string, label: string,
  *   note?: string | null, vendor?: string | null, aliases?: string | null, summary?: string | null,
- *   tasks?: string[] }} SuggestEntry
+ *   tasks?: string[], sections?: string[], parts?: string, keywords?: string }} SuggestEntry
  * @typedef {{ products: SuggestEntry[], vendors: SuggestEntry[], sections: SuggestEntry[],
  *   pages: SuggestEntry[] }} SuggestIndex
  * @typedef {{ type: SuggestType, title: string, href: string, label: string, note: string | null }} Suggestion
@@ -51,7 +51,7 @@ const toSuggestion = ({ type, title, href, label, note }) => ({
 export function suggest(index, rawQuery, limit = SUGGEST_LIMIT) {
   const query = rawQuery.trim().slice(0, 100)
   if (normalize(query).length < MIN_QUERY) return { query, items: [], more: false }
-  const products = searchItems(index.products, query, 60)
+  const products = onePerPlace(searchItems(index.products, query, 60))
   const others = [
     ...searchItems(index.vendors, query, 1, true),
     ...searchItems(index.sections, query, 2, true),
@@ -62,6 +62,21 @@ export function suggest(index, rawQuery, limit = SUGGEST_LIMIT) {
     .slice(0, limit)
     .map(toSuggestion)
   return { query, items, more: products.length > shown.length }
+}
+
+/**
+ * Одна строка на место, куда ведёт подсказка: 15 продлений «Изоляции» ведут в одно семейство —
+ * показываем первое (самое подходящее), а не 15 одинаковых строк.
+ * @param {SuggestEntry[]} entries
+ */
+function onePerPlace(entries) {
+  const seen = new Set()
+  return entries.filter((entry) => {
+    const place = entry.href.split('#')[0]
+    if (seen.has(place)) return false
+    seen.add(place)
+    return true
+  })
 }
 
 /** Группы панели подсказок в порядке показа. Пустые группы не показываются. */
