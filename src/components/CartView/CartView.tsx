@@ -16,7 +16,7 @@ import styles from './CartView.module.css'
  * Без подборок: только проверка состава и отправка заявки. Состав можно скопировать текстом —
  * для согласования внутри компании.
  */
-export function CartView() {
+export function CartView({ whatsappHref = null }: { whatsappHref?: string | null }) {
   const { items, ready, remove, setQuantity } = useCart()
   const { quote, error, busy, retry } = useCartQuote(items, ready)
   const [copied, setCopied] = useState(false)
@@ -36,8 +36,8 @@ export function CartView() {
     }
   }
 
-  if (!ready) return <EmptyCart loading />
-  if (!items.length) return <EmptyCart />
+  if (!ready) return <EmptyCart loading whatsappHref={whatsappHref} />
+  if (!items.length) return <EmptyCart whatsappHref={whatsappHref} />
 
   return (
     <>

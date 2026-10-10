@@ -2,13 +2,15 @@ import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { CheckoutView } from '@/components/CheckoutView/CheckoutView'
 import { Container } from '@/components/Container/Container'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
+import { getContacts } from '@/lib/navigation'
 
 export const metadata = {
   title: 'Оформление заявки — CAD.kz',
   robots: { index: false, follow: false },
 }
 
-export default function CheckoutPage() {
+export default async function CheckoutPage() {
+  const contacts = await getContacts()
   return (
     <main>
       <Container>
@@ -21,9 +23,9 @@ export default function CheckoutPage() {
         />
         <PageIntro
           title="Оформление заявки"
-          lead="Состав заказа и контакты для заявки. Сумму перед сохранением ещё раз проверит сервер."
+          lead="Проверьте состав и оставьте имя и телефон — менеджер подтвердит цену и наличие и свяжется с вами."
         />
-        <CheckoutView />
+        <CheckoutView whatsappHref={contacts.whatsappHref} />
       </Container>
     </main>
   )

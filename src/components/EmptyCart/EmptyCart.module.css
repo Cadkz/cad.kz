@@ -8,6 +8,12 @@
   background: var(--color-blue-soft);
 }
 
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
 /* Место занято, но не видно и не нажимается (на время загрузки корзины). */
 .reserve {
   visibility: hidden;

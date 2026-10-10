@@ -9,6 +9,7 @@ import { PickerSummary } from '@/components/PickerSummary/PickerSummary'
 import { ProductHeader } from '@/components/ProductHeader/ProductHeader'
 import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
 import { ProductSection } from '@/components/ProductSection/ProductSection'
+import { aboutEntries } from '@/domain/familyAbout.mjs'
 import { type FamilyPage, splitTitle } from '@/lib/families'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
@@ -34,7 +35,15 @@ export async function FamilyView({ family, pick }: { family: FamilyPage; pick: n
       hours: contacts.hours,
     },
   }
-  const described = family.members.filter((m) => m.description)
+  const about = aboutEntries(
+    family.members.map((m) => ({
+      id: m.id,
+      title: m.title,
+      label: splitTitle(m.title).label,
+      description: m.description ?? '',
+      href: m.href,
+    })),
+  )
   return (
     <main>
       <Container>
@@ -65,15 +74,15 @@ export async function FamilyView({ family, pick }: { family: FamilyPage; pick: n
             <ProductSection title="Выберите программы" id="config">
               <PickerSteps />
             </ProductSection>
-            {described.length > 0 && (
-              <ProductSection title="О программах" id="about">
+            {about.length > 0 && (
+              <ProductSection title={about.length > 1 ? 'О программах' : 'О программе'} id="about">
                 <div className={styles.list}>
-                  {described.map((member) => (
-                    <details key={member.id} className={styles.item}>
-                      <summary className={styles.summary}>{splitTitle(member.title).label}</summary>
-                      <ArticleBody blocks={parseBody(member.description ?? '')} />
-                      {member.href && (
-                        <Link href={member.href} className={styles.link}>
+                  {about.map((entry) => (
+                    <details key={entry.key} className={styles.item}>
+                      <summary className={styles.summary}>{entry.heading}</summary>
+                      <ArticleBody blocks={parseBody(entry.description)} />
+                      {entry.href && (
+                        <Link href={entry.href} className={styles.link}>
                           Отдельная страница программы
                         </Link>
                       )}

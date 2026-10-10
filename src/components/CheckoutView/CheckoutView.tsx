@@ -10,14 +10,14 @@ import { OrderSummary } from '../OrderSummary/OrderSummary'
 import styles from './CheckoutView.module.css'
 
 /** Оформление заказа: сводка, форма и результат. Цену подтверждает только сервер. */
-export function CheckoutView() {
+export function CheckoutView({ whatsappHref = null }: { whatsappHref?: string | null }) {
   const { items, ready } = useCart()
   const { quote, setQuote, error, busy, retry } = useCartQuote(items, ready)
   const checkout = useCheckout(quote, setQuote)
 
-  if (!ready) return <EmptyCart loading />
+  if (!ready) return <EmptyCart loading whatsappHref={whatsappHref} />
   if (checkout.done) return <CheckoutDone order={checkout.done} />
-  if (!items.length) return <EmptyCart />
+  if (!items.length) return <EmptyCart whatsappHref={whatsappHref} />
 
   return (
     <div className={styles.layout}>

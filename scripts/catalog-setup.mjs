@@ -9,6 +9,7 @@
 
 import config from '@payload-config'
 import { getPayload } from 'payload'
+import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
@@ -102,6 +103,13 @@ try {
   else {
     console.log(`Кнопка обновления: ${renew.families.join('; ') || '—'}`)
     for (const line of renew.missing) console.log(`  не найдено — семейство ${line}`)
+  }
+  const cards = await setupCards(payload)
+  if (!cards) console.log('Тексты карточек уже почищены.')
+  else {
+    console.log(`Тексты карточек почищены: ${cards.products.length} товаров`)
+    for (const line of cards.products) console.log(`  ${line}`)
+    console.log(`Подписи картинок «Revit 20xx» → «Revit»: ${cards.media}`)
   }
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
