@@ -1,25 +1,19 @@
+/* Главный тёмный блок главной во всю ширину экрана: перелом ритма страницы.
+   Содержимое — в общей рамке сайта, левый край совпадает с логотипом. */
 .section {
-  padding-top: var(--section-gap);
-}
-
-.band {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-4);
-  padding: var(--space-8) var(--space-6);
+  position: relative;
+  margin-top: var(--section-gap);
+  padding: var(--space-12) 0;
   /* clip, а не hidden: hidden делает блок прокручиваемым контейнером, и чертёж
      с прорисовкой по прокрутке (BannerArt onScroll) перестаёт видеть прокрутку страницы. */
   overflow: clip;
-  border-radius: var(--radius-lg);
-  position: relative;
   isolation: isolate;
   background: var(--gradient-deep);
   color: var(--color-text-inverse);
 }
 
 /* Фон кодом: чертёжная сетка вместо картинки-узора. */
-.band::before {
+.section::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -29,12 +23,20 @@
   mask-image: linear-gradient(to left, black, transparent 70%);
 }
 
-.band::after {
+.section::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: var(--z-below);
   background: radial-gradient(circle at 100% 0%, var(--color-glow), transparent 40%);
+}
+
+.band {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
 }
 
 .art {
@@ -128,8 +130,8 @@
 }
 
 @media (min-width: 640px) {
-  .band {
-    padding: var(--space-12);
+  .section {
+    padding: var(--space-16) 0;
   }
 
   .stage {
@@ -138,10 +140,6 @@
 }
 
 @media (min-width: 960px) {
-  .band {
-    padding: var(--space-16);
-  }
-
   .stage {
     grid-column: span 3;
   }
@@ -151,8 +149,8 @@
 @media (min-width: 1200px) {
   .art {
     position: absolute;
-    top: var(--space-10);
-    right: var(--space-12);
+    top: 0;
+    right: 0;
     z-index: var(--z-below);
     display: block;
     width: calc(var(--control-height) * 5);
