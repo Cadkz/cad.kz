@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { ArticleBody } from '@/components/ArticleBody/ArticleBody'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
@@ -9,6 +10,7 @@ import { PickerSummary } from '@/components/PickerSummary/PickerSummary'
 import { ProductHeader } from '@/components/ProductHeader/ProductHeader'
 import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
 import { ProductSection } from '@/components/ProductSection/ProductSection'
+import { Reveal } from '@/components/Reveal/Reveal'
 import { aboutEntries } from '@/domain/familyAbout.mjs'
 import { type FamilyPage, splitTitle } from '@/lib/families'
 import { getContacts } from '@/lib/navigation'
@@ -75,21 +77,36 @@ export async function FamilyView({ family, pick }: { family: FamilyPage; pick: n
               <PickerSteps />
             </ProductSection>
             {about.length > 0 && (
-              <ProductSection title={about.length > 1 ? 'О программах' : 'О программе'} id="about">
-                <div className={styles.list}>
-                  {about.map((entry) => (
-                    <details key={entry.key} className={styles.item}>
-                      <summary className={styles.summary}>{entry.heading}</summary>
-                      <ArticleBody blocks={parseBody(entry.description)} />
-                      {entry.href && (
-                        <Link href={entry.href} className={styles.link}>
-                          Отдельная страница программы
-                        </Link>
-                      )}
-                    </details>
-                  ))}
-                </div>
-              </ProductSection>
+              <Reveal>
+                <ProductSection
+                  title={about.length > 1 ? 'О программах' : 'О программе'}
+                  id="about"
+                >
+                  <div className={styles.list}>
+                    {about.map((entry) => (
+                      <details key={entry.key} className={styles.item}>
+                        <summary className={styles.summary}>
+                          {entry.heading}
+                          <Plus
+                            size={20}
+                            strokeWidth={1.75}
+                            aria-hidden="true"
+                            className={styles.icon}
+                          />
+                        </summary>
+                        <div className={styles.body}>
+                          <ArticleBody blocks={parseBody(entry.description)} />
+                          {entry.href && (
+                            <Link href={entry.href} className={styles.link}>
+                              Отдельная страница программы
+                            </Link>
+                          )}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                </ProductSection>
+              </Reveal>
             )}
           </ProductLayout>
           <PickerBar />

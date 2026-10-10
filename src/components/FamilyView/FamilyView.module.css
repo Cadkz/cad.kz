@@ -1,22 +1,53 @@
+/* Описания программ — как частые вопросы на главной: карточки с плюсом, текст проявляется. */
 .list {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--color-border);
+  gap: var(--space-3);
 }
 
 .item {
-  padding: var(--space-4) 0;
-  border-bottom: 1px solid var(--color-border);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition: border-color var(--duration-fast) var(--ease);
+}
+
+.item:hover {
+  border-color: var(--color-border-strong);
 }
 
 .summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
   color: var(--color-navy);
   font-weight: var(--weight-semibold);
+  list-style: none;
   cursor: pointer;
 }
 
-.item[open] .summary {
-  margin-bottom: var(--space-3);
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.item[open] .icon {
+  transform: rotate(45deg);
+}
+
+.body {
+  padding: 0 var(--space-5) var(--space-5);
+}
+
+.item[open] .body {
+  animation: open var(--duration-enter) var(--ease);
 }
 
 .link {
@@ -25,4 +56,21 @@
   color: var(--color-blue);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
+}
+
+.link:hover {
+  color: var(--color-navy);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item[open] .body {
+    animation: none;
+  }
+}
+
+@keyframes open {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--space-1)));
+  }
 }
