@@ -33,12 +33,12 @@
   background: radial-gradient(circle at 85% 20%, var(--color-glow), transparent 45%);
 }
 
-.drawing {
+.art {
   display: none;
 }
 
 @media (min-width: 960px) {
-  .drawing {
+  .art {
     position: absolute;
     right: var(--space-8);
     bottom: var(--space-6);

@@ -35,6 +35,10 @@
   background: radial-gradient(circle at 100% 0%, var(--color-glow), transparent 40%);
 }
 
+.art {
+  display: none;
+}
+
 .title {
   max-width: var(--measure);
   color: var(--color-text-inverse);
@@ -138,5 +142,22 @@
 
   .stage {
     grid-column: span 3;
+  }
+}
+
+/* Слои BIM-модели справа от заголовка и вводного текста — только где хватает места. */
+@media (min-width: 1200px) {
+  .art {
+    position: absolute;
+    top: var(--space-10);
+    right: var(--space-12);
+    z-index: var(--z-below);
+    display: block;
+    width: calc(var(--control-height) * 5);
+  }
+
+  .title,
+  .lead {
+    max-width: min(var(--measure), calc(100% - var(--control-height) * 5 - var(--space-12)));
   }
 }

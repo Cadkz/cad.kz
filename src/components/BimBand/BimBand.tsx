@@ -1,5 +1,6 @@
 import type { Home } from '@/lib/home'
 import { Badge } from '../Badge/Badge'
+import { BannerArt } from '../BannerArt/BannerArt'
 import { ButtonLink } from '../Button/Button'
 import { Container } from '../Container/Container'
 import styles from './BimBand.module.css'
@@ -11,6 +12,7 @@ export function BimBand({ bim }: { bim: Home['bim'] }) {
     <section className={styles.section} aria-labelledby="bim-title">
       <Container>
         <div className={styles.band}>
+          <BannerArt name="layers" className={styles.art} />
           {bim.eyebrow && <Badge tone="onDark">{bim.eyebrow}</Badge>}
           <h2 id="bim-title" className={styles.title}>
             {bim.title}

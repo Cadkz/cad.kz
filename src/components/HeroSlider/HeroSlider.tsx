@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import type { Slide } from '@/lib/home'
-import { FrameDrawing } from '../FrameDrawing/FrameDrawing'
+import { BannerArt } from '../BannerArt/BannerArt'
 import styles from './HeroSlider.module.css'
 
 const INTERVAL = 4000
@@ -39,7 +39,7 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <FrameDrawing className={styles.drawing} />
+      <BannerArt name="tag" className={styles.art} />
       <div key={index} className={styles.content} aria-live={paused ? 'polite' : 'off'}>
         <p className={styles.title}>{slide.title}</p>
         {slide.text && <p className={styles.text}>{slide.text}</p>}

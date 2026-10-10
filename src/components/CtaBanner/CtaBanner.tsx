@@ -1,4 +1,5 @@
 import type { Home } from '@/lib/home'
+import { BannerArt } from '../BannerArt/BannerArt'
 import { ButtonLink } from '../Button/Button'
 import { Container } from '../Container/Container'
 import styles from './CtaBanner.module.css'
@@ -16,6 +17,7 @@ export function CtaBanner({ cta }: { cta: Home['cta'] }) {
             </h2>
             {cta.text && <p className={styles.lead}>{cta.text}</p>}
           </div>
+          <BannerArt name="compare" className={styles.art} />
           {cta.link && (
             <ButtonLink href={cta.link.href} variant="light">
               {cta.link.label}

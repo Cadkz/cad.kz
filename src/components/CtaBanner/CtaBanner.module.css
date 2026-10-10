@@ -42,6 +42,10 @@
   max-width: var(--measure);
 }
 
+.art {
+  display: none;
+}
+
 .title {
   color: var(--color-text-inverse);
 }
@@ -54,5 +58,19 @@
 @media (min-width: 640px) {
   .banner {
     padding: var(--space-12);
+  }
+}
+
+/* Два сравниваемых КП между текстом и кнопкой — от 960 px. */
+@media (min-width: 960px) {
+  .banner {
+    flex-wrap: nowrap;
+  }
+
+  .art {
+    display: block;
+    flex: none;
+    width: calc(var(--control-height) * 4);
+    margin-left: auto;
   }
 }

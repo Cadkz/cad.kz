@@ -1,39 +1,46 @@
-.drawing {
+.svg {
   display: block;
   width: 100%;
   height: auto;
+  overflow: visible;
   stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.frame,
-.ground,
-.bracing,
-.dimension {
+.path {
   stroke-dasharray: 1;
   stroke-dashoffset: 0;
-  animation: draw var(--duration-draw) var(--ease) both;
+  animation: draw var(--duration-draw) var(--ease) var(--duration-fast) both;
 }
 
-.frame {
+.main {
   stroke: var(--color-sky);
   stroke-width: 1.5;
-  animation-delay: var(--duration-fast);
 }
 
-.ground {
+.accent {
+  stroke: var(--color-sky-strong);
+  stroke-width: 2;
+}
+
+.soft {
   stroke: var(--color-on-dark-line);
   stroke-width: 1;
 }
 
-.bracing {
-  stroke: var(--color-sky-strong);
-  stroke-width: 1.5;
-  animation-delay: var(--duration-draw);
-}
-
-.dimension {
+.muted {
   stroke: var(--color-text-on-dark);
   stroke-width: 1;
+}
+
+/* Плита слоя BIM: заливка прячет линии нижних слоёв, контур — по общему правилу. */
+.slab {
+  fill: var(--color-navy-deep);
+  stroke: var(--color-sky);
+  stroke-width: 1.5;
+}
+
+.late {
   animation-delay: var(--duration-draw);
 }
 
@@ -42,6 +49,13 @@
   font-family: var(--font-body);
   font-size: var(--text-overline);
   animation: appear var(--duration-base) var(--ease) var(--duration-draw) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .path,
+  .label {
+    animation: none;
+  }
 }
 
 @keyframes draw {

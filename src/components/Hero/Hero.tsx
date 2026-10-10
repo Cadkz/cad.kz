@@ -2,9 +2,9 @@ import { MessageCircle } from 'lucide-react'
 import type { Home } from '@/lib/home'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { Badge } from '../Badge/Badge'
+import { BannerArt } from '../BannerArt/BannerArt'
 import { ButtonLink } from '../Button/Button'
 import { Container } from '../Container/Container'
-import { FrameDrawing } from '../FrameDrawing/FrameDrawing'
 import { SolutionRequest } from '../SolutionRequest/SolutionRequest'
 import styles from './Hero.module.css'
 
@@ -30,7 +30,7 @@ export function Hero({ home, directions }: Props) {
     <section className={styles.hero}>
       <Container>
         <div className={styles.band}>
-          <FrameDrawing className={styles.drawing} />
+          <BannerArt name="frame" className={styles.art} />
           <div className={styles.content}>
             {home.eyebrow && <Badge tone="onDark">{home.eyebrow}</Badge>}
             <h1 className={styles.title}>{home.title}</h1>
