@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { EXTRA_ORDER } from '@/domain/familySeed.mjs'
 import type { PickerView } from '@/domain/picker.mjs'
 import type { ProductLine } from '../../payload-types'
 import { cms } from './payload'
@@ -23,6 +24,8 @@ export type FamilyMember = {
   slug: string
   title: string
   description: string | null
+  /** Продление, обновление или пакет лицензий: в свёрнутом блоке внизу. */
+  extra: boolean
   /** Своя страница, если у товара она есть (вид не «Без своей страницы»). */
   href: string | null
 }
@@ -55,7 +58,14 @@ export async function getFamily(slug: string): Promise<FamilyPage | null> {
     sort: ['lineOrder', 'title'],
     pagination: false,
     depth: 0,
-    select: { title: true, slug: true, legacyUrl: true, description: true, pageView: true },
+    select: {
+      title: true,
+      slug: true,
+      legacyUrl: true,
+      description: true,
+      pageView: true,
+      lineOrder: true,
+    },
   })
   const [offers, context] = await Promise.all([
     offersOf(
@@ -69,34 +79,52 @@ export async function getFamily(slug: string): Promise<FamilyPage | null> {
     slug: p.slug,
     title: p.title,
     description: p.description ?? null,
+    extra: (p.lineOrder ?? 0) >= EXTRA_ORDER,
     href: p.pageView === 'none' ? null : productPath(p),
   }))
+  const item = (m: FamilyMember) => {
+    const { label, note } = splitTitle(m.title)
+    return {
+      key: `p${m.id}`,
+      productId: m.id,
+      label,
+      note,
+      offers: pickerOffers(offers.get(m.id) ?? [], context),
+      fixedOffers: [],
+      preselect: false,
+      anchor: m.slug,
+    }
+  }
+  const main = members.filter((m) => !m.extra)
+  const extra = members.filter((m) => m.extra)
   const picker: PickerView = {
     switches: [],
-    steps: members.length
-      ? [
-          {
-            key: 'family',
-            title: 'Программы',
-            hint: 'Отметьте нужные — менеджер пришлёт коммерческое предложение на отмеченное.',
-            mode: 'many',
-            collapsed: false,
-            items: members.map((m) => {
-              const { label, note } = splitTitle(m.title)
-              return {
-                key: `p${m.id}`,
-                productId: m.id,
-                label,
-                note,
-                offers: pickerOffers(offers.get(m.id) ?? [], context),
-                fixedOffers: [],
-                preselect: false,
-                anchor: m.slug,
-              }
-            }),
-          },
-        ]
-      : [],
+    steps: [
+      ...(main.length
+        ? [
+            {
+              key: 'family',
+              title: 'Программы',
+              hint: 'Отметьте нужные — менеджер пришлёт коммерческое предложение на отмеченное.',
+              mode: 'many' as const,
+              collapsed: false,
+              items: main.map(item),
+            },
+          ]
+        : []),
+      ...(extra.length
+        ? [
+            {
+              key: 'family-extra',
+              title: 'Продление, обновление и пакеты лицензий',
+              hint: 'Если программа уже куплена: продление, переход с прежней версии, доп. места.',
+              mode: 'many' as const,
+              collapsed: main.length > 0,
+              items: extra.map(item),
+            },
+          ]
+        : []),
+    ],
   }
   const vendor =
     line.manufacturer && typeof line.manufacturer !== 'number' ? line.manufacturer : null

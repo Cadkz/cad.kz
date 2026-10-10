@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { itemUnavailable, offerFor, type PickerStep as Step } from '@/domain/picker.mjs'
 import { PickerOption } from '../PickerOption/PickerOption'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
@@ -52,6 +52,16 @@ export function PickerStep({ step, number, titled = false }: Props) {
   const chosen = step.items.filter((item) => isChecked(item.key)).length
   // Открыт сразу, если что-то уже выбрано (например, по старому адресу); дальше — как решит человек.
   const [openAtStart] = useState(chosen > 0)
+  const moreRef = useRef<HTMLDetailsElement>(null)
+  // Старый адрес товара ведёт к его строке (#код): строка в свёрнутом блоке — раскрыть и показать.
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.slice(1))
+    const more = moreRef.current
+    const row = id ? document.getElementById(id) : null
+    if (!more || !row || !more.contains(row) || more.open) return
+    more.open = true
+    row.scrollIntoView({ block: 'center' })
+  }, [])
 
   return (
     <fieldset className={styles.step}>
@@ -62,7 +72,7 @@ export function PickerStep({ step, number, titled = false }: Props) {
       </legend>
       {step.hint && <p className={styles.hint}>{step.hint}</p>}
       {step.collapsed ? (
-        <details className={styles.more} open={openAtStart || undefined}>
+        <details ref={moreRef} className={styles.more} open={openAtStart || undefined}>
           <summary className={styles.summary}>
             {chosen > 0 ? `Выбрано: ${chosen}` : 'Показать варианты'}
             <ChevronDown
