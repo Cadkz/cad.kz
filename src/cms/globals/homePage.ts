@@ -33,8 +33,8 @@ export const homePage: GlobalConfig = {
       type: 'group',
       admin: {
         description:
-          'Под первым экраном. Только проверенные статусы: их видит клиент перед заявкой. ' +
-          'Пустой список партнёров — блок не показывается.',
+          'Под первым экраном: заголовок и логотипы производителей. Статус и подпись — ' +
+          'по желанию. Пустой список партнёров — блок не показывается.',
       },
       fields: [
         textField('title', 'Заголовок'),
@@ -46,15 +46,15 @@ export const homePage: GlobalConfig = {
           maxRows: 8,
           fields: [
             textField('vendor', 'Производитель', true),
-            textField('status', 'Статус', true),
-            textField('note', 'Что поставляем'),
             {
               name: 'logo',
-              label: 'Логотип или значок партнёра',
+              label: 'Логотип',
               type: 'upload',
               relationTo: 'media',
-              admin: { description: 'Необязательно. Без него показывается название.' },
+              admin: { description: 'Без него показывается название.' },
             },
+            textField('status', 'Статус (необязательно)'),
+            textField('note', 'Подпись (необязательно)'),
             textField('href', 'Ссылка (каталог производителя, сертификат)'),
           ],
         },

@@ -1,29 +1,40 @@
 // @ts-check
-// Первое наполнение блока «Официальный партнёр» на главной. Только статусы, которые подтвердил
-// владелец (маркетолог CAD.kz): Autodesk — Gold-партнёр, официальный дилер SCAD Soft и Canon,
-// официальный представитель Fine Software (GEO5) в Казахстане и СНГ. Дилерство ЛИРА-FEM
-// не указываем. Дальше блок правится в админке: «Главная страница» → «Официальный партнёр».
+// Наполнение блока «Официальный партнёр производителей» на главной.
+// v1 — статусы словами; v2 (решение владельца 11.10.2026) — коротко: заголовок и логотипы,
+// без статусов и пояснений. Производители — те, чьи сертификаты выложены на старом cad.kz
+// («О компании» → «Сертификаты компании»). Логотипы — со старого cad.kz (цветной вариант);
+// у SCAD Soft и Canon там своих нет — показывается название, логотип владелец загрузит в админке.
+// Дальше блок правится в админке: «Главная страница» → «Блок «Официальный партнёр»».
+
+/** Первое наполнение (11.10.2026), по нему v2 узнаёт, что блок не правили вручную. */
+export const TRUST_SEED_V1_VENDORS = ['Autodesk', 'SCAD Soft', 'Fine Software', 'Canon']
 
 export const TRUST_SEED = {
   title: 'Официальный партнёр производителей',
-  lead: 'Продаём лицензионные программы и оборудование. Реквизиты компании и условия гарантии открыты на сайте.',
+  /** @type {string | null} */
+  lead: null,
   partners: [
-    {
-      vendor: 'Autodesk',
-      status: 'Золотой партнёр (Gold Partner)',
-      note: 'AutoCAD, Revit, Civil 3D и другие',
-    },
-    { vendor: 'SCAD Soft', status: 'Официальный дилер', note: 'SCAD Office и программы-сателлиты' },
+    { vendor: 'Autodesk', logoPath: '/upload/iblock/683/683f6f7d2d26861e1c2493ce7ea53ed7.png' },
+    { vendor: 'SCAD Soft', logoPath: null },
     {
       vendor: 'Fine Software',
-      status: 'Официальный представитель в Казахстане и СНГ',
-      note: 'Геотехнические программы GEO5',
+      logoPath: '/upload/iblock/7f5/az2jsxd7xj4f01j2utb56t4rbbfl8dnw.png',
     },
-    { vendor: 'Canon', status: 'Официальный дилер', note: 'Широкоформатные плоттеры' },
+    { vendor: 'АВС', logoPath: '/upload/iblock/535/bmfz2m4kff6l23o505jex2atzm84f0lh.png' },
+    {
+      vendor: 'CSoft Development',
+      logoPath: '/upload/iblock/907/be3rh6o9gci06l3hkpgc7nlt6c22d1qw.png',
+    },
+    { vendor: 'Canon', logoPath: null },
   ],
-  links: [
-    { label: 'Реквизиты компании', href: '/about/requisites' },
-    { label: 'Гарантии', href: '/about/guaranty' },
-    { label: 'Как купить', href: '/about/howto' },
-  ],
+  /** @type {{ label: string, href: string }[]} */
+  links: [],
+}
+
+/** Блок без логотипов — для демоданных и как запасной вариант, если старый сайт недоступен. */
+export const TRUST_DATA = {
+  title: TRUST_SEED.title,
+  lead: TRUST_SEED.lead,
+  partners: TRUST_SEED.partners.map(({ vendor }) => ({ vendor })),
+  links: TRUST_SEED.links,
 }

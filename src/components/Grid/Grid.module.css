@@ -46,6 +46,9 @@
 }
 
 @media (min-width: 960px) {
+  .md2 > * {
+    grid-column: span 2;
+  }
   .md3 > * {
     grid-column: span 3;
   }

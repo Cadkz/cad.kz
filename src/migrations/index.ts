@@ -12,6 +12,7 @@ import * as migration_20261009_212940_checkout_optional_email from './20261009_2
 import * as migration_20261009_235733_search_aliases from './20261009_235733_search_aliases'
 import * as migration_20261010_182552_family_renew_label from './20261010_182552_family_renew_label'
 import * as migration_20261010_203359_home_trust from './20261010_203359_home_trust'
+import * as migration_20261010_213658_home_trust_optional from './20261010_213658_home_trust_optional'
 
 export const migrations = [
   {
@@ -83,5 +84,10 @@ export const migrations = [
     up: migration_20261010_203359_home_trust.up,
     down: migration_20261010_203359_home_trust.down,
     name: '20261010_203359_home_trust',
+  },
+  {
+    up: migration_20261010_213658_home_trust_optional.up,
+    down: migration_20261010_213658_home_trust_optional.down,
+    name: '20261010_213658_home_trust_optional',
   },
 ]

@@ -1,4 +1,4 @@
-import { ArrowRight, BadgeCheck } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Home } from '@/lib/home'
@@ -8,38 +8,36 @@ import styles from './TrustBand.module.css'
 
 type Partner = Home['trust']['partners'][number]
 
-function PartnerCard({ partner }: { partner: Partner }) {
+function PartnerTile({ partner }: { partner: Partner }) {
   const body = (
     <>
-      <div className={styles.brand}>
-        {partner.logo ? (
-          <Image
-            src={partner.logo.url}
-            alt={partner.logo.alt}
-            width={partner.logo.width}
-            height={partner.logo.height}
-            className={styles.logo}
-          />
-        ) : (
-          <span className={styles.vendor}>{partner.vendor}</span>
-        )}
-        <BadgeCheck size={20} strokeWidth={1.75} aria-hidden="true" className={styles.check} />
-      </div>
-      <p className={styles.status}>{partner.status}</p>
-      {partner.note && <p className={styles.note}>{partner.note}</p>}
+      {partner.logo ? (
+        <Image
+          src={partner.logo.url}
+          alt={partner.vendor}
+          width={partner.logo.width}
+          height={partner.logo.height}
+          className={styles.logo}
+        />
+      ) : (
+        <span className={styles.vendor}>{partner.vendor}</span>
+      )}
+      {partner.status && <span className={styles.status}>{partner.status}</span>}
+      {partner.note && <span className={styles.note}>{partner.note}</span>}
     </>
   )
-  if (!partner.href) return <div className={styles.card}>{body}</div>
+  if (!partner.href) return <div className={styles.tile}>{body}</div>
   return (
-    <Link href={partner.href} className={`${styles.card} ${styles.linked}`}>
+    <Link href={partner.href} className={`${styles.tile} ${styles.linked}`}>
       {body}
     </Link>
   )
 }
 
 /**
- * Блок доверия под первым экраном главной: статусы у производителей и ссылки на реквизиты
- * и гарантии. Всё из CMS («Главная» → «Официальный партнёр»); нет партнёров — блока нет.
+ * Блок доверия под первым экраном главной: заголовок и логотипы производителей (решение
+ * владельца — коротко, без пояснений). Статус, подпись, подзаголовок и ссылки — только
+ * если заполнены в CMS («Главная» → «Официальный партнёр»); нет партнёров — блока нет.
  */
 export function TrustBand({ trust }: { trust: Home['trust'] }) {
   if (!trust.partners.length) return null
@@ -49,10 +47,10 @@ export function TrustBand({ trust }: { trust: Home['trust'] }) {
       title={trust.title || 'Официальный партнёр производителей'}
       sub={trust.lead ?? undefined}
     >
-      <Grid as="ul" span={{ base: 12, sm: 6, md: 3 }}>
+      <Grid as="ul" span={{ base: 6, sm: 4, md: 2 }}>
         {trust.partners.map((partner) => (
-          <li key={`${partner.vendor}-${partner.status}`}>
-            <PartnerCard partner={partner} />
+          <li key={partner.vendor}>
+            <PartnerTile partner={partner} />
           </li>
         ))}
       </Grid>

@@ -1,13 +1,17 @@
-.card {
+.tile {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
   height: 100%;
-  padding: var(--space-5);
+  min-height: calc(var(--icon-box) * 2);
+  padding: var(--space-2) var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   color: var(--color-text);
+  text-align: center;
 }
 
 .linked {
@@ -21,14 +25,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  min-height: var(--icon-box);
-}
-
 .vendor {
   color: var(--color-navy);
   font-family: var(--font-heading);
@@ -39,26 +35,21 @@
 
 .logo {
   width: auto;
-  max-width: 70%;
-  height: var(--icon-box);
+  max-width: 100%;
+  /* У логотипов со старого сайта поля внутри картинки (200×120), поэтому выше значка. */
+  height: calc(var(--icon-box) * 3 / 2);
   object-fit: contain;
-  object-position: left center;
-}
-
-.check {
-  flex: none;
-  color: var(--color-blue);
 }
 
 .status {
   color: var(--color-text);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
 }
 
 .note {
   color: var(--color-text-muted);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
 }
 
 .links {

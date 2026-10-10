@@ -113,13 +113,7 @@ try {
     console.log(`Подписи картинок «Revit 20xx» → «Revit»: ${cards.media}`)
   }
   const trust = await setupHomeTrust(payload)
-  if (!trust) console.log('Блок «Официальный партнёр» на главной уже настроен.')
-  else
-    console.log(
-      trust === 'filled'
-        ? 'Блок «Официальный партнёр» на главной заполнен.'
-        : 'Блок «Официальный партнёр» уже заполнен в админке, не трогаем.',
-    )
+  console.log(trust ?? 'Блок «Официальный партнёр» на главной уже настроен.')
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1

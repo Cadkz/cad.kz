@@ -50,7 +50,7 @@ export async function getHome() {
       lead: page.trust?.lead ?? null,
       partners: (page.trust?.partners ?? []).map((p) => ({
         vendor: p.vendor,
-        status: p.status,
+        status: p.status ?? null,
         note: p.note ?? null,
         logo: toPicture(p.logo, p.vendor),
         href: p.href ?? null,

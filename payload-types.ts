@@ -1417,7 +1417,7 @@ export interface HomePage {
       }[]
     | null;
   /**
-   * Под первым экраном. Только проверенные статусы: их видит клиент перед заявкой. Пустой список партнёров — блок не показывается.
+   * Под первым экраном: заголовок и логотипы производителей. Статус и подпись — по желанию. Пустой список партнёров — блок не показывается.
    */
   trust?: {
     title?: string | null;
@@ -1425,12 +1425,12 @@ export interface HomePage {
     partners?:
       | {
           vendor: string;
-          status: string;
-          note?: string | null;
           /**
-           * Необязательно. Без него показывается название.
+           * Без него показывается название.
            */
           logo?: (number | null) | Media;
+          status?: string | null;
+          note?: string | null;
           href?: string | null;
           id?: string | null;
         }[]
@@ -1556,9 +1556,9 @@ export interface HomePageSelect<T extends boolean = true> {
           | T
           | {
               vendor?: T;
+              logo?: T;
               status?: T;
               note?: T;
-              logo?: T;
               href?: T;
               id?: T;
             };

@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
 import styles from './Grid.module.css'
 
-type Span = 3 | 4 | 6 | 8 | 12
+/** 2 — только для сетки из мелких плиток (6 в ряд от 960 px), у Col его нет. */
+type Span = 2 | 3 | 4 | 6 | 8 | 12
+type ColSpan = Exclude<Span, 2>
 type Props = {
   children: ReactNode
   className?: string
@@ -33,7 +35,7 @@ export function Col({
 }: {
   children: ReactNode
   className?: string
-  span?: { base?: Span; sm?: Span; md?: Span }
+  span?: { base?: ColSpan; sm?: ColSpan; md?: ColSpan }
 }) {
   const classes = [
     styles[`colBase${span.base ?? 12}`],

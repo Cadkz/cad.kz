@@ -37,7 +37,7 @@ const PUBLICATION_PATHS: string[] = legacyPublications
 const PUBLICATION_SET = new Set(PUBLICATION_PATHS)
 
 /** Адрес старого сайта; для проверки на тестовом сервере — IMPORT_IMAGES_FROM. */
-const oldSite = () => (process.env.IMPORT_IMAGES_FROM || OLD_SITE).replace(/\/+$/, '')
+export const oldSite = () => (process.env.IMPORT_IMAGES_FROM || OLD_SITE).replace(/\/+$/, '')
 
 export type Failure = { path: string; reason: string }
 export type PagesReply = {
@@ -338,7 +338,7 @@ const pendingImages = (): Where => ({
 })
 
 /** Картинка или PDF со старого сайта → запись «Медиа» (одна на файл, повтор берёт готовую). */
-async function mediaFor(payload: Payload, url: string, alt: string) {
+export async function mediaFor(payload: Payload, url: string, alt: string) {
   const pathname = decodeURIComponent(new URL(url).pathname)
   const legacyKey = `legacy:file:${pathname}`
   const { docs } = await payload.find({
