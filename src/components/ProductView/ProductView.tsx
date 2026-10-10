@@ -13,6 +13,7 @@ import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
 import { ProductLinkCard } from '@/components/ProductLinkCard/ProductLinkCard'
 import { ProductSection } from '@/components/ProductSection/ProductSection'
 import { PropertyList } from '@/components/PropertyList/PropertyList'
+import { Reveal } from '@/components/Reveal/Reveal'
 import { kindProfile } from '@/domain/productKind.mjs'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
@@ -39,10 +40,10 @@ function Related({ title, items }: { title: string; items: RelatedProduct[] }) {
   return (
     <ProductSection title={title} standalone>
       <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
-        {items.slice(0, 6).map((item) => (
-          <li key={item.slug}>
+        {items.slice(0, 6).map((item, i) => (
+          <Reveal as="li" key={item.slug} step={i}>
             <ProductLinkCard href={item.href} title={item.title} vendor={item.vendor} />
-          </li>
+          </Reveal>
         ))}
       </Grid>
     </ProductSection>
@@ -115,7 +116,7 @@ export async function ProductView({
             <ProductSection
               title={guided ? 'Подберите комплект' : profile.configTitle}
               id="config"
-              sub={guided ? 'Отметьте нужное — итог справа пересчитается сразу.' : undefined}
+              sub={guided ? 'Отметьте нужное — итог пересчитается сразу.' : undefined}
             >
               <PickerSteps />
             </ProductSection>
@@ -123,19 +124,25 @@ export async function ProductView({
               <ProductGallery pictures={product.pictures} title={product.title} />
             )}
             {product.description && (
-              <ProductSection title={profile.about} id="about">
-                <ProductAbout blocks={parseBody(product.description)} />
-              </ProductSection>
+              <Reveal>
+                <ProductSection title={profile.about} id="about">
+                  <ProductAbout blocks={parseBody(product.description)} />
+                </ProductSection>
+              </Reveal>
             )}
             {product.properties.length > 0 && (
-              <ProductSection title={profile.specs} id="specs">
-                <PropertyList items={product.properties} />
-              </ProductSection>
+              <Reveal>
+                <ProductSection title={profile.specs} id="specs">
+                  <PropertyList items={product.properties} />
+                </ProductSection>
+              </Reveal>
             )}
             {product.faq.length > 0 && (
-              <ProductSection title="Частые вопросы" id="faq">
-                <Faq items={product.faq} />
-              </ProductSection>
+              <Reveal>
+                <ProductSection title="Частые вопросы" id="faq">
+                  <Faq items={product.faq} />
+                </ProductSection>
+              </Reveal>
             )}
           </ProductLayout>
           <PickerBar />

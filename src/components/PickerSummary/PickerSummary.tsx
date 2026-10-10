@@ -27,6 +27,14 @@ export function PickerSummary() {
   }
 
   const canBuy = !meta.familySlug && total.state === 'done' && ready
+  const sumText =
+    total.state === 'done' || total.state === 'error'
+      ? total.text
+      : total.state === 'busy'
+        ? 'Считаем…'
+        : total.state === 'request'
+          ? 'По запросу'
+          : '—'
   return (
     <div className={styles.box} id="summary">
       <p className={styles.label}>Ваш выбор</p>
@@ -70,13 +78,10 @@ export function PickerSummary() {
       <div className={styles.total}>
         <span className={styles.label}>Итого с НДС</span>
         <output className={styles.sum} data-state={total.state} aria-live="polite">
-          {total.state === 'done' || total.state === 'error'
-            ? total.text
-            : total.state === 'busy'
-              ? 'Считаем…'
-              : total.state === 'request'
-                ? 'По запросу'
-                : '—'}
+          {/* key: при каждой новой сумме число заново проявляется — видно, что итог пересчитан. */}
+          <span key={sumText} className={styles.sumValue}>
+            {sumText}
+          </span>
         </output>
       </div>
       <Button block disabled={!lines.length} onClick={() => openRequest(action.kind)}>
