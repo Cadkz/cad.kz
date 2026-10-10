@@ -133,6 +133,17 @@ export const productLines: CollectionConfig = {
             admin: { condition: (data) => Boolean(data?.familyPage) },
           },
           {
+            name: 'renewLabel',
+            label: 'Кнопка обновления',
+            type: 'text',
+            admin: {
+              condition: (data) => Boolean(data?.familyPage),
+              description:
+                'Например, «Обновить версию». Пусто — кнопки нет. Заявка менеджеру без корзины: ' +
+                'он сам уточнит лицензию клиента.',
+            },
+          },
+          {
             name: 'seo',
             label: 'Для поисковиков',
             type: 'group',

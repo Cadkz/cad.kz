@@ -26,7 +26,7 @@ export async function FamilyView({ family, pick }: { family: FamilyPage; pick: n
   const meta = {
     productId: first.id,
     productTitle: family.title,
-    renewLabel: null,
+    renewLabel: family.renewLabel,
     familySlug: family.slug,
     contacts: {
       phones: contacts.phones,

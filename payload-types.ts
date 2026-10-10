@@ -368,6 +368,10 @@ export interface ProductLine {
    */
   slug?: string | null;
   intro?: string | null;
+  /**
+   * Например, «Обновить версию». Пусто — кнопки нет. Заявка менеджеру без корзины: он сам уточнит лицензию клиента.
+   */
+  renewLabel?: string | null;
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -1073,6 +1077,7 @@ export interface ProductLinesSelect<T extends boolean = true> {
   familyPage?: T;
   slug?: T;
   intro?: T;
+  renewLabel?: T;
   seo?:
     | T
     | {

@@ -451,3 +451,10 @@ export function planExtras(products) {
   }
   return { lines, options, noPage: [...noPage], drafts }
 }
+
+/**
+ * Семейства, где продления и обновления не показываются списком (решение владельца 10.10.2026):
+ * товары из свёрнутого блока уходят в черновики, вместо них в итоге кнопка заявки менеджеру.
+ * @type {{ slug: string, renewLabel: string }[]}
+ */
+export const RENEW_FAMILIES = [{ slug: 'passat', renewLabel: 'Обновить версию' }]

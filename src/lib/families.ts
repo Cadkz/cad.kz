@@ -35,6 +35,8 @@ export type FamilyPage = {
   slug: string
   title: string
   intro: string | null
+  /** Кнопка «Обновить версию» в итоге: заявка менеджеру без корзины. */
+  renewLabel: string | null
   vendor: string | null
   seo: ProductLine['seo']
   members: FamilyMember[]
@@ -133,6 +135,7 @@ export async function getFamily(slug: string): Promise<FamilyPage | null> {
     slug: line.slug,
     title: line.title,
     intro: line.intro ?? line.summary ?? null,
+    renewLabel: line.renewLabel || null,
     vendor: vendor?.title ?? null,
     seo: line.seo,
     members,
