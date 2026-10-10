@@ -18,6 +18,7 @@ import { Drawer } from '../Drawer/Drawer'
 import { FilterPanel } from '../FilterPanel/FilterPanel'
 import { Pagination } from '../Pagination/Pagination'
 import { ProductCard } from '../ProductCard/ProductCard'
+import { Reveal } from '../Reveal/Reveal'
 import styles from './CatalogFilter.module.css'
 
 type Props = { items: CatalogItem[]; facets: Facet[]; lines: CatalogLine[]; initial: FilterState }
@@ -67,10 +68,10 @@ export function CatalogFilter({ items, facets, lines, initial }: Props) {
         <CatalogSteps items={items} facets={facets} lines={lines} state={state} onChange={change} />
         {found.items.length ? (
           <ul className={styles.grid}>
-            {found.items.map((item) => (
-              <li key={item.id}>
+            {found.items.map((item, index) => (
+              <Reveal as="li" key={item.id} step={index % 3}>
                 <ProductCard product={item} />
-              </li>
+              </Reveal>
             ))}
           </ul>
         ) : (
