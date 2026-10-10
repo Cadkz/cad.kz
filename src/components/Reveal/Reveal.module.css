@@ -1,0 +1,27 @@
+/* Появление при прокрутке: блок проявляется, пока входит в экран (первые 60 % своей высоты).
+   Уже видимое при загрузке и пролистанное выше остаётся на месте — анимация привязана
+   к положению на экране, а не ко времени. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+
+    .step1 {
+      animation-range: entry 8% entry 68%;
+    }
+
+    .step2 {
+      animation-range: entry 16% entry 76%;
+    }
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-6));
+  }
+}

@@ -1,3 +1,4 @@
+import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import type { Direction } from '@/lib/catalog'
 import { catalogHref } from '@/lib/navigationHrefs'
@@ -19,6 +20,7 @@ export function DirectionCard({ direction }: { direction: Direction }) {
       </span>
       <span className={styles.title}>{direction.title}</span>
       {direction.summary && <span className={styles.summary}>{direction.summary}</span>}
+      <ArrowRight size={20} strokeWidth={1.75} aria-hidden="true" className={styles.arrow} />
     </Link>
   )
 }

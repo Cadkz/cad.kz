@@ -39,7 +39,7 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <BannerArt name="tag" className={styles.art} />
+      <BannerArt name="tag" className={styles.art} onScroll />
       <div key={index} className={styles.content} aria-live={paused ? 'polite' : 'off'}>
         <p className={styles.title}>{slide.title}</p>
         {slide.text && <p className={styles.text}>{slide.text}</p>}

@@ -8,7 +8,9 @@
   align-items: flex-start;
   gap: var(--space-4);
   padding: var(--space-8) var(--space-6);
-  overflow: hidden;
+  /* clip, а не hidden: hidden делает блок прокручиваемым контейнером, и чертёж
+     с прорисовкой по прокрутке (BannerArt onScroll) перестаёт видеть прокрутку страницы. */
+  overflow: clip;
   border-radius: var(--radius-lg);
   position: relative;
   isolation: isolate;

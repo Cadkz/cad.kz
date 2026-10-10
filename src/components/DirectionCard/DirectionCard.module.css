@@ -1,17 +1,21 @@
+/* Телефон: компактная строка — значок слева, заголовок и описание справа (9 карточек
+   не растягивают страницу). От 640 px — плитка: значок, под ним заголовок и описание;
+   заголовки карточек одного ряда начинаются на одной высоте, даже если переносятся. */
 .card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: var(--space-2);
+  display: grid;
+  grid-template-columns: var(--icon-box) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-1) var(--space-4);
   height: 100%;
-  min-height: calc(var(--control-height) * 4);
-  padding: var(--space-6);
+  padding: var(--space-5);
   overflow: hidden;
   border-radius: var(--radius-lg);
   color: var(--color-text-inverse);
   isolation: isolate;
-  transition: box-shadow var(--duration-base) var(--ease);
+  transition:
+    box-shadow var(--duration-base) var(--ease),
+    transform var(--duration-base) var(--ease);
 }
 
 .card::before {
@@ -24,6 +28,11 @@
 
 .card:hover {
   box-shadow: var(--shadow-md);
+  transform: translateY(calc(-1 * var(--space-1)));
+}
+
+.card:active {
+  transform: none;
 }
 
 .navy {
@@ -44,15 +53,15 @@
   right: calc(-1 * var(--space-4));
   bottom: calc(-1 * var(--space-4));
   z-index: var(--z-below);
-  opacity: 0.14;
+  opacity: 0.1;
   transition:
     opacity var(--duration-base) var(--ease),
     transform var(--duration-base) var(--ease);
 }
 
 .big svg {
-  width: calc(var(--icon-box) * 3);
-  height: calc(var(--icon-box) * 3);
+  width: calc(var(--icon-box) * 2);
+  height: calc(var(--icon-box) * 2);
   stroke-width: 1;
 }
 
@@ -63,17 +72,17 @@
 
 .icon {
   display: inline-flex;
+  grid-row: span 2;
   align-items: center;
   justify-content: center;
   width: var(--icon-box);
   height: var(--icon-box);
-  margin-bottom: auto;
   border-radius: var(--radius-md);
   background: var(--color-on-dark-soft);
 }
 
 .title {
-  margin-top: var(--space-6);
+  align-self: end;
   font-family: var(--font-heading);
   font-size: var(--text-h4);
   font-weight: var(--weight-bold);
@@ -83,4 +92,53 @@
 .summary {
   color: var(--color-text-on-dark);
   font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+/* Стрелка появляется при наведении: карточка — переход в каталог. */
+.arrow {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-height: calc(var(--control-height) * 4);
+    padding: var(--space-6);
+  }
+
+  .big {
+    opacity: 0.14;
+  }
+
+  .big svg {
+    width: calc(var(--icon-box) * 3);
+    height: calc(var(--icon-box) * 3);
+  }
+
+  .title {
+    align-self: auto;
+    margin-top: var(--space-10);
+  }
+
+  .arrow {
+    position: absolute;
+    top: var(--space-6);
+    right: var(--space-6);
+    display: inline-flex;
+    color: var(--color-text-on-dark);
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--space-1)));
+    transition:
+      opacity var(--duration-base) var(--ease),
+      transform var(--duration-base) var(--ease);
+  }
+
+  .card:hover .arrow,
+  .card:focus-visible .arrow {
+    opacity: 1;
+    transform: none;
+  }
 }

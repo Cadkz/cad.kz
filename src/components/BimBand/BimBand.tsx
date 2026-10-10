@@ -12,7 +12,7 @@ export function BimBand({ bim }: { bim: Home['bim'] }) {
     <section className={styles.section} aria-labelledby="bim-title">
       <Container>
         <div className={styles.band}>
-          <BannerArt name="layers" className={styles.art} />
+          <BannerArt name="layers" className={styles.art} onScroll />
           {bim.eyebrow && <Badge tone="onDark">{bim.eyebrow}</Badge>}
           <h2 id="bim-title" className={styles.title}>
             {bim.title}

@@ -17,7 +17,7 @@ export function CtaBanner({ cta }: { cta: Home['cta'] }) {
             </h2>
             {cta.text && <p className={styles.lead}>{cta.text}</p>}
           </div>
-          <BannerArt name="compare" className={styles.art} />
+          <BannerArt name="compare" className={styles.art} onScroll />
           {cta.link && (
             <ButtonLink href={cta.link.href} variant="light">
               {cta.link.label}

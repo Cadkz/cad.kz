@@ -1,15 +1,26 @@
 import styles from './BannerArt.module.css'
 import { DRAWINGS, type DrawingName } from './drawings'
 
+type Props = {
+  name: DrawingName
+  className?: string
+  /**
+   * Баннер ниже первого экрана: чертёж прорисовывается, пока баннер входит в экран при
+   * прокрутке, а не сразу при загрузке, когда его ещё никто не видит.
+   */
+  onScroll?: boolean
+}
+
 /**
- * Линейный чертёж для тёмного баннера: прорисовывается один раз при появлении страницы.
- * Декоративный (aria-hidden), кодом, без картинки. Размер и место задаёт баннер через
- * className обёртки: сам чертёж занимает её ширину целиком.
+ * Линейный чертёж для тёмного баннера: прорисовывается один раз при появлении страницы
+ * (или при прокрутке до баннера — onScroll). Декоративный (aria-hidden), кодом, без картинки.
+ * Размер и место задаёт баннер через className обёртки: чертёж занимает её ширину целиком.
  */
-export function BannerArt({ name, className }: { name: DrawingName; className?: string }) {
+export function BannerArt({ name, className, onScroll = false }: Props) {
   const drawing = DRAWINGS[name]
+  const classes = [className, onScroll && styles.scroll].filter(Boolean).join(' ')
   return (
-    <div className={className} aria-hidden="true">
+    <div className={classes || undefined} aria-hidden="true">
       <svg
         className={styles.svg}
         viewBox={drawing.viewBox}

@@ -30,11 +30,7 @@ export function PromoBand({ home }: { home: Home }) {
                 <h3 className={styles.cardTitle}>{card.title}</h3>
                 {card.text && <p className={styles.cardText}>{card.text}</p>}
                 {card.link && (
-                  <ButtonLink
-                    href={card.link.href}
-                    variant={card.dark ? 'ghostDark' : 'outline'}
-                    size="sm"
-                  >
+                  <ButtonLink href={card.link.href} variant={card.dark ? 'ghostDark' : 'outline'}>
                     {card.link.label}
                   </ButtonLink>
                 )}

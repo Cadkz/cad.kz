@@ -58,6 +58,31 @@
   }
 }
 
+/* onScroll: прорисовка привязана к прокрутке — линии рисуются, пока чертёж входит в экран,
+   и готовы, когда он виден целиком (успевает и у баннера в самом низу страницы).
+   Браузер без поддержки рисует по времени при загрузке, как в первом экране. */
+@supports (animation-timeline: view()) {
+  .scroll {
+    view-timeline-name: --art;
+  }
+
+  .scroll .path {
+    animation-delay: 0s;
+    animation-timeline: --art;
+    animation-range: entry 10% entry 80%;
+  }
+
+  .scroll .late {
+    animation-range: entry 70% entry 100%;
+  }
+
+  .scroll .label {
+    animation-delay: 0s;
+    animation-timeline: --art;
+    animation-range: entry 90% entry 100%;
+  }
+}
+
 @keyframes draw {
   from {
     stroke-dashoffset: 1;
