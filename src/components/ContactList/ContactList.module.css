@@ -49,3 +49,25 @@
 .social:hover {
   background: var(--color-blue);
 }
+
+/* Тёмный фон (подвал): светлые телефоны и ссылки, соцсети — полупрозрачные плашки. */
+.onDark .phone {
+  color: var(--color-text-inverse);
+}
+
+.onDark .line {
+  color: var(--color-text-on-dark);
+}
+
+.onDark .phone:hover,
+.onDark .line:hover {
+  color: var(--color-sky);
+}
+
+.onDark .social {
+  background: var(--color-on-dark-soft);
+}
+
+.onDark .social:hover {
+  background: var(--color-on-dark-hover);
+}

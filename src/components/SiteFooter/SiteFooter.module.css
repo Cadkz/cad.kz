@@ -1,15 +1,30 @@
+/* Тёмный подвал во всю ширину экрана — спокойное завершение страницы.
+   Содержимое в общей рамке, левый край совпадает с логотипом шапки. */
 .footer {
-  padding: var(--section-gap) 0 var(--space-10);
+  position: relative;
+  margin-top: var(--section-gap);
+  padding: var(--space-12) 0 var(--space-8);
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--gradient-deep);
+  color: var(--color-text-on-dark);
+}
+
+/* Фон кодом: чертёжная сетка, растворяется к низу. */
+.footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--blueprint-dark);
+  background-size: var(--blueprint-size);
+  mask-image: linear-gradient(to bottom, black, transparent 80%);
 }
 
 .card {
   display: grid;
   grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
   gap: var(--space-8) var(--grid-gap);
-  padding: var(--space-8) var(--space-6);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
 }
 
 .card > * {
@@ -22,9 +37,14 @@
   gap: var(--space-4);
 }
 
+/* Логотип тёмный (PNG): в подвале показываем его белым. */
+.logo img {
+  filter: brightness(0) invert(1);
+}
+
 .text {
   max-width: var(--sidebar);
-  color: var(--color-text-muted);
+  color: var(--color-text-on-dark);
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
 }
@@ -37,19 +57,19 @@
 }
 
 .title {
-  color: var(--color-navy);
+  color: var(--color-text-inverse);
   font-family: var(--font-heading);
   font-size: var(--text-body);
   font-weight: var(--weight-bold);
 }
 
 .link {
-  color: var(--color-text-muted);
+  color: var(--color-text-on-dark);
   font-size: var(--text-sm);
 }
 
 .link:hover {
-  color: var(--color-blue);
+  color: var(--color-sky);
 }
 
 .bottom {
@@ -57,14 +77,16 @@
   flex-wrap: wrap;
   justify-content: space-between;
   gap: var(--space-2) var(--space-6);
+  margin-top: var(--space-10);
   padding-top: var(--space-6);
-  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-on-dark-line);
+  color: var(--color-text-on-dark);
   font-size: var(--text-sm);
 }
 
 @media (min-width: 640px) {
-  .card {
-    padding: var(--space-10);
+  .footer {
+    padding-top: var(--space-16);
   }
 
   .card > * {

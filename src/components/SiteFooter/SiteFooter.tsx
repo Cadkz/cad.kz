@@ -6,7 +6,7 @@ import { Container } from '../Container/Container'
 import { Logo } from '../Logo/Logo'
 import styles from './SiteFooter.module.css'
 
-/** Общий подвал сайта: на всех страницах одинаковый, многоколоночный. */
+/** Общий подвал сайта: тёмный во всю ширину экрана, содержимое в рамке сайта. */
 export async function SiteFooter() {
   const contacts = await getContacts()
   const year = new Date().getFullYear()
@@ -15,7 +15,9 @@ export async function SiteFooter() {
       <Container>
         <div className={styles.card}>
           <div className={styles.brand}>
-            <Logo />
+            <span className={styles.logo}>
+              <Logo />
+            </span>
             {contacts.footerText && <p className={styles.text}>{contacts.footerText}</p>}
           </div>
           {footerColumns.map((column) => (
@@ -36,7 +38,7 @@ export async function SiteFooter() {
           ))}
           <div className={styles.column}>
             <p className={styles.title}>Контакты</p>
-            <ContactList contacts={contacts} />
+            <ContactList contacts={contacts} onDark />
           </div>
         </div>
         <div className={styles.bottom}>
