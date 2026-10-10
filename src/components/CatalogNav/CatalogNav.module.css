@@ -1,0 +1,49 @@
+.root {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .root {
+    display: contents;
+  }
+}
+
+/* Единственная залитая кнопка шапки: главное действие — открыть каталог. */
+.trigger {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-height);
+  padding: 0 var(--space-3) 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-blue);
+  color: var(--color-text-inverse);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    transform var(--duration-fast) var(--ease);
+}
+
+.trigger:hover,
+.trigger[aria-expanded="true"] {
+  background: var(--color-blue-hover);
+}
+
+.trigger:active {
+  transform: scale(0.98);
+}
+
+.chevron {
+  opacity: 0.8;
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.trigger[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}

@@ -63,3 +63,69 @@ export function suggest(index, rawQuery, limit = SUGGEST_LIMIT) {
     .map(toSuggestion)
   return { query, items, more: products.length > shown.length }
 }
+
+/** Группы панели подсказок в порядке показа. Пустые группы не показываются. */
+const GROUPS = /** @type {const} */ ([
+  { key: 'products', title: 'Товары', types: ['product', 'family'] },
+  { key: 'vendors', title: 'Производители', types: ['vendor'] },
+  { key: 'sections', title: 'Разделы каталога', types: ['section'] },
+  { key: 'pages', title: 'Страницы сайта', types: ['page'] },
+])
+
+/**
+ * Подсказки по группам: товары и семейства, производители, разделы, страницы.
+ * Внутри группы — порядок ответа (самое подходящее выше).
+ * @template {{ type: SuggestType }} T
+ * @param {T[]} items
+ * @returns {{ key: string, title: string, items: T[] }[]}
+ */
+export function groupSuggestions(items) {
+  return GROUPS.map(({ key, title, types }) => ({
+    key,
+    title,
+    items: items.filter((item) => /** @type {readonly string[]} */ (types).includes(item.type)),
+  })).filter((group) => group.items.length > 0)
+}
+
+/**
+ * Куски названия с отметкой, совпал ли кусок с началом слова запроса: «SCAD Office» по «скад» —
+ * не выделяется (совпало по звучанию), по «off» — выделено «Off». Регистр и «ё» не важны.
+ * @param {string} title
+ * @param {string} query
+ * @returns {{ text: string, match: boolean }[]}
+ */
+export function markMatches(title, query) {
+  // Те же длины строк: toLowerCase и ё→е не меняют число символов, позиции совпадают.
+  const fold = (/** @type {string} */ text) => text.toLowerCase().replace(/ё/g, 'е')
+  const haystack = fold(title)
+  const words = [...new Set(fold(query).split(/[^\p{L}\p{N}]+/u))].filter((w) => w.length >= 2)
+  /** @type {boolean[]} */
+  const marked = Array.from({ length: title.length }, () => false)
+  for (const word of words)
+    for (const at of wordStarts(haystack, word))
+      for (let i = at; i < at + word.length; i += 1) marked[i] = true
+  /** @type {{ text: string, match: boolean }[]} */
+  const parts = []
+  for (let i = 0; i < title.length; i += 1) {
+    const last = parts[parts.length - 1]
+    if (last && last.match === marked[i]) last.text += title[i]
+    else parts.push({ text: title[i] ?? '', match: Boolean(marked[i]) })
+  }
+  return parts
+}
+
+/**
+ * Где слово запроса стоит в начале слова названия: «scad» в «SCAD++» — да, «ad» в «SCAD» — нет.
+ * @param {string} haystack
+ * @param {string} word
+ * @returns {number[]}
+ */
+function wordStarts(haystack, word) {
+  /** @type {number[]} */
+  const found = []
+  for (let at = haystack.indexOf(word); at >= 0; at = haystack.indexOf(word, at + 1)) {
+    const prev = haystack[at - 1]
+    if (prev === undefined || !/[\p{L}\p{N}]/u.test(prev)) found.push(at)
+  }
+  return found
+}

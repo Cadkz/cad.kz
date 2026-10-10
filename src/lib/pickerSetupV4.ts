@@ -193,6 +193,11 @@ export async function setupPickerV4(payload: Payload): Promise<Report | null> {
 
   for (const family of LIRA_FAMILIES) {
     const vendor = ctx.vendorId.get(family.vendor)
+    // Производителя нет (пустая или демобаза) — искать линейку не с чем: запрос с пустым id падает.
+    if (vendor == null) {
+      ctx.report.missing.push(`линейка ${family.vendor}: ${family.line}`)
+      continue
+    }
     const { docs } = await payload.find({
       collection: 'product-lines',
       where: { and: [{ manufacturer: { equals: vendor } }, { title: { equals: family.line } }] },
@@ -200,7 +205,7 @@ export async function setupPickerV4(payload: Payload): Promise<Report | null> {
       ...opts,
     })
     const line = docs[0]
-    if (!line || vendor == null) {
+    if (!line) {
       ctx.report.missing.push(`линейка ${family.vendor}: ${family.line}`)
       continue
     }

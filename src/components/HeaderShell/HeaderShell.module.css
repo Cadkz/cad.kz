@@ -1,0 +1,22 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  background: var(--color-bg);
+  transition:
+    background-color var(--duration-base) var(--ease),
+    box-shadow var(--duration-base) var(--ease);
+}
+
+/* Стекло только у закреплённой строки и только там, где браузер умеет размывать фон.
+   Без размытия — непрозрачный фон: текст страницы не просвечивает. */
+.header[data-scrolled="true"] {
+  box-shadow: var(--shadow-header);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .header[data-scrolled="true"] {
+    background: var(--color-header-glass);
+    backdrop-filter: var(--blur-glass);
+  }
+}

@@ -4,21 +4,25 @@ import { Search } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { HeaderAction } from '../HeaderAction/HeaderAction'
 import { SearchBox } from '../SearchBox/SearchBox'
 import styles from './SiteSearch.module.css'
 
-type Props = { hints: readonly string[]; whatsappHref: string | null }
+type Props = {
+  hints: readonly string[]
+  typingHints: readonly string[]
+  whatsappHref: string | null
+}
 
 /**
- * Поиск в шапке. От 1200 px — поле прямо в шапке. Уже — значок: открывает панель с полем
- * под шапкой (планшет) или на весь экран (телефон). Панель выносится в body: у липкой шапки
- * backdrop-filter, внутри неё position: fixed не работает.
+ * Поиск в шапке. От 640 px — широкое поле прямо в первой строке, забирает всё свободное место.
+ * На телефоне — значок-лупа: открывает поиск отдельным слоем на весь экран.
+ * Слой выносится в body: у закреплённой шапки backdrop-filter, внутри неё fixed не работает.
  */
-export function SiteSearch({ hints, whatsappHref }: Props) {
+export function SiteSearch({ hints, typingHints, whatsappHref }: Props) {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const toggle = useRef<HTMLButtonElement>(null)
-  const layer = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   useEffect(() => setMounted(true), [])
 
@@ -27,55 +31,48 @@ export function SiteSearch({ hints, whatsappHref }: Props) {
     toggle.current?.focus()
   }, [])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: перешли на другую страницу — панель закрыта
+  // biome-ignore lint/correctness/useExhaustiveDependencies: перешли на другую страницу — слой закрыт
   useEffect(() => setOpen(false), [pathname])
 
   useEffect(() => {
     if (!open) return
     const root = document.documentElement
     root.dataset.scrollLocked = 'true'
-    function onPointer(event: PointerEvent) {
-      const target = event.target
-      if (!(target instanceof Node)) return
-      if (layer.current?.contains(target) || toggle.current?.contains(target)) return
-      setOpen(false)
-    }
-    document.addEventListener('pointerdown', onPointer)
     return () => {
       delete root.dataset.scrollLocked
-      document.removeEventListener('pointerdown', onPointer)
     }
   }, [open])
 
   return (
     <>
       <div className={styles.inline}>
-        <SearchBox variant="inline" hints={hints} whatsappHref={whatsappHref} />
+        <SearchBox
+          variant="inline"
+          hints={hints}
+          typingHints={typingHints}
+          whatsappHref={whatsappHref}
+        />
       </div>
-      <button
+      <HeaderAction
         ref={toggle}
-        type="button"
         className={styles.toggle}
-        aria-label="Поиск по каталогу"
+        hideFrom="sm"
+        icon={<Search size={20} strokeWidth={1.75} aria-hidden="true" />}
+        ariaLabel="Поиск по каталогу"
         aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <Search size={20} strokeWidth={1.75} aria-hidden="true" />
-      </button>
+        onClick={() => setOpen(true)}
+      />
       {mounted &&
         open &&
         createPortal(
-          <div ref={layer} className={styles.layer} role="dialog" aria-label="Поиск по каталогу">
-            <div className={styles.frame}>
-              <div className={styles.panel}>
-                <SearchBox
-                  variant="layer"
-                  hints={hints}
-                  whatsappHref={whatsappHref}
-                  onClose={close}
-                />
-              </div>
-            </div>
+          <div className={styles.layer} role="dialog" aria-modal="true" aria-label="Поиск">
+            <SearchBox
+              variant="layer"
+              hints={hints}
+              typingHints={typingHints}
+              whatsappHref={whatsappHref}
+              onClose={close}
+            />
           </div>,
           document.body,
         )}

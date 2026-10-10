@@ -1,25 +1,26 @@
 'use client'
 
 import { ShoppingCart } from 'lucide-react'
-import Link from 'next/link'
 import { useCart } from '../CartProvider/CartProvider'
+import { HeaderAction } from '../HeaderAction/HeaderAction'
 import styles from './CartButton.module.css'
 
 export function CartButton() {
   const { items, ready } = useCart()
   const count = items.reduce((sum, item) => sum + item.quantity, 0)
   return (
-    <Link
+    <HeaderAction
       href="/cart"
-      className={styles.button}
-      aria-label={count ? `Корзина, товаров: ${count}` : 'Корзина'}
-    >
-      <ShoppingCart size={20} strokeWidth={1.75} aria-hidden="true" />
-      {ready && count > 0 && (
-        <span className={styles.count} aria-hidden="true">
-          {count > 99 ? '99+' : count}
-        </span>
-      )}
-    </Link>
+      icon={<ShoppingCart size={20} strokeWidth={1.75} aria-hidden="true" />}
+      label="Корзина"
+      ariaLabel={count ? `Корзина, товаров: ${count}` : 'Корзина'}
+      badge={
+        ready && count > 0 ? (
+          <span className={styles.count} aria-hidden="true">
+            {count > 99 ? '99+' : count}
+          </span>
+        ) : null
+      }
+    />
   )
 }

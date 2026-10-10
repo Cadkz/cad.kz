@@ -1,70 +1,33 @@
-.header {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-header);
-  background: var(--color-header-bg);
-  backdrop-filter: blur(6px);
-}
-
+/* Первая строка: меню и логотип слева, поиск забирает всё свободное место, действия справа. */
 .bar {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  min-height: var(--header-height);
+  gap: var(--space-2);
+  height: var(--header-height);
 }
 
 .actions {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.phones {
-  display: none;
-  flex-direction: column;
-  align-items: flex-end;
-  line-height: var(--leading-snug);
-}
-
-.phone {
-  color: var(--color-navy);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  white-space: nowrap;
-}
-
-.phone:hover {
-  color: var(--color-blue);
-}
-
-.whatsapp {
-  display: none;
   flex-shrink: 0;
   align-items: center;
-  justify-content: center;
-  width: var(--control-height);
-  height: var(--control-height);
-  border-radius: var(--radius-round);
-  background: var(--color-whatsapp);
-  color: var(--color-text-inverse);
+  gap: var(--space-1);
 }
 
 @media (min-width: 640px) {
-  .whatsapp {
-    display: inline-flex;
+  .bar {
+    gap: var(--space-3);
   }
 }
 
 @media (min-width: 960px) {
   .bar {
-    gap: var(--space-6);
+    gap: var(--space-4);
   }
 }
 
 @media (min-width: 1200px) {
-  .phones {
-    display: flex;
+  .bar {
+    gap: var(--space-5);
   }
 }

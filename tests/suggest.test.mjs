@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { searchItems } from '../src/domain/search.mjs'
-import { suggest } from '../src/domain/suggest.mjs'
+import { groupSuggestions, markMatches, suggest } from '../src/domain/suggest.mjs'
 
 const product = (title, vendor, summary = '') => ({
   type: 'product',
@@ -114,5 +114,41 @@ test('другие названия из админки: «акад» наход
   assert.deepEqual(
     searchItems(items, 'акад').map((item) => item.title),
     ['AutoCAD'],
+  )
+})
+
+test('группы подсказок: товары и семейства первыми, пустые группы не показываются', () => {
+  const items = [
+    { type: 'vendor', title: 'SCAD Soft' },
+    { type: 'product', title: 'SCAD Office' },
+    { type: 'family', title: 'Программы-сателлиты' },
+    { type: 'page', title: 'Контакты' },
+  ]
+  const groups = groupSuggestions(items)
+  assert.deepEqual(
+    groups.map((group) => [group.title, group.items.map((item) => item.title)]),
+    [
+      ['Товары', ['SCAD Office', 'Программы-сателлиты']],
+      ['Производители', ['SCAD Soft']],
+      ['Страницы сайта', ['Контакты']],
+    ],
+  )
+})
+
+test('выделение совпадения: с начала слова, без учёта регистра и «ё»', () => {
+  const marked = (title, query) =>
+    markMatches(title, query)
+      .filter((part) => part.match)
+      .map((part) => part.text)
+  assert.deepEqual(marked('SCAD Office', 'scad'), ['SCAD'])
+  assert.deepEqual(marked('SCAD Office', 'off sc'), ['SC', 'Off'])
+  assert.deepEqual(marked('SCAD Office', 'ad'), [])
+  assert.deepEqual(marked('Расчёт оснований', 'расчет'), ['Расчёт'])
+  assert.deepEqual(marked('SCAD Office', 'скад'), [])
+  assert.equal(
+    markMatches('Artec Leo', 'leo')
+      .map((part) => part.text)
+      .join(''),
+    'Artec Leo',
   )
 })

@@ -8,6 +8,7 @@
   gap: var(--space-3);
 }
 
+/* Одно цельное поле: тонкая граница, значок, текст и «очистить» внутри, без вложенных рамок. */
 .field {
   position: relative;
   display: flex;
@@ -18,21 +19,20 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  transition: border-color var(--duration-fast) var(--ease);
+  transition:
+    border-color var(--duration-fast) var(--ease),
+    box-shadow var(--duration-fast) var(--ease);
 }
 
 .field:hover {
-  border-color: var(--color-blue-mid);
+  border-color: var(--color-border-strong);
 }
 
+/* Фокус (и мышью, и с клавиатуры — для поля ввода браузер их не различает): синяя граница
+   всего поля вместе с «Очистить» и мягкий ореол. Граница контрастная — фокус всегда виден. */
 .field:focus-within {
-  border-color: var(--color-blue);
-}
-
-/* Обводка фокуса — вокруг всего поля вместе с кнопкой «Очистить», а не только вокруг ввода. */
-.field:has(.input:focus-visible) {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
+  border-color: var(--color-focus);
+  box-shadow: var(--ring-soft);
 }
 
 .input:focus-visible {
@@ -98,8 +98,8 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: var(--control-height-sm);
-  height: var(--control-height-sm);
+  width: var(--space-8);
+  height: var(--space-8);
   margin-right: var(--space-1);
   padding: 0;
   border: 0;
@@ -107,10 +107,14 @@
   background: none;
   color: var(--color-text-muted);
   cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
 }
 
 .clear:hover {
-  color: var(--color-navy);
+  background: var(--color-hover);
+  color: var(--color-text);
 }
 
 .cancel {
@@ -122,30 +126,57 @@
   color: var(--color-blue);
   font: inherit;
   font-size: var(--text-body);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
   cursor: pointer;
 }
 
-/* Поле в шапке: подсказки выпадают панелью под полем, правый край — по полю. */
-.inline {
-  width: var(--search-field);
-}
-
+/* Поле в шапке: подсказки — плавающая панель под полем, по его краю, не шире экрана.
+   Узкое поле (планшет) — панель шире поля, к правому краю; широкое — по левому краю поля. */
 .inline .dropdown {
   position: absolute;
   top: calc(100% + var(--space-2));
   right: 0;
   z-index: var(--z-dropdown);
-  width: var(--search-panel);
-  max-height: var(--dropdown-max-height);
+  width: min(max(100%, var(--search-panel)), var(--search-panel-max));
+  max-height: min(var(--search-panel-height), var(--dropdown-max-height));
   overflow-y: auto;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
+  overscroll-behavior: contain;
+  border-radius: var(--radius-panel);
+  background: var(--color-popover);
+  box-shadow: var(--shadow-popover);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(calc(-1 * var(--space-1)));
+  transition:
+    opacity var(--duration-exit) var(--ease),
+    transform var(--duration-exit) var(--ease),
+    visibility 0s linear var(--duration-exit);
 }
 
-/* Поле в панели поиска: список идёт под полем и прокручивается внутри панели. */
+.inline .dropdown[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity var(--duration-enter) var(--ease),
+    transform var(--duration-enter) var(--ease),
+    visibility 0s;
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .inline .dropdown {
+    backdrop-filter: var(--blur-glass);
+  }
+}
+
+@media (min-width: 960px) {
+  .inline .dropdown {
+    right: auto;
+    left: 0;
+  }
+}
+
+/* Телефон: результаты прямо под полем и прокручиваются внутри слоя. */
 .layer {
   display: flex;
   flex-direction: column;
@@ -156,6 +187,11 @@
 .layer .dropdown {
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.layer .dropdown[data-open="false"] {
+  display: none;
 }
 
 .layer .dropdown > * {

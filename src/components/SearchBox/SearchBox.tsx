@@ -3,15 +3,21 @@
 import { Search, X } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { type KeyboardEvent, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { groupSuggestions } from '@/domain/suggest.mjs'
 import { useSuggest } from '@/lib/useSuggest'
 import { useTypingHint } from '@/lib/useTypingHint'
-import { type SearchOption, SearchSuggestions } from '../SearchSuggestions/SearchSuggestions'
+import {
+  type SearchGroup,
+  type SearchOption,
+  SearchSuggestions,
+} from '../SearchSuggestions/SearchSuggestions'
 import styles from './SearchBox.module.css'
 
 type Props = {
-  /** inline — поле в шапке, список выпадает под ним; layer — поле в панели поиска (планшет, телефон). */
+  /** inline — поле в шапке, подсказки выпадают под ним; layer — поиск на весь экран телефона. */
   variant: 'inline' | 'layer'
   hints: readonly string[]
+  typingHints: readonly string[]
   whatsappHref: string | null
   onClose?: () => void
 }
@@ -22,7 +28,7 @@ const searchHref = (query: string) => `/search?q=${encodeURIComponent(query.trim
  * Поле поиска с подсказками (комбобокс): стрелки выбирают строку, Enter открывает её или страницу
  * всех результатов, Escape закрывает. Без скриптов — обычная форма на страницу поиска.
  */
-export function SearchBox({ variant, hints, whatsappHref, onClose }: Props) {
+export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const listId = useId()
@@ -31,22 +37,30 @@ export function SearchBox({ variant, hints, whatsappHref, onClose }: Props) {
   const hint = useRef<HTMLSpanElement>(null)
   const [value, setValue] = useState('')
   const [focused, setFocused] = useState(variant === 'layer')
+  // Человек уже работал с поиском — примеры больше не печатаются.
+  const [touched, setTouched] = useState(false)
   const [open, setOpen] = useState(variant === 'layer')
   const [active, setActive] = useState(-1)
   const state = useSuggest(value)
 
-  const options = useMemo<SearchOption[]>(() => {
+  const { groups, options } = useMemo(() => {
     const result = state.status === 'done' || state.status === 'loading' ? state.result : null
-    if (!result) return []
-    const list: SearchOption[] = result.items.map((suggestion, index) => ({
-      id: `${listId}-${index}`,
-      href: suggestion.href,
-      suggestion,
+    if (!result) return { groups: [] as SearchGroup[], options: [] as SearchOption[] }
+    let n = 0
+    const groups: SearchGroup[] = groupSuggestions(result.items).map((group) => ({
+      key: group.key,
+      title: group.title,
+      options: group.items.map((suggestion) => ({
+        id: `${listId}-${n++}`,
+        href: suggestion.href,
+        suggestion,
+      })),
     }))
+    const options = groups.flatMap((group) => group.options)
     const products = result.items.some((s) => s.type === 'product' || s.type === 'family')
     if (result.more || products)
-      list.push({ id: `${listId}-all`, href: searchHref(result.query), suggestion: null })
-    return list
+      options.push({ id: `${listId}-all`, href: searchHref(result.query), suggestion: null })
+    return { groups, options }
   }, [state, listId])
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: новый набор подсказок — выбор сначала
@@ -59,7 +73,7 @@ export function SearchBox({ variant, hints, whatsappHref, onClose }: Props) {
     if (variant === 'layer') input.current?.focus()
   }, [variant])
 
-  useTypingHint(hint, hints, variant === 'inline' && !focused && !value)
+  useTypingHint(hint, typingHints, variant === 'inline' && !touched && !focused && !value)
 
   const showPanel = open && (variant === 'layer' || focused || value.trim().length > 0)
 
@@ -112,7 +126,7 @@ export function SearchBox({ variant, hints, whatsappHref, onClose }: Props) {
         <form
           action="/search"
           className={styles.field}
-          data-hint={!focused && !value}
+          data-hint={variant === 'inline' && !touched && !focused && !value}
           onSubmit={(event) => {
             event.preventDefault()
             if (!value.trim()) return
@@ -134,6 +148,7 @@ export function SearchBox({ variant, hints, whatsappHref, onClose }: Props) {
             }}
             onFocus={() => {
               setFocused(true)
+              setTouched(true)
               setOpen(true)
             }}
             onKeyDown={onKeyDown}
@@ -144,7 +159,7 @@ export function SearchBox({ variant, hints, whatsappHref, onClose }: Props) {
             aria-autocomplete="list"
             aria-expanded={showPanel && options.length > 0}
             aria-controls={listId}
-            aria-activedescendant={options[active]?.id}
+            aria-activedescendant={showPanel ? options[active]?.id : undefined}
             autoComplete="off"
             maxLength={100}
             enterKeyHint="search"
@@ -159,7 +174,7 @@ export function SearchBox({ variant, hints, whatsappHref, onClose }: Props) {
                 input.current?.focus()
               }}
             >
-              <X size={20} strokeWidth={1.75} aria-hidden="true" />
+              <X size={16} strokeWidth={1.75} aria-hidden="true" />
             </button>
           )}
         </form>
@@ -169,27 +184,32 @@ export function SearchBox({ variant, hints, whatsappHref, onClose }: Props) {
           </button>
         )}
       </search>
-      {showPanel && (
-        // Нажатие в списке не забирает фокус у поля: иначе на Safari список закрылся бы до клика.
-        // biome-ignore lint/a11y/noStaticElementInteractions: не действие, а удержание фокуса в поле
-        <div className={styles.dropdown} onMouseDown={(event) => event.preventDefault()}>
-          <SearchSuggestions
-            query={value}
-            state={state}
-            options={options}
-            listId={listId}
-            active={active}
-            hints={hints}
-            whatsappHref={whatsappHref}
-            onHint={(text) => {
-              setValue(text)
-              input.current?.focus()
-            }}
-            onPick={close}
-            onHover={setActive}
-          />
-        </div>
-      )}
+      {/* Панель всегда в разметке: и появление, и исчезновение плавные. Нажатие в ней не забирает
+          фокус у поля, иначе на Safari список закрылся бы до клика. */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: не действие, а удержание фокуса в поле */}
+      <div
+        className={styles.dropdown}
+        data-open={showPanel}
+        inert={!showPanel}
+        onMouseDown={(event) => event.preventDefault()}
+      >
+        <SearchSuggestions
+          query={value}
+          state={state}
+          groups={groups}
+          options={options}
+          listId={listId}
+          active={showPanel ? active : -1}
+          hints={hints}
+          whatsappHref={whatsappHref}
+          onHint={(text) => {
+            setValue(text)
+            input.current?.focus()
+          }}
+          onPick={close}
+          onHover={setActive}
+        />
+      </div>
     </div>
   )
 }

@@ -1,0 +1,151 @@
+.subnav {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .subnav {
+    position: relative;
+    z-index: var(--z-subnav);
+    display: block;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  height: var(--subnav-height);
+}
+
+/* Текст первого пункта стоит ровно по левому краю логотипа: отступ пункта вынесен за рамку. */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: calc(-1 * var(--space-3));
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--space-8);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
+}
+
+.item:hover,
+.item[aria-expanded="true"] {
+  background: var(--color-hover);
+  color: var(--color-text);
+}
+
+.chevron {
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.item[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}
+
+.dropWrap {
+  position: relative;
+}
+
+/* Панель всегда в разметке: закрытие тоже плавное, но быстрее открытия. */
+.dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  display: flex;
+  gap: var(--space-6);
+  padding: var(--space-4);
+  border-radius: var(--radius-panel);
+  background: var(--color-popover);
+  box-shadow: var(--shadow-popover);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(calc(-1 * var(--space-1)));
+  transition:
+    opacity var(--duration-exit) var(--ease),
+    transform var(--duration-exit) var(--ease),
+    visibility 0s linear var(--duration-exit);
+}
+
+.dropdown[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity var(--duration-enter) var(--ease),
+    transform var(--duration-enter) var(--ease),
+    visibility 0s;
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .dropdown {
+    backdrop-filter: var(--blur-glass);
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  min-width: max-content;
+}
+
+.columnTitle {
+  margin-bottom: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+
+.dropLink {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.dropLink:hover {
+  background: var(--color-hover);
+}
+
+.contacts {
+  padding-left: var(--space-6);
+  border-left: 1px solid var(--color-hairline);
+}
+
+.contacts > div {
+  padding: var(--space-1) var(--space-3);
+}
+
+.phone {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  transition: color var(--duration-fast) var(--ease);
+}
+
+.phone:hover {
+  color: var(--color-text);
+}

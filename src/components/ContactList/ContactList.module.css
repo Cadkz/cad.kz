@@ -6,9 +6,9 @@
 }
 
 .phone {
-  color: var(--color-navy);
+  color: var(--color-text);
   font-size: var(--text-body);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
   white-space: nowrap;
 }
 

@@ -47,7 +47,7 @@
 .section:hover,
 .section[aria-current="true"] {
   background: var(--color-bg);
-  color: var(--color-navy);
+  color: var(--color-text);
 }
 
 .section[aria-current="true"] .icon {

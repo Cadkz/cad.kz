@@ -1,91 +1,47 @@
+/* Поле в шапке забирает всё свободное место строки (от 640 px). */
 .inline {
   display: none;
 }
 
+/* Телефон: лупа справа, перед WhatsApp и корзиной. */
 .toggle {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: var(--control-height);
-  height: var(--control-height);
-  padding: 0;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-navy);
-  cursor: pointer;
-  transition: border-color var(--duration-fast) var(--ease);
+  margin-left: auto;
 }
 
-.toggle:hover,
-.toggle[aria-expanded="true"] {
-  border-color: var(--color-blue-mid);
-}
-
-/* Телефон: поиск на весь экран. */
+/* Телефон: поиск отдельным непрозрачным слоем на весь экран — читаемость важнее эффекта.
+   Высота по видимой части экрана: открытая клавиатура не перекрывает результаты. */
 .layer {
   position: fixed;
-  inset: 0;
+  inset: 0 0 auto;
   z-index: var(--z-drawer);
   display: flex;
   flex-direction: column;
+  height: 100dvh;
+  padding: var(--space-3) var(--gutter) 0;
   background: var(--color-surface);
+  animation: enter var(--duration-enter) var(--ease);
 }
 
-.frame {
-  display: flex;
+.layer > * {
   flex: 1;
-  flex-direction: column;
   min-height: 0;
 }
 
-.panel {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-  padding: var(--space-3) var(--gutter);
-}
-
-.panel > * {
-  flex: 1;
-}
-
-/* Планшет и узкий ноутбук: панель под шапкой у правого края рамки. */
 @media (min-width: 640px) {
-  .layer {
-    inset: var(--header-height) 0 auto;
-    background: none;
-    pointer-events: none;
-  }
-
-  .frame {
-    align-items: flex-end;
-    width: min(var(--container), 100% - 2 * var(--gutter));
-    margin-inline: auto;
-  }
-
-  .panel {
-    flex: none;
-    width: var(--search-panel);
-    max-height: var(--dropdown-max-height);
-    padding: var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-md);
-    pointer-events: auto;
-  }
-}
-
-@media (min-width: 1200px) {
   .inline {
     display: block;
+    flex: 1;
+    min-width: 0;
   }
 
-  .toggle,
   .layer {
     display: none;
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-1));
   }
 }

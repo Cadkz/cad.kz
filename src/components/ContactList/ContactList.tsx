@@ -3,10 +3,11 @@ import type { Contacts } from '@/lib/navigation'
 import { socialIcons, socialNames, TelegramIcon, WhatsappIcon } from '../icons/icons'
 import styles from './ContactList.module.css'
 
-type Props = { contacts: Contacts; socials?: boolean }
+/** whatsapp = false — строку WhatsApp не показывать: рядом уже есть своя кнопка WhatsApp. */
+type Props = { contacts: Contacts; socials?: boolean; whatsapp?: boolean }
 
 /** Телефоны, мессенджеры и соцсети из настроек CMS. */
-export function ContactList({ contacts, socials = true }: Props) {
+export function ContactList({ contacts, socials = true, whatsapp = true }: Props) {
   return (
     <div className={styles.list}>
       {contacts.phones.map((phone) => (
@@ -14,7 +15,7 @@ export function ContactList({ contacts, socials = true }: Props) {
           {phone.label}
         </a>
       ))}
-      {contacts.whatsappHref && (
+      {whatsapp && contacts.whatsappHref && (
         <a href={contacts.whatsappHref} className={styles.line} target="_blank" rel="noreferrer">
           <WhatsappIcon size={16} />
           Написать в WhatsApp

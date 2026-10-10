@@ -5,6 +5,7 @@ import { Grid } from '../Grid/Grid'
 import { NewsCard } from '../NewsCard/NewsCard'
 import { PageIntro } from '../PageIntro/PageIntro'
 import { PageLinks } from '../PageLinks/PageLinks'
+import { PublicationTabs } from '../PublicationTabs/PublicationTabs'
 import { TopicLinks } from '../TopicLinks/TopicLinks'
 import styles from './PublicationIndex.module.css'
 
@@ -40,7 +41,9 @@ export async function PublicationIndex({ path, title, lead, kind, params }: Prop
     <main>
       <Container>
         <Breadcrumbs items={[{ title: 'Главная', href: '/' }, { title }]} />
-        <PageIntro title={title} lead={lead} />
+        <PageIntro title={title} lead={lead}>
+          {kind !== 'promotion' && <PublicationTabs current={path} />}
+        </PageIntro>
         <TopicLinks topics={topics} active={topic} hrefFor={(slug) => query({ topic: slug })} />
         {result.docs.length ? (
           <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
