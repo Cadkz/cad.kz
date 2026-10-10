@@ -1,5 +1,5 @@
 // Семейства редких товаров CSoft, MagiCAD, НТП Трубопровод, Chaos и АСКОН: правила раскладки
-// по названиям (черновик 10.10.2026, на проверке у владельца). Товар попадает в первое подходящее
+// по названиям (10.10.2026, проверено владельцем). Товар попадает в первое подходящее
 // семейство по порядку списка, получает линейку и вид «Без своей страницы»: в каталоге и меню
 // вместо него одна карточка семейства, старый адрес ведёт на его строку в семействе.
 // Продления, обновления с прежних версий, подписки и пакеты лицензий идут в конец семейства
@@ -25,16 +25,6 @@ const intro = (/** @type {string} */ what) =>
 /** @type {FamilySeed[]} */
 export const FAMILIES = [
   // CSoft Development
-  {
-    vendor: 'Csoft Development',
-    slug: 'model-studio-cs',
-    title: 'Model Studio CS и CADLib',
-    intro: intro(
-      'Трёхмерное проектирование промышленных объектов по разделам: трубопроводы, электрика, ' +
-        'ОВ, ВК, строительные решения, генплан; CADLib — общая модель и архив проекта.',
-    ),
-    match: /Model Studio CS|CADLib/i,
-  },
   {
     vendor: 'Csoft Development',
     slug: 'electrics',
@@ -78,13 +68,6 @@ export const FAMILIES = [
     title: 'RasterDesk и Spotlight',
     intro: intro('Работа со сканами чертежей: правка растра, векторизация, распознавание.'),
     match: /RasterDesk|RasterID|SpotLight/i,
-  },
-  {
-    vendor: 'Csoft Development',
-    slug: 'plantracer',
-    title: 'PlanTracer',
-    intro: intro('Технические и межевые планы, обмерные чертежи.'),
-    match: /PlanTracer/i,
   },
   {
     vendor: 'Csoft Development',
@@ -142,28 +125,6 @@ export const FAMILIES = [
     intro: intro('Сетевые лицензии CS EnerGuide.'),
     match: /EnerGuide/i,
   },
-  // MagiCAD
-  {
-    vendor: 'MagiCAD',
-    slug: 'magicad-revit',
-    title: 'MagiCAD для Revit',
-    intro: intro('Инженерные системы в Revit: вентиляция, трубопроводы, электрика, спринклеры.'),
-    match: /для Revit/i,
-  },
-  {
-    vendor: 'MagiCAD',
-    slug: 'magicad-suite',
-    title: 'MagiCAD Suite',
-    intro: intro('Наборы MagiCAD по разделам.'),
-    match: /MagiCAD Suite/i,
-  },
-  {
-    vendor: 'MagiCAD',
-    slug: 'magicad-autocad',
-    title: 'MagiCAD для AutoCAD',
-    intro: intro('Инженерные системы в AutoCAD: вентиляция, трубопроводы, электрика, спринклеры.'),
-    match: /MagiCAD/i,
-  },
   // НТП Трубопровод
   {
     vendor: 'НТП Трубопровод',
@@ -176,8 +137,11 @@ export const FAMILIES = [
     vendor: 'НТП Трубопровод',
     slug: 'start',
     title: 'СТАРТ',
-    intro: intro('Прочность и жёсткость трубопроводов: основа СТАРТ-Проф и дополнительные модули.'),
-    match: /^СТАРТ/,
+    intro: intro(
+      'Прочность и жёсткость трубопроводов: основа СТАРТ-Проф, дополнительные модули и расчёт ' +
+        'остаточного ресурса.',
+    ),
+    match: /^СТАРТ|^Ресурс$/,
   },
   {
     vendor: 'НТП Трубопровод',
@@ -311,4 +275,179 @@ export function planFamilies(products) {
     family.members = sorted
   }
   return { families: families.filter((f) => f.members.length), unmatched }
+}
+
+/**
+ * Группы без своей страницы (решение владельца 10.10): у программ свои страницы, линейка только
+ * собирает их в меню и каталоге. Продления и комплекты в группу не входят — они вариантами
+ * на странице программы (OPTION_RULES).
+ * @typedef {{ vendor: string, title: string, match: RegExp, except?: RegExp }} LineSeed
+ * @type {LineSeed[]}
+ */
+export const PLAIN_LINES = [
+  {
+    vendor: 'Csoft Development',
+    title: 'Model Studio CS и CADLib',
+    match: /Model Studio CS|CADLib/i,
+    except: /подписка на обновления/i,
+  },
+  { vendor: 'MagiCAD', title: 'MagiCAD для Revit', match: /для Revit/i },
+  { vendor: 'MagiCAD', title: 'MagiCAD для AutoCAD', match: /MagiCAD/i, except: /Suite/i },
+]
+
+/** Снято с продажи в Казахстане (ответ владельца 10.10): в черновики. */
+export const DRAFT_TITLE = { vendor: 'Csoft Development', match: /PlanTracer/i }
+
+/**
+ * Варианты на странице программы: сама программа и альтернатива (продление, комплект).
+ * Альтернатива получает вид «Без своей страницы», её старый адрес открывает программу
+ * с выбранной альтернативой (?pick=ID). Одна альтернатива может быть у нескольких программ:
+ * комплект MagiCAD Suite — и у версии для AutoCAD, и у версии для Revit.
+ * @typedef {{
+ *   vendor: string, step: string, base: RegExp, alt: (title: string) => RegExp | null,
+ *   baseLabel: string, altLabel: (altTitle: string) => string, altNote: string,
+ *   licenseSwitches?: boolean,
+ * }} OptionRule
+ * @type {OptionRule[]}
+ */
+export const OPTION_RULES = [
+  {
+    vendor: 'Csoft Development',
+    step: 'Лицензия',
+    base: /^(?:Model Studio CS|CADLib)/i,
+    alt: (title) => new RegExp(`^Подписка на обновления ${escapeRegExp(title)}$`, 'i'),
+    baseLabel: 'Новая лицензия',
+    altLabel: () => 'Подписка на обновления',
+    altNote: 'Если программа уже куплена',
+    licenseSwitches: true,
+  },
+  {
+    vendor: 'MagiCAD',
+    step: 'Что купить',
+    base: /^MagiCAD (?!Suite)/i,
+    alt: (title) => {
+      const part = /^MagiCAD (.+?)(?: для Revit)?$/i.exec(title)?.[1]
+      return part ? new RegExp(`^MagiCAD Suite ${escapeRegExp(part)}$`, 'i') : null
+    },
+    baseLabel: 'Только эта программа',
+    altLabel: (altTitle) => `Комплект ${altTitle}`,
+    altNote: 'Версии для AutoCAD и для Revit вместе',
+  },
+]
+
+/**
+ * Переключатели «Вид лицензии» и «Срок» по условиям лицензии предложения из Битрикса
+ * («сетевая, доп. место, на 2 года»). Порядок значений — порядок показа, первое выбрано сразу.
+ */
+export const LICENSE_SWITCHES = [
+  {
+    title: 'Вид лицензии',
+    options: [
+      { value: 'Локальная', note: 'Один компьютер', test: /локальн/i },
+      { value: 'Сетевая: сервер', note: 'Серверная часть сетевой лицензии', test: /серверн/i },
+      {
+        value: 'Сетевая: доп. место',
+        note: 'Ещё одно рабочее место к серверу',
+        test: /доп\. место/i,
+      },
+    ],
+  },
+  {
+    title: 'Срок',
+    options: [
+      { value: '1 год', note: null, test: /на 1 год/i },
+      { value: '2 года', note: null, test: /на 2 года/i },
+      { value: '3 года', note: null, test: /на 3 года/i },
+      { value: 'Квартал', note: null, test: /квартальн/i },
+      { value: 'Бессрочная', note: null, test: /бессрочн/i },
+    ],
+  },
+]
+
+/**
+ * Значения переключателей для предложения по тексту условий лицензии.
+ * @param {string | null | undefined} license
+ * @returns {string[]}
+ */
+export function licenseVariants(license) {
+  if (!license) return []
+  return LICENSE_SWITCHES.flatMap((sw) => {
+    const option = sw.options.find((o) => o.test.test(license))
+    return option ? [option.value] : []
+  })
+}
+
+/**
+ * Переключатели только с теми значениями, что есть у предложений; переключатель с одним
+ * значением не нужен.
+ * @param {string[][]} offerVariants
+ */
+export function usedLicenseSwitches(offerVariants) {
+  const used = new Set(offerVariants.flat())
+  return LICENSE_SWITCHES.map((sw) => ({
+    title: sw.title,
+    options: sw.options
+      .filter((o) => used.has(o.value))
+      .map((o) => ({ value: o.value, note: o.note })),
+  })).filter((sw) => sw.options.length > 1)
+}
+
+/** @param {string} text */
+function escapeRegExp(text) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
+ * Группы, варианты и черновики для товаров, не вошедших в семейства.
+ * @param {{ id: number, title: string, vendor: string, skip?: boolean }[]} products
+ */
+export function planExtras(products) {
+  const free = products.filter((p) => !p.skip)
+  /** @type {{ title: string, vendor: string, ids: number[] }[]} */
+  const lines = []
+  /** @type {{ productId: number, step: string, licenseSwitches: boolean, items: { productId: number, label: string, note: string | null, preselect: boolean }[] }[]} */
+  const options = []
+  const noPage = new Set()
+  const drafts = free
+    .filter((p) => p.vendor === DRAFT_TITLE.vendor && DRAFT_TITLE.match.test(p.title))
+    .map((p) => p.id)
+  for (const rule of OPTION_RULES) {
+    const own = free.filter((p) => p.vendor === rule.vendor)
+    for (const base of own.filter((p) => rule.base.test(p.title))) {
+      const pattern = rule.alt(base.title)
+      const alt = pattern ? own.find((p) => p.id !== base.id && pattern.test(p.title)) : null
+      if (!alt) continue
+      noPage.add(alt.id)
+      options.push({
+        productId: base.id,
+        step: rule.step,
+        licenseSwitches: Boolean(rule.licenseSwitches),
+        items: [
+          { productId: base.id, label: rule.baseLabel, note: null, preselect: true },
+          {
+            productId: alt.id,
+            label: rule.altLabel(alt.title),
+            note: rule.altNote,
+            preselect: false,
+          },
+        ],
+      })
+    }
+  }
+  const taken = new Set([...noPage, ...drafts])
+  for (const line of PLAIN_LINES) {
+    const ids = free
+      .filter(
+        (p) =>
+          p.vendor === line.vendor &&
+          !taken.has(p.id) &&
+          line.match.test(p.title) &&
+          !line.except?.test(p.title),
+      )
+      .sort((a, b) => a.title.localeCompare(b.title, 'ru'))
+      .map((p) => p.id)
+    for (const id of ids) taken.add(id)
+    if (ids.length) lines.push({ title: line.title, vendor: line.vendor, ids })
+  }
+  return { lines, options, noPage: [...noPage], drafts }
 }

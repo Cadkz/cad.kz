@@ -1,13 +1,15 @@
 // Разделы каталога по утверждённым направлениям: новые разделы, «Правила разделов»,
 // «С этим покупают» у разделов, разделы у товаров; затем приоритет показа (топы продаж первыми);
 // затем вторая настройка: дубли производителей, линейки, приложения в конец, темы новостей;
-// затем подбор AutoCAD и SCAD Office и семейство сателлитов SCAD; другие названия для поиска. Выполняется один раз (отметка в журнале
+// затем подбор AutoCAD и SCAD Office и семейство сателлитов SCAD; семейства редких товаров;
+// другие названия для поиска. Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
+import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
 import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
@@ -69,6 +71,16 @@ try {
   else {
     console.log(`Подбор и семейства: ${pickerV4.done.join('; ') || '—'}`)
     for (const line of pickerV4.missing) console.log(`  не найдено — ${line}`)
+  }
+  const families = await setupFamiliesV5(payload)
+  if (!families) console.log('Семейства редких товаров уже настроены.')
+  else {
+    console.log(`Семейства: ${families.families.join('; ') || '—'}; товаров ${families.products}`)
+    console.log(`Группы без своей страницы: ${families.lines.join('; ') || '—'}`)
+    console.log(
+      `Варианты на странице программы: ${families.options}; в черновики: ${families.drafts}`,
+    )
+    for (const line of families.unmatched) console.log(`  без места — ${line}`)
   }
   const aliases = await setupSearchAliases(payload)
   if (!aliases) console.log('Другие названия для поиска уже заполнены.')

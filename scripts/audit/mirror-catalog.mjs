@@ -3,7 +3,8 @@
 // на настоящих названиях. Снимок берётся с демо через браузер (/api/manufacturers, /api/products,
 // /api/offers, /api/sections) и кладётся вне репозитория. Формат:
 // { m: [[название, приоритет]], p: [[название, тип, №производителя, основной, доп. через пробел,
-//   id на демо, приоритет, статус, адрес]], o: [[id товара на демо, комплектация, сумма, валюта]] }.
+//   id на демо, приоритет, статус, адрес]], o: [[id товара на демо, комплектация, сумма, валюта,
+//   условия лицензии (необязательно)]] }.
 // Запуск (после миграций и seed-demo, до catalog-setup):
 // pnpm exec payload run scripts/audit/mirror-catalog.mjs <путь к снимку.json>
 import { readFileSync } from 'node:fs'
@@ -46,8 +47,11 @@ for (const [title, priority] of snap.m) {
 }
 
 const offersBy = new Map()
-for (const [productId, configuration, amount, currency] of snap.o)
-  offersBy.set(productId, [...(offersBy.get(productId) ?? []), { configuration, amount, currency }])
+for (const [productId, configuration, amount, currency, license] of snap.o)
+  offersBy.set(productId, [
+    ...(offersBy.get(productId) ?? []),
+    { configuration, amount, currency, license: license || '—' },
+  ])
 
 let created = 0
 for (const [title, letter, maker, main, extra, demoId, priority, status, slug] of snap.p) {
@@ -84,7 +88,7 @@ for (const [title, letter, maker, main, extra, demoId, priority, status, slug] o
         status: 'published',
         product: product.id,
         configuration: offer.configuration,
-        license: '—',
+        license: offer.license,
         amount: offer.amount,
         currency: offer.currency,
         includesVat: false,
