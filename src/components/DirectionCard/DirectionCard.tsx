@@ -8,10 +8,7 @@ import styles from './DirectionCard.module.css'
 /** Карточка направления: открывает каталог, отфильтрованный по этому направлению. */
 export function DirectionCard({ direction }: { direction: Direction }) {
   return (
-    <Link
-      href={catalogHref({ direction: direction.slug })}
-      className={`${styles.card} ${styles[direction.tone]}`}
-    >
+    <Link href={catalogHref({ direction: direction.slug })} className={styles.card}>
       <span className={styles.big} aria-hidden="true">
         <SectionIcon name={direction.icon} size={24} />
       </span>
