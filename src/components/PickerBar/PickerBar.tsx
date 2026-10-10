@@ -20,20 +20,17 @@ export function PickerBar() {
           ? 'Цена по запросу'
           : 'Выберите комплект'
   return (
-    <>
-      <div className={styles.spacer} aria-hidden="true" />
-      <div className={styles.bar}>
-        <span className={styles.price}>{text}</span>
-        {lines.length ? (
-          <button type="button" className={styles.button} onClick={() => openRequest(action.kind)}>
-            {action.label}
-          </button>
-        ) : (
-          <a href="#config" className={styles.button}>
-            Выбрать
-          </a>
-        )}
-      </div>
-    </>
+    <div className={styles.bar} data-bottom-bar>
+      <span className={styles.price}>{text}</span>
+      {lines.length ? (
+        <button type="button" className={styles.button} onClick={() => openRequest(action.kind)}>
+          {action.label}
+        </button>
+      ) : (
+        <a href="#config" className={styles.button}>
+          Выбрать
+        </a>
+      )}
+    </div>
   )
 }

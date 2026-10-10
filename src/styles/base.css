@@ -36,6 +36,23 @@ body > main {
   flex: 1 0 auto;
 }
 
+/* На телефоне внизу закреплена строка подбора (PickerBar): страница, включая подвал,
+   заканчивается выше неё, с небольшим запасом и с учётом полоски жестов iPhone. */
+body:has([data-bottom-bar]) {
+  padding-bottom: calc(
+    var(--control-height) +
+    var(--space-6) +
+    var(--space-4) +
+    env(safe-area-inset-bottom)
+  );
+}
+
+@media (min-width: 960px) {
+  body:has([data-bottom-bar]) {
+    padding-bottom: 0;
+  }
+}
+
 h1,
 h2,
 h3,
