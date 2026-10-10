@@ -10,6 +10,7 @@ import { getPayload } from 'payload'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
+import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
 import { setupPriorities } from '../src/lib/prioritySetup.ts'
 import { setupSearchAliases } from '../src/lib/searchSetup.ts'
 import { setupVendors } from '../src/lib/vendorsSetup.ts'
@@ -63,6 +64,12 @@ try {
   const pickerV3 = await setupPickerV3(payload)
   if (!pickerV3) console.log('Названия в подборе SCAD и AutoCAD уже обновлены.')
   else console.log(`Подбор, понятные названия: ${pickerV3.join('; ') || '—'}`)
+  const pickerV4 = await setupPickerV4(payload)
+  if (!pickerV4) console.log('Подбор GEO5, Revit, ЛИРА, АВС, Artec уже настроен.')
+  else {
+    console.log(`Подбор и семейства: ${pickerV4.done.join('; ') || '—'}`)
+    for (const line of pickerV4.missing) console.log(`  не найдено — ${line}`)
+  }
   const aliases = await setupSearchAliases(payload)
   if (!aliases) console.log('Другие названия для поиска уже заполнены.')
   else console.log(`Другие названия для поиска: ${aliases.join('; ') || '—'}`)
