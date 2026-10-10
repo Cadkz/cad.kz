@@ -1,5 +1,6 @@
 // @ts-check
-// Заявка без корзины: запрос цены, продление, помощь с выбором, КП по семейству.
+// Заявка без корзины: запрос цены, продление, помощь с выбором, КП по семейству,
+// «Подобрать решение» с главной (источник home: задача словами, без товара).
 // Клиент выбрал «Перезвоните мне» и оставил имя и телефон. Чистые функции без базы:
 // проверка формы (та же в браузере и на сервере) и данные для CRM.
 // Названия и цены в заявку подставляет сервер из базы по ID, от клиента берутся только ID.
@@ -37,12 +38,20 @@ function hasControl(value) {
   return false
 }
 
+/** Откуда заявка: со страницы товара или семейства — или с главной («Подобрать решение»). */
+export const REQUEST_SOURCES = /** @type {const} */ (['product', 'home'])
+
+/** Задача в заявке с главной: хотя бы пара слов. */
+export const TASK_MIN = 5
+
 /**
  * Поля, которые человек заполняет сам: имя, телефон, комментарий, согласие.
+ * С главной комментарий — это задача, без неё заявка не уходит.
  * @param {Record<string, unknown>} input
  * @param {Record<string, string>} errors
+ * @param {boolean} [taskRequired]
  */
-function checkContact(input, errors) {
+function checkContact(input, errors, taskRequired = false) {
   const name = text(input.name)
   if (name.length < 2 || name.length > 100 || hasControl(name))
     errors.name = 'Укажите имя: от 2 до 100 символов'
@@ -52,6 +61,8 @@ function checkContact(input, errors) {
     typeof input.comment === 'string' ? input.comment.replace(/\r\n?/g, '\n').trim() : ''
   if (comment.length > 1000 || hasControl(comment))
     errors.comment = 'Комментарий не длиннее 1000 символов'
+  else if (taskRequired && comment.length < TASK_MIN)
+    errors.comment = 'Опишите задачу хотя бы парой слов'
   if (input.consent !== true)
     errors.consent = 'Без согласия на обработку данных заявку отправить нельзя'
   return { name, phone: phone ?? '', comment }
@@ -60,14 +71,16 @@ function checkContact(input, errors) {
 /**
  * Проверка только полей формы — мгновенные подсказки в браузере.
  * @param {unknown} raw
+ * @param {{ taskRequired?: boolean }} [options]  taskRequired — форма «Подобрать решение» с главной.
  * @returns {{ ok: true } | { ok: false, errors: Record<string, string> }}
  */
-export function validateContact(raw) {
+export function validateContact(raw, options = {}) {
   /** @type {Record<string, string>} */
   const errors = {}
   checkContact(
     raw && typeof raw === 'object' ? /** @type {Record<string, unknown>} */ (raw) : {},
     errors,
+    options.taskRequired,
   )
   return Object.keys(errors).length ? { ok: false, errors } : { ok: true }
 }
@@ -80,7 +93,9 @@ export function validateContact(raw) {
  * @typedef {object} SiteRequest
  * @property {string} idempotencyKey
  * @property {RequestKind} kind
- * @property {number} pageProductId  Товар, на странице которого заявка (для семейства — любой из списка).
+ * @property {typeof REQUEST_SOURCES[number]} source
+ * @property {number | null} pageProductId  Товар, на странице которого заявка (для семейства — любой из списка); с главной — null.
+ * @property {string | null} direction  С главной: адрес выбранного направления (необязательно), название подставит сервер.
  * @property {string | null} familySlug
  * @property {RequestItem[]} items
  * @property {number} quantity
@@ -104,9 +119,18 @@ export function validateRequest(raw) {
     errors.idempotencyKey = 'Не удалось подготовить форму. Обновите страницу и попробуйте ещё раз.'
   const kind = REQUEST_KINDS.find((k) => k === input.kind)
   if (!kind) errors.kind = 'Некорректный тип заявки'
-  const pageProductId = Number(input.pageProductId)
-  if (!Number.isSafeInteger(pageProductId) || pageProductId <= 0)
+  const source = input.source === 'home' ? 'home' : 'product'
+  // С главной — только «помощь с выбором», без товара и выбранных позиций.
+  if (source === 'home' && kind !== 'help') errors.kind = 'Некорректный тип заявки'
+  const pageProductId = source === 'home' ? null : Number(input.pageProductId)
+  if (pageProductId !== null && (!Number.isSafeInteger(pageProductId) || pageProductId <= 0))
     errors.page = 'Некорректная страница'
+  const direction =
+    source === 'home' &&
+    typeof input.direction === 'string' &&
+    /^[a-z0-9-]{1,80}$/.test(input.direction)
+      ? input.direction
+      : null
   const familySlug =
     typeof input.familySlug === 'string' && /^[a-z0-9-]{1,80}$/.test(input.familySlug)
       ? input.familySlug
@@ -149,17 +173,20 @@ export function validateRequest(raw) {
         choices.push({ title, value })
       }
   }
+  if (source === 'home' && (items.length || choices.length)) errors.items = 'Некорректный выбор'
   if (kind === 'quote' && !items.length && !errors.items)
     errors.items = 'Отметьте хотя бы одну программу'
-  const contact = checkContact(input, errors)
+  const contact = checkContact(input, errors, source === 'home')
   if (Object.keys(errors).length || !kind) return { ok: false, errors }
   return {
     ok: true,
     value: {
       idempotencyKey: idempotencyKey.toLowerCase(),
       kind,
+      source,
       pageProductId,
-      familySlug,
+      direction,
+      familySlug: source === 'home' ? null : familySlug,
       items,
       quantity,
       choices,

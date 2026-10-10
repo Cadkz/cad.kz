@@ -1,0 +1,22 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.intro {
+  color: var(--color-gray-700);
+  font-size: var(--text-sm);
+}
+
+.alt {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.link {
+  color: var(--color-navy);
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

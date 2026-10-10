@@ -3,7 +3,7 @@
 // затем вторая настройка: дубли производителей, линейки, приложения в конец, темы новостей;
 // затем подбор AutoCAD и SCAD Office и семейство сателлитов SCAD; семейства редких товаров;
 // другие названия для поиска; актуализация версий по сайтам производителей; продления ПАССАТ
-// — кнопкой «Обновить версию». Выполняется один раз (отметка в журнале
+// — кнопкой «Обновить версию»; блок «Официальный партнёр» на главной. Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -12,6 +12,7 @@ import { getPayload } from 'payload'
 import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
+import { setupHomeTrust } from '../src/lib/homeSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
 import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
@@ -111,6 +112,14 @@ try {
     for (const line of cards.products) console.log(`  ${line}`)
     console.log(`Подписи картинок «Revit 20xx» → «Revit»: ${cards.media}`)
   }
+  const trust = await setupHomeTrust(payload)
+  if (!trust) console.log('Блок «Официальный партнёр» на главной уже настроен.')
+  else
+    console.log(
+      trust === 'filled'
+        ? 'Блок «Официальный партнёр» на главной заполнен.'
+        : 'Блок «Официальный партнёр» уже заполнен в админке, не трогаем.',
+    )
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1

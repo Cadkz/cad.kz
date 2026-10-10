@@ -28,6 +28,47 @@ export const homePage: GlobalConfig = {
       ],
     },
     {
+      name: 'trust',
+      label: 'Блок «Официальный партнёр»',
+      type: 'group',
+      admin: {
+        description:
+          'Под первым экраном. Только проверенные статусы: их видит клиент перед заявкой. ' +
+          'Пустой список партнёров — блок не показывается.',
+      },
+      fields: [
+        textField('title', 'Заголовок'),
+        { name: 'lead', label: 'Подзаголовок', type: 'textarea' },
+        {
+          name: 'partners',
+          label: 'Партнёрства',
+          type: 'array',
+          maxRows: 8,
+          fields: [
+            textField('vendor', 'Производитель', true),
+            textField('status', 'Статус', true),
+            textField('note', 'Что поставляем'),
+            {
+              name: 'logo',
+              label: 'Логотип или значок партнёра',
+              type: 'upload',
+              relationTo: 'media',
+              admin: { description: 'Необязательно. Без него показывается название.' },
+            },
+            textField('href', 'Ссылка (каталог производителя, сертификат)'),
+          ],
+        },
+        {
+          name: 'links',
+          label: 'Ссылки под блоком',
+          type: 'array',
+          maxRows: 3,
+          admin: { description: 'Например, «Реквизиты компании» → /about/requisites.' },
+          fields: [textField('label', 'Текст', true), textField('href', 'Ссылка', true)],
+        },
+      ],
+    },
+    {
       name: 'bim',
       label: 'Блок «Внедрение BIM»',
       type: 'group',

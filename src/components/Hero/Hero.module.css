@@ -54,7 +54,8 @@
 
 .actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-self: stretch;
   gap: var(--space-3);
   margin-top: var(--space-2);
 }
@@ -62,6 +63,13 @@
 @media (min-width: 640px) {
   .band {
     padding: var(--space-10);
+  }
+
+  /* От 640 кнопки в ряд по своей ширине; на телефоне — столбиком во всю ширину. */
+  .actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-self: flex-start;
   }
 }
 

@@ -10,6 +10,7 @@ import { NewsCard } from '@/components/NewsCard/NewsCard'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
 import { PromoBand } from '@/components/PromoBand/PromoBand'
 import { Section } from '@/components/Section/Section'
+import { TrustBand } from '@/components/TrustBand/TrustBand'
 import { getDirections } from '@/lib/catalog'
 import { fromParams, toQuery } from '@/lib/catalogFilter'
 import { getHome } from '@/lib/home'
@@ -23,7 +24,8 @@ const newsTones = ['navy', 'graphite', 'deep'] as const
 export const metadata = { alternates: { canonical: '/' } }
 
 /**
- * Главная — шаблон «Витрина»: первый экран с двумя действиями, направления, акции, BIM,
+ * Главная — шаблон «Витрина»: первый экран с тремя действиями, официальные партнёрства,
+ * направления, акции, BIM,
  * как мы работаем, новости, вопросы. Каталог — отдельная страница /catalog.
  */
 export default async function Home({ searchParams }: Props) {
@@ -39,7 +41,8 @@ export default async function Home({ searchParams }: Props) {
   return (
     <main>
       <CatalogHashRedirect />
-      <Hero home={home} />
+      <Hero home={home} directions={directions} />
+      <TrustBand trust={home.trust} />
       <Section
         id="directions"
         title="Выберите направление"

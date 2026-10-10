@@ -4,6 +4,8 @@
  * Цены, сроки и описания учебные: перед публикацией их проверяет редактор.
  */
 
+import { TRUST_SEED } from './homeTrust.mjs'
+
 type Icon = 'building' | 'columns' | 'layers' | 'route' | 'wrench' | 'droplet' | 'cog'
 type MoreIcon = 'image' | 'file' | 'scan' | 'printer' | 'monitor' | 'graduation'
 
@@ -561,6 +563,7 @@ export const demoSettings = {
 export const demoHome = {
   eyebrow: 'Более 5 000 решений для проектировщиков',
   title: 'Софт, оборудование и обучение для проектных организаций и частных специалистов',
+  trust: TRUST_SEED,
   sideCards: [
     {
       title: 'Подберём комплект под ваше ТЗ',

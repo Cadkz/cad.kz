@@ -2,6 +2,7 @@ import type { HomePage } from '../../payload-types'
 import { getContacts } from './navigation'
 import { newsHref } from './navigationHrefs'
 import { cms } from './payload'
+import { toPicture } from './pictures'
 import { getPublications } from './publications'
 
 export type HomeLink = { label: string; href: string } | null
@@ -21,7 +22,7 @@ function resolveLink(
 export async function getHome() {
   const payload = await cms()
   const [page, contacts, promotions] = await Promise.all([
-    payload.findGlobal({ slug: 'home-page', depth: 0 }) as Promise<HomePage>,
+    payload.findGlobal({ slug: 'home-page', depth: 1 }) as Promise<HomePage>,
     getContacts(),
     getPublications({ kinds: ['promotion'], limit: 5 }),
   ])
@@ -44,6 +45,18 @@ export async function getHome() {
       dark: Boolean(card.dark),
       link: resolveLink(card.linkLabel, card.linkHref, wa),
     })),
+    trust: {
+      title: page.trust?.title ?? null,
+      lead: page.trust?.lead ?? null,
+      partners: (page.trust?.partners ?? []).map((p) => ({
+        vendor: p.vendor,
+        status: p.status,
+        note: p.note ?? null,
+        logo: toPicture(p.logo, p.vendor),
+        href: p.href ?? null,
+      })),
+      links: (page.trust?.links ?? []).map((l) => ({ label: l.label, href: l.href })),
+    },
     bim: {
       eyebrow: page.bim?.eyebrow ?? null,
       title: page.bim?.title ?? null,

@@ -73,9 +73,28 @@ function priced(
   }
 }
 
+/** С главной: направление, если клиент его выбрал и такое направление опубликовано. */
+async function homeChoices(payload: Payload, request: SiteRequest) {
+  if (!request.direction) return []
+  const { docs } = await payload.find({
+    collection: 'sections',
+    where: {
+      and: [
+        { slug: { equals: request.direction } },
+        { isDirection: { equals: true } },
+        { status: { equals: 'published' } },
+      ],
+    },
+    limit: 1,
+    ...options,
+  })
+  return docs[0] ? [{ title: 'Направление', value: docs[0].title }] : []
+}
+
 /** Выбор переключателей, который действительно есть в подборе товара: остальное отбрасывается. */
 async function checkedChoices(payload: Payload, request: SiteRequest) {
-  if (!request.choices.length || request.familySlug) return []
+  if (request.source === 'home') return homeChoices(payload, request)
+  if (!request.choices.length || request.familySlug || request.pageProductId === null) return []
   const product = await payload.findByID({
     collection: 'products',
     id: request.pageProductId,
@@ -90,8 +109,10 @@ async function checkedChoices(payload: Payload, request: SiteRequest) {
   )
 }
 
-/** Название страницы для менеджера: товар или семейство. */
+/** Название страницы для менеджера: товар, семейство или главная. */
 async function pageTitle(payload: Payload, request: SiteRequest) {
+  if (request.source === 'home' || request.pageProductId === null)
+    return { title: 'Главная: подобрать решение', page: '/' }
   if (request.familySlug) {
     const { docs } = await payload.find({
       collection: 'product-lines',

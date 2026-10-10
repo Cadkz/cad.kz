@@ -1416,6 +1416,36 @@ export interface HomePage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Под первым экраном. Только проверенные статусы: их видит клиент перед заявкой. Пустой список партнёров — блок не показывается.
+   */
+  trust?: {
+    title?: string | null;
+    lead?: string | null;
+    partners?:
+      | {
+          vendor: string;
+          status: string;
+          note?: string | null;
+          /**
+           * Необязательно. Без него показывается название.
+           */
+          logo?: (number | null) | Media;
+          href?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Например, «Реквизиты компании» → /about/requisites.
+     */
+    links?:
+      | {
+          label: string;
+          href: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
   bim?: {
     eyebrow?: string | null;
     title?: string | null;
@@ -1516,6 +1546,29 @@ export interface HomePageSelect<T extends boolean = true> {
         linkHref?: T;
         dark?: T;
         id?: T;
+      };
+  trust?:
+    | T
+    | {
+        title?: T;
+        lead?: T;
+        partners?:
+          | T
+          | {
+              vendor?: T;
+              status?: T;
+              note?: T;
+              logo?: T;
+              href?: T;
+              id?: T;
+            };
+        links?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              id?: T;
+            };
       };
   bim?:
     | T
