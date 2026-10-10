@@ -187,7 +187,7 @@ export const FAMILIES = [
     vendor: 'Chaos Group',
     slug: 'chaos-education',
     title: 'Chaos для учебных заведений',
-    intro: intro('Учебные лицензии V-Ray и Phoenix FD для студентов, преподавателей и классов.'),
+    intro: intro('Учебные лицензии V-Ray и VRScans для студентов, преподавателей и классов.'),
     match: /студентов|Academic licenses/i,
   },
   {
@@ -195,8 +195,8 @@ export const FAMILIES = [
     slug: 'v-ray',
     title: 'V-Ray',
     intro: intro(
-      'Визуализация для 3ds Max, Maya, SketchUp, Rhino, Revit, Cinema 4D, Unreal и других ' +
-        'программ: рабочие места, узлы рендеринга, аренда на месяц и год.',
+      'Визуализация V-Ray для Cinema 4D и Unreal, облачные кредиты для рендеринга и ключ ' +
+        'защиты: аренда на месяц и год.',
     ),
     match: /V-Ray|Vray/i,
   },

@@ -2,7 +2,7 @@
 // «С этим покупают» у разделов, разделы у товаров; затем приоритет показа (топы продаж первыми);
 // затем вторая настройка: дубли производителей, линейки, приложения в конец, темы новостей;
 // затем подбор AutoCAD и SCAD Office и семейство сателлитов SCAD; семейства редких товаров;
-// другие названия для поиска. Выполняется один раз (отметка в журнале
+// другие названия для поиска; актуализация версий по сайтам производителей. Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -16,6 +16,7 @@ import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
 import { setupPriorities } from '../src/lib/prioritySetup.ts'
 import { setupSearchAliases } from '../src/lib/searchSetup.ts'
 import { setupVendors } from '../src/lib/vendorsSetup.ts'
+import { setupVersions } from '../src/lib/versionsSetup.ts'
 
 const payload = await getPayload({ config })
 try {
@@ -85,6 +86,15 @@ try {
   const aliases = await setupSearchAliases(payload)
   if (!aliases) console.log('Другие названия для поиска уже заполнены.')
   else console.log(`Другие названия для поиска: ${aliases.join('; ') || '—'}`)
+  const versions = await setupVersions(payload)
+  if (!versions) console.log('Версии уже актуализированы.')
+  else {
+    console.log(`Версии, товары: ${versions.products.join('; ') || '—'}`)
+    console.log(`Версии, комплектаций обновлено: ${versions.offers}`)
+    console.log(`В черновики: ${versions.drafts.length} ${versions.drafts.join('; ')}`)
+    console.log(`Семейства: ${versions.families.join('; ') || '—'}`)
+    for (const line of versions.missing) console.log(`  не найдено — ${line}`)
+  }
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1
