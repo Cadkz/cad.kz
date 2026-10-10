@@ -18,6 +18,8 @@ export type CatalogItem = ProductCardData & {
   directions: string[]
   types: string[]
   vendor: string | null
+  /** Другие названия для поиска из админки («акад, автокад»). */
+  aliases: string | null
   tasks: string[]
   /** Приоритет показа (src/domain/priority.mjs): больше — выше в списке. */
   rank: number
@@ -151,6 +153,7 @@ export async function getCatalog(): Promise<{
       title: product.title,
       manufacturer: vendor,
       vendor,
+      aliases: product.searchAliases ?? null,
       summary: product.summary ?? null,
       icon: productSections[0]?.icon ?? null,
       picture: pictures.get(product.id) ?? null,

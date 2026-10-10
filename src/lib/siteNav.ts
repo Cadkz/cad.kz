@@ -55,3 +55,28 @@ export const footerColumns = [
     ],
   },
 ]
+
+/** Страницы сайта для подсказок поиска: название и слова, по которым её ищут. */
+export const searchPages = [
+  { title: 'Каталог', href: catalogHref(), words: 'все товары программы оборудование' },
+  { title: 'Новости', href: '/news', words: '' },
+  { title: 'Статьи', href: '/articles', words: 'обзоры' },
+  { title: 'Акции', href: '/news?kind=promotion', words: 'скидки распродажа' },
+  { title: 'Как купить', href: '/about/howto', words: 'оплата заказ счёт' },
+  { title: 'Доставка', href: '/about/delivery', words: '' },
+  { title: 'Гарантии', href: '/about/guaranty', words: 'гарантия возврат' },
+  { title: 'О компании', href: '/about', words: '' },
+  { title: 'Реквизиты', href: '/about/requisites', words: 'бин иин банк' },
+  { title: 'Контакты', href: '/contacts', words: 'телефон адрес офис карта' },
+]
+
+/** Примеры запросов, которые «печатаются» в пустом поле поиска. Каждый что-то находит. */
+export const searchHints = [
+  'SCAD Office',
+  'AutoCAD',
+  'GEO5',
+  '3D-сканер Artec',
+  'ЛИРА-FEM',
+  'Курсы Revit',
+  'Плоттер',
+]

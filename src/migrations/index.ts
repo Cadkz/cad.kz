@@ -9,6 +9,7 @@ import * as migration_20261009_122905_lines_topics from './20261009_122905_lines
 import * as migration_20261009_200050_picker_families from './20261009_200050_picker_families'
 import * as migration_20261009_204932_picker_item_offers from './20261009_204932_picker_item_offers'
 import * as migration_20261009_212940_checkout_optional_email from './20261009_212940_checkout_optional_email'
+import * as migration_20261009_235733_search_aliases from './20261009_235733_search_aliases'
 
 export const migrations = [
   {
@@ -65,5 +66,10 @@ export const migrations = [
     up: migration_20261009_212940_checkout_optional_email.up,
     down: migration_20261009_212940_checkout_optional_email.down,
     name: '20261009_212940_checkout_optional_email',
+  },
+  {
+    up: migration_20261009_235733_search_aliases.up,
+    down: migration_20261009_235733_search_aliases.down,
+    name: '20261009_235733_search_aliases',
   },
 ]

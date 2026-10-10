@@ -1,6 +1,5 @@
-import Link from 'next/link'
 import { getContacts, getMenu } from '@/lib/navigation'
-import { catalogHref } from '@/lib/navigationHrefs'
+import { searchHints } from '@/lib/siteNav'
 import { CartButton } from '../CartButton/CartButton'
 import { ContactList } from '../ContactList/ContactList'
 import { Container } from '../Container/Container'
@@ -8,7 +7,7 @@ import { WhatsappIcon } from '../icons/icons'
 import { Logo } from '../Logo/Logo'
 import { MainNav } from '../MainNav/MainNav'
 import { MobileMenu } from '../MobileMenu/MobileMenu'
-import { SearchButton } from '../SearchButton/SearchButton'
+import { SiteSearch } from '../SiteSearch/SiteSearch'
 import styles from './SiteHeader.module.css'
 
 /** Общая шапка сайта. Единственная: подключается в layout, ширина — рамка --container. */
@@ -44,11 +43,8 @@ export async function SiteHeader() {
               <WhatsappIcon size={20} />
             </a>
           )}
-          <SearchButton />
+          <SiteSearch hints={searchHints} whatsappHref={contacts.whatsappHref} />
           <CartButton />
-          <Link href={catalogHref()} className={styles.cta}>
-            Подобрать решение
-          </Link>
           <MobileMenu menu={menu} contacts={<ContactList contacts={contacts} />} />
         </div>
       </Container>

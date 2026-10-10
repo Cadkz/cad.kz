@@ -1,7 +1,7 @@
 // Разделы каталога по утверждённым направлениям: новые разделы, «Правила разделов»,
 // «С этим покупают» у разделов, разделы у товаров; затем приоритет показа (топы продаж первыми);
 // затем вторая настройка: дубли производителей, линейки, приложения в конец, темы новостей;
-// затем подбор AutoCAD и SCAD Office и семейство сателлитов SCAD. Выполняется один раз (отметка в журнале
+// затем подбор AutoCAD и SCAD Office и семейство сателлитов SCAD; другие названия для поиска. Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -11,6 +11,7 @@ import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
 import { setupPriorities } from '../src/lib/prioritySetup.ts'
+import { setupSearchAliases } from '../src/lib/searchSetup.ts'
 import { setupVendors } from '../src/lib/vendorsSetup.ts'
 
 const payload = await getPayload({ config })
@@ -62,6 +63,9 @@ try {
   const pickerV3 = await setupPickerV3(payload)
   if (!pickerV3) console.log('Названия в подборе SCAD и AutoCAD уже обновлены.')
   else console.log(`Подбор, понятные названия: ${pickerV3.join('; ') || '—'}`)
+  const aliases = await setupSearchAliases(payload)
+  if (!aliases) console.log('Другие названия для поиска уже заполнены.')
+  else console.log(`Другие названия для поиска: ${aliases.join('; ') || '—'}`)
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1

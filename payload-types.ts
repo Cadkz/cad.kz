@@ -181,6 +181,10 @@ export interface Product {
   kind: 'software' | 'hardware' | 'course' | 'service';
   summary?: string | null;
   /**
+   * Через запятую: как товар ещё называют покупатели, например «акад, автокад». Поиск на сайте находит товар и по этим словам. Опечатки и русские буквы вместо латинских поиск понимает сам — их вписывать не нужно.
+   */
+  searchAliases?: string | null;
+  /**
    * Пустая строка — новый абзац, «## » в начале — подзаголовок, «- » — пункт списка.
    */
   description?: string | null;
@@ -900,6 +904,7 @@ export interface ProductsSelect<T extends boolean = true> {
   renewLabel?: T;
   kind?: T;
   summary?: T;
+  searchAliases?: T;
   description?: T;
   manufacturer?: T;
   line?: T;

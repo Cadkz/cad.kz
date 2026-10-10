@@ -245,6 +245,17 @@ const productCollection = contentCollection({
     },
     { name: 'summary', label: 'Коротко для карточки (1–2 предложения)', type: 'textarea' },
     {
+      name: 'searchAliases',
+      label: 'Другие названия для поиска',
+      type: 'text',
+      admin: {
+        description:
+          'Через запятую: как товар ещё называют покупатели, например «акад, автокад». ' +
+          'Поиск на сайте находит товар и по этим словам. Опечатки и русские буквы вместо латинских ' +
+          'поиск понимает сам — их вписывать не нужно.',
+      },
+    },
+    {
       name: 'description',
       label: 'Описание',
       type: 'textarea',

@@ -8,10 +8,10 @@
  * - забытую раскладку: «фгещсфв» → autocad;
  * - опечатки: одна буква в словах от 4 букв, две — от 7 («автокат» → AutoCAD);
  * - начало слова: «скан» находит «сканер».
- * Синонимы и «акад» → AutoCAD — потом, словарём у товара в админке.
+ * - другие названия товара из админки («акад» → AutoCAD): весят как название.
  */
 
-/** @typedef {{ title: string, vendor?: string | null, summary?: string | null, tasks?: string[] }} Searchable */
+/** @typedef {{ title: string, vendor?: string | null, aliases?: string | null, summary?: string | null, tasks?: string[] }} Searchable */
 
 const CYR = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
 const LAT = [
@@ -146,6 +146,8 @@ export function sound(latin) {
 function wordScore(query, word) {
   if (word === query) return 3
   if (query.length >= 2 && word.startsWith(query)) return 2
+  // Окончание: «курсы» → «курс», «сканеры» → «сканер», «плоттеров» → «плоттер».
+  if (word.length >= 4 && query.length - word.length <= 2 && query.startsWith(word)) return 2
   const typos = allowedTypos(query.length)
   if (typos && distance(query, word, typos) <= typos) return 1
   return 0
@@ -196,15 +198,16 @@ const indexWords = (text) =>
  * @param {T[]} items
  * @param {string} query
  * @param {number} [limit]
+ * @param {boolean} [exactOnly] без находок с опечаткой (для коротких списков: производители, страницы)
  * @returns {T[]}
  */
-export function searchItems(items, query, limit = 60) {
+export function searchItems(items, query, limit = 60, exactOnly = false) {
   const words = normalize(query).split(' ').filter(Boolean).slice(0, 6)
   if (!words.length) return []
   /** @type {{ item: T, score: number, exact: boolean, index: number }[]} */
   const found = []
   items.forEach((item, index) => {
-    const title = indexWords(`${item.title} ${item.vendor ?? ''}`)
+    const title = indexWords(`${item.title} ${item.vendor ?? ''} ${item.aliases ?? ''}`)
     const rest = indexWords(`${item.summary ?? ''} ${(item.tasks ?? []).join(' ')}`)
     let score = 0
     let exact = true
@@ -220,7 +223,7 @@ export function searchItems(items, query, limit = 60) {
   })
   const anyExact = found.some((entry) => entry.exact)
   return found
-    .filter((entry) => entry.exact || !anyExact)
+    .filter((entry) => entry.exact || (!anyExact && !exactOnly))
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .slice(0, limit)
     .map((entry) => entry.item)

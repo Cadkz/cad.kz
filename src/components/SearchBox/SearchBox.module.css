@@ -1,0 +1,163 @@
+.root {
+  position: relative;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.field {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+  height: var(--control-height);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition: border-color var(--duration-fast) var(--ease);
+}
+
+.field:hover {
+  border-color: var(--color-blue-mid);
+}
+
+.field:focus-within {
+  border-color: var(--color-blue);
+}
+
+/* Обводка фокуса — вокруг всего поля вместе с кнопкой «Очистить», а не только вокруг ввода. */
+.field:has(.input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+.icon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--space-3) 0 var(--space-10);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-body);
+  outline: none;
+}
+
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Пока «печатаются» примеры, обычная подсказка поля спрятана, чтобы тексты не наложились. */
+.field[data-hint="true"] .input::placeholder {
+  color: transparent;
+}
+
+.hint {
+  position: absolute;
+  inset-inline: var(--space-10) var(--space-3);
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--text-body);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease);
+}
+
+.hint[data-fading="true"] {
+  opacity: 0;
+}
+
+.field:not([data-hint="true"]) .hint {
+  display: none;
+}
+
+.clear {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  margin-right: var(--space-1);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.clear:hover {
+  color: var(--color-navy);
+}
+
+.cancel {
+  flex-shrink: 0;
+  height: var(--control-height);
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--color-blue);
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+/* Поле в шапке: подсказки выпадают панелью под полем, правый край — по полю. */
+.inline {
+  width: var(--search-field);
+}
+
+.inline .dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: var(--z-dropdown);
+  width: var(--search-panel);
+  max-height: var(--dropdown-max-height);
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+/* Поле в панели поиска: список идёт под полем и прокручивается внутри панели. */
+.layer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+}
+
+.layer .dropdown {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.layer .dropdown > * {
+  padding-inline: 0;
+}
