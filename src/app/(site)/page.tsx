@@ -7,7 +7,7 @@ import { Faq } from '@/components/Faq/Faq'
 import { FaqHelp } from '@/components/FaqHelp/FaqHelp'
 import { Col, Grid } from '@/components/Grid/Grid'
 import { Hero } from '@/components/Hero/Hero'
-import { NewsCard } from '@/components/NewsCard/NewsCard'
+import { NewsDigest } from '@/components/NewsDigest/NewsDigest'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
 import { PromoBand } from '@/components/PromoBand/PromoBand'
 import { Reveal } from '@/components/Reveal/Reveal'
@@ -21,8 +21,6 @@ import { CATALOG_PATH, catalogHref } from '@/lib/navigationHrefs'
 import { getPublications, toCard } from '@/lib/publications'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
-
-const newsTones = ['navy', 'graphite', 'deep'] as const
 
 export const metadata = { alternates: { canonical: '/' } }
 
@@ -49,6 +47,7 @@ export default async function Home({ searchParams }: Props) {
       <TrustBand trust={home.trust} />
       <Section
         id="directions"
+        tone="tint"
         title="Выберите направление"
         sub="Карточка открывает каталог с программами этого направления."
         action={{ href: catalogHref(), label: 'Весь каталог' }}
@@ -79,21 +78,18 @@ export default async function Home({ searchParams }: Props) {
           </Reveal>
         </Section>
       )}
+      <Reveal>
+        <CtaBanner cta={home.cta} />
+      </Reveal>
       <Section
         id="news"
         title="Новости и обновления"
         action={{ href: '/news', label: 'Все новости' }}
       >
-        <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
-          {news.docs.map((item, i) => (
-            <Reveal as="li" key={item.id} step={i}>
-              <NewsCard news={toCard(item)} tone={newsTones[i % newsTones.length]} />
-            </Reveal>
-          ))}
-        </Grid>
+        <NewsDigest items={news.docs.map(toCard)} />
       </Section>
       {home.faq.length > 0 && (
-        <Section id="faq" title="Частые вопросы">
+        <Section id="faq" tone="tint" title="Частые вопросы">
           <Grid>
             <Col span={{ base: 12, md: 8 }}>
               <Faq items={home.faq} />
@@ -104,9 +100,6 @@ export default async function Home({ searchParams }: Props) {
           </Grid>
         </Section>
       )}
-      <Reveal>
-        <CtaBanner cta={home.cta} />
-      </Reveal>
     </main>
   )
 }
