@@ -116,16 +116,22 @@ test('задачи, которые ничего не сужают, не пока
 })
 
 test('задачи GEO5 по названиям программ и пакетов', () => {
-  assert.deepEqual(geoModuleTasks('GEO5 Свайный фундамент'), ['Свайные фундаменты'])
-  assert.deepEqual(geoModuleTasks('GEO5 Плита'), ['Фундаменты мелкого заложения'])
-  assert.deepEqual(geoModuleTasks('GEO5 Откос'), ['Расчёт устойчивости'])
-  assert.deepEqual(geoModuleTasks('GEO5 Шпунтовое ограждение'), ['Ограждающие конструкции'])
-  assert.deepEqual(geoModuleTasks('GEO5 МКЭ - Тоннель'), [
+  assert.deepEqual(geoModuleTasks('GEO5 Сваи'), ['Свайные фундаменты'])
+  assert.deepEqual(geoModuleTasks('GEO5 Свая CPT'), ['Свайные фундаменты'])
+  assert.deepEqual(geoModuleTasks('GEO5 Отдельные фундаменты – СРТ'), [
+    'Фундаменты мелкого заложения',
+  ])
+  assert.deepEqual(geoModuleTasks('GEO5 МКЭ'), [
     'Расчёт устойчивости',
+    'Ограждающие конструкции',
     'Расчёт осадки',
     'Тоннели и шахты',
   ])
-  assert.deepEqual(geoModuleTasks('GEO5 Стратиграфия'), ['Геологическое моделирование'])
+  assert.deepEqual(geoModuleTasks('GEO5 Data Collector'), [
+    'Геологическое моделирование',
+    'Инженерно-геологические изыскания',
+  ])
+  assert.deepEqual(geoModuleTasks('GEO5 Откос'), [])
   assert.deepEqual(geoPackageTasks('Основания зданий и сооружений'), [
     'Фундаменты мелкого заложения',
     'Свайные фундаменты',

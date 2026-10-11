@@ -3,16 +3,22 @@ import type { Product } from '../../payload-types'
 import {
   GEO5_MAIN_TASKS,
   GEO5_OLD_TASKS,
+  GEO5_TASKS,
   geoModuleTasks,
   geoPackageTasks,
 } from '../domain/geoTasks.mjs'
 import { relId } from './rel'
 
-/** Ключ записи в журнале «Запуски импорта»: настройка выполняется один раз. */
-export const GEO5_CATALOG_KEY = 'catalog-setup:geo5-catalog-v1'
+/**
+ * Ключ записи в журнале «Запуски импорта»: настройка выполняется один раз. v2 — задачи программ
+ * точно по списку владельца (12.10.2026) вместо правил по словам из v1.
+ */
+export const GEO5_CATALOG_KEY = 'catalog-setup:geo5-catalog-v2'
 const opts = { overrideAccess: true, depth: 0 } as const
 
 const same = (a: string[], b: string[]) => a.length === b.length && a.every((x, i) => x === b[i])
+/** Задачи пусты или все из девяти: их ставила настройка, а не человек в админке. */
+const ours = (tasks: string[]) => tasks.every((task) => GEO5_TASKS.includes(task))
 
 /**
  * GEO5 в каталоге (решение владельца 12.10.2026): пакеты карточками, девять задач как на
@@ -43,7 +49,7 @@ export async function setupGeo5Catalog(payload: Payload): Promise<string[] | nul
       const items = (step.items ?? []).map((item) => {
         const id = relId(item.product)
         if (id != null && id !== geo5.id) moduleIds.add(id)
-        if (!bundle || (item.tasks ?? []).length) return item
+        if (!bundle || !ours(item.tasks ?? [])) return item
         const tasks = geoPackageTasks(item.label ?? '')
         if (tasks.length) report.push(`Пакет ${item.label}: ${tasks.join(', ')}`)
         return { ...item, tasks }
@@ -51,7 +57,7 @@ export async function setupGeo5Catalog(payload: Payload): Promise<string[] | nul
       return { ...step, items, inCatalog: bundle ? true : step.inCatalog }
     })
     const current = (geo5.tasks ?? []).map((task) => task.title)
-    const tasksChanged = !current.length || same(current, GEO5_OLD_TASKS)
+    const tasksChanged = same(current, GEO5_OLD_TASKS) || ours(current)
     const data: Partial<Product> = {
       picker: { ...geo5.picker, steps: nextSteps },
       ...(tasksChanged ? { tasks: GEO5_MAIN_TASKS.map((title) => ({ title })) } : {}),
@@ -72,19 +78,19 @@ export async function setupGeo5Catalog(payload: Payload): Promise<string[] | nul
         ...opts,
       })
       for (const module of modules.docs) {
-        if ((module.tasks ?? []).length) continue
+        const current = (module.tasks ?? []).map((task) => task.title)
+        if (!ours(current)) continue
         const tasks = geoModuleTasks(module.title)
-        if (!tasks.length) {
-          report.push(`${module.title}: задача не подобрана`)
-          continue
-        }
+        // Названия, которых нет в списке владельца, — в отчёт: им задачу ставят в админке.
+        if (!tasks.length) report.push(`${module.title}: нет в списке владельца, без задач`)
+        if (same(current, tasks)) continue
         await payload.update({
           collection: 'products',
           id: module.id,
           data: { tasks: tasks.map((title) => ({ title })) },
           ...opts,
         })
-        report.push(`${module.title}: ${tasks.join(', ')}`)
+        if (tasks.length) report.push(`${module.title}: ${tasks.join(', ')}`)
       }
     }
   }
