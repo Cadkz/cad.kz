@@ -39,8 +39,14 @@
   gap: var(--space-4);
 }
 
-.art {
-  display: none;
+/* BIM-модель: на телефоне — над текстом, растворяется книзу; от 960 px — справа сверху,
+   растворяется к тексту и к этапам. Ниже первого экрана — загружается лениво. */
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: calc(-1 * var(--space-12)) 0 var(--space-4);
+  mask-image: linear-gradient(to bottom, black 60%, transparent);
 }
 
 .title {
@@ -134,6 +140,10 @@
     padding: var(--space-16) 0;
   }
 
+  .image {
+    margin-top: calc(-1 * var(--space-16));
+  }
+
   .stage {
     grid-column: span 6;
   }
@@ -145,19 +155,23 @@
   }
 }
 
-/* Слои BIM-модели справа от заголовка и вводного текста — только где хватает места. */
-@media (min-width: 1200px) {
-  .art {
+@media (min-width: 960px) {
+  .image {
     position: absolute;
     top: 0;
     right: 0;
     z-index: var(--z-below);
-    display: block;
-    width: calc(var(--control-height) * 5);
+    width: 60%;
+    margin: 0;
+    mask-image:
+      linear-gradient(to right, transparent, black 35%),
+      linear-gradient(to bottom, black 35%, transparent 80%);
+    mask-composite: intersect;
   }
 
+  /* Заголовок и вводный текст — в левых 7 колонках, на тёмной половине. */
   .title,
   .lead {
-    max-width: min(var(--measure), calc(100% - var(--control-height) * 5 - var(--space-12)));
+    max-width: min(var(--measure), calc(100% * 7 / 12));
   }
 }

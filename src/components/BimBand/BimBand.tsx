@@ -1,6 +1,7 @@
+import Image from 'next/image'
 import type { Home } from '@/lib/home'
+import bimImage from '../../../public/images/home/bim-model.webp'
 import { Badge } from '../Badge/Badge'
-import { BannerArt } from '../BannerArt/BannerArt'
 import { ButtonLink } from '../Button/Button'
 import { Container } from '../Container/Container'
 import styles from './BimBand.module.css'
@@ -10,9 +11,14 @@ export function BimBand({ bim }: { bim: Home['bim'] }) {
   if (!bim.title) return null
   return (
     <section className={styles.section} aria-labelledby="bim-title">
+      <Image
+        src={bimImage}
+        alt=""
+        sizes="(min-width: 960px) 60vw, 100vw"
+        className={styles.image}
+      />
       <Container>
         <div className={styles.band}>
-          <BannerArt name="layers" className={styles.art} onScroll />
           {bim.eyebrow && <Badge tone="onDark">{bim.eyebrow}</Badge>}
           <h2 id="bim-title" className={styles.title}>
             {bim.title}
