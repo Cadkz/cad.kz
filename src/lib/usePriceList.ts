@@ -193,7 +193,12 @@ export function usePriceList(vendors: PriceVendor[]) {
         ...data,
         rows: data.rows.map((row) => ({
           ...row,
-          use: sure(row) && row.newKzt !== null && row.newKzt !== row.oldKzt,
+          // Отмечены уверенные строки, где меняется цена, и найденные по названию впервые
+          // (auto): даже с той же ценой запись запомнит их название и артикул на следующий раз.
+          use:
+            sure(row) &&
+            row.newKzt !== null &&
+            (row.newKzt !== row.oldKzt || row.status === 'auto'),
         })),
       })
     } catch (problem) {
