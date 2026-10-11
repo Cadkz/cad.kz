@@ -102,7 +102,7 @@ export function PriceUpload({ vendors }: { vendors: PriceVendor[] }) {
         </p>
         {list.file && list.file.sheets.length > 1 && (
           <label className={styles.field}>
-            <span>Лист (по умолчанию первый — актуальный)</span>
+            <span>Лист (выбран первый, где есть прайс)</span>
             <select value={list.sheet} onChange={(e) => list.chooseSheet(Number(e.target.value))}>
               {list.file.sheets.map((s, i) => (
                 <option key={s.name} value={i}>
