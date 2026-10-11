@@ -1,11 +1,13 @@
 import { cache } from 'react'
 import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
+import { cheapestTotal } from '../domain/picker.mjs'
 import { compareInSection, priorityRank } from '../domain/priority.mjs'
 import { familyLines } from './families'
 import { withFamilies } from './familyCards'
 import { formatKzt } from './format'
 import { cms } from './payload'
+import { pickerView } from './picker'
 import { cardPictures } from './pictures'
 import { loadPricingContext, type PricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
@@ -72,6 +74,36 @@ function cheapest(offers: Offer[], context: PricingContext) {
     }
   }
   return best?.formatted ?? null
+}
+
+/**
+ * Цена «от» товара с подбором по шагам — самый дешёвый комплект, который реально собрать
+ * на странице (основа + обязательный выбор или готовый комплект), а не самое дешёвое из
+ * собственных предложений товара: иначе каталог и страница товара показывают разное.
+ */
+function pickerFrom(
+  product: Product,
+  offersByProduct: Map<number, Offer[]>,
+  titles: Map<number, string>,
+  context: PricingContext,
+) {
+  const view = pickerView(product, offersByProduct, titles, context)
+  const byId = new Map(
+    view.steps
+      .flatMap((step) => step.items)
+      .flatMap((item) => offersByProduct.get(item.productId) ?? [])
+      .map((offer) => [String(offer.id), offer]),
+  )
+  const total = cheapestTotal(view, (offerId) => {
+    const offer = byId.get(offerId)
+    if (!offer) return null
+    try {
+      return BigInt(quoteOffer(offer, context).unitKzt)
+    } catch {
+      return null
+    }
+  })
+  return total == null ? null : formatKzt(total.toString())
 }
 
 /**
@@ -179,8 +211,13 @@ async function loadCatalog(): Promise<{
       summary: product.summary ?? null,
       icon: productSections[0]?.icon ?? null,
       picture: pictures.get(product.id) ?? null,
-      priceFrom: cheapest(productOffers, context),
-      offersCount: productOffers.length,
+      priceFrom:
+        product.pageView === 'picker'
+          ? pickerFrom(product, offersByProduct, titleById, context)
+          : cheapest(productOffers, context),
+      // У подбора вариантов всегда несколько: цена показывается с «от».
+      offersCount:
+        product.pageView === 'picker' ? Math.max(productOffers.length, 2) : productOffers.length,
       cartOfferId: cartOffer(product, productOffers, context),
       badge: requires.length ? `Плагин для ${requires.join(' / ')}` : null,
       group: kindGroup[product.kind],

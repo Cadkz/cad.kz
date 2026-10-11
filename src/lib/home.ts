@@ -3,7 +3,7 @@ import { getContacts } from './navigation'
 import { newsHref } from './navigationHrefs'
 import { cms } from './payload'
 import { toPicture } from './pictures'
-import { getPublications } from './publications'
+import { getCurrentPromotions } from './publications'
 
 export type HomeLink = { label: string; href: string } | null
 export type Slide = { title: string; text: string | null; href: string }
@@ -24,7 +24,7 @@ export async function getHome() {
   const [page, contacts, promotions] = await Promise.all([
     payload.findGlobal({ slug: 'home-page', depth: 1 }) as Promise<HomePage>,
     getContacts(),
-    getPublications({ kinds: ['promotion'], limit: 5 }),
+    getCurrentPromotions(5),
   ])
   const wa = contacts.whatsappHref
   return {
@@ -32,7 +32,7 @@ export async function getHome() {
     /** Номер WhatsApp из контактов: главная кнопка первого экрана. */
     whatsappHref: wa,
     title: page.title,
-    slides: promotions.docs.map(
+    slides: promotions.map(
       (item): Slide => ({
         title: item.title,
         text: item.excerpt ?? null,

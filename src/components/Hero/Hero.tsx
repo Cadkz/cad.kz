@@ -47,7 +47,7 @@ export function Hero({ home, directions }: Props) {
               )}
               <SolutionRequest
                 directions={directions.map(({ slug, title }) => ({ slug, title }))}
-                whatsappHref={whatsapp}
+                whatsappHref={home.whatsappHref}
               />
               <ButtonLink href={catalogHref()} variant="ghostDark">
                 Перейти в каталог

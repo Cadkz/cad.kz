@@ -9,7 +9,7 @@ import styles from './SolutionRequest.module.css'
 
 type Props = {
   directions: { slug: string; title: string }[]
-  /** Ссылка WhatsApp с уже набранным началом сообщения: запасной путь в той же панели. */
+  /** Номер WhatsApp (wa.me): запасной путь в той же панели, уже набранная задача уходит туда же. */
   whatsappHref: string | null
 }
 
@@ -19,6 +19,9 @@ type Props = {
  */
 export function SolutionRequest({ directions, whatsappHref }: Props) {
   const [open, setOpen] = useState(false)
+  // Что человек уже написал в форме: переходит в WhatsApp, чтобы не набирать задачу заново.
+  const [task, setTask] = useState('')
+  const text = `Здравствуйте! Помогите подобрать программы. Моя задача: ${task.trim()}`
   return (
     <>
       <Button variant="ghostDark" onClick={() => setOpen(true)}>
@@ -32,11 +35,16 @@ export function SolutionRequest({ directions, whatsappHref }: Props) {
               Опишите задачу своими словами — менеджер подберёт программы или оборудование,
               перезвонит и пришлёт предложение.
             </p>
-            <SolutionForm directions={directions} />
+            <SolutionForm directions={directions} onTaskChange={setTask} />
             {whatsappHref && (
               <p className={styles.alt}>
                 Удобнее переписываться?{' '}
-                <a href={whatsappHref} target="_blank" rel="noreferrer" className={styles.link}>
+                <a
+                  href={`${whatsappHref}?text=${encodeURIComponent(text)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.link}
+                >
                   Напишите задачу в WhatsApp
                 </a>
               </p>

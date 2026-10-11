@@ -11,6 +11,8 @@ import styles from './SolutionForm.module.css'
 type Props = {
   /** Направления каталога для быстрого выбора: адрес и название. */
   directions: { slug: string; title: string }[]
+  /** Текст задачи по мере набора: панель подставляет его в ссылку WhatsApp. */
+  onTaskChange?: (task: string) => void
 }
 
 /**
@@ -18,7 +20,7 @@ type Props = {
  * имя и телефон. Сохраняет сервер (/api/request, источник home); в демо честно говорим,
  * что менеджерам заявка не уходит.
  */
-export function SolutionForm({ directions }: Props) {
+export function SolutionForm({ directions, onTaskChange }: Props) {
   const key = useRef<string | null>(null)
   const [direction, setDirection] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -82,6 +84,7 @@ export function SolutionForm({ directions }: Props) {
         hint="Например: считать каркас здания из металла, 3 рабочих места. Или: нужен плоттер А0."
         rows={3}
         error={errors.comment}
+        onChange={(event) => onTaskChange?.(event.target.value)}
       />
       {directions.length > 0 && (
         <RadioChips

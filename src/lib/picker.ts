@@ -83,6 +83,20 @@ export async function loadPicker(payload: Payload, product: Product): Promise<Pi
   }
 
   const titles = new Map(products.docs.map((p) => [p.id, p.title]))
+  return pickerView(product, offers, titles, context)
+}
+
+/**
+ * Подбор по шагам из админки, собранный из уже загруженных предложений и названий товаров.
+ * Тот же расчёт нужен каталогу (цена «от» самого дешёвого комплекта), поэтому без запросов.
+ */
+export function pickerView(
+  product: Product,
+  offers: Map<number, Offer[]>,
+  titles: Map<number, string>,
+  context: PricingContext,
+): PickerView {
+  const steps = product.picker?.steps ?? []
   const view: PickerView = {
     switches: (product.picker?.switches ?? []).map((sw, index) => ({
       key: sw.id ?? `s${index}`,

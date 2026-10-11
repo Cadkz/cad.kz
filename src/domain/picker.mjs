@@ -33,6 +33,7 @@
  * @property {string[]} fixedOffers  Только эти предложения (например, полная конфигурация S392 и SPro); пусто — все.
  * @property {boolean} preselect
  * @property {string} [anchor]  Якорь строки: адрес старой страницы товара ведёт прямо к ней.
+ * @property {string[]} [includes]  Ключи вариантов, которые уже входят в этот пакет (семейства).
  *
  * @typedef {object} PickerStep
  * @property {string} key
@@ -247,9 +248,45 @@ export function pickedLines(view, state) {
       if (item) add(step, item)
     }
     if (step.mode === 'many')
-      for (const item of step.items) if (state.many.includes(item.key)) add(step, item)
+      for (const item of step.items)
+        if (state.many.includes(item.key) && !includedBy(view, state, item.key)) add(step, item)
   }
   return lines
+}
+
+/**
+ * Отмеченный пакет, в который уже входит этот вариант, или null: тогда вариант показывается
+ * как «входит в пакет» и в итог отдельной строкой не попадает.
+ * @param {PickerView} view
+ * @param {PickerState} state
+ * @param {string} key
+ * @returns {PickerItem | null}
+ */
+export function includedBy(view, state, key) {
+  for (const step of view.steps)
+    for (const item of step.items)
+      if (state.many.includes(item.key) && item.includes?.includes(key)) return item
+  return null
+}
+
+/**
+ * Галочка в шаге «несколько». Отмеченный пакет снимает галочки с программ, которые в него
+ * входят, чтобы не заплатить за одно дважды. Выбор готового комплекта сбрасывается.
+ * @param {PickerView} view
+ * @param {PickerState} state
+ * @param {string} key
+ * @returns {PickerState}
+ */
+export function toggleMany(view, state, key) {
+  if (state.many.includes(key))
+    return { ...state, bundle: null, many: state.many.filter((k) => k !== key) }
+  const item = view.steps.flatMap((s) => s.items).find((i) => i.key === key)
+  const inside = item?.includes ?? []
+  return {
+    ...state,
+    bundle: null,
+    many: [...state.many.filter((k) => !inside.includes(k)), key],
+  }
 }
 
 /**
@@ -293,4 +330,61 @@ export function offersAsPicker(productId, offers, licenses, title = 'Компл�
       },
     ],
   }
+}
+
+/**
+ * Самый дешёвый комплект, который можно собрать в подборе, — для цены «от» в каталоге.
+ * Для каждого сочетания переключателей: всё из шагов «основа» плюс самый дешёвый вариант
+ * каждого шага «один вариант»; отдельно — каждый готовый комплект. Галочки (шаг «несколько»)
+ * необязательны и в минимум не входят. Сборка, где хоть одна обязательная строка без цены,
+ * не считается. Ничего не собирается — null («по запросу»).
+ * @param {PickerView} view
+ * @param {(offerId: string) => bigint | null} unitOf  Цена за единицу с НДС, посчитанная сервером.
+ * @returns {bigint | null}
+ */
+export function cheapestTotal(view, unitOf) {
+  /** @type {Record<string, string>[]} */
+  let combos = [{}]
+  for (const sw of view.switches)
+    combos = combos.flatMap((c) => sw.options.map((o) => ({ ...c, [sw.key]: o.value })))
+  /** @type {bigint | null} */
+  let best = null
+  const consider = (/** @type {bigint | null} */ sum) => {
+    if (sum != null && (best == null || sum < best)) best = sum
+  }
+  const priceOf = (/** @type {PickerItem} */ item, /** @type {Record<string, string>} */ sel) => {
+    const offer = offerFor(item, view.switches, sel)
+    return offer ? unitOf(offer.id) : null
+  }
+  for (const sel of combos) {
+    /** @type {bigint | null} */
+    let manual = 0n
+    let parts = 0
+    // Без break: даже если ручная сборка не считается, готовые комплекты ниже ещё проверяются.
+    for (const step of view.steps) {
+      if (step.mode === 'base')
+        for (const item of step.items) {
+          if (itemUnavailable(item, view.switches, sel)) continue
+          const unit = priceOf(item, sel)
+          manual = unit == null || manual == null ? null : manual + unit
+          parts++
+        }
+      if (step.mode === 'one') {
+        const units = step.items
+          .filter((i) => !itemUnavailable(i, view.switches, sel))
+          .map((i) => priceOf(i, sel))
+          .filter((u) => u != null)
+        if (!units.length || manual == null) manual = null
+        else {
+          manual = manual + units.reduce((a, b) => (b < a ? b : a))
+          parts++
+        }
+      }
+      if (step.mode === 'bundle')
+        for (const item of step.items)
+          if (!itemUnavailable(item, view.switches, sel)) consider(priceOf(item, sel))
+    }
+    if (parts) consider(manual)
+  }
+  return best
 }

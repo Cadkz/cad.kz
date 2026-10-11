@@ -19,6 +19,7 @@ import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
 import { setupPriorities } from '../src/lib/prioritySetup.ts'
 import { setupFamilyRenew } from '../src/lib/renewSetup.ts'
 import { setupSearchAliases } from '../src/lib/searchSetup.ts'
+import { setupMepTasks } from '../src/lib/tasksSetup.ts'
 import { setupVendors } from '../src/lib/vendorsSetup.ts'
 import { setupVersions } from '../src/lib/versionsSetup.ts'
 
@@ -90,6 +91,9 @@ try {
   const aliases = await setupSearchAliases(payload)
   if (!aliases) console.log('Другие названия для поиска уже заполнены.')
   else console.log(`Другие названия для поиска: ${aliases.join('; ') || '—'}`)
+  const mepTasks = await setupMepTasks(payload)
+  if (!mepTasks) console.log('Задачи инженерных сетей уже проставлены.')
+  else console.log(`Задачи инженерных сетей: ${mepTasks.join('; ') || '—'}`)
   const versions = await setupVersions(payload)
   if (!versions) console.log('Версии уже актуализированы.')
   else {

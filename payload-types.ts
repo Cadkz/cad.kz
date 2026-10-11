@@ -511,6 +511,10 @@ export interface Publication {
   cover?: (number | null) | Media;
   publishedAt?: string | null;
   /**
+   * После этой даты акция пропадает с главной (в списке акций остаётся). Пусто — показывается полгода от даты публикации.
+   */
+  endsAt?: string | null;
+  /**
    * Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.
    */
   seo?: {
@@ -1104,6 +1108,7 @@ export interface PublicationsSelect<T extends boolean = true> {
   body?: T;
   cover?: T;
   publishedAt?: T;
+  endsAt?: T;
   seo?:
     | T
     | {

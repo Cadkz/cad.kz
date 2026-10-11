@@ -2,7 +2,7 @@
 
 import { ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { itemUnavailable, offerFor, type PickerStep as Step } from '@/domain/picker.mjs'
+import { includedBy, itemUnavailable, offerFor, type PickerStep as Step } from '@/domain/picker.mjs'
 import { PickerOption } from '../PickerOption/PickerOption'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
 import styles from './PickerStep.module.css'
@@ -34,21 +34,25 @@ export function PickerStep({ step, number, titled = false }: Props) {
     if (step.mode === 'bundle' && state.bundle !== key) picker.chooseBundle(key)
   }
 
-  const options = step.items.map((item) => (
-    <PickerOption
-      key={item.key}
-      control={controls[step.mode]}
-      name={step.key}
-      label={item.label}
-      note={item.note}
-      price={offerFor(item, view.switches, state.switches)?.price ?? null}
-      checked={isChecked(item.key)}
-      disabled={itemUnavailable(item, view.switches, state.switches)}
-      disabledNote={`нет в ${switchText}`}
-      onChange={() => change(item.key)}
-      anchor={item.anchor}
-    />
-  ))
+  const options = step.items.map((item) => {
+    // Программа уже в отмеченном пакете: галочка стоит, но снять или выбрать отдельно нельзя.
+    const pack = step.mode === 'many' ? includedBy(view, state, item.key) : null
+    return (
+      <PickerOption
+        key={item.key}
+        control={controls[step.mode]}
+        name={step.key}
+        label={item.label}
+        note={item.note}
+        price={offerFor(item, view.switches, state.switches)?.price ?? null}
+        checked={pack ? true : isChecked(item.key)}
+        disabled={pack != null || itemUnavailable(item, view.switches, state.switches)}
+        disabledNote={pack ? 'входит в пакет' : `нет в ${switchText}`}
+        onChange={() => change(item.key)}
+        anchor={item.anchor}
+      />
+    )
+  })
   const chosen = step.items.filter((item) => isChecked(item.key)).length
   // Открыт сразу, если что-то уже выбрано (например, по старому адресу); дальше — как решит человек.
   const [openAtStart] = useState(chosen > 0)

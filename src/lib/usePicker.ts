@@ -8,6 +8,7 @@ import {
   type PickerView,
   pickedLines,
   setSwitch,
+  toggleMany,
 } from '@/domain/picker.mjs'
 import { formatKzt } from './format'
 
@@ -65,12 +66,7 @@ export function usePicker(view: PickerView, pick: number | null) {
     chooseSwitch: (key: string, value: string) => setState((s) => setSwitch(view, s, key, value)),
     chooseOne: (step: string, item: string) =>
       setState((s) => ({ ...s, one: { ...s.one, [step]: item }, bundle: null })),
-    toggle: (item: string) =>
-      setState((s) => ({
-        ...s,
-        bundle: null,
-        many: s.many.includes(item) ? s.many.filter((k) => k !== item) : [...s.many, item],
-      })),
+    toggle: (item: string) => setState((s) => toggleMany(view, s, item)),
     chooseBundle: (item: string | null) =>
       setState((s) => ({ ...s, bundle: s.bundle === item ? null : item })),
   }

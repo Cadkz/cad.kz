@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  cheapestTotal,
   initialState,
   itemUnavailable,
   lineLabel,
@@ -197,4 +198,57 @@ test('обычная страница: предложения товара од�
   assert.deepEqual(offersAsPicker(7, [], {}), { switches: [], steps: [] })
   const lines = pickedLines(view, initialState(view))
   assert.equal(lineLabel(lines[0]), 'Базовая')
+})
+
+test('цена «от» подбора — самый дешёвый собираемый комплект, а не самое дешёвое предложение', () => {
+  const view = {
+    switches: [edition],
+    steps: [
+      {
+        key: 'b',
+        title: 'Основа',
+        hint: null,
+        mode: 'base',
+        collapsed: false,
+        items: [item('ssb', 1, [offer('ssb392', ['S392']), offer('ssbpro', ['SPro'])])],
+      },
+      {
+        key: 'o',
+        title: 'Что проверять',
+        hint: null,
+        mode: 'one',
+        collapsed: false,
+        items: [
+          item('rc', 2, [offer('rc392', ['S392'])]),
+          item('ss', 3, [offer('ss392', ['S392'])]),
+        ],
+      },
+      {
+        key: 'm',
+        title: 'Доп.',
+        hint: null,
+        mode: 'many',
+        collapsed: false,
+        items: [item('extra', 4, [offer('x', [])])],
+      },
+      {
+        key: 'k',
+        title: 'Комплекты',
+        hint: null,
+        mode: 'bundle',
+        collapsed: false,
+        items: [item('full', 5, [offer('fullpro', ['SPro'])])],
+      },
+    ],
+  }
+  const prices = { ssb392: 100n, ssbpro: 300n, rc392: 50n, ss392: 40n, x: 1n, fullpro: 500n }
+  const unit = (id) => prices[id] ?? null
+  // S392: основа 100 + самый дешёвый обязательный 40; галочки не входят; комплект SPro дороже.
+  assert.equal(cheapestTotal(view, unit), 140n)
+  // Основа без цены — ручная сборка не считается, остаётся комплект.
+  assert.equal(
+    cheapestTotal(view, (id) => (id.startsWith('ssb') ? null : unit(id))),
+    500n,
+  )
+  assert.equal(cheapestTotal({ switches: [], steps: [] }, unit), null)
 })

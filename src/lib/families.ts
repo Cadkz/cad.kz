@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { familyIncludes, uniqueLabels } from '@/domain/familyPackages.mjs'
 import { EXTRA_ORDER } from '@/domain/familySeed.mjs'
 import type { PickerView } from '@/domain/picker.mjs'
 import type { ProductLine } from '../../payload-types'
@@ -84,19 +85,24 @@ export async function getFamily(slug: string): Promise<FamilyPage | null> {
     extra: (p.lineOrder ?? 0) >= EXTRA_ORDER,
     href: p.pageView === 'none' ? null : productPath(p),
   }))
-  const item = (m: FamilyMember) => {
-    const { label, note } = splitTitle(m.title)
-    return {
-      key: `p${m.id}`,
-      productId: m.id,
-      label,
-      note,
-      offers: pickerOffers(offers.get(m.id) ?? [], context),
-      fixedOffers: [],
-      preselect: false,
-      anchor: m.slug,
-    }
-  }
+  const keyOf = (m: FamilyMember) => `p${m.id}`
+  const labels = new Map(
+    uniqueLabels(members.map((m) => ({ ...splitTitle(m.title), title: m.title }))).map(
+      (text, i) => [members[i]?.id, text],
+    ),
+  )
+  const includes = familyIncludes(members.map((m) => ({ key: keyOf(m), title: m.title })))
+  const item = (m: FamilyMember) => ({
+    key: keyOf(m),
+    productId: m.id,
+    label: labels.get(m.id)?.label ?? m.title,
+    note: labels.get(m.id)?.note ?? null,
+    offers: pickerOffers(offers.get(m.id) ?? [], context),
+    fixedOffers: [],
+    preselect: false,
+    anchor: m.slug,
+    includes: includes.get(keyOf(m)) ?? [],
+  })
   const main = members.filter((m) => !m.extra)
   const extra = members.filter((m) => m.extra)
   const picker: PickerView = {

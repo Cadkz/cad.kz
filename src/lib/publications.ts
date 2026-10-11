@@ -64,6 +64,49 @@ export async function getPublications({
   return { docs: result.docs, totalPages: result.totalPages, page: result.page ?? 1 }
 }
 
+/** Сколько дней акция без даты окончания считается свежей для главной. */
+const PROMO_FRESH_DAYS = 180
+
+/**
+ * Действующие акции для главной: дата «действует до» не прошла, а если её нет — опубликована
+ * не раньше полугода назад. Прошедшие остаются в списке акций, но на главной не висят.
+ */
+export async function getCurrentPromotions(limit: number) {
+  const payload = await cms()
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+  const fresh = new Date(now.getTime() - PROMO_FRESH_DAYS * 86_400_000).toISOString()
+  const { docs } = await payload.find({
+    collection: 'publications',
+    where: {
+      and: [
+        { status: { equals: 'published' } },
+        { kind: { equals: 'promotion' } },
+        {
+          or: [
+            { endsAt: { greater_than_equal: today } },
+            {
+              and: [
+                { endsAt: { exists: false } },
+                {
+                  or: [
+                    { publishedAt: { greater_than_equal: fresh } },
+                    { publishedAt: { exists: false } },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    sort: '-publishedAt',
+    limit,
+    depth: 1,
+  })
+  return docs
+}
+
 export async function getPublication(slug: string) {
   const payload = await cms()
   const { docs } = await payload.find({

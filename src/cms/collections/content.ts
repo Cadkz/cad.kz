@@ -78,6 +78,18 @@ export const publications = contentCollection({
     },
     relationField('cover', 'Обложка', 'media'),
     { name: 'publishedAt', label: 'Дата публикации', type: 'date' },
+    {
+      name: 'endsAt',
+      label: 'Акция действует до',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        condition: (data) => data?.kind === 'promotion',
+        description:
+          'После этой даты акция пропадает с главной (в списке акций остаётся). Пусто — ' +
+          'показывается полгода от даты публикации.',
+      },
+    },
     seoField,
   ],
 })
