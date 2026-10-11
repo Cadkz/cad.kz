@@ -2,37 +2,16 @@
   padding-top: var(--space-6);
 }
 
+/* Светлая плашка: слева текст и кнопки, справа картинка, растворяющаяся к тексту. */
 .band {
   position: relative;
-  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   isolation: isolate;
-  background: var(--gradient-navy);
-  color: var(--color-text-inverse);
-}
-
-/* Фон кодом: чертёжная сетка, растворяющаяся к краям, и мягкое свечение справа. */
-.band::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-below);
-  background-image: var(--blueprint-dark);
-  background-size: var(--blueprint-size);
-  mask-image: var(--blueprint-fade);
-}
-
-.band::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-below);
-  background: radial-gradient(circle at 85% 20%, var(--color-glow), transparent 45%);
-}
-
-.art {
-  display: none;
+  background: var(--color-surface);
 }
 
 .content {
@@ -41,14 +20,15 @@
   align-items: flex-start;
   gap: var(--space-4);
   max-width: var(--measure);
+  padding: var(--space-8) var(--space-6) 0;
 }
 
 .title {
-  color: var(--color-text-inverse);
+  color: var(--color-navy);
 }
 
 .lead {
-  color: var(--color-text-on-dark);
+  color: var(--color-gray-700);
   font-size: var(--text-body);
 }
 
@@ -60,9 +40,20 @@
   margin-top: var(--space-2);
 }
 
+/* Телефон: картинка под кнопками, видна правая часть сцены, верх растворяется в фон. */
+.image {
+  order: 1;
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--ratio-card);
+  object-fit: cover;
+  object-position: 85% center;
+  mask-image: linear-gradient(to bottom, transparent, black 30%);
+}
+
 @media (min-width: 640px) {
-  .band {
-    padding: var(--space-10);
+  .content {
+    padding: var(--space-10) var(--space-10) 0;
   }
 
   /* От 640 кнопки в ряд по своей ширине; на телефоне — столбиком во всю ширину. */
@@ -73,24 +64,36 @@
   }
 }
 
+/* Компьютер: картинка занимает правую часть плашки по всей высоте, текст поверх её
+   пустой светлой половины. */
 @media (min-width: 960px) {
   .band {
+    min-height: calc(var(--control-height) * 10);
+    justify-content: center;
+  }
+
+  /* Текст — в левых 7 колонках из 12, картинка справа. */
+  .content {
+    max-width: min(var(--measure), calc(100% * 7 / 12));
     padding: var(--space-16) var(--space-10);
   }
 
-  /* Чертёж — в правой части баннера, по центру высоты; текст на него не заходит. */
-  .art {
+  .image {
     position: absolute;
-    top: 50%;
-    right: var(--space-10);
+    top: 0;
+    right: 0;
     z-index: var(--z-below);
-    display: block;
-    width: calc(var(--control-height) * 6);
-    transform: translateY(-50%);
+    width: 50%;
+    height: 100%;
+    aspect-ratio: auto;
+    object-position: right center;
+    mask-image: linear-gradient(to right, transparent, black 35%);
   }
+}
 
-  /* Текст не заходит на чертёж. */
-  .content {
-    max-width: min(var(--measure), calc(100% - var(--control-height) * 6 - var(--space-10)));
+/* Широкий экран: места больше — картинка шире, текст по-прежнему на светлой половине. */
+@media (min-width: 1200px) {
+  .image {
+    width: 70%;
   }
 }

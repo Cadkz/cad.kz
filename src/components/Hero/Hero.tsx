@@ -1,8 +1,9 @@
 import { MessageCircle } from 'lucide-react'
+import Image from 'next/image'
 import type { Home } from '@/lib/home'
 import { catalogHref } from '@/lib/navigationHrefs'
+import heroImage from '../../../public/images/home/hero-building.webp'
 import { Badge } from '../Badge/Badge'
-import { BannerArt } from '../BannerArt/BannerArt'
 import { ButtonLink } from '../Button/Button'
 import { Container } from '../Container/Container'
 import { SolutionRequest } from '../SolutionRequest/SolutionRequest'
@@ -18,8 +19,9 @@ type Props = {
 }
 
 /**
- * Первый экран главной: плашка, заголовок и три действия — написать задачу в WhatsApp,
- * оставить короткую заявку «Подобрать решение» или открыть каталог.
+ * Первый экран главной: светлый, слева плашка, заголовок и три действия — написать задачу
+ * в WhatsApp, оставить заявку «Подобрать решение» или открыть каталог; справа инженерная
+ * сцена (здание, переходящее в чертёж). На телефоне картинка под кнопками.
  * Акции и предложения — ниже, отдельным блоком (PromoBand).
  */
 export function Hero({ home, directions }: Props) {
@@ -30,9 +32,15 @@ export function Hero({ home, directions }: Props) {
     <section className={styles.hero}>
       <Container>
         <div className={styles.band}>
-          <BannerArt name="frame" className={styles.art} />
+          <Image
+            src={heroImage}
+            alt=""
+            priority
+            sizes="(min-width: 960px) 760px, 100vw"
+            className={styles.image}
+          />
           <div className={styles.content}>
-            {home.eyebrow && <Badge tone="onDark">{home.eyebrow}</Badge>}
+            {home.eyebrow && <Badge>{home.eyebrow}</Badge>}
             <h1 className={styles.title}>{home.title}</h1>
             <p className={styles.lead}>
               Опишите задачу — менеджер подберёт комплект и пришлёт коммерческое предложение. Или
@@ -40,7 +48,7 @@ export function Hero({ home, directions }: Props) {
             </p>
             <div className={styles.actions}>
               {whatsapp && (
-                <ButtonLink href={whatsapp} variant="light">
+                <ButtonLink href={whatsapp}>
                   <MessageCircle size={20} strokeWidth={1.75} aria-hidden="true" />
                   Написать задачу в WhatsApp
                 </ButtonLink>
@@ -49,7 +57,7 @@ export function Hero({ home, directions }: Props) {
                 directions={directions.map(({ slug, title }) => ({ slug, title }))}
                 whatsappHref={whatsapp}
               />
-              <ButtonLink href={catalogHref()} variant="ghostDark">
+              <ButtonLink href={catalogHref()} variant="outline">
                 Перейти в каталог
               </ButtonLink>
             </div>
