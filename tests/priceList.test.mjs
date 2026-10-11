@@ -341,3 +341,53 @@ test('производитель по имени файла из папки «П
   assert.equal(vendorFromFile('Прайс_2026-09-24.xlsx', vendors), null)
   assert.equal(vendorFromFile('price.xlsx', vendors), null)
 })
+
+test('редакция «S 392» = «S392», та же цена помогает найти, цена в разы другая — не предлагается', () => {
+  const offers = [
+    {
+      id: 1,
+      label: 'SCAD++ Напряженно-деформированное состояние (SSB) S392',
+      names: [],
+      kzt: '2762540',
+    },
+    {
+      id: 2,
+      label: 'SCAD++ Напряженно-деформированное состояние (SSB) SPro',
+      names: [],
+      kzt: '3604700',
+    },
+    { id: 5, label: 'SCAD Office v. 25.1 · Полная конфигурация, S392', names: [], kzt: '7273200' },
+    {
+      id: 9,
+      label: 'SCAD Office v. 25.1 · Полная конфигурация, S Promax',
+      names: [],
+      kzt: '7783600',
+    },
+  ]
+  const row = (index, name, kzt) => ({ index, name, id: '', price: kzt, kzt })
+  const res = matchRows(
+    [
+      row(
+        1,
+        'Право на использование SCAD Office Напряженно-деформированное состояние (SSВ) S 392',
+        '2762540',
+      ),
+      row(
+        2,
+        'Право на использование SCAD Office Напряженно-деформированное состояние (SSВ) S PRO',
+        '3604700',
+      ),
+      row(
+        3,
+        'При приобретении полной конфигурации SCAD Office, включает справочники S392',
+        '7273200',
+      ),
+      row(4, 'Дополнительные функции SCAD Office полная конфигурация', '612480'),
+    ],
+    offers,
+  )
+  assert.deepEqual(
+    res.map((r) => r.offerId),
+    [1, 2, 5, null],
+  )
+})

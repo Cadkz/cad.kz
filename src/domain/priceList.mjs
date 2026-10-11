@@ -18,8 +18,12 @@
  *   groupCol?: number, codeCol?: number, prices?: PriceColumn[] }} Columns
  * @typedef {{ title: string, prices: PriceColumn[], kzt: boolean }} PriceSet
  */
-/** @typedef {{ index: number, name: string, id: string, price: string | null, alt?: string[], code?: string }} PriceRow */
-/** @typedef {{ id: number, label: string, names: string[] }} OfferCandidate */
+/** @typedef {{ index: number, name: string, id: string, price: string | null, alt?: string[], code?: string, kzt?: string | null }} PriceRow */
+/**
+ * kzt — цена за единицу в тенге с НДС, посчитанная сервером: у предложения — нынешняя, у строки
+ * прайса — какой станет. Совпала — сильный признак той же позиции; отличается в разы — не та.
+ * @typedef {{ id: number, label: string, names: string[], kzt?: string | null }} OfferCandidate
+ */
 /**
  * @typedef {'id' | 'saved' | 'auto' | 'check' | 'none' | 'noPrice'} MatchStatus
  * @typedef {{ index: number, offerId: number | null, status: MatchStatus, score: number }} MatchResult
@@ -326,6 +330,9 @@ export function nameTokens(text) {
   const words = String(text ?? '')
     .toLowerCase()
     .replace(/ё/g, 'е')
+    // Редакции пишут то слитно, то раздельно: «S 392» = «S392», «S PRO» = «SPro», «Smax» = «S Promax».
+    .replace(/\b([a-z])\s+(\d{2,}|pro[a-z]*|max[a-z]*)\b/g, '$1$2')
+    .replace(/\bsmax\b/g, 'spromax')
     .replace(/[^a-zа-я0-9+]+/g, ' ')
     .split(' ')
     .filter((word) => word && !STOP.has(word))
@@ -363,6 +370,22 @@ export const codeName = (/** @type {string} */ code) => `Артикул: ${code}
 /** Нормализованное название для запоминания и точного сравнения. */
 export const nameKey = (/** @type {string} */ text) => nameTokens(text).join(' ')
 
+/** Прибавка к похожести, если цена строки совпала с нынешней ценой предложения до тенге. */
+const SAME_PRICE_BONUS = 0.3
+/** Новая цена меньше 60 % или больше 167 % нынешней — предложение не то. */
+const MIN_RATIO = 0.6
+
+/**
+ * Новая цена строки к нынешней цене предложения; неизвестна одна из них — null.
+ * @param {string | null | undefined} next
+ * @param {string | null | undefined} now
+ */
+function priceRatio(next, now) {
+  const a = Number(next)
+  const b = Number(now)
+  return next && now && a > 0 && b > 0 ? a / b : null
+}
+
 export const AUTO_SCORE = 0.75
 export const CHECK_SCORE = 0.4
 
@@ -378,6 +401,7 @@ export function matchRows(rows, offers) {
   const saved = new Map()
   for (const offer of offers) for (const name of offer.names) saved.set(nameKey(name), offer.id)
   const tokens = offers.map((offer) => ({ id: offer.id, words: nameTokens(offer.label) }))
+  const kztById = new Map(offers.map((offer) => [offer.id, offer.kzt ?? null]))
 
   /** @type {(MatchResult & { second: number | null })[]} */
   const results = rows.map((row) => {
@@ -394,13 +418,20 @@ export function matchRows(rows, offers) {
     // Строка с группой сравнивается и целиком, и по частям: лучшее совпадение из вариантов.
     const variants = names.map(nameTokens)
     const ranked = tokens
-      .map((offer) => ({
-        id: offer.id,
-        score: Math.max(...variants.map((words) => similarity(words, offer.words))),
-      }))
+      .map((offer) => {
+        const words = Math.max(...variants.map((v) => similarity(v, offer.words)))
+        const ratio = priceRatio(row.kzt, kztById.get(offer.id))
+        // Та же цена при хоть каком-то сходстве названий — почти наверняка та же позиция
+        // («При приобретении полной конфигурации… S392» = «Полная конфигурация, S392»).
+        const bonus = ratio === 1 && words >= 0.2 ? SAME_PRICE_BONUS : 0
+        return { id: offer.id, score: Math.min(1, words + bonus), ratio }
+      })
       .sort((a, b) => b.score - a.score)
     const [best, next] = ranked
-    if (!best || best.score < CHECK_SCORE)
+    // Цена отличается в разы — это другая позиция, даже если слова похожи: не предлагаем.
+    const far = (/** @type {number | null} */ r) =>
+      r != null && (r < MIN_RATIO || r > 1 / MIN_RATIO)
+    if (!best || best.score < CHECK_SCORE || far(best.ratio))
       return { ...base, offerId: null, status: 'none', score: round(best?.score ?? 0) }
     const clear = best.score >= AUTO_SCORE && best.score - (next?.score ?? 0) >= 0.08
     return {

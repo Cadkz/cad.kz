@@ -170,12 +170,24 @@ export async function previewPriceList(
   ])
   if (!offers.length) return fail('У этого производителя нет предложений с ценами на сайте')
   const byId = new Map(offers.map((row) => [row.offer.id, row]))
+  // Цены в тенге с НДС для сравнения: нынешняя у предложения и будущая у строки прайса.
+  const plainKzt = (offer: Parameters<typeof quoteOffer>[0]) => {
+    try {
+      return quoteOffer(offer, context).unitKzt
+    } catch {
+      return null
+    }
+  }
   const matches = matchRows(
-    rows,
+    rows.map((row) => ({
+      ...row,
+      kzt: row.price ? plainKzt({ ...config, amount: row.price }) : null,
+    })),
     offers.map((row) => ({
       id: row.offer.id,
       label: offerLabel(row),
       names: row.offer.priceNames ?? [],
+      kzt: plainKzt(row.offer),
     })),
   )
   const rowByIndex = new Map(rows.map((row) => [row.index, row]))
