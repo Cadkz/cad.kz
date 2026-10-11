@@ -1,19 +1,25 @@
-/* Главный тёмный блок главной во всю ширину экрана: перелом ритма страницы.
-   Содержимое — в общей рамке сайта, левый край совпадает с логотипом. */
 .section {
-  position: relative;
-  margin-top: var(--section-gap);
-  padding: var(--space-12) 0;
+  padding-top: var(--section-gap);
+}
+
+.band {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-8) var(--space-6);
   /* clip, а не hidden: hidden делает блок прокручиваемым контейнером, и чертёж
      с прорисовкой по прокрутке (BannerArt onScroll) перестаёт видеть прокрутку страницы. */
   overflow: clip;
+  border-radius: var(--radius-lg);
+  position: relative;
   isolation: isolate;
   background: var(--gradient-deep);
   color: var(--color-text-inverse);
 }
 
 /* Фон кодом: чертёжная сетка вместо картинки-узора. */
-.section::before {
+.band::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -23,7 +29,7 @@
   mask-image: linear-gradient(to left, black, transparent 70%);
 }
 
-.section::after {
+.band::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -31,22 +37,15 @@
   background: radial-gradient(circle at 100% 0%, var(--color-glow), transparent 40%);
 }
 
-.band {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-4);
-}
-
-/* BIM-модель: на телефоне — над текстом, растворяется книзу; от 960 px — справа сверху,
-   растворяется к тексту и к этапам. Ниже первого экрана — загружается лениво. */
+/* BIM-модель (картинка): на телефоне — во всю ширину плашки сверху, растворяется книзу;
+   от 960 px — справа сверху, растворяется к тексту и к этапам. Грузится лениво. */
 .image {
   display: block;
-  width: 100%;
+  width: calc(100% + var(--space-6) * 2);
+  max-width: none;
   height: auto;
-  margin: calc(-1 * var(--space-12)) 0 var(--space-4);
-  mask-image: linear-gradient(to bottom, black 60%, transparent);
+  margin: calc(-1 * var(--space-8)) calc(-1 * var(--space-6)) 0;
+  mask-image: linear-gradient(to bottom, black 55%, transparent);
 }
 
 .title {
@@ -136,12 +135,13 @@
 }
 
 @media (min-width: 640px) {
-  .section {
-    padding: var(--space-16) 0;
+  .band {
+    padding: var(--space-12);
   }
 
   .image {
-    margin-top: calc(-1 * var(--space-16));
+    width: calc(100% + var(--space-12) * 2);
+    margin: calc(-1 * var(--space-12)) calc(-1 * var(--space-12)) 0;
   }
 
   .stage {
@@ -150,6 +150,10 @@
 }
 
 @media (min-width: 960px) {
+  .band {
+    padding: var(--space-16);
+  }
+
   .stage {
     grid-column: span 3;
   }
@@ -165,7 +169,7 @@
     margin: 0;
     mask-image:
       linear-gradient(to right, transparent, black 35%),
-      linear-gradient(to bottom, black 35%, transparent 80%);
+      linear-gradient(to bottom, black 35%, transparent 85%);
     mask-composite: intersect;
   }
 

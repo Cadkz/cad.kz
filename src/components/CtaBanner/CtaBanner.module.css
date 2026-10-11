@@ -3,68 +3,76 @@
 }
 
 .banner {
-  position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-4);
-  padding: var(--space-6);
-  overflow: hidden;
-  border: 1px solid var(--color-blue-mid);
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6) var(--space-8);
+  padding: var(--space-8) var(--space-6);
+  /* clip, а не hidden: hidden делает блок прокручиваемым контейнером, и чертёж
+     с прорисовкой по прокрутке (BannerArt onScroll) перестаёт видеть прокрутку страницы. */
+  overflow: clip;
   border-radius: var(--radius-lg);
+  position: relative;
   isolation: isolate;
-  background: var(--color-blue-soft);
+  background: var(--color-navy);
 }
 
-/* Фон кодом: светлая чертёжная сетка, растворяется к тексту. */
+/* Фон кодом: чертёжная сетка вместо картинки-узора. */
 .banner::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: var(--z-below);
-  background-image: var(--blueprint-light);
+  background-image: var(--blueprint-dark);
   background-size: var(--blueprint-size);
   mask-image: linear-gradient(to left, black, transparent 60%);
 }
 
-.icon {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: calc(var(--icon-box) + var(--space-4));
-  height: calc(var(--icon-box) + var(--space-4));
-  border-radius: var(--radius-round);
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+.banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background: radial-gradient(circle at 0% 100%, var(--color-glow), transparent 40%);
 }
 
 .text {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-3);
   max-width: var(--measure);
 }
 
+.art {
+  display: none;
+}
+
 .title {
-  font-size: var(--text-h3);
+  color: var(--color-text-inverse);
 }
 
 .lead {
-  color: var(--color-gray-700);
-  font-size: var(--text-sm);
+  color: var(--color-text-on-dark);
+  font-size: var(--text-body);
 }
 
-/* От 960 px — одна строка: значок, текст, кнопка справа. */
+@media (min-width: 640px) {
+  .banner {
+    padding: var(--space-12);
+  }
+}
+
+/* Два сравниваемых КП между текстом и кнопкой — от 960 px. */
 @media (min-width: 960px) {
   .banner {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-6);
-    padding: var(--space-6) var(--space-8);
+    flex-wrap: nowrap;
   }
 
-  .banner > :last-child {
+  .art {
+    display: block;
+    flex: none;
+    width: calc(var(--control-height) * 4);
     margin-left: auto;
   }
 }

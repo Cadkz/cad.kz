@@ -22,32 +22,20 @@ type Props = {
   withExcerpt?: boolean
   /** Уровень заголовка: h2 в списке под h1 страницы, h3 в секции главной под её h2. */
   level?: 2 | 3
-  /** compact — строка с маленькой обложкой слева (второстепенные новости на главной). */
-  variant?: 'card' | 'compact'
 }
 
 /** Карточка новости или статьи: обложка, дата, тематика, заголовок, анонс. */
-export function NewsCard({
-  news,
-  tone = 'navy',
-  withExcerpt = false,
-  level = 3,
-  variant = 'card',
-}: Props) {
+export function NewsCard({ news, tone = 'navy', withExcerpt = false, level = 3 }: Props) {
   const Heading = level === 2 ? 'h2' : 'h3'
   return (
-    <article className={`${styles.card} ${styles[variant]}`}>
+    <article className={styles.card}>
       <div className={`${styles.thumb} ${styles[tone]}`}>
         {news.cover ? (
           <Image
             src={news.cover.url}
             alt={news.cover.alt}
             fill
-            sizes={
-              variant === 'compact'
-                ? '96px'
-                : '(min-width: 960px) 588px, (min-width: 640px) 50vw, 100vw'
-            }
+            sizes="(min-width: 960px) 384px, (min-width: 640px) 50vw, 100vw"
             className={styles.image}
           />
         ) : (

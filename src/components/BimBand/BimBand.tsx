@@ -11,14 +11,14 @@ export function BimBand({ bim }: { bim: Home['bim'] }) {
   if (!bim.title) return null
   return (
     <section className={styles.section} aria-labelledby="bim-title">
-      <Image
-        src={bimImage}
-        alt=""
-        sizes="(min-width: 960px) 60vw, 100vw"
-        className={styles.image}
-      />
       <Container>
         <div className={styles.band}>
+          <Image
+            src={bimImage}
+            alt=""
+            sizes="(min-width: 1200px) 720px, (min-width: 960px) 60vw, 100vw"
+            className={styles.image}
+          />
           {bim.eyebrow && <Badge tone="onDark">{bim.eyebrow}</Badge>}
           <h2 id="bim-title" className={styles.title}>
             {bim.title}

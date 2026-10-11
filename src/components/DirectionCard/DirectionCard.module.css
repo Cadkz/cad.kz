@@ -10,19 +10,23 @@
   height: 100%;
   padding: var(--space-5);
   overflow: hidden;
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  color: var(--color-navy);
+  color: var(--color-text-inverse);
   isolation: isolate;
   transition:
-    border-color var(--duration-base) var(--ease),
     box-shadow var(--duration-base) var(--ease),
     transform var(--duration-base) var(--ease);
 }
 
+.card::before {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background: var(--gradient-card-shade);
+  content: "";
+}
+
 .card:hover {
-  border-color: var(--color-blue-mid);
   box-shadow: var(--shadow-md);
   transform: translateY(calc(-1 * var(--space-1)));
 }
@@ -31,14 +35,25 @@
   transform: none;
 }
 
-/* Крупная контурная иконка в углу — фирменный декор карточек направлений. */
+.navy {
+  background: var(--gradient-deep);
+}
+
+.blue {
+  background: var(--gradient-navy);
+}
+
+.graphite {
+  background: var(--gradient-graphite);
+}
+
+/* Крупная полупрозрачная иконка в углу — фирменный декор карточек направлений. */
 .big {
   position: absolute;
   right: calc(-1 * var(--space-4));
   bottom: calc(-1 * var(--space-4));
   z-index: var(--z-below);
-  color: var(--color-blue);
-  opacity: 0.06;
+  opacity: 0.1;
   transition:
     opacity var(--duration-base) var(--ease),
     transform var(--duration-base) var(--ease);
@@ -51,7 +66,7 @@
 }
 
 .card:hover .big {
-  opacity: 0.12;
+  opacity: 0.22;
   transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1)));
 }
 
@@ -63,17 +78,7 @@
   width: var(--icon-box);
   height: var(--icon-box);
   border-radius: var(--radius-md);
-  background: var(--color-blue-soft);
-  color: var(--color-blue);
-  transition:
-    background var(--duration-base) var(--ease),
-    color var(--duration-base) var(--ease);
-}
-
-/* При наведении значок заливается фирменным синим — главный акцент карточки. */
-.card:hover .icon {
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  background: var(--color-on-dark-soft);
 }
 
 .title {
@@ -85,7 +90,7 @@
 }
 
 .summary {
-  color: var(--color-text-muted);
+  color: var(--color-text-on-dark);
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
 }
@@ -105,7 +110,7 @@
   }
 
   .big {
-    opacity: 0.08;
+    opacity: 0.14;
   }
 
   .big svg {
@@ -123,7 +128,7 @@
     top: var(--space-6);
     right: var(--space-6);
     display: inline-flex;
-    color: var(--color-blue);
+    color: var(--color-text-on-dark);
     opacity: 0;
     transform: translateX(calc(-1 * var(--space-1)));
     transition:
@@ -134,13 +139,6 @@
   .card:hover .arrow,
   .card:focus-visible .arrow {
     opacity: 1;
-    transform: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card:hover,
-  .card:hover .big {
     transform: none;
   }
 }

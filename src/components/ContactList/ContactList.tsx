@@ -3,16 +3,13 @@ import type { Contacts } from '@/lib/navigation'
 import { socialIcons, socialNames, TelegramIcon, WhatsappIcon } from '../icons/icons'
 import styles from './ContactList.module.css'
 
-/**
- * whatsapp = false — строку WhatsApp не показывать: рядом уже есть своя кнопка WhatsApp.
- * onDark — светлый текст на тёмном фоне (подвал).
- */
-type Props = { contacts: Contacts; socials?: boolean; whatsapp?: boolean; onDark?: boolean }
+/** whatsapp = false — строку WhatsApp не показывать: рядом уже есть своя кнопка WhatsApp. */
+type Props = { contacts: Contacts; socials?: boolean; whatsapp?: boolean }
 
 /** Телефоны, мессенджеры и соцсети из настроек CMS. */
-export function ContactList({ contacts, socials = true, whatsapp = true, onDark = false }: Props) {
+export function ContactList({ contacts, socials = true, whatsapp = true }: Props) {
   return (
-    <div className={onDark ? `${styles.list} ${styles.onDark}` : styles.list}>
+    <div className={styles.list}>
       {contacts.phones.map((phone) => (
         <a key={phone.tel} href={`tel:${phone.tel}`} className={styles.phone}>
           {phone.label}

@@ -18,12 +18,7 @@ type Props = {
 export function Section({ title, sub, action, id, tone = 'plain', children }: Props) {
   const headingId = id ? `${id}-title` : undefined
   return (
-    <section
-      id={id}
-      className={`${styles.section} ${styles[tone]}`}
-      data-tone={tone}
-      aria-labelledby={headingId}
-    >
+    <section id={id} className={`${styles.section} ${styles[tone]}`} aria-labelledby={headingId}>
       <Container>
         <div className={styles.head}>
           <div className={styles.text}>

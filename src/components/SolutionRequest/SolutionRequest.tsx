@@ -21,7 +21,7 @@ export function SolutionRequest({ directions, whatsappHref }: Props) {
   const [open, setOpen] = useState(false)
   return (
     <>
-      <Button variant="secondary" onClick={() => setOpen(true)}>
+      <Button variant="ghostDark" onClick={() => setOpen(true)}>
         <ListChecks size={20} strokeWidth={1.75} aria-hidden="true" />
         Подобрать решение
       </Button>
