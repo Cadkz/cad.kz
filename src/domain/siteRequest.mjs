@@ -9,7 +9,15 @@ import { CONSENT_TEXT, CONSENT_VERSION, normalizePhone } from './order.mjs'
 
 export { CONSENT_TEXT, CONSENT_VERSION }
 
-export const REQUEST_KINDS = /** @type {const} */ (['price', 'renew', 'help', 'quote'])
+export const REQUEST_KINDS = /** @type {const} */ ([
+  'price',
+  'renew',
+  'help',
+  'quote',
+  'demo',
+  'consult',
+  'signup',
+])
 
 /** @typedef {typeof REQUEST_KINDS[number]} RequestKind */
 
@@ -19,6 +27,9 @@ export const KIND_LABELS = {
   renew: 'Продление',
   help: 'Помощь с выбором',
   quote: 'Коммерческое предложение',
+  demo: 'Демонстрация',
+  consult: 'Консультация',
+  signup: 'Запись на курс',
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -38,8 +49,55 @@ function hasControl(value) {
   return false
 }
 
-/** Откуда заявка: со страницы товара или семейства — или с главной («Подобрать решение»). */
-export const REQUEST_SOURCES = /** @type {const} */ (['product', 'home'])
+/**
+ * Откуда заявка: со страницы товара или семейства, с главной («Подобрать решение») или со страницы
+ * «Продление лицензий» (программа, номер лицензии, число мест — без товара).
+ */
+export const REQUEST_SOURCES = /** @type {const} */ (['product', 'home', 'renew'])
+
+/** Программы на странице продления: чипы формы; «Другая» — клиент пишет название сам. */
+export const RENEW_PROGRAMS = ['AutoCAD', 'АВС', 'ЛИРА-FEM', 'SCAD Office', 'GEO5']
+
+/**
+ * Данные продления со страницы «Продление лицензий»: программа обязательна, номер лицензии
+ * и число мест — если клиент их знает.
+ * @param {unknown} raw
+ * @param {Record<string, string>} errors
+ * @returns {{ program: string, license: string, seats: number | null }}
+ */
+function checkRenewal(raw, errors) {
+  const input = raw && typeof raw === 'object' ? /** @type {Record<string, unknown>} */ (raw) : {}
+  const program = text(input.program)
+  if (program.length < 2 || program.length > 60 || hasControl(program))
+    errors.program = 'Выберите программу или напишите её название'
+  const license = text(input.license)
+  if (license.length > 60 || hasControl(license))
+    errors.license = 'Номер лицензии не длиннее 60 знаков'
+  const seats = input.seats == null || input.seats === '' ? null : Number(input.seats)
+  if (seats !== null && (!Number.isInteger(seats) || seats < 1 || seats > 999))
+    errors.seats = 'Число мест от 1 до 999'
+  return { program, license, seats }
+}
+
+/**
+ * Проверка полей формы продления в браузере: те же правила, что на сервере.
+ * @param {unknown} raw
+ * @returns {{ ok: true } | { ok: false, errors: Record<string, string> }}
+ */
+export function validateRenewal(raw) {
+  /** @type {Record<string, string>} */
+  const errors = {}
+  const input = raw && typeof raw === 'object' ? /** @type {Record<string, unknown>} */ (raw) : {}
+  checkRenewal(input.renewal, errors)
+  checkContact(input, errors)
+  return Object.keys(errors).length ? { ok: false, errors } : { ok: true }
+}
+
+/** Подпись нажатой кнопки для менеджера: короткий текст без служебных символов. */
+function buttonText(/** @type {unknown} */ value) {
+  const label = text(value)
+  return label && label.length <= 60 && !hasControl(label) ? label : ''
+}
 
 /** Задача в заявке с главной: хотя бы пара слов. */
 export const TASK_MIN = 5
@@ -103,6 +161,8 @@ export function validateContact(raw, options = {}) {
  * @property {string} name
  * @property {string} phone
  * @property {string} comment
+ * @property {string} button  Подпись нажатой кнопки («Получить КП», «Записаться на демонстрацию»).
+ * @property {{ program: string, license: string, seats: number | null } | null} renewal  Со страницы продления.
  */
 
 /**
@@ -119,10 +179,11 @@ export function validateRequest(raw) {
     errors.idempotencyKey = 'Не удалось подготовить форму. Обновите страницу и попробуйте ещё раз.'
   const kind = REQUEST_KINDS.find((k) => k === input.kind)
   if (!kind) errors.kind = 'Некорректный тип заявки'
-  const source = input.source === 'home' ? 'home' : 'product'
-  // С главной — только «помощь с выбором», без товара и выбранных позиций.
+  const source = REQUEST_SOURCES.find((item) => item === input.source) ?? 'product'
+  // С главной — только «помощь с выбором», со страницы продления — только продление; без товара.
   if (source === 'home' && kind !== 'help') errors.kind = 'Некорректный тип заявки'
-  const pageProductId = source === 'home' ? null : Number(input.pageProductId)
+  if (source === 'renew' && kind !== 'renew') errors.kind = 'Некорректный тип заявки'
+  const pageProductId = source === 'product' ? Number(input.pageProductId) : null
   if (pageProductId !== null && (!Number.isSafeInteger(pageProductId) || pageProductId <= 0))
     errors.page = 'Некорректная страница'
   const direction =
@@ -173,7 +234,8 @@ export function validateRequest(raw) {
         choices.push({ title, value })
       }
   }
-  if (source === 'home' && (items.length || choices.length)) errors.items = 'Некорректный выбор'
+  if (source !== 'product' && (items.length || choices.length)) errors.items = 'Некорректный выбор'
+  const renewal = source === 'renew' ? checkRenewal(input.renewal, errors) : null
   if (kind === 'quote' && !items.length && !errors.items)
     errors.items = 'Отметьте хотя бы одну программу'
   const contact = checkContact(input, errors, source === 'home')
@@ -186,11 +248,13 @@ export function validateRequest(raw) {
       source,
       pageProductId,
       direction,
-      familySlug: source === 'home' ? null : familySlug,
+      familySlug: source === 'product' ? familySlug : null,
       items,
       quantity,
       choices,
       ...contact,
+      button: buttonText(input.button),
+      renewal,
     },
   }
 }
@@ -221,10 +285,13 @@ export function makeRequestNumber(
 /**
  * Данные для CRM в том же формате, что у заказа (src/domain/integrations.ts, CrmLead),
  * плюс тип заявки. Строки без цены передаются без сумм.
- * @param {{ number: string, idempotencyKey: string, kind: RequestKind, pageTitle: string, choices: { title: string, value: string }[], name: string, phone: string, comment: string, consentAt: string, lines: ResolvedLine[], totalKzt: string | null }} request
+ * Источник (`source`): нажатая кнопка, товар, его раздел и сценарий покупки — чтобы следующий
+ * анализ CRM видел, откуда пришла сделка, а не только её название.
+ * @param {{ number: string, idempotencyKey: string, kind: RequestKind, pageTitle: string, choices: { title: string, value: string }[], name: string, phone: string, comment: string, consentAt: string, lines: ResolvedLine[], totalKzt: string | null, source?: { button: string, product: string | null, section: string | null, scenario: string | null, page: string | null } }} request
  */
 export function toCrmRequest(request) {
   return {
+    ...(request.source ? { source: request.source } : {}),
     idempotencyKey: request.idempotencyKey,
     orderNumber: request.number,
     kind: request.kind,

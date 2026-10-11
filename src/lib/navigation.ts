@@ -1,7 +1,7 @@
 import type { Section, SiteSetting } from '../../payload-types'
 import { menuColumns } from '../domain/menu.mjs'
 import { priorityRank } from '../domain/priority.mjs'
-import { kindGroup } from './catalog'
+import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
 import { familyLines } from './families'
 import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
@@ -84,21 +84,29 @@ export async function getMenu(): Promise<MenuTab[]> {
     }),
   ])
 
+  // Подразделы видны через верхний раздел (src/domain/sectionTree.mjs).
+  const top = topSections(sections.docs.map((s) => ({ id: s.id, parent: relId(s.parent) })))
+  const groupOf = new Map(sections.docs.map((s) => [s.id, s.menuGroup]))
   const vendorLevel = new Map(manufacturers.docs.map((m) => [m.id, m.priority]))
   const vendorTitle = new Map(manufacturers.docs.map((m) => [m.id, m.title]))
   const items = products.docs.map((product) => {
     const vendor = relId(product.manufacturer)
+    const main = relId(product.mainSection)
+    const topMain = main == null ? null : (top.get(main) ?? main)
     return {
       id: product.id,
       title: product.title,
-      main: relId(product.mainSection),
-      sections: (product.sections ?? []).map((section) => relId(section) ?? 0),
+      main: topMain,
+      sections: withTopSections(
+        (product.sections ?? []).map((section) => relId(section) ?? 0),
+        top,
+      ),
       href: productPath(product),
       vendor,
       line: relId(product.line),
       lineOrder: product.lineOrder ?? null,
       rank: priorityRank(product.priority, vendor == null ? null : vendorLevel.get(vendor)),
-      group: kindGroup[product.kind],
+      group: itemGroup(product.kind, topMain == null ? null : groupOf.get(topMain)),
     }
   })
 
@@ -136,7 +144,7 @@ export async function getMenu(): Promise<MenuTab[]> {
     allHref: catalogHref({ group }),
     columns: menuColumns(
       sections.docs
-        .filter((section) => section.menuGroup === group)
+        .filter((section) => section.menuGroup === group && relId(section.parent) == null)
         .map(({ id, slug, title, menuGroup, isDirection, pinnedManufacturers, icon }) => ({
           id,
           icon: icon ?? null,

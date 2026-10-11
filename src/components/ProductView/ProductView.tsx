@@ -77,6 +77,10 @@ export async function ProductView({
     kind: product.kind,
     productTitle: product.title,
     renewLabel: product.renewLabel,
+    scenario: product.scenario,
+    demo: product.demo,
+    picks: cross.length > 0,
+    about: Boolean(product.description),
     contacts: {
       phones: contacts.phones,
       whatsappHref: contacts.whatsappHref,

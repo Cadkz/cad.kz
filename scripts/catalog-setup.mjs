@@ -3,7 +3,8 @@
 // затем вторая настройка: дубли производителей, линейки, приложения в конец, темы новостей;
 // затем подбор AutoCAD и SCAD Office и семейство сателлитов SCAD; семейства редких товаров;
 // другие названия для поиска; актуализация версий по сайтам производителей; продления ПАССАТ
-// — кнопкой «Обновить версию»; пакеты и девять задач GEO5 в каталоге; блок «Официальный партнёр» на главной. Выполняется один раз (отметка в журнале
+// — кнопкой «Обновить версию»; пакеты и девять задач GEO5 в каталоге; блок «Официальный партнёр» на главной;
+// каталог по CRM (САПР и черчение, широкоформат, сценарии покупки, популярные решения). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -11,6 +12,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
+import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
 import { setupGeo5Catalog } from '../src/lib/geoSetup.ts'
 import { setupHomeTrust } from '../src/lib/homeSetup.ts'
@@ -122,6 +124,9 @@ try {
   }
   const trust = await setupHomeTrust(payload)
   console.log(trust ?? 'Блок «Официальный партнёр» на главной уже настроен.')
+  const crm = await setupCrmCatalog(payload)
+  if (!crm) console.log('Каталог по CRM уже настроен.')
+  else for (const line of crm) console.log(`Каталог по CRM — ${line}`)
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1

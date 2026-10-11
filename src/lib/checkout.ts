@@ -11,6 +11,7 @@ import {
 import type { CheckoutDeps, NewOrder } from '@/domain/checkout.mjs'
 import type { Order } from '../../payload-types'
 import { quoteCart } from './cartQuote'
+import { withOrderContext } from './orderContext'
 
 const options = { overrideAccess: true, depth: 0 } as const
 
@@ -96,6 +97,8 @@ export function createCheckoutDeps(payload: Payload): CheckoutDeps {
       return { phone: byPhone.totalDocs, client: byClient?.totalDocs ?? 0 }
     },
     async saveOrder({ order, crmLead }) {
+      // Раздел и сценарий строк — для анализа сделок (src/lib/orderContext.ts).
+      const lead = await withOrderContext(payload, crmLead)
       // Заказ и запись очереди CRM сохраняются одной транзакцией: либо обе, либо ни одной.
       const req = await createLocalReq({}, payload)
       const owner = await initTransaction(req)
@@ -113,7 +116,7 @@ export function createCheckoutDeps(payload: Payload): CheckoutDeps {
             order: created.id,
             state: 'pending',
             attempts: 0,
-            snapshot: structuredClone(crmLead),
+            snapshot: structuredClone(lead),
           },
           req,
           ...options,

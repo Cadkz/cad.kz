@@ -2,6 +2,7 @@ import {
   Building2,
   Cog,
   Columns3,
+  DraftingCompass,
   Droplet,
   FileText,
   GraduationCap,
@@ -29,6 +30,7 @@ const icons: Record<string, LucideIcon> = {
   printer: Printer,
   monitor: Monitor,
   graduation: GraduationCap,
+  compass: DraftingCompass,
 }
 
 type Props = { name?: string | null; size?: 16 | 20 | 24; className?: string }

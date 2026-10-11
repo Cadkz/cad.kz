@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import type { Product, Section } from '../../payload-types'
+import { resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
 import type { PickerView } from '../domain/picker.mjs'
 import { formatKzt } from './format'
 import { cms } from './payload'
@@ -44,6 +45,10 @@ export type ProductPage = {
   /** Подбор комплекта; у обычной страницы — один шаг из своих предложений. */
   picker: PickerView
   renewLabel: string | null
+  /** Сценарий покупки (src/domain/buyScenario.mjs): от него кнопки итога. */
+  scenario: Scenario
+  /** У основного раздела включена запись на демонстрацию (сканеры). */
+  demo: boolean
   /** Линейка и производитель: куда вести адрес товара без своей страницы. */
   lineId: number | null
   vendorId: number | null
@@ -75,6 +80,9 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
   })
   const product = docs[0]
   if (!product) return null
+  const main = typeof product.mainSection === 'object' ? product.mainSection : null
+  // Подраздел без своих настроек берёт сценарий и демонстрацию у родителя.
+  const parent = main && typeof main.parent === 'object' ? main.parent : null
   const [offers, context, picker] = await Promise.all([
     payload.find({
       collection: 'offers',
@@ -132,6 +140,12 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     pageView: product.pageView ?? 'standard',
     picker,
     renewLabel: product.renewLabel || null,
+    scenario: resolveScenario({
+      own: product.scenario,
+      section: main?.scenario ?? parent?.scenario,
+      kind: product.kind,
+    }),
+    demo: Boolean(main?.demoButton ?? parent?.demoButton),
     lineId: relId(product.line),
     vendorId: relId(product.manufacturer),
     pictures: productPictures(product),

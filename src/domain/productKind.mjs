@@ -3,7 +3,8 @@
  * Один шаблон страницы товара для всех типов, но содержимое говорит на языке типа:
  * у программ — лицензии и комплектация, у оборудования — варианты поставки и технические
  * характеристики, у курсов — формат, программа и запись, у услуг — состав работ и консультация.
- * Блоки и дизайн общие, меняются только подписи и главное действие.
+ * Блоки и дизайн общие, меняются только подписи. Кнопки итога — по сценарию покупки
+ * (src/domain/buyScenario.mjs).
  */
 
 /** @typedef {'software' | 'hardware' | 'course' | 'service'} ProductKind */
@@ -16,7 +17,6 @@
  * @property {string} specs  Заголовок характеристик.
  * @property {string} quantity  Подпись количества в итоге.
  * @property {string} quantityAria  Подсказка поля количества для экранного диктора.
- * @property {string | null} actionLabel  Своё главное действие вместо «Получить КП» / «Запросить цену».
  * @property {string} similar  Заголовок блока похожих.
  */
 
@@ -29,7 +29,6 @@ export const KIND_PROFILES = {
     specs: 'Характеристики',
     quantity: 'Лицензий',
     quantityAria: 'Количество лицензий (рабочих мест)',
-    actionLabel: null,
     similar: 'Похожие программы',
   },
   hardware: {
@@ -39,7 +38,6 @@ export const KIND_PROFILES = {
     specs: 'Технические характеристики',
     quantity: 'Количество',
     quantityAria: 'Количество устройств',
-    actionLabel: null,
     similar: 'Похожее оборудование',
   },
   course: {
@@ -49,7 +47,6 @@ export const KIND_PROFILES = {
     specs: 'Продолжительность и формат',
     quantity: 'Участников',
     quantityAria: 'Количество участников',
-    actionLabel: 'Записаться на курс',
     similar: 'Другие курсы',
   },
   service: {
@@ -59,7 +56,6 @@ export const KIND_PROFILES = {
     specs: 'Условия',
     quantity: 'Количество',
     quantityAria: 'Количество',
-    actionLabel: 'Запросить консультацию',
     similar: 'Другие услуги',
   },
 }

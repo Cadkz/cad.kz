@@ -27,6 +27,17 @@ export type CrmLead = {
   kind?: string
   kindLabel?: string
   pageTitle?: string
+  /**
+   * Откуда пришла заявка: нажатая кнопка, товар, его раздел и сценарий покупки. Нужен, чтобы
+   * анализ сделок не упирался в тег «Другое» и продления, которые не видно по названию.
+   */
+  source?: {
+    button: string
+    product: string | null
+    section: string | null
+    scenario: string | null
+    page: string | null
+  }
   contactWay?: 'callback'
   consent: { accepted: true; at: string; version: string }
   contact: { name: string; email?: string; phone?: string }
@@ -41,6 +52,9 @@ export type CrmLead = {
     /** Пусто — цена по запросу (заявка без корзины). */
     unitKzt: string
     totalKzt: string
+    /** Раздел и сценарий покупки товара строки (у заказа из корзины). */
+    section?: string
+    scenario?: string
   }[]
   totalKzt: string
   messages: Message[]

@@ -157,7 +157,7 @@ export const siteRequests: CollectionConfig = {
   admin: {
     group: 'Продажи',
     useAsTitle: 'number',
-    defaultColumns: ['number', 'createdAt', 'kind', 'productTitle', 'contactName', 'mode'],
+    defaultColumns: ['number', 'createdAt', 'kind', 'productTitle', 'button', 'contactName'],
   },
   defaultSort: '-createdAt',
   access: { read: isAdmin, create: nobody, update: nobody, delete: nobody },
@@ -174,6 +174,17 @@ export const siteRequests: CollectionConfig = {
         { label: 'Продление', value: 'renew' },
         { label: 'Помощь с выбором', value: 'help' },
         { label: 'Коммерческое предложение', value: 'quote' },
+        { label: 'Демонстрация', value: 'demo' },
+        { label: 'Консультация', value: 'consult' },
+        { label: 'Запись на курс', value: 'signup' },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        textField('button', 'Нажатая кнопка'),
+        textField('sectionTitle', 'Раздел товара'),
+        textField('scenario', 'Сценарий покупки'),
       ],
     },
     {

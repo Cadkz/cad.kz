@@ -8,11 +8,30 @@ function kzt(value) {
   return `${money.format(BigInt(value))} ₸`
 }
 
+/**
+ * Откуда заявка одной строкой: кнопка, товар, раздел, сценарий. Идёт в «Дополнительно об
+ * источнике» (SOURCE_DESCRIPTION) и в комментарий — по ней потом делается анализ сделок.
+ */
+export function sourceLine(lead) {
+  const source = lead.source
+  if (!source) return ''
+  return [
+    source.button && `Кнопка: ${source.button}`,
+    source.product && `Товар: ${source.product}`,
+    source.section && `Раздел: ${source.section}`,
+    source.scenario && `Сценарий: ${source.scenario}`,
+    source.page && `Страница: ${source.page}`,
+  ]
+    .filter(Boolean)
+    .join('; ')
+}
+
 /** Состав заявки текстом для комментария лида: менеджер видит всё, не открывая CMS. */
 function describe(lead) {
   const rows = lead.items.map((item) => {
     const options = [item.configuration, item.license].filter((v) => v && v !== '—').join(', ')
-    const what = options ? `${item.title}, ${options}` : item.title
+    const where = [item.section, item.scenario].filter(Boolean).join(', ')
+    const what = `${options ? `${item.title}, ${options}` : item.title}${where ? ` [${where}]` : ''}`
     if (!item.unitKzt) return `${what}: ${item.quantity} шт., цена по запросу`
     return `${what}: ${item.quantity} шт. × ${kzt(item.unitKzt)} = ${kzt(item.totalKzt)}`
   })
@@ -23,6 +42,8 @@ function describe(lead) {
   const parts = [...head, ...rows, ...total]
   if (lead.buyer.type === 'company' && lead.buyer.bin) parts.push(`БИН: ${lead.buyer.bin}`)
   if (lead.comment) parts.push(`Комментарий покупателя: ${lead.comment}`)
+  const source = sourceLine(lead)
+  if (source) parts.push(`Источник: ${source}`)
   if (lead.messages.length) {
     parts.push('', 'Диалог с консультантом на сайте:')
     for (const message of lead.messages) {
@@ -52,6 +73,7 @@ export function toBitrix24Lead(lead) {
         CURRENCY_ID: 'KZT',
         COMMENTS: describe(lead),
         SOURCE_ID: 'WEB',
+        SOURCE_DESCRIPTION: sourceLine(lead) || undefined,
         // По этим двум полям при неясном ответе ищем уже созданный лид, а не создаём второй.
         ORIGINATOR_ID: 'cad.kz',
         ORIGIN_ID: lead.idempotencyKey,

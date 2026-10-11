@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, type ReactNode, useContext, useState } from 'react'
+import type { Scenario } from '@/domain/buyScenario.mjs'
 import type { PickerView } from '@/domain/picker.mjs'
 import { type KindProfile, kindProfile } from '@/domain/productKind.mjs'
 import type { RequestKind } from '@/domain/siteRequest.mjs'
@@ -18,6 +19,12 @@ export type PickerMeta = {
   kind?: string | null
   /** Страница семейства: корзины нет, только «Получить КП». */
   familySlug?: string | null
+  /** Сценарий покупки и признаки страницы для кнопок итога (src/domain/buyScenario.mjs). */
+  scenario?: Scenario
+  demo?: boolean
+  /** Под товаром есть «С этим покупают» и описание: ссылки-якоря у оборудования и курсов. */
+  picks?: boolean
+  about?: boolean
   contacts: Pick<Contacts, 'phones' | 'whatsappHref' | 'hours'>
 }
 
@@ -25,7 +32,8 @@ type ContextValue = PickerApi & {
   view: PickerView
   meta: PickerMeta
   profile: KindProfile
-  openRequest: (kind: RequestKind) => void
+  /** Открыть окно заявки; button — подпись нажатой кнопки, уходит менеджеру в Битрикс24. */
+  openRequest: (kind: RequestKind, button?: string) => void
 }
 
 const Context = createContext<ContextValue | null>(null)
@@ -38,14 +46,15 @@ type Props = { view: PickerView; meta: PickerMeta; pick: PickTarget | null; chil
  */
 export function PickerProvider({ view, meta, pick, children }: Props) {
   const api = usePicker(view, pick)
-  const [request, setRequest] = useState<RequestKind | null>(null)
+  const [request, setRequest] = useState<{ kind: RequestKind; button: string } | null>(null)
+  const openRequest = (kind: RequestKind, button?: string) =>
+    setRequest({ kind, button: button ?? '' })
   return (
-    <Context.Provider
-      value={{ ...api, view, meta, profile: kindProfile(meta.kind), openRequest: setRequest }}
-    >
+    <Context.Provider value={{ ...api, view, meta, profile: kindProfile(meta.kind), openRequest }}>
       {children}
       <RequestDialog
-        kind={request}
+        kind={request?.kind ?? null}
+        button={request?.button ?? ''}
         onClose={() => setRequest(null)}
         pageTitle={meta.productTitle}
         pageProductId={meta.productId}

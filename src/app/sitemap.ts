@@ -60,6 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry('/articles', undefined, 0.6),
     ...(pageSlugs.has('about') ? [entry('/about', undefined, 0.4)] : []),
     entry('/contacts', undefined, 0.4),
+    entry('/renew', undefined, 0.5),
     ...products.docs.map((product) => entry(productPath(product), product.updatedAt, 0.8)),
     ...[...(await familyLines()).values()].map((family) => entry(family.href, undefined, 0.7)),
     ...publications.docs.map((doc) =>

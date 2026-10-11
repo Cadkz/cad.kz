@@ -6,9 +6,11 @@ import {
   killTransaction,
   type Payload,
 } from 'payload'
+import { resolveScenario, SCENARIO_LABELS } from '@/domain/buyScenario.mjs'
 import {
   CONSENT_TEXT,
   CONSENT_VERSION,
+  KIND_LABELS,
   makeRequestNumber,
   type ResolvedLine,
   type SiteRequest,
@@ -91,9 +93,21 @@ async function homeChoices(payload: Payload, request: SiteRequest) {
   return docs[0] ? [{ title: 'Направление', value: docs[0].title }] : []
 }
 
+/** Со страницы продления: программа, номер лицензии и число мест, как их указал клиент. */
+function renewalChoices(request: SiteRequest) {
+  const renewal = request.renewal
+  if (!renewal) return []
+  return [
+    { title: 'Программа', value: renewal.program },
+    ...(renewal.license ? [{ title: 'Номер лицензии', value: renewal.license }] : []),
+    ...(renewal.seats ? [{ title: 'Мест', value: String(renewal.seats) }] : []),
+  ]
+}
+
 /** Выбор переключателей, который действительно есть в подборе товара: остальное отбрасывается. */
 async function checkedChoices(payload: Payload, request: SiteRequest) {
   if (request.source === 'home') return homeChoices(payload, request)
+  if (request.source === 'renew') return renewalChoices(request)
   if (!request.choices.length || request.familySlug || request.pageProductId === null) return []
   const product = await payload.findByID({
     collection: 'products',
@@ -109,8 +123,34 @@ async function checkedChoices(payload: Payload, request: SiteRequest) {
   )
 }
 
-/** Название страницы для менеджера: товар, семейство или главная. */
+/**
+ * Раздел и сценарий покупки товара страницы — для анализа сделок в Битрикс24. Сценарий считается
+ * так же, как кнопки на странице (src/domain/buyScenario.mjs).
+ */
+async function productContext(payload: Payload, request: SiteRequest) {
+  const id = request.pageProductId
+  if (request.source !== 'product' || id === null) return { section: null, scenario: null }
+  const product = await payload.findByID({
+    collection: 'products',
+    id,
+    depth: 1,
+    disableErrors: true,
+    overrideAccess: true,
+    select: { kind: true, scenario: true, mainSection: true },
+  })
+  if (!product) return { section: null, scenario: null }
+  const main = typeof product.mainSection === 'object' ? product.mainSection : null
+  const scenario = resolveScenario({
+    own: product.scenario,
+    section: main?.scenario,
+    kind: product.kind,
+  })
+  return { section: main?.title ?? null, scenario: SCENARIO_LABELS[scenario] }
+}
+
+/** Название страницы для менеджера: товар, семейство, продление или главная. */
 async function pageTitle(payload: Payload, request: SiteRequest) {
+  if (request.source === 'renew') return { title: 'Продление лицензий', page: '/renew' }
   if (request.source === 'home' || request.pageProductId === null)
     return { title: 'Главная: подобрать решение', page: '/' }
   if (request.familySlug) {
@@ -166,11 +206,13 @@ export async function saveSiteRequest(
   })
   if (recent.totalDocs >= HOURLY_PHONE_LIMIT) return 'rate_limited'
 
-  const [lines, page, choices] = await Promise.all([
+  const [lines, page, choices, context] = await Promise.all([
     resolveLines(payload, request),
     pageTitle(payload, request),
     checkedChoices(payload, request),
+    productContext(payload, request),
   ])
+  const button = request.button || KIND_LABELS[request.kind]
   const priced = lines.filter((line) => line.totalKzt)
   const totalKzt =
     priced.length === lines.length && lines.length
@@ -190,6 +232,13 @@ export async function saveSiteRequest(
     consentAt: now.toISOString(),
     lines,
     totalKzt,
+    source: {
+      button,
+      product: request.source === 'product' && !request.familySlug ? page.title : null,
+      section: context.section,
+      scenario: context.scenario,
+      page: page.page,
+    },
   })
 
   const req = await createLocalReq({}, payload)
@@ -200,6 +249,9 @@ export async function saveSiteRequest(
       data: {
         number,
         kind: request.kind,
+        button,
+        sectionTitle: context.section ?? undefined,
+        scenario: context.scenario ?? undefined,
         mode: 'demo',
         productTitle: page.title,
         page: page.page ?? undefined,

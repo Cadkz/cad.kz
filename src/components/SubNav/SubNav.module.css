@@ -65,11 +65,12 @@
   position: relative;
 }
 
-/* Панель всегда в разметке: закрытие тоже плавное, но быстрее открытия. */
+/* Панель всегда в разметке: закрытие тоже плавное, но быстрее открытия. До 1200 px она
+   выровнена по правому краю пункта, иначе выходит за экран и даёт прокрутку вбок. */
 .dropdown {
   position: absolute;
   top: calc(100% + var(--space-1));
-  left: 0;
+  right: 0;
   display: flex;
   gap: var(--space-6);
   padding: var(--space-4);
@@ -83,6 +84,13 @@
     opacity var(--duration-exit) var(--ease),
     transform var(--duration-exit) var(--ease),
     visibility 0s linear var(--duration-exit);
+}
+
+@media (min-width: 1200px) {
+  .dropdown {
+    right: auto;
+    left: 0;
+  }
 }
 
 .dropdown[data-open="true"] {

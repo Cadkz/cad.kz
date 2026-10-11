@@ -69,6 +69,56 @@ export const homePage: GlobalConfig = {
       ],
     },
     {
+      name: 'popular',
+      label: 'Блок «Популярные решения»',
+      type: 'group',
+      admin: {
+        description:
+          'Сразу под логотипами партнёров: до 8 карточек, две строки по 4. Порядок — по спросу ' +
+          '(документ по CRM, 12.10.2026). Пустой список — блок не показывается.',
+      },
+      fields: [
+        textField('title', 'Заголовок'),
+        { name: 'lead', label: 'Подзаголовок', type: 'textarea' },
+        {
+          name: 'items',
+          label: 'Карточки',
+          type: 'array',
+          maxRows: 8,
+          labels: { singular: 'Карточка', plural: 'Карточки' },
+          fields: [
+            {
+              name: 'product',
+              label: 'Товар',
+              type: 'relationship',
+              relationTo: 'products',
+              admin: {
+                description:
+                  'Карточка берёт с товара название, картинку и цену «от». Можно не выбирать, ' +
+                  'если карточка ведёт на раздел (например, «Сканеры Artec»): тогда заполните ' +
+                  'название и ссылку.',
+              },
+            },
+            textField('title', 'Название (если не как у товара)'),
+            textField('text', 'Коротко (одна строка)'),
+            textField('href', 'Ссылка (если не на товар)'),
+            textField('buttonLabel', 'Текст кнопки (пусто — по сценарию покупки товара)'),
+          ],
+        },
+      ],
+    },
+    {
+      name: 'renew',
+      label: 'Полоса «Продление лицензий»',
+      type: 'group',
+      admin: {
+        description:
+          'Под направлениями: программы чипами ведут на страницу продления с выбранной ' +
+          'программой. Пустой заголовок — полоса не показывается.',
+      },
+      fields: [textField('title', 'Заголовок'), { name: 'text', label: 'Текст', type: 'textarea' }],
+    },
+    {
       name: 'bim',
       label: 'Блок «Внедрение BIM»',
       type: 'group',

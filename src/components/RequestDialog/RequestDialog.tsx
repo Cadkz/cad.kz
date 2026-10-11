@@ -20,6 +20,8 @@ export type RequestLine = {
 
 type Props = {
   kind: RequestKind | null
+  /** Подпись нажатой кнопки — уходит менеджеру вместе с заявкой. */
+  button?: string
   onClose: () => void
   pageTitle: string
   pageProductId: number
@@ -36,6 +38,9 @@ const titles: Record<RequestKind, string> = {
   renew: 'Продление и обновление',
   help: 'Помочь с выбором',
   quote: 'Получить КП',
+  demo: 'Записаться на демонстрацию',
+  consult: 'Консультация инженера',
+  signup: 'Записаться',
 }
 
 const intro: Record<RequestKind, string> = {
@@ -44,7 +49,16 @@ const intro: Record<RequestKind, string> = {
     'Отметьте программы, которые у вас уже есть. Менеджер сам уточнит данные лицензии и подготовит продление или обновление.',
   help: 'Расскажите менеджеру о задачах — он подскажет комплект и редакцию.',
   quote: 'Менеджер подготовит коммерческое предложение на выбранный комплект.',
+  demo: 'Покажем оборудование в работе на ваших задачах. Менеджер договорится о дне и времени.',
+  consult: 'Инженер ответит на вопросы о программе, составе и обновлениях.',
+  signup: 'Менеджер уточнит даты, формат и пришлёт счёт.',
 }
+
+/** Где показать оборудование: уходит менеджеру первой строкой комментария. */
+const places = [
+  { value: 'в офисе CAD.kz', label: 'В офисе CAD.kz' },
+  { value: 'с выездом к нам', label: 'С выездом к нам' },
+]
 
 type Way = 'callback' | 'call' | 'whatsapp'
 /** WhatsApp первым: так быстрее всего, состав уже набран в сообщении. Звонок — запасной путь. */
@@ -75,8 +89,10 @@ function messageText(
 export function RequestDialog(props: Props) {
   const { kind, onClose, pageTitle, lines, choices, quantity, contacts } = props
   const [way, setWay] = useState<Way>(contacts.whatsappHref ? 'whatsapp' : 'callback')
+  const [place, setPlace] = useState(places[0]?.value ?? '')
   if (!kind) return null
-  const text = messageText(kind, pageTitle, lines, choices, quantity)
+  const note = kind === 'demo' ? `Демонстрация: ${place}` : ''
+  const text = `${messageText(kind, pageTitle, lines, choices, quantity)}${note ? `\n${note}` : ''}`
   return (
     <Drawer open onClose={onClose} title={titles[kind]}>
       <div className={styles.body}>
@@ -100,6 +116,15 @@ export function RequestDialog(props: Props) {
             {quantity > 1 && <p className={styles.detail}>Количество: {quantity}</p>}
           </div>
         )}
+        {kind === 'demo' && (
+          <RadioChips
+            legend="Где показать"
+            name="demo-place"
+            value={place}
+            options={places}
+            onChange={setPlace}
+          />
+        )}
         <RadioChips
           legend="Как удобнее связаться"
           name="contact-way"
@@ -107,7 +132,7 @@ export function RequestDialog(props: Props) {
           options={contacts.whatsappHref ? ways : ways.filter((w) => w.value !== 'whatsapp')}
           onChange={(value) => setWay(value as Way)}
         />
-        {way === 'callback' && <CallbackForm {...props} kind={kind} />}
+        {way === 'callback' && <CallbackForm {...props} kind={kind} note={note} />}
         {way === 'call' && (
           <div className={styles.call}>
             {contacts.phones.map((phone) => (

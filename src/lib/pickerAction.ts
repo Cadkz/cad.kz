@@ -1,18 +1,20 @@
-import type { KindProfile } from '@/domain/productKind.mjs'
-import type { RequestKind } from '@/domain/siteRequest.mjs'
-import type { PickerTotal } from './usePicker'
+import type { PickerMeta } from '@/components/PickerProvider/PickerProvider'
+import { type ActionSet, scenarioActions } from '@/domain/buyScenario.mjs'
 
 /**
- * Главное действие страницы товара — одно, его видно и в итоге справа, и в строке внизу
- * на телефоне. Цены нет — «Запросить цену», иначе «Получить КП»: менеджер пришлёт предложение
- * сразу, без корзины. Корзина, продление и помощь с выбором — второстепенные действия.
- * У курсов и услуг подпись своя («Записаться на курс», «Запросить консультацию»), заявка та же.
+ * Кнопки страницы товара — по сценарию покупки (src/domain/buyScenario.mjs): одни и те же
+ * в итоге справа и в строке внизу на телефоне. `cart` — у товара есть цена и в выборе нет
+ * варианта «по запросу» (usePickerCart).
  */
-export function mainAction(
-  total: PickerTotal,
-  profile: KindProfile,
-): { kind: RequestKind; label: string } {
-  const kind = total.state === 'request' ? 'price' : 'quote'
-  if (profile.actionLabel) return { kind, label: profile.actionLabel }
-  return kind === 'price' ? { kind, label: 'Запросить цену' } : { kind, label: 'Получить КП' }
+export function pickerActions(meta: PickerMeta, cart: boolean): ActionSet {
+  return scenarioActions({
+    scenario: meta.scenario ?? 'standard',
+    cart,
+    kind: meta.kind,
+    demo: meta.demo,
+    renewLabel: meta.renewLabel,
+    picks: meta.picks,
+    about: meta.about,
+    family: Boolean(meta.familySlug),
+  })
 }

@@ -1,23 +1,24 @@
 'use client'
 
-import { Check, Minus, Plus, ShoppingCart } from 'lucide-react'
+import { Minus, Plus } from 'lucide-react'
 import { lineLabel } from '@/domain/picker.mjs'
-import { mainAction } from '@/lib/pickerAction'
+import { pickerActions } from '@/lib/pickerAction'
 import { usePickerCart } from '@/lib/usePickerCart'
-import { Button, ButtonLink } from '../Button/Button'
+import { PickerAction } from '../PickerAction/PickerAction'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
 import styles from './PickerSummary.module.css'
 
 /**
- * Итог подбора в боковой колонке: что выбрано, количество, сумма с сервера. Есть цена —
- * главная кнопка «В корзину», вторая — «Получить КП» (`mainAction`); цены нет — одна
- * «Запросить цену». Продление и помощь с выбором — ссылками ниже.
+ * Итог подбора в боковой колонке: что выбрано, количество, сумма с сервера. Кнопки — по сценарию
+ * покупки (src/domain/buyScenario.mjs): у стандартной лицензии с ценой «В корзину» и «Получить КП
+ * на организацию», без цены — «Получить КП»; у корпоративного ПО — «Подобрать решение»,
+ * у сканеров — «Записаться на демонстрацию». Продление и помощь — ссылками ниже.
  */
 export function PickerSummary() {
   const picker = usePickerContext()
-  const { lines, total, quantity, setQuantity, openRequest, meta, view, state, profile } = picker
-  const { cartFirst, canAdd, added, addToCart } = usePickerCart()
-  const action = mainAction(total, profile)
+  const { lines, total, quantity, setQuantity, meta, view, state, profile } = picker
+  const { cartFirst } = usePickerCart()
+  const actions = pickerActions(meta, cartFirst)
   const sumText =
     total.state === 'done' || total.state === 'error'
       ? total.text
@@ -75,34 +76,15 @@ export function PickerSummary() {
           </span>
         </output>
       </div>
-      {cartFirst &&
-        (added ? (
-          <ButtonLink href="/cart" block variant="secondary">
-            <Check size={20} strokeWidth={1.75} aria-hidden="true" />В корзине — оформить
-          </ButtonLink>
-        ) : (
-          <Button block disabled={!canAdd} onClick={addToCart}>
-            <ShoppingCart size={20} strokeWidth={1.75} aria-hidden="true" />В корзину
-          </Button>
-        ))}
-      <Button
-        block
-        variant={cartFirst ? 'outline' : 'primary'}
-        disabled={!lines.length}
-        onClick={() => openRequest(action.kind)}
-      >
-        {action.label}
-      </Button>
-      <div className={styles.links}>
-        {meta.renewLabel && (
-          <Button variant="text" size="sm" onClick={() => openRequest('renew')}>
-            {meta.renewLabel}
-          </Button>
-        )}
-        <Button variant="text" size="sm" onClick={() => openRequest('help')}>
-          Помочь с выбором
-        </Button>
-      </div>
+      <PickerAction action={actions.main} variant="primary" />
+      {actions.second && <PickerAction action={actions.second} variant="outline" />}
+      {actions.links.length > 0 && (
+        <div className={styles.links}>
+          {actions.links.map((action) => (
+            <PickerAction key={action.label} action={action} variant="text" />
+          ))}
+        </div>
+      )}
       <p className={styles.note}>
         Учебные цены демоверсии. Точную стоимость и сроки подтвердит менеджер.
       </p>

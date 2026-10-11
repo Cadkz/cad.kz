@@ -1,8 +1,10 @@
 import { cache } from 'react'
 import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
+import { cardAction, resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
 import { cheapestTotal } from '../domain/picker.mjs'
 import { compareInSection, priorityRank } from '../domain/priority.mjs'
+import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
 import { catalogExtras } from './catalogExtras'
 import { familyLines } from './families'
 import { withFamilies } from './familyCards'
@@ -27,6 +29,8 @@ export type CatalogItem = ProductCardData & {
   tasks: string[]
   /** Приоритет показа (src/domain/priority.mjs): больше — выше в списке. */
   rank: number
+  /** Сценарий покупки: от него кнопки карточки и страницы товара. */
+  scenario: Scenario
   /** Основной раздел (slug): в своём разделе товар стоит выше, чем в чужом. */
   main: string | null
   /** Линейка производителя (id строкой) и порядок в ней: путь «производитель → линейка». */
@@ -60,6 +64,8 @@ export type Facet = {
 
 export type Direction = {
   slug: string
+  /** Своя ссылка вместо каталога направления (плитки «Оборудование», «Обучение и внедрение»). */
+  href?: string
   title: string
   summary: string | null
   icon: string | null
@@ -201,6 +207,8 @@ async function loadCatalog(): Promise<{
 
   const pictures = await cardPictures(payload, products.docs, manufacturers.docs)
   const sectionById = new Map(sections.docs.map((section) => [section.id, section]))
+  // Подразделы (у раздела есть родитель) видны через верхний раздел: src/domain/sectionTree.mjs.
+  const top = topSections(sections.docs.map((s) => ({ id: s.id, parent: relId(s.parent) })))
   const vendorById = new Map(manufacturers.docs.map((m: Manufacturer) => [m.id, m.title]))
   const vendorLevel = new Map(manufacturers.docs.map((m: Manufacturer) => [m.id, m.priority]))
   const titleById = new Map(products.docs.map((product) => [product.id, product.title]))
@@ -212,15 +220,34 @@ async function loadCatalog(): Promise<{
   }
 
   const items = products.docs.map((product): CatalogItem => {
-    const productSections = (product.sections ?? [])
-      .map((section) => sectionById.get(relId(section) ?? -1))
+    const ownIds = (product.sections ?? []).map((section) => relId(section) ?? -1)
+    const productSections = withTopSections(ownIds, top)
+      .map((id) => sectionById.get(id))
       .filter((section): section is Section => Boolean(section))
+    const mainId = relId(product.mainSection) ?? -1
+    const mainSection = sectionById.get(mainId)
+    const topMain = sectionById.get(top.get(mainId) ?? mainId)
+    const group = itemGroup(product.kind, topMain?.menuGroup)
+    const scenario = resolveScenario({
+      own: product.scenario,
+      section: mainSection?.scenario ?? topMain?.scenario,
+      kind: product.kind,
+    })
     const productOffers = offersByProduct.get(product.id) ?? []
     const requires = (product.requiresProducts ?? [])
       .map((item) => titleById.get(relId(item) ?? -1))
       .filter(Boolean)
     const vendorId = relId(product.manufacturer) ?? -1
     const vendor = vendorById.get(vendorId) ?? null
+    const offersCount =
+      product.pageView === 'picker' ? Math.max(productOffers.length, 2) : productOffers.length
+    const cartId = cartOffer(product, productOffers, context)
+    const action = cardAction({
+      scenario,
+      kind: product.kind,
+      demo: Boolean(mainSection?.demoButton ?? topMain?.demoButton),
+      cart: cartId != null,
+    })
     return {
       id: product.id,
       href: productPath(product),
@@ -236,21 +263,21 @@ async function loadCatalog(): Promise<{
           ? pickerFrom(product, offersByProduct, titleById, context)
           : cheapest(productOffers, context),
       // У подбора вариантов всегда несколько: цена показывается с «от».
-      offersCount:
-        product.pageView === 'picker' ? Math.max(productOffers.length, 2) : productOffers.length,
-      cartOfferId: cartOffer(product, productOffers, context),
+      offersCount,
+      // Корзина из карточки — только где сценарий её предлагает (src/domain/buyScenario.mjs).
+      cartOfferId: action.cart ? cartId : null,
+      actionLabel: action.label,
       badge: requires.length ? `Плагин для ${requires.join(' / ')}` : null,
-      group: kindGroup[product.kind],
+      group,
+      scenario,
       // Направления — разделы программ: курсы и оборудование в них не показываются, их направление
       // нужно только подборкам «С этим покупают».
       directions:
-        kindGroup[product.kind] === 'software'
-          ? productSections.filter((s) => s.isDirection).map((s) => s.slug)
-          : [],
+        group === 'software' ? productSections.filter((s) => s.isDirection).map((s) => s.slug) : [],
       types: productSections.filter((s) => !s.isDirection).map((s) => s.slug),
       tasks: (product.tasks ?? []).map((task) => task.title),
       rank: priorityRank(product.priority, vendorLevel.get(vendorId)),
-      main: sectionById.get(relId(product.mainSection) ?? -1)?.slug ?? null,
+      main: topMain?.slug ?? null,
       line: product.line == null ? null : String(relId(product.line)),
       lineOrder: product.lineOrder ?? null,
       scope: 'all',
@@ -273,15 +300,17 @@ async function loadCatalog(): Promise<{
   // Без выбранного раздела: топы продаж первыми, дальше по названию.
   listed.sort(compareInSection())
 
-  const facets = sections.docs.map((section) => ({
-    slug: section.slug,
-    title: section.title,
-    group: section.menuGroup,
-    isDirection: Boolean(section.isDirection),
-    pins: (section.pinnedManufacturers ?? [])
-      .map((m) => vendorById.get(relId(m) ?? -1))
-      .filter((title): title is string => Boolean(title)),
-  }))
+  const facets = sections.docs
+    .filter((section) => relId(section.parent) == null)
+    .map((section) => ({
+      slug: section.slug,
+      title: section.title,
+      group: section.menuGroup,
+      isDirection: Boolean(section.isDirection),
+      pins: (section.pinnedManufacturers ?? [])
+        .map((m) => vendorById.get(relId(m) ?? -1))
+        .filter((title): title is string => Boolean(title)),
+    }))
   const lines = productLines.docs.flatMap((line) => {
     const vendor = vendorById.get(relId(line.manufacturer) ?? -1)
     return vendor

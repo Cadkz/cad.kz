@@ -15,6 +15,10 @@ type Props = {
   quantity: number
   choices: { title: string; value: string }[]
   lines: RequestLine[]
+  /** Подпись нажатой кнопки: менеджер в Битрикс24 видит, откуда заявка. */
+  button?: string
+  /** Строка перед комментарием клиента, например «Демонстрация: в офисе CAD.kz». */
+  note?: string
 }
 
 type Sent = { number: string }
@@ -24,7 +28,7 @@ type Sent = { number: string }
  * (/api/request) вместе с выбором клиента; в демо честно говорим, что менеджерам она не уходит.
  */
 export function CallbackForm(props: Props) {
-  const { kind, pageProductId, familySlug, quantity, choices, lines } = props
+  const { kind, pageProductId, familySlug, quantity, choices, lines, button, note } = props
   const key = useRef<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState('')
@@ -52,8 +56,10 @@ export function CallbackForm(props: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...contact,
+          comment: [note, contact.comment].filter(Boolean).join('\n'),
           idempotencyKey: key.current,
           kind,
+          button,
           pageProductId,
           familySlug,
           quantity,

@@ -9,7 +9,7 @@ import styles from './DirectionCard.module.css'
 export function DirectionCard({ direction }: { direction: Direction }) {
   return (
     <Link
-      href={catalogHref({ direction: direction.slug })}
+      href={direction.href ?? catalogHref({ direction: direction.slug })}
       className={`${styles.card} ${styles[direction.tone]}`}
     >
       <span className={styles.big} aria-hidden="true">

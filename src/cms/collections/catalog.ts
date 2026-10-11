@@ -1,4 +1,5 @@
 import type { CollectionConfig, Field } from 'payload'
+import { SCENARIO_LABELS, SCENARIOS } from '../../domain/buyScenario.mjs'
 import { contentCollection, relationField, seoField, slugField, textField } from '../fields'
 import { productSections } from '../hooks/productSections'
 import { pageViewFields, pickerField } from './picker'
@@ -18,6 +19,7 @@ export const sectionIcons = [
   'printer',
   'monitor',
   'graduation',
+  'compass',
 ] as const
 
 const levelOptions = [
@@ -26,6 +28,31 @@ const levelOptions = [
   { label: 'Обычный', value: 'normal' },
   { label: 'В конце списка', value: 'low' },
 ]
+
+const scenarioOptions = SCENARIOS.map((value) => ({ label: SCENARIO_LABELS[value], value }))
+
+/**
+ * Сценарий покупки (src/domain/buyScenario.mjs): от него кнопки карточки и страницы товара.
+ * У раздела — по умолчанию для его товаров, у товара — свой, если отличается.
+ */
+function scenarioField(forProduct: boolean): Field {
+  return {
+    name: 'scenario',
+    label: 'Сценарий покупки',
+    type: 'select',
+    options: scenarioOptions,
+    admin: {
+      position: 'sidebar',
+      description: forProduct
+        ? 'Пусто — как у основного раздела. Стандартная лицензия: «В корзину», «Получить КП», ' +
+          '«Продлить лицензию». Корпоративное ПО: «Подобрать решение», «Запросить КП», ' +
+          '«Консультация инженера». Оборудование: «Запросить цену» или «Записаться на ' +
+          'демонстрацию». Продление: «Продлить». Услуга: «Записаться» или «Обсудить проект».'
+        : 'Кнопки по умолчанию для товаров раздела. У товара можно выбрать свой сценарий. ' +
+          'Пусто — по типу товара.',
+    },
+  }
+}
 
 /**
  * Приоритет показа в меню, каталоге и подборках (src/domain/priority.mjs). У товара пусто —
@@ -172,7 +199,17 @@ export const sections = contentCollection({
   plural: 'Разделы',
   fields: [
     slugField(),
-    relationField('parent', 'Родительский раздел', 'sections'),
+    {
+      name: 'parent',
+      label: 'Родительский раздел',
+      type: 'relationship',
+      relationTo: 'sections',
+      admin: {
+        description:
+          'Подраздел: в меню, фильтре и на главной не показывается отдельно, его товары видны ' +
+          'в родительском разделе. Например, «Расходные материалы» внутри «Широкоформатной печати».',
+      },
+    },
     { name: 'isDirection', label: 'Направление', type: 'checkbox' },
     {
       name: 'menuGroup',
@@ -206,6 +243,17 @@ export const sections = contentCollection({
       ],
     },
     { name: 'order', label: 'Порядок вывода', type: 'number', defaultValue: 100 },
+    scenarioField(false),
+    {
+      name: 'demoButton',
+      label: 'Запись на демонстрацию',
+      type: 'checkbox',
+      admin: {
+        position: 'sidebar',
+        description:
+          'У оборудования раздела главная кнопка — «Записаться на демонстрацию» (3D-сканеры).',
+      },
+    },
     {
       name: 'pinnedManufacturers',
       label: 'Первыми в разделе: производители по порядку',
@@ -241,6 +289,7 @@ const productCollection = contentCollection({
   fields: [
     slugField(),
     priorityField(true),
+    scenarioField(true),
     ...pageViewFields,
     {
       name: 'kind',

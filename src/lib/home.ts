@@ -57,6 +57,22 @@ export async function getHome() {
       })),
       links: (page.trust?.links ?? []).map((l) => ({ label: l.label, href: l.href })),
     },
+    popular: {
+      title: page.popular?.title || 'Популярные решения',
+      lead: page.popular?.lead ?? null,
+      items: (page.popular?.items ?? []).map((item) => ({
+        key: item.id ?? `${item.title}-${item.href}`,
+        productId:
+          typeof item.product === 'object' && item.product
+            ? item.product.id
+            : (item.product ?? null),
+        title: item.title ?? null,
+        text: item.text ?? null,
+        href: item.href ?? null,
+        buttonLabel: item.buttonLabel ?? null,
+      })),
+    },
+    renew: { title: page.renew?.title ?? null, text: page.renew?.text ?? null },
     bim: {
       eyebrow: page.bim?.eyebrow ?? null,
       title: page.bim?.title ?? null,

@@ -171,11 +171,15 @@ export interface Product {
    */
   priority?: ('flagship' | 'top' | 'normal' | 'low') | null;
   /**
+   * Пусто — как у основного раздела. Стандартная лицензия: «В корзину», «Получить КП», «Продлить лицензию». Корпоративное ПО: «Подобрать решение», «Запросить КП», «Консультация инженера». Оборудование: «Запросить цену» или «Записаться на демонстрацию». Продление: «Продлить». Услуга: «Записаться» или «Обсудить проект».
+   */
+  scenario?: ('standard' | 'corporate' | 'equipment' | 'renewal' | 'service') | null;
+  /**
    * Без своей страницы: прежний адрес ведёт на товар с подбором, где этот товар — вариант, или на страницу семейства (линейки с галочкой «Своя страница семейства»). В каталоге и меню такой товар не показывается отдельно.
    */
   pageView: 'standard' | 'picker' | 'none';
   /**
-   * Например, «Продлить подписку» или «Обновить версию». Пусто — кнопки нет. Продление — заявка менеджеру, без корзины.
+   * Например, «Продлить подписку» или «Обновить версию». Пусто — у стандартной лицензии «Продлить лицензию», у других сценариев кнопки нет. Продление — заявка менеджеру.
    */
   renewLabel?: string | null;
   kind: 'software' | 'hardware' | 'course' | 'service';
@@ -398,6 +402,9 @@ export interface Section {
   title: string;
   status: 'draft' | 'published';
   slug: string;
+  /**
+   * Подраздел: в меню, фильтре и на главной не показывается отдельно, его товары видны в родительском разделе. Например, «Расходные материалы» внутри «Широкоформатной печати».
+   */
   parent?: (number | null) | Section;
   isDirection?: boolean | null;
   menuGroup: 'software' | 'hardware' | 'service';
@@ -417,10 +424,19 @@ export interface Section {
         | 'printer'
         | 'monitor'
         | 'graduation'
+        | 'compass'
       )
     | null;
   tone?: ('navy' | 'blue' | 'graphite') | null;
   order?: number | null;
+  /**
+   * Кнопки по умолчанию для товаров раздела. У товара можно выбрать свой сценарий. Пусто — по типу товара.
+   */
+  scenario?: ('standard' | 'corporate' | 'equipment' | 'renewal' | 'service') | null;
+  /**
+   * У оборудования раздела главная кнопка — «Записаться на демонстрацию» (3D-сканеры).
+   */
+  demoButton?: boolean | null;
   /**
    * Например, в «Геотехнике»: Fine Software (GEO5), ЛИРА-FEM, SCAD. Порядок можно менять перетаскиванием. Работает внутри одного уровня приоритета: топ продаж всё равно выше обычного товара.
    */
@@ -661,7 +677,10 @@ export interface Order {
 export interface SiteRequest {
   id: number;
   number: string;
-  kind: 'price' | 'renew' | 'help' | 'quote';
+  kind: 'price' | 'renew' | 'help' | 'quote' | 'demo' | 'consult' | 'signup';
+  button?: string | null;
+  sectionTitle?: string | null;
+  scenario?: string | null;
   mode: 'demo' | 'live';
   productTitle: string;
   page?: string | null;
@@ -916,6 +935,7 @@ export interface ProductsSelect<T extends boolean = true> {
   status?: T;
   slug?: T;
   priority?: T;
+  scenario?: T;
   pageView?: T;
   renewLabel?: T;
   kind?: T;
@@ -1040,6 +1060,8 @@ export interface SectionsSelect<T extends boolean = true> {
   icon?: T;
   tone?: T;
   order?: T;
+  scenario?: T;
+  demoButton?: T;
   pinnedManufacturers?: T;
   crossSections?: T;
   legacyKey?: T;
@@ -1257,6 +1279,9 @@ export interface OrdersSelect<T extends boolean = true> {
 export interface SiteRequestsSelect<T extends boolean = true> {
   number?: T;
   kind?: T;
+  button?: T;
+  sectionTitle?: T;
+  scenario?: T;
   mode?: T;
   productTitle?: T;
   page?: T;
@@ -1461,6 +1486,33 @@ export interface HomePage {
         }[]
       | null;
   };
+  /**
+   * Сразу под логотипами партнёров: до 8 карточек, две строки по 4. Порядок — по спросу (документ по CRM, 12.10.2026). Пустой список — блок не показывается.
+   */
+  popular?: {
+    title?: string | null;
+    lead?: string | null;
+    items?:
+      | {
+          /**
+           * Карточка берёт с товара название, картинку и цену «от». Можно не выбирать, если карточка ведёт на раздел (например, «Сканеры Artec»): тогда заполните название и ссылку.
+           */
+          product?: (number | null) | Product;
+          title?: string | null;
+          text?: string | null;
+          href?: string | null;
+          buttonLabel?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * Под направлениями: программы чипами ведут на страницу продления с выбранной программой. Пустой заголовок — полоса не показывается.
+   */
+  renew?: {
+    title?: string | null;
+    text?: string | null;
+  };
   bim?: {
     eyebrow?: string | null;
     title?: string | null;
@@ -1584,6 +1636,28 @@ export interface HomePageSelect<T extends boolean = true> {
               href?: T;
               id?: T;
             };
+      };
+  popular?:
+    | T
+    | {
+        title?: T;
+        lead?: T;
+        items?:
+          | T
+          | {
+              product?: T;
+              title?: T;
+              text?: T;
+              href?: T;
+              buttonLabel?: T;
+              id?: T;
+            };
+      };
+  renew?:
+    | T
+    | {
+        title?: T;
+        text?: T;
       };
   bim?:
     | T

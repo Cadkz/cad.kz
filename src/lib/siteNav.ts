@@ -7,11 +7,36 @@ import { catalogHref } from './navigationHrefs'
  */
 /** Вторая строка шапки (от 960 px) и мобильное меню: разделы сайта после каталога и поиска. */
 export const sectionLinks = [
+  // По CRM продления не видны по названию сделки — отдельный вход первым (решение 12.10.2026).
+  { title: 'Продление лицензий', href: '/renew' },
   { title: 'Обучение', href: catalogHref({ group: 'service', type: 'training' }) },
   { title: 'Внедрение BIM', href: catalogHref({ group: 'service', type: 'consulting' }) },
   { title: 'Акции', href: '/news?kind=promotion' },
   // Новости и статьи — один раздел: на обеих страницах переключатель (PublicationTabs).
   { title: 'Новости и статьи', href: '/news', also: ['/articles'] },
+]
+
+/**
+ * Плитки после направлений на главной: оборудование и услуги — тоже входы в каталог.
+ * С ними 10 направлений по CRM заполняют сетку без пустого места (12 плиток: 4 ряда по 3).
+ */
+export const directionExtras = [
+  {
+    slug: 'hardware',
+    href: catalogHref({ group: 'hardware' }),
+    title: 'Оборудование',
+    summary: '3D-сканеры Artec, плоттеры и сканеры чертежей, рабочие станции.',
+    icon: 'scan',
+    tone: 'graphite' as const,
+  },
+  {
+    slug: 'service',
+    href: catalogHref({ group: 'service' }),
+    title: 'Обучение и внедрение',
+    summary: 'Курсы учебного центра, внедрение BIM и консалтинг.',
+    icon: 'graduation',
+    tone: 'blue' as const,
+  },
 ]
 
 /** «Новости и статьи»: переключатель между типами публикаций, адреса прежние. */
@@ -67,6 +92,11 @@ export const footerColumns = [
 /** Страницы сайта для подсказок поиска: название и слова, по которым её ищут. */
 export const searchPages = [
   { title: 'Каталог', href: catalogHref(), words: 'все товары программы оборудование' },
+  {
+    title: 'Продление лицензий',
+    href: '/renew',
+    words: 'продлить продление обновить обновление подписка лицензия',
+  },
   { title: 'Новости', href: '/news', words: '' },
   { title: 'Статьи', href: '/articles', words: 'обзоры' },
   { title: 'Акции', href: '/news?kind=promotion', words: 'скидки распродажа' },
