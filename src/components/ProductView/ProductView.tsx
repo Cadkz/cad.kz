@@ -1,7 +1,6 @@
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
 import { Faq } from '@/components/Faq/Faq'
-import { Grid } from '@/components/Grid/Grid'
 import { PickerBar } from '@/components/PickerBar/PickerBar'
 import { PickerProvider } from '@/components/PickerProvider/PickerProvider'
 import { PickerSteps } from '@/components/PickerSteps/PickerSteps'
@@ -10,17 +9,19 @@ import { ProductAbout } from '@/components/ProductAbout/ProductAbout'
 import { ProductGallery } from '@/components/ProductGallery/ProductGallery'
 import { ProductHeader } from '@/components/ProductHeader/ProductHeader'
 import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
-import { ProductLinkCard } from '@/components/ProductLinkCard/ProductLinkCard'
+import { ProductPicks } from '@/components/ProductPicks/ProductPicks'
 import { ProductSection } from '@/components/ProductSection/ProductSection'
 import { PropertyList } from '@/components/PropertyList/PropertyList'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { kindProfile } from '@/domain/productKind.mjs'
+import { getCatalog } from '@/lib/catalog'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
 import type { ProductPage, RelatedProduct } from '@/lib/product'
 import { getRecommendations } from '@/lib/recommendations'
 import { parseBody } from '@/lib/richText'
+import type { PickItem } from '../PickRow/PickRow'
 
 const groupLabels = {
   software: 'Программное обеспечение',
@@ -35,18 +36,17 @@ const groupKeys = {
   service: 'service',
 }
 
-function Related({ title, items }: { title: string; items: RelatedProduct[] }) {
-  if (!items.length) return null
-  return (
-    <ProductSection title={title} standalone>
-      <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
-        {items.slice(0, 6).map((item, i) => (
-          <Reveal as="li" key={item.slug} step={i}>
-            <ProductLinkCard href={item.href} title={item.title} vendor={item.vendor} />
-          </Reveal>
-        ))}
-      </Grid>
-    </ProductSection>
+/** Строки подборки с картинкой, ценой и корзиной — из того же набора, что каталог. */
+function toPicks(items: RelatedProduct[], byHref: Map<string, PickItem>): PickItem[] {
+  return items.map(
+    (item) =>
+      byHref.get(item.href) ?? {
+        ...item,
+        picture: null,
+        priceFrom: null,
+        offersCount: 0,
+        cartOfferId: null,
+      },
   )
 }
 
@@ -63,10 +63,12 @@ export async function ProductView({
   product: ProductPage
   pick: number | null
 }) {
-  const [{ cross, similar }, contacts] = await Promise.all([
+  const [{ cross, similar }, contacts, catalog] = await Promise.all([
     cms().then((payload) => getRecommendations(payload, product.id)),
     getContacts(),
+    getCatalog(),
   ])
+  const byHref = new Map<string, PickItem>(catalog.items.map((item) => [item.href, item]))
   const direction = product.sections.find((s) => s.isDirection)
   const guided = product.pageView === 'picker'
   const profile = kindProfile(product.kind)
@@ -147,8 +149,22 @@ export async function ProductView({
           </ProductLayout>
           <PickerBar />
         </PickerProvider>
-        <Related title="С этим покупают" items={cross} />
-        <Related title={profile.similar} items={similar} />
+        <ProductPicks
+          panels={[
+            {
+              id: 'cross',
+              title: 'С этим покупают',
+              sub: 'Часто берут вместе с этим товаром.',
+              items: toPicks(cross, byHref),
+            },
+            {
+              id: 'similar',
+              title: profile.similar,
+              sub: 'Другие варианты под ту же задачу.',
+              items: toPicks(similar, byHref),
+            },
+          ]}
+        />
       </Container>
     </main>
   )

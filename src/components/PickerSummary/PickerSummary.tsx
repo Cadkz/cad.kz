@@ -1,32 +1,23 @@
 'use client'
 
-import { Minus, Plus } from 'lucide-react'
-import { useState } from 'react'
+import { Check, Minus, Plus, ShoppingCart } from 'lucide-react'
 import { lineLabel } from '@/domain/picker.mjs'
 import { mainAction } from '@/lib/pickerAction'
+import { usePickerCart } from '@/lib/usePickerCart'
 import { Button, ButtonLink } from '../Button/Button'
-import { useCart } from '../CartProvider/CartProvider'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
 import styles from './PickerSummary.module.css'
 
 /**
- * Итог подбора в боковой колонке: что выбрано, количество, сумма с сервера. Одно главное
- * действие (`mainAction`), ниже — «В корзину» для закупки нескольких программ, продление и
- * помощь с выбором ссылками.
+ * Итог подбора в боковой колонке: что выбрано, количество, сумма с сервера. Есть цена —
+ * главная кнопка «В корзину», вторая — «Получить КП» (`mainAction`); цены нет — одна
+ * «Запросить цену». Продление и помощь с выбором — ссылками ниже.
  */
 export function PickerSummary() {
   const picker = usePickerContext()
   const { lines, total, quantity, setQuantity, openRequest, meta, view, state, profile } = picker
-  const { add, ready } = useCart()
-  const [added, setAdded] = useState(false)
+  const { cartFirst, canAdd, added, addToCart } = usePickerCart()
   const action = mainAction(total, profile)
-
-  function toCart() {
-    for (const line of lines) if (line.offer) add({ offerId: line.offer.id, quantity })
-    setAdded(true)
-  }
-
-  const canBuy = !meta.familySlug && total.state === 'done' && ready
   const sumText =
     total.state === 'done' || total.state === 'error'
       ? total.text
@@ -84,19 +75,24 @@ export function PickerSummary() {
           </span>
         </output>
       </div>
-      <Button block disabled={!lines.length} onClick={() => openRequest(action.kind)}>
-        {action.label}
-      </Button>
-      {canBuy &&
+      {cartFirst &&
         (added ? (
-          <ButtonLink href="/cart" block variant="outline">
-            Добавлено — перейти в корзину
+          <ButtonLink href="/cart" block variant="secondary">
+            <Check size={20} strokeWidth={1.75} aria-hidden="true" />В корзине — оформить
           </ButtonLink>
         ) : (
-          <Button block variant="outline" onClick={toCart}>
-            В корзину
+          <Button block disabled={!canAdd} onClick={addToCart}>
+            <ShoppingCart size={20} strokeWidth={1.75} aria-hidden="true" />В корзину
           </Button>
         ))}
+      <Button
+        block
+        variant={cartFirst ? 'outline' : 'primary'}
+        disabled={!lines.length}
+        onClick={() => openRequest(action.kind)}
+      >
+        {action.label}
+      </Button>
       <div className={styles.links}>
         {meta.renewLabel && (
           <Button variant="text" size="sm" onClick={() => openRequest('renew')}>

@@ -32,6 +32,7 @@ export function withFamilies(
       summary: family.summary ?? first.summary,
       priceFrom,
       offersCount: Math.max(offers, 2),
+      cartOfferId: null,
       badge: null,
       directions: [...new Set(list.flatMap((item) => item.directions))],
       types: [...new Set(list.flatMap((item) => item.types))],

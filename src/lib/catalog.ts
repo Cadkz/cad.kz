@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
 import { compareInSection, priorityRank } from '../domain/priority.mjs'
@@ -73,6 +74,22 @@ function cheapest(offers: Offer[], context: PricingContext) {
   return best?.formatted ?? null
 }
 
+/**
+ * Предложение, которое можно сразу положить в корзину из карточки: ровно одна комплектация
+ * с ценой и обычная страница товара. При нескольких комплектациях или подборе по шагам
+ * выбор — на странице товара, чтобы в корзину не попал случайный вариант (решение 08.10.2026).
+ */
+function cartOffer(product: Product, offers: Offer[], context: PricingContext) {
+  const [only] = offers
+  if (offers.length !== 1 || !only || product.pageView === 'picker') return null
+  try {
+    quoteOffer(only, context)
+    return String(only.id)
+  } catch {
+    return null
+  }
+}
+
 export async function getDirections(): Promise<Direction[]> {
   const payload = await cms()
   const { docs } = await payload.find({
@@ -91,8 +108,13 @@ export async function getDirections(): Promise<Direction[]> {
   }))
 }
 
-/** Все опубликованные товары с ценой «от» и признаками фильтра. Один набор запросов на страницу. */
-export async function getCatalog(): Promise<{
+/**
+ * Все опубликованные товары с ценой «от» и признаками фильтра. Один набор запросов на страницу:
+ * повторный вызов в том же запросе (каталог, поиск, подборки на странице товара) берёт готовое.
+ */
+export const getCatalog = cache(loadCatalog)
+
+async function loadCatalog(): Promise<{
   items: CatalogItem[]
   facets: Facet[]
   lines: CatalogLine[]
@@ -159,6 +181,7 @@ export async function getCatalog(): Promise<{
       picture: pictures.get(product.id) ?? null,
       priceFrom: cheapest(productOffers, context),
       offersCount: productOffers.length,
+      cartOfferId: cartOffer(product, productOffers, context),
       badge: requires.length ? `Плагин для ${requires.join(' / ')}` : null,
       group: kindGroup[product.kind],
       // Направления — разделы программ: курсы и оборудование в них не показываются, их направление
