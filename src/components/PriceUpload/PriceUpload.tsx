@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { AdminButton } from '@/components/AdminButton/AdminButton'
+import { FileDrop } from '@/components/FileDrop/FileDrop'
 import { PriceColumns } from '@/components/PriceColumns/PriceColumns'
 import { PriceMatchTable } from '@/components/PriceMatchTable/PriceMatchTable'
 import { downloadCurrent, type PriceVendor, usePriceList } from '@/lib/usePriceList'
@@ -88,13 +89,10 @@ export function PriceUpload({ vendors }: { vendors: PriceVendor[] }) {
 
       <section className={styles.step}>
         <h2 className={styles.title}>2. Файл прайса</h2>
-        <input
-          type="file"
+        <FileDrop
           accept=".xlsx,.ods,.csv,.xls,.html,.htm"
-          onChange={(e) => {
-            const picked = e.target.files?.[0]
-            if (picked) list.chooseFile(picked)
-          }}
+          fileName={list.file?.name ?? null}
+          onFile={(picked) => list.chooseFile(picked)}
         />
         <p className={styles.hint}>
           Excel (.xlsx), выгрузка 1С (.ods) или CSV. Файл читается здесь, в браузере, и никуда не
