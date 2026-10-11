@@ -2,25 +2,33 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { deflateRawSync } from 'node:zlib'
 import {
+  codeName,
   guessColumns,
   matchRows,
+  oneCPriceKind,
   parsePrice,
   priceLabel,
   priceRows,
   priceSets,
+  priceSheet,
+  vendorFromFile,
 } from '../src/domain/priceList.mjs'
 import { readSpreadsheet, SpreadsheetError } from '../src/domain/spreadsheet.mjs'
 
 /** Минимальный .xlsx: zip с книгой, одним листом и общими строками (часть файлов сжата). */
 function xlsx(sheetXml, strings) {
-  const files = {
+  return zip({
     'xl/workbook.xml':
       '<workbook><sheets><sheet name="Прайс SCAD" sheetId="1" r:id="rId1"/></sheets></workbook>',
     'xl/_rels/workbook.xml.rels':
       '<Relationships><Relationship Id="rId1" Target="worksheets/sheet1.xml"/></Relationships>',
     'xl/sharedStrings.xml': `<sst>${strings.map((s) => `<si><t>${s}</t></si>`).join('')}</sst>`,
     'xl/worksheets/sheet1.xml': sheetXml,
-  }
+  })
+}
+
+/** Zip из файлов: чётные сжаты, нечётные хранятся как есть (как в настоящих архивах). */
+function zip(files) {
   const local = []
   const central = []
   let offset = 0
@@ -101,6 +109,7 @@ test('колонки по заголовкам; из двух цен — та, �
     priceCol: 3,
     idCol: -1,
     groupCol: -1,
+    codeCol: -1,
     prices: [],
   })
 })
@@ -260,4 +269,75 @@ test('xlsx: объединённая по вертикали группа пов
     ['Сателлиты', 'КРИСТАЛЛ', '900'],
     ['Сателлиты', 'АРБАТ'],
   ])
+})
+
+/** Выгрузка прайса из 1С в .ods: служебный лист «Вид цены» и лист с товарами. */
+function ods() {
+  const cell = (v) =>
+    typeof v === 'number'
+      ? `<table:table-cell office:value-type="float" office:value="${v}"><text:p>${String(v).replace('.', ',')}</text:p></table:table-cell>`
+      : `<table:table-cell office:value-type="string"><text:p>${v}</text:p></table:table-cell>`
+  const row = (cells) =>
+    `<table:table-row>${cells.map(cell).join('')}<table:table-cell table:number-columns-repeated="1020"/></table:table-row>`
+  const content =
+    '<office:document-content><office:body><office:spreadsheet>' +
+    `<table:table table:name="Лист1">${row(['Уникальный идентификатор', 'Вид цены', 'Номер колонки "Цена"'])}${row(['261f', 'Рекомендованная с НДС', 8])}</table:table>` +
+    `<table:table table:name="Лист_1">${row(['№', 'Артикул', 'Товар', 'Цена'])}<table:table-row table:number-rows-repeated="1"><table:table-cell table:number-columns-repeated="4"/></table:table-row>` +
+    row([
+      1,
+      'GCS27L-CT-10000000',
+      'Право на использование программного обеспечения ПК GeoniCS (2027.x, локальная лицензия (1 год))',
+      1145337.6,
+    ]) +
+    row([2, 'GCS27L-CT-20000000', 'GeoniCS (2027.x, локальная лицензия (2 года))', 2230958.4]) +
+    row([3, 'GCS27E-CT-10000000', 'GeoniCS учебная', 'по запросу']) +
+    row([4, 'GCS27A-CT-10000000', 'GeoniCS доп. место', 900]) +
+    '<table:table-row table:number-rows-repeated="1048000"><table:table-cell table:number-columns-repeated="1024"/></table:table-row>' +
+    '</table:table></office:spreadsheet></office:body></office:document-content>'
+  return zip({ mimetype: 'application/vnd.oasis.opendocument.spreadsheet', 'content.xml': content })
+}
+
+test('ods из 1С: служебный лист пропускается, точные числа, артикул, НДС по виду цены', async () => {
+  const sheets = await readSpreadsheet(ods())
+  assert.deepEqual(
+    sheets.map((s) => s.name),
+    ['Лист1', 'Лист_1'],
+  )
+  assert.equal(sheets[1].rows.length, 6, 'хвост пустых строк отброшен')
+  assert.equal(priceSheet(sheets), 1)
+  assert.deepEqual(oneCPriceKind(sheets), { includesVat: true, kind: 'Рекомендованная с НДС' })
+  const columns = guessColumns(sheets[1].rows)
+  assert.equal(columns.codeCol, 1)
+  const rows = priceRows(sheets[1].rows, columns)
+  assert.equal(rows[0].price, '1145337.6')
+  assert.equal(rows[0].code, 'GCS27L-CT-10000000')
+  assert.equal(rows[2].price, null)
+})
+
+test('по запомненному артикулу строка находится, даже если название сменилось', () => {
+  const offers = [
+    { id: 7, label: 'Совсем другое название', names: [codeName('GCS27L-CT-10000000')] },
+    { id: 8, label: 'GeoniCS локальная 1 год', names: [] },
+  ]
+  const [result] = matchRows(
+    [{ index: 1, name: 'GeoniCS 2028.x новая', id: '', price: '1', code: 'GCS27L-CT-10000000' }],
+    offers,
+  )
+  assert.equal(result.offerId, 7)
+  assert.equal(result.status, 'saved')
+})
+
+test('производитель по имени файла из папки «Прайсы»', () => {
+  const vendors = [
+    'Autodesk',
+    'SCAD Soft',
+    'Fine Software',
+    'CSoft Development',
+    'НТП Трубопровод',
+  ].map((title, id) => ({ id, title }))
+  assert.equal(vendorFromFile('Прайс_SCAD_2026-09-15.xlsx', vendors), 1)
+  assert.equal(vendorFromFile('Прайс_FinSoft_GEO5_2026-09-15.ods', vendors), 2)
+  assert.equal(vendorFromFile('Прайс_НТП_Трубопровод_2026-09-24.ods', vendors), 4)
+  assert.equal(vendorFromFile('Прайс_2026-09-24.xlsx', vendors), null)
+  assert.equal(vendorFromFile('price.xlsx', vendors), null)
 })

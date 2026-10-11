@@ -12,11 +12,13 @@
  * становится своей строкой с подписью колонки, пусто — одна цена из priceCol. groupCol — колонка
  * группы слева от названия (объединённые ячейки «Ж/Б конструкции (RC)»).
  * @typedef {{ col: number, label: string }} PriceColumn
+ * codeCol — артикул (в выгрузке 1С: «SCAD RCS392», «GS-G-S-001»): по нему строка узнаётся и
+ * в следующих прайсах, когда название меняется вместе с версией.
  * @typedef {{ headerRow: number, nameCol: number, priceCol: number, idCol: number,
- *   groupCol?: number, prices?: PriceColumn[] }} Columns
+ *   groupCol?: number, codeCol?: number, prices?: PriceColumn[] }} Columns
  * @typedef {{ title: string, prices: PriceColumn[], kzt: boolean }} PriceSet
  */
-/** @typedef {{ index: number, name: string, id: string, price: string | null, alt?: string[] }} PriceRow */
+/** @typedef {{ index: number, name: string, id: string, price: string | null, alt?: string[], code?: string }} PriceRow */
 /** @typedef {{ id: number, label: string, names: string[] }} OfferCandidate */
 /**
  * @typedef {'id' | 'saved' | 'auto' | 'check' | 'none' | 'noPrice'} MatchStatus
@@ -26,6 +28,7 @@
 const NAME_HEAD = /наимен|назван|продукт|товар|программ|модул|позици|описани|name|product|item/i
 const PRICE_HEAD = /цен|стоим|price|сумм|руб|тенге|тг|₸|eur|usd|€|\$/i
 const ID_HEAD = /^\s*(id|ид|id предложения)\s*$/i
+const CODE_HEAD = /артикул|^\s*код\s*$|sku|article|part\s*n/i
 
 /** Не больше этого — за ID не принимаем: это может быть номер строки или артикул. */
 const MAX_ID = 10_000_000
@@ -41,7 +44,94 @@ export function guessColumns(rows) {
   if (base.headerRow < 0) return base
   const groupCol = guessGroup(rows, base)
   const sets = priceSets(rows, base)
-  return { ...base, groupCol, prices: sets[0]?.prices ?? [] }
+  return { ...base, groupCol, codeCol: guessCode(rows, base), prices: sets[0]?.prices ?? [] }
+}
+
+/**
+ * Колонка артикула: по заголовку («Артикул»), а без заголовка — колонка сразу слева от названия
+ * с короткими кодами почти в каждой строке (не номера по порядку и не группа).
+ * @param {string[][]} rows
+ * @param {Columns} columns
+ */
+function guessCode(rows, columns) {
+  const head = (rows[columns.headerRow] ?? []).findIndex(
+    (cell, i) => CODE_HEAD.test(cell) && i !== columns.nameCol && i !== columns.priceCol,
+  )
+  if (head >= 0) return head
+  const col = columns.nameCol - 1
+  if (col < 0 || (rows[columns.headerRow]?.[col] ?? '').trim()) return -1
+  const body = rows
+    .slice(columns.headerRow + 1, columns.headerRow + 200)
+    .filter((row) => (row[columns.nameCol] ?? '').trim())
+  const codes = body.filter((row) => {
+    const value = (row[col] ?? '').trim()
+    return value && value.length <= 40 && parsePrice(value) == null && /\d/.test(value)
+  })
+  return body.length && codes.length >= body.length * 0.8 ? col : -1
+}
+
+/**
+ * Лист с прайсом: первый, где нашёлся заголовок «название + цена» и хотя бы три цены. В выгрузке
+ * 1С первый лист служебный («Вид цены», номера колонок), прайс — на втором.
+ * @param {{ rows: string[][] }[]} sheets
+ */
+export function priceSheet(sheets) {
+  const index = sheets.findIndex((sheet) => {
+    const base = guessBase(sheet.rows)
+    return (
+      base.headerRow >= 0 && countPrices(sheet.rows.slice(base.headerRow + 1), base.priceCol) >= 3
+    )
+  })
+  return Math.max(index, 0)
+}
+
+/**
+ * Служебный лист выгрузки 1С («Вид цены: Рекомендованная с НДС»): цены в тенге, НДС по
+ * названию вида цены. Не выгрузка 1С — null, настройки берутся у производителя.
+ * @param {{ rows: string[][] }[]} sheets
+ * @returns {{ includesVat: boolean, kind: string } | null}
+ */
+export function oneCPriceKind(sheets) {
+  for (const sheet of sheets) {
+    const head = sheet.rows.findIndex((row) => row.some((cell) => /^вид цены$/i.test(cell.trim())))
+    if (head < 0) continue
+    const col = sheet.rows[head].findIndex((cell) => /^вид цены$/i.test(cell.trim()))
+    const kinds = sheet.rows
+      .slice(head + 1)
+      .map((row) => (row[col] ?? '').trim())
+      .filter(Boolean)
+    const kind = kinds.find((k) => /рекоменд|розн/i.test(k)) ?? kinds[0] ?? ''
+    return { includesVat: /с\s*ндс/i.test(kind), kind }
+  }
+  return null
+}
+
+/**
+ * Производитель по имени файла из папки «Прайсы» (`Прайс_Вендор_ГГГГ-ММ-ДД.xlsx`): слова между
+ * «Прайс» и датой сравниваются с названиями производителей (целиком или по первым трём буквам:
+ * «FinSoft» → «Fine Software»). Не нашёлся или несколько — null, производитель выбирают вручную.
+ * @param {string} fileName
+ * @param {{ id: number, title: string }[]} vendors
+ * @returns {number | null}
+ */
+export function vendorFromFile(fileName, vendors) {
+  const words = (/** @type {string} */ text) =>
+    text
+      .toLowerCase()
+      .replace(/ё/g, 'е')
+      .split(/[^a-zа-я0-9]+/)
+      .filter((w) => w.length >= 3 && !/^(прайс|price|xlsx|ods|csv|\d+)$/.test(w))
+  const file = words(fileName.replace(/\d{4}-\d{2}-\d{2}.*$/, ''))
+  if (!file.length) return null
+  const scored = vendors.map((vendor) => {
+    const own = words(vendor.title)
+    const exact = file.filter((w) => own.includes(w)).length
+    const near = file.filter((w) => own.some((o) => o.slice(0, 3) === w.slice(0, 3))).length
+    return { id: vendor.id, score: exact * 2 + near }
+  })
+  const top = Math.max(0, ...scored.map((v) => v.score))
+  const best = scored.filter((v) => v.score === top)
+  return top > 0 && best.length === 1 ? (best[0]?.id ?? null) : null
 }
 
 /** @param {string[][]} rows @returns {Columns} */
@@ -206,7 +296,7 @@ export function parsePrice(raw) {
 }
 
 const STOP = new Set(
-  'на для и с в по от до из к или шт ед лицензия лицензии лицензию программа программное обеспечение право использование использования базовая версия'.split(
+  'на для и с в по от до из к или шт ед лицензия лицензии лицензию программа программное обеспечение право использование использования базовая версия программы эвм пк'.split(
     ' ',
   ),
 )
@@ -267,6 +357,9 @@ export function similarity(row, offer) {
   return Math.max((2 * common) / total, (0.9 * common) / weigh(row))
 }
 
+/** Как артикул запоминается у предложения среди «Названий в прайсах»: «Артикул: SCAD RCS392». */
+export const codeName = (/** @type {string} */ code) => `Артикул: ${code}`
+
 /** Нормализованное название для запоминания и точного сравнения. */
 export const nameKey = (/** @type {string} */ text) => nameTokens(text).join(' ')
 
@@ -293,6 +386,8 @@ export function matchRows(rows, offers) {
     const id = Number(row.id)
     if (row.id && Number.isSafeInteger(id) && id > 0 && id < MAX_ID && byId.has(id))
       return { ...base, offerId: id, status: 'id', score: 1 }
+    const byCode = row.code ? saved.get(nameKey(codeName(row.code))) : undefined
+    if (byCode != null) return { ...base, offerId: byCode, status: 'saved', score: 1 }
     const names = [row.name, ...(row.alt ?? [])]
     const remembered = names.map((name) => saved.get(nameKey(name))).find((id) => id != null)
     if (remembered != null) return { ...base, offerId: remembered, status: 'saved', score: 1 }
@@ -400,11 +495,21 @@ export function priceRows(rows, columns) {
     if (!name || parsePrice(name) != null) return
     if (group === name || parsePrice(group) != null) group = ''
     const id = columns.idCol >= 0 ? (cells[columns.idCol] ?? '').trim() : ''
+    const codeCol = columns.codeCol ?? -1
+    const code = codeCol >= 0 ? clean(cells[codeCol]) : ''
+    const extra = code ? { code } : {}
     const full = group ? `${group} — ${name}` : name
     const parts = group ? [group, name] : []
     if (!prices) {
       const price = parsePrice(cells[columns.priceCol] ?? '')
-      result.push({ index, name: full, id, price, ...(parts.length ? { alt: parts } : {}) })
+      result.push({
+        index,
+        name: full,
+        id,
+        price,
+        ...extra,
+        ...(parts.length ? { alt: parts } : {}),
+      })
       return
     }
     const values = prices
@@ -422,6 +527,7 @@ export function priceRows(rows, columns) {
         name: label ? `${full} · ${label}` : full,
         id,
         price: value.price,
+        ...(code && values.length === 1 ? extra : {}),
         ...(parts.length ? { alt: parts.map(withLabel) } : {}),
       })
     }

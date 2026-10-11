@@ -4,9 +4,12 @@ import { useState } from 'react'
 import {
   type Columns,
   guessColumns,
+  oneCPriceKind,
   type PriceSet,
   priceRows,
   priceSets,
+  priceSheet,
+  vendorFromFile,
 } from '@/domain/priceList.mjs'
 import { readSpreadsheet, type Sheet, SpreadsheetError } from '@/domain/spreadsheet.mjs'
 
@@ -30,6 +33,8 @@ export type Settings = {
 export type MatchRow = {
   index: number
   name: string
+  /** Артикул из прайса: запоминается у предложения вместе с названием. */
+  code: string | null
   price: string | null
   offerId: number | null
   status: 'id' | 'saved' | 'auto' | 'check' | 'none' | 'noPrice' | 'manual'
@@ -104,14 +109,14 @@ export function usePriceList(vendors: PriceVendor[]) {
    * Колонки по листу. Если цен два набора (тенге с НДС и евро), по умолчанию — тот, что в валюте
    * нынешних цен производителя на сайте: так цены остаются привязаны к тем же курсам.
    */
-  function setupColumns(sheetRows: string[][]) {
+  function setupColumns(sheetRows: string[][], base: Settings = settings) {
     const guessed = guessColumns(sheetRows)
     const found = priceSets(sheetRows, guessed)
-    const vendor = vendors.find((v) => v.id === settings.vendor)
+    const vendor = vendors.find((v) => v.id === base.vendor)
     const preferred =
       found.find((set) => (vendor?.currency === 'KZT') === set.kzt) ?? found[0] ?? null
     setColumns(preferred ? { ...guessed, prices: preferred.prices } : guessed)
-    if (preferred && found.length > 1) setSettings(settingsFor(preferred, settings))
+    if (preferred && found.length > 1) setSettings(settingsFor(preferred, base))
   }
 
   function chooseSet(index: number) {
@@ -139,10 +144,24 @@ export function usePriceList(vendors: PriceVendor[]) {
     setPreview(null)
     try {
       const sheets = await readSpreadsheet(new Uint8Array(await picked.arrayBuffer()))
-      // Актуальный лист прайса — первый (в прайсе SCAD остальные — история по старым курсам).
+      // Актуальный лист прайса — первый с таблицей «название + цена» (в прайсе SCAD остальные —
+      // история по старым курсам, в выгрузке 1С первый лист служебный).
+      const index = priceSheet(sheets)
       setFile({ name: picked.name, sheets })
-      setSheet(0)
-      setupColumns(sheets[0]?.rows ?? [])
+      setSheet(index)
+      // Файл из папки «Прайсы» (`Прайс_Вендор_ГГГГ-ММ-ДД`) сам выбирает производителя, а выгрузка
+      // 1С — тенге и НДС по виду цены. Всё можно поправить вручную до проверки.
+      const vendorId = vendorFromFile(picked.name, vendors)
+      const oneC = oneCPriceKind(sheets)
+      const vendor = vendors.find((v) => v.id === (vendorId ?? settings.vendor))
+      const next = {
+        vendor: vendor?.id ?? settings.vendor,
+        currency: oneC ? 'KZT' : (vendor?.currency ?? settings.currency),
+        includesVat: oneC ? oneC.includesVat : (vendor?.includesVat ?? settings.includesVat),
+        sourceVat: oneC ? '16' : (vendor?.sourceVat ?? settings.sourceVat),
+      }
+      setSettings(next)
+      setupColumns(sheets[index]?.rows ?? [], next)
     } catch (problem) {
       setFile(null)
       setError(
@@ -228,7 +247,12 @@ export function usePriceList(vendors: PriceVendor[]) {
         action: 'apply',
         ...settings,
         fileName: file?.name,
-        items: chosen.map((row) => ({ offerId: row.offerId, amount: row.price, name: row.name })),
+        items: chosen.map((row) => ({
+          offerId: row.offerId,
+          amount: row.price,
+          name: row.name,
+          code: row.code,
+        })),
       })
       setDone(
         `Записано: цена изменилась у ${result.changed}, без изменений ${result.same}` +

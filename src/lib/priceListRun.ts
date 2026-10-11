@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 import type { Offer, Product } from '../../payload-types'
-import { matchRows, nameKey, type PriceRow } from '../domain/priceList.mjs'
+import { codeName, matchRows, nameKey, type PriceRow } from '../domain/priceList.mjs'
 import { formatKzt } from './format'
 import { loadPricingContext, type PricingContext, quoteOffer } from './pricing'
 import { relId } from './rel'
@@ -142,6 +142,7 @@ function readRows(raw: unknown): PriceRow[] | string {
       name: String(row.name ?? '').slice(0, 300),
       id: String(row.id ?? '').slice(0, 20),
       price,
+      ...(row.code ? { code: String(row.code).slice(0, 60) } : {}),
       ...(alt.length ? { alt } : {}),
     })
   }
@@ -187,6 +188,7 @@ export async function previewPriceList(
       return {
         ...match,
         name: row?.name ?? '',
+        code: row?.code ?? null,
         price: row?.price ?? null,
         oldAmount: found ? `${found.offer.amount} ${found.offer.currency}` : null,
         oldKzt: found ? kzt(found.offer, context) : null,
@@ -232,7 +234,7 @@ export async function applyPriceList(
   if (typeof config === 'string') return fail(config)
   if (!Array.isArray(data.items) || !data.items.length) return fail('Нет строк для записи')
   if (data.items.length > MAX_ROWS) return fail('Слишком много строк')
-  const items: { offerId: number; amount: string; name: string }[] = []
+  const items: { offerId: number; amount: string; name: string; code: string }[] = []
   const seen = new Set<number>()
   for (const raw of data.items) {
     const item = (raw ?? {}) as Record<string, unknown>
@@ -243,7 +245,12 @@ export async function applyPriceList(
     if (seen.has(offerId))
       return fail('Одно предложение выбрано в двух строках прайса. Оставьте одну.')
     seen.add(offerId)
-    items.push({ offerId, amount, name: String(item.name ?? '').slice(0, 300) })
+    items.push({
+      offerId,
+      amount,
+      name: String(item.name ?? '').slice(0, 300),
+      code: String(item.code ?? '').slice(0, 60),
+    })
   }
 
   const report = {
@@ -263,10 +270,12 @@ export async function applyPriceList(
       continue
     }
     const names = offer.priceNames ?? []
-    const remember =
-      data.remember !== false &&
-      item.name &&
-      !names.some((name) => nameKey(name) === nameKey(item.name))
+    // Запоминаем название строки и артикул: по артикулу строка найдётся и в прайсе новой версии.
+    const fresh = [item.name, item.code ? codeName(item.code) : '']
+      .filter(Boolean)
+      .filter((name, i, all) => all.indexOf(name) === i)
+      .filter((name) => !names.some((known) => nameKey(known) === nameKey(name)))
+    const remember = data.remember !== false && fresh.length > 0
     const same =
       offer.amount === item.amount &&
       offer.currency === config.currency &&
@@ -284,7 +293,7 @@ export async function applyPriceList(
         currency: config.currency,
         includesVat: config.includesVat,
         sourceVat: config.sourceVat,
-        ...(remember ? { priceNames: [...names, item.name] } : {}),
+        ...(remember ? { priceNames: [...names, ...fresh] } : {}),
       },
       ...opts,
     })

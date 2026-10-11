@@ -90,14 +90,15 @@ export function PriceUpload({ vendors }: { vendors: PriceVendor[] }) {
         <h2 className={styles.title}>2. Файл прайса</h2>
         <input
           type="file"
-          accept=".xlsx,.csv,.xls,.html,.htm"
+          accept=".xlsx,.ods,.csv,.xls,.html,.htm"
           onChange={(e) => {
             const picked = e.target.files?.[0]
             if (picked) list.chooseFile(picked)
           }}
         />
         <p className={styles.hint}>
-          Excel (.xlsx) или CSV. Файл читается здесь, в браузере, и никуда не загружается.
+          Excel (.xlsx), выгрузка 1С (.ods) или CSV. Файл читается здесь, в браузере, и никуда не
+          загружается.
         </p>
         {list.file && list.file.sheets.length > 1 && (
           <label className={styles.field}>

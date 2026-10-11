@@ -1,5 +1,6 @@
 /**
- * Чтение таблицы прайса без библиотек: Excel (.xlsx), CSV и «Excel» в виде HTML-таблицы.
+ * Чтение таблицы прайса без библиотек: Excel (.xlsx), OpenDocument (.ods — так сохраняет
+ * выгрузка 1С), CSV и «Excel» в виде HTML-таблицы.
  * Работает в браузере (файл никуда не загружается) и в Node для тестов. Результат — листы
  * со строками ячеек-строк, без попытки угадать заголовки: это делает src/domain/priceList.mjs.
  *
@@ -169,6 +170,8 @@ function fillVerticalMerges(rows, xml) {
 async function readXlsx(bytes) {
   const files = zipEntries(bytes)
   const read = async (/** @type {string} */ name) => (await files.get(name)?.()) ?? ''
+  if (files.has('content.xml') && !files.has('xl/workbook.xml'))
+    return odsSheets(await read('content.xml'))
   const workbook = await read('xl/workbook.xml')
   if (!workbook) throw new SpreadsheetError('В файле нет листов Excel. Это точно .xlsx?')
   const rels = await read('xl/_rels/workbook.xml.rels')
@@ -188,6 +191,55 @@ async function readXlsx(bytes) {
     const path = target.startsWith('/') ? target.slice(1) : `xl/${target.replace(/^\.\//, '')}`
     sheets.push({ name, rows: sheetRows(await read(path), strings) })
   }
+  return sheets
+}
+
+// ---------- ods ----------
+
+/** Больше этого повтор пустых ячеек и строк не разворачиваем: так .ods добивает лист до края. */
+const MAX_REPEAT = 100
+
+/**
+ * Листы .ods из content.xml. Число берётся из office:value (точное, без форматирования
+ * «1 145 337,60»), текст — из абзацев ячейки. Повторы (number-columns-repeated) разворачиваются,
+ * хвост из пустых ячеек и строк отбрасывается.
+ * @param {string} xml
+ * @returns {Sheet[]}
+ */
+function odsSheets(xml) {
+  /** @type {Sheet[]} */
+  const sheets = []
+  for (const table of xml.matchAll(/<table:table\b([^>]*)>([\s\S]*?)<\/table:table>/g)) {
+    const name = decodeEntities(/table:name="([^"]*)"/.exec(table[1])?.[1] ?? 'Лист')
+    /** @type {string[][]} */
+    const rows = []
+    const rowRe = /<table:table-row\b([^>]*?)(?:\/>|>([\s\S]*?)<\/table:table-row>)/g
+    for (const tr of table[2].matchAll(rowRe)) {
+      /** @type {string[]} */
+      const cells = []
+      const cellRe =
+        /<table:(?:covered-)?table-cell\b([^>]*?)(?:\/>|>([\s\S]*?)<\/table:(?:covered-)?table-cell>)/g
+      for (const td of (tr[2] ?? '').matchAll(cellRe)) {
+        const attrs = td[1]
+        const number = /office:value="([^"]*)"/.exec(attrs)?.[1]
+        const text = [...(td[2] ?? '').matchAll(/<text:p\b[^>]*>([\s\S]*?)<\/text:p>/g)]
+          .map((p) =>
+            decodeEntities(p[1].replace(/<text:s\b[^>]*\/>/g, ' ').replace(/<[^>]+>/g, '')),
+          )
+          .join(' ')
+        const value = (number ?? text).replace(/\s+/g, ' ').trim()
+        const repeat = Number(/number-columns-repeated="(\d+)"/.exec(attrs)?.[1] ?? 1)
+        for (let i = 0; i < Math.min(repeat, MAX_REPEAT); i++) cells.push(value)
+      }
+      while (cells.length && !cells[cells.length - 1]) cells.pop()
+      const repeat = Number(/number-rows-repeated="(\d+)"/.exec(tr[1])?.[1] ?? 1)
+      for (let i = 0; i < Math.min(repeat, cells.length ? MAX_REPEAT : 1); i++) rows.push(cells)
+      if (rows.length >= MAX_ROWS) break
+    }
+    while (rows.length && !rows[rows.length - 1].length) rows.pop()
+    sheets.push({ name, rows })
+  }
+  if (!sheets.length) throw new SpreadsheetError('В файле .ods не нашлось листов.')
   return sheets
 }
 
