@@ -132,9 +132,10 @@ export function itemUnavailable(item, switches, selected) {
 /**
  * Начальный выбор: первые значения переключателей, отмеченные «Выбран сразу» варианты,
  * в шаге «один вариант» — отмеченный или первый доступный. pick — товар из адреса (?pick=ID):
- * старый адрес пакета SCAD ведёт на SCAD Office с уже выбранным пакетом.
+ * старый адрес пакета SCAD ведёт на SCAD Office с уже выбранным пакетом. Строка — ключ варианта
+ * (?item=…): карточка пакета GEO5 в каталоге открывает GEO5 с этим пакетом.
  * @param {PickerView} view
- * @param {number | null} [pick]
+ * @param {number | string | null} [pick]
  * @returns {PickerState}
  */
 export function initialState(view, pick = null) {
@@ -162,12 +163,14 @@ export function initialState(view, pick = null) {
 /**
  * @param {PickerView} view
  * @param {PickerState} state
- * @param {number} productId
+ * @param {number | string} pick  ID товара или ключ варианта
  * @returns {PickerState}
  */
-function applyPick(view, state, productId) {
+function applyPick(view, state, pick) {
   for (const step of view.steps) {
-    const item = step.items.find((i) => i.productId === productId)
+    const item = step.items.find((i) =>
+      typeof pick === 'string' ? i.key === pick : i.productId === pick,
+    )
     if (!item) continue
     if (step.mode === 'one') return { ...state, one: { ...state.one, [step.key]: item.key } }
     if (step.mode === 'many')

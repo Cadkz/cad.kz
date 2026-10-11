@@ -39,6 +39,7 @@ export function withFamilies(
       tasks: [],
       rank: Math.max(...list.map((item) => item.rank)),
       lineOrder: 0,
+      scope: 'family',
     })
   }
   return [...items.filter((item) => !hidden.has(item.id)), ...cards]

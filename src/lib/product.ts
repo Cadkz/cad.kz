@@ -150,8 +150,19 @@ export function productMetadata(product: ProductPage): Metadata {
   })
 }
 
-/** Товар из адреса ?pick=ID: старый адрес варианта ведёт на подбор с уже выбранным вариантом. */
-export function pickParam(value: string | string[] | undefined): number | null {
-  const id = Number(Array.isArray(value) ? value[0] : value)
+/** Что выбрать в подборе сразу: ID товара (число) или ключ варианта подбора (строка). */
+export type PickTarget = number | string
+
+type Params = Record<string, string | string[] | undefined>
+const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value)
+
+/**
+ * Выбор из адреса: ?pick=ID — старый адрес варианта ведёт на подбор с уже выбранным вариантом;
+ * ?item=ключ — карточка пакета в каталоге открывает подбор с этим пакетом.
+ */
+export function pickParam(params: Params): PickTarget | null {
+  const item = first(params.item)
+  if (item && /^[\w-]{1,64}$/.test(item)) return item
+  const id = Number(first(params.pick))
   return Number.isSafeInteger(id) && id > 0 ? id : null
 }

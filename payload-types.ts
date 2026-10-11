@@ -236,6 +236,10 @@ export interface Product {
           mode: 'base' | 'one' | 'many' | 'bundle';
           hint?: string | null;
           collapsed?: boolean | null;
+          /**
+           * Каждый вариант шага — своя карточка в каталоге рядом с товаром (например, пакеты GEO5). Кнопка карточки открывает эту страницу с уже выбранным вариантом.
+           */
+          inCatalog?: boolean | null;
           items?:
             | {
                 product: number | Product;
@@ -249,6 +253,10 @@ export interface Product {
                 label?: string | null;
                 note?: string | null;
                 preselect?: boolean | null;
+                /**
+                 * Нужны, только если у шага стоит «Показывать в каталоге карточками»: по ним карточка находится в «Уточнить по задачам». Названия — точно как у задач товаров.
+                 */
+                tasks?: string[] | null;
                 id?: string | null;
               }[]
             | null;
@@ -944,6 +952,7 @@ export interface ProductsSelect<T extends boolean = true> {
               mode?: T;
               hint?: T;
               collapsed?: T;
+              inCatalog?: T;
               items?:
                 | T
                 | {
@@ -952,6 +961,7 @@ export interface ProductsSelect<T extends boolean = true> {
                     label?: T;
                     note?: T;
                     preselect?: T;
+                    tasks?: T;
                     id?: T;
                   };
               id?: T;

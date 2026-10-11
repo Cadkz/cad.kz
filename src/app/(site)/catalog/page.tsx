@@ -31,7 +31,7 @@ export default async function CatalogPage({ searchParams }: Props) {
         />
         <CatalogFilter
           key={JSON.stringify(initial)}
-          items={catalog.items}
+          items={[...catalog.items, ...catalog.extras]}
           facets={catalog.facets}
           lines={catalog.lines}
           initial={initial}

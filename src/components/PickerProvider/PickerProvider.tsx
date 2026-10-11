@@ -5,6 +5,7 @@ import type { PickerView } from '@/domain/picker.mjs'
 import { type KindProfile, kindProfile } from '@/domain/productKind.mjs'
 import type { RequestKind } from '@/domain/siteRequest.mjs'
 import type { Contacts } from '@/lib/navigation'
+import type { PickTarget } from '@/lib/product'
 import { type PickerApi, usePicker } from '@/lib/usePicker'
 import { RequestDialog } from '../RequestDialog/RequestDialog'
 
@@ -29,7 +30,7 @@ type ContextValue = PickerApi & {
 
 const Context = createContext<ContextValue | null>(null)
 
-type Props = { view: PickerView; meta: PickerMeta; pick: number | null; children: ReactNode }
+type Props = { view: PickerView; meta: PickerMeta; pick: PickTarget | null; children: ReactNode }
 
 /**
  * Общий выбор для страницы товара: шаги подбора в основной колонке и итог в боковой видят одно

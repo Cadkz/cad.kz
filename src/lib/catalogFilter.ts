@@ -5,7 +5,7 @@
  */
 import { compareInLine } from '../domain/catalogTree.mjs'
 import { compareInSection } from '../domain/priority.mjs'
-import type { CatalogGroup, CatalogItem, Facet } from './catalog'
+import type { CatalogGroup, CatalogItem, CatalogLine, Facet } from './catalog'
 
 export type FilterState = {
   group: CatalogGroup | null
@@ -33,7 +33,28 @@ export const emptyFilter: FilterState = {
 
 const groups: CatalogGroup[] = ['software', 'hardware', 'service']
 
+/** Выбран ровно один производитель: его товары показываются группами по линейкам. */
+export const vendorView = (state: FilterState) => state.vendors.length === 1
+
+/** Видна ли карточка при этом выборе (поле scope, src/lib/catalog.ts). */
+function visible(item: CatalogItem, state: FilterState, ignore?: Key) {
+  // Для счётчиков задач считаем, будто задача уже выбрана: иначе задачи, которые есть только
+  // у отдельных программ GEO5, не попали бы в список.
+  const tasksOn = state.tasks.length > 0 || ignore === 'tasks'
+  switch (item.scope) {
+    case 'family':
+      return !vendorView(state)
+    case 'detail':
+      return vendorView(state) || tasksOn
+    case 'task':
+      return tasksOn
+    default:
+      return true
+  }
+}
+
 export function matches(item: CatalogItem, state: FilterState, ignore?: Key) {
+  if (!visible(item, state, ignore)) return false
   if (ignore !== 'group' && state.group && item.group !== state.group) return false
   if (ignore !== 'direction' && state.direction && !item.directions.includes(state.direction))
     return false
@@ -84,6 +105,11 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
       .sort(byLabel)
 
   const typeGroup: CatalogGroup = state.group === 'service' ? 'service' : 'hardware'
+  // Задачи показываются, только если сужают выдачу: когда каждая задача оставляет то же самое,
+  // список галочек ничего не даёт (замечание владельца 12.10.2026 про GEO5).
+  const taskList = fromCounts(taskCounts, state.tasks)
+  const shown = items.filter((item) => matches(item, state)).length
+  const narrows = state.tasks.length > 0 || taskList.some((option) => option.count !== shown)
   return {
     groups: groups.filter((group) => (groupCounts.get(group) ?? 0) > 0),
     directions:
@@ -105,7 +131,7 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
           ),
     vendors: fromCounts(vendorCounts, state.vendors),
     // Задачи раскрываются после выбора направления или типа: так фильтр остаётся коротким.
-    tasks: state.direction || state.type ? fromCounts(taskCounts, state.tasks) : [],
+    tasks: (state.direction || state.type) && narrows ? taskList : [],
   }
 }
 
@@ -145,6 +171,63 @@ export function results(items: CatalogItem[], state: FilterState, facets: Facet[
     page,
     items: list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
   }
+}
+
+/**
+ * Если в разделе остался один производитель, шаг выбора производителя лишний: каталог сразу
+ * показывает его товары группами. Возвращает выбор для показа, адрес страницы не меняется.
+ */
+export function autoVendor(items: CatalogItem[], state: FilterState): FilterState {
+  if (!(state.type ?? state.direction) || state.vendors.length) return state
+  const vendors = new Set(
+    items.filter((item) => matches(item, state)).map((item) => item.vendor ?? ''),
+  )
+  const [only] = vendors
+  return vendors.size === 1 && only ? { ...state, vendors: [only] } : state
+}
+
+export type ResultGroup = {
+  key: string
+  /** Пусто — группа одна, заголовок не нужен. */
+  title: string
+  /** Страница семейства: там можно отметить несколько программ сразу. */
+  href: string | null
+  items: CatalogItem[]
+}
+
+/**
+ * Товары выбранного производителя по линейкам («Программный комплекс», «Программы-сателлиты»):
+ * без отдельного шага с карточками линеек. null — производитель не выбран, обычная сетка.
+ */
+export function groupedResults(
+  items: CatalogItem[],
+  state: FilterState,
+  lines: CatalogLine[],
+): ResultGroup[] | null {
+  if (!vendorView(state)) return null
+  const list = items.filter((item) => matches(item, state))
+  const own = lines
+    .filter((line) => line.vendor === state.vendors[0])
+    .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title, 'ru'))
+  const groups: ResultGroup[] = own
+    .map((line) => ({
+      key: line.id,
+      title: line.title,
+      href: line.familyHref,
+      items: list.filter((item) => item.line === line.id).sort(compareInLine),
+    }))
+    .filter((group) => group.items.length > 0)
+  const known = new Set(groups.map((group) => group.key))
+  const rest = list.filter((item) => item.line == null || !known.has(item.line))
+  if (rest.length)
+    groups.push({
+      key: 'other',
+      title: groups.length ? 'Другие программы' : '',
+      href: null,
+      items: rest.sort(compareInLine),
+    })
+  if (groups.length === 1 && groups[0]) groups[0] = { ...groups[0], title: '' }
+  return groups
 }
 
 /** Состояние ↔ адрес страницы: ссылку на подборку можно отправить коллеге. */

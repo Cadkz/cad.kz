@@ -3,7 +3,7 @@
 // затем вторая настройка: дубли производителей, линейки, приложения в конец, темы новостей;
 // затем подбор AutoCAD и SCAD Office и семейство сателлитов SCAD; семейства редких товаров;
 // другие названия для поиска; актуализация версий по сайтам производителей; продления ПАССАТ
-// — кнопкой «Обновить версию»; блок «Официальный партнёр» на главной. Выполняется один раз (отметка в журнале
+// — кнопкой «Обновить версию»; пакеты и девять задач GEO5 в каталоге; блок «Официальный партнёр» на главной. Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -12,6 +12,7 @@ import { getPayload } from 'payload'
 import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
+import { setupGeo5Catalog } from '../src/lib/geoSetup.ts'
 import { setupHomeTrust } from '../src/lib/homeSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
@@ -94,6 +95,9 @@ try {
   const mepTasks = await setupMepTasks(payload)
   if (!mepTasks) console.log('Задачи инженерных сетей уже проставлены.')
   else console.log(`Задачи инженерных сетей: ${mepTasks.join('; ') || '—'}`)
+  const geo5 = await setupGeo5Catalog(payload)
+  if (!geo5) console.log('GEO5 в каталоге уже настроен.')
+  else for (const line of geo5) console.log(`GEO5 в каталоге — ${line}`)
   const versions = await setupVersions(payload)
   if (!versions) console.log('Версии уже актуализированы.')
   else {

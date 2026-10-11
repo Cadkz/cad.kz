@@ -18,5 +18,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function FamilyPageRoute({ params, searchParams }: Props) {
   const family = await getFamily((await params).slug)
   if (!family) notFound()
-  return <FamilyView family={family} pick={pickParam((await searchParams).pick)} />
+  return <FamilyView family={family} pick={pickParam(await searchParams)} />
 }

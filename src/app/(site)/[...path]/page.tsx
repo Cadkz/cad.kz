@@ -44,5 +44,5 @@ export default async function LegacyPage({ params, searchParams }: Props) {
   if ('redirect' in resolution) permanentRedirect(resolution.redirect)
   const { product } = resolution
   if (product.pageView === 'none') permanentRedirect(await noPageTarget(await cms(), product))
-  return <ProductView product={product} pick={pickParam((await searchParams).pick)} />
+  return <ProductView product={product} pick={pickParam(await searchParams)} />
 }

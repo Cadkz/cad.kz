@@ -127,6 +127,11 @@ test('адрес ?pick=ID отмечает вариант: старый адре
   assert.equal(bundle.bundle, 'full')
 })
 
+test('адрес ?item=ключ выбирает вариант по ключу: карточка пакета в каталоге', () => {
+  assert.equal(initialState(scad, 'nofx').bundle, 'nofx')
+  assert.equal(initialState(scad, 'нет-такого').bundle, initialState(scad).bundle)
+})
+
 test('смена редакции меняет предложения, недоступный комплект меняется на доступный', () => {
   let state = initialState(scad)
   state = setSwitch(scad, state, 'ed', 'SPro')

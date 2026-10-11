@@ -4,15 +4,18 @@ import { SlidersHorizontal } from 'lucide-react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { CatalogItem, CatalogLine, Facet } from '@/lib/catalog'
 import {
+  autoVendor,
   emptyFilter,
   type FilterState,
   facetOptions,
+  groupedResults,
   results,
   toQuery,
   update,
 } from '@/lib/catalogFilter'
 import { positions } from '@/lib/plural'
 import { Button } from '../Button/Button'
+import { CatalogGroups } from '../CatalogGroups/CatalogGroups'
 import { CatalogSteps } from '../CatalogSteps/CatalogSteps'
 import { Drawer } from '../Drawer/Drawer'
 import { FilterPanel } from '../FilterPanel/FilterPanel'
@@ -40,8 +43,11 @@ export function CatalogFilter({ items, facets, lines, initial }: Props) {
     if (scroll) top.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [])
 
-  const options = useMemo(() => facetOptions(items, facets, state), [items, facets, state])
-  const found = useMemo(() => results(items, state, facets), [items, state, facets])
+  // Один производитель в разделе — сразу его товары, без шага выбора производителя.
+  const view = useMemo(() => autoVendor(items, state), [items, state])
+  const options = useMemo(() => facetOptions(items, facets, view), [items, facets, view])
+  const found = useMemo(() => results(items, view, facets), [items, view, facets])
+  const groups = useMemo(() => groupedResults(items, view, lines), [items, view, lines])
   const change = (patch: Partial<FilterState>) => commit(update(state, patch))
   const reset = () => commit(emptyFilter)
   const closePanel = useCallback(() => setPanelOpen(false), [])
@@ -65,8 +71,17 @@ export function CatalogFilter({ items, facets, lines, initial }: Props) {
             </Button>
           </span>
         </div>
-        <CatalogSteps items={items} facets={facets} lines={lines} state={state} onChange={change} />
-        {found.items.length ? (
+        <CatalogSteps
+          items={items}
+          facets={facets}
+          lines={lines}
+          state={view}
+          auto={view !== state}
+          onChange={change}
+        />
+        {groups?.length ? (
+          <CatalogGroups key={toQuery(view)} groups={groups} />
+        ) : found.items.length ? (
           <ul className={styles.grid}>
             {found.items.map((item, index) => (
               <Reveal as="li" key={item.id} step={index % 3}>
@@ -82,11 +97,13 @@ export function CatalogFilter({ items, facets, lines, initial }: Props) {
             </Button>
           </div>
         )}
-        <Pagination
-          page={found.page}
-          pages={found.pages}
-          onPage={(page) => commit({ ...state, page }, true)}
-        />
+        {!groups && (
+          <Pagination
+            page={found.page}
+            pages={found.pages}
+            onPage={(page) => commit({ ...state, page }, true)}
+          />
+        )}
       </div>
       <Drawer open={panelOpen} onClose={closePanel} title="Фильтр каталога" side="left">
         {panel}

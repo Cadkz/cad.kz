@@ -3,6 +3,7 @@ import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
 import { cheapestTotal } from '../domain/picker.mjs'
 import { compareInSection, priorityRank } from '../domain/priority.mjs'
+import { catalogExtras } from './catalogExtras'
 import { familyLines } from './families'
 import { withFamilies } from './familyCards'
 import { formatKzt } from './format'
@@ -31,10 +32,22 @@ export type CatalogItem = ProductCardData & {
   /** Линейка производителя (id строкой) и порядок в ней: путь «производитель → линейка». */
   line: string | null
   lineOrder: number | null
+  /**
+   * Когда карточка видна (src/lib/catalogFilter.ts): all — всегда; family — карточка семейства,
+   * пока не выбран производитель; detail — программа семейства или пакет, когда выбран
+   * производитель или задача; task — отдельная программа подбора, только когда выбрана задача.
+   */
+  scope: 'all' | 'family' | 'detail' | 'task'
 }
 
-/** Линейка производителя для шага каталога. */
-export type CatalogLine = { id: string; title: string; vendor: string; order: number }
+/** Линейка производителя для шага каталога. familyHref — страница семейства, если она есть. */
+export type CatalogLine = {
+  id: string
+  title: string
+  vendor: string
+  order: number
+  familyHref: string | null
+}
 
 export type Facet = {
   slug: string
@@ -112,8 +125,13 @@ function pickerFrom(
  * выбор — на странице товара, чтобы в корзину не попал случайный вариант (решение 08.10.2026).
  */
 function cartOffer(product: Product, offers: Offer[], context: PricingContext) {
+  return product.pageView === 'picker' ? null : singleOffer(offers, context)
+}
+
+/** Единственное предложение с ценой — его ID, иначе null. */
+function singleOffer(offers: Offer[], context: PricingContext) {
   const [only] = offers
-  if (offers.length !== 1 || !only || product.pageView === 'picker') return null
+  if (offers.length !== 1 || !only) return null
   try {
     quoteOffer(only, context)
     return String(only.id)
@@ -148,6 +166,8 @@ export const getCatalog = cache(loadCatalog)
 
 async function loadCatalog(): Promise<{
   items: CatalogItem[]
+  /** Дополнительные карточки только для страницы каталога (src/lib/catalogExtras.ts). */
+  extras: CatalogItem[]
   facets: Facet[]
   lines: CatalogLine[]
 }> {
@@ -233,10 +253,20 @@ async function loadCatalog(): Promise<{
       main: sectionById.get(relId(product.mainSection) ?? -1)?.slug ?? null,
       line: product.line == null ? null : String(relId(product.line)),
       lineOrder: product.lineOrder ?? null,
+      scope: 'all',
     }
   })
   const hidden = new Set(products.docs.filter((p) => p.pageView === 'none').map((p) => p.id))
-  const listed = withFamilies(items, hidden, await familyLines(), (ids) => {
+  const families = await familyLines()
+  const extras = catalogExtras({
+    items,
+    products: products.docs,
+    offersByProduct,
+    families,
+    priceOf: (list) => cheapest(list, context),
+    cartOf: (list) => singleOffer(list, context),
+  })
+  const listed = withFamilies(items, hidden, families, (ids) => {
     const list = ids.flatMap((id) => offersByProduct.get(id) ?? [])
     return { priceFrom: cheapest(list, context), offers: list.length }
   })
@@ -255,8 +285,16 @@ async function loadCatalog(): Promise<{
   const lines = productLines.docs.flatMap((line) => {
     const vendor = vendorById.get(relId(line.manufacturer) ?? -1)
     return vendor
-      ? [{ id: String(line.id), title: line.title, vendor, order: line.order ?? 100 }]
+      ? [
+          {
+            id: String(line.id),
+            title: line.title,
+            vendor,
+            order: line.order ?? 100,
+            familyHref: families.get(line.id)?.href ?? null,
+          },
+        ]
       : []
   })
-  return { items: listed, facets, lines }
+  return { items: listed, extras, facets, lines }
 }

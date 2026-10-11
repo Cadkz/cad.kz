@@ -15,6 +15,7 @@ import { aboutEntries } from '@/domain/familyAbout.mjs'
 import { type FamilyPage, splitTitle } from '@/lib/families'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
+import type { PickTarget } from '@/lib/product'
 import { parseBody } from '@/lib/richText'
 import styles from './FamilyView.module.css'
 
@@ -22,7 +23,13 @@ import styles from './FamilyView.module.css'
  * Страница семейства — шаблон «Товар»: слева список программ с галочками и их описания
  * (свёрнуты), справа итог с «Получить КП». Адреса старых страниц ведут к строке программы.
  */
-export async function FamilyView({ family, pick }: { family: FamilyPage; pick: number | null }) {
+export async function FamilyView({
+  family,
+  pick,
+}: {
+  family: FamilyPage
+  pick: PickTarget | null
+}) {
   const contacts = await getContacts()
   const first = family.members[0]
   if (!first) return null

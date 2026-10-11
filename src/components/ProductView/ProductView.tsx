@@ -18,7 +18,7 @@ import { getCatalog } from '@/lib/catalog'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
-import type { ProductPage, RelatedProduct } from '@/lib/product'
+import type { PickTarget, ProductPage, RelatedProduct } from '@/lib/product'
 import { getRecommendations } from '@/lib/recommendations'
 import { parseBody } from '@/lib/richText'
 import type { PickItem } from '../PickRow/PickRow'
@@ -61,7 +61,7 @@ export async function ProductView({
   pick,
 }: {
   product: ProductPage
-  pick: number | null
+  pick: PickTarget | null
 }) {
   const [{ cross, similar }, contacts, catalog] = await Promise.all([
     cms().then((payload) => getRecommendations(payload, product.id)),

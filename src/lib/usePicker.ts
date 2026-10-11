@@ -10,6 +10,7 @@ import {
   setSwitch,
   toggleMany,
 } from '@/domain/picker.mjs'
+import type { PickTarget } from '@/lib/product'
 import { formatKzt } from './format'
 
 /** Итог: считает сервер. «request» — в выборе есть вариант без цены, итог по запросу. */
@@ -21,7 +22,7 @@ export type PickerTotal =
   | { state: 'error'; text: string }
 
 /** Выбор в подборе и итог с сервера (/api/quote). Клиент передаёт только ID и количество. */
-export function usePicker(view: PickerView, pick: number | null) {
+export function usePicker(view: PickerView, pick: PickTarget | null) {
   const [state, setState] = useState<PickerState>(() => initialState(view, pick))
   const [quantity, setQuantityRaw] = useState(1)
   const [total, setTotal] = useState<PickerTotal>({ state: 'empty' })

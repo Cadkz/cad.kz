@@ -14,6 +14,7 @@ import * as migration_20261010_182552_family_renew_label from './20261010_182552
 import * as migration_20261010_203359_home_trust from './20261010_203359_home_trust'
 import * as migration_20261010_213658_home_trust_optional from './20261010_213658_home_trust_optional'
 import * as migration_20261011_153337_promo_ends_at from './20261011_153337_promo_ends_at'
+import * as migration_20261011_195336_catalog_packages from './20261011_195336_catalog_packages'
 
 export const migrations = [
   {
@@ -95,5 +96,10 @@ export const migrations = [
     up: migration_20261011_153337_promo_ends_at.up,
     down: migration_20261011_153337_promo_ends_at.down,
     name: '20261011_153337_promo_ends_at',
+  },
+  {
+    up: migration_20261011_195336_catalog_packages.up,
+    down: migration_20261011_195336_catalog_packages.down,
+    name: '20261011_195336_catalog_packages',
   },
 ]

@@ -21,5 +21,5 @@ export default async function ProductPage({ params, searchParams }: Props) {
   if (!product) notFound()
   if (product.pageView === 'none') permanentRedirect(await noPageTarget(await cms(), product))
   if (product.path !== `/products/${product.slug}`) permanentRedirect(product.path)
-  return <ProductView product={product} pick={pickParam((await searchParams).pick)} />
+  return <ProductView product={product} pick={pickParam(await searchParams)} />
 }

@@ -75,7 +75,11 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         ) : (
           // Та же ссылка, что у названия: для клавиатуры и экранного диктора достаточно одной.
           <Link
-            href={product.offersCount > 1 ? `${product.href}#config` : product.href}
+            href={
+              product.offersCount > 1 && !product.href.includes('#')
+                ? `${product.href}#config`
+                : product.href
+            }
             className={styles.more}
             tabIndex={-1}
             aria-hidden="true"

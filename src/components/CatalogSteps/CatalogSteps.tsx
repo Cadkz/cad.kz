@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronLeft } from 'lucide-react'
+import Link from 'next/link'
 import { useMemo } from 'react'
 import type { CatalogItem, CatalogLine, Facet } from '@/lib/catalog'
 import { type FilterState, matches } from '@/lib/catalogFilter'
@@ -12,19 +13,25 @@ type Props = {
   items: CatalogItem[]
   facets: Facet[]
   lines: CatalogLine[]
+  /** Выбор, как его показывает каталог (с подставленным единственным производителем). */
   state: FilterState
+  /** Производителя подставил сам каталог: возвращаться к списку производителей некуда. */
+  auto: boolean
   onChange: (patch: Partial<FilterState>) => void
 }
 
 /**
- * Путь по разделу каталога, как в меню: производители карточками → линейки производителя.
- * Показывается, когда выбрано направление или тип; товары — ниже, в общей сетке.
+ * Шаг «производитель» в разделе каталога, как в меню. Товары выбранного производителя — ниже,
+ * группами по линейкам (CatalogGroups), без отдельного шага с карточками линеек.
+ * У производителя с одним товаром в разделе карточка сразу ведёт на этот товар.
  */
-export function CatalogSteps({ items, facets, lines, state, onChange }: Props) {
+export function CatalogSteps({ items, facets, lines, state, auto, onChange }: Props) {
   const section = state.type ?? state.direction
   const tree = useMemo(() => {
     if (!section) return []
-    const scope = items.filter((item) => matches(item, { ...state, line: null }, 'vendors'))
+    // Как в обычном списке: семейство одной карточкой, без пакетов и программ семейства.
+    const listState = { ...state, vendors: [], line: null }
+    const scope = items.filter((item) => matches(item, listState))
     const titles = new Map(
       scope.flatMap((item) => (item.vendor ? [[item.vendor, item.vendor]] : [])),
     )
@@ -40,80 +47,68 @@ export function CatalogSteps({ items, facets, lines, state, onChange }: Props) {
 
   if (!section || tree.length === 0) return null
   const sectionTitle = facets.find((facet) => facet.slug === section)?.title ?? ''
-  const vendor = state.vendors.length === 1 ? tree.find((v) => v.title === state.vendors[0]) : null
 
-  if (!vendor) {
-    if (state.vendors.length || tree.length < 2) return null
+  if (state.vendors.length === 0) {
+    if (tree.length < 2) return null
     return (
       <div className={styles.root}>
         <p className={styles.crumbs}>{sectionTitle}: производители</p>
         <ul className={styles.cards}>
-          {tree.map((item) => (
-            <li key={item.key}>
-              <button
-                type="button"
-                className={styles.card}
-                onClick={() => onChange({ vendors: [item.title] })}
-              >
-                <span className={styles.title}>{item.title}</span>
-                <span className={styles.hint}>
-                  {item.lines.length > 1
-                    ? item.lines.map((l) => l.title).join(' · ')
-                    : positions(item.lines.reduce((sum, l) => sum + l.items.length, 0))}
-                </span>
-              </button>
-            </li>
-          ))}
+          {tree.map((vendor) => {
+            const products = vendor.lines.flatMap((line) => line.items)
+            const hint =
+              vendor.lines.length > 1
+                ? vendor.lines.map((line) => line.title).join(' · ')
+                : products.length === 1
+                  ? (products[0]?.title ?? '')
+                  : positions(products.length)
+            const body = (
+              <>
+                <span className={styles.title}>{vendor.title}</span>
+                <span className={styles.hint}>{hint}</span>
+              </>
+            )
+            const [only] = products
+            return (
+              <li key={vendor.key}>
+                {products.length === 1 && only ? (
+                  <Link href={only.href} className={styles.card}>
+                    {body}
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.card}
+                    onClick={() => onChange({ vendors: [vendor.title] })}
+                  >
+                    {body}
+                  </button>
+                )}
+              </li>
+            )
+          })}
         </ul>
       </div>
     )
   }
 
-  const line = vendor.lines.find((item) => item.key === state.line)
-  const back = (
-    <button
-      type="button"
-      className={styles.back}
-      onClick={() => (line ? onChange({ line: null }) : onChange({ vendors: [] }))}
-    >
-      <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-      {line ? `Все линейки ${vendor.title}` : 'Все производители'}
-    </button>
-  )
-  if (vendor.lines.length < 2 || line)
-    return (
-      <div className={styles.root}>
-        <p className={styles.crumbs}>
-          {back}
-          {line && <span>{line.title}</span>}
-        </p>
-      </div>
-    )
+  if (state.vendors.length > 1) return null
+  const vendor = state.vendors[0] ?? ''
+  const line = state.line ? lines.find((item) => item.id === state.line) : null
+  if (auto && !line) return null
   return (
     <div className={styles.root}>
       <p className={styles.crumbs}>
-        {back}
-        <span>{vendor.title}: линейки</span>
+        <button
+          type="button"
+          className={styles.back}
+          onClick={() => (line ? onChange({ line: null }) : onChange({ vendors: [] }))}
+        >
+          <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+          {line ? `Все программы ${vendor}` : 'Все производители'}
+        </button>
+        <span>{line ? line.title : vendor}</span>
       </p>
-      <ul className={styles.cards}>
-        {vendor.lines.map((item) => (
-          <li key={item.key}>
-            <button
-              type="button"
-              className={styles.card}
-              onClick={() => onChange({ line: item.key })}
-            >
-              <span className={styles.title}>{item.title}</span>
-              <span className={styles.hint}>
-                {item.items
-                  .slice(0, 3)
-                  .map((product) => product.title)
-                  .join(' · ')}
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
     </div>
   )
 }
