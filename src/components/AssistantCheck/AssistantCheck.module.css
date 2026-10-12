@@ -1,0 +1,86 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.root {
+  display: grid;
+  gap: var(--base);
+}
+
+.field {
+  display: grid;
+  gap: calc(var(--base) / 4);
+}
+
+.questions {
+  width: 100%;
+  padding: calc(var(--base) / 2);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-elevation-0);
+  font: inherit;
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--base);
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--theme-success-750);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.summary {
+  margin: 0;
+}
+
+.list {
+  display: grid;
+  gap: var(--base);
+  margin: 0;
+  padding-left: var(--base);
+}
+
+.item {
+  display: grid;
+  gap: calc(var(--base) / 4);
+  padding-bottom: var(--base);
+  border-bottom: 1px solid var(--theme-elevation-100);
+}
+
+.question {
+  margin: 0;
+}
+
+.reply {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.meta {
+  margin: 0;
+  color: var(--theme-elevation-500);
+}
+
+.flags {
+  margin: 0;
+  padding-left: var(--base);
+}
+
+.warn {
+  color: var(--theme-error-750);
+}
+
+.info {
+  color: var(--theme-warning-650);
+}
+
+.error {
+  margin: 0;
+  color: var(--theme-error-750);
+}

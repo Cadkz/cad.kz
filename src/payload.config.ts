@@ -57,6 +57,11 @@ export default buildConfig({
           path: '/price-list',
           meta: { title: 'Загрузить прайс' },
         },
+        assistantCheck: {
+          Component: '/components/AssistantCheckView/AssistantCheckView#AssistantCheckView',
+          path: '/assistant-check',
+          meta: { title: 'Проверка Юки' },
+        },
         legacyContent: {
           Component: '/components/LegacyContentView/LegacyContentView#LegacyContentView',
           path: '/legacy-content',

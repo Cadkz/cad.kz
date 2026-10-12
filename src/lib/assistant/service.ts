@@ -30,9 +30,21 @@ export type AssistantAnswer =
 const FAILED =
   'Не получилось получить ответ. Попробуйте ещё раз через минуту или передайте вопрос менеджеру.'
 
-async function modelAnswer(payload: Payload, messages: StoredMessage[]) {
+/** Обращение модели к инструменту — для страницы проверки ответов в админке. */
+export type ToolCall = { name: string; input: unknown; result: unknown }
+
+async function modelAnswer(
+  payload: Payload,
+  messages: StoredMessage[],
+  onTool?: (call: ToolCall) => void,
+) {
   const tools = createTools(payload)
   const { apiKey, model } = modelSettings()
+  const runTool = async (name: string, input: unknown) => {
+    const result = await tools.run(name, input)
+    onTool?.({ name, input, result })
+    return result
+  }
   const { text } = await anthropicReply({
     fetchImpl: fetch,
     apiKey,
@@ -40,11 +52,39 @@ async function modelAnswer(payload: Payload, messages: StoredMessage[]) {
     system: systemPrompt({ today: formatDay(new Date().toISOString()) }),
     messages: modelHistory(messages),
     tools: ASSISTANT_TOOLS,
-    runTool: tools.run,
+    runTool,
     signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
   })
   const reply = cleanReply(text)
   return { reply, cards: mentionedCards(reply, tools.found) }
+}
+
+/**
+ * Ответ на последний вопрос разговора без сохранения: модель или демо-режим, плюс форма
+ * продления под ответом о продлении. Ошибку модели пробрасывает.
+ */
+export async function answerMessages(
+  payload: Payload,
+  mode: AssistantMode,
+  messages: StoredMessage[],
+  onTool?: (call: ToolCall) => void,
+): Promise<{ reply: string; cards: AssistantCard[] }> {
+  const message = messages[messages.length - 1]?.content ?? ''
+  let answer: { reply: string; cards: AssistantCard[] }
+  if (mode === 'demo') {
+    const action = quickAction(message)
+    const found = action ? [] : (await findCards(message)).map(toCard)
+    const { text, cards } = demoReply(found, {
+      first: messages.length <= 1,
+      quick: Boolean(action),
+      quickText: action?.demo,
+    })
+    answer = { reply: text, cards }
+  } else answer = await modelAnswer(payload, messages, onTool)
+  // Про продление — под ответом форма продления (настоящая заявка, менеджер найдёт лицензию).
+  if (wantsRenewal(message) && !answer.cards.some((c) => c.href === RENEW_CARD.href))
+    answer = { ...answer, cards: [...answer.cards, { ...RENEW_CARD }] }
+  return answer
 }
 
 /**
@@ -69,23 +109,7 @@ export async function askAssistant(
 
   let answer: { reply: string; cards: AssistantCard[] } | null = null
   try {
-    if (mode === 'demo') {
-      const action = quickAction(input.message)
-      const found = action ? [] : (await findCards(input.message)).map(toCard)
-      const { text, cards } = demoReply(found, {
-        first: !previous.length,
-        quick: Boolean(action),
-        quickText: action?.demo,
-      })
-      answer = { reply: text, cards }
-    } else answer = await modelAnswer(payload, messages)
-    // Про продление — под ответом форма продления (настоящая заявка, менеджер найдёт лицензию).
-    if (
-      answer &&
-      wantsRenewal(input.message) &&
-      !answer.cards.some((c) => c.href === RENEW_CARD.href)
-    )
-      answer = { ...answer, cards: [...answer.cards, { ...RENEW_CARD }] }
+    answer = await answerMessages(payload, mode, messages)
   } catch (error) {
     // В журнал — только вид ошибки и код ответа, без текста запроса и ключа.
     const status = error instanceof ModelError ? error.status : null

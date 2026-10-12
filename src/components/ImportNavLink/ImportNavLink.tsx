@@ -2,15 +2,20 @@ import type { ServerProps } from 'payload'
 import styles from './ImportNavLink.module.css'
 
 /**
- * Свои страницы в меню админки: «Загрузить прайс» — администратору и маркетологу,
+ * Свои страницы в меню админки: «Загрузить прайс» и «Проверка Юки» — администратору и маркетологу,
  * «Импорт из Битрикса» и «Перенос со старого сайта» — только администратору.
  */
 export function ImportNavLink({ user }: ServerProps) {
   if (user?.role !== 'admin' && user?.role !== 'editor') return null
   const price = (
-    <a className={styles.link} href="/admin/price-list">
-      Загрузить прайс
-    </a>
+    <>
+      <a className={styles.link} href="/admin/price-list">
+        Загрузить прайс
+      </a>
+      <a className={styles.link} href="/admin/assistant-check">
+        Проверка Юки
+      </a>
+    </>
   )
   if (user.role !== 'admin') return price
   return (
