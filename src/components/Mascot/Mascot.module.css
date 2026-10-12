@@ -1,0 +1,104 @@
+/* Обёртка: одно появление (прозрачность и подъём на 8 px). Место под картинку занято сразу —
+   ширину задают атрибуты width/height, страница не прыгает. */
+.mascot {
+  display: inline-block;
+  flex-shrink: 0;
+  animation: appear var(--duration-base) var(--ease) backwards;
+}
+
+/* Реакция на наведение — у вложенного слоя, чтобы не спорить с анимацией появления. */
+.pose {
+  position: relative;
+  display: block;
+  transform-origin: 50% 100%;
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.figure,
+.blink {
+  display: block;
+  width: auto;
+  height: var(--mascot-height);
+}
+
+.blink {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: blink var(--duration-blink) linear var(--delay-blink);
+}
+
+@media (hover: hover) {
+  .mascot:hover .pose {
+    transform: rotate(-2deg) translateY(calc(var(--space-1) * -1));
+  }
+
+  /* Вторая анимация добавляется к первой и запускается заново при каждом наведении;
+     первая (после появления) при этом не перезапускается — у неё то же имя. */
+  .mascot:hover .blink {
+    animation:
+      blink var(--duration-blink) linear var(--delay-blink),
+      blinkAgain var(--duration-blink) linear;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot:hover .pose {
+    transform: none;
+  }
+}
+
+.icon {
+  --mascot-height: var(--icon-box);
+}
+
+.avatar {
+  --mascot-height: var(--mascot-avatar);
+}
+
+.sm {
+  --mascot-height: var(--mascot-sm);
+}
+
+.md {
+  --mascot-height: var(--mascot-md);
+}
+
+.lg {
+  --mascot-height: var(--mascot-md);
+}
+
+@media (min-width: 960px) {
+  .lg {
+    --mascot-height: var(--mascot-lg);
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+}
+
+@keyframes blinkAgain {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+}

@@ -1,11 +1,19 @@
+/* Телефон: Кади над текстом. От 640 px: текст слева, Кади справа. */
 .empty {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: var(--space-6);
+  padding: var(--space-10);
+  border-radius: var(--radius-lg);
+  background: var(--color-blue-soft);
+}
+
+.text {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-4);
-  padding: var(--space-10);
-  border-radius: var(--radius-lg);
-  background: var(--color-blue-soft);
 }
 
 .actions {
@@ -17,4 +25,12 @@
 /* Место занято, но не видно и не нажимается (на время загрузки корзины). */
 .reserve {
   visibility: hidden;
+}
+
+@media (min-width: 640px) {
+  .empty {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
 }

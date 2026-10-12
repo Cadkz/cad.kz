@@ -4,6 +4,7 @@ import { catalogHref } from '@/lib/navigationHrefs'
 import { positions } from '@/lib/plural'
 import { Grid } from '../Grid/Grid'
 import { WhatsappIcon } from '../icons/icons'
+import { Mascot } from '../Mascot/Mascot'
 import { ProductCard } from '../ProductCard/ProductCard'
 import styles from './SearchResults.module.css'
 
@@ -25,26 +26,30 @@ export function SearchResults({ query, items, partial = false, whatsappHref }: P
     const text = `Здравствуйте! Ищу на сайте: ${query}. Подскажите, пожалуйста.`
     return (
       <div className={styles.empty}>
-        <p className={styles.emptyTitle}>По запросу «{query}» ничего не нашлось</p>
-        <p className={styles.emptyText}>
-          Проверьте написание или напишите, что ищете, — менеджер подскажет.
-        </p>
-        <div className={styles.actions}>
-          {whatsappHref && (
-            <a
-              href={`${whatsappHref}?text=${encodeURIComponent(text)}`}
-              className={styles.whatsapp}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <WhatsappIcon size={20} />
-              Спросить в WhatsApp
-            </a>
-          )}
-          <Link href={catalogHref()} className={styles.catalog}>
-            Перейти в каталог
-          </Link>
+        <div className={styles.emptyBody}>
+          <p className={styles.emptyTitle}>Ничего не найдено</p>
+          <p className={styles.emptyText}>
+            По запросу «{query}» товаров нет. Проверьте написание, измените запрос или напишите, что
+            ищете, — менеджер подскажет.
+          </p>
+          <div className={styles.actions}>
+            {whatsappHref && (
+              <a
+                href={`${whatsappHref}?text=${encodeURIComponent(text)}`}
+                className={styles.whatsapp}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <WhatsappIcon size={20} />
+                Спросить в WhatsApp
+              </a>
+            )}
+            <Link href={catalogHref()} className={styles.catalog}>
+              Перейти в каталог
+            </Link>
+          </div>
         </div>
+        <Mascot pose="search" />
       </div>
     )
   }

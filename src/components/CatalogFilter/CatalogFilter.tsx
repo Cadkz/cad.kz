@@ -19,6 +19,7 @@ import { CatalogGroups } from '../CatalogGroups/CatalogGroups'
 import { CatalogSteps } from '../CatalogSteps/CatalogSteps'
 import { Drawer } from '../Drawer/Drawer'
 import { FilterPanel } from '../FilterPanel/FilterPanel'
+import { Mascot } from '../Mascot/Mascot'
 import { Pagination } from '../Pagination/Pagination'
 import { ProductCard } from '../ProductCard/ProductCard'
 import { Reveal } from '../Reveal/Reveal'
@@ -91,10 +92,9 @@ export function CatalogFilter({ items, facets, lines, initial }: Props) {
           </ul>
         ) : (
           <div className={styles.empty}>
+            <Mascot pose="search" size="sm" />
             <p>По выбранным условиям товаров нет.</p>
-            <Button variant="secondary" size="sm" onClick={reset}>
-              Сбросить фильтр
-            </Button>
+            <Button onClick={reset}>Сбросить фильтр</Button>
           </div>
         )}
         {!groups && (

@@ -1,7 +1,37 @@
+/* Телефон: Кади над текстом. От 960 px: текст на 7 колонок, Кади на 5 справа. */
+.layout {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  gap: var(--space-6) var(--grid-gap);
+  align-items: center;
+  padding-bottom: var(--section-gap);
+}
+
+.text {
+  grid-column: span 12;
+}
+
+.mascot {
+  grid-column: span 12;
+  grid-row: 1;
+  justify-self: start;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
-  padding-bottom: var(--section-gap);
+}
+
+@media (min-width: 960px) {
+  .text {
+    grid-column: span 7;
+  }
+
+  .mascot {
+    grid-column: span 5;
+    grid-row: auto;
+    justify-self: center;
+  }
 }

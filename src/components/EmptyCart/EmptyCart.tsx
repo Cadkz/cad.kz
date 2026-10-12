@@ -1,6 +1,7 @@
 import { catalogHref } from '@/lib/navigationHrefs'
 import { ButtonLink } from '../Button/Button'
 import { WhatsappIcon } from '../icons/icons'
+import { Mascot } from '../Mascot/Mascot'
 import styles from './EmptyCart.module.css'
 
 /** Текст, который уже набран в WhatsApp: клиенту остаётся дописать задачу. */
@@ -22,21 +23,25 @@ export function EmptyCart({ loading = false, whatsappHref = null }: Props) {
   const reserve = loading ? styles.reserve : undefined
   return (
     <div className={styles.empty} role={loading ? 'status' : undefined}>
-      <h2>{loading ? 'Загружаем корзину…' : 'В корзине пока пусто'}</h2>
-      <p className={reserve}>Выберите решение в каталоге или опишите задачу — поможем с выбором.</p>
-      <div className={reserve ? `${styles.actions} ${reserve}` : styles.actions}>
-        <ButtonLink href={catalogHref()}>Перейти в каталог</ButtonLink>
-        {whatsappHref && (
-          <ButtonLink
-            href={`${whatsappHref}?text=${encodeURIComponent(HELP_TEXT)}`}
-            variant="outline"
-            external
-          >
-            <WhatsappIcon size={20} />
-            Помочь с выбором
-          </ButtonLink>
-        )}
+      <div className={styles.text}>
+        <h2>{loading ? 'Загружаем корзину…' : 'Корзина пока пустая'}</h2>
+        <p className={reserve}>Перейдите в каталог, чтобы выбрать нужное ПО или оборудование.</p>
+        <div className={reserve ? `${styles.actions} ${reserve}` : styles.actions}>
+          <ButtonLink href={catalogHref()}>Перейти в каталог</ButtonLink>
+          {whatsappHref && (
+            <ButtonLink
+              href={`${whatsappHref}?text=${encodeURIComponent(HELP_TEXT)}`}
+              variant="outline"
+              external
+            >
+              <WhatsappIcon size={20} />
+              Помочь с выбором
+            </ButtonLink>
+          )}
+        </div>
       </div>
+      {/* key: после загрузки Кади появляется заново, а не остаётся невидимым с отыгранной анимацией. */}
+      <Mascot key={loading ? 'loading' : 'ready'} pose="empty-cart" className={reserve} />
     </div>
   )
 }

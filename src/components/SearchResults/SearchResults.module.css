@@ -16,15 +16,31 @@
   list-style: none;
 }
 
+/* Телефон: Кади над текстом. От 640 px: текст слева, Кади справа. */
 .empty {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: flex-start;
-  gap: var(--space-3);
+  gap: var(--space-6);
   margin-top: var(--space-6);
   padding: var(--space-8) var(--space-6);
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-lg);
+}
+
+.emptyBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .empty {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
 }
 
 .emptyTitle {
