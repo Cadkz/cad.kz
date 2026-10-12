@@ -1,5 +1,6 @@
-/* Телефон: компактная строка — значок слева, заголовок и описание справа (9 карточек
-   не растягивают страницу). От 640 px — плитка: значок, под ним заголовок и описание;
+/* Телефон: компактная строка — значок слева, заголовок и описание справа (12 карточек
+   не растягивают страницу). От 640 px — плитка (компактнее с 12.10.2026: 4 в ряд от 960 px,
+   сетка 4 × 3): значок, под ним заголовок и описание;
    заголовки карточек одного ряда начинаются на одной высоте, даже если переносятся. */
 .card {
   position: relative;
@@ -105,8 +106,8 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    min-height: calc(var(--control-height) * 4);
-    padding: var(--space-6);
+    min-height: calc(var(--control-height) * 3);
+    padding: var(--space-5);
   }
 
   .big {
@@ -114,19 +115,27 @@
   }
 
   .big svg {
-    width: calc(var(--icon-box) * 3);
-    height: calc(var(--icon-box) * 3);
+    width: calc(var(--icon-box) * 2);
+    height: calc(var(--icon-box) * 2);
   }
 
   .title {
     align-self: auto;
-    margin-top: var(--space-10);
+    margin-top: var(--space-4);
+  }
+
+  /* В узкой колонке (4 в ряд на 960 px) описание не длиннее трёх строк. */
+  .summary {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
   }
 
   .arrow {
     position: absolute;
-    top: var(--space-6);
-    right: var(--space-6);
+    top: var(--space-5);
+    right: var(--space-5);
     display: inline-flex;
     color: var(--color-text-on-dark);
     opacity: 0;

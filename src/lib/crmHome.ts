@@ -3,6 +3,7 @@ import type { HomePage } from '../../payload-types'
 import {
   CRM_POPULAR,
   CRM_POPULAR_V1_LABELS,
+  CRM_POPULAR_V3,
   CRM_RENEW_BAND,
   ESTIMATE_SUMMARY_FIX,
 } from '../domain/crmCatalogSeed.mjs'
@@ -33,10 +34,21 @@ async function findProduct(payload: Payload, slug: string | null, title: RegExp 
 
 type PopularItems = NonNullable<NonNullable<HomePage['popular']>['items']>
 
-/** Плитки «Популярных решений» по CRM_POPULAR: товар — для логотипа, ссылка — если своя. */
-async function popularItems(payload: Payload, report: string[]): Promise<PopularItems> {
+type PopularSeed = {
+  slug: string | null
+  title: RegExp | null
+  label: string
+  href: string | null
+}
+
+/** Плитки «Популярных решений» по списку: товар — для логотипа, ссылка — если своя. */
+async function popularItems(
+  payload: Payload,
+  report: string[],
+  list: PopularSeed[] = CRM_POPULAR,
+): Promise<PopularItems> {
   const items: PopularItems = []
-  for (const card of CRM_POPULAR) {
+  for (const card of list) {
     const product = await findProduct(payload, card.slug, card.title)
     if (!product) report.push(`Популярные решения: не найден товар для «${card.label}»`)
     // Без товара и своей ссылки плитка ведёт в каталог.
@@ -119,6 +131,46 @@ export async function setupPopularV2(payload: Payload): Promise<string[] | null>
   await payload.create({
     collection: 'import-runs',
     data: { idempotencyKey: POPULAR_V2_KEY, state: 'done', snapshot: { report } },
+    ...opts,
+  })
+  return report
+}
+
+/** Ключ записи в журнале «Запуски импорта»: третий вариант плиток, один раз. */
+export const POPULAR_V3_KEY = 'home-setup:popular-v3'
+
+/**
+ * «Популярные решения» по списку владельца 12.10.2026, вечер (CRM_POPULAR_V3). Меняет блок,
+ * только если в нём второй вариант (CRM_POPULAR) — правленное в админке не трогаем.
+ * null — уже сделано.
+ */
+export async function setupPopularV3(payload: Payload): Promise<string[] | null> {
+  const done = await payload.find({
+    collection: 'import-runs',
+    where: { idempotencyKey: { equals: POPULAR_V3_KEY } },
+    limit: 1,
+    ...opts,
+  })
+  if (done.docs.length) return null
+  const report: string[] = []
+  const page: HomePage = await payload.findGlobal({ slug: 'home-page', ...opts })
+  const titles = (page.popular?.items ?? []).map((item) => item.title ?? '')
+  const v2 = CRM_POPULAR.map((card) => card.label)
+  const untouched = titles.length === v2.length && titles.every((title, i) => title === v2[i])
+  if (untouched) {
+    const items = await popularItems(payload, report, CRM_POPULAR_V3)
+    await payload.updateGlobal({
+      slug: 'home-page',
+      data: { popular: { title: page.popular?.title || 'Популярные решения', lead: null, items } },
+      ...opts,
+    })
+    report.push(
+      `Популярные решения: ${items.length} плиток (${items.map((i) => i.title).join(', ')})`,
+    )
+  } else report.push('Популярные решения правили в админке — не трогаем')
+  await payload.create({
+    collection: 'import-runs',
+    data: { idempotencyKey: POPULAR_V3_KEY, state: 'done', snapshot: { report } },
     ...opts,
   })
   return report

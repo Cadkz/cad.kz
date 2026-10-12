@@ -5,7 +5,7 @@ import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './PopularCard.module.css'
 
 /**
- * Плитка «Популярных решений»: маленький логотип и название, как плитки производителей.
+ * Плитка «Популярных решений»: маленький логотип и название в одну строку, высота 64 px.
  * Вся плитка — ссылка на товар или в каталог.
  */
 export function PopularCard({ card }: { card: PopularCardData }) {

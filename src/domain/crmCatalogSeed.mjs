@@ -349,6 +349,27 @@ export const CRM_POPULAR = [
   },
 ]
 
+/**
+ * «Популярные решения», третий вариант (замечание владельца 12.10.2026, вечер): короче и в его
+ * порядке — AutoCAD, Revit, АВС-KZ, GEO5, SCAD, ЛИРА, Fusion, 3D-сканеры Artec. Плитка — логотип
+ * и название. Fusion продаётся двумя товарами (Team, CLOUD) — ведёт в поиск, где видны оба.
+ */
+export const CRM_POPULAR_V3 = [
+  { slug: 'autocad', title: /^AutoCAD$/i, label: 'AutoCAD', href: null },
+  { slug: 'autodesk-revit', title: /^Revit$/i, label: 'Revit', href: null },
+  { slug: null, title: /^(Программный комплекс АВС|АВС-4)/i, label: 'АВС-KZ', href: null },
+  { slug: 'geo5', title: /^GEO5$/i, label: 'GEO5', href: null },
+  { slug: 'scad_v23', title: /^SCAD Office/i, label: 'SCAD Office', href: null },
+  { slug: null, title: /^ЛИРА\s*-\s*FEM/i, label: 'ЛИРА-FEM', href: null },
+  { slug: null, title: /^Fusion 360 Team$/i, label: 'Fusion', href: '/search?q=Fusion' },
+  {
+    slug: null,
+    title: /^Artec Leo$/i,
+    label: '3D-сканеры Artec',
+    href: '/catalog?group=hardware&type=scanners&vendor=Artec+3D',
+  },
+]
+
 /** Описание «Смет» из первой настройки: АВС-4 → АВС-KZ (ребрендинг, замечание владельца). */
 export const ESTIMATE_SUMMARY_FIX = [
   'АВС-4 и сметно-нормативные базы РК: сметы, обновления баз.',

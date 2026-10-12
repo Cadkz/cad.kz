@@ -12,7 +12,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
-import { setupPopularV2 } from '../src/lib/crmHome.ts'
+import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
 import { setupGeo5Catalog } from '../src/lib/geoSetup.ts'
@@ -131,6 +131,9 @@ try {
   const popular = await setupPopularV2(payload)
   if (!popular) console.log('Популярные решения плитками уже настроены.')
   else for (const line of popular) console.log(line)
+  const popularV3 = await setupPopularV3(payload)
+  if (!popularV3) console.log('Популярные решения по списку владельца уже настроены.')
+  else for (const line of popularV3) console.log(line)
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1

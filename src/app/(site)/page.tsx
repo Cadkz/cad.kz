@@ -60,7 +60,7 @@ export default async function Home({ searchParams }: Props) {
           sub={home.popular.lead ?? undefined}
           action={{ href: catalogHref(), label: 'Весь каталог' }}
         >
-          <Grid as="ul" span={{ base: 6, md: 3 }}>
+          <Grid as="ul" span={{ base: 6, sm: 3 }}>
             {popular.map((card) => (
               <li key={card.key}>
                 <PopularCard card={card} />
@@ -75,7 +75,7 @@ export default async function Home({ searchParams }: Props) {
         sub="Карточка открывает каталог этого направления."
         action={popular.length ? undefined : { href: catalogHref(), label: 'Весь каталог' }}
       >
-        <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
+        <Grid as="ul" span={{ base: 12, sm: 6, md: 3 }}>
           {[...directions, ...directionExtras].map((direction, i) => (
             <Reveal as="li" key={direction.slug} step={i}>
               <DirectionCard direction={direction} />
