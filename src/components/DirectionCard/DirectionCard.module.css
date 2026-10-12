@@ -27,9 +27,26 @@
   content: "";
 }
 
+/* При наведении в карточке зажигается сияние — тот же перелив, что в тёмных баннерах. */
+.card::after {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background:
+    radial-gradient(70% 60% at 100% 0%, var(--aurora-dark-sky), transparent 70%),
+    radial-gradient(60% 55% at 0% 100%, var(--aurora-dark-violet), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease);
+  content: "";
+}
+
 .card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-glow);
   transform: translateY(calc(-1 * var(--space-1)));
+}
+
+.card:hover::after {
+  opacity: 1;
 }
 
 .card:active {

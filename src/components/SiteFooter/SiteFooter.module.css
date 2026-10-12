@@ -1,4 +1,8 @@
 .footer {
+  position: relative;
+  isolation: isolate;
+  /* сияние снизу шире подвала — обрезаем, чтобы не было прокрутки вбок */
+  overflow: clip;
   padding: var(--section-gap) 0 var(--space-10);
 }
 
@@ -10,6 +14,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
+  box-shadow: var(--shadow-float);
 }
 
 .card > * {
@@ -58,7 +63,8 @@
   justify-content: space-between;
   gap: var(--space-2) var(--space-6);
   padding-top: var(--space-6);
-  color: var(--color-text-muted);
+  /* строка лежит на сиянии: цвет темнее обычного серого ради контраста */
+  color: var(--color-gray-700);
   font-size: var(--text-sm);
 }
 

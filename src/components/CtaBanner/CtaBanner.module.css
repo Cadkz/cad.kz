@@ -1,5 +1,13 @@
 .section {
   padding-top: var(--section-gap);
+  /* свечение под баннером шире рамки — обрезаем по ширине, вниз оно выглядывает */
+  overflow-x: clip;
+}
+
+/* Обёртка баннера: под ней лежит свечение (Aurora halo), баннер его не обрезает. */
+.frame {
+  position: relative;
+  isolation: isolate;
 }
 
 .banner {
@@ -18,7 +26,7 @@
   background: var(--color-navy);
 }
 
-/* Фон кодом: чертёжная сетка вместо картинки-узора. */
+/* Фон кодом: чертёжная сетка вместо картинки-узора; перелив — Aurora glow. */
 .banner::before {
   content: "";
   position: absolute;
@@ -27,14 +35,6 @@
   background-image: var(--blueprint-dark);
   background-size: var(--blueprint-size);
   mask-image: linear-gradient(to left, black, transparent 60%);
-}
-
-.banner::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-below);
-  background: radial-gradient(circle at 0% 100%, var(--color-glow), transparent 40%);
 }
 
 .text {

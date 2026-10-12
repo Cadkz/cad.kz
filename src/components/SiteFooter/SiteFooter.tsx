@@ -1,17 +1,22 @@
 import Link from 'next/link'
 import { getContacts } from '@/lib/navigation'
 import { footerColumns } from '@/lib/siteNav'
+import { Aurora } from '../Aurora/Aurora'
 import { ContactList } from '../ContactList/ContactList'
 import { Container } from '../Container/Container'
 import { Logo } from '../Logo/Logo'
 import styles from './SiteFooter.module.css'
 
-/** Общий подвал сайта: на всех страницах одинаковый, многоколоночный. */
+/**
+ * Общий подвал сайта: на всех страницах одинаковый, многоколоночный. Белая карточка парит
+ * над мягким сиянием, которое поднимается от нижнего края страницы.
+ */
 export async function SiteFooter() {
   const contacts = await getContacts()
   const year = new Date().getFullYear()
   return (
     <footer className={styles.footer}>
+      <Aurora variant="floor" />
       <Container>
         <div className={styles.card}>
           <div className={styles.brand}>

@@ -2,6 +2,36 @@
   padding: var(--section-gap) 0 0;
 }
 
+/* Пятно света за блоком: пастельное, у края экрана, к центру растворяется. Под карточками
+   белые поверхности чуть отделяются от фона страницы — без заливки и линий. Пятна гаснут
+   раньше верхнего и нижнего края секции, поэтому границы секции не видно. */
+.glowLeft,
+.glowRight {
+  position: relative;
+  isolation: isolate;
+}
+
+.glowLeft::after,
+.glowRight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  pointer-events: none;
+}
+
+.glowLeft::after {
+  background:
+    radial-gradient(42% 46% at 0% 50%, var(--aurora-pool-sky), transparent),
+    radial-gradient(24% 28% at 8% 68%, var(--aurora-pool-violet), transparent);
+}
+
+.glowRight::after {
+  background:
+    radial-gradient(42% 46% at 100% 50%, var(--aurora-pool-violet), transparent),
+    radial-gradient(24% 28% at 92% 68%, var(--aurora-pool-sky), transparent);
+}
+
 .tint {
   margin-top: var(--section-gap);
   padding-bottom: var(--section-gap);
@@ -36,6 +66,34 @@
   flex-direction: column;
   gap: var(--space-2);
   max-width: var(--measure);
+}
+
+/* Штрих-акцент над заголовком: короткая линия в цветах сияния — метка начала блока. */
+.text::before {
+  content: "";
+  width: var(--space-8);
+  height: var(--space-1);
+  margin-bottom: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--gradient-aurora-line);
+  transform-origin: left center;
+}
+
+/* Прорисовывается слева направо, пока секция входит в экран; без поддержки — сразу готов. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .text::before {
+      animation: stroke linear both;
+      animation-timeline: view();
+      animation-range: entry 20% entry 80%;
+    }
+  }
+}
+
+@keyframes stroke {
+  from {
+    transform: scaleX(0);
+  }
 }
 
 .sub {

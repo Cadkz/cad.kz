@@ -1,0 +1,80 @@
+/* Сияние: пятна света — радиальные градиенты (без filter: blur, дешевле для телефона).
+   Двигается только transform, слой не ловит нажатия и лежит под содержимым родителя. */
+.aurora {
+  position: absolute;
+  z-index: var(--z-below);
+  pointer-events: none;
+}
+
+/* Внутри тёмного баннера: голубое пятно справа сверху, сине-фиолетовое слева снизу.
+   Слой больше баннера, чтобы при переливе края не показывались. */
+.glow {
+  inset: -20%;
+  background:
+    radial-gradient(40% 50% at 78% 22%, var(--aurora-dark-sky), transparent 70%),
+    radial-gradient(38% 46% at 22% 92%, var(--aurora-dark-violet), transparent 70%);
+}
+
+/* Под тёмным баннером: цветное свечение выглядывает снизу и по бокам. Родитель-обёртка
+   баннера не обрезает его, а секция обрезает по ширине (overflow-x: clip). */
+.halo {
+  inset: 20% calc(var(--space-8) * -1) calc(var(--space-12) * -1);
+  /* Каждое пятно гаснет до прозрачного раньше края слоя — краёв у свечения не видно. */
+  background:
+    radial-gradient(26% 44% at 24% 56%, var(--aurora-halo-sky), transparent),
+    radial-gradient(26% 44% at 76% 58%, var(--aurora-halo-violet), transparent),
+    radial-gradient(36% 34% at 50% 64%, var(--aurora-halo-blue), transparent);
+}
+
+/* Снизу светлого блока: пастельный перелив поднимается от нижнего края. */
+.floor {
+  /* С запасом за края: при переливе край слоя не должен показаться (родитель обрезает). */
+  inset: 0 calc(var(--space-8) * -1) calc(var(--space-6) * -1);
+  background:
+    radial-gradient(42% 80% at 14% 100%, var(--aurora-light-sky), transparent),
+    radial-gradient(40% 85% at 86% 100%, var(--aurora-light-violet), transparent),
+    radial-gradient(55% 50% at 50% 105%, var(--aurora-light-blue), transparent);
+  transform-origin: 50% 100%;
+}
+
+@media (min-width: 640px) {
+  .halo {
+    inset: 20% calc(var(--space-16) * -1) calc(var(--space-16) * -1);
+  }
+}
+
+/* Медленный перелив туда-обратно; при prefers-reduced-motion слой стоит на месте. */
+@media (prefers-reduced-motion: no-preference) {
+  .aurora {
+    animation: drift var(--duration-drift) var(--ease-drift) infinite alternate;
+  }
+
+  /* Ниже первого экрана свечение разгорается, пока блок входит в экран. */
+  @supports (animation-timeline: view()) {
+    .onScroll {
+      animation:
+        drift var(--duration-drift) var(--ease-drift) infinite alternate,
+        kindle linear both;
+      animation-timeline: auto, view();
+      animation-range:
+        normal,
+        entry 10% cover 40%;
+    }
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(calc(var(--space-6) * -1), 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(var(--space-6), calc(var(--space-3) * -1), 0) scale(1.06);
+  }
+}
+
+@keyframes kindle {
+  from {
+    opacity: 0;
+  }
+}

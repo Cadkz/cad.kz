@@ -56,6 +56,7 @@ export default async function Home({ searchParams }: Props) {
       {popular.length > 0 && (
         <Section
           id="popular"
+          glow="right"
           title={home.popular.title}
           sub={home.popular.lead ?? undefined}
           action={{ href: catalogHref(), label: 'Весь каталог' }}
@@ -106,6 +107,7 @@ export default async function Home({ searchParams }: Props) {
       )}
       <Section
         id="news"
+        glow="left"
         title="Новости и обновления"
         action={{ href: '/news', label: 'Все новости' }}
       >
@@ -118,7 +120,7 @@ export default async function Home({ searchParams }: Props) {
         </Grid>
       </Section>
       {home.faq.length > 0 && (
-        <Section id="faq" title="Частые вопросы">
+        <Section id="faq" glow="right" title="Частые вопросы">
           <Grid>
             <Col span={{ base: 12, md: 8 }}>
               <Faq items={home.faq} />

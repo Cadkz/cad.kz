@@ -11,14 +11,22 @@ type Props = {
   id?: string
   /** tint — голубая подложка во всю ширину экрана с фирменным узором. */
   tone?: 'plain' | 'tint'
+  /** Мягкое пятно света за блоком слева или справа — отделяет блок на светлом фоне. */
+  glow?: 'left' | 'right'
   children: ReactNode
 }
 
-/** Секция страницы: заголовок h2, подзаголовок, ссылка «Все …» и содержимое в рамке сайта. */
-export function Section({ title, sub, action, id, tone = 'plain', children }: Props) {
+const glows = { left: styles.glowLeft, right: styles.glowRight }
+
+/**
+ * Секция страницы: штрих-акцент, заголовок h2, подзаголовок, ссылка «Все …» и содержимое
+ * в рамке сайта. Штрих над заголовком прорисовывается, когда секция входит в экран.
+ */
+export function Section({ title, sub, action, id, tone = 'plain', glow, children }: Props) {
   const headingId = id ? `${id}-title` : undefined
+  const classes = [styles.section, styles[tone], glow && glows[glow]]
   return (
-    <section id={id} className={`${styles.section} ${styles[tone]}`} aria-labelledby={headingId}>
+    <section id={id} className={classes.filter(Boolean).join(' ')} aria-labelledby={headingId}>
       <Container>
         <div className={styles.head}>
           <div className={styles.text}>

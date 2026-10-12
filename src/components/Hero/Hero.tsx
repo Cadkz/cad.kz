@@ -1,6 +1,7 @@
 import { MessageCircle } from 'lucide-react'
 import type { Home } from '@/lib/home'
 import { catalogHref } from '@/lib/navigationHrefs'
+import { Aurora } from '../Aurora/Aurora'
 import { Badge } from '../Badge/Badge'
 import { BannerArt } from '../BannerArt/BannerArt'
 import { ButtonLink } from '../Button/Button'
@@ -20,7 +21,8 @@ type Props = {
 /**
  * Первый экран главной: плашка, заголовок и три действия — написать задачу в WhatsApp,
  * оставить короткую заявку «Подобрать решение» или открыть каталог.
- * Акции и предложения — ниже, отдельным блоком (PromoBand).
+ * Акции и предложения — ниже, отдельным блоком (PromoBand). Внутри баннера медленно
+ * переливается сияние, снизу из-под него выглядывает цветное свечение (Aurora).
  */
 export function Hero({ home, directions }: Props) {
   const whatsapp = home.whatsappHref
@@ -29,29 +31,33 @@ export function Hero({ home, directions }: Props) {
   return (
     <section className={styles.hero}>
       <Container>
-        <div className={styles.band}>
-          <BannerArt name="frame" className={styles.art} />
-          <div className={styles.content}>
-            {home.eyebrow && <Badge tone="onDark">{home.eyebrow}</Badge>}
-            <h1 className={styles.title}>{home.title}</h1>
-            <p className={styles.lead}>
-              Опишите задачу — менеджер подберёт комплект и пришлёт коммерческое предложение. Или
-              выберите сами в каталоге.
-            </p>
-            <div className={styles.actions}>
-              {whatsapp && (
-                <ButtonLink href={whatsapp} variant="light">
-                  <MessageCircle size={20} strokeWidth={1.75} aria-hidden="true" />
-                  Написать задачу в WhatsApp
+        <div className={styles.frame}>
+          <Aurora variant="halo" />
+          <div className={styles.band}>
+            <Aurora variant="glow" />
+            <BannerArt name="frame" className={styles.art} />
+            <div className={styles.content}>
+              {home.eyebrow && <Badge tone="onDark">{home.eyebrow}</Badge>}
+              <h1 className={styles.title}>{home.title}</h1>
+              <p className={styles.lead}>
+                Опишите задачу — менеджер подберёт комплект и пришлёт коммерческое предложение. Или
+                выберите сами в каталоге.
+              </p>
+              <div className={styles.actions}>
+                {whatsapp && (
+                  <ButtonLink href={whatsapp} variant="light">
+                    <MessageCircle size={20} strokeWidth={1.75} aria-hidden="true" />
+                    Написать задачу в WhatsApp
+                  </ButtonLink>
+                )}
+                <SolutionRequest
+                  directions={directions.map(({ slug, title }) => ({ slug, title }))}
+                  whatsappHref={home.whatsappHref}
+                />
+                <ButtonLink href={catalogHref()} variant="ghostDark">
+                  Перейти в каталог
                 </ButtonLink>
-              )}
-              <SolutionRequest
-                directions={directions.map(({ slug, title }) => ({ slug, title }))}
-                whatsappHref={home.whatsappHref}
-              />
-              <ButtonLink href={catalogHref()} variant="ghostDark">
-                Перейти в каталог
-              </ButtonLink>
+              </div>
             </div>
           </div>
         </div>
