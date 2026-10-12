@@ -1,5 +1,4 @@
-import { ArrowRight, MessageCircle } from 'lucide-react'
-import Link from 'next/link'
+import { MessageCircle } from 'lucide-react'
 import type { Home } from '@/lib/home'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { Badge } from '../Badge/Badge'
@@ -19,8 +18,8 @@ type Props = {
 }
 
 /**
- * Первый экран главной: плашка, заголовок и три действия по важности — написать задачу в WhatsApp,
- * оставить короткую заявку «Подобрать решение» или открыть каталог (ссылкой текстом).
+ * Первый экран главной: плашка, заголовок и три действия — написать задачу в WhatsApp,
+ * оставить короткую заявку «Подобрать решение» или открыть каталог.
  * Акции и предложения — ниже, отдельным блоком (PromoBand).
  */
 export function Hero({ home, directions }: Props) {
@@ -50,10 +49,9 @@ export function Hero({ home, directions }: Props) {
                 directions={directions.map(({ slug, title }) => ({ slug, title }))}
                 whatsappHref={home.whatsappHref}
               />
-              <Link href={catalogHref()} className={styles.catalog}>
+              <ButtonLink href={catalogHref()} variant="ghostDark">
                 Перейти в каталог
-                <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
-              </Link>
+              </ButtonLink>
             </div>
           </div>
         </div>

@@ -1,27 +1,29 @@
-/* Строка-переход, а не плитка: логотип слева, название, стрелка справа (от 640 px). */
+/* Как плитка производителя: рамка, белый фон, по центру логотип и подпись. */
 .tile {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  justify-content: center;
+  gap: var(--space-2);
   height: 100%;
-  min-height: var(--space-16);
-  padding: var(--space-3);
+  min-height: calc(var(--icon-box) * 2);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
+  text-align: center;
   transition:
     border-color var(--duration-fast) var(--ease),
     box-shadow var(--duration-fast) var(--ease);
 }
 
 .tile:hover {
-  border-color: var(--color-blue-mid);
+  border-color: var(--color-border-strong);
   box-shadow: var(--shadow-sm);
 }
 
 .logo {
   display: inline-flex;
-  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: var(--icon-box);
@@ -36,43 +38,13 @@
 }
 
 .title {
-  flex: 1;
-  min-width: 0;
   color: var(--color-navy);
   font-family: var(--font-heading);
-  font-size: var(--text-sm);
+  font-size: var(--text-body);
   font-weight: var(--weight-bold);
   line-height: var(--leading-snug);
 }
 
-.arrow {
-  display: none;
-  flex-shrink: 0;
-  color: var(--color-gray-500);
-  transition:
-    color var(--duration-fast) var(--ease),
-    transform var(--duration-fast) var(--ease);
-}
-
 .tile:hover .title {
   color: var(--color-blue);
-}
-
-.tile:hover .arrow {
-  color: var(--color-blue);
-  transform: translateX(var(--space-1));
-}
-
-@media (min-width: 640px) {
-  .tile {
-    padding: var(--space-3) var(--space-4) var(--space-3) var(--space-3);
-  }
-
-  .title {
-    font-size: var(--text-body);
-  }
-
-  .arrow {
-    display: inline-flex;
-  }
 }

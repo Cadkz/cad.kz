@@ -1,4 +1,3 @@
-import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { PopularCardData } from '@/lib/popular'
@@ -6,8 +5,8 @@ import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './PopularCard.module.css'
 
 /**
- * Быстрый переход «Популярных решений»: строка 64 px — логотип, название, стрелка.
- * Вся строка — ссылка на товар или в каталог.
+ * Плитка «Популярных решений»: маленький логотип и название, как плитки производителей.
+ * Вся плитка — ссылка на товар или в каталог.
  */
 export function PopularCard({ card }: { card: PopularCardData }) {
   return (
@@ -27,7 +26,6 @@ export function PopularCard({ card }: { card: PopularCardData }) {
         )}
       </span>
       <span className={styles.title}>{card.title}</span>
-      <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" className={styles.arrow} />
     </Link>
   )
 }

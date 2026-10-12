@@ -60,31 +60,9 @@
   margin-top: var(--space-2);
 }
 
-/* Третье действие — тише кнопок: ссылка текстом. На телефоне по центру под кнопками. */
-.catalog {
-  display: inline-flex;
-  align-items: center;
-  align-self: center;
-  gap: var(--space-1);
-  min-height: var(--control-height);
-  padding: 0 var(--space-2);
-  color: var(--color-text-on-dark);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  transition: color var(--duration-fast) var(--ease);
-}
-
-.catalog:hover {
-  color: var(--color-text-inverse);
-}
-
 @media (min-width: 640px) {
   .band {
     padding: var(--space-10);
-  }
-
-  .catalog {
-    margin-left: var(--space-2);
   }
 
   /* От 640 кнопки в ряд по своей ширине; на телефоне — столбиком во всю ширину. */
