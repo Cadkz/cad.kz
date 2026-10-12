@@ -2,12 +2,12 @@ import { permanentRedirect } from 'next/navigation'
 import { BimBand } from '@/components/BimBand/BimBand'
 import { CatalogHashRedirect } from '@/components/CatalogHashRedirect/CatalogHashRedirect'
 import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
-import { DirectionCard } from '@/components/DirectionCard/DirectionCard'
+import { DirectionIndex } from '@/components/DirectionIndex/DirectionIndex'
 import { Faq } from '@/components/Faq/Faq'
 import { FaqHelp } from '@/components/FaqHelp/FaqHelp'
 import { Col, Grid } from '@/components/Grid/Grid'
 import { Hero } from '@/components/Hero/Hero'
-import { NewsCard } from '@/components/NewsCard/NewsCard'
+import { NewsLine } from '@/components/NewsLine/NewsLine'
 import { PopularCard } from '@/components/PopularCard/PopularCard'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
 import { PromoBand } from '@/components/PromoBand/PromoBand'
@@ -25,14 +25,14 @@ import { directionExtras } from '@/lib/siteNav'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
-const newsTones = ['navy', 'graphite', 'deep'] as const
-
 export const metadata = { alternates: { canonical: '/' } }
 
 /**
- * Главная — шаблон «Витрина» (порядок по документу о каталоге по CRM, 12.10.2026): первый экран
- * с тремя действиями, популярные решения плитками (блок партнёров скрыт), направления, продление
- * лицензий, акции, BIM, как мы работаем, новости, вопросы. Каталог — отдельная страница /catalog.
+ * Главная — шаблон «Витрина» (редизайн по аудиту 12.10.2026): у каждого блока свой вид подачи.
+ * Первый экран (тёмный) → популярные решения строками-переходами → продление лицензий сразу под
+ * ними → направления светлым указателем → акции (слайдер) → как мы работаем линией → BIM (тёмный)
+ * → новости лентой → вопросы → «Нашли дешевле» (тёмный). Тёмных крупных блоков три, остальное
+ * светлое; отступы между секциями разные (tight / normal / wide). Каталог — страница /catalog.
  */
 export default async function Home({ searchParams }: Props) {
   // Старые ссылки на каталог с условиями (/?direction=…#catalog) ведут на /catalog с теми же условиями.
@@ -60,7 +60,7 @@ export default async function Home({ searchParams }: Props) {
           sub={home.popular.lead ?? undefined}
           action={{ href: catalogHref(), label: 'Весь каталог' }}
         >
-          <Grid as="ul" span={{ base: 6, md: 3 }}>
+          <Grid as="ul" span={{ base: 6, sm: 3 }}>
             {popular.map((card) => (
               <li key={card.key}>
                 <PopularCard card={card} />
@@ -69,33 +69,27 @@ export default async function Home({ searchParams }: Props) {
           </Grid>
         </Section>
       )}
-      <Section
-        id="directions"
-        title="Выберите направление"
-        sub="Карточка открывает каталог этого направления."
-        action={popular.length ? undefined : { href: catalogHref(), label: 'Весь каталог' }}
-      >
-        <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
-          {[...directions, ...directionExtras].map((direction, i) => (
-            <Reveal as="li" key={direction.slug} step={i}>
-              <DirectionCard direction={direction} />
-            </Reveal>
-          ))}
-        </Grid>
-      </Section>
       <Reveal>
         <RenewBand title={home.renew.title} text={home.renew.text} />
       </Reveal>
+      <Section
+        id="directions"
+        space="wide"
+        title="Выберите направление"
+        sub="Откроется каталог этого направления."
+        action={popular.length ? undefined : { href: catalogHref(), label: 'Весь каталог' }}
+      >
+        <Reveal>
+          <DirectionIndex items={[...directions, ...directionExtras]} />
+        </Reveal>
+      </Section>
       <Reveal>
         <PromoBand home={home} />
-      </Reveal>
-      <Reveal>
-        <BimBand bim={home.bim} />
       </Reveal>
       {home.process.length > 0 && (
         <Section
           id="process"
-          tone="tint"
+          space="wide"
           title="Как мы работаем — и почему нам доверяют"
           sub="Прозрачный процесс от заявки до внедрения."
         >
@@ -104,18 +98,18 @@ export default async function Home({ searchParams }: Props) {
           </Reveal>
         </Section>
       )}
+      <Reveal>
+        <BimBand bim={home.bim} />
+      </Reveal>
       <Section
         id="news"
+        space="wide"
         title="Новости и обновления"
         action={{ href: '/news', label: 'Все новости' }}
       >
-        <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
-          {news.docs.map((item, i) => (
-            <Reveal as="li" key={item.id} step={i}>
-              <NewsCard news={toCard(item)} tone={newsTones[i % newsTones.length]} />
-            </Reveal>
-          ))}
-        </Grid>
+        <Reveal>
+          <NewsLine items={news.docs.map(toCard)} />
+        </Reveal>
       </Section>
       {home.faq.length > 0 && (
         <Section id="faq" title="Частые вопросы">

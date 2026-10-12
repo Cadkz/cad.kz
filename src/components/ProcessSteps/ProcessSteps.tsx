@@ -1,29 +1,23 @@
-import { BookOpen, FileText, MessageSquare } from 'lucide-react'
 import type { Home } from '@/lib/home'
-import { Grid } from '../Grid/Grid'
 import styles from './ProcessSteps.module.css'
 
-const icons = [MessageSquare, FileText, BookOpen]
-
-/** Три шага работы с клиентом: номер, иконка, заголовок, описание. */
+/**
+ * Шаги работы с клиентом линией: номер в кружке на общей тонкой линии, под ним заголовок
+ * и описание. От 960 px шаги в ряд, на телефоне — столбиком, линия идёт сверху вниз.
+ * Без карточек и фона: блок — спокойная пауза между акциями и BIM.
+ */
 export function ProcessSteps({ steps }: { steps: Home['process'] }) {
   return (
-    <Grid as="ul" span={{ base: 12, md: 4 }}>
-      {steps.map((step, i) => {
-        const Icon = icons[i % icons.length] ?? MessageSquare
-        return (
-          <li key={step.title} className={styles.card}>
-            <div className={styles.top}>
-              <span className={styles.num}>{i + 1}</span>
-              <Icon size={24} strokeWidth={1.75} aria-hidden="true" className={styles.icon} />
-            </div>
-            <div className={styles.body}>
-              <h3 className={styles.title}>{step.title}</h3>
-              {step.text && <p className={styles.text}>{step.text}</p>}
-            </div>
-          </li>
-        )
-      })}
-    </Grid>
+    <ol className={styles.steps}>
+      {steps.map((step, i) => (
+        <li key={step.title} className={styles.step}>
+          <span className={styles.num}>{String(i + 1).padStart(2, '0')}</span>
+          <div className={styles.body}>
+            <h3 className={styles.title}>{step.title}</h3>
+            {step.text && <p className={styles.text}>{step.text}</p>}
+          </div>
+        </li>
+      ))}
+    </ol>
   )
 }

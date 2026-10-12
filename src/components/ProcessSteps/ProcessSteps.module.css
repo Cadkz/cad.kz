@@ -1,48 +1,88 @@
-.card {
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
+.steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-5) var(--space-6);
-  background: var(--gradient-soft);
+/* Телефон: номер слева, линия от номера вниз к следующему шагу. */
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--icon-box) minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.step:not(:last-child)::after {
+  position: absolute;
+  top: var(--icon-box);
+  bottom: calc(-1 * var(--space-6));
+  left: calc(var(--icon-box) / 2);
+  border-left: 1px solid var(--color-blue-mid);
+  content: "";
 }
 
 .num {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--control-height-sm);
-  height: var(--control-height-sm);
+  width: var(--icon-box);
+  height: var(--icon-box);
+  border: 1px solid var(--color-blue-mid);
   border-radius: var(--radius-round);
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  background: var(--color-bg);
+  color: var(--color-blue);
   font-family: var(--font-heading);
   font-size: var(--text-sm);
-  font-weight: var(--weight-heavy);
-}
-
-.icon {
-  color: var(--color-blue);
+  font-weight: var(--weight-bold);
 }
 
 .body {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-5) var(--space-6) var(--space-6);
+  padding-top: var(--space-2);
+  max-width: var(--measure);
 }
 
 .title {
+  color: var(--color-navy);
   font-size: var(--text-h4);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-snug);
 }
 
 .text {
   color: var(--color-text-muted);
   font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+/* От 960 px: шаги в ряд по 4 колонки сетки, линия идёт от номера к номеру следующего шага. */
+@media (min-width: 960px) {
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--grid-gap);
+  }
+
+  .step {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+
+  .step:not(:last-child)::after {
+    top: calc(var(--icon-box) / 2);
+    right: calc(var(--space-3) - var(--grid-gap));
+    bottom: auto;
+    left: calc(var(--icon-box) + var(--space-3));
+    border-top: 1px solid var(--color-blue-mid);
+    border-left: 0;
+  }
+
+  .body {
+    padding-top: 0;
+    padding-right: var(--space-6);
+  }
 }
