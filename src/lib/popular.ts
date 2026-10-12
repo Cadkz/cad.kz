@@ -1,3 +1,4 @@
+import { brandOf } from '@/domain/brands.mjs'
 import type { CatalogItem } from './catalog'
 import type { Home } from './home'
 import type { Picture } from './pictures'
@@ -8,6 +9,8 @@ export type PopularCardData = {
   href: string
   picture: Picture | null
   icon: string | null
+  /** Фирменный вид: ключ цвета и логотип программы (по названию плитки). */
+  brand: { key: string; logo: string } | null
 }
 
 /**
@@ -32,7 +35,13 @@ export function popularCards(
         href,
         picture: product?.picture ?? null,
         icon: product?.icon ?? null,
+        brand: brandFor(title),
       },
     ]
   })
+}
+
+function brandFor(title: string): PopularCardData['brand'] {
+  const brand = brandOf(title)
+  return brand ? { key: brand.key, logo: brand.logo } : null
 }

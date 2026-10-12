@@ -55,3 +55,74 @@
 .tile:hover .title {
   color: var(--color-blue);
 }
+
+/* Фирменный вид программы (12.10.2026): цвет производителя — полоска слева, лёгкая подложка
+   от левого края и рамка; при наведении рамка ярче. Цвет задаёт класс
+   бренда через --brand. Содержимое — от левого края, чтобы логотипы стояли в одну линию. */
+.branded {
+  position: relative;
+  justify-content: flex-start;
+  padding-left: var(--space-5);
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--brand) 16%, var(--color-border));
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--brand) 9%, var(--color-surface)),
+    var(--color-surface) 70%
+  );
+  text-align: left;
+}
+
+.branded::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--space-1);
+  background: var(--brand);
+  content: "";
+}
+
+.branded:hover {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--color-border));
+}
+
+.branded:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Название остаётся тёмным: светлые фирменные цвета (оранжевый Fusion) на светлом фоне
+   не дают нужного контраста текста. */
+.branded:hover .title {
+  color: var(--color-navy);
+}
+
+.autocad {
+  --brand: var(--brand-autocad);
+}
+
+.revit {
+  --brand: var(--brand-revit);
+}
+
+.fusion {
+  --brand: var(--brand-fusion);
+}
+
+.abc {
+  --brand: var(--brand-abc);
+}
+
+.geo5 {
+  --brand: var(--brand-geo5);
+}
+
+.scad {
+  --brand: var(--brand-scad);
+}
+
+.lira {
+  --brand: var(--brand-lira);
+}
+
+.artec {
+  --brand: var(--brand-artec);
+}
