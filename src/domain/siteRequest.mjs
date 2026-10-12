@@ -1,6 +1,7 @@
 // @ts-check
 // Заявка без корзины: запрос цены, продление, помощь с выбором, КП по семейству,
-// «Подобрать решение» с главной (источник home: задача словами, без товара).
+// «Подобрать решение» с главной (источник home: задача словами, без товара),
+// «Передать менеджеру» из чата с Кади (источник assistant: переписку сервер берёт из своей базы).
 // Клиент выбрал «Перезвоните мне» и оставил имя и телефон. Чистые функции без базы:
 // проверка формы (та же в браузере и на сервере) и данные для CRM.
 // Названия и цены в заявку подставляет сервер из базы по ID, от клиента берутся только ID.
@@ -53,7 +54,7 @@ function hasControl(value) {
  * Откуда заявка: со страницы товара или семейства, с главной («Подобрать решение») или со страницы
  * «Продление лицензий» (программа, номер лицензии, число мест — без товара).
  */
-export const REQUEST_SOURCES = /** @type {const} */ (['product', 'home', 'renew'])
+export const REQUEST_SOURCES = /** @type {const} */ (['product', 'home', 'renew', 'assistant'])
 
 /** Программы на странице продления: чипы формы; «Другая» — клиент пишет название сам. */
 export const RENEW_PROGRAMS = ['AutoCAD', 'АВС', 'ЛИРА-FEM', 'SCAD Office', 'GEO5']
@@ -163,6 +164,8 @@ export function validateContact(raw, options = {}) {
  * @property {string} comment
  * @property {string} button  Подпись нажатой кнопки («Получить КП», «Записаться на демонстрацию»).
  * @property {{ program: string, license: string, seats: number | null } | null} renewal  Со страницы продления.
+ * @property {string | null} conversationId  Из чата с Кади: ключ разговора, переписку сервер берёт из базы.
+ * @property {string | null} page  Из чата с Кади: адрес страницы, где был клиент.
  */
 
 /**
@@ -183,6 +186,19 @@ export function validateRequest(raw) {
   // С главной — только «помощь с выбором», со страницы продления — только продление; без товара.
   if (source === 'home' && kind !== 'help') errors.kind = 'Некорректный тип заявки'
   if (source === 'renew' && kind !== 'renew') errors.kind = 'Некорректный тип заявки'
+  if (source === 'assistant' && kind !== 'consult') errors.kind = 'Некорректный тип заявки'
+  const conversationId =
+    source === 'assistant' && typeof input.conversationId === 'string'
+      ? input.conversationId.toLowerCase()
+      : null
+  if (source === 'assistant' && !UUID.test(conversationId ?? ''))
+    errors.idempotencyKey = 'Не удалось найти разговор. Обновите страницу и попробуйте ещё раз.'
+  const page =
+    source === 'assistant' &&
+    typeof input.page === 'string' &&
+    /^\/[^\s<>"]{0,200}$/.test(input.page)
+      ? input.page
+      : null
   const pageProductId = source === 'product' ? Number(input.pageProductId) : null
   if (pageProductId !== null && (!Number.isSafeInteger(pageProductId) || pageProductId <= 0))
     errors.page = 'Некорректная страница'
@@ -255,6 +271,8 @@ export function validateRequest(raw) {
       ...contact,
       button: buttonText(input.button),
       renewal,
+      conversationId,
+      page,
     },
   }
 }
@@ -287,7 +305,8 @@ export function makeRequestNumber(
  * плюс тип заявки. Строки без цены передаются без сумм.
  * Источник (`source`): нажатая кнопка, товар, его раздел и сценарий покупки — чтобы следующий
  * анализ CRM видел, откуда пришла сделка, а не только её название.
- * @param {{ number: string, idempotencyKey: string, kind: RequestKind, pageTitle: string, choices: { title: string, value: string }[], name: string, phone: string, comment: string, consentAt: string, lines: ResolvedLine[], totalKzt: string | null, source?: { button: string, product: string | null, section: string | null, scenario: string | null, page: string | null } }} request
+ * Из чата с Кади — вся переписка (`messages`): менеджер продолжает разговор с того же места.
+ * @param {{ number: string, idempotencyKey: string, kind: RequestKind, pageTitle: string, choices: { title: string, value: string }[], name: string, phone: string, comment: string, consentAt: string, lines: ResolvedLine[], totalKzt: string | null, source?: { button: string, product: string | null, section: string | null, scenario: string | null, page: string | null }, messages?: { role: 'user' | 'assistant', content: string }[] }} request
  */
 export function toCrmRequest(request) {
   return {
@@ -314,6 +333,6 @@ export function toCrmRequest(request) {
       totalKzt: line.totalKzt ?? '',
     })),
     totalKzt: request.totalKzt ?? '0',
-    messages: [],
+    messages: (request.messages ?? []).map((m) => ({ role: m.role, content: m.content })),
   }
 }

@@ -17,6 +17,7 @@ import {
   toCrmRequest,
 } from '@/domain/siteRequest.mjs'
 import type { Offer } from '../../payload-types'
+import { findConversation, saveConversation } from './assistant/conversation'
 import { findPublicOffer, loadPricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
 
@@ -108,6 +109,7 @@ function renewalChoices(request: SiteRequest) {
 async function checkedChoices(payload: Payload, request: SiteRequest) {
   if (request.source === 'home') return homeChoices(payload, request)
   if (request.source === 'renew') return renewalChoices(request)
+  if (request.source === 'assistant') return []
   if (!request.choices.length || request.familySlug || request.pageProductId === null) return []
   const product = await payload.findByID({
     collection: 'products',
@@ -151,6 +153,7 @@ async function productContext(payload: Payload, request: SiteRequest) {
 /** Название страницы для менеджера: товар, семейство, продление или главная. */
 async function pageTitle(payload: Payload, request: SiteRequest) {
   if (request.source === 'renew') return { title: 'Продление лицензий', page: '/renew' }
+  if (request.source === 'assistant') return { title: 'Чат с Кади на сайте', page: request.page }
   if (request.source === 'home' || request.pageProductId === null)
     return { title: 'Главная: подобрать решение', page: '/' }
   if (request.familySlug) {
@@ -169,6 +172,29 @@ async function pageTitle(payload: Payload, request: SiteRequest) {
     ...options,
   })
   return { title: docs[0]?.title ?? 'Сайт', page: docs[0] ? productPath(docs[0]) : null }
+}
+
+/** Разговор с Кади передан менеджеру: в журнале видно, с какой заявкой. Не вышло — не страшно. */
+async function markHandedOff(
+  payload: Payload,
+  key: string,
+  conversation: NonNullable<Awaited<ReturnType<typeof findConversation>>>,
+  number: string,
+) {
+  try {
+    await saveConversation(
+      payload,
+      key,
+      conversation,
+      { ...conversation.snapshot, requestNumber: number },
+      'handed-off',
+    )
+  } catch (error) {
+    console.error(
+      'Не удалось отметить разговор переданным',
+      error instanceof Error ? error.name : '',
+    )
+  }
 }
 
 export type SavedRequest = { number: string; repeated: boolean; idempotencyKey: string }
@@ -206,11 +232,12 @@ export async function saveSiteRequest(
   })
   if (recent.totalDocs >= HOURLY_PHONE_LIMIT) return 'rate_limited'
 
-  const [lines, page, choices, context] = await Promise.all([
+  const [lines, page, choices, context, conversation] = await Promise.all([
     resolveLines(payload, request),
     pageTitle(payload, request),
     checkedChoices(payload, request),
     productContext(payload, request),
+    request.conversationId ? findConversation(payload, request.conversationId) : null,
   ])
   const button = request.button || KIND_LABELS[request.kind]
   const priced = lines.filter((line) => line.totalKzt)
@@ -239,6 +266,7 @@ export async function saveSiteRequest(
       scenario: context.scenario,
       page: page.page,
     },
+    messages: conversation?.snapshot.messages,
   })
 
   const req = await createLocalReq({}, payload)
@@ -285,6 +313,8 @@ export async function saveSiteRequest(
       ...options,
     })
     if (owner) await commitTransaction(req)
+    if (conversation && request.conversationId)
+      await markHandedOff(payload, request.conversationId, conversation, number)
     return { number, repeated: false, idempotencyKey: request.idempotencyKey }
   } catch (error) {
     if (owner) await killTransaction(req)

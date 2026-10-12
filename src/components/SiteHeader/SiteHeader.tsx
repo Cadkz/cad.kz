@@ -1,5 +1,6 @@
 import { getContacts, getMenu } from '@/lib/navigation'
 import { searchHints, typingHints } from '@/lib/siteNav'
+import { AssistantSlot } from '../AssistantSlot/AssistantSlot'
 import { CartButton } from '../CartButton/CartButton'
 import { CatalogNav } from '../CatalogNav/CatalogNav'
 import { ContactList } from '../ContactList/ContactList'
@@ -39,6 +40,7 @@ export async function SiteHeader() {
             whatsappHref={contacts.whatsappHref}
           />
           <div className={styles.actions}>
+            <AssistantSlot whatsappHref={contacts.whatsappHref} />
             {contacts.whatsappHref && (
               <HeaderAction
                 href={contacts.whatsappHref}

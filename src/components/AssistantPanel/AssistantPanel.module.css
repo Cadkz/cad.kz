@@ -1,0 +1,86 @@
+/* Телефон: окно на весь экран поверх страницы и шапки. Появляется проявлением и сдвигом
+   на 8 px (--duration-enter), как панели шапки. */
+.panel {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-drawer);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  animation: open var(--duration-enter) var(--ease);
+}
+
+.panel:focus {
+  outline: none;
+}
+
+/* От 640 px: окно под закреплённой строкой шапки, у правого края рамки --container (под кнопкой
+   «Спросить Кади»). Страница остаётся доступной: можно листать каталог, не закрывая разговор. */
+@media (min-width: 640px) {
+  .panel {
+    inset: calc(var(--header-height) + var(--space-2))
+      max(var(--gutter), calc((100% - var(--container)) / 2)) auto auto;
+    z-index: var(--z-dropdown);
+    width: var(--assistant-width);
+    height: min(
+      var(--assistant-height),
+      calc(100dvh - var(--header-height) - var(--space-2) - var(--gutter))
+    );
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-popover);
+    transform-origin: 100% 0;
+  }
+}
+
+.head {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tools {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  border: 0;
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--color-navy);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.icon:hover {
+  background: var(--color-hover);
+}
+
+.note {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-blue-soft);
+  color: var(--color-navy);
+  font-size: var(--text-sm);
+}
+
+@keyframes open {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+}

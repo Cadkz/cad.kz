@@ -1,0 +1,153 @@
+.feed {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+  padding: var(--space-4);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Приветствие: Кади с ноутбуком слева, смотрит вправо — на текст и кнопки. */
+.intro {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.introText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.botRow,
+.userRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  animation: appear var(--duration-base) var(--ease);
+}
+
+.botRow {
+  align-items: flex-start;
+}
+
+.userRow {
+  align-items: flex-end;
+}
+
+.bot,
+.user {
+  max-width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.bot {
+  border-radius: var(--radius-sm) var(--radius-lg) var(--radius-lg) var(--radius-lg);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.user {
+  max-width: 85%;
+  border-radius: var(--radius-lg) var(--radius-sm) var(--radius-lg) var(--radius-lg);
+  background: var(--color-navy);
+  color: var(--color-text-inverse);
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-navy);
+  text-decoration: none;
+  transition: border-color var(--duration-fast) var(--ease);
+}
+
+.card:hover {
+  border-color: var(--color-border-strong);
+}
+
+.cardText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cardTitle {
+  font-weight: var(--weight-semibold);
+}
+
+.cardMeta {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* Ожидание ответа: Кади думает слева, рядом подпись с бегущими точками. */
+.thinking {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.dots::after {
+  display: inline-block;
+  width: 3ch;
+  content: "…";
+  text-align: left;
+  animation: pulse var(--period-blink) var(--ease) infinite;
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-left: 2px solid var(--color-error);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-1));
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
+}

@@ -1,25 +1,8 @@
-/** Provider-neutral contract. Tools, not model text, are the source of price. */
+/**
+ * Сообщение диалога с ИИ-консультантом в лиде. Сам консультант — src/lib/assistant/ (адаптер модели
+ * по MODEL_PROVIDER, инструменты поиска и цены, демо-режим без модели).
+ */
 export type Message = { role: 'user' | 'assistant'; content: string }
-export type ConsultantTools = {
-  searchProducts: (task: string) => Promise<{ id: string; title: string }[]>
-  getOffers: (productId: string) => Promise<{ id: string; configuration: string }[]>
-  quote: (
-    offerId: string,
-    quantity: number,
-  ) => Promise<{ unitKzt: string; totalKzt: string; rule: string }>
-}
-export interface ConsultantProvider {
-  reply(messages: Message[], tools: ConsultantTools, signal: AbortSignal): Promise<Message>
-}
-export const demoConsultant: ConsultantProvider = {
-  async reply() {
-    return {
-      role: 'assistant',
-      content:
-        'Демонстрационный режим. Модель ещё не подключена. Выберите направление в каталоге и рассчитайте учебную цену в конфигураторе.',
-    }
-  },
-}
 export type CrmLead = {
   idempotencyKey: string
   orderNumber: string

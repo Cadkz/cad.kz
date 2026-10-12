@@ -9,8 +9,7 @@ type Props = {
 }
 
 /**
- * Заготовка для будущего ИИ-консультанта: голова Кади, имя и подпись.
- * Пока на сайте не выводится — чата нет, кнопок-пустышек не делаем (docs/ARCHITECTURE.md).
+ * Шапка окна ИИ-консультанта (AssistantPanel): голова Кади, имя и подпись.
  */
 export function AssistantHeader({ size = 'icon', titleId }: Props) {
   return (
