@@ -48,6 +48,10 @@
   }
 }
 
+.head {
+  --mascot-height: var(--mascot-head);
+}
+
 .icon {
   --mascot-height: var(--icon-box);
 }

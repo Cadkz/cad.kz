@@ -86,7 +86,7 @@ export function Assistant({ demo, whatsappHref }: Props) {
     <>
       <HeaderAction
         hideFrom="sm"
-        icon={<Mascot pose="head" size="icon" eager hover={false} />}
+        icon={<Mascot pose="head" size="head" eager hover={false} />}
         ariaLabel="Спросить Юки — ИИ-консультант CAD.kz"
         aria-haspopup="dialog"
         aria-expanded={open}

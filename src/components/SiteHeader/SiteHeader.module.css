@@ -7,16 +7,21 @@
   height: var(--header-height);
 }
 
+/* На телефоне кнопки вплотную: у каждой своё поле нажатия 44 × 44, поэтому расстояния между
+   значками одинаковые и попасть пальцем легко. */
 .actions {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: var(--space-1);
 }
 
 @media (min-width: 640px) {
   .bar {
     gap: var(--space-3);
+  }
+
+  .actions {
+    gap: var(--space-1);
   }
 }
 

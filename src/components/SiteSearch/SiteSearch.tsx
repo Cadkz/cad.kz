@@ -4,7 +4,6 @@ import { Search } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { HeaderAction } from '../HeaderAction/HeaderAction'
 import { SearchBox } from '../SearchBox/SearchBox'
 import styles from './SiteSearch.module.css'
 
@@ -16,7 +15,8 @@ type Props = {
 
 /**
  * Поиск в шапке. От 640 px — широкое поле прямо в первой строке, забирает всё свободное место.
- * На телефоне — значок-лупа: открывает поиск отдельным слоем на весь экран.
+ * На телефоне — короткое поле «Поиск» (кнопка в виде поля, видно, что сюда пишут): открывает
+ * поиск отдельным слоем на весь экран.
  * Слой выносится в body: у закреплённой шапки backdrop-filter, внутри неё fixed не работает.
  */
 export function SiteSearch({ hints, typingHints, whatsappHref }: Props) {
@@ -53,15 +53,17 @@ export function SiteSearch({ hints, typingHints, whatsappHref }: Props) {
           whatsappHref={whatsappHref}
         />
       </div>
-      <HeaderAction
+      <button
         ref={toggle}
+        type="button"
         className={styles.toggle}
-        hideFrom="sm"
-        icon={<Search size={20} strokeWidth={1.75} aria-hidden="true" />}
-        ariaLabel="Поиск по каталогу"
+        aria-label="Поиск по каталогу"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-      />
+      >
+        <Search size={20} strokeWidth={1.75} aria-hidden="true" />
+        <span className={styles.toggleText}>Поиск</span>
+      </button>
       {mounted &&
         open &&
         createPortal(

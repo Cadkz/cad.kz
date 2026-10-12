@@ -32,6 +32,19 @@
   display: inline-flex;
 }
 
+/* Все значки шапки одного размера: на телефоне крупнее (по ним попадают пальцем). */
+.icon > svg {
+  width: var(--header-icon);
+  height: var(--header-icon);
+}
+
+@media (min-width: 640px) {
+  .icon > svg {
+    width: var(--header-icon-sm);
+    height: var(--header-icon-sm);
+  }
+}
+
 .whatsapp .icon {
   color: var(--color-whatsapp);
 }

@@ -3,9 +3,39 @@
   display: none;
 }
 
-/* Телефон: лупа справа, перед WhatsApp и корзиной. */
+/* Телефон: короткое поле «Поиск» на всё свободное место между логотипом и кнопками —
+   как поле на компьютере, только уже. Нажатие открывает слой поиска. */
 .toggle {
-  margin-left: auto;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  height: var(--control-height);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-body);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease);
+}
+
+.toggle:hover {
+  border-color: var(--color-border-strong);
+}
+
+.toggle svg {
+  flex-shrink: 0;
+}
+
+.toggleText {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 /* Телефон: поиск отдельным непрозрачным слоем на весь экран — читаемость важнее эффекта.
@@ -34,7 +64,8 @@
     min-width: 0;
   }
 
-  .layer {
+  .layer,
+  .toggle {
     display: none;
   }
 }

@@ -54,10 +54,11 @@ const POSES = {
 } satisfies Record<string, { src: StaticImageData; blink: StaticImageData | null }>
 
 export type MascotPose = keyof typeof POSES
-export type MascotSize = 'icon' | 'avatar' | 'launcher' | 'xs' | 'sm' | 'md' | 'lg'
+export type MascotSize = 'head' | 'icon' | 'avatar' | 'launcher' | 'xs' | 'sm' | 'md' | 'lg'
 
 /** Наибольшая высота показа в px — как токены --icon-box, --mascot-*; по ней браузер берёт файл 1x/2x. */
 const HEIGHT: Record<MascotSize, number> = {
+  head: 32,
   icon: 40,
   avatar: 64,
   launcher: 80,
