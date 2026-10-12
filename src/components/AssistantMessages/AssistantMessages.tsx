@@ -2,7 +2,7 @@
 
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ASSISTANT_GREETING,
   ASSISTANT_GREETING_GRUMPY,
@@ -16,22 +16,23 @@ import styles from './AssistantMessages.module.css'
 
 type Props = {
   chat: ReturnType<typeof useAssistant>
-  /** Чат часто дёргали: Кади недовольный и приветствие другое (только пока разговора нет). */
+  /** Чат часто дёргали: Юки недовольный и приветствие другое (только пока разговора нет). */
   grumpy: boolean
   onHandoff: () => void
 }
 
-/** Ссылки на товары, которые Кади назвал в ответе. */
+/** Ссылки на товары, которые Юки назвал в ответе. */
 function Cards({ cards }: { cards: AssistantCard[] }) {
   return (
     <ul className={styles.cards}>
       {cards.map((card) => (
-        <li key={card.id}>
+        <li key={card.href}>
           <Link href={card.href} className={styles.card}>
             <span className={styles.cardText}>
               <span className={styles.cardTitle}>{card.title}</span>
               <span className={styles.cardMeta}>
-                {[card.vendor, card.price ?? 'Цена по запросу'].filter(Boolean).join(' · ')}
+                {card.note ??
+                  [card.vendor, card.price ?? 'Цена по запросу'].filter(Boolean).join(' · ')}
               </span>
             </span>
             <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -42,9 +43,30 @@ function Cards({ cards }: { cards: AssistantCard[] }) {
   )
 }
 
+/** Ответ готовится дольше этого — Юки садится за ноутбук (только пока ответ правда ещё ждём). */
+const LONG_WAIT_MS = 8000
+
+/** Ожидание ответа: Юки думает, а если ответ задерживается — работает за ноутбуком. */
+function Waiting() {
+  const [long, setLong] = useState(false)
+  useEffect(() => {
+    const timer = setTimeout(() => setLong(true), LONG_WAIT_MS)
+    return () => clearTimeout(timer)
+  }, [])
+  return (
+    <div className={styles.thinking} role="status">
+      <Mascot pose={long ? 'laptop' : 'think'} size="avatar" />
+      <span className={styles.dots}>
+        {long ? 'Ещё немного, собираю ответ' : 'Проверю, что подойдёт для вашей задачи'}
+      </span>
+    </div>
+  )
+}
+
 /**
- * Лента разговора. Пусто — Кади с ноутбуком, приветствие и быстрые действия. Пока ждём ответ —
- * Кади думает (лапа у подбородка). Кади слева и смотрит вправо, на сообщения.
+ * Лента разговора. Пусто — Юки с ноутбуком (крупно), приветствие и быстрые действия; после
+ * первого вопроса Юки мельче — место под сообщения. Пока ждём ответ — Юки думает (лапа у
+ * подбородка). Юки слева и смотрит вправо, на сообщения.
  * Новые сообщения объявляются скринридеру (role="log").
  */
 export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
@@ -60,7 +82,7 @@ export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
   return (
     <div className={styles.feed} role="log" aria-live="polite" aria-relevant="additions">
       <div className={styles.intro}>
-        <Mascot pose={sulky ? 'grumpy' : 'laptop'} size="sm" eager />
+        <Mascot pose={sulky ? 'grumpy' : 'laptop'} size={count ? 'avatar' : 'sm'} eager />
         <div className={styles.introText}>
           <p className={styles.bot}>{sulky ? ASSISTANT_GREETING_GRUMPY : ASSISTANT_GREETING}</p>
           {!count && (
@@ -91,12 +113,7 @@ export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
           {message.cards && message.cards.length > 0 && <Cards cards={message.cards} />}
         </div>
       ))}
-      {chat.waiting && (
-        <div className={styles.thinking} role="status">
-          <Mascot pose="think" size="avatar" />
-          <span className={styles.dots}>Кади думает</span>
-        </div>
-      )}
+      {chat.waiting && <Waiting />}
       {chat.error && (
         <div className={styles.error} role="alert">
           <p>{chat.error}</p>

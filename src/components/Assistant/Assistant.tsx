@@ -9,20 +9,20 @@ import { AssistantPanel } from '../AssistantPanel/AssistantPanel'
 import { HeaderAction } from '../HeaderAction/HeaderAction'
 import { Mascot } from '../Mascot/Mascot'
 
-/** Открыли чат GRUMPY_OPENS раз за GRUMPY_WINDOW_MS — Кади недоволен ещё GRUMPY_MS. */
+/** Открыли чат GRUMPY_OPENS раз за GRUMPY_WINDOW_MS — Юки недоволен ещё GRUMPY_MS. */
 const GRUMPY_OPENS = 3
 const GRUMPY_WINDOW_MS = 8000
 const GRUMPY_MS = 6000
 
 type Props = {
-  /** Модель не подключена: Кади честно говорит об этом и ищет по каталогу. */
+  /** Модель не подключена: Юки честно говорит об этом и ищет по каталогу. */
   demo: boolean
   whatsappHref: string | null
 }
 
 /**
- * ИИ-консультант Кади. Вход: на телефоне — голова Кади в шапке (ничего на странице не
- * закрывает), от 640 px — Кади-буханка в правом нижнем углу (AssistantLauncher). Окно чата
+ * ИИ-консультант Юки. Вход: на телефоне — голова Юки в шапке (ничего на странице не
+ * закрывает), от 640 px — Юки-буханка в правом нижнем углу (AssistantLauncher). Окно чата
  * открывается на месте буханки, на телефоне — на весь экран. Выводится, только когда работает
  * сервис консультанта (src/lib/assistant/provider.ts); окно само не открывается — его открывает
  * человек (кнопкой или из содержимого страницы — openAssistant() в src/lib/openAssistant.ts).
@@ -61,7 +61,7 @@ export function Assistant({ demo, whatsappHref }: Props) {
   useEffect(() => {
     setMounted(true)
     const root = document.documentElement
-    // Чат на сайте есть — кнопки «Спросить Кади» в содержимом страниц открывают его.
+    // Чат на сайте есть — кнопки «Спросить Юки» в содержимом страниц открывают его.
     root.dataset.assistant = 'on'
     const onOpen = () =>
       show(document.activeElement instanceof HTMLElement ? document.activeElement : null)
@@ -80,7 +80,7 @@ export function Assistant({ demo, whatsappHref }: Props) {
       <HeaderAction
         hideFrom="sm"
         icon={<Mascot pose="head" size="icon" eager hover={false} />}
-        ariaLabel="Спросить Кади — ИИ-помощник CAD.kz"
+        ariaLabel="Спросить Юки — ИИ-консультант CAD.kz"
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={(event) => toggle(event.currentTarget)}

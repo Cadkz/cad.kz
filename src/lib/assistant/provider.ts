@@ -3,7 +3,7 @@ import { ANTHROPIC_DEFAULT_MODEL } from '@/domain/anthropicChat.mjs'
 /**
  * Режим консультанта:
  * - model — подключена модель (MODEL_PROVIDER=anthropic и MODEL_API_KEY);
- * - demo — модели нет, Кади честно говорит об этом и ищет по каталогу (MODEL_PROVIDER=demo,
+ * - demo — модели нет, Юки честно говорит об этом и ищет по каталогу (MODEL_PROVIDER=demo,
  *   а в демоверсии сайта — и при пустом MODEL_PROVIDER);
  * - null — консультант выключен: на сайте нет ни кнопки, ни окна.
  */

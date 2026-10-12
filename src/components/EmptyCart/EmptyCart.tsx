@@ -40,7 +40,7 @@ export function EmptyCart({ loading = false, whatsappHref = null }: Props) {
           )}
         </div>
       </div>
-      {/* key: после загрузки Кади появляется заново, а не остаётся невидимым с отыгранной анимацией. */}
+      {/* key: после загрузки Юки появляется заново, а не остаётся невидимым с отыгранной анимацией. */}
       <Mascot
         key={loading ? 'loading' : 'ready'}
         pose="empty-cart"

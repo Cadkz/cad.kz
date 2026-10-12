@@ -40,7 +40,7 @@ export async function SiteHeader() {
             whatsappHref={contacts.whatsappHref}
           />
           <div className={styles.actions}>
-            {/* Кади: на телефоне — голова здесь, от 640 px — буханка в углу экрана. */}
+            {/* Юки: на телефоне — голова здесь, от 640 px — буханка в углу экрана. */}
             <AssistantSlot whatsappHref={contacts.whatsappHref} />
             {contacts.whatsappHref && (
               <HeaderAction

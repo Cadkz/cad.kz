@@ -9,7 +9,7 @@
   overscroll-behavior: contain;
 }
 
-/* Приветствие: Кади с ноутбуком слева, смотрит вправо — на текст и кнопки. */
+/* Приветствие: Юки с ноутбуком слева, смотрит вправо — на текст и кнопки. */
 .intro {
   display: flex;
   align-items: flex-end;
@@ -112,7 +112,7 @@
   font-size: var(--text-sm);
 }
 
-/* Ожидание ответа: Кади думает слева, рядом подпись с бегущими точками. */
+/* Ожидание ответа: Юки думает слева, рядом подпись с бегущими точками. */
 .thinking {
   display: flex;
   align-items: flex-end;
@@ -126,7 +126,7 @@
   width: 3ch;
   content: "…";
   text-align: left;
-  animation: pulse var(--period-blink) var(--ease) infinite;
+  animation: pulse var(--duration-draw) var(--ease) infinite;
 }
 
 .error {

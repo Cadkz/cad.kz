@@ -37,8 +37,8 @@ function writeStored(value: Stored) {
 }
 
 /**
- * Состояние чата с Кади: сообщения, ожидание ответа, ошибка. История — на сервере, здесь копия
- * для показа. Новый вопрос нельзя отправить, пока Кади отвечает на прошлый.
+ * Состояние чата с Юки: сообщения, ожидание ответа, ошибка. История — на сервере, здесь копия
+ * для показа. Новый вопрос нельзя отправить, пока Юки отвечает на прошлый.
  */
 export function useAssistant() {
   const [conversationId, setConversationId] = useState('')
@@ -81,7 +81,11 @@ export function useAssistant() {
             ...list,
             { role: 'assistant', content: result.reply, cards: result.cards ?? [] },
           ])
-        else setError(result.error || 'Кади не ответил. Попробуйте ещё раз.')
+        else
+          setError(
+            result.error ||
+              'Не получилось выполнить действие. Попробуйте ещё раз или передайте вопрос менеджеру.',
+          )
       } catch {
         setError('Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.')
       } finally {

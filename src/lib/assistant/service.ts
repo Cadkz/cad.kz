@@ -7,11 +7,13 @@ import {
   cleanReply,
   countTurns,
   demoReply,
-  isQuickAction,
   mentionedCards,
   modelHistory,
+  quickAction,
+  RENEW_CARD,
   type StoredMessage,
   systemPrompt,
+  wantsRenewal,
 } from '@/domain/assistant.mjs'
 import { formatDay } from '../format'
 import { findConversation, saveConversation } from './conversation'
@@ -26,7 +28,7 @@ export type AssistantAnswer =
   | { status: 'limit' | 'busy' | 'failed'; error: string }
 
 const FAILED =
-  'Кади сейчас не может ответить. Попробуйте ещё раз через минуту или передайте вопрос менеджеру.'
+  'Не получилось получить ответ. Попробуйте ещё раз через минуту или передайте вопрос менеджеру.'
 
 async function modelAnswer(payload: Payload, messages: StoredMessage[]) {
   const tools = createTools(payload)
@@ -46,7 +48,7 @@ async function modelAnswer(payload: Payload, messages: StoredMessage[]) {
 }
 
 /**
- * Вопрос клиента → ответ Кади. Сообщение клиента сохраняется и тогда, когда модель не ответила:
+ * Вопрос клиента → ответ Юки. Сообщение клиента сохраняется и тогда, когда модель не ответила:
  * менеджер увидит вопрос в лиде, если клиент передаст разговор.
  */
 export async function askAssistant(
@@ -68,11 +70,22 @@ export async function askAssistant(
   let answer: { reply: string; cards: AssistantCard[] } | null = null
   try {
     if (mode === 'demo') {
-      const quick = isQuickAction(input.message)
-      const found = quick ? [] : (await findCards(input.message)).map(toCard)
-      const { text, cards } = demoReply(found, { first: !previous.length, quick })
+      const action = quickAction(input.message)
+      const found = action ? [] : (await findCards(input.message)).map(toCard)
+      const { text, cards } = demoReply(found, {
+        first: !previous.length,
+        quick: Boolean(action),
+        quickText: action?.demo,
+      })
       answer = { reply: text, cards }
     } else answer = await modelAnswer(payload, messages)
+    // Про продление — под ответом форма продления (настоящая заявка, менеджер найдёт лицензию).
+    if (
+      answer &&
+      wantsRenewal(input.message) &&
+      !answer.cards.some((c) => c.href === RENEW_CARD.href)
+    )
+      answer = { ...answer, cards: [...answer.cards, { ...RENEW_CARD }] }
   } catch (error) {
     // В журнал — только вид ошибки и код ответа, без текста запроса и ключа.
     const status = error instanceof ModelError ? error.status : null
@@ -94,7 +107,7 @@ export async function askAssistant(
     ...(stored?.snapshot.requestNumber ? { requestNumber: stored.snapshot.requestNumber } : {}),
   })
   if (!saved)
-    return { status: 'busy', error: 'Кади ещё отвечает на прошлый вопрос. Подождите немного.' }
+    return { status: 'busy', error: 'Ответ на прошлый вопрос ещё готовится. Подождите немного.' }
   if (!answer) return { status: 'failed', error: FAILED }
   return { status: 'ok', reply: answer.reply, cards: answer.cards, demo: mode === 'demo' }
 }

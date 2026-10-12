@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { CatalogItem } from '@/lib/catalog'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { positions } from '@/lib/plural'
+import { AskYuki } from '../AskYuki/AskYuki'
 import { Grid } from '../Grid/Grid'
 import { WhatsappIcon } from '../icons/icons'
 import { Mascot } from '../Mascot/Mascot'
@@ -47,6 +48,7 @@ export function SearchResults({ query, items, partial = false, whatsappHref }: P
             <Link href={catalogHref()} className={styles.catalog}>
               Перейти в каталог
             </Link>
+            <AskYuki variant="text" />
           </div>
         </div>
         <Mascot pose="search" className={styles.mascot} />

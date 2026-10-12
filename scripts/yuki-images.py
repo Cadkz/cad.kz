@@ -1,8 +1,8 @@
-"""Обработка поз Кади из исходников ChatGPT (правила — docs/DESIGN.md, «Иконки и изображения»).
+"""Обработка поз Юки из исходников ChatGPT (правила — docs/DESIGN.md, «Иконки и изображения»).
 
-Запуск: python3 scripts/kadi-images.py <папка с исходниками>
-Нужны Pillow, numpy, scipy. Исходники 1254 × 1254 с прозрачным фоном: kadi-<поза>.png
-и, если есть, kadi-<поза>-closed.png (те же контуры, глаза закрыты).
+Запуск: python3 scripts/yuki-images.py <папка с исходниками>
+Нужны Pillow, numpy, scipy. Исходники 1254 × 1254 с прозрачным фоном: yuki-<поза>.png
+и, если есть, yuki-<поза>-closed.png (те же контуры, глаза закрыты).
 
 Что делает с каждой позой из POSES:
 1. Убирает мелкий мусор: оставляет фигуру (непрозрачность > 40, куски от 150 px)
@@ -12,9 +12,9 @@
    от открытой (глаза, у некоторых поз и брови), по прямоугольникам с растушёвкой 10 px.
 4. mirror: отражает позу (смотрит влево — для места справа от текста), надпись на жилете
    переносится незеркальной.
-5. Голову для шапки чата (kadi-head) вырезает из neutral квадратом 256 px.
+5. Голову для шапки чата (yuki-head) вырезает из neutral квадратом 256 px.
 
-Готовые файлы — public/images/mascot/kadi-<поза>.png и kadi-<поза>-blink.png.
+Готовые файлы — public/images/mascot/yuki-<поза>.png и yuki-<поза>-blink.png.
 """
 
 import sys
@@ -33,7 +33,7 @@ POSES = {
     'think': False,
     'laptop': False,
     'greeting': False,
-    # 13.10.2026: буханка (Кади-консультант в углу) и её «машет лапой», недовольный (часто
+    # 13.10.2026: буханка (Юки-консультант в углу) и её «машет лапой», недовольный (часто
     # дёргают чат), в нитках (запутались в комплектациях), играет с клубком (в запасе).
     'loaf': False,
     'loaf-wave': False,
@@ -158,13 +158,13 @@ def save(img: Image.Image, name: str) -> None:
 
 
 def head(full: np.ndarray, blink: np.ndarray, eyes: np.ndarray) -> None:
-    """Голова для шапки чата: квадрат по глазам, как прежняя kadi-head (глаза на 56 % высоты)."""
+    """Голова для шапки чата: квадрат по глазам, как прежняя yuki-head (глаза на 56 % высоты)."""
     ys, xs = np.nonzero(eyes > 0.99)
     side = int(round((xs.max() - xs.min()) / 0.73))
     cx, cy = (xs.max() + xs.min()) / 2, (ys.max() + ys.min()) / 2
     x0, y0 = int(round(cx - side / 2)), int(round(cy - 0.56 * side))
     box = (x0, y0, x0 + side, y0 + side)
-    for arr, name in ((full, 'kadi-head.png'), (blink, 'kadi-head-blink.png')):
+    for arr, name in ((full, 'yuki-head.png'), (blink, 'yuki-head-blink.png')):
         img = halve(arr)  # уменьшение с учётом прозрачности, затем до 256
         small = (box[0] // 2, box[1] // 2, (box[0] + side) // 2, (box[1] + side) // 2)
         save(img.crop(small).resize((HEAD, HEAD), Image.Resampling.LANCZOS), name)
@@ -172,8 +172,8 @@ def head(full: np.ndarray, blink: np.ndarray, eyes: np.ndarray) -> None:
 
 def process(src: Path, pose: str, flip: bool) -> None:
     print(pose)
-    opened = load(src / f'kadi-{pose}.png')
-    closed_path = src / f'kadi-{pose}-closed.png'
+    opened = load(src / f'yuki-{pose}.png')
+    closed_path = src / f'yuki-{pose}-closed.png'
     mask = figure_mask(opened)
     opened = clean(opened, mask)
     blink = None
@@ -187,19 +187,19 @@ def process(src: Path, pose: str, flip: bool) -> None:
         mask = mask[:, ::-1]
         blink = rest[0] if rest else None
     x0, y0, x1, y1 = crop_box(mask)
-    save(halve(opened[y0:y1, x0:x1]), f'kadi-{pose}.png')
+    save(halve(opened[y0:y1, x0:x1]), f'yuki-{pose}.png')
     if blink is not None:
-        save(halve(blink[y0:y1, x0:x1]), f'kadi-{pose}-blink.png')
+        save(halve(blink[y0:y1, x0:x1]), f'yuki-{pose}-blink.png')
     if pose == 'neutral' and blink is not None:
         head(opened, blink, eyes)
 
 
 def main() -> None:
     if len(sys.argv) != 2:
-        sys.exit('Укажите папку с исходниками: python3 scripts/kadi-images.py <папка>')
+        sys.exit('Укажите папку с исходниками: python3 scripts/yuki-images.py <папка>')
     src = Path(sys.argv[1])
     for pose, flip in POSES.items():
-        if (src / f'kadi-{pose}.png').exists():
+        if (src / f'yuki-{pose}.png').exists():
             process(src, pose, flip)
 
 

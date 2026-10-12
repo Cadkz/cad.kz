@@ -53,7 +53,7 @@ export function AssistantHandoff({ conversationId, whatsappHref, onBack }: Props
           source: 'assistant',
           conversationId,
           page: window.location.pathname,
-          button: 'Чат с Кади: передать менеджеру',
+          button: 'Чат с Юки: передать менеджеру',
           items: [],
         }),
       })
@@ -92,14 +92,14 @@ export function AssistantHandoff({ conversationId, whatsappHref, onBack }: Props
           <TextField
             label="Имя"
             name="name"
-            id="kadi-name"
+            id="yuki-name"
             autoComplete="name"
             error={errors.name}
           />
           <TextField
             label="Телефон"
             name="phone"
-            id="kadi-phone"
+            id="yuki-phone"
             type="tel"
             autoComplete="tel"
             placeholder="+7 701 123-45-67"
@@ -108,14 +108,14 @@ export function AssistantHandoff({ conversationId, whatsappHref, onBack }: Props
           <TextAreaField
             label="Комментарий"
             name="comment"
-            id="kadi-comment"
+            id="yuki-comment"
             hint="Необязательно. Например, когда удобно говорить."
             rows={2}
             error={errors.comment}
           />
           <CheckboxField
             name="consent"
-            id="kadi-consent"
+            id="yuki-consent"
             label={CONSENT_TEXT}
             error={errors.consent}
           />

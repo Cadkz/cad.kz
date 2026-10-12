@@ -15,7 +15,7 @@ type Props = {
 const WARN_AT = ASSISTANT_LIMITS.messageChars - 100
 
 /**
- * Поле вопроса: Enter — отправить, Shift+Enter — новая строка. Пока Кади отвечает, отправить
+ * Поле вопроса: Enter — отправить, Shift+Enter — новая строка. Пока Юки отвечает, отправить
  * нельзя, но печатать можно. Под полем — «Передать менеджеру».
  */
 export function AssistantComposer({ disabled, onSend, onHandoff }: Props) {
@@ -39,7 +39,7 @@ export function AssistantComposer({ disabled, onSend, onHandoff }: Props) {
     <form className={styles.composer} onSubmit={submit}>
       <div className={styles.row}>
         <label htmlFor={fieldId} className="visually-hidden">
-          Ваш вопрос Кади
+          Ваш вопрос Юки
         </label>
         <textarea
           id={fieldId}

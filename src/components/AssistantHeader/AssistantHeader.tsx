@@ -9,7 +9,7 @@ type Props = {
 }
 
 /**
- * Шапка окна ИИ-консультанта (AssistantPanel): голова Кади, имя и подпись.
+ * Шапка окна ИИ-консультанта (AssistantPanel): голова Юки, имя и подпись.
  */
 export function AssistantHeader({ size = 'icon', titleId }: Props) {
   return (
@@ -17,9 +17,9 @@ export function AssistantHeader({ size = 'icon', titleId }: Props) {
       <Mascot pose="head" size={size} eager />
       <div className={styles.text}>
         <p id={titleId} className={styles.name}>
-          Кади
+          Юки
         </p>
-        <p className={styles.caption}>ИИ-помощник CAD.kz</p>
+        <p className={styles.caption}>ИИ-консультант CAD.kz</p>
       </div>
     </div>
   )

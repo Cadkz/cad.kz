@@ -26,7 +26,7 @@ function trapFocus(event: KeyboardEvent, container: HTMLElement) {
 type Props = {
   chat: ReturnType<typeof useAssistant>
   demo: boolean
-  /** Чат часто открывали и закрывали — Кади встречает недовольным. */
+  /** Чат часто открывали и закрывали — Юки встречает недовольным. */
   grumpy: boolean
   whatsappHref: string | null
   /** returnFocus: false — закрыли кликом мимо окна, фокус остаётся там, куда кликнули. */
@@ -34,7 +34,7 @@ type Props = {
 }
 
 /**
- * Окно чата с Кади. От 640 px — окно в правом нижнем углу, на месте Кади: страницу можно листать,
+ * Окно чата с Юки. От 640 px — окно в правом нижнем углу, на месте Юки: страницу можно листать,
  * не закрывая разговор. На телефоне — на весь экран, страница под ним не прокручивается.
  * Escape и клик мимо окна (от 640 px) закрывают его; форма передачи менеджеру открывается
  * вместо поля ввода.
@@ -129,7 +129,7 @@ export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Pr
       {demo && (
         <p className={styles.note}>
           <Info size={16} strokeWidth={1.75} aria-hidden="true" />
-          Демоверсия: ИИ не подключён, Кади ищет по каталогу.
+          Демоверсия: ИИ не подключён, Юки ищет по каталогу.
         </p>
       )}
       {handoff ? (

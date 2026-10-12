@@ -10,8 +10,12 @@ import {
   isQuickAction,
   mentionedCards,
   modelHistory,
+  QUICK_ACTIONS,
+  quickAction,
+  RENEW_CARD,
   systemPrompt,
   validateChat,
+  wantsRenewal,
 } from '../src/domain/assistant.mjs'
 import { toBitrix24Lead } from '../src/domain/bitrix24.mjs'
 import { toCrmRequest, validateRequest } from '../src/domain/siteRequest.mjs'
@@ -91,11 +95,41 @@ test('демо-режим честно говорит, что ИИ не подк
   assert.equal(isQuickAction('Нужен AutoCAD'), false)
 })
 
+test('быстрые действия по руководству Юки; продление — с формой на сайте', () => {
+  assert.deepEqual(
+    QUICK_ACTIONS.map((a) => a.label),
+    [
+      'Подобрать программу',
+      'Узнать стоимость',
+      'Продлить лицензию',
+      'Найти оборудование',
+      'Связаться с менеджером',
+    ],
+  )
+  // Каждая кнопка что-то делает: отправляет вопрос или открывает передачу менеджеру.
+  for (const action of QUICK_ACTIONS) assert.ok(action.text || action.handoff)
+  const renew = quickAction('Хочу продлить лицензию')
+  assert.equal(renew?.id, 'renew')
+  const reply = demoReply([], { first: false, quick: true, quickText: renew?.demo })
+  assert.match(reply.text, /Продление оформляется заявкой/)
+  assert.equal(quickAction('Нужен AutoCAD'), undefined)
+  assert.equal(wantsRenewal('Как продлить SCAD?'), true)
+  assert.equal(wantsRenewal('Продление лицензии AutoCAD'), true)
+  assert.equal(wantsRenewal('Нужен плоттер'), false)
+  assert.equal(RENEW_CARD.href, '/renew')
+})
+
 test('правила модели: цены только из инструмента, без обещаний, передача менеджеру', () => {
   const prompt = systemPrompt({ today: '12 октября 2026' })
   assert.match(prompt, /только результат quote/)
   assert.match(prompt, /Не обещай скидки/)
   assert.match(prompt, /Передать менеджеру/)
+  assert.match(prompt, /Ты — Юки, ИИ-консультант/)
+  assert.match(prompt, /на «вы»/)
+  assert.match(prompt, /без рода/)
+  assert.match(prompt, /не называй себя/)
+  assert.match(prompt, /заявка или заказ оформлены/)
+  assert.match(prompt, /соответствие нормам/)
   assert.deepEqual(
     ASSISTANT_TOOLS.map((t) => t.name),
     ['searchProducts', 'getOffers', 'quote'],
@@ -230,7 +264,7 @@ test('передача менеджеру из чата: заявка «Конс
     number: 'REQ-20261012-AAAAA',
     idempotencyKey: id,
     kind: 'consult',
-    pageTitle: 'Чат с Кади на сайте',
+    pageTitle: 'Чат с Юки на сайте',
     choices: [],
     name: 'Анна',
     phone: '+77011234567',
