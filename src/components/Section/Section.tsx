@@ -9,23 +9,16 @@ type Props = {
   sub?: string
   action?: { href: string; label: string }
   id?: string
-  /**
-   * Отступ сверху: tight — продолжение предыдущего блока, wide — пауза между крупными частями
-   * страницы. Заливок во всю ширину экрана нет (решение владельца).
-   */
-  space?: 'tight' | 'normal' | 'wide'
+  /** tint — голубая подложка во всю ширину экрана с фирменным узором. */
+  tone?: 'plain' | 'tint'
   children: ReactNode
 }
 
 /** Секция страницы: заголовок h2, подзаголовок, ссылка «Все …» и содержимое в рамке сайта. */
-export function Section({ title, sub, action, id, space = 'normal', children }: Props) {
+export function Section({ title, sub, action, id, tone = 'plain', children }: Props) {
   const headingId = id ? `${id}-title` : undefined
   return (
-    <section
-      id={id}
-      className={[styles.section, styles[space]].filter(Boolean).join(' ')}
-      aria-labelledby={headingId}
-    >
+    <section id={id} className={`${styles.section} ${styles[tone]}`} aria-labelledby={headingId}>
       <Container>
         <div className={styles.head}>
           <div className={styles.text}>

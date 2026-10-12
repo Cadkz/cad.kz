@@ -126,8 +126,6 @@
   --space-20: 80px;
 
   --section-gap: var(--space-12); /* вертикальный отступ между секциями (на ≥640px — 64px) */
-  --section-gap-tight: var(--space-8); /* связанные блоки подряд (на ≥640px — 40px) */
-  --section-gap-wide: var(--space-16); /* пауза между крупными частями главной (на ≥640px — 80px) */
 
   /* ---------- Скругления ---------- */
   --radius-lg: 24px; /* баннеры, крупные карточки, секции */
@@ -205,8 +203,6 @@
   :root {
     --gutter: var(--space-8);
     --section-gap: var(--space-16);
-    --section-gap-tight: var(--space-10);
-    --section-gap-wide: var(--space-20);
     --header-height: 72px;
   }
 }

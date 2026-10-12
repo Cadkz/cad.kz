@@ -2,12 +2,24 @@
   padding: var(--section-gap) 0 0;
 }
 
-.tight {
-  padding-top: var(--section-gap-tight);
+.tint {
+  margin-top: var(--section-gap);
+  padding-bottom: var(--section-gap);
+  position: relative;
+  isolation: isolate;
+  background: var(--color-blue-soft);
 }
 
-.wide {
-  padding-top: var(--section-gap-wide);
+/* Фон кодом: светлая чертёжная сетка, к краям растворяется. */
+.tint::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--blueprint-light);
+  background-size: var(--blueprint-size);
+  background-position: center top;
+  mask-image: radial-gradient(ellipse at 50% 0%, black, transparent 70%);
 }
 
 .head {
