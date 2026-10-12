@@ -49,7 +49,7 @@ export function SearchResults({ query, items, partial = false, whatsappHref }: P
             </Link>
           </div>
         </div>
-        <Mascot pose="search" />
+        <Mascot pose="search" className={styles.mascot} />
       </div>
     )
   }

@@ -16,7 +16,7 @@
   list-style: none;
 }
 
-/* Телефон: Кади над текстом. От 640 px: текст слева, Кади справа. */
+/* Телефон: Кади над текстом у правого края — смотрит влево, на текст. От 640 px: текст слева, Кади справа. */
 .empty {
   display: flex;
   flex-direction: column-reverse;
@@ -26,6 +26,10 @@
   padding: var(--space-8) var(--space-6);
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-lg);
+}
+
+.mascot {
+  align-self: flex-end;
 }
 
 .emptyBody {
@@ -40,6 +44,10 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .mascot {
+    align-self: auto;
   }
 }
 

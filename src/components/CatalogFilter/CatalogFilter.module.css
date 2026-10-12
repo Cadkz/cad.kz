@@ -37,16 +37,40 @@
   list-style: none;
 }
 
+/* Как пустой поиск: телефон — Кади над текстом у правого края, смотрит влево на текст;
+   от 640 px текст и кнопка слева, Кади справа. */
 .empty {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: column-reverse;
+  align-items: flex-start;
   gap: var(--space-4);
-  padding: var(--space-12) var(--space-4);
+  padding: var(--space-8) var(--space-6);
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-lg);
   color: var(--color-text-muted);
-  text-align: center;
+}
+
+.emptyBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.mascot {
+  align-self: flex-end;
+}
+
+@media (min-width: 640px) {
+  .empty {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mascot {
+    align-self: auto;
+  }
 }
 
 .drawerFoot {

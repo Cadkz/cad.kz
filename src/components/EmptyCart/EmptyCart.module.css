@@ -1,4 +1,4 @@
-/* Телефон: Кади над текстом. От 640 px: текст слева, Кади справа. */
+/* Телефон: Кади над текстом у правого края — смотрит влево, на текст. От 640 px: текст слева, Кади справа. */
 .empty {
   display: flex;
   flex-direction: column-reverse;
@@ -7,6 +7,10 @@
   padding: var(--space-10);
   border-radius: var(--radius-lg);
   background: var(--color-blue-soft);
+}
+
+.mascot {
+  align-self: flex-end;
 }
 
 .text {
@@ -32,5 +36,9 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .mascot {
+    align-self: auto;
   }
 }

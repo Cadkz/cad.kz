@@ -1,4 +1,4 @@
-/* Телефон: Кади над текстом. От 960 px: текст на 7 колонок, Кади на 5 справа. */
+/* Телефон: Кади над текстом у правого края. От 960 px: текст на 7 колонок, Кади на 5 справа. */
 .layout {
   display: grid;
   grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
@@ -14,7 +14,7 @@
 .mascot {
   grid-column: span 12;
   grid-row: 1;
-  justify-self: start;
+  justify-self: end; /* Кади смотрит влево — на текст под ним */
 }
 
 .actions {

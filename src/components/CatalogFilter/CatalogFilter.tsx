@@ -92,9 +92,11 @@ export function CatalogFilter({ items, facets, lines, initial }: Props) {
           </ul>
         ) : (
           <div className={styles.empty}>
-            <Mascot pose="search" size="sm" />
-            <p>По выбранным условиям товаров нет.</p>
-            <Button onClick={reset}>Сбросить фильтр</Button>
+            <div className={styles.emptyBody}>
+              <p>По выбранным условиям товаров нет.</p>
+              <Button onClick={reset}>Сбросить фильтр</Button>
+            </div>
+            <Mascot pose="search" size="sm" className={styles.mascot} />
           </div>
         )}
         {!groups && (
