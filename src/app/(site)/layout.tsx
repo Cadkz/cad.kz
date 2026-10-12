@@ -31,10 +31,8 @@ export function generateMetadata(): Metadata {
   }
 }
 
-const criticalFonts = [
-  '/fonts/manrope-cyrillic-wght-normal.woff2',
-  '/fonts/inter-cyrillic-wght-normal.woff2',
-]
+// Один корпоративный шрифт Golos Text: на первом экране нужна кириллица.
+const criticalFonts = ['/fonts/golos-text-cyrillic-wght-normal.woff2']
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   for (const href of criticalFonts) {

@@ -84,14 +84,14 @@
   --blueprint-fade: radial-gradient(ellipse at 70% 30%, black, transparent 75%);
 
   /* ---------- Шрифты ---------- */
-  --font-heading: "Manrope", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  --font-heading: "Golos Text", system-ui, sans-serif;
+  --font-body: "Golos Text", system-ui, sans-serif;
 
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
   --weight-bold: 700;
-  --weight-heavy: 800;
+  --weight-heavy: 700; /* у Golos 800 слишком тяжёлый: заголовки и крупные цены на 700 */
 
   /* Шкала кеглей. Других размеров шрифта в проекте нет. */
   --text-display: clamp(24px, 0.75vw + 21px, 30px); /* h1 страницы: 24 на телефоне → 30 */
@@ -109,7 +109,7 @@
   --leading-normal: 1.55;
   --leading-relaxed: 1.7; /* длинные тексты статей */
 
-  --tracking-tight: -0.02em;
+  --tracking-tight: -0.01em; /* Golos плотнее Manrope — сжимаем меньше */
   --tracking-overline: 0.12em;
 
   /* ---------- Отступы (шаг 4px) ---------- */
