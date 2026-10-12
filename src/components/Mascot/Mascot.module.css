@@ -25,7 +25,7 @@
   position: absolute;
   inset: 0;
   opacity: 0;
-  animation: blink var(--duration-blink) linear var(--delay-blink);
+  animation: blink var(--period-blink) linear var(--delay-blink) infinite;
 }
 
 @media (hover: hover) {
@@ -34,10 +34,10 @@
   }
 
   /* Вторая анимация добавляется к первой и запускается заново при каждом наведении;
-     первая (после появления) при этом не перезапускается — у неё то же имя. */
+     первая (повторяющаяся) при этом не перезапускается — у неё то же имя и те же параметры. */
   .mascot:hover .blink {
     animation:
-      blink var(--duration-blink) linear var(--delay-blink),
+      blink var(--period-blink) linear var(--delay-blink) infinite,
       blinkAgain var(--duration-blink) linear;
   }
 }
@@ -81,13 +81,17 @@
   }
 }
 
+/* Повторяющееся моргание: глаза закрыты в начале круга --period-blink, остальное время открыты.
+   Проценты — от 3200 мс: 0–5.6 % ≈ 180 мс (--duration-blink). При reduced-motion анимация
+   сжимается до одного кадра и кончается открытыми глазами. */
 @keyframes blink {
   0%,
+  5.6%,
   100% {
     opacity: 0;
   }
-  25%,
-  75% {
+  1.4%,
+  4.2% {
     opacity: 1;
   }
 }
