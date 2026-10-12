@@ -27,13 +27,15 @@ type Props = {
   chat: ReturnType<typeof useAssistant>
   demo: boolean
   whatsappHref: string | null
-  onClose: () => void
+  /** returnFocus: false — закрыли кликом мимо окна, фокус остаётся там, куда кликнули. */
+  onClose: (returnFocus?: boolean) => void
 }
 
 /**
  * Окно чата с Кади. От 640 px — окно в правом нижнем углу, на месте Кади: страницу можно листать,
  * не закрывая разговор. На телефоне — на весь экран, страница под ним не прокручивается.
- * Escape закрывает окно; форма передачи менеджеру открывается вместо поля ввода.
+ * Escape и клик мимо окна (от 640 px) закрывают его; форма передачи менеджеру открывается
+ * вместо поля ввода.
  */
 export function AssistantPanel({ chat, demo, whatsappHref, onClose }: Props) {
   const titleId = useId()
@@ -72,10 +74,20 @@ export function AssistantPanel({ chat, demo, whatsappHref, onClose }: Props) {
       else if (event.key === 'Tab' && phone.matches && panel.current)
         trapFocus(event, panel.current)
     }
+    // Клик в любое место страницы мимо окна закрывает его (на телефоне окно на весь экран).
+    // Полоса прокрутки страницы — не «мимо»: ею листают, не закрывая разговор.
+    function onPointerDown(event: PointerEvent) {
+      const target = event.target
+      if (phone.matches || !(target instanceof Node)) return
+      if (target === root || panel.current?.contains(target)) return
+      onClose(false)
+    }
     document.addEventListener('keydown', onKey)
+    document.addEventListener('pointerdown', onPointerDown)
     return () => {
       phone.removeEventListener('change', lock)
       document.removeEventListener('keydown', onKey)
+      document.removeEventListener('pointerdown', onPointerDown)
       delete root.dataset.scrollLocked
     }
   }, [onClose])
@@ -102,7 +114,12 @@ export function AssistantPanel({ chat, demo, whatsappHref, onClose }: Props) {
               <RotateCcw size={20} strokeWidth={1.75} aria-hidden="true" />
             </button>
           )}
-          <button type="button" className={styles.icon} onClick={onClose} aria-label="Закрыть чат">
+          <button
+            type="button"
+            className={styles.icon}
+            onClick={() => onClose()}
+            aria-label="Закрыть чат"
+          >
             <X size={20} strokeWidth={1.75} aria-hidden="true" />
           </button>
         </div>

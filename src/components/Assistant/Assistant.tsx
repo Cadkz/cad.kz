@@ -26,10 +26,11 @@ export function Assistant({ demo, whatsappHref }: Props) {
   const chat = useAssistant()
   const launcher = useRef<HTMLButtonElement>(null)
 
-  const close = useCallback(() => {
+  const close = useCallback((returnFocus = true) => {
     setOpen(false)
-    // Окно закрыто — фокус возвращается на кнопку, с которой его открыли.
-    requestAnimationFrame(() => launcher.current?.focus())
+    // Закрыли крестиком или Escape — фокус возвращается на Кади, с которого окно открыли.
+    // Кликом мимо окна — остаётся там, куда кликнули (поле поиска, ссылка).
+    if (returnFocus) requestAnimationFrame(() => launcher.current?.focus())
   }, [])
 
   return (
