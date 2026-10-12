@@ -40,7 +40,6 @@ export async function SiteHeader() {
             whatsappHref={contacts.whatsappHref}
           />
           <div className={styles.actions}>
-            <AssistantSlot whatsappHref={contacts.whatsappHref} />
             {contacts.whatsappHref && (
               <HeaderAction
                 href={contacts.whatsappHref}
@@ -56,6 +55,8 @@ export async function SiteHeader() {
         </Container>
       </HeaderShell>
       <SubNav phone={contacts.phones[0] ?? null} contacts={contactList} />
+      {/* Кади-консультант в углу экрана: вне HeaderShell, чтобы fixed считался от экрана. */}
+      <AssistantSlot whatsappHref={contacts.whatsappHref} />
     </>
   )
 }

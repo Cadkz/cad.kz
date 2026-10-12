@@ -14,23 +14,23 @@
   outline: none;
 }
 
-/* От 640 px: окно под закреплённой строкой шапки, у правого края рамки --container (под кнопкой
-   «Спросить Кади»). Страница остаётся доступной: можно листать каталог, не закрывая разговор. */
+/* От 640 px: окно в правом нижнем углу экрана, на месте Кади (AssistantLauncher), не выше
+   экрана под закреплённой шапкой. Страница остаётся доступной: можно листать каталог,
+   не закрывая разговор. */
 @media (min-width: 640px) {
   .panel {
-    inset: calc(var(--header-height) + var(--space-2))
-      max(var(--gutter), calc((100% - var(--container)) / 2)) auto auto;
+    inset: auto var(--space-6) var(--space-6) auto;
     z-index: var(--z-dropdown);
     width: var(--assistant-width);
     height: min(
       var(--assistant-height),
-      calc(100dvh - var(--header-height) - var(--space-2) - var(--gutter))
+      calc(100dvh - var(--header-height) - var(--space-2) - var(--space-6))
     );
     overflow: hidden;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-panel);
-    box-shadow: var(--shadow-popover);
-    transform-origin: 100% 0;
+    box-shadow: var(--shadow-lg);
+    transform-origin: 100% 100%;
   }
 }
 

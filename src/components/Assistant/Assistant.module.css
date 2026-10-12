@@ -1,4 +1,0 @@
-/* Голова Кади вместо значка: --icon-box, кнопка шапки остаётся высотой --control-height. */
-.head {
-  display: inline-flex;
-}

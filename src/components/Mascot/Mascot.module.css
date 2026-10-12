@@ -29,13 +29,13 @@
 }
 
 @media (hover: hover) {
-  .mascot:hover .pose {
+  .hover:hover .pose {
     transform: rotate(-2deg) translateY(calc(var(--space-1) * -1));
   }
 
   /* Вторая анимация добавляется к первой и запускается заново при каждом наведении;
      первая (повторяющаяся) при этом не перезапускается — у неё то же имя и те же параметры. */
-  .mascot:hover .blink {
+  .hover:hover .blink {
     animation:
       blink var(--period-blink) linear var(--delay-blink) infinite,
       blinkAgain var(--duration-blink) linear;
@@ -43,7 +43,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mascot:hover .pose {
+  .hover:hover .pose {
     transform: none;
   }
 }
@@ -54,6 +54,10 @@
 
 .avatar {
   --mascot-height: var(--mascot-avatar);
+}
+
+.launcher {
+  --mascot-height: var(--mascot-launcher-sm);
 }
 
 .sm {
@@ -69,6 +73,10 @@
 }
 
 @media (min-width: 960px) {
+  .launcher {
+    --mascot-height: var(--mascot-launcher);
+  }
+
   .lg {
     --mascot-height: var(--mascot-lg);
   }

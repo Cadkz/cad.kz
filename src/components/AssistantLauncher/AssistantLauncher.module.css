@@ -1,0 +1,174 @@
+/* Кади в углу экрана. Под выпадающими меню шапки и выдвижными панелями (--z-header ниже
+   --z-dropdown и --z-drawer): мегаменю и корзина его закрывают, а не наоборот. */
+.launcher {
+  position: fixed;
+  right: var(--space-4);
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  z-index: var(--z-header);
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    opacity var(--duration-base) var(--ease),
+    transform var(--duration-base) var(--ease),
+    visibility 0s linear;
+}
+
+/* Телефон со строкой подбора внизу (PickerBar, data-bottom-bar): Кади садится над ней,
+   а не закрывает цену и кнопку. Высота строки — как отступ body в base.css. */
+:global(body:has([data-bottom-bar])) .launcher {
+  bottom: calc(
+    var(--control-height) +
+    var(--space-6) +
+    var(--space-3) +
+    env(safe-area-inset-bottom)
+  );
+}
+
+/* Окно чата открыто — Кади уходит вниз, окно стоит на его месте. */
+.launcher[data-open="true"] {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(var(--space-4));
+  transition:
+    opacity var(--duration-exit) var(--ease),
+    transform var(--duration-exit) var(--ease),
+    visibility 0s linear var(--duration-exit);
+}
+
+/* Фигура: место под картинку занято шириной сидящей позы; поза «машет лапой» кладётся поверх. */
+.cat {
+  position: relative;
+  display: block;
+  filter: drop-shadow(var(--shadow-sm));
+  transform-origin: 50% 100%;
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.sit,
+.wave {
+  transition: opacity var(--duration-fast) var(--ease);
+}
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+}
+
+/* Реплика слева от Кади, на уровне морды. */
+.bubble {
+  position: absolute;
+  right: calc(100% + var(--space-1));
+  bottom: 55%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  color: var(--color-navy);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(var(--space-2));
+  transition:
+    opacity var(--duration-fast) var(--ease),
+    transform var(--duration-base) var(--ease);
+}
+
+/* Реакция: машет лапой и говорит. Наведение мышью, фокус с клавиатуры или подсказка раз за визит. */
+.launcher[data-hint="true"] .bubble,
+.launcher:focus-visible .bubble {
+  opacity: 1;
+  transform: none;
+}
+
+.launcher[data-hint="true"] .wave,
+.launcher:focus-visible .wave {
+  opacity: 1;
+}
+
+.launcher[data-hint="true"] .sit,
+.launcher:focus-visible .sit {
+  opacity: 0;
+}
+
+.launcher[data-hint="true"] .cat,
+.launcher:focus-visible .cat {
+  transform: translateY(calc(var(--space-1) * -1));
+}
+
+@media (hover: hover) {
+  .launcher:hover .bubble {
+    opacity: 1;
+    transform: none;
+  }
+
+  .launcher:hover .wave {
+    opacity: 1;
+  }
+
+  .launcher:hover .sit {
+    opacity: 0;
+  }
+
+  /* Привстаёт навстречу курсору — на 4 px вверх, без наклона. */
+  .launcher:hover .cat {
+    transform: translateY(calc(var(--space-1) * -1));
+  }
+}
+
+/* Нажатие: пружинит, приседая к земле. */
+.launcher:active .cat {
+  transform: scale(0.94, 0.9);
+  transition-duration: var(--duration-fast);
+}
+
+/* Фокус — рамка вокруг кота, а не вокруг невидимой реплики. */
+.launcher:focus-visible {
+  outline-offset: var(--space-1);
+}
+
+@media (min-width: 640px) {
+  .launcher {
+    right: var(--space-6);
+    bottom: var(--space-6);
+  }
+
+  :global(body:has([data-bottom-bar])) .launcher {
+    bottom: calc(var(--control-height) + var(--space-6) + var(--space-4));
+  }
+}
+
+/* От 960 px строки подбора нет (в PickerBar она скрыта) — Кади на обычном месте. */
+@media (min-width: 960px) {
+  :global(body:has([data-bottom-bar])) .launcher {
+    bottom: var(--space-6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launcher,
+  .launcher[data-open="true"],
+  .cat,
+  .bubble {
+    transition: none;
+  }
+
+  .launcher[data-open="true"],
+  .launcher:hover .cat,
+  .launcher:active .cat,
+  .launcher:focus-visible .cat,
+  .launcher[data-hint="true"] .cat,
+  .launcher:hover .bubble {
+    transform: none;
+  }
+}

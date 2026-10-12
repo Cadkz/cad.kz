@@ -36,16 +36,25 @@ const POSES = {
 } satisfies Record<string, { src: StaticImageData; blink: StaticImageData | null }>
 
 export type MascotPose = keyof typeof POSES
-export type MascotSize = 'icon' | 'avatar' | 'sm' | 'md' | 'lg'
+export type MascotSize = 'icon' | 'avatar' | 'launcher' | 'sm' | 'md' | 'lg'
 
 /** Наибольшая высота показа в px — как токены --icon-box, --mascot-*; по ней браузер берёт файл 1x/2x. */
-const HEIGHT: Record<MascotSize, number> = { icon: 40, avatar: 64, sm: 120, md: 160, lg: 240 }
+const HEIGHT: Record<MascotSize, number> = {
+  icon: 40,
+  avatar: 64,
+  launcher: 96,
+  sm: 120,
+  md: 160,
+  lg: 240,
+}
 
 type Props = {
   pose: MascotPose
   size?: MascotSize
   /** На первом экране (404) — грузить сразу, а не по прокрутке. */
   eager?: boolean
+  /** Своя реакция на наведение (наклон и лишнее моргание). false — реакцию задаёт родитель. */
+  hover?: boolean
   className?: string
 }
 
@@ -55,12 +64,14 @@ type Props = {
  * Появляется один раз, моргает раз в несколько секунд и при наведении; при prefers-reduced-motion — без движения.
  * Стоит справа от текста и смотрит влево, на текст и кнопки (позы search, empty-cart, not-found отражены).
  */
-export function Mascot({ pose, size = 'md', eager = false, className }: Props) {
+export function Mascot({ pose, size = 'md', eager = false, hover = true, className }: Props) {
   const { src, blink } = POSES[pose]
   const height = HEIGHT[size]
   const width = Math.round((src.width * height) / src.height)
   const loading = eager ? 'eager' : 'lazy'
-  const classes = [styles.mascot, styles[size], className].filter(Boolean).join(' ')
+  const classes = [styles.mascot, styles[size], hover && styles.hover, className]
+    .filter(Boolean)
+    .join(' ')
   return (
     <span className={classes} aria-hidden="true">
       <span className={styles.pose}>
