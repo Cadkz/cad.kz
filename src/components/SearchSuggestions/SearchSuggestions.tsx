@@ -40,7 +40,7 @@ function metaOf(suggestion: Suggestion) {
 
 /**
  * Выпадающая область поиска: «Часто ищут» (поле пустое), подсказки по группам, «ничего не
- * нашлось». Ниже спокойная строка «Все результаты» и самая тихая — написать инженеру.
+ * нашлось». Ниже спокойная строка «Все результаты» и самая тихая — написать нам в WhatsApp.
  */
 export function SearchSuggestions(props: Props) {
   const { query, state, groups, options, listId, active, hints, whatsappHref } = props
@@ -171,7 +171,7 @@ export function SearchSuggestions(props: Props) {
         <a href={whatsapp} className={styles.engineer} target="_blank" rel="noreferrer">
           <WhatsappIcon size={16} className={styles.engineerIcon} />
           <span>
-            Не нашли нужное? <span className={styles.engineerLink}>Напишите инженеру</span>
+            Не нашли нужное? <span className={styles.engineerLink}>Напишите нам</span>
           </span>
         </a>
       )}

@@ -102,7 +102,7 @@ export function MobileMenu({ menu, contacts, whatsappHref }: Props) {
         {whatsappHref && (
           <a href={whatsappHref} className={styles.cta} target="_blank" rel="noreferrer">
             <WhatsappIcon size={20} />
-            Написать инженеру в WhatsApp
+            Написать в WhatsApp
           </a>
         )}
       </Drawer>

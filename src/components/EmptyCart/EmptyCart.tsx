@@ -23,9 +23,7 @@ export function EmptyCart({ loading = false, whatsappHref = null }: Props) {
   return (
     <div className={styles.empty} role={loading ? 'status' : undefined}>
       <h2>{loading ? 'Загружаем корзину…' : 'В корзине пока пусто'}</h2>
-      <p className={reserve}>
-        Выберите решение в каталоге или напишите задачу — инженер подскажет, что подойдёт.
-      </p>
+      <p className={reserve}>Выберите решение в каталоге или опишите задачу — поможем с выбором.</p>
       <div className={reserve ? `${styles.actions} ${reserve}` : styles.actions}>
         <ButtonLink href={catalogHref()}>Перейти в каталог</ButtonLink>
         {whatsappHref && (
