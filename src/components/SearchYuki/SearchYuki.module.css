@@ -1,0 +1,67 @@
+/* Строка «Спросить Юки» — над строкой WhatsApp, такая же тихая, но с головой Юки. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--control-height-sm);
+  margin-top: var(--space-1);
+  padding: 0 var(--space-3) 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.row:hover {
+  background: var(--color-hover);
+}
+
+.query {
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+}
+
+/* Ничего не нашлось: текст и кнопка слева, Юки с лупой справа смотрит на них. */
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+}
+
+.text {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+}
+
+.lead {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.button {
+  min-height: var(--control-height-sm);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-blue);
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-blue);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.button:hover {
+  background: var(--color-hover);
+}

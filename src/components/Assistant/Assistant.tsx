@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { OPEN_ASSISTANT_EVENT } from '@/lib/openAssistant'
+import { OPEN_ASSISTANT_EVENT, type OpenAssistantDetail } from '@/lib/openAssistant'
 import { useAssistant } from '@/lib/useAssistant'
 import { AssistantLauncher } from '../AssistantLauncher/AssistantLauncher'
 import { AssistantPanel } from '../AssistantPanel/AssistantPanel'
@@ -37,6 +37,9 @@ export function Assistant({ demo, whatsappHref }: Props) {
   const opener = useRef<HTMLElement | null>(null)
   const opens = useRef<number[]>([])
   const calm = useRef<ReturnType<typeof setTimeout>>(undefined)
+  // Свежая функция отправки для обработчика события (он подписан один раз).
+  const send = useRef(chat.send)
+  send.current = chat.send
 
   const show = useCallback((from: HTMLElement | null) => {
     opener.current = from
@@ -63,8 +66,12 @@ export function Assistant({ demo, whatsappHref }: Props) {
     const root = document.documentElement
     // Чат на сайте есть — кнопки «Спросить Юки» в содержимом страниц открывают его.
     root.dataset.assistant = 'on'
-    const onOpen = () =>
+    // С событием может прийти вопрос (например, запрос из поиска) — он сразу уходит Юки.
+    const onOpen = (event: Event) => {
       show(document.activeElement instanceof HTMLElement ? document.activeElement : null)
+      const { message } = (event as CustomEvent<OpenAssistantDetail>).detail ?? {}
+      if (message) void send.current(message)
+    }
     window.addEventListener(OPEN_ASSISTANT_EVENT, onOpen)
     return () => {
       delete root.dataset.assistant
