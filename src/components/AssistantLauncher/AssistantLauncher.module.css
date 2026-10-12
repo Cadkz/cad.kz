@@ -1,33 +1,42 @@
-/* Кади в углу экрана. Под выпадающими меню шапки и выдвижными панелями (--z-header ниже
+/* Кади-буханка в углу экрана, от 640 px (на телефоне Кади — голова в шапке и ничего на странице
+   не закрывает). Под выпадающими меню шапки и выдвижными панелями (--z-header ниже
    --z-dropdown и --z-drawer): мегаменю и корзина его закрывают, а не наоборот. */
 .launcher {
-  position: fixed;
-  right: var(--space-4);
-  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
-  z-index: var(--z-header);
-  display: flex;
-  align-items: flex-end;
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius-md);
-  background: transparent;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition:
-    opacity var(--duration-base) var(--ease),
-    transform var(--duration-base) var(--ease),
-    visibility 0s linear;
+  display: none;
 }
 
-/* Телефон со строкой подбора внизу (PickerBar, data-bottom-bar): Кади садится над ней,
-   а не закрывает цену и кнопку. Высота строки — как отступ body в base.css. */
-:global(body:has([data-bottom-bar])) .launcher {
-  bottom: calc(
-    var(--control-height) +
-    var(--space-6) +
-    var(--space-3) +
-    env(safe-area-inset-bottom)
-  );
+@media (min-width: 640px) {
+  .launcher {
+    position: fixed;
+    right: var(--space-6);
+    bottom: var(--space-6);
+    z-index: var(--z-header);
+    display: flex;
+    align-items: flex-end;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      opacity var(--duration-base) var(--ease),
+      transform var(--duration-base) var(--ease),
+      visibility 0s linear;
+  }
+
+  /* Строка подбора внизу (PickerBar, data-bottom-bar, до 960 px): Кади ложится над ней,
+     а не на цену и кнопку. Высота строки — как отступ body в base.css. */
+  :global(body:has([data-bottom-bar])) .launcher {
+    bottom: calc(var(--control-height) + var(--space-6) + var(--space-4));
+  }
+}
+
+/* От 960 px строки подбора нет (в PickerBar она скрыта) — Кади на обычном месте. */
+@media (min-width: 960px) {
+  :global(body:has([data-bottom-bar])) .launcher {
+    bottom: var(--space-6);
+  }
 }
 
 /* Окно чата открыто — Кади уходит вниз, окно стоит на его месте. */
@@ -41,7 +50,7 @@
     visibility 0s linear var(--duration-exit);
 }
 
-/* Фигура: место под картинку занято шириной сидящей позы; поза «машет лапой» кладётся поверх. */
+/* Фигура: место занято шириной буханки; «машет лапой» и «недовольный» кладутся поверх. */
 .cat {
   position: relative;
   display: block;
@@ -50,8 +59,9 @@
   transition: transform var(--duration-base) var(--ease);
 }
 
-.sit,
-.wave {
+.rest,
+.wave,
+.grumpy {
   transition: opacity var(--duration-fast) var(--ease);
 }
 
@@ -62,11 +72,19 @@
   opacity: 0;
 }
 
+/* Недовольный сидит, а не лежит: уже и выше буханки, стоит у её правого края. */
+.grumpy {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+}
+
 /* Реплика слева от Кади, на уровне морды. */
 .bubble {
   position: absolute;
   right: calc(100% + var(--space-1));
-  bottom: 55%;
+  bottom: 50%;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -84,9 +102,11 @@
     transform var(--duration-base) var(--ease);
 }
 
-/* Реакция: машет лапой и говорит. Наведение мышью, фокус с клавиатуры или подсказка раз за визит. */
+/* Реакция: приподнимается, машет лапой и говорит. Наведение мышью, фокус с клавиатуры или
+   подсказка раз за визит. */
 .launcher[data-hint="true"] .bubble,
-.launcher:focus-visible .bubble {
+.launcher:focus-visible .bubble,
+.launcher[data-grumpy="true"] .bubble {
   opacity: 1;
   transform: none;
 }
@@ -96,8 +116,8 @@
   opacity: 1;
 }
 
-.launcher[data-hint="true"] .sit,
-.launcher:focus-visible .sit {
+.launcher[data-hint="true"] .rest,
+.launcher:focus-visible .rest {
   opacity: 0;
 }
 
@@ -116,7 +136,7 @@
     opacity: 1;
   }
 
-  .launcher:hover .sit {
+  .launcher:hover .rest {
     opacity: 0;
   }
 
@@ -124,6 +144,17 @@
   .launcher:hover .cat {
     transform: translateY(calc(var(--space-1) * -1));
   }
+}
+
+/* Недовольный важнее наведения: пока сердится, лапой не машет. */
+.launcher[data-grumpy="true"] .grumpy {
+  opacity: 1;
+}
+
+.launcher[data-grumpy="true"] .rest,
+.launcher[data-grumpy="true"] .wave,
+.launcher[data-grumpy="true"]:hover .wave {
+  opacity: 0;
 }
 
 /* Нажатие: пружинит, приседая к земле. */
@@ -135,24 +166,6 @@
 /* Фокус — рамка вокруг кота, а не вокруг невидимой реплики. */
 .launcher:focus-visible {
   outline-offset: var(--space-1);
-}
-
-@media (min-width: 640px) {
-  .launcher {
-    right: var(--space-6);
-    bottom: var(--space-6);
-  }
-
-  :global(body:has([data-bottom-bar])) .launcher {
-    bottom: calc(var(--control-height) + var(--space-6) + var(--space-4));
-  }
-}
-
-/* От 960 px строки подбора нет (в PickerBar она скрыта) — Кади на обычном месте. */
-@media (min-width: 960px) {
-  :global(body:has([data-bottom-bar])) .launcher {
-    bottom: var(--space-6);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

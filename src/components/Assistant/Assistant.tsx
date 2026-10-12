@@ -2,9 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { OPEN_ASSISTANT_EVENT } from '@/lib/openAssistant'
 import { useAssistant } from '@/lib/useAssistant'
 import { AssistantLauncher } from '../AssistantLauncher/AssistantLauncher'
 import { AssistantPanel } from '../AssistantPanel/AssistantPanel'
+import { HeaderAction } from '../HeaderAction/HeaderAction'
+import { Mascot } from '../Mascot/Mascot'
+
+/** Открыли чат GRUMPY_OPENS раз за GRUMPY_WINDOW_MS — Кади недоволен ещё GRUMPY_MS. */
+const GRUMPY_OPENS = 3
+const GRUMPY_WINDOW_MS = 8000
+const GRUMPY_MS = 6000
 
 type Props = {
   /** Модель не подключена: Кади честно говорит об этом и ищет по каталогу. */
@@ -13,37 +21,88 @@ type Props = {
 }
 
 /**
- * ИИ-консультант Кади: сам Кади в правом нижнем углу экрана (AssistantLauncher) и окно чата
- * на его месте. Выводится, только когда работает сервис консультанта
- * (src/lib/assistant/provider.ts); окно не всплывает само — его открывает человек.
+ * ИИ-консультант Кади. Вход: на телефоне — голова Кади в шапке (ничего на странице не
+ * закрывает), от 640 px — Кади-буханка в правом нижнем углу (AssistantLauncher). Окно чата
+ * открывается на месте буханки, на телефоне — на весь экран. Выводится, только когда работает
+ * сервис консультанта (src/lib/assistant/provider.ts); окно само не открывается — его открывает
+ * человек (кнопкой или из содержимого страницы — openAssistant() в src/lib/openAssistant.ts).
  * Разговор не теряется при переходе по страницам и закрытии окна.
  */
 export function Assistant({ demo, whatsappHref }: Props) {
   const [open, setOpen] = useState(false)
-  // Окно выносится в body: так fixed считается от экрана, а не от предка с transform/filter.
+  const [grumpy, setGrumpy] = useState(false)
+  // Буханка и окно выносятся в body: внутри шапки (backdrop-filter) fixed считался бы от неё.
   const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
   const chat = useAssistant()
-  const launcher = useRef<HTMLButtonElement>(null)
+  const opener = useRef<HTMLElement | null>(null)
+  const opens = useRef<number[]>([])
+  const calm = useRef<ReturnType<typeof setTimeout>>(undefined)
+
+  const show = useCallback((from: HTMLElement | null) => {
+    opener.current = from
+    const now = Date.now()
+    opens.current = [...opens.current.filter((t) => now - t < GRUMPY_WINDOW_MS), now]
+    if (opens.current.length >= GRUMPY_OPENS) {
+      opens.current = []
+      setGrumpy(true)
+      clearTimeout(calm.current)
+      calm.current = setTimeout(() => setGrumpy(false), GRUMPY_MS)
+    }
+    setOpen(true)
+  }, [])
 
   const close = useCallback((returnFocus = true) => {
     setOpen(false)
-    // Закрыли крестиком или Escape — фокус возвращается на Кади, с которого окно открыли.
+    // Закрыли крестиком или Escape — фокус возвращается туда, откуда окно открыли.
     // Кликом мимо окна — остаётся там, куда кликнули (поле поиска, ссылка).
-    if (returnFocus) requestAnimationFrame(() => launcher.current?.focus())
+    if (returnFocus) requestAnimationFrame(() => opener.current?.focus())
   }, [])
+
+  useEffect(() => {
+    setMounted(true)
+    const root = document.documentElement
+    // Чат на сайте есть — кнопки «Спросить Кади» в содержимом страниц открывают его.
+    root.dataset.assistant = 'on'
+    const onOpen = () =>
+      show(document.activeElement instanceof HTMLElement ? document.activeElement : null)
+    window.addEventListener(OPEN_ASSISTANT_EVENT, onOpen)
+    return () => {
+      delete root.dataset.assistant
+      window.removeEventListener(OPEN_ASSISTANT_EVENT, onOpen)
+      clearTimeout(calm.current)
+    }
+  }, [show])
+
+  const toggle = (from: HTMLElement) => (open ? close() : show(from))
 
   return (
     <>
-      <AssistantLauncher
-        ref={launcher}
-        open={open}
-        onClick={() => (open ? close() : setOpen(true))}
+      <HeaderAction
+        hideFrom="sm"
+        icon={<Mascot pose="head" size="icon" eager hover={false} />}
+        ariaLabel="Спросить Кади — ИИ-помощник CAD.kz"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={(event) => toggle(event.currentTarget)}
       />
       {mounted &&
-        open &&
         createPortal(
-          <AssistantPanel chat={chat} demo={demo} whatsappHref={whatsappHref} onClose={close} />,
+          <>
+            <AssistantLauncher
+              open={open}
+              grumpy={grumpy}
+              onClick={(event) => toggle(event.currentTarget)}
+            />
+            {open && (
+              <AssistantPanel
+                chat={chat}
+                demo={demo}
+                grumpy={grumpy}
+                whatsappHref={whatsappHref}
+                onClose={close}
+              />
+            )}
+          </>,
           document.body,
         )}
     </>

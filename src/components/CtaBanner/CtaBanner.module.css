@@ -48,6 +48,15 @@
   display: none;
 }
 
+/* Кади сидит на нижнем крае баннера (минус нижний отступ баннера). На телефоне — справа
+   от кнопки (order: кнопка, потом Кади), от 960 px — между чертежом и кнопкой. */
+.kadi {
+  order: 1;
+  align-self: flex-end;
+  margin-bottom: calc(var(--space-8) * -1);
+  margin-left: auto;
+}
+
 .title {
   color: var(--color-text-inverse);
 }
@@ -60,6 +69,10 @@
 @media (min-width: 640px) {
   .banner {
     padding: var(--space-12);
+  }
+
+  .kadi {
+    margin-bottom: calc(var(--space-12) * -1);
   }
 }
 
@@ -74,5 +87,10 @@
     flex: none;
     width: calc(var(--control-height) * 4);
     margin-left: auto;
+  }
+
+  .kadi {
+    order: 0;
+    margin-left: 0;
   }
 }

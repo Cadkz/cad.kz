@@ -16,10 +16,25 @@ const ITEMS: Item[] = [
   },
   { pose: 'think', size: 'md', title: 'Думает', where: 'ИИ-консультант: ожидание ответа' },
   { pose: 'laptop', size: 'md', title: 'С ноутбуком', where: 'ИИ-консультант: работает' },
-  { pose: 'greeting', size: 'md', title: 'Приветствие', where: 'ИИ-консультант: первое окно' },
+  { pose: 'loaf', size: 'md', title: 'Буханка', where: 'ИИ-консультант: кнопка в углу от 640 px' },
+  {
+    pose: 'loaf-wave',
+    size: 'md',
+    title: 'Буханка машет',
+    where: 'ИИ-консультант: наведение и подсказка',
+  },
+  { pose: 'grumpy', size: 'md', title: 'Недовольный', where: 'Чат открыли 3 раза за 8 с' },
+  { pose: 'tangled', size: 'md', title: 'В нитках', where: '«Запутались в комплектациях?»' },
+  { pose: 'yarn', size: 'md', title: 'С клубком', where: 'Запас, пока не выводится' },
+  { pose: 'greeting', size: 'md', title: 'Приветствие', where: 'Запас (была кнопка в углу)' },
   { pose: 'neutral', size: 'md', title: 'Спокойный', where: 'Запас, пока не выводится' },
   { pose: 'success', size: 'md', title: 'Доволен', where: 'После заявки — при запуске' },
-  { pose: 'head', size: 'avatar', title: 'Голова', where: 'Шапка окна ИИ-консультанта' },
+  {
+    pose: 'head',
+    size: 'avatar',
+    title: 'Голова',
+    where: 'Шапка окна чата; кнопка в шапке сайта на телефоне',
+  },
 ]
 
 /** Служебная витрина поз Кади для демоверсии: проверить вид и моргание. */

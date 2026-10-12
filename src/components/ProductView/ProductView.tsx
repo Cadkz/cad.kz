@@ -2,6 +2,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
 import { Faq } from '@/components/Faq/Faq'
 import { PickerBar } from '@/components/PickerBar/PickerBar'
+import { PickerHelp } from '@/components/PickerHelp/PickerHelp'
 import { PickerProvider } from '@/components/PickerProvider/PickerProvider'
 import { PickerSteps } from '@/components/PickerSteps/PickerSteps'
 import { PickerSummary } from '@/components/PickerSummary/PickerSummary'
@@ -125,6 +126,7 @@ export async function ProductView({
               sub={guided ? 'Отметьте нужное — итог пересчитается сразу.' : undefined}
             >
               <PickerSteps />
+              <PickerHelp />
             </ProductSection>
             {product.pictures.length > 0 && (
               <ProductGallery pictures={product.pictures} title={product.title} />

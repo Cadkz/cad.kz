@@ -26,6 +26,8 @@ function trapFocus(event: KeyboardEvent, container: HTMLElement) {
 type Props = {
   chat: ReturnType<typeof useAssistant>
   demo: boolean
+  /** Чат часто открывали и закрывали — Кади встречает недовольным. */
+  grumpy: boolean
   whatsappHref: string | null
   /** returnFocus: false — закрыли кликом мимо окна, фокус остаётся там, куда кликнули. */
   onClose: (returnFocus?: boolean) => void
@@ -37,7 +39,7 @@ type Props = {
  * Escape и клик мимо окна (от 640 px) закрывают его; форма передачи менеджеру открывается
  * вместо поля ввода.
  */
-export function AssistantPanel({ chat, demo, whatsappHref, onClose }: Props) {
+export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Props) {
   const titleId = useId()
   const panel = useRef<HTMLElement>(null)
   const [handoff, setHandoff] = useState(false)
@@ -138,7 +140,7 @@ export function AssistantPanel({ chat, demo, whatsappHref, onClose }: Props) {
         />
       ) : (
         <>
-          <AssistantMessages chat={chat} onHandoff={() => setHandoff(true)} />
+          <AssistantMessages chat={chat} grumpy={grumpy} onHandoff={() => setHandoff(true)} />
           <AssistantComposer
             disabled={chat.waiting || !chat.conversationId}
             onSend={chat.send}

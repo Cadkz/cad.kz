@@ -33,6 +33,13 @@ POSES = {
     'think': False,
     'laptop': False,
     'greeting': False,
+    # 13.10.2026: буханка (Кади-консультант в углу) и её «машет лапой», недовольный (часто
+    # дёргают чат), в нитках (запутались в комплектациях), играет с клубком (в запасе).
+    'loaf': False,
+    'loaf-wave': False,
+    'grumpy': False,
+    'tangled': False,
+    'yarn': False,
 }
 
 MARGIN = 12  # поле вокруг фигуры в исходных px

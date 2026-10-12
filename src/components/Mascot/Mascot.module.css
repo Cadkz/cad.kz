@@ -60,6 +60,10 @@
   --mascot-height: var(--mascot-launcher-sm);
 }
 
+.xs {
+  --mascot-height: var(--mascot-xs);
+}
+
 .sm {
   --mascot-height: var(--mascot-sm);
 }

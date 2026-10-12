@@ -2,9 +2,13 @@ import type { Home } from '@/lib/home'
 import { BannerArt } from '../BannerArt/BannerArt'
 import { ButtonLink } from '../Button/Button'
 import { Container } from '../Container/Container'
+import { Mascot } from '../Mascot/Mascot'
 import styles from './CtaBanner.module.css'
 
-/** Тёмный баннер с призывом внизу страницы. Тексты — из CMS. */
+/**
+ * Тёмный баннер с призывом внизу страницы. Тексты — из CMS. Мелкий Кади с лупой сидит на нижнем
+ * крае баннера между чертежом двух КП и кнопкой: «сравним цену».
+ */
 export function CtaBanner({ cta }: { cta: Home['cta'] }) {
   if (!cta.title) return null
   return (
@@ -18,6 +22,7 @@ export function CtaBanner({ cta }: { cta: Home['cta'] }) {
             {cta.text && <p className={styles.lead}>{cta.text}</p>}
           </div>
           <BannerArt name="compare" className={styles.art} onScroll />
+          <Mascot pose="search" size="xs" className={styles.kadi} />
           {cta.link && (
             <ButtonLink href={cta.link.href} variant="light">
               {cta.link.label}

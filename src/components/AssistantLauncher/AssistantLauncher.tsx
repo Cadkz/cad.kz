@@ -1,6 +1,6 @@
 'use client'
 
-import { type Ref, useEffect, useState } from 'react'
+import { type MouseEvent, useEffect, useState } from 'react'
 import { Mascot } from '../Mascot/Mascot'
 import styles from './AssistantLauncher.module.css'
 
@@ -27,18 +27,20 @@ function rememberHint() {
 
 type Props = {
   open: boolean
-  onClick: () => void
-  ref?: Ref<HTMLButtonElement>
+  /** Чат только что часто открывали и закрывали — Кади сидит недовольный. */
+  grumpy: boolean
+  onClick: (event: MouseEvent<HTMLButtonElement>) => void
 }
 
 /**
- * Кади в правом нижнем углу экрана — кнопка ИИ-консультанта.
- * Сидит и моргает; при наведении или фокусе машет лапой и показывает «Спросить Кади»;
- * при нажатии пружинит. Один раз за посещение сам машет и спрашивает «Помочь с выбором?».
+ * Кади-буханка в правом нижнем углу экрана — кнопка ИИ-консультанта (от 640 px; на телефоне
+ * Кади — голова в шапке). Лежит и моргает; при наведении или фокусе приподнимается, машет лапой
+ * и показывает «Спросить Кади»; при нажатии пружинит. Раз за посещение сам машет и спрашивает
+ * «Помочь с выбором?». Если чат дёргают (grumpy) — сидит недовольный.
  * Пока окно чата открыто, Кади прячется: окно стоит на его месте.
- * На телефоне со строкой подбора внизу поднимается над ней.
+ * Со строкой подбора внизу (до 960 px) поднимается над ней.
  */
-export function AssistantLauncher({ open, onClick, ref }: Props) {
+export function AssistantLauncher({ open, grumpy, onClick }: Props) {
   const [hint, setHint] = useState(false)
 
   useEffect(() => {
@@ -57,25 +59,26 @@ export function AssistantLauncher({ open, onClick, ref }: Props) {
 
   return (
     <button
-      ref={ref}
       type="button"
       className={styles.launcher}
       data-open={open}
-      data-hint={hint && !open}
+      data-hint={hint && !open && !grumpy}
+      data-grumpy={grumpy}
       aria-label="Спросить Кади — ИИ-помощник CAD.kz"
       aria-haspopup="dialog"
       aria-expanded={open}
-      onClick={() => {
+      onClick={(event) => {
         setHint(false)
-        onClick()
+        onClick(event)
       }}
     >
       <span className={styles.bubble} aria-hidden="true">
-        {hint ? 'Помочь с выбором?' : 'Спросить Кади'}
+        {grumpy ? 'Я никуда не убегаю' : hint ? 'Помочь с выбором?' : 'Спросить Кади'}
       </span>
       <span className={styles.cat}>
-        <Mascot pose="neutral" size="launcher" eager hover={false} className={styles.sit} />
-        <Mascot pose="greeting" size="launcher" eager hover={false} className={styles.wave} />
+        <Mascot pose="loaf" size="launcher" eager hover={false} className={styles.rest} />
+        <Mascot pose="loaf-wave" size="launcher" eager hover={false} className={styles.wave} />
+        <Mascot pose="grumpy" size="launcher" hover={false} className={styles.grumpy} />
       </span>
     </button>
   )

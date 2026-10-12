@@ -3,7 +3,12 @@
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
-import { ASSISTANT_GREETING, type AssistantCard, QUICK_ACTIONS } from '@/domain/assistant.mjs'
+import {
+  ASSISTANT_GREETING,
+  ASSISTANT_GREETING_GRUMPY,
+  type AssistantCard,
+  QUICK_ACTIONS,
+} from '@/domain/assistant.mjs'
 import type { useAssistant } from '@/lib/useAssistant'
 import { Button } from '../Button/Button'
 import { Mascot } from '../Mascot/Mascot'
@@ -11,6 +16,8 @@ import styles from './AssistantMessages.module.css'
 
 type Props = {
   chat: ReturnType<typeof useAssistant>
+  /** Чат часто дёргали: Кади недовольный и приветствие другое (только пока разговора нет). */
+  grumpy: boolean
   onHandoff: () => void
 }
 
@@ -40,9 +47,10 @@ function Cards({ cards }: { cards: AssistantCard[] }) {
  * Кади думает (лапа у подбородка). Кади слева и смотрит вправо, на сообщения.
  * Новые сообщения объявляются скринридеру (role="log").
  */
-export function AssistantMessages({ chat, onHandoff }: Props) {
+export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
   const end = useRef<HTMLDivElement>(null)
   const count = chat.messages.length
+  const sulky = grumpy && !count
 
   // Новое сообщение или ожидание — лента прокручивается к концу.
   useEffect(() => {
@@ -52,9 +60,9 @@ export function AssistantMessages({ chat, onHandoff }: Props) {
   return (
     <div className={styles.feed} role="log" aria-live="polite" aria-relevant="additions">
       <div className={styles.intro}>
-        <Mascot pose="laptop" size="sm" eager />
+        <Mascot pose={sulky ? 'grumpy' : 'laptop'} size="sm" eager />
         <div className={styles.introText}>
-          <p className={styles.bot}>{ASSISTANT_GREETING}</p>
+          <p className={styles.bot}>{sulky ? ASSISTANT_GREETING_GRUMPY : ASSISTANT_GREETING}</p>
           {!count && (
             <div className={styles.actions}>
               {QUICK_ACTIONS.map((action) => (
