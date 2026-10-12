@@ -1,5 +1,5 @@
 .band {
-  padding-top: var(--section-gap);
+  padding-top: var(--section-gap-tight);
 }
 
 /* Телефон: столбик — значок, текст и чипы, кнопка во всю ширину. От 960 px — в строку. */
