@@ -5,18 +5,15 @@ import type { Picture } from './pictures'
 export type PopularCardData = {
   key: string
   title: string
-  text: string | null
   href: string
   picture: Picture | null
   icon: string | null
-  price: string | null
-  label: string
 }
 
 /**
- * Карточки «Популярных решений» на главной: название, картинка, цена «от» и кнопка — с товара
- * (тот же набор, что в каталоге), подписи из админки важнее. Карточка без товара и без ссылки,
- * как и снятый с публикации товар без своей ссылки, не показывается.
+ * Плитки «Популярных решений» на главной: маленький логотип с товара (тот же набор, что
+ * в каталоге) и название. Своя ссылка из админки важнее ссылки товара: «Inventor и Fusion»
+ * ведёт в каталог, а не на один Inventor. Без товара и без ссылки плитка не показывается.
  */
 export function popularCards(
   items: Home['popular']['items'],
@@ -28,21 +25,13 @@ export function popularCards(
     const href = item.href || product?.href
     const title = item.title || product?.title
     if (!href || !title) return []
-    const price = product
-      ? product.priceFrom
-        ? `${product.offersCount > 1 ? 'от ' : ''}${product.priceFrom}`
-        : 'Цена по запросу'
-      : null
     return [
       {
         key: String(item.key),
         title,
-        text: item.text || product?.summary || null,
         href,
         picture: product?.picture ?? null,
         icon: product?.icon ?? null,
-        price,
-        label: item.buttonLabel || product?.actionLabel || 'Подробнее',
       },
     ]
   })

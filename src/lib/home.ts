@@ -67,9 +67,7 @@ export async function getHome() {
             ? item.product.id
             : (item.product ?? null),
         title: item.title ?? null,
-        text: item.text ?? null,
         href: item.href ?? null,
-        buttonLabel: item.buttonLabel ?? null,
       })),
     },
     renew: { title: page.renew?.title ?? null, text: page.renew?.text ?? null },

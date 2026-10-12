@@ -1487,7 +1487,7 @@ export interface HomePage {
       | null;
   };
   /**
-   * Сразу под логотипами партнёров: до 8 карточек, две строки по 4. Порядок — по спросу (документ по CRM, 12.10.2026). Пустой список — блок не показывается.
+   * Под первым экраном: до 8 плиток (маленький логотип и название), две строки по 4. Порядок — по спросу (документ по CRM, 12.10.2026). Пустой список — блок не показывается.
    */
   popular?: {
     title?: string | null;
@@ -1495,13 +1495,11 @@ export interface HomePage {
     items?:
       | {
           /**
-           * Карточка берёт с товара название, картинку и цену «от». Можно не выбирать, если карточка ведёт на раздел (например, «Сканеры Artec»): тогда заполните название и ссылку.
+           * С товара берётся логотип и ссылка. Если плитка про несколько программ («Inventor и Fusion»), впишите ссылку на каталог — товар нужен только для логотипа.
            */
           product?: (number | null) | Product;
           title?: string | null;
-          text?: string | null;
           href?: string | null;
-          buttonLabel?: string | null;
           id?: string | null;
         }[]
       | null;
@@ -1647,9 +1645,7 @@ export interface HomePageSelect<T extends boolean = true> {
           | {
               product?: T;
               title?: T;
-              text?: T;
               href?: T;
-              buttonLabel?: T;
               id?: T;
             };
       };

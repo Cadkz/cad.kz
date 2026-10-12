@@ -16,6 +16,7 @@ import * as migration_20261010_213658_home_trust_optional from './20261010_21365
 import * as migration_20261011_153337_promo_ends_at from './20261011_153337_promo_ends_at'
 import * as migration_20261011_195336_catalog_packages from './20261011_195336_catalog_packages'
 import * as migration_20261011_223417_crm_catalog from './20261011_223417_crm_catalog'
+import * as migration_20261012_095832_popular_tiles from './20261012_095832_popular_tiles'
 
 export const migrations = [
   {
@@ -107,5 +108,10 @@ export const migrations = [
     up: migration_20261011_223417_crm_catalog.up,
     down: migration_20261011_223417_crm_catalog.down,
     name: '20261011_223417_crm_catalog',
+  },
+  {
+    up: migration_20261012_095832_popular_tiles.up,
+    down: migration_20261012_095832_popular_tiles.down,
+    name: '20261012_095832_popular_tiles',
   },
 ]

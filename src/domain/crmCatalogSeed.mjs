@@ -47,7 +47,7 @@ export const CRM_RENAMES = {
 export const CRM_SUMMARIES = {
   estimate: [
     'АВС-4 — сметы по казахстанским нормативам.',
-    'АВС-4 и сметно-нормативные базы РК: сметы, обновления баз.',
+    'АВС-KZ и сметно-нормативные базы РК: сметы, обновления баз.',
   ],
   arch: [
     'AutoCAD, Revit — проектирование зданий и BIM-координация.',
@@ -316,68 +316,55 @@ export function seedProductLevel(product) {
 }
 
 /**
- * Первое наполнение «Популярных решений»: 8 карточек по спросу в CRM. Товар ищется по адресу,
- * затем по началу названия. SCAD Office — четвёртым, перед ЛИРА-FEM (ответ владельца).
- * @type {{ slug: string | null, title: RegExp | null, label: string | null, text: string,
- *   button: string }[]}
+ * «Популярные решения» — компактные плитки (логотип и название) вместо блока партнёров (замечание
+ * владельца 12.10.2026: меньше шума). Порядок владельца: AutoCAD, АВС-KZ (ребрендинг АВС-4),
+ * Revit и AEC, SCAD, ЛИРА, GEO5, Inventor и Fusion, сканеры Artec. Плитка из двух продуктов ведёт
+ * в каталог с их производителем и разделом, а не на один товар; товар нужен для логотипа.
+ * Товар ищется по адресу, затем по началу названия.
+ * @type {{ slug: string | null, title: RegExp | null, label: string, href: string | null }[]}
  */
 export const CRM_POPULAR = [
-  {
-    slug: 'autocad',
-    title: /^AutoCAD$/i,
-    label: 'AutoCAD и AutoCAD LT',
-    text: 'Черчение и проектирование: новая лицензия или продление',
-    button: 'Купить или получить КП',
-  },
-  {
-    slug: null,
-    title: /^(Программный комплекс АВС|АВС-4)/i,
-    label: 'АВС-4 и нормативные базы',
-    text: 'Сметы по нормативам РК, обновления баз',
-    button: 'Купить',
-  },
+  { slug: 'autocad', title: /^AutoCAD$/i, label: 'AutoCAD и AutoCAD LT', href: null },
+  { slug: null, title: /^(Программный комплекс АВС|АВС-4)/i, label: 'АВС-KZ', href: null },
   {
     slug: 'autodesk-revit',
     title: /^Revit$/i,
     label: 'Revit и AEC Collection',
-    text: 'BIM-моделирование зданий',
-    button: 'Подобрать',
+    href: '/catalog?direction=arch&vendor=Autodesk',
   },
+  { slug: 'scad_v23', title: /^SCAD Office/i, label: 'SCAD Office', href: null },
+  { slug: null, title: /^ЛИРА\s*-\s*FEM/i, label: 'ЛИРА-FEM', href: null },
+  { slug: 'geo5', title: /^GEO5$/i, label: 'GEO5', href: null },
   {
-    slug: 'scad_v23',
-    title: /^SCAD Office/i,
-    label: 'SCAD Office',
-    text: 'Расчёт конструкций: готовые комплекты',
-    button: 'Подобрать комплект',
-  },
-  {
-    slug: null,
-    title: /^ЛИРА\s*-\s*FEM/i,
-    label: 'ЛИРА-FEM',
-    text: 'Расчёт конструкций: редакции и модули',
-    button: 'Подобрать комплект',
-  },
-  {
-    slug: 'geo5',
-    title: /^GEO5$/i,
-    label: 'GEO5',
-    text: 'Геотехника: пакеты по задачам',
-    button: 'Выбрать пакет',
+    slug: 'inventor_professional',
+    title: /^Inventor Professional$/i,
+    label: 'Inventor и Fusion',
+    href: '/catalog?direction=machine&vendor=Autodesk',
   },
   {
     slug: null,
     title: /^Artec Leo$/i,
     label: 'Сканеры Artec',
-    text: 'Leo, Eva, Spider — покажем в работе',
-    button: 'Записаться на демо',
+    href: '/catalog?group=hardware&type=scanners&vendor=Artec+3D',
   },
-  {
-    slug: 'inventor_professional',
-    title: /^Inventor Professional$/i,
-    label: 'Inventor и Fusion',
-    text: 'Проектирование изделий и производство',
-    button: 'Подобрать',
-  },
+]
+
+/** Описание «Смет» из первой настройки: АВС-4 → АВС-KZ (ребрендинг, замечание владельца). */
+export const ESTIMATE_SUMMARY_FIX = [
+  'АВС-4 и сметно-нормативные базы РК: сметы, обновления баз.',
+  'АВС-KZ и сметно-нормативные базы РК: сметы, обновления баз.',
+]
+
+/** Названия первого наполнения (12.10.2026, утро): блок с ними не правили — его можно заменить. */
+export const CRM_POPULAR_V1_LABELS = [
+  'AutoCAD и AutoCAD LT',
+  'АВС-4 и нормативные базы',
+  'Revit и AEC Collection',
+  'SCAD Office',
+  'ЛИРА-FEM',
+  'GEO5',
+  'Сканеры Artec',
+  'Inventor и Fusion',
 ]
 
 /** Полоса «Продление лицензий» на главной. */

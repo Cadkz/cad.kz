@@ -224,11 +224,20 @@ test('сценарии и уровни товаров по правилам', ()
   )
 })
 
-test('популярные решения: 8 карточек, SCAD Office перед ЛИРА-FEM', () => {
+test('популярные решения: порядок владельца, АВС-KZ, плитки из двух программ ведут в каталог', () => {
   assert.equal(CRM_POPULAR.length, 8)
   const order = CRM_POPULAR.map((card) => card.label)
-  assert.ok(order.indexOf('SCAD Office') < order.indexOf('ЛИРА-FEM'))
-  assert.equal(order[0], 'AutoCAD и AutoCAD LT')
+  assert.deepEqual(order.slice(0, 5), [
+    'AutoCAD и AutoCAD LT',
+    'АВС-KZ',
+    'Revit и AEC Collection',
+    'SCAD Office',
+    'ЛИРА-FEM',
+  ])
+  const href = (label) => CRM_POPULAR.find((card) => card.label === label)?.href
+  assert.equal(href('Inventor и Fusion'), '/catalog?direction=machine&vendor=Autodesk')
+  assert.equal(href('Revit и AEC Collection'), '/catalog?direction=arch&vendor=Autodesk')
+  assert.match(href('Сканеры Artec') ?? '', /type=scanners&vendor=Artec/)
 })
 
 const contact = { name: 'Анна', phone: '+7 701 123 45 67', consent: true }

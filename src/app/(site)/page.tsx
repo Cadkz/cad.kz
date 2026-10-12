@@ -14,7 +14,6 @@ import { PromoBand } from '@/components/PromoBand/PromoBand'
 import { RenewBand } from '@/components/RenewBand/RenewBand'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { Section } from '@/components/Section/Section'
-import { TrustBand } from '@/components/TrustBand/TrustBand'
 import { getCatalog, getDirections } from '@/lib/catalog'
 import { fromParams, toQuery } from '@/lib/catalogFilter'
 import { getHome } from '@/lib/home'
@@ -32,7 +31,7 @@ export const metadata = { alternates: { canonical: '/' } }
 
 /**
  * Главная — шаблон «Витрина» (порядок по документу о каталоге по CRM, 12.10.2026): первый экран
- * с тремя действиями, официальные партнёрства, популярные решения, направления, продление
+ * с тремя действиями, популярные решения плитками (блок партнёров скрыт), направления, продление
  * лицензий, акции, BIM, как мы работаем, новости, вопросы. Каталог — отдельная страница /catalog.
  */
 export default async function Home({ searchParams }: Props) {
@@ -52,7 +51,8 @@ export default async function Home({ searchParams }: Props) {
     <main>
       <CatalogHashRedirect />
       <Hero home={home} directions={directions} />
-      <TrustBand trust={home.trust} />
+      {/* Блок «Официальный партнёр» скрыт (замечание владельца 12.10.2026: меньше шума), данные
+          остались в админке — вернуть: <TrustBand trust={home.trust} />. */}
       {popular.length > 0 && (
         <Section
           id="popular"
@@ -60,11 +60,11 @@ export default async function Home({ searchParams }: Props) {
           sub={home.popular.lead ?? undefined}
           action={{ href: catalogHref(), label: 'Весь каталог' }}
         >
-          <Grid as="ul" span={{ base: 12, sm: 6, md: 3 }}>
-            {popular.map((card, i) => (
-              <Reveal as="li" key={card.key} step={i % 4}>
+          <Grid as="ul" span={{ base: 6, md: 3 }}>
+            {popular.map((card) => (
+              <li key={card.key}>
                 <PopularCard card={card} />
-              </Reveal>
+              </li>
             ))}
           </Grid>
         </Section>
