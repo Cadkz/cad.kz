@@ -1,0 +1,37 @@
+/* Плитки по 4 колонки от 960 px, по 6 от 640, на телефоне во всю ширину. */
+.list {
+  padding-bottom: var(--section-gap);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+/* Высота сцены — по самой крупной позе (404 от 960 px), чтобы подписи ряда стояли на одной линии. */
+.stage {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: var(--mascot-lg);
+  margin-bottom: var(--space-3);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-h4);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: var(--color-text);
+}
+
+.where {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  color: var(--color-text-muted);
+}

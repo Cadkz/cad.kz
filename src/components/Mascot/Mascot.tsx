@@ -4,6 +4,8 @@ import emptyCartBlink from '../../../public/images/mascot/kadi-empty-cart-blink.
 import greeting from '../../../public/images/mascot/kadi-greeting.png'
 import head from '../../../public/images/mascot/kadi-head.png'
 import headBlink from '../../../public/images/mascot/kadi-head-blink.png'
+import laptop from '../../../public/images/mascot/kadi-laptop.png'
+import laptopBlink from '../../../public/images/mascot/kadi-laptop-blink.png'
 import neutral from '../../../public/images/mascot/kadi-neutral.png'
 import neutralBlink from '../../../public/images/mascot/kadi-neutral-blink.png'
 import notFound from '../../../public/images/mascot/kadi-not-found.png'
@@ -11,11 +13,15 @@ import notFoundBlink from '../../../public/images/mascot/kadi-not-found-blink.pn
 import search from '../../../public/images/mascot/kadi-search.png'
 import searchBlink from '../../../public/images/mascot/kadi-search-blink.png'
 import success from '../../../public/images/mascot/kadi-success.png'
+import think from '../../../public/images/mascot/kadi-think.png'
+import thinkBlink from '../../../public/images/mascot/kadi-think-blink.png'
 import styles from './Mascot.module.css'
 
 /**
  * Позы Кади. blink — слой того же размера, где видны только закрытые глаза:
  * кладётся поверх и на мгновение проявляется (моргание).
+ * think (думает) и laptop (с ноутбуком) смотрят вправо — только для окна ИИ-консультанта,
+ * где Кади слева от сообщений; на страницы справа от текста их не ставить.
  */
 const POSES = {
   neutral: { src: neutral, blink: neutralBlink },
@@ -24,6 +30,8 @@ const POSES = {
   'not-found': { src: notFound, blink: notFoundBlink },
   success: { src: success, blink: null },
   greeting: { src: greeting, blink: null },
+  think: { src: think, blink: thinkBlink },
+  laptop: { src: laptop, blink: laptopBlink },
   head: { src: head, blink: headBlink },
 } satisfies Record<string, { src: StaticImageData; blink: StaticImageData | null }>
 
