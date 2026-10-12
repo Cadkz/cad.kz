@@ -9,3 +9,19 @@
   width: auto;
   height: var(--logo-height);
 }
+
+/* Знак без надписи в шапке: крупнее надписи, ширина целая (знак 7 : 10). */
+.mark {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  color: var(--color-blue);
+  border-radius: var(--radius-sm);
+}
+
+.mark svg {
+  display: block;
+  width: var(--logo-mark-width);
+  height: var(--logo-mark-height);
+  fill: currentColor;
+}

@@ -180,7 +180,9 @@
   --control-height-sm: 36px; /* малая кнопка, чип, стрелки слайдера */
   --icon-box: 40px; /* квадрат под иконку в карточке, кнопки соцсетей */
   --drawer-width: 360px; /* выдвижная панель: мобильное меню, фильтр, корзина */
-  --logo-height: 28px;
+  --logo-height: 28px; /* знак с надписью (подвал) */
+  --logo-mark-height: 40px; /* знак без надписи в шапке, до 640 px */
+  --logo-mark-width: 28px; /* ширина знака: высота × 0,7 */
   --pattern-tile: 212px; /* плитка фирменного узора из граней (public/images/patterns) */
   --menu-rail: 240px; /* мегаменю: колонка групп каталога */
   --menu-sections: 300px; /* мегаменю: колонка разделов */
@@ -232,5 +234,7 @@
     --gutter: var(--space-8);
     --section-gap: var(--space-16);
     --header-height: 72px;
+    --logo-mark-height: 50px;
+    --logo-mark-width: 35px;
   }
 }

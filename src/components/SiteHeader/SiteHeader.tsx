@@ -32,7 +32,7 @@ export async function SiteHeader() {
             contacts={<ContactList contacts={contacts} socials={false} whatsapp={false} />}
             whatsappHref={contacts.whatsappHref}
           />
-          <Logo priority />
+          <Logo variant="mark" />
           <CatalogNav menu={menu} whatsappHref={contacts.whatsappHref} />
           <SiteSearch
             hints={searchHints}
