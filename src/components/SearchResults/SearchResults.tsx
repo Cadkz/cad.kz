@@ -14,14 +14,37 @@ type Props = {
   items: CatalogItem[]
   /** Нашлись не все слова запроса: показываем похожее и говорим об этом. */
   partial?: boolean
+  /** Дополнения к найденным программам — отдельной группой под ними. */
+  addons?: CatalogItem[]
+  /** Программы, к которым эти дополнения. */
+  bases?: string[]
   whatsappHref: string | null
+}
+
+function Cards({ items }: { items: CatalogItem[] }) {
+  return (
+    <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }} className={styles.list}>
+      {items.map((item) => (
+        <li key={item.id}>
+          <ProductCard product={item} />
+        </li>
+      ))}
+    </Grid>
+  )
 }
 
 /**
  * Результаты поиска карточками каталога. Ничего не нашлось — не тупик: написать, что ищете,
  * в WhatsApp (текст уже набран) или перейти в каталог.
  */
-export function SearchResults({ query, items, partial = false, whatsappHref }: Props) {
+export function SearchResults({
+  query,
+  items,
+  partial = false,
+  addons = [],
+  bases = [],
+  whatsappHref,
+}: Props) {
   if (!query.trim()) return null
   if (!items.length) {
     const text = `Здравствуйте! Ищу на сайте: ${query}. Подскажите, пожалуйста.`
@@ -62,13 +85,13 @@ export function SearchResults({ query, items, partial = false, whatsappHref }: P
           ? `Точно по запросу ничего нет — похожее: ${positions(items.length)}`
           : `Найдено: ${positions(items.length)}`}
       </p>
-      <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }} className={styles.list}>
-        {items.map((item) => (
-          <li key={item.id}>
-            <ProductCard product={item} />
-          </li>
-        ))}
-      </Grid>
+      <Cards items={items} />
+      {addons.length > 0 && (
+        <>
+          <h2 className={styles.group}>Дополнения для {bases.join(', ')}</h2>
+          <Cards items={addons} />
+        </>
+      )}
     </section>
   )
 }

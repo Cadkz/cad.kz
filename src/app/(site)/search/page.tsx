@@ -21,7 +21,10 @@ export default async function SearchPage({ searchParams }: Props) {
   const params = await searchParams
   const raw = Array.isArray(params.q) ? params.q[0] : params.q
   const query = (raw ?? '').slice(0, 100)
-  const [{ items, partial }, contacts] = await Promise.all([searchCatalog(query), getContacts()])
+  const [{ items, partial, addons, bases }, contacts] = await Promise.all([
+    searchCatalog(query),
+    getContacts(),
+  ])
   return (
     <main>
       <Container>
@@ -36,6 +39,8 @@ export default async function SearchPage({ searchParams }: Props) {
           query={query}
           items={items}
           partial={partial}
+          addons={addons}
+          bases={bases}
           whatsappHref={contacts.whatsappHref}
         />
       </Container>

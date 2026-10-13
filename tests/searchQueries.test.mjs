@@ -226,7 +226,12 @@ test('не нашлись все слова — похожие товары с �
   const exact = searchDetailed(items, 'плоттер canon')
   assert.equal(exact.partial, false)
   // Одно слово не нашлось — пусто, без «похожих».
-  assert.deepEqual(searchDetailed(items, 'пылесос'), { items: [], partial: false })
+  assert.deepEqual(searchDetailed(items, 'пылесос'), {
+    items: [],
+    partial: false,
+    addons: [],
+    bases: [],
+  })
 })
 
 test('ложных находок нет', () => {

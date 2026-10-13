@@ -5,12 +5,22 @@ import { relId } from './rel'
  * Что ещё видит поиск у товара, кроме названия и анонса (src/domain/search.mjs):
  * - sections — названия разделов каталога, основной первым («Плоттеры», «3D-сканеры»);
  * - parts — названия программ в составе: варианты подбора (у GEO5 — все модули);
- * - keywords — описание, характеристики (кроме артикула), кнопка продления.
- * У семейства: разделы и названия всех его программ.
+ * - keywords — описание, характеристики (кроме артикула), кнопка продления;
+ * - key и addonOf — id товара и id программ из «Требуется базовое ПО»: поиск показывает
+ *   дополнения к найденной программе отдельной группой.
+ * У семейства: разделы и названия всех его программ, key — минус id линейки (как у карточки
+ * семейства в каталоге), members — id его товаров, addonOf — базовое ПО всех его товаров.
  * Держится в памяти сервера минуту, как индекс подсказок: в карточки каталога это не попадает,
  * чтобы не утяжелять страницы.
  */
-export type SearchExtra = { sections: string[]; parts: string; keywords: string }
+export type SearchExtra = {
+  sections: string[]
+  parts: string
+  keywords: string
+  key: number
+  members: number[]
+  addonOf: number[]
+}
 
 const TTL = 60_000
 const published = { status: { equals: 'published' } } as const
@@ -56,6 +66,7 @@ async function loadExtras(): Promise<Extras> {
         properties: true,
         renewLabel: true,
         picker: true,
+        requiresProducts: true,
       },
     }),
     payload.find({
@@ -70,7 +81,10 @@ async function loadExtras(): Promise<Extras> {
   const titleById = new Map(products.docs.map((product) => [product.id, product.title]))
 
   const result: Extras = { products: new Map(), families: new Map() }
-  const members = new Map<number, { titles: string[]; sections: Set<string> }>()
+  const members = new Map<
+    number,
+    { titles: string[]; sections: Set<string>; ids: number[]; addonOf: Set<number> }
+  >()
   for (const product of products.docs) {
     const main = relId(product.mainSection)
     const ids = [main, ...(product.sections ?? []).map(relId).filter((id) => id !== main)]
@@ -88,7 +102,14 @@ async function loadExtras(): Promise<Extras> {
     const properties = (product.properties ?? [])
       .filter(({ name }) => !HIDDEN_PROPERTIES.has(name.trim().toLowerCase()))
       .map(({ name, value }) => `${name} ${value}`)
+    const addonOf = (product.requiresProducts ?? []).flatMap((rel) => {
+      const id = relId(rel)
+      return id == null ? [] : [id]
+    })
     result.products.set(product.id, {
+      key: product.id,
+      members: [],
+      addonOf,
       sections: [...new Set(titles)],
       parts: [...new Set(parts)].join(' '),
       keywords: [plainText(product.description ?? ''), ...properties, product.renewLabel ?? '']
@@ -97,13 +118,23 @@ async function loadExtras(): Promise<Extras> {
     })
     const line = relId(product.line)
     if (line == null) continue
-    const family = members.get(line) ?? { titles: [], sections: new Set<string>() }
+    const family = members.get(line) ?? {
+      titles: [],
+      sections: new Set<string>(),
+      ids: [],
+      addonOf: new Set<number>(),
+    }
     family.titles.push(product.title)
+    family.ids.push(product.id)
     for (const title of titles) family.sections.add(title)
+    for (const id of addonOf) family.addonOf.add(id)
     members.set(line, family)
   }
   for (const [line, family] of members)
     result.families.set(line, {
+      key: -line,
+      members: family.ids,
+      addonOf: [...family.addonOf],
       sections: [...family.sections],
       parts: family.titles.join(' '),
       keywords: '',

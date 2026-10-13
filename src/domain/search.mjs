@@ -18,14 +18,24 @@
  * задачи; слова описания и характеристик. В составе и описании — только точно, без опечаток.
  * Если все слова запроса не нашлись ни у одного товара, показываются товары без одного слова
  * (partial): «плоттер А0» найдёт плоттеры, даже если «А0» нигде не написано.
+ *
+ * Запрос — название программы («автокад», «ревит», «скад»: с него начинается название
+ * какого-то товара) — показываются только товары, где слова нашлись в названии, производителе,
+ * разделе или составе. Упоминания в описании («работает в среде AutoCAD», курс по Civil 3D)
+ * не показываются (замечание владельца 13.10.2026). Отдельной группой addons — дополнения к
+ * найденным программам: товары, у которых в «Требуется базовое ПО» стоит найденная программа
+ * (MagiCAD для AutoCAD, СПДС GraphiCS), даже если слова запроса в их названии нет.
  */
 
 /**
  * @typedef {{ title: string, vendor?: string | null, aliases?: string | null,
  *   summary?: string | null, tasks?: string[], sections?: string[], parts?: string | null,
- *   keywords?: string | null }} Searchable
+ *   keywords?: string | null, key?: number | null, members?: number[],
+ *   addonOf?: number[] }} Searchable
  * sections — названия разделов каталога, основной первым; parts — названия программ в составе
  * (варианты подбора, программы семейства); keywords — описание, характеристики, кнопка продления.
+ * key — id товара; members — id товаров семейства (у карточки семейства); addonOf — id базовых
+ * программ, для которых товар — дополнение (у семейства — всех его товаров).
  */
 
 const CYR = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
@@ -410,26 +420,46 @@ function matchWord(word, item) {
 }
 
 /**
- * Где нашлось слово запроса: очки и точность (без опечаток).
+ * Где нашлось слово запроса: очки, точность (без опечаток) и strong — в названии, разделе или
+ * составе, а не только в анонсе или описании.
  * @param {QueryWord} word
  * @param {Prepared} item
  */
 function matchPlace(word, item) {
   const inName = bestScore(word, item.name)
-  if (inName >= 2) return { score: inName * 3, exact: true }
+  if (inName >= 2) return { score: inName * 3, exact: true, strong: true }
   const inSection = bestScore(word, item.sections, true)
-  if (inSection >= 2) return { score: inSection * 3, exact: true }
+  if (inSection >= 2) return { score: inSection * 3, exact: true, strong: true }
   const inParts = bestScore(word, item.parts, true)
-  if (inParts >= 2) return { score: inParts * 2, exact: true }
+  if (inParts >= 2) return { score: inParts * 2, exact: true, strong: true }
   const inAbout = bestScore(word, item.about)
-  if (inAbout >= 2) return { score: inAbout, exact: true }
+  if (inAbout >= 2) return { score: inAbout, exact: true, strong: false }
   const inKeywords = bestScore(word, item.keywords, true)
-  if (inKeywords >= 2) return { score: 1, exact: true }
+  if (inKeywords >= 2) return { score: 1, exact: true, strong: false }
   // Только с опечаткой — в названии весит больше, чем в анонсе.
-  if (inName) return { score: inName * 3, exact: false }
-  if (inAbout) return { score: inAbout, exact: false }
-  return { score: 0, exact: false }
+  if (inName) return { score: inName * 3, exact: false, strong: true }
+  if (inAbout) return { score: inAbout, exact: false, strong: false }
+  return { score: 0, exact: false, strong: false }
 }
+
+/**
+ * Запрос — название программы: первое слово запроса совпало с первым словом названия товара
+ * («автокад» → AutoCAD, «скад» → SCAD Office), а не просто встретилось внутри названия
+ * («вентиляция» в «MagiCAD Вентиляция» — это задача, а не программа).
+ * @param {QueryWord} word
+ * @param {Prepared} item
+ */
+function startsTitle(word, item) {
+  const [first] = item.title
+  return first !== undefined && bestScore(word, [first]) >= 2
+}
+
+/**
+ * id программы и товаров её семейства: по ним дополнение узнаёт свою базу.
+ * @param {Searchable} item
+ * @returns {number[]}
+ */
+const ownIds = (item) => [...(item.key == null ? [] : [item.key]), ...(item.members ?? [])]
 
 /**
  * Запрос покрывает название целиком: «civil 3d» — сама программа Civil 3D, а не курс по ней.
@@ -469,19 +499,21 @@ export function queryWords(query) {
  * @param {number} [limit]
  * @param {boolean} [exactOnly] без находок с опечаткой и без неполных (короткие списки:
  *   производители, разделы, страницы)
- * @returns {{ items: T[], partial: boolean }}
+ * @returns {{ items: T[], partial: boolean, addons: T[], bases: string[] }} addons — дополнения
+ *   к найденным программам (bases — их названия), только когда запрос — название программы
  */
 export function searchDetailed(items, query, limit = 60, exactOnly = false) {
   const { required, optional } = queryWords(query)
-  if (!required.length) return { items: [], partial: false }
+  if (!required.length) return { items: [], partial: false, addons: [], bases: [] }
   const must = required.map(queryWord)
   const may = optional.map(queryWord)
-  /** @type {{ item: T, score: number, exact: boolean, missed: number, index: number }[]} */
+  /** @type {{ item: T, score: number, exact: boolean, strong: boolean, missed: number, index: number }[]} */
   const found = []
   items.forEach((item, index) => {
     const words = prepare(item)
     let score = 0
     let exact = true
+    let strong = true
     let missed = 0
     for (const word of must) {
       const match = matchWord(word, words)
@@ -491,6 +523,7 @@ export function searchDetailed(items, query, limit = 60, exactOnly = false) {
         continue
       }
       if (!match.exact) exact = false
+      if (!match.strong) strong = false
       score += match.score
     }
     for (const word of may) {
@@ -499,25 +532,46 @@ export function searchDetailed(items, query, limit = 60, exactOnly = false) {
     }
     // Меньше очка: только порядок среди равных.
     if (score && wholeTitle([...must, ...may], words)) score += 0.9
-    found.push({ item, score, exact, missed, index })
+    found.push({ item, score, exact, strong, missed, index })
   })
   const full = found.filter((entry) => entry.missed === 0)
   // Без одного слова — только если запрос из двух и больше слов и полных находок нет.
   const partial = !full.length && must.length >= 2 && !exactOnly
   const pool = partial ? found.filter((entry) => entry.score > 0) : full
   const anyExact = pool.some((entry) => entry.exact)
+  const ordered = pool
+    .filter((entry) => entry.exact || (!anyExact && !exactOnly))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+  const [first] = must
+  const named =
+    !partial &&
+    first !== undefined &&
+    ordered.some((entry) => entry.strong && startsTitle(first, prepare(entry.item)))
+  if (!named)
+    return {
+      items: ordered.slice(0, limit).map((entry) => entry.item),
+      partial: partial && pool.length > 0,
+      addons: [],
+      bases: [],
+    }
+  // Запрос — название программы: только находки в названии, разделе и составе, плюс дополнения.
+  const strong = ordered.filter((entry) => entry.strong).map((entry) => entry.item)
+  const baseIds = new Set(strong.flatMap(ownIds))
+  const isAddon = (/** @type {Searchable} */ item) =>
+    (item.addonOf ?? []).some((id) => baseIds.has(id) && !ownIds(item).includes(id))
+  const main = strong.filter((item) => !isAddon(item))
+  const addons = items.filter(isAddon)
+  const used = new Set(addons.flatMap((item) => item.addonOf ?? []))
   return {
-    items: pool
-      .filter((entry) => entry.exact || (!anyExact && !exactOnly))
-      .sort((a, b) => b.score - a.score || a.index - b.index)
-      .slice(0, limit)
-      .map((entry) => entry.item),
-    partial: partial && pool.length > 0,
+    items: main.slice(0, limit),
+    partial: false,
+    addons: addons.slice(0, limit),
+    bases: main.filter((item) => ownIds(item).some((id) => used.has(id))).map((i) => i.title),
   }
 }
 
 /**
- * Найти товары (см. searchDetailed): только список.
+ * Найти товары (см. searchDetailed): один список, дополнения — после найденных программ.
  * @template {Searchable} T
  * @param {T[]} items
  * @param {string} query
@@ -526,5 +580,6 @@ export function searchDetailed(items, query, limit = 60, exactOnly = false) {
  * @returns {T[]}
  */
 export function searchItems(items, query, limit = 60, exactOnly = false) {
-  return searchDetailed(items, query, limit, exactOnly).items
+  const found = searchDetailed(items, query, limit, exactOnly)
+  return [...found.items, ...found.addons].slice(0, limit)
 }

@@ -6,6 +6,10 @@ export type CatalogSearch = {
   items: CatalogItem[]
   /** Нашлись не все слова запроса: показаны похожие товары. */
   partial: boolean
+  /** Дополнения к найденным программам (MagiCAD для AutoCAD по запросу «автокад»). */
+  addons: CatalogItem[]
+  /** Названия программ, к которым найдены дополнения. */
+  bases: string[]
 }
 
 /**
@@ -13,7 +17,7 @@ export type CatalogSearch = {
  * Разделы, состав и описание товара поиску даёт getSearchExtras, в карточки они не попадают.
  */
 export async function searchCatalog(query: string): Promise<CatalogSearch> {
-  if (!query.trim()) return { items: [], partial: false }
+  if (!query.trim()) return { items: [], partial: false, addons: [], bases: [] }
   const [{ items }, extras] = await Promise.all([getCatalog(), getSearchExtras()])
   const searchable = items.map((item) => ({
     ...item,
@@ -22,5 +26,10 @@ export async function searchCatalog(query: string): Promise<CatalogSearch> {
     item,
   }))
   const found = searchDetailed(searchable, query)
-  return { items: found.items.map((entry) => entry.item), partial: found.partial }
+  return {
+    items: found.items.map((entry) => entry.item),
+    partial: found.partial,
+    addons: found.addons.map((entry) => entry.item),
+    bases: found.bases,
+  }
 }
