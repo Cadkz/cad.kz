@@ -7,11 +7,12 @@ import { PageIntro } from '@/components/PageIntro/PageIntro'
 import { ReadingLayout } from '@/components/ReadingLayout/ReadingLayout'
 import { RelatedList } from '@/components/RelatedList/RelatedList'
 import { pagePath } from '@/domain/legacyPages.mjs'
+import { parseRequisites } from '@/domain/requisites.mjs'
 import { getContacts } from '@/lib/navigation'
 import { getInfoLinks, getPage } from '@/lib/pages'
 import { cms } from '@/lib/payload'
 import { bodyPictures } from '@/lib/pictures'
-import { imageSources, parseBody } from '@/lib/richText'
+import { type Block, imageSources, parseBody } from '@/lib/richText'
 import { pageMetadata } from '@/lib/seo'
 
 const PRIVACY = pagePath('privacy-policy')
@@ -37,6 +38,16 @@ const QUESTIONS: Record<
   },
 }
 
+/** «Реквизиты»: вступление абзацем и таблица «подпись — значение»; не узнали — обычный текст. */
+function requisitesBlocks(body: string | null | undefined, title: string): Block[] {
+  const parsed = parseRequisites(body ?? '')
+  if (!parsed) return parseBody(body, title)
+  return [
+    ...(parsed.intro ? [{ type: 'paragraph' as const, text: parsed.intro }] : []),
+    { type: 'fields', items: parsed.fields },
+  ]
+}
+
 /** Метаданные текстовой страницы: перенесённые title и description или название. */
 export async function infoPageMetadata(slug: string) {
   const page = await getPage(slug)
@@ -56,7 +67,10 @@ export async function infoPageMetadata(slug: string) {
 export async function InfoPageView({ slug }: { slug: string }) {
   const page = await getPage(slug)
   if (!page) redirect(slug === 'about' ? '/' : '/about')
-  const blocks = parseBody(page.body, page.title)
+  const blocks =
+    slug === 'requisites'
+      ? requisitesBlocks(page.body, page.title)
+      : parseBody(page.body, page.title)
   const questions = QUESTIONS[slug]
   const [links, pictures, contacts] = await Promise.all([
     getInfoLinks(),
