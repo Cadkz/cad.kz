@@ -1,30 +1,41 @@
-import type { Section, SiteSetting } from '../../payload-types'
-import { menuColumns } from '../domain/menu.mjs'
+import type { HomePage, Section, SiteSetting } from '../../payload-types'
+import { brandOf } from '../domain/brands.mjs'
+import { menuColumns, menuTitle, menuVendors } from '../domain/menu.mjs'
 import { priorityRank } from '../domain/priority.mjs'
 import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
 import { familyLines } from './families'
 import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
+import type { PopularCardData } from './popular'
 import { productPath } from './productPath'
 
 export type MenuLink = { title: string; href: string }
-/** Линейка производителя в меню: первые товары и адрес каталога с этой линейкой. */
-export type MenuLine = {
-  key: string
+/** Программа в меню: название, пояснение после тире, производитель. */
+export type MenuProgram = {
   title: string
-  links: MenuLink[]
-  more: boolean
-  allHref: string
+  note: string | null
+  vendor: string | null
+  href: string
 }
-export type MenuVendor = { key: string; title: string; allHref: string; lines: MenuLine[] }
-/** Раздел в мегаменю: производители раздела по порядку и адрес каталога с этим разделом. */
+/** Раздел в мегаменю: программы раздела по приоритету и его производители. */
 export type MenuColumn = {
   title: string
   icon: string | null
   allHref: string
-  vendors: MenuVendor[]
+  programs: MenuProgram[]
+  /** В разделе программ больше, чем в меню: показать «Все программы раздела». */
+  more: boolean
+  vendors: MenuLink[]
 }
 export type MenuTab = { key: string; label: string; columns: MenuColumn[]; allHref: string }
+/** Производитель во вкладке «Производители»: каталог с ним и главные его программы. */
+export type MenuVendor = { title: string; href: string; hint: string }
+export type Menu = {
+  tabs: MenuTab[]
+  /** «Популярные программы» — те же плитки, что на главной (админка → «Главная страница»). */
+  popular: PopularCardData[]
+  vendors: MenuVendor[]
+}
 
 const groupLabels: Record<Section['menuGroup'], string> = {
   software: 'Программное обеспечение',
@@ -35,13 +46,39 @@ const groupLabels: Record<Section['menuGroup'], string> = {
 const relId = (value: number | { id: number } | null | undefined) =>
   value == null ? null : typeof value === 'number' ? value : value.id
 
+/** «Популярные программы» в меню: товар или своя ссылка из админки, фирменный логотип по названию. */
+function menuPopular(
+  items: NonNullable<HomePage['popular']>['items'],
+  products: Map<number, { title: string; href: string }>,
+): PopularCardData[] {
+  return (items ?? []).flatMap((item, index) => {
+    const id = relId(item.product)
+    const product = id == null ? undefined : products.get(id)
+    const href = item.href || product?.href
+    const title = item.title || (product ? menuTitle(product.title) : null)
+    if (!href || !title) return []
+    const brand = brandOf(title)
+    return [
+      {
+        key: item.id ?? String(index),
+        title,
+        href,
+        picture: null,
+        icon: null,
+        brand: brand ? { key: brand.key, logo: brand.logo } : null,
+      },
+    ]
+  })
+}
+
 /**
- * Мегаменю строится из разделов, производителей, линеек и товаров CMS: новый товар сам появляется
- * в меню. Путь: раздел → производитель → линейка → товары (src/domain/menu.mjs).
+ * Мегаменю строится из разделов, производителей и товаров CMS: новый товар сам появляется в меню.
+ * Вариант А (13.10.2026): раздел по задаче → сразу его программы; популярные программы — плитками
+ * из блока главной; все производители — отдельной вкладкой (src/domain/menu.mjs).
  */
-export async function getMenu(): Promise<MenuTab[]> {
+export async function getMenu(): Promise<Menu> {
   const payload = await cms()
-  const [sections, products, manufacturers, lines] = await Promise.all([
+  const [sections, products, manufacturers, home] = await Promise.all([
     payload.find({
       collection: 'sections',
       where: { status: { equals: 'published' } },
@@ -75,13 +112,7 @@ export async function getMenu(): Promise<MenuTab[]> {
       depth: 0,
       select: { priority: true, title: true },
     }),
-    payload.find({
-      collection: 'product-lines',
-      where: { status: { equals: 'published' } },
-      pagination: false,
-      depth: 0,
-      select: { title: true, manufacturer: true, order: true },
-    }),
+    payload.findGlobal({ slug: 'home-page', depth: 0, select: { popular: true } }),
   ])
 
   // Подразделы видны через верхний раздел (src/domain/sectionTree.mjs).
@@ -110,7 +141,7 @@ export async function getMenu(): Promise<MenuTab[]> {
     }
   })
 
-  // Товары без своей страницы в меню не показываются, их семейство — одной строкой в линейке.
+  // Товары без своей страницы в меню не показываются, их семейство — одной строкой.
   const families = await familyLines()
   const hidden = new Set(products.docs.filter((p) => p.pageView === 'none').map((p) => p.id))
   const familyItems = [...families].flatMap(([lineId, family]) => {
@@ -131,13 +162,6 @@ export async function getMenu(): Promise<MenuTab[]> {
   })
   const menuItems = [...items.filter((item) => !hidden.has(item.id)), ...familyItems]
 
-  const lineData = lines.docs.map((line) => ({
-    id: line.id,
-    title: line.title,
-    vendor: relId(line.manufacturer) ?? 0,
-    order: line.order ?? 100,
-  }))
-
   const tabs: MenuTab[] = (Object.keys(groupLabels) as Section['menuGroup'][]).map((group) => ({
     key: group,
     label: groupLabels[group],
@@ -155,14 +179,23 @@ export async function getMenu(): Promise<MenuTab[]> {
           pins: (pinnedManufacturers ?? []).map((m) => relId(m) ?? 0),
         })),
       menuItems,
-      lineData,
       vendorTitle,
       catalogHref,
     ),
   }))
 
-  // Отдельной вкладки «По отраслям» нет: направления и есть разделы программ.
-  return tabs.filter((tab) => tab.columns.length > 0)
+  const byId = new Map(items.map((item) => [item.id, item]))
+  return {
+    // Отдельной вкладки «По отраслям» нет: направления и есть разделы программ.
+    tabs: tabs.filter((tab) => tab.columns.length > 0),
+    popular: menuPopular(home.popular?.items, byId),
+    // Курсы и консалтинг — в «Услугах», производителями их не ищут.
+    vendors: menuVendors(
+      menuItems.filter((item) => item.group !== 'service'),
+      vendorTitle,
+      catalogHref,
+    ),
+  }
 }
 
 export type Contacts = {

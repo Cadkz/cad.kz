@@ -5,7 +5,8 @@
 // другие названия для поиска; актуализация версий по сайтам производителей; продления ПАССАТ
 // — кнопкой «Обновить версию»; пакеты и девять задач GEO5 в каталоге; блок «Официальный партнёр» на главной;
 // каталог по CRM (САПР и черчение, широкоформат, сценарии покупки, популярные решения);
-// дополнения к AutoCAD, Revit, Inventor (Требуется базовое ПО) и AutoCAD LT. Выполняется один раз (отметка в журнале
+// дополнения к AutoCAD, Revit, Inventor (Требуется базовое ПО) и AutoCAD LT; названия разделов для
+// меню по варианту А. Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -19,6 +20,7 @@ import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
 import { setupGeo5Catalog } from '../src/lib/geoSetup.ts'
 import { setupHomeTrust } from '../src/lib/homeSetup.ts'
+import { setupMenu } from '../src/lib/menuSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
 import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
@@ -139,6 +141,9 @@ try {
   const addons = await setupAddons(payload)
   if (!addons) console.log('Дополнения к AutoCAD, Revit, Inventor уже связаны.')
   else for (const line of addons) console.log(`Дополнения — ${line}`)
+  const menu = await setupMenu(payload)
+  if (!menu) console.log('Названия разделов для меню уже настроены.')
+  else for (const line of menu) console.log(`Меню — ${line}`)
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1

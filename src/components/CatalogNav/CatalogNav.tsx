@@ -9,17 +9,16 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { MenuTab } from '@/lib/navigation'
+import type { Menu } from '@/lib/navigation'
 import { MegaMenu } from '../MegaMenu/MegaMenu'
 import styles from './CatalogNav.module.css'
 
-type Props = { menu: MenuTab[]; whatsappHref: string | null }
+type Props = { menu: Menu; whatsappHref: string | null }
 
 /**
  * Кнопка «Каталог» в первой строке шапки (от 960 px) и мегаменю под ней.
  * Открывается наведением мыши или нажатием, закрывается уходом мыши (с задержкой), щелчком
- * мимо и Escape — фокус возвращается на кнопку. Само мегаменю (группа → раздел → производитель
- * → линейка → товары) не менялось.
+ * мимо и Escape — фокус возвращается на кнопку. Мегаменю: группа → раздел по задаче → программы.
  */
 export function CatalogNav({ menu, whatsappHref }: Props) {
   const [open, setOpen] = useState(false)
@@ -86,7 +85,7 @@ export function CatalogNav({ menu, whatsappHref }: Props) {
       {open && (
         <MegaMenu
           id="nav-catalog"
-          tabs={menu}
+          menu={menu}
           onNavigate={close}
           whatsappHref={whatsappHref}
           onPointerEnter={hover(true)}
