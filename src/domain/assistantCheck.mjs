@@ -27,7 +27,12 @@ export const CHECK_QUESTIONS = [
   'Не пришло письмо с лицензией',
   'Не запускается АВС, ошибка ключа',
   'Где скачать дистрибутив АВС?',
+  'Сколько вместе AutoCAD LT на год и АВС с привязкой к компьютеру?',
+  'Нужны 2 AutoCAD LT на год и Revit на год, какая общая сумма?',
   'Сделаете 3D-печать детали?',
+  'Отсканируете деталь сканером Artec?',
+  'Сделаете 3D-модель по скану?',
+  'Распечатаете чертежи на плоттере?',
   'Хочу вернуть деньги за лицензию',
   'Менеджер не отвечает, хочу пожаловаться',
   'Я после вебинара по GEO5',
@@ -163,16 +168,42 @@ export function checkReply(reply, trace) {
   return flags
 }
 
+/** Аргумент инструмента словами: позиции заказа — «код × количество». */
+function arg(/** @type {unknown} */ value) {
+  if (!Array.isArray(value)) return String(value)
+  return value
+    .map((item) =>
+      item && typeof item === 'object' && 'code' in item
+        ? `${item.code} × ${'quantity' in item ? item.quantity : 1}`
+        : String(item),
+    )
+    .join('; ')
+}
+
+/** Итог priceTotal словами: строки, сумма и что не вошло. */
+function totalOutcome(/** @type {Record<string, unknown>} */ data) {
+  const lines = /** @type {Record<string, unknown>[]} */ (data.lines)
+  const excluded = Array.isArray(data.excluded)
+    ? /** @type {Record<string, unknown>[]} */ (data.excluded)
+    : []
+  const parts = lines.map((l) => `${l.name}: ${l.unitPrice} × ${l.quantity} = ${l.sum}`)
+  const total = data.total ?? data.totalWithoutExcluded
+  const sum = total ? `итого ${total}${data.total ? '' : ' (не все позиции)'}` : 'итога нет'
+  const skipped = excluded.map((e) => `без цены: ${e.name ?? e.code} — ${e.reason}`)
+  return [...parts, sum, ...skipped].join('; ')
+}
+
 /**
  * Короткое описание обращения к инструменту для таблицы: что спросила модель и что получила.
  * @param {ToolTrace} call
  */
 export function describeCall({ name, input, result }) {
-  const args = input && typeof input === 'object' ? Object.values(input).join(', ') : ''
+  const args = input && typeof input === 'object' ? Object.values(input).map(arg).join(', ') : ''
   const data =
     result && typeof result === 'object' ? /** @type {Record<string, unknown>} */ (result) : {}
   let outcome = ''
   if (typeof data.error === 'string') outcome = `ошибка: ${data.error}`
+  else if (Array.isArray(data.lines)) outcome = totalOutcome(data)
   else if (Array.isArray(data.products))
     outcome = data.products.length
       ? data.products

@@ -12,7 +12,9 @@ import {
   priceUnit,
   queryWords,
   searchPriceIndex,
+  sumPriceRows,
   termText,
+  totalItems,
   validateKnowledge,
   validatePriceRows,
   workTime,
@@ -314,5 +316,58 @@ test('рабочее время Астаны: будни 9–18, обед 13–1
   assert.equal(
     workTime(new Date('2026-10-13T06:05:00Z')).text,
     'вторник, 13.10.2026, 11:05 по времени Астаны',
+  )
+})
+
+test('сумма заказа: несколько товаров, количество, позиции без цены и пакеты', () => {
+  const table = parsePriceTable(SHEETS)
+  assert.ok(table)
+  const sum = (items) => sumPriceRows(table.rows, items, 'included')
+  // AutoCAD LT ×2 + АВС ×1: 2 × 100 000 + 200 000.
+  const both = sum([
+    { code: '11-1', quantity: 2 },
+    { code: '11-6', quantity: 1 },
+  ])
+  assert.equal(both.total, '400\u00a0000\u00a0₸')
+  assert.equal(both.vat, 'с НДС')
+  assert.deepEqual(
+    both.lines.map((l) => [l.code, l.sum]),
+    [
+      ['11-1', '200\u00a0000\u00a0₸'],
+      ['11-6', '200\u00a0000\u00a0₸'],
+    ],
+  )
+  assert.deepEqual(both.excluded, [])
+  // Пакет одной штукой складывается точно, с тиынами; продление и «по запросу» — нет.
+  const mixed = sum([
+    { code: '11-8', quantity: 1 },
+    { code: '11-4', quantity: 1 },
+    { code: '11-3', quantity: 1 },
+    { code: '11-5', quantity: 1 },
+    { code: 'нет-такого', quantity: 1 },
+  ])
+  assert.equal(mixed.total, null)
+  assert.equal(mixed.totalWithoutExcluded, '1\u00a0645\u00a0337,60\u00a0₸')
+  assert.deepEqual(
+    mixed.excluded.map((e) => e.code),
+    ['11-3', '11-5', 'нет-такого'],
+  )
+  assert.match(mixed.note ?? '', /менеджер/)
+  // Несколько пакетов мест — к менеджеру; нечего складывать — итога нет.
+  const packs = sum([{ code: '11-8', quantity: 2 }])
+  assert.equal(packs.total, null)
+  assert.equal(packs.lines.length, 0)
+  assert.match(packs.excluded[0]?.reason ?? '', /пакет/)
+  // Ввод модели: список позиций, старый вид «код + количество», ошибки словами.
+  assert.deepEqual(totalItems({ items: [{ code: ' 11-1 ', quantity: 3 }, { code: '11-6' }] }), [
+    { code: '11-1', quantity: 3 },
+    { code: '11-6', quantity: 1 },
+  ])
+  assert.deepEqual(totalItems({ code: '11-1', quantity: 2 }), [{ code: '11-1', quantity: 2 }])
+  assert.equal(typeof totalItems({}), 'string')
+  assert.equal(typeof totalItems({ items: [{ code: '11-1', quantity: 0 }] }), 'string')
+  assert.equal(
+    typeof totalItems({ items: Array(11).fill({ code: '11-1', quantity: 1 }) }),
+    'string',
   )
 })

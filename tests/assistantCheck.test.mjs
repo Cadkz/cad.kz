@@ -113,6 +113,28 @@ test('обращение к инструменту словами', () => {
     'priceTotal(11-1, 3) → 1 ₸ × 3 = 3 ₸',
   )
   assert.equal(
+    describeCall({
+      name: 'priceTotal',
+      input: {
+        items: [
+          { code: '11-1', quantity: 2 },
+          { code: '11-6', quantity: 1 },
+          { code: '11-5', quantity: 1 },
+        ],
+      },
+      result: {
+        lines: [
+          { name: 'LT', unitPrice: '1 ₸', quantity: 2, sum: '2 ₸' },
+          { name: 'АВС', unitPrice: '5 ₸', quantity: 1, sum: '5 ₸' },
+        ],
+        excluded: [{ code: '11-5', name: 'Revit', reason: 'по запросу' }],
+        total: null,
+        totalWithoutExcluded: '7 ₸',
+      },
+    }),
+    'priceTotal(11-1 × 2; 11-6 × 1; 11-5 × 1) → LT: 1 ₸ × 2 = 2 ₸; АВС: 5 ₸ × 1 = 5 ₸; итого 7 ₸ (не все позиции); без цены: Revit — по запросу',
+  )
+  assert.equal(
     describeCall({ name: 'getOffers', input: { productId: 3 }, result: { error: 'Нужен ID' } }),
     'getOffers(3) → ошибка: Нужен ID',
   )

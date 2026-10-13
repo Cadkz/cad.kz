@@ -556,6 +556,111 @@ export function vatText(/** @type {VatMode} */ vat) {
   return 'включён ли НДС — не указано, это требует уточнения'
 }
 
+// ---------- сумма заказа ----------
+
+/** Сколько разных позиций Кадди может сложить в одной сумме. */
+export const TOTAL_ITEMS_LIMIT = 10
+
+/**
+ * Позиции для суммы из ввода модели: `items: [{ code, quantity }]` или одна позиция
+ * `{ code, quantity }` (как было до 13.10). Количество не указано — 1.
+ * @param {unknown} input
+ * @returns {{ code: string, quantity: number }[] | string}  Список или ошибка словами.
+ */
+export function totalItems(input) {
+  const data =
+    input && typeof input === 'object' ? /** @type {Record<string, unknown>} */ (input) : {}
+  const raw = Array.isArray(data.items) ? data.items : data.code === undefined ? [] : [data]
+  if (!raw.length) return 'Нужен список позиций: items — код из searchPriceList и количество'
+  if (raw.length > TOTAL_ITEMS_LIMIT)
+    return `Не больше ${TOTAL_ITEMS_LIMIT} позиций за раз — большой заказ считает менеджер`
+  /** @type {{ code: string, quantity: number }[]} */
+  const items = []
+  for (const item of raw) {
+    const entry =
+      item && typeof item === 'object' ? /** @type {Record<string, unknown>} */ (item) : {}
+    const code = typeof entry.code === 'string' ? entry.code.trim().slice(0, 60) : ''
+    const quantity = entry.quantity === undefined ? 1 : Number(entry.quantity)
+    if (!code) return 'У каждой позиции нужен код из searchPriceList'
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 999)
+      return `Количество у ${code} — от 1 до 999`
+    items.push({ code, quantity })
+  }
+  return items
+}
+
+/**
+ * Сумма по нескольким строкам прайса: точная арифметика в тиынах, без округления. Складываются
+ * только строки, цену которых Кадди может назвать (canTellPrice); пакет мест — только одной штукой.
+ * Остальные — в `excluded` с причиной: их стоимость уточняет менеджер, и сумма без них не полная.
+ * @param {PriceRow[]} rows
+ * @param {{ code: string, quantity: number }[]} items
+ * @param {VatMode} vat
+ */
+export function sumPriceRows(rows, items, vat) {
+  /** @type {{ code: string, name: string, unit: string, unitPrice: string, quantity: number, sum: string }[]} */
+  const lines = []
+  /** @type {{ code: string, name: string | null, reason: string }[]} */
+  const excluded = []
+  let total = 0n
+  for (const { code, quantity } of items) {
+    const key = code.toLowerCase()
+    const row = rows.find((r) => r.code.toLowerCase() === key)
+    if (!row) {
+      excluded.push({
+        code,
+        name: null,
+        reason: 'Такого кода в прайсе нет — возьми код из searchPriceList',
+      })
+      continue
+    }
+    const allowed = canTellPrice(row)
+    if (!allowed.ok || !row.tiyn) {
+      excluded.push({
+        code,
+        name: row.name,
+        reason: allowed.ok ? 'Цена недоступна' : allowed.reason,
+      })
+      continue
+    }
+    if (row.seats && row.seats > 1 && quantity > 1) {
+      excluded.push({
+        code,
+        name: row.name,
+        reason: 'Это пакет мест — сумму за несколько пакетов уточняет менеджер',
+      })
+      continue
+    }
+    const sum = BigInt(row.tiyn) * BigInt(quantity)
+    total += sum
+    lines.push({
+      code: row.code,
+      name: row.name,
+      unit: priceUnit(row),
+      unitPrice: formatTiyn(row.tiyn),
+      quantity,
+      sum: formatTiyn(sum.toString()),
+    })
+  }
+  if (!lines.length)
+    return {
+      lines,
+      excluded,
+      total: null,
+      note: 'Ни одну позицию сложить нельзя — стоимость уточняет менеджер',
+    }
+  if (!excluded.length)
+    return { lines, excluded, total: formatTiyn(total.toString()), vat: vatText(vat) }
+  return {
+    lines,
+    excluded,
+    total: null,
+    totalWithoutExcluded: formatTiyn(total.toString()),
+    vat: vatText(vat),
+    note: 'Общей суммы нет: часть позиций без цены (excluded). Можно назвать сумму позиций с ценой, прямо сказав, какие позиции в неё не вошли и что их стоимость уточнит менеджер.',
+  }
+}
+
 // ---------- рабочее время ----------
 
 const DAYS = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота']

@@ -9,7 +9,9 @@ import {
   type PriceRow,
   priceUnit,
   searchPriceIndex,
+  sumPriceRows,
   termText,
+  totalItems,
   vatText,
 } from '@/domain/priceTable.mjs'
 import { searchCatalog } from '../search'
@@ -148,26 +150,11 @@ export function priceByCode(table: LoadedPriceTable, input: unknown) {
   }
 }
 
-/** Сумма за количество: только цена за место или лицензию, точно, без округления. */
+/** Сумма за одну или несколько позиций с количеством: точно, без округления (sumPriceRows). */
 export function totalByCode(table: LoadedPriceTable, input: unknown) {
-  const row = findRow(table, text(input, 'code', 60))
-  if (!row) return { error: 'Такого кода в прайсе нет — возьми код из searchPriceList' }
-  const quantity = Number(field(input, 'quantity'))
-  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 999)
-    return { error: 'Количество от 1 до 999' }
-  const allowed = canTellPrice(row)
-  if (!allowed.ok || !row.tiyn) return { error: allowed.ok ? 'Цена недоступна' : allowed.reason }
-  if (row.seats && row.seats > 1)
-    return { error: 'Это пакет мест — сумму за несколько пакетов уточняет менеджер' }
-  return {
-    code: row.code,
-    name: row.name,
-    unit: priceUnit(row),
-    unitPrice: formatTiyn(row.tiyn),
-    quantity,
-    total: formatTiyn((BigInt(row.tiyn) * BigInt(quantity)).toString()),
-    vat: vatText(table.summary.vat),
-  }
+  const items = totalItems(input)
+  if (typeof items === 'string') return { error: items }
+  return sumPriceRows(table.rows, items, table.summary.vat)
 }
 
 /**
