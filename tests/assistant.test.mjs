@@ -84,6 +84,23 @@ test('под ответом — только товары, названные в
   assert.deepEqual(mentionedCards('Ничего не подошло', found), [])
 })
 
+test('ссылка находится, если Кадди написал модель иначе, чем в каталоге', () => {
+  const card = (n, title) => ({ id: n, title, href: `/p/${n}`, vendor: null, price: null })
+  const found = [
+    card(1, 'imagePROGRAF TZ-30000'),
+    card(2, 'plotWAVE T30/35'),
+    card(3, 'AutoCAD LT 2027'),
+  ]
+  assert.deepEqual(
+    mentionedCards('Плоттер Canon TZ30000 (36", 2400×1200 dpi) — цена по запросу.', found).map(
+      (c) => c.id,
+    ),
+    [1],
+  )
+  // Год сам по себе не код модели: «2027» не тянет за собой AutoCAD LT.
+  assert.deepEqual(mentionedCards('Revit 2027 — 5 388 860 ₸.', found), [])
+})
+
 test('демо-режим честно говорит, что ИИ не подключён', () => {
   const card = { id: 1, title: 'AutoCAD', href: '/p', vendor: 'Autodesk', price: null }
   const found = demoReply([card])
