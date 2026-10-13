@@ -2,36 +2,6 @@
   padding: var(--section-gap) 0 0;
 }
 
-/* Пятно света за блоком: пастельное, у края экрана, к центру растворяется. Под карточками
-   белые поверхности чуть отделяются от фона страницы — без заливки и линий. Пятна гаснут
-   раньше верхнего и нижнего края секции, поэтому границы секции не видно. */
-.glowLeft,
-.glowRight {
-  position: relative;
-  isolation: isolate;
-}
-
-.glowLeft::after,
-.glowRight::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-below);
-  pointer-events: none;
-}
-
-.glowLeft::after {
-  background:
-    radial-gradient(42% 46% at 0% 50%, var(--fade-pool-sky)),
-    radial-gradient(24% 28% at 8% 68%, var(--fade-pool-violet));
-}
-
-.glowRight::after {
-  background:
-    radial-gradient(42% 46% at 100% 50%, var(--fade-pool-violet)),
-    radial-gradient(24% 28% at 92% 68%, var(--fade-pool-sky));
-}
-
 .tint {
   margin-top: var(--section-gap);
   padding-bottom: var(--section-gap);

@@ -1,10 +1,8 @@
 .section {
   padding-top: var(--section-gap);
-  /* свечение под баннером шире рамки — обрезаем по ширине, вниз оно выглядывает */
-  overflow-x: clip;
 }
 
-/* Обёртка баннера: под ней лежит свечение (Aurora halo), баннер его не обрезает. */
+/* Обёртка баннера. */
 .frame {
   position: relative;
   isolation: isolate;

@@ -1,8 +1,4 @@
 .footer {
-  position: relative;
-  isolation: isolate;
-  /* сияние снизу шире подвала — обрезаем, чтобы не было прокрутки вбок */
-  overflow: clip;
   padding: var(--section-gap) 0 var(--space-10);
 }
 

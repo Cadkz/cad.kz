@@ -22,7 +22,7 @@ type Props = {
  * Первый экран главной: плашка, заголовок и три действия — написать задачу в WhatsApp,
  * оставить короткую заявку «Подобрать решение» или открыть каталог.
  * Акции и предложения — ниже, отдельным блоком (PromoBand). Внутри баннера медленно
- * переливается сияние, снизу из-под него выглядывает цветное свечение (Aurora).
+ * переливается сияние (Aurora glow). Свечения вокруг баннера нет (решение владельца 13.10.2026).
  */
 export function Hero({ home, directions }: Props) {
   const whatsapp = home.whatsappHref
@@ -32,9 +32,8 @@ export function Hero({ home, directions }: Props) {
     <section className={styles.hero}>
       <Container>
         <div className={styles.frame}>
-          <Aurora variant="halo" />
           <div className={styles.band}>
-            <Aurora variant="glow" />
+            <Aurora />
             <BannerArt name="frame" className={styles.art} />
             <div className={styles.content}>
               {home.eyebrow && <Badge tone="onDark">{home.eyebrow}</Badge>}

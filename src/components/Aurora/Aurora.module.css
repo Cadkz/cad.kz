@@ -1,63 +1,21 @@
 /* Сияние: пятна света — радиальные градиенты (без filter: blur, дешевле для телефона).
    Двигается только transform, слой не ловит нажатия и лежит под содержимым родителя. */
+/* Голубое пятно справа сверху, сине-фиолетовое слева снизу. Слой больше баннера, чтобы при
+   переливе края не показывались. */
 .aurora {
   position: absolute;
+  inset: -20%;
   z-index: var(--z-below);
   pointer-events: none;
-}
-
-/* Внутри тёмного баннера: голубое пятно справа сверху, сине-фиолетовое слева снизу.
-   Слой больше баннера, чтобы при переливе края не показывались. */
-.glow {
-  inset: -20%;
   background:
     radial-gradient(30% 38% at 72% 30%, var(--fade-dark-sky)),
     radial-gradient(28% 34% at 28% 70%, var(--fade-dark-violet));
-}
-
-/* Под тёмным баннером: цветное свечение выглядывает снизу и по бокам. Родитель-обёртка
-   баннера не обрезает его, а секция обрезает по ширине (overflow-x: clip).
-   Каждое пятно целиком внутри слоя (центр ± радиус от 0 до 100 %) и гаснет до нуля по S-кривой
-   (--fade-*): края свечения нет, ни сбоку, ни снизу, при любом сдвиге перелива. */
-.halo {
-  inset: 20% calc(var(--space-8) * -1) calc(var(--space-16) * -1);
-  background:
-    radial-gradient(16% 42% at 17% 56%, var(--fade-halo-sky)),
-    radial-gradient(16% 42% at 83% 56%, var(--fade-halo-violet)),
-    radial-gradient(40% 30% at 50% 68%, var(--fade-halo-blue));
-}
-
-/* Снизу светлого блока: пастельный перелив поднимается от нижнего края. */
-.floor {
-  /* С запасом за края: при переливе край слоя не должен показаться (родитель обрезает). */
-  inset: 0 calc(var(--space-8) * -1) calc(var(--space-6) * -1);
-  background:
-    radial-gradient(42% 80% at 14% 100%, var(--fade-light-sky)),
-    radial-gradient(40% 85% at 86% 100%, var(--fade-light-violet)),
-    radial-gradient(55% 50% at 50% 105%, var(--fade-light-blue));
-  transform-origin: 50% 100%;
-}
-
-@media (min-width: 640px) {
-  .halo {
-    inset: 20% calc(var(--space-16) * -2) calc(var(--space-20) * -1);
-  }
 }
 
 /* Медленный перелив туда-обратно; при prefers-reduced-motion слой стоит на месте. */
 @media (prefers-reduced-motion: no-preference) {
   .aurora {
     animation: drift var(--duration-drift) var(--ease-drift) infinite alternate;
-  }
-
-  /* Ниже первого экрана свечение разгорается, когда блок вошёл в экран (RevealObserver
-     ставит data-reveal: wait — ждёт, in — в экране). Без JavaScript свечение видно сразу. */
-  .onScroll[data-reveal="wait"] {
-    opacity: 0;
-  }
-
-  .onScroll[data-reveal="in"] {
-    transition: opacity var(--duration-kindle) var(--ease-reveal);
   }
 }
 

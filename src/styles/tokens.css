@@ -65,19 +65,9 @@
   /* Внутри тёмных баннеров: пятна света поверх navy. */
   --aurora-dark-sky: rgba(138, 196, 255, 0.34);
   --aurora-dark-violet: rgba(150, 140, 255, 0.36);
-  /* Ореол под тёмным баннером: цветная «тень», как свечение за карточкой. */
-  --aurora-halo-blue: rgba(31, 61, 168, 0.5);
-  --aurora-halo-sky: rgba(95, 168, 255, 0.62);
-  --aurora-halo-violet: rgba(110, 108, 240, 0.6);
-  /* На светлом фоне страницы: пастельные пятна за блоками и сияние в подвале. */
-  --aurora-light-blue: rgba(31, 61, 168, 0.18);
-  --aurora-light-sky: rgba(95, 168, 255, 0.4);
-  --aurora-light-violet: rgba(110, 108, 240, 0.32);
-  --aurora-pool-sky: rgba(95, 168, 255, 0.16);
-  --aurora-pool-violet: rgba(110, 108, 240, 0.12);
   /* Плавное затухание пятна (13.10.2026): прозрачность спадает по S-кривой 100 → 90 → 65 → 35
      → 10 → 0 %, без резкого края, где цвет обрывается в ноль. Использовать как список цветов
-     радиального градиента: radial-gradient(40% 50% at 20% 50%, var(--fade-halo-sky)). */
+     радиального градиента: radial-gradient(40% 50% at 20% 50%, var(--fade-dark-sky)). */
   --fade-dark-sky:
     var(--aurora-dark-sky), color-mix(in srgb, var(--aurora-dark-sky) 90%, transparent) 20%,
     color-mix(in srgb, var(--aurora-dark-sky) 65%, transparent) 40%,
@@ -88,46 +78,6 @@
     color-mix(in srgb, var(--aurora-dark-violet) 65%, transparent) 40%,
     color-mix(in srgb, var(--aurora-dark-violet) 35%, transparent) 60%,
     color-mix(in srgb, var(--aurora-dark-violet) 10%, transparent) 80%, transparent;
-  --fade-halo-blue:
-    var(--aurora-halo-blue), color-mix(in srgb, var(--aurora-halo-blue) 90%, transparent) 20%,
-    color-mix(in srgb, var(--aurora-halo-blue) 65%, transparent) 40%,
-    color-mix(in srgb, var(--aurora-halo-blue) 35%, transparent) 60%,
-    color-mix(in srgb, var(--aurora-halo-blue) 10%, transparent) 80%, transparent;
-  --fade-halo-sky:
-    var(--aurora-halo-sky), color-mix(in srgb, var(--aurora-halo-sky) 90%, transparent) 20%,
-    color-mix(in srgb, var(--aurora-halo-sky) 65%, transparent) 40%,
-    color-mix(in srgb, var(--aurora-halo-sky) 35%, transparent) 60%,
-    color-mix(in srgb, var(--aurora-halo-sky) 10%, transparent) 80%, transparent;
-  --fade-halo-violet:
-    var(--aurora-halo-violet), color-mix(in srgb, var(--aurora-halo-violet) 90%, transparent) 20%,
-    color-mix(in srgb, var(--aurora-halo-violet) 65%, transparent) 40%,
-    color-mix(in srgb, var(--aurora-halo-violet) 35%, transparent) 60%,
-    color-mix(in srgb, var(--aurora-halo-violet) 10%, transparent) 80%, transparent;
-  --fade-light-blue:
-    var(--aurora-light-blue), color-mix(in srgb, var(--aurora-light-blue) 90%, transparent) 20%,
-    color-mix(in srgb, var(--aurora-light-blue) 65%, transparent) 40%,
-    color-mix(in srgb, var(--aurora-light-blue) 35%, transparent) 60%,
-    color-mix(in srgb, var(--aurora-light-blue) 10%, transparent) 80%, transparent;
-  --fade-light-sky:
-    var(--aurora-light-sky), color-mix(in srgb, var(--aurora-light-sky) 90%, transparent) 20%,
-    color-mix(in srgb, var(--aurora-light-sky) 65%, transparent) 40%,
-    color-mix(in srgb, var(--aurora-light-sky) 35%, transparent) 60%,
-    color-mix(in srgb, var(--aurora-light-sky) 10%, transparent) 80%, transparent;
-  --fade-light-violet:
-    var(--aurora-light-violet), color-mix(in srgb, var(--aurora-light-violet) 90%, transparent) 20%,
-    color-mix(in srgb, var(--aurora-light-violet) 65%, transparent) 40%,
-    color-mix(in srgb, var(--aurora-light-violet) 35%, transparent) 60%,
-    color-mix(in srgb, var(--aurora-light-violet) 10%, transparent) 80%, transparent;
-  --fade-pool-sky:
-    var(--aurora-pool-sky), color-mix(in srgb, var(--aurora-pool-sky) 90%, transparent) 20%,
-    color-mix(in srgb, var(--aurora-pool-sky) 65%, transparent) 40%,
-    color-mix(in srgb, var(--aurora-pool-sky) 35%, transparent) 60%,
-    color-mix(in srgb, var(--aurora-pool-sky) 10%, transparent) 80%, transparent;
-  --fade-pool-violet:
-    var(--aurora-pool-violet), color-mix(in srgb, var(--aurora-pool-violet) 90%, transparent) 20%,
-    color-mix(in srgb, var(--aurora-pool-violet) 65%, transparent) 40%,
-    color-mix(in srgb, var(--aurora-pool-violet) 35%, transparent) 60%,
-    color-mix(in srgb, var(--aurora-pool-violet) 10%, transparent) 80%, transparent;
   /* Штрих над заголовком секции. */
   --gradient-aurora-line: linear-gradient(
     90deg,
@@ -237,8 +187,6 @@
   --shadow-header: 0 1px 0 rgba(30, 45, 75, 0.06); /* нижняя граница закреплённой шапки */
   /* Карточка над сиянием (подвал): мягкая, широкая, чуть синяя — карточка «парит». */
   /* Тёмная карточка при наведении: цветная тень в тон сиянию. */
-  --shadow-glow:
-    0 18px 40px -12px rgba(31, 61, 168, 0.45), 0 8px 24px -8px rgba(110, 108, 240, 0.3);
   --shadow-float: 0 1px 2px rgba(17, 33, 116, 0.04), 0 24px 56px -16px rgba(17, 33, 116, 0.16);
 
   /* ---------- Контейнеры ---------- */
@@ -307,7 +255,6 @@
   --duration-reveal: 900ms;
   --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
   --delay-reveal-step: 90ms; /* соседние карточки ряда — чуть позже друг друга */
-  --duration-kindle: 1600ms; /* свечение под баннером разгорается, когда баннер вошёл в экран */
 
   /* ---------- Слои ---------- */
   --z-below: -1; /* декор под содержимым внутри блока с isolation: isolate */

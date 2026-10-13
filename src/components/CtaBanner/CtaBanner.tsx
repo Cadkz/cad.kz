@@ -9,7 +9,7 @@ import styles from './CtaBanner.module.css'
 /**
  * Тёмный баннер с призывом внизу страницы. Тексты — из CMS. Мелкий Юки с лупой сидит на нижнем
  * крае баннера между чертежом двух КП и кнопкой: «сравним цену». Последний акцент страницы:
- * внутри переливается сияние, снизу разгорается цветное свечение, когда баннер входит в экран.
+ * внутри переливается сияние, свечения вокруг баннера нет.
  */
 export function CtaBanner({ cta }: { cta: Home['cta'] }) {
   if (!cta.title) return null
@@ -17,9 +17,8 @@ export function CtaBanner({ cta }: { cta: Home['cta'] }) {
     <section className={styles.section} aria-labelledby="cta-title">
       <Container>
         <div className={styles.frame}>
-          <Aurora variant="halo" onScroll />
           <div className={styles.banner}>
-            <Aurora variant="glow" />
+            <Aurora />
             <div className={styles.text}>
               <h2 id="cta-title" className={styles.title}>
                 {cta.title}
