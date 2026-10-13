@@ -1,25 +1,33 @@
+import type { Slide } from '@/lib/home'
 import { type TopicCovers, toCard } from '@/lib/publications'
 import type { Publication } from '../../../payload-types'
+import { HeroSlider } from '../HeroSlider/HeroSlider'
 import { NewsCard } from '../NewsCard/NewsCard'
 import { Reveal } from '../Reveal/Reveal'
 import { Section } from '../Section/Section'
 import styles from './HomeNews.module.css'
 
-type Props = { feature: Publication | null; news: Publication[]; covers: TopicCovers }
+type Props = { slides: Slide[]; news: Publication[]; covers: TopicCovers }
 
 /**
- * «Статьи и новости» на главной (замечание владельца 13.10.2026): слева крупно последняя
- * статья, справа две последние новости. Статей нет — крупно самая свежая новость.
+ * «Новости и акции» на главной (замечание владельца 13.10.2026, вечер): слева баннер-слайдер
+ * действующих акций и предложений, справа две последние новости. Отдельного блока акций
+ * на главной больше нет (все акции — в слайдере и на /news?kind=promotion). Действующих акций
+ * нет — слева крупно самая свежая новость.
  */
-export function HomeNews({ feature, news, covers }: Props) {
-  const main = feature ?? news[0] ?? null
-  const side = (feature ? news : news.slice(1)).slice(0, 2)
-  if (!main) return null
+export function HomeNews({ slides, news, covers }: Props) {
+  const feature = slides.length ? null : (news[0] ?? null)
+  const side = (feature ? news.slice(1) : news).slice(0, 2)
+  if (!slides.length && !feature) return null
   return (
-    <Section id="news" title="Статьи и новости" action={{ href: '/news', label: 'Все материалы' }}>
+    <Section id="news" title="Новости и акции" action={{ href: '/news', label: 'Все новости' }}>
       <ul className={styles.grid}>
         <Reveal as="li" className={styles.main}>
-          <NewsCard news={toCard(main, covers)} size="large" withExcerpt />
+          {feature ? (
+            <NewsCard news={toCard(feature, covers)} size="large" withExcerpt />
+          ) : (
+            <HeroSlider slides={slides} />
+          )}
         </Reveal>
         {side.map((item, i) => (
           <Reveal as="li" key={item.id} step={i + 1} className={styles.side}>

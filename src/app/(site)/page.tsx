@@ -9,9 +9,8 @@ import { FaqHelp } from '@/components/FaqHelp/FaqHelp'
 import { Col, Grid } from '@/components/Grid/Grid'
 import { Hero } from '@/components/Hero/Hero'
 import { HomeNews } from '@/components/HomeNews/HomeNews'
-import { PopularCard } from '@/components/PopularCard/PopularCard'
+import { PopularRow } from '@/components/PopularRow/PopularRow'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
-import { PromoBand } from '@/components/PromoBand/PromoBand'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { Section } from '@/components/Section/Section'
 import { getCatalog, getDirections } from '@/lib/catalog'
@@ -28,20 +27,20 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 export const metadata = { alternates: { canonical: '/' } }
 
 /**
- * Главная — шаблон «Витрина»: первый экран с тремя действиями, популярные решения плитками
- * (блок партнёров скрыт), направления и под ними каталог с фильтром (вернули 13.10.2026; полный
- * каталог — /catalog), действующие акции, BIM, как мы работаем (с карточками «ТЗ» и
- * «госзакупки»), статьи и новости, вопросы. Продление лицензий — только в меню (13.10.2026).
+ * Главная — шаблон «Витрина»: первый экран с тремя действиями, популярные решения в один ряд
+ * (блок партнёров скрыт), направления и под ними каталог с фильтром (полный каталог — /catalog),
+ * BIM сразу после каталога, как мы работаем (с карточками «ТЗ» и «госзакупки»), «Новости и
+ * акции» (слайдер акций + две новости), вопросы. Продление лицензий — только в меню.
+ * Порядок и состав — по замечаниям владельца 13.10.2026, вечер.
  */
 export default async function Home({ searchParams }: Props) {
   // Старые ссылки на каталог с условиями (/?direction=…#catalog) ведут на /catalog с теми же условиями.
   const query = toQuery(fromParams(await searchParams))
   if (query) permanentRedirect(`${CATALOG_PATH}?${query}`)
 
-  const [home, directions, articles, news, contacts, catalog, topicCovers] = await Promise.all([
+  const [home, directions, news, contacts, catalog, topicCovers] = await Promise.all([
     getHome(),
     getDirections(),
-    getPublications({ kinds: ['article'], limit: 1 }),
     getPublications({ limit: 3 }),
     getContacts(),
     getCatalog(),
@@ -61,13 +60,7 @@ export default async function Home({ searchParams }: Props) {
           sub={home.popular.lead ?? undefined}
           action={{ href: catalogHref(), label: 'Весь каталог' }}
         >
-          <Grid as="ul" span={{ base: 6, sm: 3 }}>
-            {popular.map((card) => (
-              <li key={card.key}>
-                <PopularCard card={card} />
-              </li>
-            ))}
-          </Grid>
+          <PopularRow cards={popular} />
         </Section>
       )}
       <Section
@@ -98,9 +91,6 @@ export default async function Home({ searchParams }: Props) {
         />
       </Section>
       <Reveal>
-        <PromoBand home={home} />
-      </Reveal>
-      <Reveal>
         <BimBand bim={home.bim} more={{ href: '/bim', label: 'Подробнее о внедрении' }} />
       </Reveal>
       {home.process.length > 0 && (
@@ -115,7 +105,7 @@ export default async function Home({ searchParams }: Props) {
           </Reveal>
         </Section>
       )}
-      <HomeNews feature={articles.docs[0] ?? null} news={news.docs} covers={topicCovers} />
+      <HomeNews slides={home.slides} news={news.docs} covers={topicCovers} />
       {home.faq.length > 0 && (
         <Section id="faq" title="Частые вопросы">
           <Grid>

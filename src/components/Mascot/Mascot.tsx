@@ -1,4 +1,6 @@
 import Image, { type StaticImageData } from 'next/image'
+import blueprint from '../../../public/images/mascot/kaddi-blueprint.png'
+import blueprintBlink from '../../../public/images/mascot/kaddi-blueprint-blink.png'
 import emptyCart from '../../../public/images/mascot/kaddi-empty-cart.png'
 import emptyCartBlink from '../../../public/images/mascot/kaddi-empty-cart-blink.png'
 import greeting from '../../../public/images/mascot/kaddi-greeting.png'
@@ -32,7 +34,8 @@ import styles from './Mascot.module.css'
  * кладётся поверх и на мгновение проявляется (моргание).
  * think (думает) и laptop (с ноутбуком) смотрят вправо — только для окна ИИ-консультанта,
  * где Кадди слева от сообщений; на страницы справа от текста их не ставить.
- * loaf (буханка) и loaf-wave (лёжа машет лапой) — Кадди-консультант в углу экрана;
+ * blueprint (сидит в каске с чертежами, смотрит влево) — Кадди-консультант в углу экрана
+ * (с 13.10.2026, вечер); loaf (буханка) и loaf-wave (лёжа машет лапой) — прежний угол, в запасе;
  * grumpy (недовольный) — когда чат часто открывают и закрывают; tangled (запутался в нитках,
  * удивлён) — «Запутались в комплектациях?» у подбора; yarn (играет с клубком) — в запасе.
  */
@@ -51,6 +54,7 @@ const POSES = {
   grumpy: { src: grumpy, blink: grumpyBlink },
   tangled: { src: tangled, blink: tangledBlink },
   yarn: { src: yarn, blink: yarnBlink },
+  blueprint: { src: blueprint, blink: blueprintBlink },
 } satisfies Record<string, { src: StaticImageData; blink: StaticImageData | null }>
 
 export type MascotPose = keyof typeof POSES
@@ -61,7 +65,7 @@ const HEIGHT: Record<MascotSize, number> = {
   head: 32,
   icon: 40,
   avatar: 64,
-  launcher: 80,
+  launcher: 96,
   xs: 96,
   sm: 120,
   md: 160,

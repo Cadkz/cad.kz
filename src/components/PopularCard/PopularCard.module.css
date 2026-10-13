@@ -49,3 +49,12 @@
 .tile:hover .title {
   color: var(--color-blue);
 }
+
+/* От 1200 px плитки стоят в один ряд и узкие (≈130 px): поля и зазор меньше, название может
+   уйти на вторую строку, высота у всех плиток ряда одинаковая. */
+@media (min-width: 1200px) {
+  .tile {
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+}

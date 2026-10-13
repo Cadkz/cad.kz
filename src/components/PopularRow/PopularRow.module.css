@@ -1,0 +1,33 @@
+/* До 1200 px — 12-колоночная сетка: плитка 6 колонок на телефоне, 3 от 640 px. */
+.row {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  gap: var(--grid-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row > * {
+  grid-column: span 6;
+}
+
+@media (min-width: 640px) {
+  .row > * {
+    grid-column: span 3;
+  }
+}
+
+/* От 1200 px — один ряд: сколько плиток в админке, на столько равных долей делится рамка
+   (8 плиток при рамке 1200 px и зазоре 24 px — ровно по 129 px). */
+@media (min-width: 1200px) {
+  .row {
+    grid-template-columns: none;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+  }
+
+  .row > * {
+    grid-column: auto;
+  }
+}

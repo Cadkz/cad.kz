@@ -33,9 +33,9 @@ type Props = {
 }
 
 /**
- * Кадди-буханка в правом нижнем углу экрана — кнопка ИИ-консультанта (от 640 px; на телефоне
- * Кадди — голова в шапке). Лежит и моргает; при наведении моргает сразу и показывает
- * «Спросить Кадди», не двигаясь; при нажатии пружинит. Раз за посещение сам машет лапой и
+ * Кадди с чертежами в правом нижнем углу экрана — кнопка ИИ-консультанта (от 640 px; на телефоне
+ * Кадди — голова в шапке). Сидит в каске и моргает; при наведении моргает сразу и показывает
+ * «Спросить Кадди», не двигаясь; при нажатии пружинит. Раз за посещение сам моргает и
  * спрашивает «Помочь с выбором?». Если чат дёргают (grumpy) — сидит недовольный.
  * Пока окно чата открыто, Кадди прячется: окно стоит на его месте.
  * Со строкой подбора внизу (до 960 px) поднимается над ней.
@@ -76,8 +76,7 @@ export function AssistantLauncher({ open, grumpy, onClick }: Props) {
         {grumpy ? 'Я никуда не убегаю' : hint ? 'Помочь с выбором?' : 'Спросить Кадди'}
       </span>
       <span className={styles.cat}>
-        <Mascot pose="loaf" size="launcher" eager className={styles.rest} />
-        <Mascot pose="loaf-wave" size="launcher" eager hover={false} className={styles.wave} />
+        <Mascot pose="blueprint" size="launcher" eager className={styles.rest} />
         <Mascot pose="grumpy" size="launcher" hover={false} className={styles.grumpy} />
       </span>
     </button>
