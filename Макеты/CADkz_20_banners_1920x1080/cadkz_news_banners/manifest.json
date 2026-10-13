@@ -1,0 +1,142 @@
+[
+  {
+    "number": 2,
+    "category": "Релизы и обновления",
+    "concept": "Модульное обновление",
+    "png": "png/02_releases.png",
+    "svg": "svg/02_releases.svg"
+  },
+  {
+    "number": 3,
+    "category": "Релизы и обновления",
+    "concept": "Новая конфигурация",
+    "png": "png/03_releases.png",
+    "svg": "svg/03_releases.svg"
+  },
+  {
+    "number": 4,
+    "category": "Вебинары и мероприятия",
+    "concept": "Свет на главном",
+    "png": "png/04_events.png",
+    "svg": "svg/04_events.svg"
+  },
+  {
+    "number": 5,
+    "category": "Вебинары и мероприятия",
+    "concept": "Зал идей",
+    "png": "png/05_events.png",
+    "svg": "svg/05_events.svg"
+  },
+  {
+    "number": 6,
+    "category": "Вебинары и мероприятия",
+    "concept": "Точки встречи",
+    "png": "png/06_events.png",
+    "svg": "svg/06_events.svg"
+  },
+  {
+    "number": 7,
+    "category": "Акции и цены",
+    "concept": "Геометрия выгоды",
+    "png": "png/07_offers.png",
+    "svg": "svg/07_offers.svg"
+  },
+  {
+    "number": 8,
+    "category": "Акции и цены",
+    "concept": "Новые пропорции",
+    "png": "png/08_offers.png",
+    "svg": "svg/08_offers.svg"
+  },
+  {
+    "number": 9,
+    "category": "Акции и цены",
+    "concept": "Форма предложения",
+    "png": "png/09_offers.png",
+    "svg": "svg/09_offers.svg"
+  },
+  {
+    "number": 10,
+    "category": "Нормативы и экспертиза",
+    "concept": "Слои стандарта",
+    "png": "png/10_standards.png",
+    "svg": "svg/10_standards.svg"
+  },
+  {
+    "number": 11,
+    "category": "Нормативы и экспертиза",
+    "concept": "Основа порядка",
+    "png": "png/11_standards.png",
+    "svg": "svg/11_standards.svg"
+  },
+  {
+    "number": 12,
+    "category": "Нормативы и экспертиза",
+    "concept": "Точность измерения",
+    "png": "png/12_standards.png",
+    "svg": "svg/12_standards.svg"
+  },
+  {
+    "number": 13,
+    "category": "BIM и технологии",
+    "concept": "Координация слоев",
+    "png": "png/13_bim.png",
+    "svg": "svg/13_bim.svg"
+  },
+  {
+    "number": 14,
+    "category": "BIM и технологии",
+    "concept": "Цифровая структура",
+    "png": "png/14_bim.png",
+    "svg": "svg/14_bim.svg"
+  },
+  {
+    "number": 15,
+    "category": "BIM и технологии",
+    "concept": "Инженерная система",
+    "png": "png/15_bim.png",
+    "svg": "svg/15_bim.svg"
+  },
+  {
+    "number": 16,
+    "category": "Практика и советы",
+    "concept": "Найти центр",
+    "png": "png/16_practice.png",
+    "svg": "svg/16_practice.svg"
+  },
+  {
+    "number": 17,
+    "category": "Практика и советы",
+    "concept": "Верное соединение",
+    "png": "png/17_practice.png",
+    "svg": "svg/17_practice.svg"
+  },
+  {
+    "number": 18,
+    "category": "Практика и советы",
+    "concept": "Увидеть сечение",
+    "png": "png/18_practice.png",
+    "svg": "svg/18_practice.svg"
+  },
+  {
+    "number": 19,
+    "category": "Новости отрасли",
+    "concept": "Город меняется",
+    "png": "png/19_industry.png",
+    "svg": "svg/19_industry.svg"
+  },
+  {
+    "number": 20,
+    "category": "Новости отрасли",
+    "concept": "Связи и инфраструктура",
+    "png": "png/20_industry.png",
+    "svg": "svg/20_industry.svg"
+  },
+  {
+    "number": 21,
+    "category": "Новости отрасли",
+    "concept": "Большая перспектива",
+    "png": "png/21_industry.png",
+    "svg": "svg/21_industry.svg"
+  }
+]
