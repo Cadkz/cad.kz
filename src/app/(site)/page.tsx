@@ -20,7 +20,7 @@ import { getHome } from '@/lib/home'
 import { getContacts } from '@/lib/navigation'
 import { CATALOG_PATH, catalogHref } from '@/lib/navigationHrefs'
 import { popularCards } from '@/lib/popular'
-import { getPublications, toCard } from '@/lib/publications'
+import { getPublications, getTopicCovers, toCard } from '@/lib/publications'
 import { directionExtras } from '@/lib/siteNav'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
@@ -39,12 +39,13 @@ export default async function Home({ searchParams }: Props) {
   const query = toQuery(fromParams(await searchParams))
   if (query) permanentRedirect(`${CATALOG_PATH}?${query}`)
 
-  const [home, directions, news, contacts, catalog] = await Promise.all([
+  const [home, directions, news, contacts, catalog, topicCovers] = await Promise.all([
     getHome(),
     getDirections(),
     getPublications({ limit: 3 }),
     getContacts(),
     getCatalog(),
+    getTopicCovers(),
   ])
   const popular = popularCards(home.popular.items, catalog.items)
   return (
@@ -112,7 +113,7 @@ export default async function Home({ searchParams }: Props) {
         <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
           {news.docs.map((item, i) => (
             <Reveal as="li" key={item.id} step={i}>
-              <NewsCard news={toCard(item)} tone={newsTones[i % newsTones.length]} />
+              <NewsCard news={toCard(item, topicCovers)} tone={newsTones[i % newsTones.length]} />
             </Reveal>
           ))}
         </Grid>

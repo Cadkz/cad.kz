@@ -28,6 +28,18 @@ export const topics: CollectionConfig = {
         defaultValue: 100,
         admin: { description: 'Меньше — левее в списке тем над новостями.' },
       },
+      {
+        name: 'covers',
+        label: 'Обложки для публикаций без своей',
+        type: 'upload',
+        relationTo: 'media',
+        hasMany: true,
+        admin: {
+          description:
+            'Показываются в карточках новостей и статей этой темы, у которых нет своей обложки. ' +
+            'Лучше 2–3 разные картинки без надписей, 16 : 7: соседние карточки получат разные.',
+        },
+      },
     ],
   }),
   admin: { useAsTitle: 'title', defaultColumns: ['title', 'slug', 'order', 'status'] },

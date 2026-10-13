@@ -567,6 +567,10 @@ export interface Topic {
    * Меньше — левее в списке тем над новостями.
    */
   order?: number | null;
+  /**
+   * Показываются в карточках новостей и статей этой темы, у которых нет своей обложки. Лучше 2–3 разные картинки без надписей, 16 : 7: соседние карточки получат разные.
+   */
+  covers?: (number | Media)[] | null;
   legacyKey?: string | null;
   legacyUrl?: string | null;
   updatedAt: string;
@@ -1219,6 +1223,7 @@ export interface TopicsSelect<T extends boolean = true> {
   status?: T;
   slug?: T;
   order?: T;
+  covers?: T;
   legacyKey?: T;
   legacyUrl?: T;
   updatedAt?: T;

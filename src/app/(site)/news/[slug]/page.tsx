@@ -15,8 +15,16 @@ import { formatDate } from '@/lib/format'
 import { getHome } from '@/lib/home'
 import { newsHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
-import { bodyPictures, toPicture } from '@/lib/pictures'
-import { getNeighbors, getPublication, getPublications, themeOf, toCard } from '@/lib/publications'
+import { bodyPictures } from '@/lib/pictures'
+import {
+  coverOf,
+  getNeighbors,
+  getPublication,
+  getPublications,
+  getTopicCovers,
+  themeOf,
+  toCard,
+} from '@/lib/publications'
 import { imageSources, parseBody } from '@/lib/richText'
 import { pageMetadata } from '@/lib/seo'
 
@@ -31,12 +39,14 @@ const sections = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const publication = await getPublication((await params).slug)
   if (!publication) return {}
+  // Картинка для соцсетей: своя обложка, иначе обложка темы, иначе общая картинка сайта.
+  const cover = coverOf(publication, await getTopicCovers())
   return pageMetadata({
     seo: publication.seo,
     title: `${publication.title} — CAD.kz`,
     description: publication.excerpt,
     path: newsHref(publication.slug),
-    image: toPicture(publication.cover)?.url,
+    image: cover?.url,
   })
 }
 
@@ -65,7 +75,7 @@ export default async function PublicationPage({ params }: Props) {
   const related = [...(sameTopic?.docs ?? []), ...latest.docs]
     .filter((doc) => !seen.has(doc.id) && seen.add(doc.id))
     .slice(0, 5)
-    .map(toCard)
+    .map((doc) => toCard(doc))
   const topicHref = (slug: string) =>
     publication.kind === 'article' ? `/articles?topic=${slug}` : `/news?topic=${slug}`
 

@@ -1,4 +1,10 @@
-import { getPublications, getTopics, type PublicationKind, toCard } from '@/lib/publications'
+import {
+  getPublications,
+  getTopicCovers,
+  getTopics,
+  type PublicationKind,
+  toCard,
+} from '@/lib/publications'
 import { Breadcrumbs } from '../Breadcrumbs/Breadcrumbs'
 import { Container } from '../Container/Container'
 import { Grid } from '../Grid/Grid'
@@ -25,9 +31,10 @@ const first = (value: string | string[] | undefined) =>
 export async function PublicationIndex({ path, title, lead, kind, params }: Props) {
   const topic = first(params.topic)
   const page = Math.max(1, Number(first(params.page)) || 1)
-  const [topics, result] = await Promise.all([
+  const [topics, result, topicCovers] = await Promise.all([
     getTopics([kind]),
     getPublications({ kinds: [kind], topic, page, limit: 12 }),
+    getTopicCovers(),
   ])
   const query = (values: Record<string, string | null>) => {
     const search = new URLSearchParams()
@@ -49,7 +56,12 @@ export async function PublicationIndex({ path, title, lead, kind, params }: Prop
           <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
             {result.docs.map((doc, i) => (
               <li key={doc.id}>
-                <NewsCard news={toCard(doc)} tone={tones[i % tones.length]} withExcerpt level={2} />
+                <NewsCard
+                  news={toCard(doc, topicCovers)}
+                  tone={tones[i % tones.length]}
+                  withExcerpt
+                  level={2}
+                />
               </li>
             ))}
           </Grid>

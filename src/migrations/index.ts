@@ -18,6 +18,7 @@ import * as migration_20261011_195336_catalog_packages from './20261011_195336_c
 import * as migration_20261011_223417_crm_catalog from './20261011_223417_crm_catalog'
 import * as migration_20261012_095832_popular_tiles from './20261012_095832_popular_tiles'
 import * as migration_20261013_061127_yuki_price_knowledge from './20261013_061127_yuki_price_knowledge'
+import * as migration_20261013_065601_topic_covers from './20261013_065601_topic_covers'
 
 export const migrations = [
   {
@@ -119,5 +120,10 @@ export const migrations = [
     up: migration_20261013_061127_yuki_price_knowledge.up,
     down: migration_20261013_061127_yuki_price_knowledge.down,
     name: '20261013_061127_yuki_price_knowledge',
+  },
+  {
+    up: migration_20261013_065601_topic_covers.up,
+    down: migration_20261013_065601_topic_covers.down,
+    name: '20261013_065601_topic_covers',
   },
 ]

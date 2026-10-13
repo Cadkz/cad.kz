@@ -1,4 +1,5 @@
 import type { Where } from 'payload'
+import { cache } from 'react'
 import type { NewsCardData } from '@/components/NewsCard/NewsCard'
 import type { Media, Publication, Topic } from '../../payload-types'
 import { formatDate } from './format'
@@ -7,11 +8,48 @@ import { cms } from './payload'
 
 export type PublicationKind = Publication['kind']
 
-function cover(value: Publication['cover']): NewsCardData['cover'] {
+type Cover = NonNullable<NewsCardData['cover']>
+
+function cover(value: number | Media | null | undefined): Cover | null {
   if (!value || typeof value === 'number') return null
-  const media = value as Media
-  if (!media.url || !media.width || !media.height) return null
-  return { url: media.url, alt: media.alt, width: media.width, height: media.height }
+  if (!value.url || !value.width || !value.height) return null
+  return { url: value.url, alt: value.alt, width: value.width, height: value.height }
+}
+
+/** Обложки тем для публикаций без своей: id темы → картинки (поле «Обложки…» у темы). */
+export type TopicCovers = Map<number, Cover[]>
+
+/** Один запрос на страницу: тем немного, картинки тем берутся сразу с размерами. */
+export const getTopicCovers = cache(async (): Promise<TopicCovers> => {
+  const payload = await cms()
+  const { docs } = await payload.find({
+    collection: 'topics',
+    pagination: false,
+    depth: 1,
+  })
+  return new Map(
+    docs.map((topic) => [
+      topic.id,
+      (topic.covers ?? []).flatMap((media) => {
+        const picture = cover(media)
+        // Картинка темы декоративная: смысл карточки несёт заголовок рядом.
+        return picture ? [{ ...picture, alt: '' }] : []
+      }),
+    ]),
+  )
+})
+
+/**
+ * Обложка публикации: своя, иначе одна из обложек темы. Выбор по id публикации — у одной
+ * публикации всегда одна и та же картинка, у соседних в списке обычно разные.
+ */
+export function coverOf(publication: Publication, topicCovers?: TopicCovers): Cover | null {
+  const own = cover(publication.cover)
+  if (own || !topicCovers) return own
+  const theme = publication.theme
+  const themeId = typeof theme === 'number' ? theme : theme?.id
+  const covers = themeId ? topicCovers.get(themeId) : undefined
+  return covers?.length ? (covers[publication.id % covers.length] ?? null) : null
 }
 
 /** Тема публикации из связи (при depth ≥ 1), прежнее текстовое поле — запасной вариант. */
@@ -21,7 +59,7 @@ export function themeOf(publication: Publication): { slug: string | null; title:
   return publication.topic ? { slug: null, title: publication.topic } : null
 }
 
-export function toCard(publication: Publication): NewsCardData {
+export function toCard(publication: Publication, topicCovers?: TopicCovers): NewsCardData {
   return {
     id: publication.id,
     href: newsHref(publication.slug),
@@ -29,7 +67,7 @@ export function toCard(publication: Publication): NewsCardData {
     date: publication.publishedAt ? formatDate(publication.publishedAt) : null,
     topic: themeOf(publication)?.title ?? null,
     excerpt: publication.excerpt ?? null,
-    cover: cover(publication.cover),
+    cover: coverOf(publication, topicCovers),
   }
 }
 
