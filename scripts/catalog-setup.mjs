@@ -6,7 +6,7 @@
 // — кнопкой «Обновить версию»; пакеты и девять задач GEO5 в каталоге; блок «Официальный партнёр» на главной;
 // каталог по CRM (САПР и черчение, широкоформат, сценарии покупки, популярные решения);
 // дополнения к AutoCAD, Revit, Inventor (Требуется базовое ПО) и AutoCAD LT; политика
-// конфиденциальности со старого сайта; страница «Внедрение BIM». Выполняется один раз (отметка в журнале
+// конфиденциальности со старого сайта; страница «Внедрение BIM»; иллюстрации тем новостей. Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -21,6 +21,7 @@ import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
 import { setupGeo5Catalog } from '../src/lib/geoSetup.ts'
 import { setupHomeTrust } from '../src/lib/homeSetup.ts'
+import { setupNewsCovers } from '../src/lib/newsCoversSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
 import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
@@ -146,6 +147,9 @@ try {
   console.log(privacy ?? 'Политика конфиденциальности уже перенесена.')
   const bim = await setupBimPage(payload)
   console.log(bim ?? 'Страница «Внедрение BIM» уже создана.')
+  const covers = await setupNewsCovers(payload)
+  if (!covers) console.log('Иллюстрации тем новостей уже загружены.')
+  else for (const line of covers) console.log(`Иллюстрации тем — ${line}`)
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1

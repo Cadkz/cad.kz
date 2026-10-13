@@ -14,6 +14,7 @@ type Props = {
   conversationId: string
   /** Что Кадди собрал в чате: имя и телефон подставлены в поля, остальное уйдёт менеджеру списком. */
   prefill?: HandoffPrefill
+  /** Ссылка WhatsApp с уже набранным текстом: что собрал и посчитал Кадди (whatsappMessage). */
   whatsappHref: string | null
   onBack: () => void
 }

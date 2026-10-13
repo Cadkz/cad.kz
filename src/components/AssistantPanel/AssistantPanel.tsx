@@ -2,6 +2,7 @@
 
 import { Info, RotateCcw, X } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
+import { whatsappMessage } from '@/domain/assistant.mjs'
 import type { HandoffPrefill, useAssistant } from '@/lib/useAssistant'
 import { AssistantComposer } from '../AssistantComposer/AssistantComposer'
 import { AssistantHandoff } from '../AssistantHandoff/AssistantHandoff'
@@ -137,7 +138,10 @@ export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Pr
         <AssistantHandoff
           conversationId={chat.conversationId}
           prefill={handoff.prefill}
-          whatsappHref={whatsappHref}
+          whatsappHref={
+            whatsappHref &&
+            `${whatsappHref}?text=${encodeURIComponent(whatsappMessage(chat.messages, handoff.prefill))}`
+          }
           onBack={() => setHandoff(false)}
         />
       ) : (

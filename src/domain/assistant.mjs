@@ -142,6 +142,53 @@ export function modelHistory(messages, limit = ASSISTANT_LIMITS.historyMessages)
   return history
 }
 
+/** Предложения с суммой в тенге: «… — 258 680 ₸ за 1 лицензию.» */
+function priceSentences(/** @type {string} */ text) {
+  return text
+    .split(/(?<=[.!?])\s+|\n+/)
+    .map((part) => part.trim())
+    .filter((part) => /\d\s*₸/.test(part))
+}
+
+function clip(/** @type {string} */ text, /** @type {number} */ max) {
+  const value = text.replace(/\s+/g, ' ').trim()
+  return value.length > max ? `${value.slice(0, max - 1).trimEnd()}…` : value
+}
+
+/**
+ * Готовый текст для WhatsApp из чата с Кадди (решение владельца 13.10): менеджер сразу видит
+ * суть, а не «здравствуйте». Коротко и по-человечески: что собрал Кадди (продукт, задача), вопрос
+ * клиента и посчитанные Кадди суммы — итог, если он был, иначе до двух цен. Цены берутся только
+ * из ответов Кадди (а он называет их только из прайса).
+ * @param {{ role: 'user' | 'assistant', content: string }[]} messages
+ * @param {{ name?: string, details?: { title: string, value: string }[] }} [prefill]
+ */
+export function whatsappMessage(messages, prefill) {
+  const lines = ['Здравствуйте! Пишу с сайта cad.kz после чата с Кадди.']
+  const name = prefill?.name?.trim()
+  if (name) lines.push(`Меня зовут ${clip(name, 60)}.`)
+  const detail = (/** @type {string} */ title) =>
+    prefill?.details?.find((item) => item.title === title)?.value
+  const product = detail('Продукт')
+  const task = detail('Задача')
+  if (product) lines.push(`Интересует: ${clip(product, 160)}.`)
+  if (task) lines.push(`Задача: ${clip(task, 160)}.`)
+  if (!product && !task) {
+    const question = [...messages].reverse().find((m) => m.role === 'user')?.content
+    if (question) lines.push(`Вопрос: ${clip(question, 200)}`)
+  }
+  const priced = [...messages]
+    .reverse()
+    .find((m) => m.role === 'assistant' && /\d\s*₸/.test(m.content))
+  if (priced) {
+    const sentences = priceSentences(priced.content)
+    const total = sentences.filter((s) => /итого/i.test(s))
+    const shown = (total.length ? total : sentences).slice(0, 2).map((s) => clip(s, 160))
+    if (shown.length) lines.push(`Кадди посчитал: ${shown.join(' ')}`)
+  }
+  return lines.join('\n')
+}
+
 /**
  * Ответ модели к показу: простой текст без разметки Markdown, не длиннее лимита.
  * Окно чата выводит текст как текст (без HTML), здесь только убирается оформление.
