@@ -50,7 +50,9 @@
     visibility 0s linear var(--duration-exit);
 }
 
-/* Фигура: место занято шириной буханки; «машет лапой» и «недовольный» кладутся поверх. */
+/* Фигура: место занято шириной буханки; «машет лапой» и «недовольный» кладутся поверх.
+   Курсор всегда попадает на лежащую буханку (верхние слои его пропускают) — от наведения на
+   неё Юки моргает (Mascot с hover). */
 .cat {
   position: relative;
   display: block;
@@ -70,6 +72,7 @@
   bottom: 0;
   left: 0;
   opacity: 0;
+  pointer-events: none;
 }
 
 /* Недовольный сидит, а не лежит: уже и выше буханки, стоит у её правого края. */
@@ -78,6 +81,7 @@
   right: 0;
   bottom: 0;
   opacity: 0;
+  pointer-events: none;
 }
 
 /* Реплика слева от Юки, на уровне морды. */
@@ -96,53 +100,29 @@
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transform: translateX(var(--space-2));
-  transition:
-    opacity var(--duration-fast) var(--ease),
-    transform var(--duration-base) var(--ease);
+  transition: opacity var(--duration-fast) var(--ease);
 }
 
-/* Реакция: приподнимается, машет лапой и говорит. Наведение мышью, фокус с клавиатуры или
-   подсказка раз за визит. */
+/* Реакция без движения (решение владельца 13.10): наведение мышью и фокус с клавиатуры —
+   Юки лежит на месте, моргает и проявляется реплика «Спросить Юки». Раз за визит сам машет
+   лапой и спрашивает «Помочь с выбором?» — смена позы на месте, без подъёма. */
 .launcher[data-hint="true"] .bubble,
 .launcher:focus-visible .bubble,
 .launcher[data-grumpy="true"] .bubble {
   opacity: 1;
-  transform: none;
 }
 
-.launcher[data-hint="true"] .wave,
-.launcher:focus-visible .wave {
+.launcher[data-hint="true"] .wave {
   opacity: 1;
 }
 
-.launcher[data-hint="true"] .rest,
-.launcher:focus-visible .rest {
+.launcher[data-hint="true"] .rest {
   opacity: 0;
-}
-
-.launcher[data-hint="true"] .cat,
-.launcher:focus-visible .cat {
-  transform: translateY(calc(var(--space-1) * -1));
 }
 
 @media (hover: hover) {
   .launcher:hover .bubble {
     opacity: 1;
-    transform: none;
-  }
-
-  .launcher:hover .wave {
-    opacity: 1;
-  }
-
-  .launcher:hover .rest {
-    opacity: 0;
-  }
-
-  /* Привстаёт навстречу курсору — на 4 px вверх, без наклона. */
-  .launcher:hover .cat {
-    transform: translateY(calc(var(--space-1) * -1));
   }
 }
 
@@ -152,8 +132,7 @@
 }
 
 .launcher[data-grumpy="true"] .rest,
-.launcher[data-grumpy="true"] .wave,
-.launcher[data-grumpy="true"]:hover .wave {
+.launcher[data-grumpy="true"] .wave {
   opacity: 0;
 }
 
@@ -177,11 +156,7 @@
   }
 
   .launcher[data-open="true"],
-  .launcher:hover .cat,
-  .launcher:active .cat,
-  .launcher:focus-visible .cat,
-  .launcher[data-hint="true"] .cat,
-  .launcher:hover .bubble {
+  .launcher:active .cat {
     transform: none;
   }
 }
