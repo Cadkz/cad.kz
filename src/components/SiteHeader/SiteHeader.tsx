@@ -1,4 +1,4 @@
-import { getContacts, getMenu } from '@/lib/navigation'
+import { getContacts, getMenu, mobilePhone } from '@/lib/navigation'
 import { searchHints, typingHints } from '@/lib/siteNav'
 import { AssistantSlot } from '../AssistantSlot/AssistantSlot'
 import { CartButton } from '../CartButton/CartButton'
@@ -40,7 +40,7 @@ export async function SiteHeader() {
             whatsappHref={contacts.whatsappHref}
           />
           <div className={styles.actions}>
-            {/* Юки: на телефоне — голова здесь, от 640 px — буханка в углу экрана. */}
+            {/* Кадди: на телефоне — голова здесь, от 640 px — буханка в углу экрана. */}
             <AssistantSlot whatsappHref={contacts.whatsappHref} />
             {contacts.whatsappHref && (
               <HeaderAction
@@ -56,7 +56,7 @@ export async function SiteHeader() {
           </div>
         </Container>
       </HeaderShell>
-      <SubNav phone={contacts.phones[0] ?? null} contacts={contactList} />
+      <SubNav phone={mobilePhone(contacts.phones)} contacts={contactList} />
     </>
   )
 }

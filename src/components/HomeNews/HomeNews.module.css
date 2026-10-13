@@ -1,0 +1,31 @@
+/* 8 + 4 колонки: крупная статья слева на две строки, справа две новости друг под другом. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  gap: var(--grid-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.main,
+.side {
+  grid-column: span 12;
+}
+
+@media (min-width: 640px) {
+  .side {
+    grid-column: span 6;
+  }
+}
+
+@media (min-width: 960px) {
+  .main {
+    grid-row: span 2;
+    grid-column: span 8;
+  }
+
+  .side {
+    grid-column: span 4;
+  }
+}

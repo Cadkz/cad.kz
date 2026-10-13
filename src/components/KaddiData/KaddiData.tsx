@@ -12,7 +12,7 @@ import {
   type VatMode,
 } from '@/domain/priceTable.mjs'
 import { readSpreadsheet, SpreadsheetError } from '@/domain/spreadsheet.mjs'
-import styles from './YukiData.module.css'
+import styles from './KaddiData.module.css'
 
 type Parsed = {
   fileName: string
@@ -27,10 +27,10 @@ function count(rows: PriceRow[], test: (row: PriceRow) => boolean) {
 }
 
 /**
- * Загрузка «Прайс CAD.kz» для Юки: файл разбирается в браузере, на экране — что нашлось,
+ * Загрузка «Прайс CAD.kz» для Кадди: файл разбирается в браузере, на экране — что нашлось,
  * затем прайс и (или) база знаний уходят на сервер и заменяют прежние.
  */
-export function YukiData() {
+export function KaddiData() {
   const [parsed, setParsed] = useState<Parsed | null>(null)
   const [vat, setVat] = useState<VatMode>('unknown')
   const [usePrice, setUsePrice] = useState(true)
@@ -66,7 +66,7 @@ export function YukiData() {
     setBusy(true)
     setError('')
     try {
-      const response = await fetch('/api/admin/yuki-data', {
+      const response = await fetch('/api/admin/kaddi-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -129,7 +129,7 @@ export function YukiData() {
               <label className={styles.field}>
                 <span>Цены в файле</span>
                 <select value={vat} onChange={(e) => setVat(e.target.value as VatMode)}>
-                  <option value="unknown">НДС не указан — Юки скажет, что это уточняется</option>
+                  <option value="unknown">НДС не указан — Кадди скажет, что это уточняется</option>
                   <option value="included">с НДС</option>
                   <option value="excluded">без НДС</option>
                 </select>
@@ -175,7 +175,7 @@ export function YukiData() {
                 busy || (!(usePrice && parsed.price) && !(useKnowledge && parsed.knowledge))
               }
             >
-              {busy ? 'Сохраняем…' : 'Загрузить для Юки'}
+              {busy ? 'Сохраняем…' : 'Загрузить для Кадди'}
             </AdminButton>
           </div>
         </div>

@@ -19,7 +19,7 @@ function reply(body: Record<string, unknown>, status: number) {
 }
 
 /**
- * ИИ-консультант Юки: новое сообщение клиента → ответ и ссылки на товары. История — на сервере
+ * ИИ-консультант Кадди: новое сообщение клиента → ответ и ссылки на товары. История — на сервере
  * (src/lib/assistant/conversation.ts). Консультант выключен — 404, кнопки на сайте тоже нет.
  */
 export async function POST(request: Request) {

@@ -8,7 +8,7 @@ import {
 } from '@/domain/priceTable.mjs'
 
 /**
- * Прайс и база знаний Юки в базе сайта: загрузка со страницы «Прайс и база Юки», чтение для
+ * Прайс и база знаний Кадди в базе сайта: загрузка со страницы «Прайс и база Кадди», чтение для
  * инструментов модели. Прайс хранится одним снимком (коллекция price-tables), в памяти сервера
  * держится вместе с поисковым индексом, пока в базе не появится новый.
  */
@@ -34,7 +34,7 @@ const options = { overrideAccess: true } as const
 const KEEP_OLD = 2
 
 const memory = globalThis as {
-  __yukiPrice?: { id: number; updatedAt: string; table: LoadedPriceTable }
+  __kaddiPrice?: { id: number; updatedAt: string; table: LoadedPriceTable }
 }
 
 function isSummary(value: unknown): value is PriceSummary {
@@ -71,7 +71,7 @@ export async function loadPriceTable(payload: Payload): Promise<LoadedPriceTable
   })
   const head = docs[0]
   if (!head) return null
-  const cached = memory.__yukiPrice
+  const cached = memory.__kaddiPrice
   if (cached && cached.id === head.id && cached.updatedAt === head.updatedAt) return cached.table
   const doc = await payload.findByID({
     collection: 'price-tables',
@@ -83,7 +83,7 @@ export async function loadPriceTable(payload: Payload): Promise<LoadedPriceTable
   if (!isSummary(doc.summary) || !Array.isArray(snapshot?.rows)) return null
   const rows = snapshot.rows as PriceRow[]
   const table = { id: doc.id, summary: doc.summary, rows, index: indexPriceRows(rows) }
-  memory.__yukiPrice = { id: doc.id, updatedAt: doc.updatedAt, table }
+  memory.__kaddiPrice = { id: doc.id, updatedAt: doc.updatedAt, table }
   return table
 }
 

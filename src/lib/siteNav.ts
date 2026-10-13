@@ -10,7 +10,8 @@ export const sectionLinks = [
   // По CRM продления не видны по названию сделки — отдельный вход первым (решение 12.10.2026).
   { title: 'Продление лицензий', href: '/renew' },
   { title: 'Обучение', href: catalogHref({ group: 'service', type: 'training' }) },
-  { title: 'Внедрение BIM', href: catalogHref({ group: 'service', type: 'consulting' }) },
+  // Отдельная страница с подробным описанием (решение владельца 13.10.2026), а не каталог услуг.
+  { title: 'Внедрение BIM', href: '/bim' },
   { title: 'Акции', href: '/news?kind=promotion' },
   // Новости и статьи — один раздел: на обеих страницах переключатель (PublicationTabs).
   { title: 'Новости и статьи', href: '/news', also: ['/articles'] },
@@ -100,6 +101,7 @@ export const searchPages = [
   { title: 'Новости', href: '/news', words: '' },
   { title: 'Статьи', href: '/articles', words: 'обзоры' },
   { title: 'Акции', href: '/news?kind=promotion', words: 'скидки распродажа' },
+  { title: 'Внедрение BIM', href: '/bim', words: 'бим внедрение консалтинг navisworks tdms' },
   { title: 'Как купить', href: '/about/howto', words: 'оплата заказ счёт' },
   { title: 'Доставка', href: '/about/delivery', words: '' },
   { title: 'Гарантии', href: '/about/guaranty', words: 'гарантия возврат' },

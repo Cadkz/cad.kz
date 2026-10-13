@@ -12,7 +12,7 @@ const MANY_ITEMS = 4
 
 /**
  * «Запутались в комплектациях?» под подбором комплекта — только там, где выбор правда
- * непростой: есть переключатели (редакция, срок) или вариантов много. Юки запутался в нитках
+ * непростой: есть переключатели (редакция, срок) или вариантов много. Кадди запутался в нитках
  * и предлагает спросить его. Консультант выключен — та же кнопка открывает заявку на консультацию.
  */
 export function PickerHelp() {
@@ -26,13 +26,13 @@ export function PickerHelp() {
     <div className={styles.help}>
       <div className={styles.text}>
         <p className={styles.title}>Запутались в комплектациях?</p>
-        <p className={styles.lead}>Расскажите, что проектируете, — Юки поможет распутать.</p>
+        <p className={styles.lead}>Расскажите, что проектируете, — Кадди поможет распутать.</p>
         <Button variant="outline" size="sm" onClick={ask}>
           <MessageCircle size={16} strokeWidth={1.75} aria-hidden="true" />
-          Спросить Юки
+          Спросить Кадди
         </Button>
       </div>
-      <Mascot pose="tangled" size="xs" className={styles.yuki} />
+      <Mascot pose="tangled" size="xs" className={styles.kaddi} />
     </div>
   )
 }

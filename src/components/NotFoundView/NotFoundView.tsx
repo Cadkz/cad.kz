@@ -1,5 +1,5 @@
 import { catalogHref } from '@/lib/navigationHrefs'
-import { AskYuki } from '../AskYuki/AskYuki'
+import { AskKaddi } from '../AskKaddi/AskKaddi'
 import { Breadcrumbs } from '../Breadcrumbs/Breadcrumbs'
 import { ButtonLink } from '../Button/Button'
 import { Container } from '../Container/Container'
@@ -9,7 +9,7 @@ import styles from './NotFoundView.module.css'
 
 /**
  * Страница «не найдено»: по-русски, в общей рамке, с выходом в каталог и на главную.
- * Текст на 7 колонок слева, Юки с чертежом справа; на телефоне Юки над текстом.
+ * Текст на 7 колонок слева, Кадди с чертежом справа; на телефоне Кадди над текстом.
  */
 export function NotFoundView() {
   return (
@@ -21,14 +21,14 @@ export function NotFoundView() {
           <div className={styles.text}>
             <PageIntro
               title="404. Кажется, эта страница потерялась среди чертежей"
-              lead="Возможно, адрес изменился или страница больше недоступна. Юки поможет найти нужный раздел."
+              lead="Возможно, адрес изменился или страница больше недоступна. Кадди поможет найти нужный раздел."
             />
             <div className={styles.actions}>
               <ButtonLink href="/">На главную</ButtonLink>
               <ButtonLink href={catalogHref()} variant="outline">
                 В каталог
               </ButtonLink>
-              <AskYuki label="Задать вопрос Юки" variant="text" />
+              <AskKaddi label="Задать вопрос Кадди" variant="text" />
               <ButtonLink href="/contacts" variant="text">
                 Контакты
               </ButtonLink>

@@ -6,11 +6,25 @@ import { ButtonLink } from '../Button/Button'
 import { Container } from '../Container/Container'
 import styles from './BimBand.module.css'
 
-/** Тёмный блок «Внедрение BIM»: вводный текст, четыре этапа, кнопка и ключевые цифры. */
-export function BimBand({ bim }: { bim: Home['bim'] }) {
+type Props = {
+  bim: Home['bim']
+  /** h1 — первый экран страницы «Внедрение BIM» (/bim), h2 — блок на главной. */
+  level?: 1 | 2
+  /** Вторая кнопка: на главной — «Подробнее о внедрении» на страницу /bim. */
+  more?: { href: string; label: string }
+  /** На странице /bim блок сразу под хлебными крошками — без верхнего отступа секции. */
+  flush?: boolean
+}
+
+/** Тёмный блок «Внедрение BIM»: вводный текст, четыре этапа, кнопки и ключевые цифры. */
+export function BimBand({ bim, level = 2, more, flush = false }: Props) {
   if (!bim.title) return null
+  const Heading = level === 1 ? 'h1' : 'h2'
   return (
-    <section className={styles.section} aria-labelledby="bim-title">
+    <section
+      className={flush ? `${styles.section} ${styles.flush}` : styles.section}
+      aria-labelledby="bim-title"
+    >
       <Container>
         <div className={styles.band}>
           <Image
@@ -20,9 +34,9 @@ export function BimBand({ bim }: { bim: Home['bim'] }) {
             className={styles.image}
           />
           {bim.eyebrow && <Badge tone="onDark">{bim.eyebrow}</Badge>}
-          <h2 id="bim-title" className={styles.title}>
+          <Heading id="bim-title" className={styles.title}>
             {bim.title}
-          </h2>
+          </Heading>
           {bim.lead && <p className={styles.lead}>{bim.lead}</p>}
           {bim.stages.length > 0 && (
             <ol className={styles.stages}>
@@ -36,11 +50,18 @@ export function BimBand({ bim }: { bim: Home['bim'] }) {
             </ol>
           )}
           <div className={styles.bottom}>
-            {bim.link && (
-              <ButtonLink href={bim.link.href} variant="light">
-                {bim.link.label}
-              </ButtonLink>
-            )}
+            <div className={styles.buttons}>
+              {bim.link && (
+                <ButtonLink href={bim.link.href} variant="light">
+                  {bim.link.label}
+                </ButtonLink>
+              )}
+              {more && (
+                <ButtonLink href={more.href} variant="ghostDark">
+                  {more.label}
+                </ButtonLink>
+              )}
+            </div>
             {bim.stats.length > 0 && (
               <dl className={styles.stats}>
                 {bim.stats.map((stat) => (

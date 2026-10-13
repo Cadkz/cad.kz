@@ -15,8 +15,8 @@ type Props = {
 }
 
 /**
- * Секция страницы: штрих-акцент, заголовок h2, подзаголовок, ссылка «Все …» и содержимое
- * в рамке сайта. Штрих над заголовком прорисовывается, когда заголовок входит в экран.
+ * Секция страницы: заголовок h2, подзаголовок, ссылка «Все …» и содержимое в рамке сайта.
+ * Штриха над заголовком нет (решение владельца 13.10.2026: лишний декор).
  */
 export function Section({ title, sub, action, id, tone = 'plain', children }: Props) {
   const headingId = id ? `${id}-title` : undefined
@@ -25,7 +25,7 @@ export function Section({ title, sub, action, id, tone = 'plain', children }: Pr
     <section id={id} className={classes.filter(Boolean).join(' ')} aria-labelledby={headingId}>
       <Container>
         <div className={styles.head}>
-          <div className={styles.text} data-reveal="">
+          <div className={styles.text}>
             <h2 id={headingId}>{title}</h2>
             {sub && <p className={styles.sub}>{sub}</p>}
           </div>

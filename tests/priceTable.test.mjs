@@ -270,7 +270,7 @@ test('поиск: разговорные названия, все слова, ф
   assert.equal(limited.rows.length, 2)
 })
 
-test('цену называет Юки только для новой лицензии ПО с числовой ценой', () => {
+test('цену называет Кадди только для новой лицензии ПО с числовой ценой', () => {
   const table = parsePriceTable(SHEETS)
   assert.ok(table)
   const row = (code) => {

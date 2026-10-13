@@ -64,6 +64,7 @@ test('old text pages lead to the new text pages', () => {
   assert.deepEqual(staticLegacyTarget('/about/'), { to: '/about' })
   assert.deepEqual(staticLegacyTarget('/about/howto/'), { to: '/about/howto' })
   assert.deepEqual(staticLegacyTarget('/about/essentials.php'), { to: '/about/requisites' })
+  assert.deepEqual(staticLegacyTarget('/about/privacy-policy.php'), { to: '/about/privacy-policy' })
   assert.deepEqual(staticLegacyTarget('/about/team/elena_shulyak'), { to: '/about' })
   assert.deepEqual(staticLegacyTarget('/about/vacancies/'), { to: '/about' })
   assert.equal(newPagePath('/about/'), '/about')

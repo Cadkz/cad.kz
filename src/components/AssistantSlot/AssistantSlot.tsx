@@ -2,7 +2,7 @@ import { assistantMode } from '@/lib/assistant/provider'
 import { Assistant } from '../Assistant/Assistant'
 
 /**
- * Юки-консультант (голова в шапке на телефоне, буханка в углу от 640 px) — только когда работает сервис консультанта (модель подключена или
+ * Кадди-консультант (голова в шапке на телефоне, буханка в углу от 640 px) — только когда работает сервис консультанта (модель подключена или
  * демо-режим с честной пометкой). Выключен — ни кнопки, ни окна.
  */
 export function AssistantSlot({ whatsappHref }: { whatsappHref: string | null }) {

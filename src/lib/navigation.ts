@@ -177,6 +177,16 @@ export type Contacts = {
   mapUrl: string | null
 }
 
+/**
+ * Мобильный номер из списка телефонов (код оператора 70x, 74x–77x; городские — 71x, 72x):
+ * его показываем в меню и в блоках «Вопросы по…» (решение владельца 13.10.2026). Нет мобильного —
+ * первый из списка.
+ */
+export function mobilePhone(phones: Contacts['phones']): Contacts['phones'][number] | null {
+  const mobile = phones.find((phone) => /^7[04567]/.test(phone.tel.replace(/\D/g, '').slice(1)))
+  return mobile ?? phones[0] ?? null
+}
+
 export async function getContacts(): Promise<Contacts> {
   const payload = await cms()
   const settings: SiteSetting = await payload.findGlobal({ slug: 'site-settings', depth: 0 })

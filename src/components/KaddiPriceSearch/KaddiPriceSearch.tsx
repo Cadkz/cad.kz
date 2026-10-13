@@ -2,7 +2,7 @@
 
 import { type FormEvent, useState } from 'react'
 import { AdminButton } from '@/components/AdminButton/AdminButton'
-import styles from './YukiPriceSearch.module.css'
+import styles from './KaddiPriceSearch.module.css'
 
 type Row = {
   code: string
@@ -18,10 +18,10 @@ type Row = {
 type Result = { total: number; rows: Row[]; note?: string; error?: string }
 
 /**
- * Проверка прайса глазами: тот же поиск, что у Юки, и что Юки скажет по каждой строке —
+ * Проверка прайса глазами: тот же поиск, что у Кадди, и что Кадди скажет по каждой строке —
  * цену или почему передаст менеджеру, и срок поставки по правилам.
  */
-export function YukiPriceSearch() {
+export function KaddiPriceSearch() {
   const [query, setQuery] = useState('')
   const [purchase, setPurchase] = useState('')
   const [busy, setBusy] = useState(false)
@@ -32,7 +32,7 @@ export function YukiPriceSearch() {
     if (query.trim().length < 2) return
     setBusy(true)
     try {
-      const response = await fetch('/api/admin/yuki-data', {
+      const response = await fetch('/api/admin/kaddi-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'search', query, purchase }),
@@ -47,7 +47,7 @@ export function YukiPriceSearch() {
 
   return (
     <section className={styles.root}>
-      <h2 className={styles.title}>Проверить прайс, как его видит Юки</h2>
+      <h2 className={styles.title}>Проверить прайс, как его видит Кадди</h2>
       <form className={styles.form} onSubmit={search}>
         <label className={styles.field}>
           <span>Название, артикул или код</span>
@@ -86,7 +86,7 @@ export function YukiPriceSearch() {
                     <th>Код</th>
                     <th>Название</th>
                     <th>Покупка, срок</th>
-                    <th>Что скажет Юки</th>
+                    <th>Что скажет Кадди</th>
                     <th>Поставка</th>
                   </tr>
                 </thead>

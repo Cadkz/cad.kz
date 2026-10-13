@@ -53,3 +53,23 @@
 .more:hover {
   color: var(--color-blue-hover);
 }
+
+.maps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: auto;
+}
+
+.mapLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-blue);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.mapLink:hover {
+  color: var(--color-blue-hover);
+}

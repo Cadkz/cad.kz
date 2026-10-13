@@ -17,7 +17,7 @@ export const homePage: GlobalConfig = {
     textField('title', 'Заголовок страницы (h1)', true),
     {
       name: 'sideCards',
-      label: 'Карточки справа от баннера',
+      label: 'Карточки в блоке «Как мы работаем»',
       type: 'array',
       maxRows: 2,
       fields: [

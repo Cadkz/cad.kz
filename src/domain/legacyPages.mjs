@@ -327,6 +327,8 @@ export const INFO_PAGES = [
   { path: '/about/delivery/', slug: 'delivery' },
   { path: '/about/guaranty/', slug: 'guaranty' },
   { path: '/about/essentials.php', slug: 'requisites' },
+  // Политика конфиденциальности (решение владельца 13.10.2026): ссылка в карточке «О компании».
+  { path: '/about/privacy-policy.php', slug: 'privacy-policy' },
 ]
 
 /** Адрес текстовой страницы на новом сайте. */

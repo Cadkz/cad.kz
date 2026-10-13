@@ -5,3 +5,7 @@
   color: var(--color-text-muted);
   text-align: center;
 }
+
+.filters {
+  margin-bottom: var(--space-8);
+}

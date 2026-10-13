@@ -1,7 +1,7 @@
 // @ts-check
 // Заявка без корзины: запрос цены, продление, помощь с выбором, КП по семейству,
 // «Подобрать решение» с главной (источник home: задача словами, без товара),
-// «Передать менеджеру» из чата с Юки (источник assistant: переписку сервер берёт из своей базы).
+// «Передать менеджеру» из чата с Кадди (источник assistant: переписку сервер берёт из своей базы).
 // Клиент выбрал «Перезвоните мне» и оставил имя и телефон. Чистые функции без базы:
 // проверка формы (та же в браузере и на сервере) и данные для CRM.
 // Названия и цены в заявку подставляет сервер из базы по ID, от клиента берутся только ID.
@@ -58,6 +58,27 @@ export const REQUEST_SOURCES = /** @type {const} */ (['product', 'home', 'renew'
 
 /** Программы на странице продления: чипы формы; «Другая» — клиент пишет название сам. */
 export const RENEW_PROGRAMS = ['AutoCAD', 'АВС', 'ЛИРА-FEM', 'SCAD Office', 'GEO5']
+
+/**
+ * Выпадающий список «Название программы» на странице продления: сначала программы с кнопок
+ * быстрого выбора, затем другие, которые чаще всего продлевают. Чего нет — «Другая программа».
+ */
+export const RENEW_PROGRAM_OPTIONS = [
+  ...RENEW_PROGRAMS,
+  'Revit',
+  'AutoCAD LT',
+  'AEC Collection',
+  'Civil 3D',
+  'Inventor',
+  'Navisworks',
+  '3ds Max',
+  'Fusion',
+  'nanoCAD',
+  'СПДС GraphiCS',
+  'RasterDesk',
+  'MagiCAD',
+  'Artec Studio',
+]
 
 /**
  * Данные продления со страницы «Продление лицензий»: программа обязательна, номер лицензии
@@ -164,8 +185,8 @@ export function validateContact(raw, options = {}) {
  * @property {string} comment
  * @property {string} button  Подпись нажатой кнопки («Получить КП», «Записаться на демонстрацию»).
  * @property {{ program: string, license: string, seats: number | null } | null} renewal  Со страницы продления.
- * @property {string | null} conversationId  Из чата с Юки: ключ разговора, переписку сервер берёт из базы.
- * @property {string | null} page  Из чата с Юки: адрес страницы, где был клиент.
+ * @property {string | null} conversationId  Из чата с Кадди: ключ разговора, переписку сервер берёт из базы.
+ * @property {string | null} page  Из чата с Кадди: адрес страницы, где был клиент.
  */
 
 /**
@@ -305,8 +326,8 @@ export function makeRequestNumber(
  * плюс тип заявки. Строки без цены передаются без сумм.
  * Источник (`source`): нажатая кнопка, товар, его раздел и сценарий покупки — чтобы следующий
  * анализ CRM видел, откуда пришла сделка, а не только её название.
- * Из чата с Юки — вся переписка (`messages`): менеджер продолжает разговор с того же места.
- * Почта — если её собрал Юки в чате (клиент подтвердил передачу с этими данными).
+ * Из чата с Кадди — вся переписка (`messages`): менеджер продолжает разговор с того же места.
+ * Почта — если её собрал Кадди в чате (клиент подтвердил передачу с этими данными).
  * @param {{ number: string, idempotencyKey: string, kind: RequestKind, pageTitle: string, choices: { title: string, value: string }[], name: string, phone: string, email?: string, comment: string, consentAt: string, lines: ResolvedLine[], totalKzt: string | null, source?: { button: string, product: string | null, section: string | null, scenario: string | null, page: string | null }, messages?: { role: 'user' | 'assistant', content: string }[] }} request
  */
 export function toCrmRequest(request) {

@@ -1,4 +1,4 @@
-/* Телефон: Юки над текстом у правого края. От 960 px: текст на 7 колонок, Юки на 5 справа. */
+/* Телефон: Кадди над текстом у правого края. От 960 px: текст на 7 колонок, Кадди на 5 справа. */
 .layout {
   display: grid;
   grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
@@ -14,7 +14,7 @@
 .mascot {
   grid-column: span 12;
   grid-row: 1;
-  justify-self: end; /* Юки смотрит влево — на текст под ним */
+  justify-self: end; /* Кадди смотрит влево — на текст под ним */
 }
 
 .actions {

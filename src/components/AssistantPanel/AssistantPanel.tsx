@@ -26,7 +26,7 @@ function trapFocus(event: KeyboardEvent, container: HTMLElement) {
 type Props = {
   chat: ReturnType<typeof useAssistant>
   demo: boolean
-  /** Чат часто открывали и закрывали — Юки встречает недовольным. */
+  /** Чат часто открывали и закрывали — Кадди встречает недовольным. */
   grumpy: boolean
   whatsappHref: string | null
   /** returnFocus: false — закрыли кликом мимо окна, фокус остаётся там, куда кликнули. */
@@ -34,7 +34,7 @@ type Props = {
 }
 
 /**
- * Окно чата с Юки. От 640 px — окно в правом нижнем углу, на месте Юки: страницу можно листать,
+ * Окно чата с Кадди. От 640 px — окно в правом нижнем углу, на месте Кадди: страницу можно листать,
  * не закрывая разговор. На телефоне — на весь экран, страница под ним не прокручивается.
  * Escape и клик мимо окна (от 640 px) закрывают его; форма передачи менеджеру открывается
  * вместо поля ввода.
@@ -42,7 +42,7 @@ type Props = {
 export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Props) {
   const titleId = useId()
   const panel = useRef<HTMLElement>(null)
-  // false — разговор; объект — форма передачи (prefill — данные, которые собрал Юки).
+  // false — разговор; объект — форма передачи (prefill — данные, которые собрал Кадди).
   const [handoff, setHandoff] = useState<false | { prefill?: HandoffPrefill }>(false)
   const shown = useRef(false)
 
@@ -130,7 +130,7 @@ export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Pr
       {demo && (
         <p className={styles.note}>
           <Info size={16} strokeWidth={1.75} aria-hidden="true" />
-          Демоверсия: ИИ не подключён, Юки ищет по каталогу.
+          Демоверсия: ИИ не подключён, Кадди ищет по каталогу.
         </p>
       )}
       {handoff ? (

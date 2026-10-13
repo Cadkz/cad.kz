@@ -1,23 +1,33 @@
 'use client'
 
 import { type FormEvent, useRef, useState } from 'react'
-import { CONSENT_TEXT, RENEW_PROGRAMS, validateRenewal } from '@/domain/siteRequest.mjs'
+import {
+  CONSENT_TEXT,
+  RENEW_PROGRAM_OPTIONS,
+  RENEW_PROGRAMS,
+  validateRenewal,
+} from '@/domain/siteRequest.mjs'
 import { Button } from '../Button/Button'
 import { CheckboxField } from '../CheckboxField/CheckboxField'
-import { TextAreaField, TextField } from '../Field/Field'
+import { SelectField, TextAreaField, TextField } from '../Field/Field'
 import { RadioChips } from '../RadioChips/RadioChips'
 import styles from './RenewForm.module.css'
 
 const OTHER = 'other'
 
+const findProgram = (name: string | null | undefined) =>
+  RENEW_PROGRAM_OPTIONS.find((p) => p.toLowerCase() === name?.trim().toLowerCase())
+
 /**
- * Заявка на продление: программа (чипы или своё название), номер лицензии и число мест — если
- * клиент их знает, имя и телефон. Сохраняет сервер (/api/request, источник renew), менеджер
- * присылает счёт. В демо честно говорим, что менеджерам заявка не уходит.
+ * Заявка на продление (упрощена 13.10.2026 по замечанию владельца): кнопки быстрого выбора и
+ * выпадающий список «Название программы» связаны — нажатие кнопки сразу ставит программу
+ * в список; «Другая программа» открывает поле для своего названия. Номер лицензии и число мест
+ * не спрашиваем — менеджер найдёт сам. Сохраняет сервер (/api/request, источник renew).
+ * В демо честно говорим, что менеджерам заявка не уходит.
  */
 export function RenewForm({ program: initial }: { program: string | null }) {
-  const known = RENEW_PROGRAMS.find((p) => p.toLowerCase() === initial?.toLowerCase())
-  // ?program=other — «Другая программа» с главной: поле названия пустое.
+  const known = findProgram(initial)
+  // ?program=other — «Другая программа»: поле названия пустое.
   const custom = !known && initial && initial.toLowerCase() !== OTHER ? initial : ''
   const key = useRef<string | null>(null)
   const [program, setProgram] = useState(known ?? (initial ? OTHER : (RENEW_PROGRAMS[0] ?? '')))
@@ -25,6 +35,14 @@ export function RenewForm({ program: initial }: { program: string | null }) {
   const [formError, setFormError] = useState('')
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState<string | null>(null)
+
+  const choose = (value: string) => {
+    setProgram(value)
+    if (value === OTHER)
+      requestAnimationFrame(() => document.getElementById('renew-program-name')?.focus())
+  }
+  // Кнопка подсвечена, только если выбрана её программа; иные из списка — ни одна кнопка.
+  const chip = RENEW_PROGRAMS.includes(program) || program === OTHER ? program : ''
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -37,8 +55,8 @@ export function RenewForm({ program: initial }: { program: string | null }) {
       consent: data.get('consent') === 'on',
       renewal: {
         program: program === OTHER ? field('program') : program,
-        license: field('license'),
-        seats: field('seats'),
+        license: '',
+        seats: '',
       },
     }
     const checked = validateRenewal(body)
@@ -84,46 +102,38 @@ export function RenewForm({ program: initial }: { program: string | null }) {
       <RadioChips
         legend="Какую программу продлить"
         name="renew-program"
-        value={program}
+        value={chip}
         options={[
           ...RENEW_PROGRAMS.map((p) => ({ value: p, label: p })),
           { value: OTHER, label: 'Другая' },
         ]}
-        onChange={setProgram}
+        onChange={choose}
       />
+      <SelectField
+        label="Название программы"
+        name="program-choice"
+        id="renew-program-choice"
+        value={program}
+        onChange={(event) => choose(event.target.value)}
+        error={program !== OTHER ? errors.program : undefined}
+      >
+        {RENEW_PROGRAM_OPTIONS.map((p) => (
+          <option key={p} value={p}>
+            {p}
+          </option>
+        ))}
+        <option value={OTHER}>Другая программа</option>
+      </SelectField>
       {program === OTHER && (
         <TextField
-          label="Название программы"
+          label="Какая программа"
           name="program"
           id="renew-program-name"
+          placeholder="Например, Tekla Structures"
           defaultValue={custom}
           error={errors.program}
         />
       )}
-      {program !== OTHER && errors.program && (
-        <p className={styles.error} role="alert">
-          {errors.program}
-        </p>
-      )}
-      <div className={styles.row}>
-        <TextField
-          label="Номер лицензии"
-          name="license"
-          id="renew-license"
-          hint="Если знаете. Нет под рукой — менеджер найдёт сам."
-          error={errors.license}
-        />
-        <TextField
-          label="Число мест"
-          name="seats"
-          id="renew-seats"
-          type="number"
-          min={1}
-          max={999}
-          inputMode="numeric"
-          error={errors.seats}
-        />
-      </div>
       <TextField label="Имя" name="name" id="renew-name" autoComplete="name" error={errors.name} />
       <TextField
         label="Телефон"
@@ -138,7 +148,7 @@ export function RenewForm({ program: initial }: { program: string | null }) {
         label="Комментарий"
         name="comment"
         id="renew-comment"
-        hint="Например: нужен счёт на организацию или переход на другую редакцию."
+        hint="Если знаете номер лицензии или число мест — напишите здесь. Нет — менеджер найдёт сам."
         rows={3}
         error={errors.comment}
       />

@@ -1,17 +1,22 @@
 import { ArrowRight, Clock, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
-import { ContactList } from '@/components/ContactList/ContactList'
 import { Container } from '@/components/Container/Container'
 import { Grid } from '@/components/Grid/Grid'
+import { mapLinks, OfficeMap } from '@/components/OfficeMap/OfficeMap'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
 import type { Contacts } from '@/lib/navigation'
 import styles from './ContactsView.module.css'
 
 type Props = { contacts: Contacts; lead: string | null }
 
-/** «Контакты» — шаблон «Витрина»: связь, офис и реквизиты карточками. Всё из настроек CMS. */
+/**
+ * «Контакты» — шаблон «Витрина»: мини-карта, офис со ссылками на 2ГИС и Google Карты, реквизиты.
+ * Телефоны и мессенджеры — в шапке и подвале, отдельной карточки нет (решение владельца 13.10.2026).
+ * Всё из настроек CMS.
+ */
 export function ContactsView({ contacts, lead }: Props) {
+  const links = contacts.address ? mapLinks(contacts.address, contacts.mapUrl) : null
   return (
     <main>
       <Container>
@@ -21,10 +26,7 @@ export function ContactsView({ contacts, lead }: Props) {
           lead={lead ?? 'Позвоните или напишите — подберём программы, оборудование и обучение.'}
         />
         <Grid span={{ base: 12, md: 4 }}>
-          <section className={styles.card}>
-            <h2 className={styles.title}>Позвонить или написать</h2>
-            <ContactList contacts={contacts} />
-          </section>
+          {contacts.address && <OfficeMap address={contacts.address} />}
           <section className={styles.card}>
             <h2 className={styles.title}>Офис</h2>
             {contacts.address ? (
@@ -41,11 +43,17 @@ export function ContactsView({ contacts, lead }: Props) {
                 {contacts.hours}
               </p>
             )}
-            {contacts.mapUrl && (
-              <a href={contacts.mapUrl} className={styles.more} target="_blank" rel="noopener">
-                Открыть на карте
-                <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
-              </a>
+            {links && (
+              <div className={styles.maps}>
+                <a href={links.twoGis} className={styles.mapLink} target="_blank" rel="noopener">
+                  Открыть в 2ГИС
+                  <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
+                </a>
+                <a href={links.google} className={styles.mapLink} target="_blank" rel="noopener">
+                  Открыть в Google Картах
+                  <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
+                </a>
+              </div>
             )}
           </section>
           <section className={styles.card}>

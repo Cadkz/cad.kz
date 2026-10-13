@@ -10,6 +10,8 @@
 
 .heading {
   margin-top: var(--space-6);
+  color: var(--color-navy);
+  line-height: var(--leading-snug);
   font-size: var(--text-h3);
   scroll-margin-top: calc(var(--header-height) + var(--space-4));
 }
@@ -24,6 +26,97 @@
 
 .list li::marker {
   color: var(--color-blue);
+}
+
+/* Нумерованные шаги: номер в кружке слева, текст пункта справа (правило 13.10.2026). */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.step {
+  position: relative;
+  min-height: var(--control-height-sm);
+  padding-left: calc(var(--control-height-sm) + var(--space-4));
+  counter-increment: step;
+}
+
+.step::before {
+  position: absolute;
+  /* Кружок 36 px по центру первой строки (строка ~27 px). */
+  top: calc(-1 * var(--space-1));
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  border-radius: var(--radius-round);
+  background: var(--color-blue-soft);
+  color: var(--color-navy);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  content: counter(step);
+}
+
+/* Подпись — значение: строки с тонкой линией между ними, подпись серым слева. */
+.fields {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.field,
+.group {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-5);
+}
+
+.field + .field,
+.field + .group,
+.group + .field {
+  border-top: 1px solid var(--color-border);
+}
+
+.group {
+  background: var(--color-blue-soft);
+  color: var(--color-navy);
+  font-weight: var(--weight-semibold);
+}
+
+.group:first-child {
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.label {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.value {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 640px) {
+  .field {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: var(--space-4);
+    align-items: baseline;
+  }
 }
 
 .note {

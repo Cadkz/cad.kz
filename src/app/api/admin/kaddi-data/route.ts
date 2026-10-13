@@ -4,8 +4,8 @@ import { loadPriceTable, replaceKnowledge, savePriceTable } from '@/lib/assistan
 import { priceByCode, searchPrice } from '@/lib/assistant/tools'
 
 /**
- * «Прайс и база Юки» в админке (администратор и маркетолог): запись прайса и базы знаний из файла,
- * разобранного в браузере, и проверочный поиск по прайсу тем же поиском, что у Юки.
+ * «Прайс и база Кадди» в админке (администратор и маркетолог): запись прайса и базы знаний из файла,
+ * разобранного в браузере, и проверочный поиск по прайсу тем же поиском, что у Кадди.
  */
 export const maxDuration = 60
 
@@ -69,9 +69,13 @@ export async function POST(request: Request) {
       parts.push(`база знаний — ${saved} записей`)
     }
     if (!parts.length) return reply({ error: 'Нечего загружать' }, 400)
-    return reply({ message: `Готово: ${parts.join(', ')}. Юки уже отвечает по новым данным.` })
+    return reply({ message: `Готово: ${parts.join(', ')}. Кадди уже отвечает по новым данным.` })
   } catch (error) {
-    console.error('Прайс и база Юки: ошибка', data.action, error instanceof Error ? error.name : '')
+    console.error(
+      'Прайс и база Кадди: ошибка',
+      data.action,
+      error instanceof Error ? error.name : '',
+    )
     return reply({ error: 'Не получилось из-за ошибки на сервере. Повторите.' }, 500)
   }
 }

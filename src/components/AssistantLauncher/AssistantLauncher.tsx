@@ -5,7 +5,7 @@ import { Mascot } from '../Mascot/Mascot'
 import styles from './AssistantLauncher.module.css'
 
 /** Подсказка «Помочь с выбором?» — один раз за посещение, через несколько секунд после входа. */
-const HINT_KEY = 'yuki-hint-shown'
+const HINT_KEY = 'kaddi-hint-shown'
 const HINT_DELAY_MS = 6000
 const HINT_SHOW_MS = 7000
 
@@ -27,17 +27,17 @@ function rememberHint() {
 
 type Props = {
   open: boolean
-  /** Чат только что часто открывали и закрывали — Юки сидит недовольный. */
+  /** Чат только что часто открывали и закрывали — Кадди сидит недовольный. */
   grumpy: boolean
   onClick: (event: MouseEvent<HTMLButtonElement>) => void
 }
 
 /**
- * Юки-буханка в правом нижнем углу экрана — кнопка ИИ-консультанта (от 640 px; на телефоне
- * Юки — голова в шапке). Лежит и моргает; при наведении моргает сразу и показывает
- * «Спросить Юки», не двигаясь; при нажатии пружинит. Раз за посещение сам машет лапой и
+ * Кадди-буханка в правом нижнем углу экрана — кнопка ИИ-консультанта (от 640 px; на телефоне
+ * Кадди — голова в шапке). Лежит и моргает; при наведении моргает сразу и показывает
+ * «Спросить Кадди», не двигаясь; при нажатии пружинит. Раз за посещение сам машет лапой и
  * спрашивает «Помочь с выбором?». Если чат дёргают (grumpy) — сидит недовольный.
- * Пока окно чата открыто, Юки прячется: окно стоит на его месте.
+ * Пока окно чата открыто, Кадди прячется: окно стоит на его месте.
  * Со строкой подбора внизу (до 960 px) поднимается над ней.
  */
 export function AssistantLauncher({ open, grumpy, onClick }: Props) {
@@ -64,7 +64,7 @@ export function AssistantLauncher({ open, grumpy, onClick }: Props) {
       data-open={open}
       data-hint={hint && !open && !grumpy}
       data-grumpy={grumpy}
-      aria-label="Спросить Юки — ИИ-консультант CAD.kz"
+      aria-label="Спросить Кадди — ИИ-консультант CAD.kz"
       aria-haspopup="dialog"
       aria-expanded={open}
       onClick={(event) => {
@@ -73,7 +73,7 @@ export function AssistantLauncher({ open, grumpy, onClick }: Props) {
       }}
     >
       <span className={styles.bubble} aria-hidden="true">
-        {grumpy ? 'Я никуда не убегаю' : hint ? 'Помочь с выбором?' : 'Спросить Юки'}
+        {grumpy ? 'Я никуда не убегаю' : hint ? 'Помочь с выбором?' : 'Спросить Кадди'}
       </span>
       <span className={styles.cat}>
         <Mascot pose="loaf" size="launcher" eager className={styles.rest} />

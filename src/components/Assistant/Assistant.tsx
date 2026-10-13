@@ -9,20 +9,20 @@ import { AssistantPanel } from '../AssistantPanel/AssistantPanel'
 import { HeaderAction } from '../HeaderAction/HeaderAction'
 import { Mascot } from '../Mascot/Mascot'
 
-/** Открыли чат GRUMPY_OPENS раз за GRUMPY_WINDOW_MS — Юки недоволен ещё GRUMPY_MS. */
+/** Открыли чат GRUMPY_OPENS раз за GRUMPY_WINDOW_MS — Кадди недоволен ещё GRUMPY_MS. */
 const GRUMPY_OPENS = 3
 const GRUMPY_WINDOW_MS = 8000
 const GRUMPY_MS = 6000
 
 type Props = {
-  /** Модель не подключена: Юки честно говорит об этом и ищет по каталогу. */
+  /** Модель не подключена: Кадди честно говорит об этом и ищет по каталогу. */
   demo: boolean
   whatsappHref: string | null
 }
 
 /**
- * ИИ-консультант Юки. Вход: на телефоне — голова Юки в шапке (ничего на странице не
- * закрывает), от 640 px — Юки-буханка в правом нижнем углу (AssistantLauncher). Окно чата
+ * ИИ-консультант Кадди. Вход: на телефоне — голова Кадди в шапке (ничего на странице не
+ * закрывает), от 640 px — Кадди-буханка в правом нижнем углу (AssistantLauncher). Окно чата
  * открывается на месте буханки, на телефоне — на весь экран. Выводится, только когда работает
  * сервис консультанта (src/lib/assistant/provider.ts); окно само не открывается — его открывает
  * человек (кнопкой или из содержимого страницы — openAssistant() в src/lib/openAssistant.ts).
@@ -64,9 +64,9 @@ export function Assistant({ demo, whatsappHref }: Props) {
   useEffect(() => {
     setMounted(true)
     const root = document.documentElement
-    // Чат на сайте есть — кнопки «Спросить Юки» в содержимом страниц открывают его.
+    // Чат на сайте есть — кнопки «Спросить Кадди» в содержимом страниц открывают его.
     root.dataset.assistant = 'on'
-    // С событием может прийти вопрос (например, запрос из поиска) — он сразу уходит Юки.
+    // С событием может прийти вопрос (например, запрос из поиска) — он сразу уходит Кадди.
     const onOpen = (event: Event) => {
       show(document.activeElement instanceof HTMLElement ? document.activeElement : null)
       const { message } = (event as CustomEvent<OpenAssistantDetail>).detail ?? {}
@@ -87,7 +87,7 @@ export function Assistant({ demo, whatsappHref }: Props) {
       <HeaderAction
         hideFrom="sm"
         icon={<Mascot pose="head" size="head" eager hover={false} />}
-        ariaLabel="Спросить Юки — ИИ-консультант CAD.kz"
+        ariaLabel="Спросить Кадди — ИИ-консультант CAD.kz"
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={(event) => toggle(event.currentTarget)}

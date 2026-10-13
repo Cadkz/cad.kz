@@ -18,7 +18,7 @@ type Row = {
 }
 
 /** Список вопросов запоминается в этом браузере, чтобы не вставлять его каждый раз. */
-const STORAGE_KEY = 'cadkz-yuki-check-questions'
+const STORAGE_KEY = 'cadkz-kaddi-check-questions'
 
 function readSaved() {
   try {
@@ -52,7 +52,7 @@ async function ask(question: string): Promise<Row> {
 }
 
 /**
- * Проверка Юки: вопросы по одному в строке → ответы по очереди, с обращениями к каталогу и ценам
+ * Проверка Кадди: вопросы по одному в строке → ответы по очереди, с обращениями к каталогу и ценам
  * и флагами «на что посмотреть». Отчёт скачивается таблицей для Excel.
  */
 export function AssistantCheck() {
@@ -84,7 +84,7 @@ export function AssistantCheck() {
   function report() {
     const head = [
       'Вопрос',
-      'Ответ Юки',
+      'Ответ Кадди',
       'Ссылки под ответом',
       'Обращения к каталогу',
       'Флаги',
@@ -98,7 +98,7 @@ export function AssistantCheck() {
       (row.flags ?? []).map((f) => f.text).join('\n'),
       row.ms ? (row.ms / 1000).toFixed(1) : '',
     ])
-    downloadText('proverka-yuki.csv', toCsv([head, ...body]), 'text/csv')
+    downloadText('proverka-kaddi.csv', toCsv([head, ...body]), 'text/csv')
   }
 
   const warnings = rows.filter((r) => r.error || r.flags?.some((f) => f.level === 'warn')).length

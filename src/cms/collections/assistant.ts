@@ -2,14 +2,14 @@ import type { CollectionConfig } from 'payload'
 import { isEditor, nobody } from '../access'
 
 /**
- * Прайс для Юки (лист product_price_list файла «Прайс CAD.kz»). Целиком одним снимком: файл
+ * Прайс для Кадди (лист product_price_list файла «Прайс CAD.kz»). Целиком одним снимком: файл
  * заменяется полностью, по строкам его не правят — правят в 1С и загружают заново на странице
- * «Прайс и база Юки». Пишет только сервер; действующий — последний со state = active.
+ * «Прайс и база Кадди». Пишет только сервер; действующий — последний со state = active.
  * В меню админки не показывается: состояние видно на странице загрузки.
  */
 export const priceTables: CollectionConfig = {
   slug: 'price-tables',
-  labels: { singular: 'Прайс для Юки', plural: 'Прайсы для Юки' },
+  labels: { singular: 'Прайс для Кадди', plural: 'Прайсы для Кадди' },
   admin: { group: 'Система', hidden: true },
   access: { read: isEditor, create: nobody, update: nobody, delete: nobody },
   fields: [
@@ -22,19 +22,19 @@ export const priceTables: CollectionConfig = {
 }
 
 /**
- * База знаний Юки (лист FAQ): факты о продуктах и порядке работы. Загружается из того же файла
- * и правится здесь по одной записи. Юки получает все включённые записи вместе с правилами.
+ * База знаний Кадди (лист FAQ): факты о продуктах и порядке работы. Загружается из того же файла
+ * и правится здесь по одной записи. Кадди получает все включённые записи вместе с правилами.
  */
 export const assistantKnowledge: CollectionConfig = {
   slug: 'assistant-knowledge',
-  labels: { singular: 'Запись базы знаний Юки', plural: 'База знаний Юки' },
+  labels: { singular: 'Запись базы знаний Кадди', plural: 'База знаний Кадди' },
   admin: {
-    group: 'Юки',
+    group: 'Кадди',
     useAsTitle: 'text',
     defaultColumns: ['text', 'product', 'active'],
     description:
-      'Факты для Юки: о продуктах, оплате, графике работы. Цены и сроки поставки отсюда Юки ' +
-      'клиенту не называет — они только из прайса. Загрузить всё из Excel — «Прайс и база Юки».',
+      'Факты для Кадди: о продуктах, оплате, графике работы. Цены и сроки поставки отсюда Кадди ' +
+      'клиенту не называет — они только из прайса. Загрузить всё из Excel — «Прайс и база Кадди».',
   },
   access: { read: isEditor, create: isEditor, update: isEditor, delete: isEditor },
   defaultSort: 'position',
@@ -55,7 +55,7 @@ export const assistantKnowledge: CollectionConfig = {
     },
     {
       name: 'active',
-      label: 'Юки использует',
+      label: 'Кадди использует',
       type: 'checkbox',
       defaultValue: true,
       admin: { position: 'sidebar' },

@@ -5,7 +5,7 @@ import { markMatches, type Suggestion } from '@/domain/suggest.mjs'
 import { catalogHref } from '@/lib/navigationHrefs'
 import type { SuggestState } from '@/lib/useSuggest'
 import { WhatsappIcon } from '../icons/icons'
-import { SearchYuki } from '../SearchYuki/SearchYuki'
+import { SearchKaddi } from '../SearchKaddi/SearchKaddi'
 import styles from './SearchSuggestions.module.css'
 
 /** Строка списка: подсказка или «Все результаты». */
@@ -41,8 +41,8 @@ function metaOf(suggestion: Suggestion) {
 
 /**
  * Выпадающая область поиска: «Часто ищут» (поле пустое), подсказки по группам, «ничего не
- * нашлось». Ниже спокойная строка «Все результаты», мини-Юки (вопрос своими словами — в чат, когда
- * консультант работает; ничего не нашлось — Юки с лупой) и самая тихая — написать нам в WhatsApp.
+ * нашлось». Ниже спокойная строка «Все результаты», мини-Кадди (вопрос своими словами — в чат, когда
+ * консультант работает; ничего не нашлось — Кадди с лупой) и самая тихая — написать нам в WhatsApp.
  */
 export function SearchSuggestions(props: Props) {
   const { query, state, groups, options, listId, active, hints, whatsappHref } = props
@@ -170,7 +170,7 @@ export function SearchSuggestions(props: Props) {
       </p>
 
       {state.status !== 'loading' && (
-        <SearchYuki query={trimmed} empty={nothing} onPick={props.onPick} />
+        <SearchKaddi query={trimmed} empty={nothing} onPick={props.onPick} />
       )}
 
       {whatsapp && (

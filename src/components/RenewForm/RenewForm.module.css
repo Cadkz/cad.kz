@@ -1,21 +1,10 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
+  /* Отступ от вводного абзаца: форма — отдельный блок, а не продолжение текста (13.10.2026). */
+  margin-top: var(--space-6);
   max-width: var(--measure);
-}
-
-/* Номер лицензии и число мест: столбиком на телефоне, рядом от 640 px. */
-.row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-4);
-}
-
-@media (min-width: 640px) {
-  .row {
-    grid-template-columns: 2fr 1fr;
-  }
 }
 
 .error {

@@ -58,15 +58,15 @@ export default buildConfig({
           path: '/price-list',
           meta: { title: 'Загрузить прайс' },
         },
-        yukiData: {
-          Component: '/components/YukiDataView/YukiDataView#YukiDataView',
-          path: '/yuki-data',
-          meta: { title: 'Прайс и база Юки' },
+        kaddiData: {
+          Component: '/components/KaddiDataView/KaddiDataView#KaddiDataView',
+          path: '/kaddi-data',
+          meta: { title: 'Прайс и база Кадди' },
         },
         assistantCheck: {
           Component: '/components/AssistantCheckView/AssistantCheckView#AssistantCheckView',
           path: '/assistant-check',
-          meta: { title: 'Проверка Юки' },
+          meta: { title: 'Проверка Кадди' },
         },
         legacyContent: {
           Component: '/components/LegacyContentView/LegacyContentView#LegacyContentView',

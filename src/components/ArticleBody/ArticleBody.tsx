@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Picture } from '@/lib/pictures'
 import { type Block, parseInline } from '@/lib/richText'
+import { ImageGallery } from '../ImageGallery/ImageGallery'
 import styles from './ArticleBody.module.css'
 
 type Props = {
@@ -20,6 +21,8 @@ function uniqueKeys(items: string[]): [string, string][] {
   })
 }
 
+const EMAIL = /^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/
+
 /** Ссылка на файл (PDF, картинка в «Медиа»), а не на страницу сайта. */
 const isFile = (href: string) =>
   href.startsWith('/api/media/') || /\.(pdf|jpe?g|png|gif|webp)$/i.test(href)
@@ -33,7 +36,8 @@ function Text({ text }: { text: string }) {
     <>
       {parseInline(text).map((part, i) => {
         const key = `${i}-${part.text}`
-        if (!part.href) return <span key={key}>{part.text}</span>
+        // Адрес почты — обычным текстом, без ссылки (решение владельца 13.10.2026).
+        if (!part.href || EMAIL.test(part.text)) return <span key={key}>{part.text}</span>
         return part.href.startsWith('/') && !isFile(part.href) ? (
           <Link key={key} href={part.href} className={styles.link}>
             {part.text}
@@ -48,7 +52,10 @@ function Text({ text }: { text: string }) {
   )
 }
 
-/** Текст статьи: абзацы, подзаголовки с якорями для оглавления, списки, выноски, картинки. */
+/**
+ * Текст статьи: абзацы, подзаголовки с якорями для оглавления, списки, нумерованные шаги,
+ * таблицы «подпись — значение» (реквизиты), выноски, картинки.
+ */
 export function ArticleBody({ blocks, pictures }: Props) {
   return (
     <div className={styles.body}>
@@ -71,6 +78,36 @@ export function ArticleBody({ blocks, pictures }: Props) {
                 ))}
               </ul>
             )
+          case 'steps':
+            return (
+              <ol key={key} className={styles.steps}>
+                {uniqueKeys(block.items).map(([itemKey, item]) => (
+                  <li key={itemKey} className={styles.step}>
+                    <Text text={item} />
+                  </li>
+                ))}
+              </ol>
+            )
+          case 'fields':
+            return (
+              <dl key={key} className={styles.fields}>
+                {block.items.map((field) =>
+                  field.value ? (
+                    <div key={`${field.label}:${field.value}`} className={styles.field}>
+                      <dt className={styles.label}>{field.label}</dt>
+                      <dd className={styles.value}>
+                        <Text text={field.value} />
+                      </dd>
+                    </div>
+                  ) : (
+                    // Строка без значения («Банковские реквизиты:») — заголовок группы.
+                    <div key={`${field.label}:${field.value}`} className={styles.group}>
+                      <dt>{field.label}</dt>
+                    </div>
+                  ),
+                )}
+              </dl>
+            )
           case 'note':
             return (
               // Выноска в тексте — примечание, а не отдельная область страницы.
@@ -78,6 +115,13 @@ export function ArticleBody({ blocks, pictures }: Props) {
                 <Text text={block.text} />
               </div>
             )
+          case 'gallery': {
+            const found = block.images.flatMap((image) => {
+              const picture = pictures?.get(image.src)
+              return picture ? [{ ...picture, alt: image.alt || picture.alt }] : []
+            })
+            return found.length ? <ImageGallery key={key} pictures={found} /> : null
+          }
           case 'image': {
             const picture = pictures?.get(block.src)
             if (!picture) return null

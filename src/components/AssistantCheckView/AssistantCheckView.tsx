@@ -4,7 +4,7 @@ import { AssistantCheck } from '@/components/AssistantCheck/AssistantCheck'
 import { assistantStatus } from '@/lib/assistant/check'
 import styles from './AssistantCheckView.module.css'
 
-/** Страница «Проверка Юки» в админке: администратор и маркетолог. */
+/** Страница «Проверка Кадди» в админке: администратор и маркетолог. */
 export function AssistantCheckView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
   const { payload, user, i18n } = req
@@ -24,15 +24,15 @@ export function AssistantCheckView({ initPageResult, params, searchParams }: Adm
   return (
     <DefaultTemplate {...template}>
       <div className={styles.root}>
-        <h1 className={styles.title}>Проверка Юки</h1>
+        <h1 className={styles.title}>Проверка Кадди</h1>
         {allowed ? (
           <>
             <p className={styles.lead}>
-              Типичные вопросы клиентов задаются Юки по очереди — так же, как на сайте, с теми же
+              Типичные вопросы клиентов задаются Кадди по очереди — так же, как на сайте, с теми же
               правилами, прайсом и базой знаний. Разговоры не сохраняются и менеджерам не уходят.
-              Под ответом — что Юки искал в прайсе и каталоге и какие цены получил, красным — на что
-              посмотреть: цена не из прайса, срок без прайса, «запрос передан» до передачи, род о
-              себе (нашёл/нашла), длинный ответ.
+              Под ответом — что Кадди искал в прайсе и каталоге и какие цены получил, красным — на
+              что посмотреть: цена не из прайса, срок без прайса, «запрос передан» до передачи, род
+              о себе (нашёл/нашла), длинный ответ.
             </p>
             <p className={status.mode === 'model' ? styles.on : styles.off}>
               <strong>{status.label}</strong>

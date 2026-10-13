@@ -154,7 +154,7 @@ async function productContext(payload: Payload, request: SiteRequest) {
 /** Название страницы для менеджера: товар, семейство, продление или главная. */
 async function pageTitle(payload: Payload, request: SiteRequest) {
   if (request.source === 'renew') return { title: 'Продление лицензий', page: '/renew' }
-  if (request.source === 'assistant') return { title: 'Чат с Юки на сайте', page: request.page }
+  if (request.source === 'assistant') return { title: 'Чат с Кадди на сайте', page: request.page }
   if (request.source === 'home' || request.pageProductId === null)
     return { title: 'Главная: подобрать решение', page: '/' }
   if (request.familySlug) {
@@ -175,7 +175,7 @@ async function pageTitle(payload: Payload, request: SiteRequest) {
   return { title: docs[0]?.title ?? 'Сайт', page: docs[0] ? productPath(docs[0]) : null }
 }
 
-/** Разговор с Юки передан менеджеру: в журнале видно, с какой заявкой. Не вышло — не страшно. */
+/** Разговор с Кадди передан менеджеру: в журнале видно, с какой заявкой. Не вышло — не страшно. */
 async function markHandedOff(
   payload: Payload,
   key: string,
@@ -241,13 +241,13 @@ export async function saveSiteRequest(
     request.conversationId ? findConversation(payload, request.conversationId) : null,
   ])
   const button = request.button || KIND_LABELS[request.kind]
-  // Из чата: что Юки собрал для менеджера (почта, компания, продукт, сроки) — с сервера, не из браузера.
+  // Из чата: что Кадди собрал для менеджера (почта, компания, продукт, сроки) — с сервера, не из браузера.
   const draft = request.source === 'assistant' ? conversation?.snapshot.handoff : undefined
   const details = draft ? handoffDetails(draft) : []
   const comment = [
     request.comment,
     details.length
-      ? `Собрал Юки в чате:\n${details.map((d) => `${d.title}: ${d.value}`).join('\n')}`
+      ? `Собрал Кадди в чате:\n${details.map((d) => `${d.title}: ${d.value}`).join('\n')}`
       : '',
   ]
     .filter(Boolean)

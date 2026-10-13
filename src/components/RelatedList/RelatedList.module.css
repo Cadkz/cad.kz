@@ -44,3 +44,21 @@
   color: var(--color-text-muted);
   font-size: var(--text-xs);
 }
+
+/* Открытая страница: синим и с меткой слева, пункт не исчезает из списка (13.10.2026). */
+.link[aria-current="page"] {
+  position: relative;
+  padding-left: var(--space-3);
+  color: var(--color-blue);
+}
+
+.link[aria-current="page"]::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--color-blue);
+  content: "";
+}

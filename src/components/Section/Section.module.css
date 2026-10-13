@@ -38,29 +38,6 @@
   max-width: var(--measure);
 }
 
-/* Штрих-акцент над заголовком: короткая линия в цветах сияния — метка начала блока. */
-.text::before {
-  content: "";
-  width: var(--space-8);
-  height: var(--space-1);
-  margin-bottom: var(--space-1);
-  border-radius: var(--radius-pill);
-  background: var(--gradient-aurora-line);
-  transform-origin: left center;
-}
-
-/* Прорисовывается слева направо, когда заголовок вошёл в экран (RevealObserver ставит
-   data-reveal: wait — ждёт, in — в экране). Без JavaScript штрих сразу готов. */
-@media (prefers-reduced-motion: no-preference) {
-  .text[data-reveal="wait"]::before {
-    transform: scaleX(0);
-  }
-
-  .text[data-reveal="in"]::before {
-    transition: transform var(--duration-reveal) var(--ease-reveal) var(--delay-reveal-step);
-  }
-}
-
 .sub {
   color: var(--color-text-muted);
   font-size: var(--text-lead);

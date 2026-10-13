@@ -1,0 +1,98 @@
+/* Превью в ряд: высота 160 px, ширина по картинке; переносятся на новую строку. */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.thumb {
+  display: block;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  cursor: zoom-in;
+  transition:
+    border-color var(--duration-fast) var(--ease),
+    box-shadow var(--duration-fast) var(--ease);
+}
+
+.thumb:hover {
+  border-color: var(--color-blue);
+  box-shadow: var(--shadow-sm);
+}
+
+.thumbImage {
+  display: block;
+  width: auto;
+  height: var(--thumb-height);
+  border-radius: var(--radius-sm);
+}
+
+.dialog {
+  max-width: calc(100vw - var(--space-8));
+  max-height: calc(100vh - var(--space-8));
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+
+.dialog::backdrop {
+  background: var(--color-overlay);
+}
+
+.frame {
+  position: relative;
+}
+
+.full {
+  display: block;
+  width: auto;
+  max-width: calc(100vw - var(--space-8));
+  height: auto;
+  max-height: calc(100vh - var(--space-8));
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.control {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  border: 0;
+  border-radius: var(--radius-round);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  color: var(--color-navy);
+  cursor: pointer;
+}
+
+.control:hover {
+  color: var(--color-blue);
+}
+
+.close {
+  top: var(--space-2);
+  right: var(--space-2);
+}
+
+.prev,
+.next {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.prev {
+  left: var(--space-2);
+}
+
+.next {
+  right: var(--space-2);
+}

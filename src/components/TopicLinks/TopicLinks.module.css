@@ -1,8 +1,24 @@
 .list {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-2);
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-4);
+}
+
+/* Подпись ряда: на телефоне строкой над кнопками, от 640 px — слева от них. */
+.label {
+  flex-basis: 100%;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+@media (min-width: 640px) {
+  .label {
+    flex-basis: auto;
+    min-width: calc(var(--control-height) * 3);
+  }
 }
 
 .chip {

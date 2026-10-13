@@ -2,6 +2,7 @@ import type { Where } from 'payload'
 import { cache } from 'react'
 import type { NewsCardData } from '@/components/NewsCard/NewsCard'
 import type { Media, Publication, Topic } from '../../payload-types'
+import { NEWS_VENDORS, newsVendor, vendorWhere } from '../domain/newsVendors.mjs'
 import { formatDate } from './format'
 import { newsHref } from './navigationHrefs'
 import { cms } from './payload'
@@ -77,14 +78,21 @@ export async function getPublications({
   limit = 12,
   page = 1,
   topic,
+  vendor,
+  promo,
 }: {
   kinds?: PublicationKind[]
   limit?: number
   page?: number
   /** Адрес темы (slug из «Тем новостей и статей»). */
   topic?: string | null
+  /** Производитель (?vendor=…, src/domain/newsVendors.mjs). */
+  vendor?: string | null
+  /** Акции: current — действующие, archive — прошедшие; не задано — все. */
+  promo?: PromoState | null
 } = {}) {
   const payload = await cms()
+  const byVendor = vendor ? newsVendor(vendor) : null
   const result = await payload.find({
     collection: 'publications',
     where: {
@@ -92,6 +100,8 @@ export async function getPublications({
         { status: { equals: 'published' } },
         { kind: { in: kinds } },
         ...(topic ? [{ 'theme.slug': { equals: topic } }] : []),
+        ...(byVendor ? [vendorWhere(byVendor)] : []),
+        ...(promo ? [promoWhere(promo)] : []),
       ],
     },
     sort: '-publishedAt',
@@ -102,47 +112,74 @@ export async function getPublications({
   return { docs: result.docs, totalPages: result.totalPages, page: result.page ?? 1 }
 }
 
-/** Сколько дней акция без даты окончания считается свежей для главной. */
+/** Сколько дней акция без даты окончания считается действующей. */
 const PROMO_FRESH_DAYS = 180
 
+export type PromoState = 'current' | 'archive'
+
 /**
- * Действующие акции для главной: дата «действует до» не прошла, а если её нет — опубликована
- * не раньше полугода назад. Прошедшие остаются в списке акций, но на главной не висят.
+ * Действующая акция: дата «действует до» не прошла, а если её нет — опубликована не раньше
+ * полугода назад. Архив — все остальные. Тот же признак на главной и во вкладках «Акций».
  */
-export async function getCurrentPromotions(limit: number) {
-  const payload = await cms()
+function promoWhere(state: PromoState): Where {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
   const fresh = new Date(now.getTime() - PROMO_FRESH_DAYS * 86_400_000).toISOString()
-  const { docs } = await payload.find({
-    collection: 'publications',
-    where: {
-      and: [
-        { status: { equals: 'published' } },
-        { kind: { equals: 'promotion' } },
+  if (state === 'current')
+    return {
+      or: [
+        { endsAt: { greater_than_equal: today } },
         {
-          or: [
-            { endsAt: { greater_than_equal: today } },
+          and: [
+            { endsAt: { exists: false } },
             {
-              and: [
-                { endsAt: { exists: false } },
-                {
-                  or: [
-                    { publishedAt: { greater_than_equal: fresh } },
-                    { publishedAt: { exists: false } },
-                  ],
-                },
+              or: [
+                { publishedAt: { greater_than_equal: fresh } },
+                { publishedAt: { exists: false } },
               ],
             },
           ],
         },
       ],
-    },
-    sort: '-publishedAt',
-    limit,
-    depth: 1,
-  })
+    }
+  return {
+    or: [
+      { endsAt: { less_than: today } },
+      { and: [{ endsAt: { exists: false } }, { publishedAt: { less_than: fresh } }] },
+    ],
+  }
+}
+
+/** Действующие акции для главной (прошедшие — во вкладке «Архивные» на странице акций). */
+export async function getCurrentPromotions(limit: number) {
+  const { docs } = await getPublications({ kinds: ['promotion'], promo: 'current', limit })
   return docs
+}
+
+/**
+ * Производители, о которых есть опубликованные материалы этого типа, — кнопки над списком.
+ * Для акций — только среди действующих или архивных, смотря какая вкладка открыта.
+ */
+export async function getNewsVendors(kinds: PublicationKind[], promo?: PromoState | null) {
+  const payload = await cms()
+  const counts = await Promise.all(
+    NEWS_VENDORS.map((vendor) =>
+      payload.count({
+        collection: 'publications',
+        where: {
+          and: [
+            { status: { equals: 'published' } },
+            { kind: { in: kinds } },
+            vendorWhere(vendor),
+            ...(promo ? [promoWhere(promo)] : []),
+          ],
+        },
+      }),
+    ),
+  )
+  return NEWS_VENDORS.filter((_, index) => (counts[index]?.totalDocs ?? 0) > 0).map(
+    ({ slug, title }) => ({ slug, title }),
+  )
 }
 
 export async function getPublication(slug: string) {

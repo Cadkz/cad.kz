@@ -3,7 +3,7 @@ import type { HandoffDraft, StoredMessage } from '@/domain/assistant.mjs'
 import type { AssistantMode } from './provider'
 
 /**
- * Разговор с Юки хранится на сервере в журнале «Диалоги консультанта» (коллекция conversations):
+ * Разговор с Кадди хранится на сервере в журнале «Диалоги консультанта» (коллекция conversations):
  * ключ — UUID разговора из браузера, снимок — сообщения. Из браузера приходит только новое
  * сообщение, поэтому история в лиде Битрикс24 — ровно то, что видел клиент.
  */
@@ -15,7 +15,7 @@ export type ConversationSnapshot = {
   clientHash: string
   /** Номер заявки, с которой разговор передан менеджеру. */
   requestNumber?: string
-  /** Что Юки собрал для передачи менеджеру (инструмент handoffToManager): почта, компания, задача… */
+  /** Что Кадди собрал для передачи менеджеру (инструмент handoffToManager): почта, компания, задача… */
   handoff?: HandoffDraft
 }
 

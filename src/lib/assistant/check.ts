@@ -10,7 +10,7 @@ export function assistantStatus() {
   const mode = assistantMode()
   if (mode === 'model') return { mode, label: `Модель подключена: ${modelSettings().model}` }
   if (mode === 'demo')
-    return { mode, label: 'Демо-режим: модель не подключена, Юки ищет по каталогу' }
+    return { mode, label: 'Демо-режим: модель не подключена, Кадди ищет по каталогу' }
   return { mode: 'off' as const, label: 'Консультант выключен' }
 }
 
@@ -26,7 +26,7 @@ export type CheckResult =
   | { ok: false; error: string; status: number }
 
 /**
- * Один вопрос со страницы «Проверка Юки»: тот же ответ, что получил бы клиент (правила, инструменты,
+ * Один вопрос со страницы «Проверка Кадди»: тот же ответ, что получил бы клиент (правила, инструменты,
  * цены сервера), но разговор не сохраняется и в журнал «Диалоги консультанта» не попадает.
  */
 export async function checkQuestion(payload: Payload, question: unknown): Promise<CheckResult> {
@@ -54,7 +54,7 @@ export async function checkQuestion(payload: Payload, question: unknown): Promis
   } catch (error) {
     const status = error instanceof ModelError ? error.status : null
     console.error(
-      'Проверка Юки: модель не ответила',
+      'Проверка Кадди: модель не ответила',
       error instanceof Error ? error.name : 'Error',
       status,
     )

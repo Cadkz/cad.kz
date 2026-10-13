@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ASSISTANT_LIMITS, type AssistantCard } from '@/domain/assistant.mjs'
 
-/** Юки подготовил передачу менеджеру: имя и телефон — в форму, остальное — списком. */
+/** Кадди подготовил передачу менеджеру: имя и телефон — в форму, остальное — списком. */
 export type HandoffPrefill = {
   name: string
   phone: string
@@ -45,8 +45,8 @@ function writeStored(value: Stored) {
 }
 
 /**
- * Состояние чата с Юки: сообщения, ожидание ответа, ошибка. История — на сервере, здесь копия
- * для показа. Новый вопрос нельзя отправить, пока Юки отвечает на прошлый.
+ * Состояние чата с Кадди: сообщения, ожидание ответа, ошибка. История — на сервере, здесь копия
+ * для показа. Новый вопрос нельзя отправить, пока Кадди отвечает на прошлый.
  */
 export function useAssistant() {
   const [conversationId, setConversationId] = useState('')

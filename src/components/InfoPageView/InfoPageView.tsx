@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { ArticleBody } from '@/components/ArticleBody/ArticleBody'
-import { AsideContacts } from '@/components/AsideContacts/AsideContacts'
 import { AskManager } from '@/components/AskManager/AskManager'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
@@ -15,10 +14,27 @@ import { bodyPictures } from '@/lib/pictures'
 import { imageSources, parseBody } from '@/lib/richText'
 import { pageMetadata } from '@/lib/seo'
 
-/** Страницы, под текстом которых стоит блок «Задать вопрос менеджеру». */
-const QUESTIONS: Record<string, { title: string; message: string }> = {
-  howto: { title: 'Вопросы по покупке', message: 'Здравствуйте! У меня вопрос по покупке.' },
-  delivery: { title: 'Вопросы по доставке', message: 'Здравствуйте! У меня вопрос по доставке.' },
+const PRIVACY = pagePath('privacy-policy')
+
+/** Страницы, под текстом которых стоит блок вопросов с Кадди. */
+const QUESTIONS: Record<
+  string,
+  { title: string; phrase: string; message: string; pose: 'greeting' | 'neutral' }
+> = {
+  howto: {
+    title: 'Вопросы по покупке',
+    phrase:
+      'Не знаете, какую редакцию взять или как оформить счёт на организацию? Спросите — подскажу или позову менеджера.',
+    message: 'Здравствуйте! У меня вопрос по покупке.',
+    pose: 'greeting',
+  },
+  delivery: {
+    title: 'Вопросы по доставке',
+    phrase:
+      'Лицензии приходят на почту быстрее любого курьера. Если что-то непонятно со сроками или получением — спросите.',
+    message: 'Здравствуйте! У меня вопрос по доставке.',
+    pose: 'neutral',
+  },
 }
 
 /** Метаданные текстовой страницы: перенесённые title и description или название. */
@@ -40,7 +56,7 @@ export async function infoPageMetadata(slug: string) {
 export async function InfoPageView({ slug }: { slug: string }) {
   const page = await getPage(slug)
   if (!page) redirect(slug === 'about' ? '/' : '/about')
-  const blocks = parseBody(page.body)
+  const blocks = parseBody(page.body, page.title)
   const questions = QUESTIONS[slug]
   const [links, pictures, contacts] = await Promise.all([
     getInfoLinks(),
@@ -61,24 +77,26 @@ export async function InfoPageView({ slug }: { slug: string }) {
         <Breadcrumbs items={crumbs} />
         <ReadingLayout
           aside={
-            <>
-              <RelatedList
-                title="О компании"
-                items={[
-                  ...links.filter((link) => link.href !== pagePath(slug)),
-                  {
-                    id: 0,
-                    href: '/contacts',
-                    title: 'Контакты',
-                    date: null,
-                    topic: null,
-                    excerpt: null,
-                    cover: null,
-                  },
-                ]}
-              />
-              <AsideContacts contacts={contacts} />
-            </>
+            // Все пункты всегда по порядку, открытая страница подсвечена (13.10.2026). Карточки
+            // контактов нет: телефоны и почта есть в шапке и подвале.
+            <RelatedList
+              title="О компании"
+              current={pagePath(slug)}
+              items={[
+                ...links.filter((link) => link.href !== PRIVACY),
+                {
+                  id: 0,
+                  href: '/contacts',
+                  title: 'Контакты',
+                  date: null,
+                  topic: null,
+                  excerpt: null,
+                  cover: null,
+                },
+                // Политика — последней: служебная страница, ссылку на неё ждут в конце списка.
+                ...links.filter((link) => link.href === PRIVACY),
+              ]}
+            />
           }
         >
           <PageIntro title={page.title} lead={page.lead} />

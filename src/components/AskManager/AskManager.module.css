@@ -1,37 +1,79 @@
+/* Блок вопросов с Кадди: текст и действия слева, кошка справа внизу смотрит на текст. */
 .box {
+  position: relative;
   display: flex;
-  flex-direction: column;
   gap: var(--space-4);
-  max-width: var(--measure);
-  margin-top: var(--space-8);
   padding: var(--space-6);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
 }
 
+.wide {
+  flex-direction: column-reverse;
+  max-width: var(--measure);
+  margin-top: var(--space-10);
+}
+
+.aside {
+  display: flow-root;
+  padding: var(--space-5);
+}
+
+.aside .mascot {
+  float: right;
+  margin: 0 0 var(--space-2) var(--space-3);
+}
+
+.aside .text {
+  display: block;
+}
+
+.aside .text > * + * {
+  margin-top: var(--space-3);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
 .title {
+  color: var(--color-navy);
   font-size: var(--text-h3);
+  line-height: var(--leading-snug);
+}
+
+.aside .title {
+  font-size: var(--text-h4);
+}
+
+.phrase {
+  color: var(--color-gray-700);
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
 }
 
 .actions {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
 }
 
 .whatsapp {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  height: var(--control-height);
-  padding: 0 var(--space-5);
+  height: var(--control-height-sm);
+  padding: 0 var(--space-4);
   border: 1px solid var(--color-blue-mid);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-navy);
-  font-size: var(--text-body);
+  font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   white-space: nowrap;
   transition: border-color var(--duration-fast) var(--ease);
@@ -46,25 +88,47 @@
   color: var(--color-whatsapp);
 }
 
-.line {
+.lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+}
+
+.phone {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   color: var(--color-navy);
-  font-size: var(--text-body);
   font-weight: var(--weight-semibold);
   white-space: nowrap;
 }
 
-.line:hover {
+.phone:hover {
   color: var(--color-blue);
 }
 
+.email {
+  color: var(--color-text-muted);
+}
+
+.aside .lines {
+  flex-direction: column;
+}
+
+.mascot {
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+/* На телефоне кошка над текстом у правого края, от 640 px — справа внизу. */
 @media (min-width: 640px) {
-  .actions {
+  .wide {
     flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-6);
+    align-items: flex-end;
+    justify-content: space-between;
   }
 }

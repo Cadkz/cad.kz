@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { AsideContacts } from '@/components/AsideContacts/AsideContacts'
+import { AskManager } from '@/components/AskManager/AskManager'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
@@ -20,7 +20,7 @@ export const metadata: Metadata = pageMetadata({
 })
 
 /**
- * «Продление лицензий» — шаблон «Чтение»: слева форма заявки, справа шаги и контакты.
+ * «Продление лицензий» — шаблон «Чтение»: слева форма заявки, справа шаги и Кадди с вопросами.
  * ?program=AutoCAD — программа выбрана сразу (ссылки с главной и из шапки).
  */
 export default async function RenewPage({ searchParams }: Props) {
@@ -35,7 +35,13 @@ export default async function RenewPage({ searchParams }: Props) {
           aside={
             <>
               <RenewSteps />
-              <AsideContacts contacts={contacts} />
+              <AskManager
+                contacts={contacts}
+                layout="aside"
+                title="Есть вопросы?"
+                phrase="Не помните, какая версия стоит, или сомневаетесь в редакции? Давайте попробую помочь."
+                message="Здравствуйте! У меня вопрос по продлению лицензии."
+              />
             </>
           }
         >

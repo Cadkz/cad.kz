@@ -7,7 +7,7 @@ import { Mascot } from '../Mascot/Mascot'
 import styles from './CtaBanner.module.css'
 
 /**
- * Тёмный баннер с призывом внизу страницы. Тексты — из CMS. Мелкий Юки с лупой сидит на нижнем
+ * Тёмный баннер с призывом внизу страницы. Тексты — из CMS. Мелкий Кадди с лупой сидит на нижнем
  * крае баннера между чертежом двух КП и кнопкой: «сравним цену». Последний акцент страницы:
  * внутри переливается сияние, свечения вокруг баннера нет.
  */
@@ -26,7 +26,7 @@ export function CtaBanner({ cta }: { cta: Home['cta'] }) {
               {cta.text && <p className={styles.lead}>{cta.text}</p>}
             </div>
             <BannerArt name="compare" className={styles.art} onScroll />
-            <Mascot pose="search" size="xs" className={styles.yuki} />
+            <Mascot pose="search" size="xs" className={styles.kaddi} />
             {cta.link && (
               <ButtonLink href={cta.link.href} variant="light">
                 {cta.link.label}

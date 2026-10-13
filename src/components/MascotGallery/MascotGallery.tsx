@@ -4,7 +4,7 @@ import styles from './MascotGallery.module.css'
 
 type Item = { pose: MascotPose; size: MascotSize; title: string; where: string }
 
-/** Позы Юки с тем размером, в каком они стоят (или будут стоять) на сайте. */
+/** Позы Кадди с тем размером, в каком они стоят (или будут стоять) на сайте. */
 const ITEMS: Item[] = [
   { pose: 'not-found', size: 'lg', title: 'С чертежом', where: 'Страница 404' },
   { pose: 'empty-cart', size: 'md', title: 'С коробкой', where: 'Пустая корзина' },
@@ -37,7 +37,7 @@ const ITEMS: Item[] = [
   },
 ]
 
-/** Служебная витрина поз Юки для демоверсии: проверить вид и моргание. */
+/** Служебная витрина поз Кадди для демоверсии: проверить вид и моргание. */
 export function MascotGallery() {
   return (
     <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }} className={styles.list}>

@@ -12,7 +12,7 @@ import styles from './AssistantHandoff.module.css'
 
 type Props = {
   conversationId: string
-  /** Что Юки собрал в чате: имя и телефон подставлены в поля, остальное уйдёт менеджеру списком. */
+  /** Что Кадди собрал в чате: имя и телефон подставлены в поля, остальное уйдёт менеджеру списком. */
   prefill?: HandoffPrefill
   whatsappHref: string | null
   onBack: () => void
@@ -20,8 +20,8 @@ type Props = {
 
 /**
  * «Передать менеджеру» из чата: имя, телефон, комментарий, согласие. Заявка уходит в /api/request
- * с ключом разговора — переписку и собранное Юки (почта, компания, продукт, сроки) сервер берёт
- * из своей базы и кладёт в лид Битрикс24. Если Юки уже собрал контакты, они подставлены: клиент
+ * с ключом разговора — переписку и собранное Кадди (почта, компания, продукт, сроки) сервер берёт
+ * из своей базы и кладёт в лид Битрикс24. Если Кадди уже собрал контакты, они подставлены: клиент
  * проверяет и подтверждает сам. В демо честно говорим, что менеджерам заявка не уходит.
  */
 export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack }: Props) {
@@ -57,7 +57,7 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
           source: 'assistant',
           conversationId,
           page: window.location.pathname,
-          button: 'Чат с Юки: передать менеджеру',
+          button: 'Чат с Кадди: передать менеджеру',
           items: [],
         }),
       })
@@ -106,7 +106,7 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
           <TextField
             label="Имя"
             name="name"
-            id="yuki-name"
+            id="kaddi-name"
             autoComplete="name"
             defaultValue={prefill?.name}
             error={errors.name}
@@ -114,7 +114,7 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
           <TextField
             label="Телефон"
             name="phone"
-            id="yuki-phone"
+            id="kaddi-phone"
             type="tel"
             autoComplete="tel"
             placeholder="+7 701 123-45-67"
@@ -124,14 +124,14 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
           <TextAreaField
             label="Комментарий"
             name="comment"
-            id="yuki-comment"
+            id="kaddi-comment"
             hint="Необязательно. Например, когда удобно говорить."
             rows={2}
             error={errors.comment}
           />
           <CheckboxField
             name="consent"
-            id="yuki-consent"
+            id="kaddi-consent"
             label={CONSENT_TEXT}
             error={errors.consent}
           />

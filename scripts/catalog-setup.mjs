@@ -5,13 +5,15 @@
 // другие названия для поиска; актуализация версий по сайтам производителей; продления ПАССАТ
 // — кнопкой «Обновить версию»; пакеты и девять задач GEO5 в каталоге; блок «Официальный партнёр» на главной;
 // каталог по CRM (САПР и черчение, широкоформат, сценарии покупки, популярные решения);
-// дополнения к AutoCAD, Revit, Inventor (Требуется базовое ПО) и AutoCAD LT. Выполняется один раз (отметка в журнале
+// дополнения к AutoCAD, Revit, Inventor (Требуется базовое ПО) и AutoCAD LT; политика
+// конфиденциальности со старого сайта; страница «Внедрение BIM». Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { setupAddons } from '../src/lib/addonsSetup.ts'
+import { setupBimPage } from '../src/lib/bimSetup.ts'
 import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
@@ -23,6 +25,7 @@ import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
 import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
 import { setupPriorities } from '../src/lib/prioritySetup.ts'
+import { setupPrivacyPage } from '../src/lib/privacySetup.ts'
 import { setupFamilyRenew } from '../src/lib/renewSetup.ts'
 import { setupSearchAliases } from '../src/lib/searchSetup.ts'
 import { setupMepTasks } from '../src/lib/tasksSetup.ts'
@@ -139,6 +142,10 @@ try {
   const addons = await setupAddons(payload)
   if (!addons) console.log('Дополнения к AutoCAD, Revit, Inventor уже связаны.')
   else for (const line of addons) console.log(`Дополнения — ${line}`)
+  const privacy = await setupPrivacyPage(payload)
+  console.log(privacy ?? 'Политика конфиденциальности уже перенесена.')
+  const bim = await setupBimPage(payload)
+  console.log(bim ?? 'Страница «Внедрение BIM» уже создана.')
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1

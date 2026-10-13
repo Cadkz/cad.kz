@@ -84,3 +84,24 @@
   color: var(--color-text-muted);
   font-size: var(--text-sm);
 }
+
+/* Крупная карточка: обложка 16 : 9, на компьютере тянется на всю высоту колонки рядом. */
+.large .thumb {
+  aspect-ratio: 16 / 9;
+}
+
+.large .title {
+  font-size: var(--text-h3);
+}
+
+@media (min-width: 960px) {
+  .large .thumb {
+    flex: 1;
+    aspect-ratio: auto;
+    min-height: calc(var(--control-height) * 6);
+  }
+
+  .large .body {
+    flex: 0 0 auto;
+  }
+}

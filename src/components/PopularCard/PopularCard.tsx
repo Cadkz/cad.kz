@@ -5,24 +5,20 @@ import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './PopularCard.module.css'
 
 /**
- * Плитка «Популярных решений»: логотип и название в одну строку, высота 64 px.
- * У известных программ (AutoCAD, Revit, GEO5…) — логотип с сайта производителя и фирменный
- * цвет: лёгкая подложка, рамка и полоска слева. Остальные — картинка товара или значок раздела.
+ * Плитка «Популярных решений»: логотип и название в одну строку, высота 48 px, цвета CAD.kz.
+ * У известных программ (AutoCAD, Revit, GEO5…) — логотип с сайта производителя, остальные —
+ * картинка товара или значок раздела.
  */
 export function PopularCard({ card }: { card: PopularCardData }) {
-  const brandClass = card.brand ? styles[card.brand.key] : undefined
   return (
-    <Link
-      href={card.href}
-      className={[styles.tile, card.brand && styles.branded, brandClass].filter(Boolean).join(' ')}
-    >
+    <Link href={card.href} className={styles.tile}>
       <span className={styles.logo}>
         {card.brand ? (
           <Image
             src={card.brand.logo}
             alt=""
-            width={80}
-            height={80}
+            width={48}
+            height={48}
             unoptimized
             className={styles.image}
           />
@@ -32,11 +28,11 @@ export function PopularCard({ card }: { card: PopularCardData }) {
             alt=""
             width={card.picture.width}
             height={card.picture.height}
-            sizes="48px"
+            sizes="24px"
             className={styles.image}
           />
         ) : (
-          <SectionIcon name={card.icon} size={24} />
+          <SectionIcon name={card.icon} size={20} />
         )}
       </span>
       {/* Неразрывный дефис: «3D-сканеры», «ЛИРА-FEM» не рвутся по дефису в узкой плитке. */}

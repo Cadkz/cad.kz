@@ -113,6 +113,7 @@ const rules = [
   [/^\/about\/delivery\/?$/i, { to: '/about/delivery' }],
   [/^\/about\/guaranty\/?$/i, { to: '/about/guaranty' }],
   [/^\/about\/essentials\.php$/i, { to: '/about/requisites' }],
+  [/^\/about\/privacy-policy\.php$/i, { to: '/about/privacy-policy' }],
   [/^\/contacts\/?$/i, { to: '/contacts' }],
   [/^\/about\/news(\/|$)/i, { to: '/news' }],
   [/^\/about\/actions(\/|$)/i, { to: '/news?kind=promotion' }],
