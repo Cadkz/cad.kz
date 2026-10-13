@@ -134,7 +134,8 @@ test('правила владельца и характер Юки: роль, ф
   const [rules, state] = systemPrompt(/** @type {any} */ (context))
   // Роль и формат владельца.
   assert.match(rules, /Ты — Юки, виртуальный ассистент компании CAD\.kz/)
-  assert.match(rules, /гендер мужской: «отправил», «подготовил», «проверил»/)
+  assert.match(rules, /без рода/)
+  assert.doesNotMatch(rules, /Зафиксировал|Я передал|гендер мужской/)
   assert.match(rules, /в пределах 10 слов, либо 2–3 коротких предложения/)
   assert.match(rules, /имя → телефон → почта → компания/)
   assert.match(rules, /ул\. А\. Пушкина, дом 6\/1, ВП-1/)
@@ -169,11 +170,11 @@ test('состояние разговора: нет прайса, обед, пе
   assert.match(state({ handoff: { state: 'prepared' } }), /ещё не подтвердил/)
   assert.match(
     state({ handoff: { state: 'sent', number: 'REQ-1', delivered: false } }),
-    /REQ-1 сохранена на сайте, но менеджерам из чата пока не уходит.*Не пиши «передал»/,
+    /REQ-1 сохранена на сайте, но менеджерам из чата пока не уходит.*Не пиши, что запрос передан/,
   )
   assert.match(
     state({ handoff: { state: 'sent', number: 'REQ-2', delivered: true } }),
-    /REQ-2 у менеджера\. Можно писать «Я передал…»/,
+    /REQ-2 у менеджера\. Можно писать «Ваш запрос передан…»/,
   )
 })
 
