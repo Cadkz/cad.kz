@@ -5,8 +5,8 @@ type Props = {
   name: DrawingName
   className?: string
   /**
-   * Баннер ниже первого экрана: чертёж прорисовывается, пока баннер входит в экран при
-   * прокрутке, а не сразу при загрузке, когда его ещё никто не видит.
+   * Баннер ниже первого экрана: чертёж прорисовывается, когда баннер вошёл в экран при
+   * прокрутке (RevealObserver), а не сразу при загрузке, когда его ещё никто не видит.
    */
   onScroll?: boolean
 }
@@ -20,7 +20,11 @@ export function BannerArt({ name, className, onScroll = false }: Props) {
   const drawing = DRAWINGS[name]
   const classes = [className, onScroll && styles.scroll].filter(Boolean).join(' ')
   return (
-    <div className={classes || undefined} aria-hidden="true">
+    <div
+      className={classes || undefined}
+      aria-hidden="true"
+      data-reveal={onScroll ? '' : undefined}
+    >
       <svg
         className={styles.svg}
         viewBox={drawing.viewBox}

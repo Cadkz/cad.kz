@@ -20,7 +20,7 @@ const glows = { left: styles.glowLeft, right: styles.glowRight }
 
 /**
  * Секция страницы: штрих-акцент, заголовок h2, подзаголовок, ссылка «Все …» и содержимое
- * в рамке сайта. Штрих над заголовком прорисовывается, когда секция входит в экран.
+ * в рамке сайта. Штрих над заголовком прорисовывается, когда заголовок входит в экран.
  */
 export function Section({ title, sub, action, id, tone = 'plain', glow, children }: Props) {
   const headingId = id ? `${id}-title` : undefined
@@ -29,7 +29,7 @@ export function Section({ title, sub, action, id, tone = 'plain', glow, children
     <section id={id} className={classes.filter(Boolean).join(' ')} aria-labelledby={headingId}>
       <Container>
         <div className={styles.head}>
-          <div className={styles.text}>
+          <div className={styles.text} data-reveal="">
             <h2 id={headingId}>{title}</h2>
             {sub && <p className={styles.sub}>{sub}</p>}
           </div>

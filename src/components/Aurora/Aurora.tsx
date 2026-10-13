@@ -22,5 +22,11 @@ const variants = { glow: styles.glow, halo: styles.halo, floor: styles.floor }
  */
 export function Aurora({ variant, onScroll = false, className }: Props) {
   const classes = [styles.aurora, variants[variant], onScroll && styles.onScroll, className]
-  return <span className={classes.filter(Boolean).join(' ')} aria-hidden="true" />
+  return (
+    <span
+      className={classes.filter(Boolean).join(' ')}
+      aria-hidden="true"
+      data-reveal={onScroll ? '' : undefined}
+    />
+  )
 }

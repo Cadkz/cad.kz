@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { preload } from 'react-dom'
 import { CartProvider } from '@/components/CartProvider/CartProvider'
+import { RevealObserver } from '@/components/RevealObserver/RevealObserver'
 import { SiteFooter } from '@/components/SiteFooter/SiteFooter'
 import { SiteHeader } from '@/components/SiteHeader/SiteHeader'
 import { DEFAULT_SHARE_IMAGE, isProduction, siteUrl } from '@/lib/seo'
@@ -46,6 +47,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {children}
           <SiteFooter />
         </CartProvider>
+        <RevealObserver />
       </body>
     </html>
   )

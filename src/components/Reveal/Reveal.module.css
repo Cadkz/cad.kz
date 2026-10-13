@@ -1,27 +1,27 @@
-/* Появление при прокрутке: блок проявляется, пока входит в экран (первые 60 % своей высоты).
-   Уже видимое при загрузке и пролистанное выше остаётся на месте — анимация привязана
-   к положению на экране, а не ко времени. */
+/* Появление при прокрутке. RevealObserver ставит data-reveal: wait — блок ниже экрана, ждёт;
+   in — вошёл в экран, проявляется и поднимается по времени, плавно до конца. Уже видимое
+   при загрузке не трогается. Без JavaScript атрибут пустой — блок виден сразу. */
 @media (prefers-reduced-motion: no-preference) {
-  @supports (animation-timeline: view()) {
-    .reveal {
-      animation: rise linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 60%;
-    }
-
-    .step1 {
-      animation-range: entry 8% entry 68%;
-    }
-
-    .step2 {
-      animation-range: entry 16% entry 76%;
-    }
-  }
-}
-
-@keyframes rise {
-  from {
+  .reveal[data-reveal="wait"] {
     opacity: 0;
     transform: translateY(var(--space-6));
+  }
+
+  .reveal[data-reveal="in"] {
+    transition:
+      opacity var(--duration-reveal) var(--ease-reveal),
+      transform var(--duration-reveal) var(--ease-reveal);
+  }
+
+  .step1[data-reveal="in"] {
+    transition-delay: var(--delay-reveal-step);
+  }
+
+  .step2[data-reveal="in"] {
+    transition-delay: calc(var(--delay-reveal-step) * 2);
+  }
+
+  .step3[data-reveal="in"] {
+    transition-delay: calc(var(--delay-reveal-step) * 3);
   }
 }

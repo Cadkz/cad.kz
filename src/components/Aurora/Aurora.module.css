@@ -11,19 +11,20 @@
 .glow {
   inset: -20%;
   background:
-    radial-gradient(40% 50% at 78% 22%, var(--aurora-dark-sky), transparent 70%),
-    radial-gradient(38% 46% at 22% 92%, var(--aurora-dark-violet), transparent 70%);
+    radial-gradient(30% 38% at 72% 30%, var(--fade-dark-sky)),
+    radial-gradient(28% 34% at 28% 70%, var(--fade-dark-violet));
 }
 
 /* Под тёмным баннером: цветное свечение выглядывает снизу и по бокам. Родитель-обёртка
-   баннера не обрезает его, а секция обрезает по ширине (overflow-x: clip). */
+   баннера не обрезает его, а секция обрезает по ширине (overflow-x: clip).
+   Каждое пятно целиком внутри слоя (центр ± радиус от 0 до 100 %) и гаснет до нуля по S-кривой
+   (--fade-*): края свечения нет, ни сбоку, ни снизу, при любом сдвиге перелива. */
 .halo {
-  inset: 20% calc(var(--space-8) * -1) calc(var(--space-12) * -1);
-  /* Каждое пятно гаснет до прозрачного раньше края слоя — краёв у свечения не видно. */
+  inset: 20% calc(var(--space-8) * -1) calc(var(--space-16) * -1);
   background:
-    radial-gradient(26% 44% at 24% 56%, var(--aurora-halo-sky), transparent),
-    radial-gradient(26% 44% at 76% 58%, var(--aurora-halo-violet), transparent),
-    radial-gradient(36% 34% at 50% 64%, var(--aurora-halo-blue), transparent);
+    radial-gradient(16% 42% at 17% 56%, var(--fade-halo-sky)),
+    radial-gradient(16% 42% at 83% 56%, var(--fade-halo-violet)),
+    radial-gradient(40% 30% at 50% 68%, var(--fade-halo-blue));
 }
 
 /* Снизу светлого блока: пастельный перелив поднимается от нижнего края. */
@@ -31,15 +32,15 @@
   /* С запасом за края: при переливе край слоя не должен показаться (родитель обрезает). */
   inset: 0 calc(var(--space-8) * -1) calc(var(--space-6) * -1);
   background:
-    radial-gradient(42% 80% at 14% 100%, var(--aurora-light-sky), transparent),
-    radial-gradient(40% 85% at 86% 100%, var(--aurora-light-violet), transparent),
-    radial-gradient(55% 50% at 50% 105%, var(--aurora-light-blue), transparent);
+    radial-gradient(42% 80% at 14% 100%, var(--fade-light-sky)),
+    radial-gradient(40% 85% at 86% 100%, var(--fade-light-violet)),
+    radial-gradient(55% 50% at 50% 105%, var(--fade-light-blue));
   transform-origin: 50% 100%;
 }
 
 @media (min-width: 640px) {
   .halo {
-    inset: 20% calc(var(--space-16) * -1) calc(var(--space-16) * -1);
+    inset: 20% calc(var(--space-16) * -2) calc(var(--space-20) * -1);
   }
 }
 
@@ -49,17 +50,14 @@
     animation: drift var(--duration-drift) var(--ease-drift) infinite alternate;
   }
 
-  /* Ниже первого экрана свечение разгорается, пока блок входит в экран. */
-  @supports (animation-timeline: view()) {
-    .onScroll {
-      animation:
-        drift var(--duration-drift) var(--ease-drift) infinite alternate,
-        kindle linear both;
-      animation-timeline: auto, view();
-      animation-range:
-        normal,
-        entry 10% cover 40%;
-    }
+  /* Ниже первого экрана свечение разгорается, когда блок вошёл в экран (RevealObserver
+     ставит data-reveal: wait — ждёт, in — в экране). Без JavaScript свечение видно сразу. */
+  .onScroll[data-reveal="wait"] {
+    opacity: 0;
+  }
+
+  .onScroll[data-reveal="in"] {
+    transition: opacity var(--duration-kindle) var(--ease-reveal);
   }
 }
 
@@ -70,11 +68,5 @@
 
   to {
     transform: translate3d(var(--space-6), calc(var(--space-3) * -1), 0) scale(1.06);
-  }
-}
-
-@keyframes kindle {
-  from {
-    opacity: 0;
   }
 }
