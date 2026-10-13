@@ -3,10 +3,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ASSISTANT_LIMITS, type AssistantCard } from '@/domain/assistant.mjs'
 
+/** Юки подготовил передачу менеджеру: имя и телефон — в форму, остальное — списком. */
+export type HandoffPrefill = {
+  name: string
+  phone: string
+  details: { title: string; value: string }[]
+}
+
 export type ChatMessage = {
   role: 'user' | 'assistant'
   content: string
   cards?: AssistantCard[]
+  handoff?: HandoffPrefill
 }
 
 type Stored = { id: string; messages: ChatMessage[] }
@@ -79,7 +87,12 @@ export function useAssistant() {
         if (response.ok && typeof result.reply === 'string')
           setMessages((list) => [
             ...list,
-            { role: 'assistant', content: result.reply, cards: result.cards ?? [] },
+            {
+              role: 'assistant',
+              content: result.reply,
+              cards: result.cards ?? [],
+              ...(result.handoff ? { handoff: result.handoff } : {}),
+            },
           ])
         else
           setError(

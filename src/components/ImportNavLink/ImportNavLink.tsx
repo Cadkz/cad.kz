@@ -2,7 +2,7 @@ import type { ServerProps } from 'payload'
 import styles from './ImportNavLink.module.css'
 
 /**
- * Свои страницы в меню админки: «Загрузить прайс» и «Проверка Юки» — администратору и маркетологу,
+ * Свои страницы в меню админки: «Загрузить прайс», «Прайс и база Юки» и «Проверка Юки» — администратору и маркетологу,
  * «Импорт из Битрикса» и «Перенос со старого сайта» — только администратору.
  */
 export function ImportNavLink({ user }: ServerProps) {
@@ -11,6 +11,9 @@ export function ImportNavLink({ user }: ServerProps) {
     <>
       <a className={styles.link} href="/admin/price-list">
         Загрузить прайс
+      </a>
+      <a className={styles.link} href="/admin/yuki-data">
+        Прайс и база Юки
       </a>
       <a className={styles.link} href="/admin/assistant-check">
         Проверка Юки

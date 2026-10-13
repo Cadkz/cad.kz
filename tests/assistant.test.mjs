@@ -4,9 +4,11 @@ import { anthropicReply, ModelError } from '../src/domain/anthropicChat.mjs'
 import {
   ASSISTANT_LIMITS,
   ASSISTANT_TOOLS,
+  checkHandoff,
   cleanReply,
   countTurns,
   demoReply,
+  handoffDetails,
   isQuickAction,
   mentionedCards,
   modelHistory,
@@ -18,6 +20,7 @@ import {
   wantsRenewal,
 } from '../src/domain/assistant.mjs'
 import { toBitrix24Lead } from '../src/domain/bitrix24.mjs'
+import { normalizePhone } from '../src/domain/order.mjs'
 import { toCrmRequest, validateRequest } from '../src/domain/siteRequest.mjs'
 
 const id = '0b6c4c1e-1a2b-4c3d-8e9f-0123456789ab'
@@ -119,20 +122,95 @@ test('быстрые действия по руководству Юки; про
   assert.equal(RENEW_CARD.href, '/renew')
 })
 
-test('правила модели: цены только из инструмента, без обещаний, передача менеджеру', () => {
-  const prompt = systemPrompt({ today: '12 октября 2026' })
-  assert.match(prompt, /только результат quote/)
-  assert.match(prompt, /Не обещай скидки/)
-  assert.match(prompt, /Передать менеджеру/)
-  assert.match(prompt, /Ты — Юки, ИИ-консультант/)
-  assert.match(prompt, /на «вы»/)
-  assert.match(prompt, /без рода/)
-  assert.match(prompt, /не называй себя/)
-  assert.match(prompt, /заявка или заказ оформлены/)
-  assert.match(prompt, /соответствие нормам/)
+const context = {
+  now: new Date('2026-10-13T06:00:00Z'),
+  knowledge: [{ product: 'АВС', text: 'Синий ключ — одно\nрабочее место АВС' }],
+  price: { updated: '2026-09-29', vat: 'unknown' },
+  handoff: { state: 'none' },
+  time: { state: 'work', text: 'вторник, 13.10.2026, 11:00 по времени Астаны' },
+}
+
+test('правила владельца и характер Юки: роль, формат, цены из прайса, передача менеджеру', () => {
+  const [rules, state] = systemPrompt(/** @type {any} */ (context))
+  // Роль и формат владельца.
+  assert.match(rules, /Ты — Юки, виртуальный ассистент компании CAD\.kz/)
+  assert.match(rules, /гендер мужской: «отправил», «подготовил», «проверил»/)
+  assert.match(rules, /в пределах 10 слов, либо 2–3 коротких предложения/)
+  assert.match(rules, /имя → телефон → почта → компания/)
+  assert.match(rules, /ул\. А\. Пушкина, дом 6\/1, ВП-1/)
+  // Характер Юки поверх.
+  assert.match(rules, /Без «мяу»/)
+  assert.match(rules, /не инженер и не менеджер/)
+  // Цены и обещания.
+  assert.match(rules, /Единственный источник стоимости — действующий прайс/)
+  assert.match(rules, /Не обещай скидку/)
+  assert.match(rules, /Не отправляй прайсы и коммерческие предложения/)
+  assert.match(rules, /AutoCAD — до двух рабочих дней; АВС и РСНБ — 5–7 рабочих дней/)
+  assert.match(rules, /https:\/\/abccenter\.kz\/download-kz\//)
+  assert.match(rules, /Наша компания не оказывает эту услугу/)
+  assert.match(rules, /не спрашивай ИИН/)
+  assert.match(rules, /handoffToManager/)
+  // База знаний — одной строкой на запись.
+  assert.match(rules, /— \[АВС\] Синий ключ — одно рабочее место АВС/)
+  assert.match(state, /вторник, 13\.10\.2026, 11:00 по времени Астаны — рабочее время/)
+  assert.match(state, /дата прайса 29\.09\.2026/)
+  assert.match(state, /Передачу менеджеру не готовили/)
   assert.deepEqual(
     ASSISTANT_TOOLS.map((t) => t.name),
-    ['searchProducts', 'getOffers', 'quote'],
+    ['searchProducts', 'searchPriceList', 'getPrice', 'priceTotal', 'handoffToManager'],
+  )
+})
+
+test('состояние разговора: нет прайса, обед, передача подготовлена, отправлена', () => {
+  const state = (patch) => systemPrompt(/** @type {any} */ ({ ...context, ...patch }))[1]
+  assert.match(state({ price: null }), /Прайс не загружен: стоимость не называй/)
+  assert.match(state({ time: { state: 'lunch', text: 'x' } }), /обеденный перерыв/)
+  assert.match(state({ time: { state: 'off', text: 'x' } }), /нерабочее время/)
+  assert.match(state({ handoff: { state: 'prepared' } }), /ещё не подтвердил/)
+  assert.match(
+    state({ handoff: { state: 'sent', number: 'REQ-1', delivered: false } }),
+    /REQ-1 сохранена на сайте, но менеджерам из чата пока не уходит.*Не пиши «передал»/,
+  )
+  assert.match(
+    state({ handoff: { state: 'sent', number: 'REQ-2', delivered: true } }),
+    /REQ-2 у менеджера\. Можно писать «Я передал…»/,
+  )
+})
+
+test('передача менеджеру от модели: имя и телефон обязательны, почта проверяется', () => {
+  const ok = checkHandoff(
+    {
+      name: ' Ирина ',
+      phone: '8 701 123 45 67',
+      email: 'irina@example.kz',
+      company: 'ТОО Проект',
+      product: 'LIRA-FEM 2025 PRO, бессрочная',
+      timeline: 'до конца месяца',
+      reason: 'КП',
+      extra: 'лишнее',
+    },
+    normalizePhone,
+  )
+  assert.equal(ok.ok, true)
+  if (!ok.ok) return
+  assert.deepEqual(ok.draft, {
+    name: 'Ирина',
+    phone: '+77011234567',
+    email: 'irina@example.kz',
+    company: 'ТОО Проект',
+    product: 'LIRA-FEM 2025 PRO, бессрочная',
+    timeline: 'до конца месяца',
+    reason: 'КП',
+  })
+  assert.deepEqual(
+    handoffDetails(ok.draft).map((d) => d.title),
+    ['Почта', 'Компания', 'Продукт', 'Сроки', 'Что нужно'],
+  )
+  assert.equal(checkHandoff({ name: 'И', phone: '87011234567' }, normalizePhone).ok, false)
+  assert.equal(checkHandoff({ name: 'Ирина', phone: '123' }, normalizePhone).ok, false)
+  assert.equal(
+    checkHandoff({ name: 'Ирина', phone: '87011234567', email: 'нет' }, normalizePhone).ok,
+    false,
   )
 })
 
@@ -192,12 +270,31 @@ test('модель вызывает инструмент, сервер отда�
   })
 })
 
+test('правила двумя частями: постоянная кешируется, состояние разговора — нет', async () => {
+  const { fetchImpl, calls } = fakeFetch([
+    { stop_reason: 'end_turn', content: [{ type: 'text', text: 'Готово.' }] },
+  ])
+  await anthropicReply({
+    ...base,
+    system: ['правила', 'состояние'],
+    fetchImpl,
+    messages: [{ role: 'user', content: 'Привет' }],
+    runTool: async () => ({}),
+  })
+  assert.deepEqual(calls[0].body.system, [
+    { type: 'text', text: 'правила', cache_control: { type: 'ephemeral' } },
+    { type: 'text', text: 'состояние' },
+  ])
+})
+
 test('модель не зацикливается на инструментах, ошибка сети — ModelError', async () => {
   const toolTurn = {
     stop_reason: 'tool_use',
     content: [{ type: 'tool_use', id: 't', name: 'searchProducts', input: { query: 'x' } }],
   }
   const { fetchImpl, calls } = fakeFetch([
+    toolTurn,
+    toolTurn,
     toolTurn,
     toolTurn,
     toolTurn,
@@ -211,8 +308,9 @@ test('модель не зацикливается на инструментах
     runTool: async () => ({ products: [] }),
   })
   assert.equal(result.text, 'Готово')
-  assert.equal(calls.length, 5)
-  assert.deepEqual(calls[4].body.tool_choice, { type: 'none' })
+  // Шесть кругов инструментов (поиск в прайсе, цена, сумма, каталог, передача), на седьмом — только текст.
+  assert.equal(calls.length, 7)
+  assert.deepEqual(calls[6].body.tool_choice, { type: 'none' })
 
   const failing = fakeFetch([{ status: 529 }])
   await assert.rejects(
@@ -268,7 +366,8 @@ test('передача менеджеру из чата: заявка «Конс
     choices: [],
     name: 'Анна',
     phone: '+77011234567',
-    comment: '',
+    email: 'anna@example.kz',
+    comment: 'Собрал Юки в чате:\nКомпания: ТОО Проект',
     consentAt: '2026-10-12T10:00:00Z',
     lines: [],
     totalKzt: null,
@@ -277,7 +376,11 @@ test('передача менеджеру из чата: заявка «Конс
       { role: 'assistant', content: 'Подойдёт AutoCAD, 1 год.' },
     ],
   })
-  const comments = toBitrix24Lead(lead).params.fields.COMMENTS
+  assert.equal(lead.contact.email, 'anna@example.kz')
+  const fields = toBitrix24Lead(lead).params.fields
+  assert.deepEqual(fields.EMAIL, [{ VALUE: 'anna@example.kz', VALUE_TYPE: 'WORK' }])
+  const comments = fields.COMMENTS
+  assert.match(comments, /Компания: ТОО Проект/)
   assert.match(comments, /Диалог с консультантом на сайте:/)
   assert.match(comments, /Клиент: Нужен AutoCAD на 3 места/)
   assert.match(comments, /Консультант: Подойдёт AutoCAD, 1 год\./)

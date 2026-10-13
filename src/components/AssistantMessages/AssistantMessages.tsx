@@ -9,7 +9,7 @@ import {
   type AssistantCard,
   QUICK_ACTIONS,
 } from '@/domain/assistant.mjs'
-import type { useAssistant } from '@/lib/useAssistant'
+import type { HandoffPrefill, useAssistant } from '@/lib/useAssistant'
 import { Button } from '../Button/Button'
 import { Mascot } from '../Mascot/Mascot'
 import styles from './AssistantMessages.module.css'
@@ -18,7 +18,8 @@ type Props = {
   chat: ReturnType<typeof useAssistant>
   /** Чат часто дёргали: Юки недовольный и приветствие другое (только пока разговора нет). */
   grumpy: boolean
-  onHandoff: () => void
+  /** Открыть форму передачи менеджеру; prefill — данные, которые собрал Юки. */
+  onHandoff: (prefill?: HandoffPrefill) => void
 }
 
 /** Ссылки на товары, которые Юки назвал в ответе. */
@@ -73,6 +74,8 @@ export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
   const end = useRef<HTMLDivElement>(null)
   const count = chat.messages.length
   const sulky = grumpy && !count
+  // Кнопка передачи — только у последнего ответа, где Юки её подготовил: данные там самые свежие.
+  const lastHandoff = chat.messages.findLastIndex((m) => m.handoff)
 
   // Новое сообщение или ожидание — лента прокручивается к концу.
   useEffect(() => {
@@ -111,6 +114,11 @@ export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
         >
           <p className={message.role === 'user' ? styles.user : styles.bot}>{message.content}</p>
           {message.cards && message.cards.length > 0 && <Cards cards={message.cards} />}
+          {message.handoff && index === lastHandoff && (
+            <Button size="sm" onClick={() => onHandoff(message.handoff)}>
+              Проверить и передать менеджеру
+            </Button>
+          )}
         </div>
       ))}
       {chat.waiting && <Waiting />}
@@ -121,7 +129,7 @@ export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
             <Button variant="outline" size="sm" onClick={chat.retry}>
               Повторить
             </Button>
-            <Button variant="text" size="sm" onClick={onHandoff}>
+            <Button variant="text" size="sm" onClick={() => onHandoff()}>
               Передать менеджеру
             </Button>
           </div>

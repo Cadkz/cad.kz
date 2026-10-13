@@ -3,6 +3,7 @@
 import { ArrowLeft } from 'lucide-react'
 import { type FormEvent, useRef, useState } from 'react'
 import { CONSENT_TEXT, validateContact } from '@/domain/siteRequest.mjs'
+import type { HandoffPrefill } from '@/lib/useAssistant'
 import { Button, ButtonLink } from '../Button/Button'
 import { CheckboxField } from '../CheckboxField/CheckboxField'
 import { TextAreaField, TextField } from '../Field/Field'
@@ -11,16 +12,19 @@ import styles from './AssistantHandoff.module.css'
 
 type Props = {
   conversationId: string
+  /** Что Юки собрал в чате: имя и телефон подставлены в поля, остальное уйдёт менеджеру списком. */
+  prefill?: HandoffPrefill
   whatsappHref: string | null
   onBack: () => void
 }
 
 /**
  * «Передать менеджеру» из чата: имя, телефон, комментарий, согласие. Заявка уходит в /api/request
- * с ключом разговора — переписку сервер берёт из своей базы и кладёт в лид Битрикс24.
- * В демо честно говорим, что менеджерам заявка не уходит.
+ * с ключом разговора — переписку и собранное Юки (почта, компания, продукт, сроки) сервер берёт
+ * из своей базы и кладёт в лид Битрикс24. Если Юки уже собрал контакты, они подставлены: клиент
+ * проверяет и подтверждает сам. В демо честно говорим, что менеджерам заявка не уходит.
  */
-export function AssistantHandoff({ conversationId, whatsappHref, onBack }: Props) {
+export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack }: Props) {
   const key = useRef<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState('')
@@ -89,11 +93,22 @@ export function AssistantHandoff({ conversationId, whatsappHref, onBack }: Props
             <h3 className={styles.title}>Передать разговор менеджеру</h3>
             <p className={styles.lead}>Менеджер увидит всю переписку и продолжит с этого места.</p>
           </div>
+          {prefill && prefill.details.length > 0 && (
+            <dl className={styles.details}>
+              {prefill.details.map((item) => (
+                <div key={item.title} className={styles.detail}>
+                  <dt>{item.title}</dt>
+                  <dd>{item.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
           <TextField
             label="Имя"
             name="name"
             id="yuki-name"
             autoComplete="name"
+            defaultValue={prefill?.name}
             error={errors.name}
           />
           <TextField
@@ -103,6 +118,7 @@ export function AssistantHandoff({ conversationId, whatsappHref, onBack }: Props
             type="tel"
             autoComplete="tel"
             placeholder="+7 701 123-45-67"
+            defaultValue={prefill?.phone}
             error={errors.phone}
           />
           <TextAreaField

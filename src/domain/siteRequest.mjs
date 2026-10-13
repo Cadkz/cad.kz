@@ -306,7 +306,8 @@ export function makeRequestNumber(
  * Источник (`source`): нажатая кнопка, товар, его раздел и сценарий покупки — чтобы следующий
  * анализ CRM видел, откуда пришла сделка, а не только её название.
  * Из чата с Юки — вся переписка (`messages`): менеджер продолжает разговор с того же места.
- * @param {{ number: string, idempotencyKey: string, kind: RequestKind, pageTitle: string, choices: { title: string, value: string }[], name: string, phone: string, comment: string, consentAt: string, lines: ResolvedLine[], totalKzt: string | null, source?: { button: string, product: string | null, section: string | null, scenario: string | null, page: string | null }, messages?: { role: 'user' | 'assistant', content: string }[] }} request
+ * Почта — если её собрал Юки в чате (клиент подтвердил передачу с этими данными).
+ * @param {{ number: string, idempotencyKey: string, kind: RequestKind, pageTitle: string, choices: { title: string, value: string }[], name: string, phone: string, email?: string, comment: string, consentAt: string, lines: ResolvedLine[], totalKzt: string | null, source?: { button: string, product: string | null, section: string | null, scenario: string | null, page: string | null }, messages?: { role: 'user' | 'assistant', content: string }[] }} request
  */
 export function toCrmRequest(request) {
   return {
@@ -320,7 +321,11 @@ export function toCrmRequest(request) {
       : request.pageTitle,
     contactWay: 'callback',
     consent: { accepted: true, at: request.consentAt, version: CONSENT_VERSION },
-    contact: { name: request.name, phone: request.phone },
+    contact: {
+      name: request.name,
+      phone: request.phone,
+      ...(request.email ? { email: request.email } : {}),
+    },
     buyer: { type: 'individual' },
     comment: request.comment || undefined,
     items: request.lines.map((line) => ({

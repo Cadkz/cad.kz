@@ -4,6 +4,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { ru } from '@payloadcms/translations/languages/ru'
 import { buildConfig } from 'payload'
+import { assistantKnowledge, priceTables } from './cms/collections/assistant'
 import { manufacturers, offers, productLines, products, sections } from './cms/collections/catalog'
 import { media, pages, publications, topics } from './cms/collections/content'
 import { crmDeliveries, orders, siteRequests } from './cms/collections/orders'
@@ -57,6 +58,11 @@ export default buildConfig({
           path: '/price-list',
           meta: { title: 'Загрузить прайс' },
         },
+        yukiData: {
+          Component: '/components/YukiDataView/YukiDataView#YukiDataView',
+          path: '/yuki-data',
+          meta: { title: 'Прайс и база Юки' },
+        },
         assistantCheck: {
           Component: '/components/AssistantCheckView/AssistantCheckView#AssistantCheckView',
           path: '/assistant-check',
@@ -87,6 +93,8 @@ export default buildConfig({
     orders,
     siteRequests,
     conversations,
+    assistantKnowledge,
+    priceTables,
     crmDeliveries,
     importRuns,
     redirects,

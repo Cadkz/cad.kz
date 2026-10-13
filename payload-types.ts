@@ -82,6 +82,8 @@ export interface Config {
     orders: Order;
     'site-requests': SiteRequest;
     conversations: Conversation;
+    'assistant-knowledge': AssistantKnowledge;
+    'price-tables': PriceTable;
     'crm-deliveries': CrmDelivery;
     'import-runs': ImportRun;
     redirects: Redirect;
@@ -107,6 +109,8 @@ export interface Config {
     orders: OrdersSelect<false> | OrdersSelect<true>;
     'site-requests': SiteRequestsSelect<false> | SiteRequestsSelect<true>;
     conversations: ConversationsSelect<false> | ConversationsSelect<true>;
+    'assistant-knowledge': AssistantKnowledgeSelect<false> | AssistantKnowledgeSelect<true>;
+    'price-tables': PriceTablesSelect<false> | PriceTablesSelect<true>;
     'crm-deliveries': CrmDeliveriesSelect<false> | CrmDeliveriesSelect<true>;
     'import-runs': ImportRunsSelect<false> | ImportRunsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -729,6 +733,52 @@ export interface Conversation {
   createdAt: string;
 }
 /**
+ * Факты для Юки: о продуктах, оплате, графике работы. Цены и сроки поставки отсюда Юки клиенту не называет — они только из прайса. Загрузить всё из Excel — «Прайс и база Юки».
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "assistant-knowledge".
+ */
+export interface AssistantKnowledge {
+  id: number;
+  text: string;
+  /**
+   * AutoCAD, АВС, GEO5… «Все» — общее правило.
+   */
+  product?: string | null;
+  active?: boolean | null;
+  position?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "price-tables".
+ */
+export interface PriceTable {
+  id: number;
+  state: string;
+  summary:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  snapshot:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "crm-deliveries".
  */
@@ -871,6 +921,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conversations';
         value: number | Conversation;
+      } | null)
+    | ({
+        relationTo: 'assistant-knowledge';
+        value: number | AssistantKnowledge;
+      } | null)
+    | ({
+        relationTo: 'price-tables';
+        value: number | PriceTable;
       } | null)
     | ({
         relationTo: 'crm-deliveries';
@@ -1311,6 +1369,29 @@ export interface ConversationsSelect<T extends boolean = true> {
   idempotencyKey?: T;
   snapshot?: T;
   state?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "assistant-knowledge_select".
+ */
+export interface AssistantKnowledgeSelect<T extends boolean = true> {
+  text?: T;
+  product?: T;
+  active?: T;
+  position?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "price-tables_select".
+ */
+export interface PriceTablesSelect<T extends boolean = true> {
+  state?: T;
+  summary?: T;
+  snapshot?: T;
   updatedAt?: T;
   createdAt?: T;
 }

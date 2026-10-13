@@ -6,6 +6,7 @@ import {
   killTransaction,
   type Payload,
 } from 'payload'
+import { handoffDetails } from '@/domain/assistant.mjs'
 import { resolveScenario, SCENARIO_LABELS } from '@/domain/buyScenario.mjs'
 import {
   CONSENT_TEXT,
@@ -240,6 +241,17 @@ export async function saveSiteRequest(
     request.conversationId ? findConversation(payload, request.conversationId) : null,
   ])
   const button = request.button || KIND_LABELS[request.kind]
+  // Из чата: что Юки собрал для менеджера (почта, компания, продукт, сроки) — с сервера, не из браузера.
+  const draft = request.source === 'assistant' ? conversation?.snapshot.handoff : undefined
+  const details = draft ? handoffDetails(draft) : []
+  const comment = [
+    request.comment,
+    details.length
+      ? `Собрал Юки в чате:\n${details.map((d) => `${d.title}: ${d.value}`).join('\n')}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join('\n\n')
   const priced = lines.filter((line) => line.totalKzt)
   const totalKzt =
     priced.length === lines.length && lines.length
@@ -255,7 +267,8 @@ export async function saveSiteRequest(
     choices,
     name: request.name,
     phone: request.phone,
-    comment: request.comment,
+    ...(draft?.email ? { email: draft.email } : {}),
+    comment,
     consentAt: now.toISOString(),
     lines,
     totalKzt,
@@ -285,8 +298,8 @@ export async function saveSiteRequest(
         page: page.page ?? undefined,
         contactName: request.name,
         contactPhone: request.phone,
-        comment: request.comment || undefined,
-        items: { lines, choices },
+        comment: comment || undefined,
+        items: { lines, choices: details.length ? details : choices },
         totalKzt: totalKzt ?? undefined,
         consent: {
           accepted: true,

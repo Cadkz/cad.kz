@@ -34,9 +34,9 @@ test('суммы в тенге: пробелы и неразрывные про�
 test('цена в ответе должна быть из инструментов', () => {
   const trace = [
     {
-      name: 'quote',
-      input: { offerId: 5, quantity: 3 },
-      result: { unit: '120 000 ₸', total: '360 000 ₸' },
+      name: 'priceTotal',
+      input: { code: '11-1', quantity: 3 },
+      result: { unitPrice: '120\u00a0000\u00a0₸', quantity: 3, total: '360\u00a0000\u00a0₸' },
     },
   ]
   assert.deepEqual(checkReply('Одно место — 120 000 ₸, за три — 360 000 ₸.', trace), [])
@@ -45,14 +45,23 @@ test('цена в ответе должна быть из инструменто
   assert.match(flags[0].text, /Цена не из инструментов: 350\s000 ₸/)
 })
 
-test('флаги руководства: род, сроки, нормы, заявка, эмодзи, разметка', () => {
-  const texts = (reply) =>
-    checkReply(reply, [])
+test('флаги правил: род, сроки, нормы, заявка, «передал», эмодзи, разметка, длина', () => {
+  const texts = (reply, trace = []) =>
+    checkReply(reply, trace)
       .map((f) => f.text)
       .join(' | ')
-  assert.match(texts('Я нашла для вас SCAD Office.'), /без рода/)
-  assert.doesNotMatch(texts('Нашлось два варианта: SCAD Office и ЛИРА-FEM.'), /без рода/)
-  assert.match(texts('Поставим лицензию за 2 дня.'), /срок поставки/)
+  assert.match(texts('Я нашла для вас SCAD Office.'), /женском роде/)
+  assert.doesNotMatch(texts('Проверил прайс. Подготовил два варианта.'), /роде/)
+  assert.match(texts('Поставим лицензию за 2 дня.'), /срок поставки без прайса/)
+  const priced = [{ name: 'getPrice', input: {}, result: { delivery: 'до двух рабочих дней' } }]
+  assert.doesNotMatch(texts('Поставка — до двух рабочих дней.', priced), /срок/)
+  assert.match(texts('Я передал ваш запрос менеджеру.'), /после подтверждённой передачи/)
+  assert.doesNotMatch(texts('Передам ваш запрос менеджеру.'), /подтверждённой/)
+  assert.match(texts('Подскажите ИИН и адрес проживания.'), /ИИН/)
+  assert.match(texts('Спасибо за вопрос.'), /Благодарит/)
+  const long = 'Это очень длинный ответ. '.repeat(8)
+  assert.match(texts(long), /Длинно для мессенджера/)
+  assert.doesNotMatch(texts('Вам нужен полный AutoCAD или AutoCAD LT?'), /Длинно/)
   assert.match(texts('Программа соответствует нормам СП РК.'), /нормам/)
   assert.match(texts('Ваша заявка оформлена.'), /заявка оформлена/)
   assert.match(texts('Конечно! 😺'), /эмодзи/)
@@ -72,11 +81,35 @@ test('обращение к инструменту словами', () => {
   )
   assert.equal(
     describeCall({
-      name: 'quote',
-      input: { offerId: 5, quantity: 1 },
-      result: { unit: '1 ₸', total: '1 ₸' },
+      name: 'searchPriceList',
+      input: { query: 'AutoCAD LT' },
+      result: { total: 2, rows: [{ code: '11-1', name: 'AutoCAD LT 1 год' }] },
     }),
-    'quote(5, 1) → 1 ₸ за ед., итого 1 ₸',
+    'searchPriceList(AutoCAD LT) → в прайсе 2: 11-1 AutoCAD LT 1 год',
+  )
+  assert.equal(
+    describeCall({
+      name: 'getPrice',
+      input: { code: '11-1' },
+      result: { price: '111 111 ₸', unit: 'за 1 место', delivery: 'до двух рабочих дней' },
+    }),
+    'getPrice(11-1) → 111 111 ₸ за 1 место, поставка: до двух рабочих дней',
+  )
+  assert.equal(
+    describeCall({
+      name: 'getPrice',
+      input: { code: '11-2' },
+      result: { price: null, note: 'Цена по запросу — уточняет менеджер' },
+    }),
+    'getPrice(11-2) → без цены: Цена по запросу — уточняет менеджер',
+  )
+  assert.equal(
+    describeCall({
+      name: 'priceTotal',
+      input: { code: '11-1', quantity: 3 },
+      result: { unitPrice: '1 ₸', quantity: 3, total: '3 ₸' },
+    }),
+    'priceTotal(11-1, 3) → 1 ₸ × 3 = 3 ₸',
   )
   assert.equal(
     describeCall({ name: 'getOffers', input: { productId: 3 }, result: { error: 'Нужен ID' } }),

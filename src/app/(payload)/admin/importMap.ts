@@ -3,6 +3,7 @@ import { ImportNavLink as ImportNavLink_7bbeaaa5cd524cf4b63c7d575feb3ba8 } from 
 import { ImportDashboardLink as ImportDashboardLink_91c324b4ec9b03a0b8447930f203df72 } from '../../../components/ImportDashboardLink/ImportDashboardLink'
 import { BitrixImportView as BitrixImportView_31f0a3e387f2bd8b4181ac01e9918aee } from '../../../components/BitrixImportView/BitrixImportView'
 import { PriceListView as PriceListView_94d00816e844af2d5fa87147e72feb4f } from '../../../components/PriceListView/PriceListView'
+import { YukiDataView as YukiDataView_78b550a9ebb6b0b787a46b6e61dfa149 } from '../../../components/YukiDataView/YukiDataView'
 import { AssistantCheckView as AssistantCheckView_ec6e0189c41c4a69611fb303565b66ab } from '../../../components/AssistantCheckView/AssistantCheckView'
 import { LegacyContentView as LegacyContentView_f30aba65b9603ebbdd7a3d9cea213479 } from '../../../components/LegacyContentView/LegacyContentView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -15,6 +16,7 @@ export const importMap = {
   "/components/ImportDashboardLink/ImportDashboardLink#ImportDashboardLink": ImportDashboardLink_91c324b4ec9b03a0b8447930f203df72,
   "/components/BitrixImportView/BitrixImportView#BitrixImportView": BitrixImportView_31f0a3e387f2bd8b4181ac01e9918aee,
   "/components/PriceListView/PriceListView#PriceListView": PriceListView_94d00816e844af2d5fa87147e72feb4f,
+  "/components/YukiDataView/YukiDataView#YukiDataView": YukiDataView_78b550a9ebb6b0b787a46b6e61dfa149,
   "/components/AssistantCheckView/AssistantCheckView#AssistantCheckView": AssistantCheckView_ec6e0189c41c4a69611fb303565b66ab,
   "/components/LegacyContentView/LegacyContentView#LegacyContentView": LegacyContentView_f30aba65b9603ebbdd7a3d9cea213479,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1,

@@ -7,6 +7,9 @@ import {
   cleanReply,
   countTurns,
   demoReply,
+  type HandoffDraft,
+  type HandoffState,
+  handoffDetails,
   mentionedCards,
   modelHistory,
   quickAction,
@@ -15,16 +18,25 @@ import {
   systemPrompt,
   wantsRenewal,
 } from '@/domain/assistant.mjs'
-import { formatDay } from '../format'
-import { findConversation, saveConversation } from './conversation'
-import { type AssistantMode, modelSettings } from './provider'
+import { workTime } from '@/domain/priceTable.mjs'
+import { type ConversationSnapshot, findConversation, saveConversation } from './conversation'
+import { loadKnowledge, priceSummary } from './priceTable'
+import { type AssistantMode, leadsReachManagers, modelSettings } from './provider'
 import { createTools, findCards, toCard } from './tools'
 
 /** Сколько ждём модель, прежде чем честно сказать, что ответа нет. */
 const MODEL_TIMEOUT_MS = 30_000
 
+import type { HandoffPrefill } from '../useAssistant'
+
 export type AssistantAnswer =
-  | { status: 'ok'; reply: string; cards: AssistantCard[]; demo: boolean }
+  | {
+      status: 'ok'
+      reply: string
+      cards: AssistantCard[]
+      demo: boolean
+      handoff?: HandoffPrefill
+    }
   | { status: 'limit' | 'busy' | 'failed'; error: string }
 
 const FAILED =
@@ -33,12 +45,32 @@ const FAILED =
 /** Обращение модели к инструменту — для страницы проверки ответов в админке. */
 export type ToolCall = { name: string; input: unknown; result: unknown }
 
+type Answer = { reply: string; cards: AssistantCard[]; handoff: HandoffDraft | null }
+
+/** Что модель знает о передаче менеджеру: по снимку разговора на сервере. */
+export function handoffState(snapshot: ConversationSnapshot | null | undefined): HandoffState {
+  if (snapshot?.requestNumber)
+    return { state: 'sent', number: snapshot.requestNumber, delivered: leadsReachManagers() }
+  return snapshot?.handoff ? { state: 'prepared' } : { state: 'none' }
+}
+
+/** Данные передачи для кнопки под ответом. */
+export function handoffPrefill(draft: HandoffDraft): HandoffPrefill {
+  return {
+    name: draft.name,
+    phone: draft.phone,
+    details: handoffDetails(draft),
+  }
+}
+
 async function modelAnswer(
   payload: Payload,
   messages: StoredMessage[],
+  handoff: HandoffState,
   onTool?: (call: ToolCall) => void,
-) {
+): Promise<Answer> {
   const tools = createTools(payload)
+  const [knowledge, price] = await Promise.all([loadKnowledge(payload), priceSummary(payload)])
   const { apiKey, model } = modelSettings()
   const runTool = async (name: string, input: unknown) => {
     const result = await tools.run(name, input)
@@ -49,14 +81,20 @@ async function modelAnswer(
     fetchImpl: fetch,
     apiKey,
     model,
-    system: systemPrompt({ today: formatDay(new Date().toISOString()) }),
+    system: systemPrompt({
+      now: new Date(),
+      knowledge,
+      price,
+      handoff,
+      time: workTime(new Date()),
+    }),
     messages: modelHistory(messages),
     tools: ASSISTANT_TOOLS,
     runTool,
     signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
   })
   const reply = cleanReply(text)
-  return { reply, cards: mentionedCards(reply, tools.found) }
+  return { reply, cards: mentionedCards(reply, tools.found), handoff: tools.handoff() }
 }
 
 /**
@@ -67,10 +105,10 @@ export async function answerMessages(
   payload: Payload,
   mode: AssistantMode,
   messages: StoredMessage[],
-  onTool?: (call: ToolCall) => void,
-): Promise<{ reply: string; cards: AssistantCard[] }> {
+  options: { onTool?: (call: ToolCall) => void; handoff?: HandoffState } = {},
+): Promise<Answer> {
   const message = messages[messages.length - 1]?.content ?? ''
-  let answer: { reply: string; cards: AssistantCard[] }
+  let answer: Answer
   if (mode === 'demo') {
     const action = quickAction(message)
     const found = action ? [] : (await findCards(message)).map(toCard)
@@ -79,8 +117,14 @@ export async function answerMessages(
       quick: Boolean(action),
       quickText: action?.demo,
     })
-    answer = { reply: text, cards }
-  } else answer = await modelAnswer(payload, messages, onTool)
+    answer = { reply: text, cards, handoff: null }
+  } else
+    answer = await modelAnswer(
+      payload,
+      messages,
+      options.handoff ?? { state: 'none' },
+      options.onTool,
+    )
   // Про продление — под ответом форма продления (настоящая заявка, менеджер найдёт лицензию).
   if (wantsRenewal(message) && !answer.cards.some((c) => c.href === RENEW_CARD.href))
     answer = { ...answer, cards: [...answer.cards, { ...RENEW_CARD }] }
@@ -107,9 +151,11 @@ export async function askAssistant(
   const now = new Date().toISOString()
   const messages: StoredMessage[] = [...previous, { role: 'user', content: input.message, at: now }]
 
-  let answer: { reply: string; cards: AssistantCard[] } | null = null
+  let answer: Answer | null = null
   try {
-    answer = await answerMessages(payload, mode, messages)
+    answer = await answerMessages(payload, mode, messages, {
+      handoff: handoffState(stored?.snapshot),
+    })
   } catch (error) {
     // В журнал — только вид ошибки и код ответа, без текста запроса и ключа.
     const status = error instanceof ModelError ? error.status : null
@@ -129,9 +175,21 @@ export async function askAssistant(
     messages,
     clientHash: stored?.snapshot.clientHash || clientHash,
     ...(stored?.snapshot.requestNumber ? { requestNumber: stored.snapshot.requestNumber } : {}),
+    // Последние данные передачи менеджеру: форма подтверждения и лид берут их отсюда, а не из браузера.
+    ...(answer?.handoff
+      ? { handoff: answer.handoff }
+      : stored?.snapshot.handoff
+        ? { handoff: stored.snapshot.handoff }
+        : {}),
   })
   if (!saved)
     return { status: 'busy', error: 'Ответ на прошлый вопрос ещё готовится. Подождите немного.' }
   if (!answer) return { status: 'failed', error: FAILED }
-  return { status: 'ok', reply: answer.reply, cards: answer.cards, demo: mode === 'demo' }
+  return {
+    status: 'ok',
+    reply: answer.reply,
+    cards: answer.cards,
+    demo: mode === 'demo',
+    ...(answer.handoff ? { handoff: handoffPrefill(answer.handoff) } : {}),
+  }
 }

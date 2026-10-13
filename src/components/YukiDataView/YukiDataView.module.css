@@ -1,0 +1,44 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.root {
+  max-width: calc(var(--base) * 64);
+  padding: calc(var(--base) * 2) var(--gutter-h) calc(var(--base) * 4);
+}
+
+.title {
+  margin: 0 0 var(--base);
+}
+
+.lead {
+  margin: 0 0 var(--base);
+  color: var(--theme-elevation-800);
+}
+
+.on,
+.off {
+  margin: 0 0 var(--base);
+}
+
+.on {
+  color: var(--theme-success-750);
+}
+
+.off {
+  color: var(--theme-warning-650);
+}
+
+.state {
+  display: grid;
+  gap: calc(var(--base) / 4);
+  margin: 0 0 calc(var(--base) * 1.5);
+  padding: var(--base);
+  border-radius: var(--style-radius-m);
+  background: var(--theme-elevation-50);
+}
+
+.state p {
+  margin: 0;
+}
+
+.warn {
+  color: var(--theme-warning-650);
+}

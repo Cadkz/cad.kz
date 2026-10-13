@@ -9,7 +9,7 @@ export const ANTHROPIC_VERSION = '2023-06-01'
 export const ANTHROPIC_DEFAULT_MODEL = 'claude-haiku-5-5'
 
 /** Сколько раз модель может обратиться к инструментам за один ответ. */
-const MAX_TOOL_ROUNDS = 4
+const MAX_TOOL_ROUNDS = 6
 /** Ответ инструмента в модель — не длиннее этого (защита от огромных списков). */
 const MAX_TOOL_RESULT = 6000
 
@@ -35,7 +35,7 @@ export class ModelError extends Error {
  *   fetchImpl: typeof fetch,
  *   apiKey: string,
  *   model: string,
- *   system: string,
+ *   system: string | string[],
  *   messages: { role: 'user' | 'assistant', content: string }[],
  *   tools: ToolSpec[],
  *   runTool: (name: string, input: unknown) => Promise<unknown>,
@@ -45,7 +45,16 @@ export class ModelError extends Error {
  * @returns {Promise<{ text: string, toolCalls: number }>}
  */
 export async function anthropicReply(options) {
-  const { fetchImpl, apiKey, model, system, tools, runTool, signal, maxTokens = 800 } = options
+  const { fetchImpl, apiKey, model, tools, runTool, signal, maxTokens = 800 } = options
+  // Правила частями: первая (постоянная) кешируется у Anthropic — дешевле и быстрее повторные
+  // запросы; вторая — состояние разговора, меняется каждый раз.
+  const system = Array.isArray(options.system)
+    ? options.system.map((text, index) => ({
+        type: 'text',
+        text,
+        ...(index === 0 ? { cache_control: { type: 'ephemeral' } } : {}),
+      }))
+    : options.system
   /** @type {{ role: 'user' | 'assistant', content: string | object[] }[]} */
   const messages = options.messages.map((m) => ({ role: m.role, content: m.content }))
   let toolCalls = 0

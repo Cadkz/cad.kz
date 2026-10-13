@@ -24,3 +24,12 @@ export function modelSettings() {
     model: process.env.MODEL_NAME?.trim() || ANTHROPIC_DEFAULT_MODEL,
   }
 }
+
+/**
+ * Доходят ли заявки из чата до менеджеров. Пока нет: заявки сайта работают в демо-режиме с
+ * тестовым адаптером Битрикс24 (src/lib/crm/bitrix24Test.ts). Поменять вместе с подключением
+ * настоящего адаптера — тогда Юки сможет говорить «Я передал…».
+ */
+export function leadsReachManagers() {
+  return false
+}

@@ -2,7 +2,7 @@
 
 import { Info, RotateCcw, X } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
-import type { useAssistant } from '@/lib/useAssistant'
+import type { HandoffPrefill, useAssistant } from '@/lib/useAssistant'
 import { AssistantComposer } from '../AssistantComposer/AssistantComposer'
 import { AssistantHandoff } from '../AssistantHandoff/AssistantHandoff'
 import { AssistantHeader } from '../AssistantHeader/AssistantHeader'
@@ -42,7 +42,8 @@ type Props = {
 export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Props) {
   const titleId = useId()
   const panel = useRef<HTMLElement>(null)
-  const [handoff, setHandoff] = useState(false)
+  // false — разговор; объект — форма передачи (prefill — данные, которые собрал Юки).
+  const [handoff, setHandoff] = useState<false | { prefill?: HandoffPrefill }>(false)
   const shown = useRef(false)
 
   // Смена экрана (чат ↔ передача менеджеру): нажатая кнопка исчезла, фокус — на новый экран.
@@ -135,16 +136,21 @@ export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Pr
       {handoff ? (
         <AssistantHandoff
           conversationId={chat.conversationId}
+          prefill={handoff.prefill}
           whatsappHref={whatsappHref}
           onBack={() => setHandoff(false)}
         />
       ) : (
         <>
-          <AssistantMessages chat={chat} grumpy={grumpy} onHandoff={() => setHandoff(true)} />
+          <AssistantMessages
+            chat={chat}
+            grumpy={grumpy}
+            onHandoff={(prefill) => setHandoff({ prefill })}
+          />
           <AssistantComposer
             disabled={chat.waiting || !chat.conversationId}
             onSend={chat.send}
-            onHandoff={() => setHandoff(true)}
+            onHandoff={() => setHandoff({})}
           />
         </>
       )}

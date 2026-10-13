@@ -41,7 +41,7 @@ export async function checkQuestion(payload: Payload, question: unknown): Promis
       payload,
       mode,
       [{ role: 'user', content: checked.value.message, at: new Date().toISOString() }],
-      (call) => calls.push(call),
+      { onTool: (call) => calls.push(call) },
     )
     return {
       ok: true,

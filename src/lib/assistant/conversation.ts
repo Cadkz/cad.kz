@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import type { StoredMessage } from '@/domain/assistant.mjs'
+import type { HandoffDraft, StoredMessage } from '@/domain/assistant.mjs'
 import type { AssistantMode } from './provider'
 
 /**
@@ -15,6 +15,8 @@ export type ConversationSnapshot = {
   clientHash: string
   /** Номер заявки, с которой разговор передан менеджеру. */
   requestNumber?: string
+  /** Что Юки собрал для передачи менеджеру (инструмент handoffToManager): почта, компания, задача… */
+  handoff?: HandoffDraft
 }
 
 export type ConversationState = 'open' | 'handed-off'
