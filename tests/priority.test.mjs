@@ -95,10 +95,6 @@ test('меню: программы раздела по уровню, внутр�
     column.programs.map((program) => program.title),
     ['GEO5', 'ЗАПРОС', 'Аа'],
   )
-  assert.deepEqual(
-    column.vendors.map((vendor) => vendor.title),
-    ['Fine Software', 'SCAD Soft', 'Другой'],
-  )
 })
 
 test('первая настройка: флагманы, топы и ключи по названиям', () => {

@@ -37,34 +37,6 @@
   list-style: none;
 }
 
-@media (min-width: 1200px) {
-  .three {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-/* Производители раздела: тихая строка ссылок, уточнение, а не обязательный шаг. */
-.links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-1) var(--space-4);
-  font-size: var(--text-sm);
-}
-
-.caption {
-  color: var(--color-text-muted);
-}
-
-.link {
-  color: var(--color-text);
-  font-weight: var(--weight-medium);
-}
-
-.link:hover {
-  color: var(--color-blue);
-}
-
 .footer {
   display: flex;
   flex-wrap: wrap;

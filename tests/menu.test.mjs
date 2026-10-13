@@ -5,7 +5,6 @@ import {
   MENU_PER_VENDOR,
   menuColumns,
   menuTitle,
-  menuVendors,
   sectionFilter,
   splitTitle,
 } from '../src/domain/menu.mjs'
@@ -59,11 +58,6 @@ test('раздел → сразу программы: топы первыми, �
   })
   assert.equal(column.more, false)
   assert.equal(column.allHref, '/catalog?direction=arch')
-  // Производители раздела — ссылками в каталог, в порядке «Первыми в разделе».
-  assert.deepEqual(column.vendors, [
-    { title: 'SCAD Soft', href: '/catalog?direction=arch&vendor=SCAD+Soft' },
-    { title: 'Autodesk', href: '/catalog?direction=arch&vendor=Autodesk' },
-  ])
 })
 
 test('не больше MENU_LINKS программ, от одного производителя не больше MENU_PER_VENDOR подряд', () => {
@@ -77,11 +71,6 @@ test('не больше MENU_LINKS программ, от одного прои�
   // ЛИРА того же уровня не утонула под модулями одного производителя.
   assert.ok(column.programs.some((p) => p.title === 'ЛИРА-FEM'))
   assert.ok(MENU_PER_VENDOR < MENU_LINKS)
-})
-
-test('один производитель в разделе — строки производителей нет', () => {
-  const [column] = menuColumns(sections, [product(1, 'AutoCAD', 1)], vendors, href)
-  assert.deepEqual(column.vendors, [])
 })
 
 test('пустые разделы не показываются, тип — с группой в адресе', () => {
@@ -110,24 +99,4 @@ test('курс с направлением не попадает в раздел
     column.programs.map((p) => p.title),
     ['Civil 3D'],
   )
-})
-
-test('вкладка «Производители»: сначала с топами, подсказка — главные программы', () => {
-  const list = menuVendors(
-    [
-      product(1, 'Robot', 1, { rank: 1 }),
-      product(2, 'AutoCAD', 1, { rank: 3 }),
-      product(3, 'Revit', 1, { rank: 3 }),
-      product(4, 'Inventor', 1, { rank: 2 }),
-      product(5, 'Navisworks', 1, { rank: 1 }),
-      product(6, 'КРИСТАЛЛ', 1, { vendor: 2, rank: 1 }),
-      product(7, 'Без производителя', 1, { vendor: null }),
-    ],
-    vendors,
-    href,
-  )
-  assert.deepEqual(list, [
-    { title: 'Autodesk', href: '/catalog?vendor=Autodesk', hint: 'AutoCAD · Revit · Inventor' },
-    { title: 'SCAD Soft', href: '/catalog?vendor=SCAD+Soft', hint: 'КРИСТАЛЛ' },
-  ])
 })

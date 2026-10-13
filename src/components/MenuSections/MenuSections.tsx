@@ -24,8 +24,8 @@ function hint(program: MenuColumn['programs'][number]) {
 }
 
 /**
- * Разделы группы слева (по задачам) и справа — программы раздела под курсором, сразу, без шага
- * с производителями (вариант А, 13.10.2026). У программ первым пунктом «Популярные программы»:
+ * Разделы группы слева (по задачам) и справа — программы раздела под курсором, сразу, без
+ * производителей (вариант А, 13.10.2026). У программ первым пунктом «Популярные программы»:
  * открыты, пока не навели на раздел. Раздел — ссылка в каталог: наведение или фокус показывают
  * его программы, клик открывает каталог.
  */
@@ -85,7 +85,7 @@ export function MenuSections({ tab, popular, onNavigate }: Props) {
         ))}
         <li>
           <Link href={tab.allHref} className={styles.everything} onClick={onNavigate}>
-            Весь раздел «{tab.label}»
+            {tab.allLabel}
             <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
           </Link>
         </li>
@@ -94,7 +94,6 @@ export function MenuSections({ tab, popular, onNavigate }: Props) {
         <MenuPanel
           key={column.title}
           title={column.title}
-          links={{ caption: 'Производители:', items: column.vendors }}
           footer={[{ href: column.allHref, label: 'Все программы раздела' }]}
           onNavigate={onNavigate}
         >

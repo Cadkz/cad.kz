@@ -33,7 +33,7 @@ function Group({ title, name, children }: { title: string; name: string; childre
 /**
  * Меню для экранов уже 960 px: кнопка слева от логотипа, панель выезжает слева.
  * Сверху «Программное обеспечение» (популярные программы, затем разделы по задачам → программы),
- * «Оборудование» и «Производители», ниже разделы сайта, «О компании», контакты и WhatsApp.
+ * и «Оборудование», ниже разделы сайта, «О компании», контакты и WhatsApp.
  */
 export function MobileMenu({ menu, contacts, whatsappHref }: Props) {
   const [open, setOpen] = useState(false)
@@ -98,15 +98,6 @@ export function MobileMenu({ menu, contacts, whatsappHref }: Props) {
               </Link>
             </Group>
           ))}
-          {menu.vendors.length > 0 && (
-            <Group title="Производители" name="mobile-menu">
-              {menu.vendors.map((vendor) => (
-                <Link key={vendor.href} href={vendor.href} className={styles.link} onClick={close}>
-                  {vendor.title}
-                </Link>
-              ))}
-            </Group>
-          )}
           {sectionLinks.map((item) => (
             <Link key={item.href} href={item.href} className={styles.topLink} onClick={close}>
               {item.title}

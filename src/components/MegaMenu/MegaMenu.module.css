@@ -6,6 +6,8 @@
   z-index: var(--z-dropdown);
   display: grid;
   grid-template-columns: var(--menu-rail) minmax(0, 1fr);
+  /* Строка не выше меню: на низком экране панель прокручивается внутри, а не обрезается. */
+  grid-template-rows: minmax(0, 1fr);
   max-height: var(--dropdown-max-height);
   overflow: hidden;
   border-radius: var(--radius-panel);
@@ -22,6 +24,8 @@
   flex-direction: column;
   justify-content: space-between;
   gap: var(--space-8);
+  min-height: 0;
+  overflow-y: auto;
   padding: var(--space-6) var(--space-4);
   background: var(--gradient-deep);
   color: var(--color-text-inverse);

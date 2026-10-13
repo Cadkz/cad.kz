@@ -1,6 +1,6 @@
 import type { HomePage, Section, SiteSetting } from '../../payload-types'
 import { brandOf } from '../domain/brands.mjs'
-import { menuColumns, menuTitle, menuVendors } from '../domain/menu.mjs'
+import { menuColumns, menuTitle } from '../domain/menu.mjs'
 import { priorityRank } from '../domain/priority.mjs'
 import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
 import { familyLines } from './families'
@@ -9,7 +9,6 @@ import { cms } from './payload'
 import type { PopularCardData } from './popular'
 import { productPath } from './productPath'
 
-export type MenuLink = { title: string; href: string }
 /** Программа в меню: название, пояснение после тире, производитель. */
 export type MenuProgram = {
   title: string
@@ -17,7 +16,7 @@ export type MenuProgram = {
   vendor: string | null
   href: string
 }
-/** Раздел в мегаменю: программы раздела по приоритету и его производители. */
+/** Раздел в мегаменю: программы раздела по приоритету. */
 export type MenuColumn = {
   title: string
   icon: string | null
@@ -25,22 +24,31 @@ export type MenuColumn = {
   programs: MenuProgram[]
   /** В разделе программ больше, чем в меню: показать «Все программы раздела». */
   more: boolean
-  vendors: MenuLink[]
 }
-export type MenuTab = { key: string; label: string; columns: MenuColumn[]; allHref: string }
-/** Производитель во вкладке «Производители»: каталог с ним и главные его программы. */
-export type MenuVendor = { title: string; href: string; hint: string }
+export type MenuTab = {
+  key: string
+  label: string
+  columns: MenuColumn[]
+  allHref: string
+  /** Ссылка на всю группу в одну строку: «Все программы». */
+  allLabel: string
+}
 export type Menu = {
   tabs: MenuTab[]
   /** «Популярные программы» — те же плитки, что на главной (админка → «Главная страница»). */
   popular: PopularCardData[]
-  vendors: MenuVendor[]
 }
 
 const groupLabels: Record<Section['menuGroup'], string> = {
   software: 'Программное обеспечение',
   hardware: 'Оборудование',
   service: 'Услуги',
+}
+
+const groupAll: Record<Section['menuGroup'], string> = {
+  software: 'Все программы',
+  hardware: 'Всё оборудование',
+  service: 'Все услуги',
 }
 
 const relId = (value: number | { id: number } | null | undefined) =>
@@ -166,6 +174,7 @@ export async function getMenu(): Promise<Menu> {
     key: group,
     label: groupLabels[group],
     allHref: catalogHref({ group }),
+    allLabel: groupAll[group],
     columns: menuColumns(
       sections.docs
         .filter((section) => section.menuGroup === group && relId(section.parent) == null)
@@ -189,12 +198,6 @@ export async function getMenu(): Promise<Menu> {
     // Отдельной вкладки «По отраслям» нет: направления и есть разделы программ.
     tabs: tabs.filter((tab) => tab.columns.length > 0),
     popular: menuPopular(home.popular?.items, byId),
-    // Курсы и консалтинг — в «Услугах», производителями их не ищут.
-    vendors: menuVendors(
-      menuItems.filter((item) => item.group !== 'service'),
-      vendorTitle,
-      catalogHref,
-    ),
   }
 }
 
