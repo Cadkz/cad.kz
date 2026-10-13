@@ -1,18 +1,19 @@
 'use client'
 
-import { ChevronDown, Menu as MenuIcon } from 'lucide-react'
+import { ChevronDown, Menu } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
-import type { Menu } from '@/lib/navigation'
+import type { MenuTab } from '@/lib/navigation'
 import { aboutColumns, sectionLinks } from '@/lib/siteNav'
 import { Drawer } from '../Drawer/Drawer'
 import { HeaderAction } from '../HeaderAction/HeaderAction'
 import { WhatsappIcon } from '../icons/icons'
+import { MobileVendors } from '../MobileVendors/MobileVendors'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './MobileMenu.module.css'
 
-type Props = { menu: Menu; contacts: ReactNode; whatsappHref: string | null }
+type Props = { menu: MenuTab[]; contacts: ReactNode; whatsappHref: string | null }
 
 /** Группы каталога, которые в меню телефона видны сразу. Обучение и внедрение — ссылками ниже. */
 const PRODUCT_GROUPS = ['software', 'hardware']
@@ -32,8 +33,8 @@ function Group({ title, name, children }: { title: string; name: string; childre
 
 /**
  * Меню для экранов уже 960 px: кнопка слева от логотипа, панель выезжает слева.
- * Сверху «Программное обеспечение» (популярные программы, затем разделы по задачам → программы),
- * и «Оборудование», ниже разделы сайта, «О компании», контакты и WhatsApp.
+ * Сверху сразу «Программное обеспечение» и «Оборудование» (разделы → производители → товары),
+ * ниже разделы сайта, «О компании», контакты и WhatsApp.
  */
 export function MobileMenu({ menu, contacts, whatsappHref }: Props) {
   const [open, setOpen] = useState(false)
@@ -42,13 +43,13 @@ export function MobileMenu({ menu, contacts, whatsappHref }: Props) {
   // biome-ignore lint/correctness/useExhaustiveDependencies: панель закрывается при переходе на другую страницу
   useEffect(() => setOpen(false), [pathname])
 
-  const groups = menu.tabs.filter((tab) => PRODUCT_GROUPS.includes(tab.key))
+  const groups = menu.filter((tab) => PRODUCT_GROUPS.includes(tab.key))
 
   return (
     <>
       <HeaderAction
         hideFrom="md"
-        icon={<MenuIcon size={24} strokeWidth={1.75} aria-hidden="true" />}
+        icon={<Menu size={24} strokeWidth={1.75} aria-hidden="true" />}
         ariaLabel="Открыть меню"
         aria-expanded={open}
         onClick={() => setOpen(true)}
@@ -57,19 +58,6 @@ export function MobileMenu({ menu, contacts, whatsappHref }: Props) {
         <nav aria-label="Меню сайта" className={styles.nav}>
           {groups.map((tab) => (
             <Group key={tab.key} title={tab.label} name="mobile-menu">
-              {tab.key === 'software' && menu.popular.length > 0 && (
-                <>
-                  <p className={styles.caption}>Популярные программы</p>
-                  <div className={styles.popular}>
-                    {menu.popular.map((card) => (
-                      <Link key={card.key} href={card.href} className={styles.chip} onClick={close}>
-                        {card.title}
-                      </Link>
-                    ))}
-                  </div>
-                  <p className={styles.caption}>По задачам</p>
-                </>
-              )}
               {tab.columns.map((column) => (
                 <details key={column.title} className={styles.section} name={`menu-${tab.key}`}>
                   <summary className={styles.sectionSummary}>
@@ -77,18 +65,9 @@ export function MobileMenu({ menu, contacts, whatsappHref }: Props) {
                     <span className={styles.sectionTitle}>{column.title}</span>
                   </summary>
                   <div className={styles.sectionBody}>
-                    {column.programs.map((program) => (
-                      <Link
-                        key={program.href}
-                        href={program.href}
-                        className={styles.program}
-                        onClick={close}
-                      >
-                        {program.title}
-                      </Link>
-                    ))}
+                    <MobileVendors column={column} onNavigate={close} />
                     <Link href={column.allHref} className={styles.all} onClick={close}>
-                      Все программы раздела
+                      Все товары раздела
                     </Link>
                   </div>
                 </details>

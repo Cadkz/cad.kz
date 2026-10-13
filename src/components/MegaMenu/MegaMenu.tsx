@@ -2,13 +2,13 @@
 
 import { MessageCircle } from 'lucide-react'
 import { type PointerEventHandler, useState } from 'react'
-import type { Menu } from '@/lib/navigation'
+import type { MenuTab } from '@/lib/navigation'
 import { MenuSections } from '../MenuSections/MenuSections'
 import styles from './MegaMenu.module.css'
 
 type Props = {
   id: string
-  menu: Menu
+  tabs: MenuTab[]
   onNavigate: () => void
   whatsappHref: string | null
   onPointerEnter: PointerEventHandler
@@ -16,20 +16,18 @@ type Props = {
 }
 
 /**
- * Мегаменю каталога (вариант А, 13.10.2026). Слева на тёмной чертёжной сетке — группы (программы,
- * оборудование, услуги; вкладки «Производители» нет — решение владельца 13.10.2026) и предложение подбора; дальше разделы группы по задачам
- * и программы раздела под курсором. У программ сверху «Популярные программы».
+ * Мегаменю каталога. Слева на тёмной чертёжной сетке — группы (программы, оборудование, услуги)
+ * и предложение подбора; дальше разделы группы и популярные товары раздела под курсором.
  * Показывается один раздел за раз, поэтому меню всегда помещается в экран.
  */
 export function MegaMenu({
   id,
-  menu,
+  tabs,
   onNavigate,
   whatsappHref,
   onPointerEnter,
   onPointerLeave,
 }: Props) {
-  const tabs = menu.tabs
   const [active, setActive] = useState(tabs[0]?.key ?? '')
   const tab = tabs.find((item) => item.key === active) ?? tabs[0]
   if (!tab) return null
@@ -78,11 +76,7 @@ export function MegaMenu({
         aria-labelledby={`${id}-tab-${tab.key}`}
         className={styles.panel}
       >
-        <MenuSections
-          tab={tab}
-          popular={tab.key === 'software' ? menu.popular : []}
-          onNavigate={onNavigate}
-        />
+        <MenuSections tab={tab} onNavigate={onNavigate} />
       </div>
     </div>
   )

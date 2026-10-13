@@ -89,7 +89,7 @@ export const demoSections: DemoSection[] = [
   },
   {
     key: 'infra',
-    title: 'Генплан, дороги и геодезия',
+    title: 'Инфраструктура и генплан',
     summary: 'Civil 3D — дороги, генплан и инженерные сети площадки.',
     menuGroup: 'software',
     isDirection: true,

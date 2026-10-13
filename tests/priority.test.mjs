@@ -63,7 +63,7 @@ test('меню: разнообразие не пускает обычный то
   ])
 })
 
-test('меню: программы раздела по уровню, внутри уровня — по «Первыми в разделе»', () => {
+test('меню: производители раздела по «Первыми в разделе», потом по уровню', () => {
   const section = {
     id: 3,
     slug: 'geotech',
@@ -84,6 +84,7 @@ test('меню: программы раздела по уровню, внутр�
   const [column] = menuColumns(
     [section],
     [product(1, 'Аа', 9, 1), product(2, 'ЗАПРОС', 1, 2), product(3, 'GEO5', 2, 2)],
+    [],
     new Map([
       [1, 'SCAD Soft'],
       [2, 'Fine Software'],
@@ -92,8 +93,8 @@ test('меню: программы раздела по уровню, внутр�
     () => '/',
   )
   assert.deepEqual(
-    column.programs.map((program) => program.title),
-    ['GEO5', 'ЗАПРОС', 'Аа'],
+    column.vendors.map((vendor) => vendor.title),
+    ['Fine Software', 'SCAD Soft', 'Другой'],
   )
 })
 
