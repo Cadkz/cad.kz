@@ -3,6 +3,7 @@ import {
   productsPart,
   publicationsPart,
   restoreImagesPart,
+  tablesPart,
   textImagesPart,
 } from '@/lib/legacyContentRun'
 
@@ -24,6 +25,8 @@ export async function POST(request: Request) {
         return reply(await productsPart(payload, data))
       case 'images':
         return reply(await textImagesPart(payload, data))
+      case 'tables':
+        return reply(await tablesPart(payload, data))
       case 'restore-images':
         return reply(await restoreImagesPart(payload, data))
       default:

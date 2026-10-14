@@ -1,12 +1,13 @@
 /**
  * Простая разметка текста публикации из поля «Текст» в админке:
  * абзацы разделяются пустой строкой, «## » в начале — заголовок раздела (попадает в оглавление),
- * «### » — подзаголовок внутри раздела,
+ * «### » — подзаголовок внутри раздела, строки «| ячейка | ячейка |» — таблица,
  * строки с «- » — список, «> » — выноска, «![описание](адрес)» отдельным абзацем — картинка
  * из «Медиа», «[текст](адрес)» внутри текста — ссылка. Без HTML: безопасно выводить как есть.
  */
 
 import { headingCase, headingLevels } from '../domain/outline.mjs'
+import { parseTable } from '../domain/tables.mjs'
 import {
   fieldLine,
   fieldLines,
@@ -24,6 +25,8 @@ export type Block =
   | { type: 'steps'; items: string[] }
   /** Пары «подпись — значение» (реквизиты, условия); значение пустое — заголовок группы. */
   | { type: 'fields'; items: { label: string; value: string }[] }
+  /** Таблица (характеристики, сравнение комплектаций); head — шапка, если есть. */
+  | { type: 'table'; head: string[] | null; rows: string[][] }
   /** Несколько картинок подряд (сертификаты): превью в ряд, крупно по нажатию. */
   | { type: 'gallery'; images: { alt: string; src: string }[] }
   | { type: 'note'; text: string }
@@ -106,6 +109,8 @@ export function parseBody(body: string | null | undefined, title?: string | null
       const src = image ? safeHref(image[2] ?? '') : null
       if (image && src) return [{ type: 'image', alt: image[1] ?? '', src }]
       const lines = chunk.split('\n').map((line) => line.trim())
+      const table = parseTable(lines)
+      if (table) return [tableBlock(table)]
       if (lines.every((line) => line.startsWith('- ')))
         return [{ type: 'list', items: lines.map((line) => line.slice(2)) }]
       if (chunk.startsWith('> '))
@@ -132,6 +137,7 @@ export function parseBody(body: string | null | undefined, title?: string | null
     block?.type === 'paragraph' && looksLikeHeading(block.text)
   const prose = (block: Block | undefined) =>
     block?.type === 'fields' ||
+    block?.type === 'table' ||
     block?.type === 'steps' ||
     (block?.type === 'paragraph' &&
       (block.text.length >= 80 || /[.!?…:]$/u.test(block.text.trim())))
@@ -157,6 +163,19 @@ export function parseBody(body: string | null | undefined, title?: string | null
     return [block]
   })
   return withGalleries(withOutline(blocks, guessed))
+}
+
+/**
+ * Таблица из двух колонок без шапки («CUDA Cores — 384») — пары «подпись — значение», как
+ * реквизиты; остальные — таблица.
+ */
+function tableBlock(table: { head: string[] | null; rows: string[][] }): Block {
+  if (!table.head && table.rows.every((row) => row.length === 2))
+    return {
+      type: 'fields',
+      items: table.rows.map(([label = '', value = '']) => ({ label, value })),
+    }
+  return { type: 'table', head: table.head, rows: table.rows }
 }
 
 /**
@@ -264,6 +283,7 @@ export function imageSources(blocks: Block[]) {
 function blockLength(block: Block) {
   if (block.type === 'list' || block.type === 'steps') return block.items.join(' ').length
   if (block.type === 'fields') return block.items.map((f) => f.label + f.value).join(' ').length
+  if (block.type === 'table') return block.rows.flat().join(' ').length
   if (block.type === 'image' || block.type === 'gallery') return 0
   return block.text.length
 }

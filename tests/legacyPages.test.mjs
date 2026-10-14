@@ -120,6 +120,7 @@ test('news page is parsed into a publication', () => {
     publishedAt: '2025-12-05T07:00:00.000Z',
     body: 'Текст вебинара.\n\n![](https://cad.kz/upload/iblock/1.jpg)',
     images: ['/upload/iblock/1.jpg'],
+    tables: [],
     excerpt: 'Описание новости длиной больше сорока знаков для поиска',
     seo: {
       title: 'Вебинар по SCAD «Новое»',

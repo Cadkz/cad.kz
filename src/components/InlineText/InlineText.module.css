@@ -1,0 +1,9 @@
+.link {
+  color: var(--color-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.link:hover {
+  color: var(--color-blue-hover);
+}

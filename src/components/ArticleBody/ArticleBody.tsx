@@ -1,8 +1,9 @@
 import Image from 'next/image'
-import Link from 'next/link'
 import type { Picture } from '@/lib/pictures'
-import { type Block, parseInline } from '@/lib/richText'
+import type { Block } from '@/lib/richText'
+import { ArticleTable } from '../ArticleTable/ArticleTable'
 import { ImageGallery } from '../ImageGallery/ImageGallery'
+import { InlineText as Text } from '../InlineText/InlineText'
 import styles from './ArticleBody.module.css'
 
 type Props = {
@@ -21,40 +22,9 @@ function uniqueKeys(items: string[]): [string, string][] {
   })
 }
 
-const EMAIL = /^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/
-
-/** Ссылка на файл (PDF, картинка в «Медиа»), а не на страницу сайта. */
-const isFile = (href: string) =>
-  href.startsWith('/api/media/') || /\.(pdf|jpe?g|png|gif|webp)$/i.test(href)
-
 /**
- * Строка со ссылками: свои страницы — через Link, внешние адреса и файлы открываются в новой
- * вкладке.
- */
-function Text({ text }: { text: string }) {
-  return (
-    <>
-      {parseInline(text).map((part, i) => {
-        const key = `${i}-${part.text}`
-        // Адрес почты — обычным текстом, без ссылки (решение владельца 13.10.2026).
-        if (!part.href || EMAIL.test(part.text)) return <span key={key}>{part.text}</span>
-        return part.href.startsWith('/') && !isFile(part.href) ? (
-          <Link key={key} href={part.href} className={styles.link}>
-            {part.text}
-          </Link>
-        ) : (
-          <a key={key} href={part.href} className={styles.link} target="_blank" rel="noopener">
-            {part.text}
-          </a>
-        )
-      })}
-    </>
-  )
-}
-
-/**
- * Текст статьи: абзацы, заголовки разделов с якорями для оглавления, подзаголовки, списки, нумерованные шаги,
- * таблицы «подпись — значение» (реквизиты), выноски, картинки.
+ * Текст статьи: абзацы, заголовки разделов с якорями для оглавления, подзаголовки, списки,
+ * нумерованные шаги, таблицы «подпись — значение» (реквизиты), таблицы, выноски, картинки.
  */
 export function ArticleBody({ blocks, pictures }: Props) {
   return (
@@ -113,6 +83,8 @@ export function ArticleBody({ blocks, pictures }: Props) {
                 )}
               </dl>
             )
+          case 'table':
+            return <ArticleTable key={key} head={block.head} rows={block.rows} />
           case 'note':
             return (
               // Выноска в тексте — примечание, а не отдельная область страницы.

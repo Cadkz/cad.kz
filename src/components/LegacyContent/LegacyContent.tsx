@@ -54,7 +54,7 @@ const message = (error: unknown) =>
   error instanceof StepError ? error.message : 'Нет связи с сайтом.'
 
 /** Шаг по страницам старого сайта: шлём запросы, пока сервер не дойдёт до конца списка. */
-function usePages(action: 'publications' | 'products') {
+function usePages(action: 'publications' | 'products' | 'tables') {
   const [state, setState] = useState<State>(initial)
   async function run() {
     const current: State = {
@@ -185,11 +185,12 @@ function Step({ title, text, button, label, summary, file, state, run }: StepPro
 
 type Props = { publications: number; news: number; promotion: number; article: number }
 
-/** Перенос со старого cad.kz: три независимых шага, каждый можно повторять. */
+/** Перенос со старого cad.kz: независимые шаги, каждый можно повторять. */
 export function LegacyContent({ publications, news, promotion, article }: Props) {
   const pages = usePages('publications')
   const images = useImages()
   const products = usePages('products')
+  const tables = usePages('tables')
   return (
     <div className={styles.root}>
       <Step
@@ -227,6 +228,18 @@ export function LegacyContent({ publications, news, promotion, article }: Props)
         file="tovary-seo-ne-pereneslos.csv"
         state={products.state}
         run={products.run}
+      />
+      <Step
+        title="4. Таблицы в текстах"
+        text="Первый перенос разложил таблицы старого сайта по ячейке в строку. Шаг заново читает старые страницы и ставит на место таких столбиков таблицы. Меняется только столбик, который совпадает с первым переносом слово в слово: места, исправленные в админке, не трогаются."
+        button="Восстановить таблицы"
+        label="Публикации со старого сайта"
+        summary={(s) =>
+          `Восстановлено таблиц ${s.totals.created} в ${s.totals.updated} публикациях, без изменений ${s.totals.existing}, не открылось ${s.failed.length}.`
+        }
+        file="tablicy-ne-vosstanovleny.csv"
+        state={tables.state}
+        run={tables.run}
       />
     </div>
   )

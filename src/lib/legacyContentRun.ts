@@ -19,6 +19,7 @@ import {
 } from '@/domain/legacyPages.mjs'
 import legacyPublications from '@/domain/legacyPublications.json'
 import { FILE_TYPE_BY_EXT, UPLOAD_MIME_TYPES } from '@/domain/mediaTypes.mjs'
+import { withTables } from '@/domain/tables.mjs'
 import { productPath } from './productPath'
 
 /**
@@ -570,6 +571,73 @@ export async function restoreImagesPart(payload: Payload, body: Record<string, u
           })
           reply.restored++
           reply.images += urls.length - imageUrls(doc.body).length
+        } catch (error) {
+          reply.failed.push({ path: oldPath, reason: pageFailure(error) })
+        }
+      }),
+    )
+    next += group.length
+  }
+  reply.next = next
+  return reply
+}
+
+/**
+ * Таблицы в уже перенесённых публикациях (решение владельца 14.10.2026): первый перенос
+ * раскладывал таблицы старого сайта по ячейке в строку. Заново читает старую страницу и
+ * заменяет такие столбики таблицами — только если столбик в тексте совпадает с тем, что дал
+ * первый перенос, слово в слово: правленные в админке места не трогает. Повтор безопасен.
+ * В ответе: created — сколько таблиц восстановлено, updated — в скольких публикациях,
+ * existing — публикации без изменений (нет таблиц, уже восстановлено или текст правили).
+ */
+export async function tablesPart(payload: Payload, body: Record<string, unknown>) {
+  const deadline = Date.now() + WORK_SECONDS * 1000
+  const { docs: all } = await payload.find({
+    collection: 'publications',
+    where: { legacyUrl: { exists: true } },
+    sort: 'id',
+    limit: 5000,
+    pagination: false,
+    select: { legacyUrl: true },
+    ...OPTS,
+  })
+  const items = all.filter((doc) => doc.legacyUrl && PUBLICATION_SET.has(doc.legacyUrl))
+  const total = items.length
+  let next = Math.min(readOffset(body.offset), total)
+  const reply: PagesReply = {
+    ok: true,
+    next,
+    total,
+    created: 0,
+    updated: 0,
+    existing: 0,
+    failed: [],
+  }
+  while (next < total && Date.now() < deadline) {
+    const group = items.slice(next, next + PARALLEL)
+    await Promise.all(
+      group.map(async ({ id, legacyUrl }) => {
+        const oldPath = String(legacyUrl)
+        try {
+          const parsed = await fetchPublication(oldPath)
+          if (!parsed?.tables.length) {
+            reply.existing++
+            return
+          }
+          const doc = await payload.findByID({
+            collection: 'publications',
+            id,
+            select: { body: true },
+            ...OPTS,
+          })
+          const { body: text, replaced } = withTables(doc.body ?? '', parsed.tables)
+          if (!replaced) {
+            reply.existing++
+            return
+          }
+          await payload.update({ collection: 'publications', id, data: { body: text }, ...OPTS })
+          reply.created += replaced
+          reply.updated++
         } catch (error) {
           reply.failed.push({ path: oldPath, reason: pageFailure(error) })
         }

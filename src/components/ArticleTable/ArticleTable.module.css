@@ -1,0 +1,44 @@
+/* Рамка как у таблицы «подпись — значение» в тексте: белая, со скруглением и границей. */
+.frame {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.frame:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.head,
+.cell {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  vertical-align: top;
+}
+
+.head {
+  background: var(--color-blue-soft);
+  color: var(--color-navy);
+  font-weight: var(--weight-semibold);
+}
+
+.cell {
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+/* Первая колонка — названия строк (комплектация, программа): чуть заметнее. */
+.cell:first-child {
+  color: var(--color-navy);
+  font-weight: var(--weight-medium);
+}

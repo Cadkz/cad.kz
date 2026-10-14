@@ -2,6 +2,7 @@
 // целиком (заголовок, дата, текст, картинки), у товаров — только title и description.
 // Без зависимостей: старые страницы однотипные (компонент news.detail), хватает простого разбора.
 import { OLD_SITE } from './bitrixImport.mjs'
+import { outerTables, tableCells, tableMarkup } from './tables.mjs'
 
 const NAMED = {
   nbsp: '\u00a0',
@@ -136,6 +137,7 @@ function decodeURISafe(value) {
 
 const IMAGE_MARK = '\u0000IMG'
 const HEADING_MARK = '\u0003'
+const TABLE_MARK = '\u0004TABLE'
 /** Ссылка ведёт на файл картинки, а не на страницу. */
 const IMAGE_FILE = /\.(jpe?g|png|gif|webp)$/i
 
@@ -148,12 +150,41 @@ function escapeParens(href) {
  * HTML текста новости → разметка поля «Текст» (абзацы, «## », «- », ссылки, картинки).
  * Картинки со старого сайта записываются полным адресом https://cad.kz/…, их потом скачивает
  * шаг «Картинки в текстах»; картинки с чужих сайтов не переносятся.
- * @returns {{ body: string, images: string[] }} images — пути картинок на старом сайте
+ * С tables: true таблицы данных переносятся таблицами (разметка «| … |»), а в tables
+ * возвращается, как каждая выглядела после переноса без них (flat), — чтобы заменить её в уже
+ * перенесённых текстах (`withTables` в `tables.mjs`).
+ * @param {string} html
+ * @param {string} [base]
+ * @param {{ tables?: boolean }} [options]
+ * @returns {{ body: string, images: string[], tables: { flat: string, markup: string }[] }}
+ *   images — пути картинок на старом сайте
  */
-export function htmlToMarkup(html, base = OLD_SITE) {
+export function htmlToMarkup(html, base = OLD_SITE, options = {}) {
   /** @type {string[]} */
   const images = []
-  let text = String(html ?? '')
+  /** @type {{ flat: string, markup: string }[]} */
+  const tables = []
+  /** @type {string[]} разметка таблицы по номеру метки */
+  const tableBlocks = []
+  let source = String(html ?? '')
+  if (options.tables) {
+    const parts = []
+    let last = 0
+    for (const { start, end } of outerTables(source)) {
+      const table = source.slice(start, end)
+      const converted = convertTable(table, base)
+      if (!converted) continue
+      const flat = htmlToMarkup(table, base)
+      images.push(...flat.images)
+      tables.push({ flat: flat.body, markup: converted.markup })
+      tableBlocks.push([converted.markup, ...converted.pictures].join('\n\n'))
+      parts.push(source.slice(last, start), `\n\n${TABLE_MARK}${tableBlocks.length - 1}\n\n`)
+      last = end
+    }
+    parts.push(source.slice(last))
+    source = parts.join('')
+  }
+  let text = source
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/<(script|style|noindex|noscript|iframe|form|object)\b[\s\S]*?<\/\1\s*>/gi, ' ')
     // Превью в ссылке на полную картинку (сертификаты в «О компании»): берём полную картинку.
@@ -209,6 +240,8 @@ export function htmlToMarkup(html, base = OLD_SITE) {
         const [alt, path] = chunk.slice(IMAGE_MARK.length).replace('\u0002', '').split('\u0001')
         return `![${alt}](${escapeParens(new URL(path ?? '', base).toString())})`
       }
+      if (chunk.startsWith(TABLE_MARK))
+        return tableBlocks[Number(chunk.slice(TABLE_MARK.length))] ?? ''
       if (chunk.startsWith(HEADING_MARK)) return `## ${chunk.slice(1).replace(/\n/g, ' ')}`
       const lines = chunk.split('\n')
       if (lines.every((line) => line.startsWith('- '))) return chunk
@@ -216,7 +249,33 @@ export function htmlToMarkup(html, base = OLD_SITE) {
       return lines.join(' ').replace(/^(#+|>|-)\s+/, '')
     })
     .filter(Boolean)
-  return { body: withoutServiceMarks(blocks.join('\n\n')), images }
+  return { body: withoutServiceMarks(blocks.join('\n\n')), images, tables }
+}
+
+/**
+ * Таблица HTML → разметка таблицы и картинки из её ячеек (идут отдельно после таблицы).
+ * null — не таблица данных (раскладка): остаётся текстом.
+ * @param {string} table
+ * @param {string} base
+ */
+function convertTable(table, base) {
+  /** @type {string[]} */
+  const pictures = []
+  const rows = tableCells(table).map((row) => ({
+    header: row.header,
+    cells: row.cells.flatMap((cell) => {
+      const chunks = htmlToMarkup(cell.html, base).body.split('\n\n')
+      pictures.push(...chunks.filter((chunk) => chunk.startsWith('![')))
+      const text = chunks
+        .filter((chunk) => chunk && !chunk.startsWith('!['))
+        .map((chunk) => chunk.replace(/^(## |- )/gm, ''))
+        .join(' ')
+        .replace(/\s+/g, ' ')
+      return [text, ...Array(cell.span - 1).fill('')]
+    }),
+  }))
+  const markup = tableMarkup(rows)
+  return markup ? { markup, pictures } : null
 }
 
 /**
@@ -249,7 +308,7 @@ const MIN_DESCRIPTION = 40
 export function excerptFrom(body, max = 220) {
   const first = String(body ?? '')
     .split('\n\n')
-    .find((block) => !/^(!\[|## |- )/.test(block))
+    .find((block) => !/^(!\[|## |- |\| )/.test(block))
   const text = (first ?? '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').trim()
   if (text.length <= max) return text
   const cut = text.slice(0, max - 1)
@@ -294,7 +353,7 @@ export function parsePublicationPage(html, path, base = OLD_SITE) {
   const seoTitle = pageTitle(html)
   const title = (h1 ? plainText(h1[1]) : '') || seoTitle
   if (!title) return null
-  const { body, images } = htmlToMarkup(content, base)
+  const { body, images, tables } = htmlToMarkup(content, base, { tables: true })
   const description = metaContent(html, 'description')
   const goodDescription = description.length >= MIN_DESCRIPTION ? description : ''
   return {
@@ -303,6 +362,7 @@ export function parsePublicationPage(html, path, base = OLD_SITE) {
     publishedAt: parseDate(divInner(html, 'bx-newsdetail-date') ?? ''),
     body,
     images,
+    tables,
     excerpt: excerptFrom(goodDescription || body),
     seo: { title: seoTitle || title, description: goodDescription },
   }
