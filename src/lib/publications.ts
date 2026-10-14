@@ -53,6 +53,15 @@ export function coverOf(publication: Publication, topicCovers?: TopicCovers): Co
   return covers?.length ? (covers[publication.id % covers.length] ?? null) : null
 }
 
+/**
+ * Анонс для вывода: анонс из одной пунктуации («.» — остаток старого сайта, попавший при
+ * переносе из первой строки текста) не показываем.
+ */
+export function excerptOf(publication: Pick<Publication, 'excerpt'>): string | null {
+  const text = publication.excerpt?.trim() ?? ''
+  return /[\p{L}\p{N}]/u.test(text) ? text : null
+}
+
 /** Тема публикации из связи (при depth ≥ 1), прежнее текстовое поле — запасной вариант. */
 export function themeOf(publication: Publication): { slug: string | null; title: string } | null {
   const theme = publication.theme
@@ -67,7 +76,7 @@ export function toCard(publication: Publication, topicCovers?: TopicCovers): New
     title: publication.title,
     date: publication.publishedAt ? formatDate(publication.publishedAt) : null,
     topic: themeOf(publication)?.title ?? null,
-    excerpt: publication.excerpt ?? null,
+    excerpt: excerptOf(publication),
     cover: coverOf(publication, topicCovers),
   }
 }

@@ -3,7 +3,7 @@ import { getContacts } from './navigation'
 import { newsHref } from './navigationHrefs'
 import { cms } from './payload'
 import { toPicture } from './pictures'
-import { getCurrentPromotions } from './publications'
+import { excerptOf, getCurrentPromotions } from './publications'
 
 export type HomeLink = { label: string; href: string } | null
 export type Slide = { title: string; text: string | null; href: string }
@@ -35,7 +35,7 @@ export async function getHome() {
     slides: promotions.map(
       (item): Slide => ({
         title: item.title,
-        text: item.excerpt ?? null,
+        text: excerptOf(item),
         href: newsHref(item.slug),
       }),
     ),

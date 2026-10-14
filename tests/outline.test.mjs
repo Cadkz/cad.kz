@@ -118,3 +118,12 @@ test('заголовок капсом — обычное написание, н�
   )
   assert.equal(headingCase('3. ЛИРА-САПР И ГРУНТ'), '3. ЛИРА-САПР и грунт')
 })
+
+test('абзац из одной точки (остаток старого сайта) не выводится', async () => {
+  const { parseBody } = await import('../src/lib/richText.ts')
+  const blocks = parseBody('.\n\nПроцесс получения лицензии.\n\n…\n\nДальше текст.')
+  assert.deepEqual(
+    blocks.map((b) => (b.type === 'paragraph' ? b.text : b.type)),
+    ['Процесс получения лицензии.', 'Дальше текст.'],
+  )
+})

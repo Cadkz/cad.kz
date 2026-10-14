@@ -238,8 +238,10 @@ function withFieldRuns(blocks: Block[]): Block[] {
   return result
 }
 
+// Остатки старого сайта: стрелки карусели, пустые ссылки и абзацы из одной пунктуации
+// (строка «.» в начале статьи — так на старом сайте делали отступ).
 const LEFTOVER =
-  /^(?:\s|&(?:amp;)?(?:lsaquo|rsaquo|laquo|raquo|nbsp);|[‹›«»<>|]|\[[‹›«»<>]*\]\([^)]*\))*$/u
+  /^(?:\s|&(?:amp;)?(?:lsaquo|rsaquo|laquo|raquo|nbsp);|[‹›«»<>|.,…·\-–—]|\[[‹›«»<>]*\]\([^)]*\))*$/u
 
 function isLeftover(text: string) {
   return LEFTOVER.test(text)

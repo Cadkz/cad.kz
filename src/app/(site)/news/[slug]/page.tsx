@@ -18,6 +18,7 @@ import { cms } from '@/lib/payload'
 import { bodyPictures } from '@/lib/pictures'
 import {
   coverOf,
+  excerptOf,
   getNeighbors,
   getPublication,
   getPublications,
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMetadata({
     seo: publication.seo,
     title: `${publication.title} — CAD.kz`,
-    description: publication.excerpt,
+    description: excerptOf(publication),
     path: newsHref(publication.slug),
     image: cover?.url,
   })
@@ -102,7 +103,7 @@ export default async function PublicationPage({ params }: Props) {
         >
           <PageIntro
             title={publication.title}
-            lead={publication.excerpt}
+            lead={excerptOf(publication)}
             meta={
               publication.publishedAt ? (
                 <>
