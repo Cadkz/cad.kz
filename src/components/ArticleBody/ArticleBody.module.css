@@ -16,6 +16,16 @@
   scroll-margin-top: calc(var(--header-height) + var(--space-4));
 }
 
+/* Подзаголовок внутри раздела (h3): меньше и ближе к тексту, в оглавление не попадает. */
+.subheading {
+  margin-top: var(--space-2);
+  color: var(--color-navy);
+  line-height: var(--leading-snug);
+  font-size: var(--text-h4);
+  font-weight: var(--weight-semibold);
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
+}
+
 .list {
   display: flex;
   flex-direction: column;

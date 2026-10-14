@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PublicationPage({ params }: Props) {
   const publication = await getPublication((await params).slug)
   if (!publication) notFound()
-  const blocks = parseBody(publication.body)
+  const blocks = parseBody(publication.body, publication.title)
   const theme = themeOf(publication)
   const [neighbors, sameTopic, latest, home, pictures] = await Promise.all([
     getNeighbors(publication),
@@ -68,7 +68,10 @@ export default async function PublicationPage({ params }: Props) {
     getHome(),
     cms().then((payload) => bodyPictures(payload, imageSources(blocks))),
   ])
-  const toc = blocks.flatMap((b) => (b.type === 'heading' ? [{ id: b.id, text: b.text }] : []))
+  // Оглавление — только разделы (h2), их не больше пяти (правило `domain/outline.mjs`).
+  const toc = blocks.flatMap((b) =>
+    b.type === 'heading' && b.level === 2 ? [{ id: b.id, text: b.text }] : [],
+  )
   const section = sections[publication.kind]
   // «Читайте также»: сначала та же тема, остальное — свежие материалы того же типа.
   const seen = new Set([publication.id])

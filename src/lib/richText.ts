@@ -1,9 +1,12 @@
 /**
  * Простая разметка текста публикации из поля «Текст» в админке:
- * абзацы разделяются пустой строкой, «## » в начале — подзаголовок раздела,
+ * абзацы разделяются пустой строкой, «## » в начале — заголовок раздела (попадает в оглавление),
+ * «### » — подзаголовок внутри раздела,
  * строки с «- » — список, «> » — выноска, «![описание](адрес)» отдельным абзацем — картинка
  * из «Медиа», «[текст](адрес)» внутри текста — ссылка. Без HTML: безопасно выводить как есть.
  */
+
+import { headingCase, headingLevels } from '../domain/outline.mjs'
 import {
   fieldLine,
   fieldLines,
@@ -13,7 +16,8 @@ import {
 } from '../domain/typography.mjs'
 
 export type Block =
-  | { type: 'heading'; id: string; text: string }
+  /** level 2 — раздел (в оглавлении), 3 — подзаголовок внутри раздела. */
+  | { type: 'heading'; id: string; text: string; level: 2 | 3 }
   | { type: 'paragraph'; text: string }
   | { type: 'list'; items: string[] }
   /** Нумерованные шаги (из «1. … 2. …» в строку или строк «1. …»). */
@@ -80,13 +84,14 @@ export function anchor(text: string) {
 
 export function parseBody(body: string | null | undefined, title?: string | null): Block[] {
   if (!body) return []
-  const used = new Map<string, number>()
-  const heading = (text: string): Block => {
-    const base = anchor(text)
-    const n = used.get(base) ?? 0
-    used.set(base, n + 1)
-    return { type: 'heading', id: n ? `${base}-${n + 1}` : base, text }
-  }
+  // Подзаголовки, угаданные по короткой строке: всегда h3, в оглавление не попадают.
+  const guessed = new WeakSet<Block>()
+  const heading = (text: string, level: 2 | 3 = 2): Block => ({
+    type: 'heading',
+    id: '',
+    text,
+    level,
+  })
   const sameAsTitle = (text: string) =>
     Boolean(title) && text.trim().toLowerCase() === title?.trim().toLowerCase()
 
@@ -95,6 +100,7 @@ export function parseBody(body: string | null | undefined, title?: string | null
     .map((chunk) => chunk.trim())
     .filter(Boolean)
     .flatMap((chunk): Block[] => {
+      if (chunk.startsWith('### ')) return [heading(chunk.slice(4).trim(), 3)]
       if (chunk.startsWith('## ')) return [heading(chunk.slice(3).trim())]
       const image = IMAGE.exec(chunk)
       const src = image ? safeHref(image[2] ?? '') : null
@@ -122,18 +128,67 @@ export function parseBody(body: string | null | undefined, title?: string | null
   const kept = withFieldRuns(
     raw.filter((block) => block.type !== 'paragraph' || !isLeftover(block.text)),
   )
+  const short = (block: Block | undefined) =>
+    block?.type === 'paragraph' && looksLikeHeading(block.text)
+  const prose = (block: Block | undefined) =>
+    block?.type === 'fields' ||
+    block?.type === 'steps' ||
+    (block?.type === 'paragraph' &&
+      (block.text.length >= 80 || /[.!?…:]$/u.test(block.text.trim())))
   const blocks = kept.flatMap((block, i): Block[] => {
+    if (block.type === 'heading') return sameAsTitle(block.text) ? [] : [block]
     if (block.type !== 'paragraph') return [block]
     if (sameAsTitle(block.text)) return []
-    // Только между текстом: перед списком короткая строка — подводка, после подзаголовка — текст.
+    // Только перед настоящим текстом (предложение или длинный абзац): перед списком короткая
+    // строка — подводка, после подзаголовка — текст. Короткие строки подряд и пары «GPU Memory —
+    // 2 GB» — остатки таблицы со старого сайта, а не подзаголовки.
     const next = kept[i + 1]
     const previous = kept[i - 1]
-    const textNext = next?.type === 'paragraph' || next?.type === 'fields' || next?.type === 'steps'
-    if (textNext && previous?.type !== 'heading' && looksLikeHeading(block.text))
-      return [heading(block.text)]
+    if (
+      prose(next) &&
+      !short(previous) &&
+      previous?.type !== 'heading' &&
+      looksLikeHeading(block.text)
+    ) {
+      const guess = heading(block.text, 3)
+      guessed.add(guess)
+      return [guess]
+    }
     return [block]
   })
-  return withGalleries(blocks)
+  return withGalleries(withOutline(blocks, guessed))
+}
+
+/**
+ * Уровни заголовков по правилу «в оглавлении не больше пяти пунктов» (`domain/outline.mjs`),
+ * якоря для оглавления. Заголовок-предложение становится обычным абзацем, двоеточие в конце
+ * заголовка не нужно, капс — обычным написанием.
+ */
+function withOutline(blocks: Block[], guessed: WeakSet<Block>): Block[] {
+  const levels = headingLevels(
+    blocks.map((block) =>
+      block.type === 'heading'
+        ? {
+            heading: true as const,
+            text: block.text,
+            level: block.level,
+            guess: guessed.has(block),
+          }
+        : { heading: false as const },
+    ),
+  )
+  const used = new Map<string, number>()
+  return blocks.flatMap((block, i): Block[] => {
+    const level = levels[i]
+    if (block.type !== 'heading') return [block]
+    if (!level)
+      return splitParagraph(block.text).map((text): Block => ({ type: 'paragraph', text }))
+    const text = headingCase(block.text.replace(/\s*:$/, ''))
+    const base = anchor(text)
+    const n = used.get(base) ?? 0
+    used.set(base, n + 1)
+    return [{ type: 'heading', id: n ? `${base}-${n + 1}` : base, text, level }]
+  })
 }
 
 /**

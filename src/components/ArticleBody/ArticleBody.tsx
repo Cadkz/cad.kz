@@ -53,7 +53,7 @@ function Text({ text }: { text: string }) {
 }
 
 /**
- * Текст статьи: абзацы, подзаголовки с якорями для оглавления, списки, нумерованные шаги,
+ * Текст статьи: абзацы, заголовки разделов с якорями для оглавления, подзаголовки, списки, нумерованные шаги,
  * таблицы «подпись — значение» (реквизиты), выноски, картинки.
  */
 export function ArticleBody({ blocks, pictures }: Props) {
@@ -63,10 +63,15 @@ export function ArticleBody({ blocks, pictures }: Props) {
         const key = `${block.type}-${i}`
         switch (block.type) {
           case 'heading':
-            return (
+            // Раздел — h2 (пункт оглавления), подзаголовок внутри раздела — h3.
+            return block.level === 2 ? (
               <h2 key={key} id={block.id} className={styles.heading}>
                 {block.text}
               </h2>
+            ) : (
+              <h3 key={key} id={block.id} className={styles.subheading}>
+                {block.text}
+              </h3>
             )
           case 'list':
             return (
