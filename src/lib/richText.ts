@@ -26,7 +26,7 @@ export type Block =
   /** Пары «подпись — значение» (реквизиты, условия); значение пустое — заголовок группы. */
   | { type: 'fields'; items: { label: string; value: string }[] }
   /** Таблица (характеристики, сравнение комплектаций); head — шапка, если есть. */
-  | { type: 'table'; head: string[] | null; rows: string[][] }
+  | { type: 'table'; head: string[][] | null; rows: string[][] }
   /** Несколько картинок подряд (сертификаты): превью в ряд, крупно по нажатию. */
   | { type: 'gallery'; images: { alt: string; src: string }[] }
   | { type: 'note'; text: string }
@@ -169,7 +169,7 @@ export function parseBody(body: string | null | undefined, title?: string | null
  * Таблица из двух колонок без шапки («CUDA Cores — 384») — пары «подпись — значение», как
  * реквизиты; остальные — таблица.
  */
-function tableBlock(table: { head: string[] | null; rows: string[][] }): Block {
+function tableBlock(table: { head: string[][] | null; rows: string[][] }): Block {
   if (!table.head && table.rows.every((row) => row.length === 2))
     return {
       type: 'fields',

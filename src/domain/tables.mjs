@@ -6,8 +6,29 @@
  * в таблице) таблицами не считаются и остаются текстом.
  */
 
-/** Ячейка длиннее — это раскладка страницы, а не таблица данных. */
+/**
+ * Ячейка длиннее — это раскладка страницы, а не таблица данных. Исключение — таблица с
+ * короткой строкой-шапкой («Решение | Последствия», «Значение | Описание»): см. `headedText`.
+ */
 export const CELL_LIMIT = 200
+
+/** Ячейка шапки не длиннее: подпись колонки, а не абзац. */
+const HEAD_LIMIT = 60
+
+/** Подпись к рисунку: такие таблицы старого сайта — раскладка картинок, а не данные. */
+const CAPTION = /^(рис\.|рисунок\s)/i
+
+/**
+ * Таблица с длинным текстом в ячейках, но с настоящей шапкой: первая строка — короткие
+ * непустые подписи колонок, ниже хотя бы две строки, нигде нет подписей «Рис. …».
+ * @param {{ cells: string[] }[]} rows
+ */
+function headedText(rows) {
+  const [head] = rows
+  if (!head || rows.length < 3) return false
+  if (!head.cells.every((cell) => cell && cell.length <= HEAD_LIMIT)) return false
+  return !rows.some((row) => row.cells.some((cell) => CAPTION.test(cell)))
+}
 
 /**
  * Таблицы верхнего уровня без вложенных таблиц: [{ start, end }] — границы в html.
@@ -118,9 +139,12 @@ export function tableMarkup(rows) {
   }))
   const columns = used.filter(Boolean).length
   if (columns < 2 || clean.length < 2) return null
-  if (clean.some((row) => row.cells.some((cell) => cell.length > CELL_LIMIT))) return null
+  const long = clean.some((row) => row.cells.some((cell) => cell.length > CELL_LIMIT))
+  if (long && !headedText(clean)) return null
   const lines = []
-  const headRows = clean.findIndex((row) => !row.header)
+  const found = clean.findIndex((row) => !row.header)
+  // У таблицы с длинным текстом шапка — первая строка, даже если на старом сайте она <td>.
+  const headRows = long && found <= 0 ? 1 : found
   clean.forEach((row, i) => {
     lines.push(`| ${row.cells.join(' | ')} |`)
     if (headRows > 0 && i === headRows - 1) lines.push(`|${' --- |'.repeat(columns)}`)
@@ -128,11 +152,16 @@ export function tableMarkup(rows) {
   return lines.join('\n')
 }
 
+/** Строк шапки без «| --- |» не больше: дальше — уже данные. */
+const HEAD_ROWS = 3
+
 /**
- * Абзац разметки — таблица: все строки «| … |». → { head, rows } или null. Шапка — строки до
- * «| --- |»; без неё у таблицы из трёх и больше колонок шапкой считается первая строка.
+ * Абзац разметки — таблица: все строки «| … |». → { head, rows } или null. head — строки
+ * шапки (их бывает несколько: объединённые ячейки старого сайта), rows — данные. Шапка —
+ * строки до «| --- |»; без неё — строки сверху с пустой первой ячейкой (угол таблицы над
+ * колонкой названий), а если таких нет — первая строка у таблицы из трёх и больше колонок.
  * @param {string[]} lines
- * @returns {{ head: string[] | null, rows: string[][] } | null}
+ * @returns {{ head: string[][] | null, rows: string[][] } | null}
  */
 export function parseTable(lines) {
   if (lines.length < 2 || !lines.every((line) => /^\|.*\|$/.test(line))) return null
@@ -145,19 +174,37 @@ export function parseTable(lines) {
   const body = lines.filter((_, i) => i !== divider).map(split)
   const width = Math.max(...body.map((row) => row.length))
   const rows = body.map((row) => Array.from({ length: width }, (_, i) => row[i] ?? ''))
-  const headCount = divider > 0 ? divider : width >= 3 ? 1 : 0
-  if (headCount > 1) {
-    // Несколько строк шапки (объединённые ячейки старого сайта) — склеиваем в одну.
-    const head = rows[0]?.map((_, i) =>
-      rows
-        .slice(0, headCount)
-        .map((row) => row[i])
-        .filter(Boolean)
-        .join(' '),
+  let headCount = divider > 0 ? divider : 0
+  if (divider <= 0) {
+    while (
+      headCount < Math.min(HEAD_ROWS, rows.length - 1) &&
+      !rows[headCount]?.[0] &&
+      rows[headCount]?.some(Boolean)
     )
-    return { head: head ?? null, rows: rows.slice(headCount) }
+      headCount++
+    if (!headCount && width >= 3) headCount = 1
   }
-  return headCount ? { head: rows[0] ?? null, rows: rows.slice(1) } : { head: null, rows }
+  return headCount
+    ? { head: rows.slice(0, headCount), rows: rows.slice(headCount) }
+    : { head: null, rows }
+}
+
+/**
+ * Ячейки строки шапки с объединением: подпись тянется на пустые ячейки справа от неё
+ * (так на старом сайте стояли подписи над группой колонок, colspan), пустые ячейки слева
+ * от первой подписи — один угол. → [{ text, span }], сумма span = числу колонок.
+ * @param {string[]} row
+ * @returns {{ text: string, span: number }[]}
+ */
+export function headSpans(row) {
+  /** @type {{ text: string, span: number }[]} */
+  const spans = []
+  for (const cell of row) {
+    const last = spans[spans.length - 1]
+    if (!cell && last) last.span++
+    else spans.push({ text: cell, span: 1 })
+  }
+  return spans
 }
 
 /** Картинка блоком: «![описание](адрес)». */
@@ -176,32 +223,31 @@ function plain(block) {
 }
 
 /**
- * Где в блоках текста лежит столбик flat (как таблица вышла после первого переноса), начиная
- * с from. Текстовые блоки должны совпасть по plain; картинка столбика — картинкой с любым
- * адресом или отсутствовать (убрана шагом 2). → { at, end } или null.
+ * Где в блоках текста лежит столбик flat (как таблица вышла при первом переносе), начиная
+ * с from. Сравнивается сплошной текст: первый перенос мог разбить ячейки на абзацы иначе,
+ * чем сейчас (ссылка и «30 %» — отдельными абзацами или одной строкой), поэтому подряд
+ * идущие блоки склеиваются, пока их текст — начало текста столбика. Картинки (блоки без
+ * текста) внутри столбика входят в него с любым адресом или отсутствуют (убраны шагом 2).
+ * → { at, end } или null.
  * @param {string[]} blocks
  * @param {string[]} flat
  * @param {number} from
  */
 function findFlat(blocks, flat, from) {
-  const first = flat.findIndex((block) => plain(block))
-  if (first < 0) return null
+  const target = flat.map(plain).filter(Boolean).join(' ')
+  if (!target) return null
   for (let at = from; at < blocks.length; at++) {
-    let i = 0
-    let j = at
-    while (i < flat.length && j <= blocks.length) {
-      const want = plain(flat[i] ?? '')
-      const have = j < blocks.length ? plain(blocks[j] ?? '') : null
-      if (!want) {
-        // Картинка из ячейки: в тексте она картинкой (адрес уже из «Медиа») или её убрали.
-        if (have === '') j++
-        i++
-      } else if (have === want) {
-        i++
-        j++
-      } else break
+    if (!plain(blocks[at] ?? '')) continue
+    let text = ''
+    for (let j = at; j < blocks.length; j++) {
+      const part = plain(blocks[j] ?? '')
+      if (!part) continue
+      text = text ? `${text} ${part}` : part
+      // Начало столбика должно кончаться на границе слова: «Отраслевые» ≠ «Отраслевые…».
+      if (!target.startsWith(text) || (text.length < target.length && target[text.length] !== ' '))
+        break
+      if (text === target) return { at, end: j + 1 }
     }
-    if (i === flat.length && j > at) return { at, end: j }
   }
   return null
 }

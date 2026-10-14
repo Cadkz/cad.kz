@@ -30,6 +30,13 @@
   background: var(--color-blue-soft);
   color: var(--color-navy);
   font-weight: var(--weight-semibold);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Шапка в несколько строк (подписи над группами колонок): строки разделены линией, у первой
+   линии нет — сверху уже граница рамки. */
+tr:first-child > .head {
+  border-top: 0;
 }
 
 .cell {

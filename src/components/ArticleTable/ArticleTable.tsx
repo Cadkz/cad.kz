@@ -1,7 +1,8 @@
+import { headSpans } from '../../domain/tables.mjs'
 import { InlineText } from '../InlineText/InlineText'
 import styles from './ArticleTable.module.css'
 
-type Props = { head: string[] | null; rows: string[][] }
+type Props = { head: string[][] | null; rows: string[][] }
 
 /** Ключи строк и ячеек: в таблицах старого сайта бывают одинаковые строки. */
 const keyed = <T,>(items: T[], name: (item: T) => string) => {
@@ -15,8 +16,9 @@ const keyed = <T,>(items: T[], name: (item: T) => string) => {
 }
 
 /**
- * Таблица в тексте статьи (характеристики, сравнение комплектаций). Широкая таблица
- * прокручивается вбок внутри своей рамки, страница вбок не едет.
+ * Таблица в тексте статьи (характеристики, сравнение комплектаций). Шапка бывает в несколько
+ * строк: подпись над группой колонок занимает всю группу, как на старом сайте. Широкая
+ * таблица прокручивается вбок внутри своей рамки, страница вбок не едет.
  */
 export function ArticleTable({ head, rows }: Props) {
   return (
@@ -25,13 +27,20 @@ export function ArticleTable({ head, rows }: Props) {
       <table className={styles.table}>
         {head && (
           <thead>
-            <tr>
-              {keyed(head, String).map(([key, cell]) => (
-                <th key={key} scope="col" className={styles.head}>
-                  <InlineText text={cell} />
-                </th>
-              ))}
-            </tr>
+            {keyed(head, (row) => row.join('|')).map(([rowKey, row]) => (
+              <tr key={rowKey}>
+                {keyed(headSpans(row), (cell) => `${cell.text}/${cell.span}`).map(([key, cell]) => (
+                  <th
+                    key={key}
+                    scope={cell.span > 1 ? 'colgroup' : 'col'}
+                    colSpan={cell.span > 1 ? cell.span : undefined}
+                    className={styles.head}
+                  >
+                    <InlineText text={cell.text} />
+                  </th>
+                ))}
+              </tr>
+            ))}
           </thead>
         )}
         <tbody>

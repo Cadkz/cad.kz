@@ -3,6 +3,7 @@ import { test } from 'node:test'
 import { htmlToMarkup, parsePublicationPage } from '../src/domain/legacyPages.mjs'
 import {
   gridRows,
+  headSpans,
   outerTables,
   parseTable,
   tableMarkup,
@@ -99,7 +100,7 @@ test('разбор разметки таблицы: шапка, пары без 
   assert.deepEqual(
     parseTable(['| ПО | CPU | DDR |', '| --- | --- | --- |', '| NanoCAD | 4Gb |  |']),
     {
-      head: ['ПО', 'CPU', 'DDR'],
+      head: [['ПО', 'CPU', 'DDR']],
       rows: [['NanoCAD', '4Gb', '']],
     },
   )
@@ -174,4 +175,57 @@ test('объединённые по вертикали ячейки не сдв�
     body,
     '| Класс | Модель | Память |\n| --- | --- | --- |\n| Офис | T400 | 2 GB |\n|  | T600 | 4 GB |',
   )
+})
+
+test('шапка без «| --- |»: строки сверху с пустым углом, подпись группы тянется вправо', () => {
+  const table = parseTable([
+    '|  |  | Время, сек. |  |',
+    '|  | Комплектация | Запуск ОС | Завершение ОС |',
+    '| 1 | 7/32/2000 | 15 | 20 |',
+  ])
+  assert.deepEqual(table?.head, [
+    ['', '', 'Время, сек.', ''],
+    ['', 'Комплектация', 'Запуск ОС', 'Завершение ОС'],
+  ])
+  assert.deepEqual(table?.rows, [['1', '7/32/2000', '15', '20']])
+  assert.deepEqual(headSpans(table?.head?.[0] ?? []), [
+    { text: '', span: 2 },
+    { text: 'Время, сек.', span: 2 },
+  ])
+  // Две колонки с пустым углом — таблица с шапкой, а не пары «подпись — значение».
+  assert.deepEqual(parseTable(['|  | Комплектации |', '| 1-4 | 7/32/2000 |'])?.head, [
+    ['', 'Комплектации'],
+  ])
+})
+
+test('длинный текст в ячейках с короткой шапкой — таблица; подписи к рисункам — текстом', () => {
+  const text = 'Солидное оснащение даёт иллюзию уверенности. '.repeat(6)
+  const headed =
+    '<table><tr><td>РЕШЕНИЕ</td><td>ПОСЛЕДСТВИЯ</td></tr>' +
+    `<tr><td>Постоянные лицензии</td><td>${text}</td></tr>` +
+    `<tr><td>Временные лицензии</td><td>${text}</td></tr></table>`
+  const { tables } = htmlToMarkup(headed, undefined, { tables: true })
+  assert.equal(tables.length, 1)
+  assert.ok(tables[0]?.markup.startsWith('| РЕШЕНИЕ | ПОСЛЕДСТВИЯ |\n| --- | --- |\n'))
+  const figures =
+    '<table><tr><td>а</td><td>б</td></tr>' +
+    `<tr><td>Рис. 3. ${text}</td><td></td></tr><tr><td>x</td><td>y</td></tr></table>`
+  assert.equal(htmlToMarkup(figures, undefined, { tables: true }).tables.length, 0)
+})
+
+test('восстановление: ячейки в тексте разбиты на абзацы иначе, чем сейчас', () => {
+  const html =
+    '<p>Список.</p><table><tr><td>Коллекции</td><td><a href="/c/aec/">Коллекция</a>' +
+    '<sup><a href="/c/aec/">®</a></sup></td><td>30&nbsp;%</td></tr>' +
+    '<tr><td>LT</td><td><a href="/c/lt/">AutoCAD LT</a></td><td>20 %</td></tr></table><p>После.</p>'
+  const { body, tables } = htmlToMarkup(html, undefined, { tables: true })
+  // Первый перенос: каждая ячейка — отдельным абзацем.
+  const stored =
+    'Список.\n\nКоллекции\n\n[Коллекция](/c/aec/)[®](/c/aec/)\n\n30 %\n\nLT\n\n' +
+    '[AutoCAD LT](/c/lt/)\n\n20 %\n\nПосле.'
+  const result = withTables(stored, tables)
+  assert.equal(result.replaced, 1)
+  assert.equal(result.body, body)
+  // Начало слова не считается совпадением: «Коллекции» ≠ «Коллекц».
+  assert.equal(withTables(stored.replace('Коллекции', 'Коллекц'), tables).replaced, 0)
 })
