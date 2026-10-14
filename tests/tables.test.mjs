@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { htmlToMarkup, parsePublicationPage } from '../src/domain/legacyPages.mjs'
-import { outerTables, parseTable, tableMarkup, withTables } from '../src/domain/tables.mjs'
+import {
+  gridRows,
+  outerTables,
+  parseTable,
+  tableMarkup,
+  withTables,
+} from '../src/domain/tables.mjs'
 
 const SPECS =
   '<table><tbody><tr><td><p>CUDA Cores</p></td><td><p>384</p></td></tr>' +
@@ -46,10 +52,47 @@ test('без tables перенос как раньше: по ячейке в с�
 test('восстановление: столбик заменяется таблицей, правленный текст не трогается', () => {
   const { body, tables } = htmlToMarkup(`<p>Вступление.</p>${SPECS}`, undefined, { tables: true })
   const old = htmlToMarkup(`<p>Вступление.</p>${SPECS}`).body
-  assert.deepEqual(withTables(old, tables), { body, replaced: 1 })
-  assert.deepEqual(withTables(body, tables), { body, replaced: 0 })
+  assert.deepEqual(withTables(old, tables), { body, replaced: 1, missed: 0 })
+  assert.deepEqual(withTables(body, tables), { body, replaced: 0, missed: 0 })
   const edited = old.replace('384', '512')
-  assert.deepEqual(withTables(edited, tables), { body: edited, replaced: 0 })
+  assert.deepEqual(withTables(edited, tables), { body: edited, replaced: 0, missed: 1 })
+})
+
+const PICTURED =
+  '<table><tr><td>Карта</td><td><img src="/upload/a.png" alt="A"></td><td>' +
+  '<a href="/upload/spec.pdf">Паспорт</a></td></tr>' +
+  '<tr><td>Сайт</td><td><a href="/bitrix/redirect.php?goto=https%3A%2F%2Fnvidia.com">NVIDIA</a></td>' +
+  '<td>8 GB</td></tr></table>'
+
+test('восстановление после шага «Картинки в текстах»: адреса из «Медиа», картинки под таблицей', () => {
+  const html = `<p>Вступление.</p>${PICTURED}<p>После.</p>`
+  const { tables } = htmlToMarkup(html, undefined, { tables: true })
+  // Так текст выглядит в базе: картинка и PDF скачаны в «Медиа», переход redirect.php убран.
+  const stored = htmlToMarkup(html)
+    .body.replace('https://cad.kz/upload/a.png', '/api/media/file/a.png')
+    .replace('/upload/spec.pdf', '/api/media/file/spec.pdf')
+    .replace(/\/bitrix\/redirect\.php\?[^)]*/, 'https://nvidia.com')
+  const { body, replaced, missed } = withTables(stored, tables)
+  assert.equal(replaced, 1)
+  assert.equal(missed, 0)
+  assert.equal(
+    body,
+    'Вступление.\n\n| Карта |  | [Паспорт](/api/media/file/spec.pdf) |\n' +
+      '| Сайт | [NVIDIA](https://nvidia.com) | 8 GB |\n\n![A](/api/media/file/a.png)\n\nПосле.',
+  )
+  assert.deepEqual(withTables(body, tables), { body, replaced: 0, missed: 0 })
+})
+
+test('картинки, которой нет на старом сайте, нет и в тексте — таблица всё равно встаёт', () => {
+  const html = `<p>Вступление.</p>${PICTURED}`
+  const { tables } = htmlToMarkup(html, undefined, { tables: true })
+  const stored = htmlToMarkup(html)
+    .body.replace(/!\[A\]\([^)]*\)\n\n/, '')
+    .replace('[Паспорт](/upload/spec.pdf)', 'Паспорт')
+  const { body, replaced } = withTables(stored, tables)
+  assert.equal(replaced, 1)
+  assert.ok(body.includes('| Карта |  | Паспорт |'))
+  assert.ok(!body.includes('!['))
 })
 
 test('разбор разметки таблицы: шапка, пары без шапки, не таблица', () => {
@@ -100,4 +143,35 @@ test('страница старого сайта: публикация несё�
   assert.equal(parsed?.tables.length, 1)
   assert.ok(parsed?.body.includes('| ПО | CPU | DDR |'))
   assert.equal(parsed?.excerpt, 'Вступление статьи.')
+})
+
+test('объединённые по вертикали ячейки не сдвигают строки ниже влево', () => {
+  const cell = (value, rows = 1, span = 1) => ({ value, rows, span })
+  assert.deepEqual(
+    gridRows(
+      [
+        { header: true, cells: [cell('Класс'), cell('Модель'), cell('Память')] },
+        { header: false, cells: [cell('Офис', 2), cell('T400'), cell('2 GB')] },
+        { header: false, cells: [cell('T600'), cell('4 GB')] },
+        { header: false, cells: [cell('Итого', 1, 2), cell('6 GB')] },
+      ],
+      '',
+    ).map((row) => row.cells),
+    [
+      ['Класс', 'Модель', 'Память'],
+      ['Офис', 'T400', '2 GB'],
+      ['', 'T600', '4 GB'],
+      ['Итого', '', '6 GB'],
+    ],
+  )
+  const { body } = htmlToMarkup(
+    '<table><tr><th>Класс</th><th>Модель</th><th>Память</th></tr>' +
+      '<tr><td rowspan="2">Офис</td><td>T400</td><td>2 GB</td></tr><tr><td>T600</td><td>4 GB</td></tr></table>',
+    undefined,
+    { tables: true },
+  )
+  assert.equal(
+    body,
+    '| Класс | Модель | Память |\n| --- | --- | --- |\n| Офис | T400 | 2 GB |\n|  | T600 | 4 GB |',
+  )
 })

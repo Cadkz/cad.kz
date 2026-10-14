@@ -35,9 +35,15 @@ export function outerTables(html) {
   return found
 }
 
+/** colspan / rowspan ячейки: 1–20. */
+function spanOf(attrs, name) {
+  const value = Number(new RegExp(`${name}\\s*=\\s*["']?(\\d+)`, 'i').exec(attrs ?? '')?.[1])
+  return Math.min(Math.max(value || 1, 1), 20)
+}
+
 /**
- * Строки и ячейки таблицы HTML: [{ header, cells: [{ html, span }] }]. header — строка шапки
- * (в <thead> или из одних <th>). span — colspan.
+ * Строки и ячейки таблицы HTML: [{ header, cells: [{ html, span, rows }] }]. header — строка
+ * шапки (в <thead> или из одних <th>). span — colspan, rows — rowspan.
  * @param {string} table
  */
 export function tableCells(table) {
@@ -50,10 +56,8 @@ export function tableCells(table) {
     const cells = [...inner.matchAll(/<(td|th)\b([^>]*)>([\s\S]*?)(?=<t[dh]\b|<\/tr|$)/gi)].map(
       (cell) => ({
         th: (cell[1] ?? '').toLowerCase() === 'th',
-        span: Math.min(
-          Math.max(Number(/colspan\s*=\s*["']?(\d+)/i.exec(cell[2] ?? '')?.[1]) || 1, 1),
-          20,
-        ),
+        span: spanOf(cell[2], 'colspan'),
+        rows: spanOf(cell[2], 'rowspan'),
         html: (cell[3] ?? '').replace(/<\/t[dh]\s*>\s*$/i, ''),
       }),
     )
@@ -63,6 +67,38 @@ export function tableCells(table) {
     rows.push({ header: inHead || cells.every((cell) => cell.th), cells })
   }
   return rows
+}
+
+/**
+ * Ячейки строк по колонкам с учётом объединений: ячейка с colspan занимает свою колонку и
+ * пустые справа, с rowspan — пустые в той же колонке ниже (иначе строки ниже съезжают влево).
+ * @template T
+ * @param {{ header: boolean, cells: { span: number, rows: number, value: T }[] }[]} rows
+ * @param {T} empty
+ * @returns {{ header: boolean, cells: T[] }[]}
+ */
+export function gridRows(rows, empty) {
+  /** @type {number[]} сколько строк ниже ещё занято по колонке */
+  const carry = []
+  return rows.map((row) => {
+    const cells = []
+    const take = () => {
+      while ((carry[cells.length] ?? 0) > 0) {
+        carry[cells.length] = (carry[cells.length] ?? 1) - 1
+        cells.push(empty)
+      }
+    }
+    for (const cell of row.cells) {
+      take()
+      for (let i = 0; i < cell.span; i++) {
+        if (cell.rows > 1) carry[cells.length] = cell.rows - 1
+        cells.push(i ? empty : cell.value)
+      }
+    }
+    // Колонки правее последней ячейки: занятые сверху тоже отсчитывают строку.
+    for (let i = cells.length; i < carry.length; i++) carry[i] = Math.max((carry[i] ?? 0) - 1, 0)
+    return { header: row.header, cells }
+  })
 }
 
 /**
@@ -124,25 +160,103 @@ export function parseTable(lines) {
   return headCount ? { head: rows[0] ?? null, rows: rows.slice(1) } : { head: null, rows }
 }
 
+/** Картинка блоком: «![описание](адрес)». */
+const PICTURE = /!\[[^\]]*\]\([^)\s]*\)/g
+/** Ссылка «[текст](адрес)». */
+const LINK = /(?<!!)\[([^\]]*)\]\(([^)\s]*)\)/g
+
+/**
+ * Блок текста для сравнения: без картинок, ссылки — только текстом, пробелы схлопнуты.
+ * Шаг «Картинки в текстах» после первого переноса поменял адреса картинок и файлов, убрал
+ * картинки, которых нет на старом сайте, и переходы /bitrix/redirect.php — текст при этом тот же.
+ * @param {string} block
+ */
+function plain(block) {
+  return block.replace(PICTURE, ' ').replace(LINK, '$1').replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * Где в блоках текста лежит столбик flat (как таблица вышла после первого переноса), начиная
+ * с from. Текстовые блоки должны совпасть по plain; картинка столбика — картинкой с любым
+ * адресом или отсутствовать (убрана шагом 2). → { at, end } или null.
+ * @param {string[]} blocks
+ * @param {string[]} flat
+ * @param {number} from
+ */
+function findFlat(blocks, flat, from) {
+  const first = flat.findIndex((block) => plain(block))
+  if (first < 0) return null
+  for (let at = from; at < blocks.length; at++) {
+    let i = 0
+    let j = at
+    while (i < flat.length && j <= blocks.length) {
+      const want = plain(flat[i] ?? '')
+      const have = j < blocks.length ? plain(blocks[j] ?? '') : null
+      if (!want) {
+        // Картинка из ячейки: в тексте она картинкой (адрес уже из «Медиа») или её убрали.
+        if (have === '') j++
+        i++
+      } else if (have === want) {
+        i++
+        j++
+      } else break
+    }
+    if (i === flat.length && j > at) return { at, end: j }
+  }
+  return null
+}
+
+/**
+ * Ссылки таблицы берут адреса из текста публикации (там они уже в «Медиа» или без перехода
+ * через redirect.php): по тексту ссылки, по порядку. «|» в ячейке таблицы — «/».
+ * @param {string} markup
+ * @param {string[]} region
+ */
+function withCurrentLinks(markup, region) {
+  const links = region.flatMap((block) =>
+    [...block.matchAll(LINK)].map((m) => ({ label: m[1] ?? '', href: m[2] ?? '' })),
+  )
+  return markup.replace(LINK, (_, label) => {
+    const found = links.findIndex((link) => link.label.replace(/\|/g, '/') === label)
+    // Нет такой ссылки в тексте — файла не оказалось на старом сайте, остаётся текст.
+    if (found < 0) return label
+    const [link] = links.splice(found, 1)
+    return `[${label}](${link?.href ?? ''})`
+  })
+}
+
 /**
  * Замена таблиц, разложенных первым переносом по ячейке в строку, на таблицы. flat — как
- * таблица выглядела после первого переноса, markup — таблица. Меняется только точное
- * совпадение целыми абзацами: текст, правленный в админке, не трогаем.
+ * таблица выглядела после первого переноса, markup — таблица. Столбик ищется целыми абзацами
+ * по тексту: адреса картинок и ссылок не важны (их поменял шаг «Картинки в текстах»), картинки
+ * из ячеек встают сразу после таблицы. Текст, правленный в админке, не трогаем.
+ * missed — таблицы, которых нет в тексте ни столбиком, ни уже таблицей (текст правили).
  * @param {string} current текст публикации сейчас
  * @param {{ flat: string, markup: string }[]} tables
- * @returns {{ body: string, replaced: number }}
+ * @returns {{ body: string, replaced: number, missed: number }}
  */
 export function withTables(current, tables) {
-  let body = `\n\n${String(current ?? '').trim()}\n\n`
+  const blocks = String(current ?? '')
+    .trim()
+    .split(/\n\s*\n/)
+    .filter((block) => block.trim())
+  const done = new Set(blocks.map((block) => plain(block.split('\n')[0] ?? '')))
   let from = 0
   let replaced = 0
+  let missed = 0
   for (const { flat, markup } of tables) {
     if (!flat || !markup || flat === markup) continue
-    const at = body.indexOf(`\n\n${flat}\n\n`, from)
-    if (at < 0) continue
-    body = `${body.slice(0, at)}\n\n${markup}\n\n${body.slice(at + flat.length + 4)}`
-    from = at + markup.length + 2
+    const found = findFlat(blocks, flat.split(/\n\s*\n/), from)
+    if (!found) {
+      if (!done.has(plain(markup.split('\n')[0] ?? ''))) missed++
+      continue
+    }
+    const region = blocks.slice(found.at, found.end)
+    const pictures = region.filter((block) => !plain(block) && block.includes('!['))
+    const table = withCurrentLinks(markup, region)
+    blocks.splice(found.at, region.length, table, ...pictures)
+    from = found.at + 1 + pictures.length
     replaced++
   }
-  return { body: body.trim(), replaced }
+  return { body: replaced ? blocks.join('\n\n') : String(current ?? '').trim(), replaced, missed }
 }

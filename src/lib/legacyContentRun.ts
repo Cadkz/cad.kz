@@ -587,8 +587,10 @@ export async function restoreImagesPart(payload: Payload, body: Record<string, u
  * раскладывал таблицы старого сайта по ячейке в строку. Заново читает старую страницу и
  * заменяет такие столбики таблицами — только если столбик в тексте совпадает с тем, что дал
  * первый перенос, слово в слово: правленные в админке места не трогает. Повтор безопасен.
+ * Адреса картинок и ссылок не сравниваются: их поменял шаг «Картинки в текстах».
  * В ответе: created — сколько таблиц восстановлено, updated — в скольких публикациях,
- * existing — публикации без изменений (нет таблиц, уже восстановлено или текст правили).
+ * existing — публикации без изменений (нет таблиц или уже восстановлено), failed — страница
+ * не открылась или таблицы не нашлось в тексте.
  */
 export async function tablesPart(payload: Payload, body: Record<string, unknown>) {
   const deadline = Date.now() + WORK_SECONDS * 1000
@@ -630,9 +632,16 @@ export async function tablesPart(payload: Payload, body: Record<string, unknown>
             select: { body: true },
             ...OPTS,
           })
-          const { body: text, replaced } = withTables(doc.body ?? '', parsed.tables)
+          const { body: text, replaced, missed } = withTables(doc.body ?? '', parsed.tables)
+          // Таблица есть на старой странице, но в тексте её нет ни столбиком, ни таблицей:
+          // текст правили в админке — показываем в списке, чтобы поправить руками.
+          if (missed)
+            reply.failed.push({
+              path: oldPath,
+              reason: `таблиц не нашлось в тексте: ${missed} (текст правили в админке?)`,
+            })
           if (!replaced) {
-            reply.existing++
+            if (!missed) reply.existing++
             return
           }
           await payload.update({ collection: 'publications', id, data: { body: text }, ...OPTS })

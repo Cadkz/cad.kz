@@ -2,7 +2,7 @@
 // целиком (заголовок, дата, текст, картинки), у товаров — только title и description.
 // Без зависимостей: старые страницы однотипные (компонент news.detail), хватает простого разбора.
 import { OLD_SITE } from './bitrixImport.mjs'
-import { outerTables, tableCells, tableMarkup } from './tables.mjs'
+import { gridRows, outerTables, tableCells, tableMarkup } from './tables.mjs'
 
 const NAMED = {
   nbsp: '\u00a0',
@@ -263,18 +263,18 @@ function convertTable(table, base) {
   const pictures = []
   const rows = tableCells(table).map((row) => ({
     header: row.header,
-    cells: row.cells.flatMap((cell) => {
+    cells: row.cells.map((cell) => {
       const chunks = htmlToMarkup(cell.html, base).body.split('\n\n')
       pictures.push(...chunks.filter((chunk) => chunk.startsWith('![')))
-      const text = chunks
+      const value = chunks
         .filter((chunk) => chunk && !chunk.startsWith('!['))
         .map((chunk) => chunk.replace(/^(## |- )/gm, ''))
         .join(' ')
         .replace(/\s+/g, ' ')
-      return [text, ...Array(cell.span - 1).fill('')]
+      return { span: cell.span, rows: cell.rows, value }
     }),
   }))
-  const markup = tableMarkup(rows)
+  const markup = tableMarkup(gridRows(rows, ''))
   return markup ? { markup, pictures } : null
 }
 
