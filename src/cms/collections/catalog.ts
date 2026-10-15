@@ -1,7 +1,15 @@
 import type { CollectionConfig, Field } from 'payload'
 import { SCENARIO_LABELS, SCENARIOS } from '../../domain/buyScenario.mjs'
 import { CHECK_LABELS, CHECKS } from '../../domain/quality.mjs'
-import { contentCollection, relationField, seoField, slugField, textField } from '../fields'
+import {
+  contentCollection,
+  legacyFields,
+  relationField,
+  seoField,
+  slugField,
+  statusField,
+  textField,
+} from '../fields'
 import { productSections } from '../hooks/productSections'
 import { offerQualityChange, offerQualityDelete, productQuality } from '../hooks/quality'
 import { pageViewFields, pickerField } from './picker'
@@ -46,10 +54,7 @@ function scenarioField(forProduct: boolean): Field {
     admin: {
       position: 'sidebar',
       description: forProduct
-        ? 'Пусто — как у основного раздела. Стандартная лицензия: «В корзину», «Получить КП», ' +
-          '«Продлить лицензию». Корпоративное ПО: «Подобрать решение», «Запросить КП», ' +
-          '«Консультация инженера». Оборудование: «Запросить цену» или «Записаться на ' +
-          'демонстрацию». Продление: «Продлить». Услуга: «Записаться» или «Обсудить проект».'
+        ? 'От него кнопки на карточке и странице товара. Пусто — как у основного раздела.'
         : 'Кнопки по умолчанию для товаров раздела. У товара можно выбрать свой сценарий. ' +
           'Пусто — по типу товара.',
     },
@@ -70,8 +75,8 @@ function priorityField(forProduct: boolean): Field {
     admin: {
       position: 'sidebar',
       description: forProduct
-        ? 'Пусто — как у производителя. Флагман — главный товар линейки (AutoCAD, SCAD Office, ' +
-          'GEO5): первым в меню и каталоге. Топ продаж — сразу после флагманов.'
+        ? 'Пусто — как у производителя. Флагман — первым в меню и каталоге, топ продаж — сразу ' +
+          'после флагманов.'
         : 'Уровень для всех товаров производителя, если у товара свой не выбран. ' +
           'Топы продаж показываются первыми в меню, каталоге и подборках.',
     },
@@ -284,185 +289,253 @@ export const sections = contentCollection({
   ],
 })
 
+/** Основное о товаре: первая вкладка, её видно сразу при открытии. */
+const productMainFields: Field[] = [
+  {
+    type: 'row',
+    fields: [
+      {
+        name: 'kind',
+        label: 'Тип',
+        type: 'select',
+        required: true,
+        options: [
+          { label: 'Программное обеспечение', value: 'software' },
+          { label: 'Оборудование', value: 'hardware' },
+          { label: 'Курс', value: 'course' },
+          { label: 'Услуга', value: 'service' },
+        ],
+        admin: { width: '40%' },
+      },
+      {
+        name: 'manufacturer',
+        label: 'Производитель',
+        type: 'relationship',
+        relationTo: 'manufacturers',
+        admin: { width: '60%' },
+      },
+    ],
+  },
+  {
+    type: 'row',
+    fields: [
+      {
+        name: 'line',
+        label: 'Линейка',
+        type: 'relationship',
+        relationTo: 'product-lines',
+        // Только линейки производителя этого товара.
+        filterOptions: ({ data }) =>
+          data?.manufacturer ? { manufacturer: { equals: data.manufacturer } } : true,
+        admin: {
+          width: '60%',
+          description: 'Например, у SCAD Soft: «Программный комплекс», «Сателлиты».',
+        },
+      },
+      {
+        name: 'lineOrder',
+        label: 'Порядок в линейке',
+        type: 'number',
+        admin: {
+          width: '40%',
+          description: 'Меньше — выше. Основа линейки (SCAD Office) — 1, пакеты — 2, модули — 3.',
+        },
+      },
+    ],
+  },
+  { name: 'summary', label: 'Коротко для карточки (1–2 предложения)', type: 'textarea' },
+  {
+    name: 'description',
+    label: 'Описание',
+    type: 'textarea',
+    admin: {
+      description:
+        'Пустая строка — новый абзац, «## » в начале — подзаголовок, «- » — пункт списка.',
+    },
+  },
+  relationField('gallery', 'Галерея', 'media', true),
+  {
+    name: 'tasks',
+    label: 'Для каких задач',
+    type: 'array',
+    labels: { singular: 'Задача', plural: 'Задачи' },
+    admin: {
+      description: '3–4 коротких пункта: показываются в шапке страницы товара.',
+    },
+    fields: [textField('title', 'Задача', true)],
+  },
+]
+
+/** Где товар виден в каталоге и как его находит поиск. */
+const productCatalogFields: Field[] = [
+  {
+    name: 'autoSections',
+    label: 'Подбирать разделы по правилам',
+    type: 'checkbox',
+    defaultValue: true,
+    admin: {
+      description:
+        'Разделы ставятся сами по «Правилам разделов». Если поменять разделы вручную, галочка ' +
+        'снимется, и правила этот товар больше не трогают. Поставьте её снова, чтобы вернуть ' +
+        'разделы по правилам.',
+    },
+  },
+  {
+    name: 'mainSection',
+    label: 'Основной раздел',
+    type: 'relationship',
+    relationTo: 'sections',
+    admin: {
+      description:
+        'Главное направление или тип товара: от него значок, хлебные крошки и «Похожие».',
+    },
+  },
+  {
+    name: 'extraSections',
+    label: 'Дополнительные разделы',
+    type: 'relationship',
+    relationTo: 'sections',
+    hasMany: true,
+    admin: { description: 'Товар виден и в этих разделах каталога.' },
+  },
+  {
+    // Основной + дополнительные одним списком, заполняется сам (хук productSections).
+    name: 'sections',
+    type: 'relationship',
+    relationTo: 'sections',
+    hasMany: true,
+    admin: { hidden: true },
+  },
+  {
+    name: 'searchAliases',
+    label: 'Другие названия для поиска',
+    type: 'text',
+    admin: {
+      description:
+        'Через запятую: как товар ещё называют покупатели, например «акад, автокад». ' +
+        'Поиск на сайте находит товар и по этим словам. Опечатки и русские буквы вместо латинских ' +
+        'поиск понимает сам — их вписывать не нужно.',
+    },
+  },
+]
+
+/** Блоки страницы товара ниже шапки и связи с другими товарами. */
+const productPageFields: Field[] = [
+  {
+    name: 'properties',
+    label: 'Характеристики',
+    type: 'array',
+    fields: [
+      {
+        type: 'row',
+        fields: [textField('name', 'Название', true), textField('value', 'Значение', true)],
+      },
+    ],
+  },
+  {
+    name: 'faq',
+    label: 'Частые вопросы',
+    type: 'array',
+    fields: [
+      textField('question', 'Вопрос', true),
+      { name: 'answer', label: 'Ответ', type: 'textarea', required: true },
+    ],
+  },
+  relationField('requiresProducts', 'Требуется базовое ПО', 'products', true),
+  {
+    type: 'collapsible',
+    label: 'Похожие и «С этим покупают»',
+    admin: {
+      initCollapsed: true,
+      description:
+        'Сайт подбирает товары сам по разделам. Ручные списки показываются первыми, ' +
+        'галочки разрешают или запрещают предлагать этот товар в чужих подборках.',
+    },
+    fields: [
+      {
+        name: 'suggestSimilar',
+        label: 'Сайт может предлагать этот товар в «Похожих»',
+        type: 'checkbox',
+        defaultValue: true,
+      },
+      {
+        name: 'suggestCross',
+        label: 'Сайт может предлагать этот товар в «С этим покупают» (и в корзине)',
+        type: 'checkbox',
+        defaultValue: true,
+      },
+      {
+        name: 'similarProducts',
+        label: 'Похожие — вручную',
+        type: 'relationship',
+        relationTo: 'products',
+        hasMany: true,
+      },
+      {
+        name: 'recommended',
+        label: '«С этим покупают» — вручную',
+        type: 'relationship',
+        relationTo: 'products',
+        hasMany: true,
+      },
+    ],
+  },
+]
+
+/**
+ * Карточка товара в админке: название сверху, дальше вкладки — главное, комплектации, подбор,
+ * страница, каталог. Справа — публикация, адрес, показ, а SEO и служебное свёрнуты.
+ * Вкладки и свёрнутые блоки без имени: данные в базе лежат как раньше, миграция не нужна.
+ */
+const productTabs: Field = {
+  type: 'tabs',
+  tabs: [
+    { label: 'Главное', fields: productMainFields },
+    {
+      label: 'Комплектации и цены',
+      fields: [
+        {
+          name: 'offersTable',
+          type: 'ui',
+          admin: { components: { Field: '/components/ProductOffers/ProductOffers#ProductOffers' } },
+        },
+      ],
+    },
+    {
+      label: 'Подбор комплекта',
+      admin: { condition: (data) => data?.pageView === 'picker' },
+      fields: [pickerField],
+    },
+    { label: 'Страница товара', fields: productPageFields },
+    { label: 'Каталог и поиск', fields: productCatalogFields },
+  ],
+}
+
+/** Справа, свёрнуто: для поисковиков и служебное (поля переноса со старого сайта). */
+const productSidebarExtras: Field[] = [
+  {
+    type: 'collapsible',
+    label: 'Для поисковиков (SEO)',
+    admin: { position: 'sidebar', initCollapsed: true },
+    fields: [seoField],
+  },
+  {
+    type: 'collapsible',
+    label: 'Служебное',
+    admin: {
+      position: 'sidebar',
+      initCollapsed: true,
+      description: 'Заполняется при переносе со старого сайта. Обычно менять не нужно.',
+    },
+    fields: legacyFields,
+  },
+]
+
 const productCollection = contentCollection({
   slug: 'products',
   singular: 'Товар',
   plural: 'Товары',
-  fields: [
-    slugField(),
-    priorityField(true),
-    scenarioField(true),
-    ...pageViewFields,
-    {
-      name: 'kind',
-      label: 'Тип',
-      type: 'select',
-      required: true,
-      options: [
-        { label: 'Программное обеспечение', value: 'software' },
-        { label: 'Оборудование', value: 'hardware' },
-        { label: 'Курс', value: 'course' },
-        { label: 'Услуга', value: 'service' },
-      ],
-    },
-    { name: 'summary', label: 'Коротко для карточки (1–2 предложения)', type: 'textarea' },
-    {
-      name: 'searchAliases',
-      label: 'Другие названия для поиска',
-      type: 'text',
-      admin: {
-        description:
-          'Через запятую: как товар ещё называют покупатели, например «акад, автокад». ' +
-          'Поиск на сайте находит товар и по этим словам. Опечатки и русские буквы вместо латинских ' +
-          'поиск понимает сам — их вписывать не нужно.',
-      },
-    },
-    {
-      name: 'description',
-      label: 'Описание',
-      type: 'textarea',
-      admin: {
-        description:
-          'Пустая строка — новый абзац, «## » в начале — подзаголовок, «- » — пункт списка.',
-      },
-    },
-    relationField('manufacturer', 'Производитель', 'manufacturers'),
-    {
-      type: 'row',
-      fields: [
-        {
-          name: 'line',
-          label: 'Линейка',
-          type: 'relationship',
-          relationTo: 'product-lines',
-          // Только линейки производителя этого товара.
-          filterOptions: ({ data }) =>
-            data?.manufacturer ? { manufacturer: { equals: data.manufacturer } } : true,
-          admin: {
-            width: '60%',
-            description: 'Например, у SCAD Soft: «Программный комплекс», «Сателлиты».',
-          },
-        },
-        {
-          name: 'lineOrder',
-          label: 'Порядок в линейке',
-          type: 'number',
-          admin: {
-            width: '40%',
-            description: 'Меньше — выше. Основа линейки (SCAD Office) — 1, пакеты — 2, модули — 3.',
-          },
-        },
-      ],
-    },
-    {
-      type: 'collapsible',
-      label: 'Разделы каталога',
-      fields: [
-        {
-          name: 'autoSections',
-          label: 'Подбирать разделы по правилам',
-          type: 'checkbox',
-          defaultValue: true,
-          admin: {
-            description:
-              'Разделы ставятся сами по «Правилам разделов». Если поменять разделы вручную, галочка ' +
-              'снимется, и правила этот товар больше не трогают. Поставьте её снова, чтобы вернуть ' +
-              'разделы по правилам.',
-          },
-        },
-        {
-          name: 'mainSection',
-          label: 'Основной раздел',
-          type: 'relationship',
-          relationTo: 'sections',
-          admin: {
-            description:
-              'Главное направление или тип товара: от него значок, хлебные крошки и «Похожие».',
-          },
-        },
-        {
-          name: 'extraSections',
-          label: 'Дополнительные разделы',
-          type: 'relationship',
-          relationTo: 'sections',
-          hasMany: true,
-          admin: { description: 'Товар виден и в этих разделах каталога.' },
-        },
-        {
-          // Основной + дополнительные одним списком, заполняется сам (хук productSections).
-          name: 'sections',
-          type: 'relationship',
-          relationTo: 'sections',
-          hasMany: true,
-          admin: { hidden: true },
-        },
-      ],
-    },
-    pickerField,
-    {
-      name: 'tasks',
-      label: 'Для каких задач',
-      type: 'array',
-      labels: { singular: 'Задача', plural: 'Задачи' },
-      admin: { description: '3–4 коротких пункта: показываются в шапке страницы товара.' },
-      fields: [textField('title', 'Задача', true)],
-    },
-    relationField('requiresProducts', 'Требуется базовое ПО', 'products', true),
-    {
-      type: 'collapsible',
-      label: 'Похожие и «С этим покупают»',
-      admin: {
-        description:
-          'Сайт подбирает товары сам по разделам. Ручные списки показываются первыми, ' +
-          'галочки разрешают или запрещают предлагать этот товар в чужих подборках.',
-      },
-      fields: [
-        {
-          name: 'suggestSimilar',
-          label: 'Сайт может предлагать этот товар в «Похожих»',
-          type: 'checkbox',
-          defaultValue: true,
-        },
-        {
-          name: 'suggestCross',
-          label: 'Сайт может предлагать этот товар в «С этим покупают» (и в корзине)',
-          type: 'checkbox',
-          defaultValue: true,
-        },
-        {
-          name: 'similarProducts',
-          label: 'Похожие — вручную',
-          type: 'relationship',
-          relationTo: 'products',
-          hasMany: true,
-        },
-        {
-          name: 'recommended',
-          label: '«С этим покупают» — вручную',
-          type: 'relationship',
-          relationTo: 'products',
-          hasMany: true,
-        },
-      ],
-    },
-    relationField('gallery', 'Галерея', 'media', true),
-    {
-      name: 'properties',
-      label: 'Характеристики',
-      type: 'array',
-      fields: [textField('name', 'Название', true), textField('value', 'Значение', true)],
-    },
-    {
-      name: 'faq',
-      label: 'Частые вопросы',
-      type: 'array',
-      fields: [
-        textField('question', 'Вопрос', true),
-        { name: 'answer', label: 'Ответ', type: 'textarea', required: true },
-      ],
-    },
-    seoField,
-  ],
+  fields: [],
 })
 
 /**
@@ -501,11 +574,17 @@ const qualityFields: Field[] = [
 
 export const products: CollectionConfig = {
   ...productCollection,
-  // Заполненность — первой справа: её видно сразу при открытии товара.
+  // Справа сверху вниз: заполненность, публикация, адрес, показ, затем свёрнутые SEO и служебное.
   fields: [
-    ...productCollection.fields.slice(0, 2),
+    textField('title', 'Название', true),
     ...qualityFields,
-    ...productCollection.fields.slice(2),
+    { ...statusField, admin: { position: 'sidebar' } },
+    { ...slugField(), admin: { position: 'sidebar' } },
+    priorityField(true),
+    scenarioField(true),
+    ...pageViewFields,
+    ...productSidebarExtras,
+    productTabs,
   ],
   enableQueryPresets: true,
   admin: {

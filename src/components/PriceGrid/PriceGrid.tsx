@@ -8,8 +8,8 @@ import { usePriceGrid } from '@/lib/usePriceGrid'
 import styles from './PriceGrid.module.css'
 
 /** Таблица цен: фильтры сверху, правка в ячейках, внизу полоса с числом правок и сводка. */
-export function PriceGrid({ data }: { data: PriceGridData }) {
-  const grid = usePriceGrid(data.rows)
+export function PriceGrid({ data, query }: { data: PriceGridData; query?: string }) {
+  const grid = usePriceGrid(data.rows, query)
   return (
     <div className={styles.root}>
       <PriceFilters grid={grid} vendors={data.vendors} sections={data.sections} />

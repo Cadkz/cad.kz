@@ -172,36 +172,36 @@ export interface UserAuthOperations {
 export interface Product {
   id: number;
   title: string;
-  status: 'draft' | 'published';
   qualityScore?: number | null;
   qualityGaps?: ('offers' | 'price' | 'image' | 'description' | 'summary' | 'section')[] | null;
+  status: 'draft' | 'published';
   slug: string;
   /**
-   * Пусто — как у производителя. Флагман — главный товар линейки (AutoCAD, SCAD Office, GEO5): первым в меню и каталоге. Топ продаж — сразу после флагманов.
+   * Пусто — как у производителя. Флагман — первым в меню и каталоге, топ продаж — сразу после флагманов.
    */
   priority?: ('flagship' | 'top' | 'normal' | 'low') | null;
   /**
-   * Пусто — как у основного раздела. Стандартная лицензия: «В корзину», «Получить КП», «Продлить лицензию». Корпоративное ПО: «Подобрать решение», «Запросить КП», «Консультация инженера». Оборудование: «Запросить цену» или «Записаться на демонстрацию». Продление: «Продлить». Услуга: «Записаться» или «Обсудить проект».
+   * От него кнопки на карточке и странице товара. Пусто — как у основного раздела.
    */
   scenario?: ('standard' | 'corporate' | 'equipment' | 'renewal' | 'service') | null;
   /**
-   * Без своей страницы: прежний адрес ведёт на товар с подбором, где этот товар — вариант, или на страницу семейства (линейки с галочкой «Своя страница семейства»). В каталоге и меню такой товар не показывается отдельно.
+   * Без своей страницы — товар виден только в подборе или на странице семейства, прежний адрес ведёт туда.
    */
   pageView: 'standard' | 'picker' | 'none';
   /**
-   * Например, «Продлить подписку» или «Обновить версию». Пусто — у стандартной лицензии «Продлить лицензию», у других сценариев кнопки нет. Продление — заявка менеджеру.
+   * Например, «Обновить версию». Пусто — «Продлить лицензию» у стандартной лицензии, у остальных кнопки нет.
    */
   renewLabel?: string | null;
+  /**
+   * Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  legacyKey?: string | null;
+  legacyUrl?: string | null;
   kind: 'software' | 'hardware' | 'course' | 'service';
-  summary?: string | null;
-  /**
-   * Через запятую: как товар ещё называют покупатели, например «акад, автокад». Поиск на сайте находит товар и по этим словам. Опечатки и русские буквы вместо латинских поиск понимает сам — их вписывать не нужно.
-   */
-  searchAliases?: string | null;
-  /**
-   * Пустая строка — новый абзац, «## » в начале — подзаголовок, «- » — пункт списка.
-   */
-  description?: string | null;
   manufacturer?: (number | null) | Manufacturer;
   /**
    * Например, у SCAD Soft: «Программный комплекс», «Сателлиты».
@@ -211,19 +211,21 @@ export interface Product {
    * Меньше — выше. Основа линейки (SCAD Office) — 1, пакеты — 2, модули — 3.
    */
   lineOrder?: number | null;
+  summary?: string | null;
   /**
-   * Разделы ставятся сами по «Правилам разделов». Если поменять разделы вручную, галочка снимется, и правила этот товар больше не трогают. Поставьте её снова, чтобы вернуть разделы по правилам.
+   * Пустая строка — новый абзац, «## » в начале — подзаголовок, «- » — пункт списка.
    */
-  autoSections?: boolean | null;
+  description?: string | null;
+  gallery?: (number | Media)[] | null;
   /**
-   * Главное направление или тип товара: от него значок, хлебные крошки и «Похожие».
+   * 3–4 коротких пункта: показываются в шапке страницы товара.
    */
-  mainSection?: (number | null) | Section;
-  /**
-   * Товар виден и в этих разделах каталога.
-   */
-  extraSections?: (number | Section)[] | null;
-  sections?: (number | Section)[] | null;
+  tasks?:
+    | {
+        title: string;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Например, SCAD Office: переключатель «Редакция», шаги «Основа», «Что будете проверять», «Дополнительные функции», «Готовые комплекты». Цена считается сервером.
    */
@@ -278,21 +280,6 @@ export interface Product {
         }[]
       | null;
   };
-  /**
-   * 3–4 коротких пункта: показываются в шапке страницы товара.
-   */
-  tasks?:
-    | {
-        title: string;
-        id?: string | null;
-      }[]
-    | null;
-  requiresProducts?: (number | Product)[] | null;
-  suggestSimilar?: boolean | null;
-  suggestCross?: boolean | null;
-  similarProducts?: (number | Product)[] | null;
-  recommended?: (number | Product)[] | null;
-  gallery?: (number | Media)[] | null;
   properties?:
     | {
         name: string;
@@ -307,15 +294,28 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
+  requiresProducts?: (number | Product)[] | null;
+  suggestSimilar?: boolean | null;
+  suggestCross?: boolean | null;
+  similarProducts?: (number | Product)[] | null;
+  recommended?: (number | Product)[] | null;
   /**
-   * Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.
+   * Разделы ставятся сами по «Правилам разделов». Если поменять разделы вручную, галочка снимется, и правила этот товар больше не трогают. Поставьте её снова, чтобы вернуть разделы по правилам.
    */
-  seo?: {
-    title?: string | null;
-    description?: string | null;
-  };
-  legacyKey?: string | null;
-  legacyUrl?: string | null;
+  autoSections?: boolean | null;
+  /**
+   * Главное направление или тип товара: от него значок, хлебные крошки и «Похожие».
+   */
+  mainSection?: (number | null) | Section;
+  /**
+   * Товар виден и в этих разделах каталога.
+   */
+  extraSections?: (number | Section)[] | null;
+  sections?: (number | Section)[] | null;
+  /**
+   * Через запятую: как товар ещё называют покупатели, например «акад, автокад». Поиск на сайте находит товар и по этим словам. Опечатки и русские буквы вместо латинских поиск понимает сам — их вписывать не нужно.
+   */
+  searchAliases?: string | null;
   /**
    * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
    */
@@ -440,6 +440,38 @@ export interface ProductLine {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "offers".
+ */
+export interface Offer {
+  id: number;
+  title: string;
+  status: 'draft' | 'published';
+  product?: (number | null) | Product;
+  configuration: string;
+  license: string;
+  amount: string;
+  currency: 'KZT' | 'USD' | 'EUR' | 'RUB';
+  includesVat?: boolean | null;
+  sourceVat: string;
+  /**
+   * Для подбора: редакция или срок этого предложения, например S392 или «1 год», так же, как в переключателе у товара. Пусто — подходит при любом выборе.
+   */
+  variants?: string[] | null;
+  /**
+   * Заполняется само при загрузке прайса: по этим названиям строка прайса в следующий раз сразу найдёт это предложение. Неверное название можно удалить.
+   */
+  priceNames?: string[] | null;
+  legacyKey?: string | null;
+  legacyUrl?: string | null;
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sections".
  */
 export interface Section {
@@ -490,38 +522,6 @@ export interface Section {
    * Например, к плоттерам — расходные материалы, к программам — курсы и внедрение. Курсы и программы с направлением предлагаются, только если направление совпадает.
    */
   crossSections?: (number | Section)[] | null;
-  legacyKey?: string | null;
-  legacyUrl?: string | null;
-  /**
-   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
-   */
-  updatedBy?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "offers".
- */
-export interface Offer {
-  id: number;
-  title: string;
-  status: 'draft' | 'published';
-  product?: (number | null) | Product;
-  configuration: string;
-  license: string;
-  amount: string;
-  currency: 'KZT' | 'USD' | 'EUR' | 'RUB';
-  includesVat?: boolean | null;
-  sourceVat: string;
-  /**
-   * Для подбора: редакция или срок этого предложения, например S392 или «1 год», так же, как в переключателе у товара. Пусто — подходит при любом выборе.
-   */
-  variants?: string[] | null;
-  /**
-   * Заполняется само при загрузке прайса: по этим названиям строка прайса в следующий раз сразу найдёт это предложение. Неверное название можно удалить.
-   */
-  priceNames?: string[] | null;
   legacyKey?: string | null;
   legacyUrl?: string | null;
   /**
@@ -1122,25 +1122,35 @@ export interface PayloadQueryPreset {
  */
 export interface ProductsSelect<T extends boolean = true> {
   title?: T;
-  status?: T;
   qualityScore?: T;
   qualityGaps?: T;
+  status?: T;
   slug?: T;
   priority?: T;
   scenario?: T;
   pageView?: T;
   renewLabel?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  legacyKey?: T;
+  legacyUrl?: T;
   kind?: T;
-  summary?: T;
-  searchAliases?: T;
-  description?: T;
   manufacturer?: T;
   line?: T;
   lineOrder?: T;
-  autoSections?: T;
-  mainSection?: T;
-  extraSections?: T;
-  sections?: T;
+  summary?: T;
+  description?: T;
+  gallery?: T;
+  tasks?:
+    | T
+    | {
+        title?: T;
+        id?: T;
+      };
   picker?:
     | T
     | {
@@ -1179,18 +1189,6 @@ export interface ProductsSelect<T extends boolean = true> {
               id?: T;
             };
       };
-  tasks?:
-    | T
-    | {
-        title?: T;
-        id?: T;
-      };
-  requiresProducts?: T;
-  suggestSimilar?: T;
-  suggestCross?: T;
-  similarProducts?: T;
-  recommended?: T;
-  gallery?: T;
   properties?:
     | T
     | {
@@ -1205,14 +1203,16 @@ export interface ProductsSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
-  seo?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-      };
-  legacyKey?: T;
-  legacyUrl?: T;
+  requiresProducts?: T;
+  suggestSimilar?: T;
+  suggestCross?: T;
+  similarProducts?: T;
+  recommended?: T;
+  autoSections?: T;
+  mainSection?: T;
+  extraSections?: T;
+  sections?: T;
+  searchAliases?: T;
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;

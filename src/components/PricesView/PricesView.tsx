@@ -20,6 +20,8 @@ export async function PricesView({ initPageResult, params, searchParams }: Admin
   }
   const allowed = user?.role === 'admin' || user?.role === 'editor'
   const data = allowed ? await loadPriceGrid(payload) : null
+  // ?q=… — ссылка «Цены таблицей» из карточки товара открывает таблицу уже с поиском по товару.
+  const query = typeof searchParams?.q === 'string' ? searchParams.q.slice(0, 200) : ''
 
   return (
     <DefaultTemplate {...template}>
@@ -38,7 +40,7 @@ export async function PricesView({ initPageResult, params, searchParams }: Admin
                 'не заданы'}{' '}
               — <a href="/admin/rates">курсы одной страницей</a>.
             </p>
-            <PriceGrid data={data} />
+            <PriceGrid data={data} query={query} />
           </>
         ) : (
           <p>Эта страница доступна администратору и маркетологу.</p>

@@ -47,9 +47,10 @@ export type Quote = {
 export type Edit = { row: PriceGridRow; amount: string | null; currency: Currency }
 type Message = { kind: 'ok' | 'error'; text: string }
 
-export function usePriceGrid(initial: PriceGridRow[]) {
+/** query — начальный поиск, например название товара из ссылки «Цены таблицей» в карточке товара. */
+export function usePriceGrid(initial: PriceGridRow[], query = '') {
   const [rows, setRows] = useState(initial)
-  const [filter, setFilterState] = useState(EMPTY)
+  const [filter, setFilterState] = useState<PriceFilter>(() => ({ ...EMPTY, query }))
   const [limit, setLimit] = useState(PAGE)
   const [drafts, setDrafts] = useState<Map<number, Draft>>(() => new Map())
   const [quotes, setQuotes] = useState<Map<number, Quote>>(() => new Map())
