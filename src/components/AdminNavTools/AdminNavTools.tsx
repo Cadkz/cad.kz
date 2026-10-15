@@ -6,6 +6,7 @@ type Tool = { label: string; href: string; adminOnly?: boolean }
 
 /** Свои страницы админки: в меню Payload их не добавить в группы, поэтому — отдельная группа. */
 const TOOLS: Tool[] = [
+  { label: 'Контроль качества', href: '/admin/quality' },
   { label: 'Цены таблицей', href: '/admin/prices' },
   { label: 'Курсы валют', href: '/admin/rates' },
   { label: 'Загрузить прайс', href: '/admin/price-list' },
@@ -16,7 +17,7 @@ const TOOLS: Tool[] = [
 ]
 
 /**
- * Группа «Инструменты» в конце меню: цены, курсы, загрузка прайса и страницы Кадди — администратору и
+ * Группа «Инструменты» в конце меню: контроль качества, цены, курсы, загрузка прайса и страницы Кадди — администратору и
  * маркетологу, импорт и перенос — только администратору.
  */
 export function AdminNavTools({ user }: ServerProps) {

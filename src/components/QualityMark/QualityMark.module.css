@@ -1,0 +1,35 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.root {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 calc(var(--base) / 3);
+  max-width: calc(var(--base) * 14);
+}
+
+.dot {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.full {
+  color: var(--theme-success-500);
+}
+
+.part {
+  color: var(--theme-warning-500);
+}
+
+.low {
+  color: var(--theme-error-500);
+}
+
+.score {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.text,
+.none {
+  color: var(--theme-elevation-500);
+}

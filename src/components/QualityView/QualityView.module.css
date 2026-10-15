@@ -1,0 +1,44 @@
+/*
+ * Страница живёт в админке Payload, где токены сайта не подключены, поэтому здесь переменные
+ * самой админки. Размеры шрифта не задаём: берутся из окружения админки.
+ */
+.root {
+  display: grid;
+  gap: calc(var(--base) * 1.5);
+  padding: calc(var(--base) * 2) var(--gutter-h) calc(var(--base) * 6);
+}
+
+.title,
+.lead,
+.summary {
+  margin: 0;
+}
+
+.lead,
+.summary {
+  max-width: calc(var(--base) * 48);
+  color: var(--theme-elevation-800);
+}
+
+.lead {
+  margin-top: calc(var(--base) * -1);
+}
+
+.summary a {
+  color: inherit;
+  font-weight: bold;
+}
+
+.section {
+  display: grid;
+  gap: calc(var(--base) * 0.75);
+}
+
+.heading {
+  margin: 0;
+}
+
+.note {
+  margin: calc(var(--base) * -0.5) 0 0;
+  color: var(--theme-elevation-500);
+}

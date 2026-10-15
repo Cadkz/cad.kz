@@ -5,6 +5,7 @@ import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { ru } from '@payloadcms/translations/languages/ru'
 import { buildConfig } from 'payload'
 import { menuCollections, menuGlobals } from './cms/menu'
+import { queryPresets } from './cms/queryPresets'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -63,6 +64,11 @@ export default buildConfig({
           path: '/rates',
           meta: { title: 'Курсы валют' },
         },
+        quality: {
+          Component: '/components/QualityView/QualityView#QualityView',
+          path: '/quality',
+          meta: { title: 'Контроль качества' },
+        },
         kaddiData: {
           Component: '/components/KaddiDataView/KaddiDataView#KaddiDataView',
           path: '/kaddi-data',
@@ -83,6 +89,8 @@ export default buildConfig({
   },
   i18n: { supportedLanguages: { ru }, fallbackLanguage: 'ru' },
   collections: menuCollections,
+  // Готовые виды списков (товары, предложения, публикации): src/cms/queryPresets.ts.
+  queryPresets,
   globals: menuGlobals,
   plugins: [
     vercelBlobStorage({

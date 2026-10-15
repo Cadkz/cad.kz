@@ -1,7 +1,6 @@
-import { CircleCheck } from 'lucide-react'
 import type { Payload, ServerProps } from 'payload'
 import { AdminActions } from '@/components/AdminActions/AdminActions'
-import { AdminQueueCard } from '@/components/AdminQueueCard/AdminQueueCard'
+import { AdminCardGrid } from '@/components/AdminCardGrid/AdminCardGrid'
 import { loadGapCards } from '@/lib/adminGaps'
 import { loadCrmCard, loadPromosCard, loadRequestsCard, type QueueCard } from '@/lib/adminQueue'
 import { loadActivityCard, loadDraftsCard, loadRatesCard } from '@/lib/adminRecent'
@@ -42,30 +41,6 @@ async function loadSections(payload: Payload, admin: boolean): Promise<Section[]
   ]
 }
 
-/** Задачи без дел сворачиваются в одну строку, чтобы на виду было только то, что надо сделать. */
-function SectionCards({ cards }: { cards: QueueCard[] }) {
-  const isDone = (card: QueueCard) => !card.always && card.total === 0 && card.items.length === 0
-  const open = cards.filter((card) => !isDone(card))
-  const done = cards.filter(isDone)
-  return (
-    <>
-      {open.length > 0 && (
-        <div className={styles.grid}>
-          {open.map((card) => (
-            <AdminQueueCard key={card.key} card={card} />
-          ))}
-        </div>
-      )}
-      {done.length > 0 && (
-        <p className={styles.done}>
-          <CircleCheck size={16} strokeWidth={1.75} aria-hidden />
-          <span>В порядке: {done.map((card) => card.title.toLowerCase()).join(', ')}.</span>
-        </p>
-      )}
-    </>
-  )
-}
-
 /**
  * Главная админки — очередь работы: быстрые кнопки, затем что требует внимания (ошибки CRM,
  * заявки, заканчивающиеся акции, черновики), неполные карточки товаров, курсы и журнал.
@@ -86,7 +61,7 @@ export async function AdminHome({ payload, user }: ServerProps) {
           <h2 className={styles.title} id={`home-${section.key}`}>
             {section.title}
           </h2>
-          <SectionCards cards={section.cards} />
+          <AdminCardGrid cards={section.cards} />
         </section>
       ))}
     </div>

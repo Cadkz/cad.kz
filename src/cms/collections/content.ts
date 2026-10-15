@@ -153,6 +153,7 @@ export const publications: CollectionConfig = {
       seoField,
     ],
   }),
+  enableQueryPresets: true,
   hooks: { beforeValidate: [publicationDefaults] },
 }
 

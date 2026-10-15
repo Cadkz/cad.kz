@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { listHref } from '@/domain/adminLinks.mjs'
 import {
   GAP_HINTS,
   GAP_LABELS,
@@ -107,6 +108,15 @@ export async function loadGapCards(payload: Payload): Promise<QueueCard[]> {
         href: `/admin/collections/products/${item.id}`,
         note: item.rank <= 1 ? 'топ продаж' : undefined,
       })),
+      more: list.length
+        ? {
+            label: 'Все в списке',
+            href: listHref('products', [
+              { status: { equals: 'published' } },
+              { qualityGaps: { in: [gap] } },
+            ]),
+          }
+        : undefined,
     } satisfies QueueCard
   })
 }

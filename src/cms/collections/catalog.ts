@@ -1,7 +1,9 @@
 import type { CollectionConfig, Field } from 'payload'
 import { SCENARIO_LABELS, SCENARIOS } from '../../domain/buyScenario.mjs'
+import { CHECK_LABELS, CHECKS } from '../../domain/quality.mjs'
 import { contentCollection, relationField, seoField, slugField, textField } from '../fields'
 import { productSections } from '../hooks/productSections'
+import { offerQualityChange, offerQualityDelete, productQuality } from '../hooks/quality'
 import { pageViewFields, pickerField } from './picker'
 
 /** Иконки разделов: ключ из этого списка сопоставляется с иконкой lucide в компоненте. */
@@ -463,16 +465,58 @@ const productCollection = contentCollection({
   ],
 })
 
+/**
+ * Отметка заполненности (src/lib/productQuality.ts): считается сама, руками не правится.
+ * Хранится в товаре, чтобы список можно было сортировать и фильтровать по ней.
+ */
+const qualityFields: Field[] = [
+  {
+    name: 'qualityScore',
+    label: 'Заполненность',
+    type: 'number',
+    index: true,
+    admin: {
+      position: 'sidebar',
+      readOnly: true,
+      components: {
+        Field: '/components/QualityField/QualityField#QualityField',
+        Cell: '/components/QualityMark/QualityMark#QualityCell',
+      },
+    },
+  },
+  {
+    name: 'qualityGaps',
+    label: 'Чего не хватает',
+    type: 'select',
+    hasMany: true,
+    options: CHECKS.map((value) => ({ label: CHECK_LABELS[value], value })),
+    admin: {
+      position: 'sidebar',
+      readOnly: true,
+      disableListColumn: true,
+      components: { Field: '/components/QualityField/QualityField#QualityHidden' },
+    },
+  },
+]
+
 export const products: CollectionConfig = {
   ...productCollection,
+  // Заполненность — первой справа: её видно сразу при открытии товара.
+  fields: [
+    ...productCollection.fields.slice(0, 2),
+    ...qualityFields,
+    ...productCollection.fields.slice(2),
+  ],
+  enableQueryPresets: true,
   admin: {
     ...productCollection.admin,
-    defaultColumns: ['title', 'manufacturer', 'line', 'mainSection', 'priority', 'status'],
+    defaultColumns: ['title', 'qualityScore', 'manufacturer', 'mainSection', 'priority', 'status'],
   },
-  hooks: { beforeChange: [productSections] },
+  // Заполненность — после разделов: она смотрит, есть ли у товара раздел.
+  hooks: { beforeChange: [productSections, productQuality] },
 }
 
-export const offers: CollectionConfig = contentCollection({
+const offerCollection = contentCollection({
   slug: 'offers',
   singular: 'Предложение',
   plural: 'Предложения',
@@ -514,3 +558,14 @@ export const offers: CollectionConfig = contentCollection({
     },
   ],
 })
+
+export const offers: CollectionConfig = {
+  ...offerCollection,
+  enableQueryPresets: true,
+  admin: {
+    ...offerCollection.admin,
+    defaultColumns: ['title', 'product', 'amount', 'currency', 'status', 'updatedAt'],
+  },
+  // У товара могли появиться или пропасть предложения и цена — пересчитать его заполненность.
+  hooks: { afterChange: [offerQualityChange], afterDelete: [offerQualityDelete] },
+}

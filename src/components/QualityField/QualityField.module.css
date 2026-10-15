@@ -1,0 +1,13 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.root {
+  /* Подсказка мельче текста админки, как пометки на главной. */
+  --quality-small: 0.875em;
+
+  margin-bottom: var(--base);
+}
+
+.hint {
+  margin: calc(var(--base) / 4) 0 0;
+  color: var(--theme-elevation-500);
+  font-size: var(--quality-small);
+}

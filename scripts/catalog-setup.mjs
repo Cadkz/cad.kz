@@ -6,7 +6,8 @@
 // — кнопкой «Обновить версию»; пакеты и девять задач GEO5 в каталоге; блок «Официальный партнёр» на главной;
 // каталог по CRM (САПР и черчение, широкоформат, сценарии покупки, популярные решения);
 // дополнения к AutoCAD, Revit, Inventor (Требуется базовое ПО) и AutoCAD LT; политика
-// конфиденциальности со старого сайта; страница «Внедрение BIM»; иллюстрации тем новостей. Выполняется один раз (отметка в журнале
+// конфиденциальности со старого сайта; страница «Внедрение BIM»; иллюстрации тем новостей; готовые виды
+// списков в админке; отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -25,6 +26,7 @@ import { setupNewsCovers } from '../src/lib/newsCoversSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
 import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
+import { setupPresets, setupQuality } from '../src/lib/presetsSetup.ts'
 import { setupPriorities } from '../src/lib/prioritySetup.ts'
 import { setupPrivacyPage } from '../src/lib/privacySetup.ts'
 import { setupFamilyRenew } from '../src/lib/renewSetup.ts'
@@ -150,6 +152,10 @@ try {
   const covers = await setupNewsCovers(payload)
   if (!covers) console.log('Иллюстрации тем новостей уже загружены.')
   else for (const line of covers) console.log(`Иллюстрации тем — ${line}`)
+  const presets = await setupPresets(payload)
+  if (!presets) console.log('Готовые виды списков уже созданы.')
+  else console.log(`Готовые виды списков: ${presets.length}`)
+  console.log(`Заполненность товаров: обновлено ${await setupQuality(payload)}`)
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1
