@@ -2,6 +2,7 @@
 // (src/lib/richText.ts): пустая строка — новый абзац, «## » — подзаголовок, «- » — пункт списка.
 // Картинки, видео, стили и ссылки из старого HTML не переносятся: остаётся текст.
 import { decodeEntities } from './bitrixFiles.mjs'
+import { gridRows, outerTables, tableCells, tableMarkup } from './tables.mjs'
 
 const BLOCK_BREAK = '\n\n'
 
@@ -18,7 +19,8 @@ const inline = (html) =>
     .replace(/\s+/g, ' ')
     .trim()
 
-export function htmlToMarkup(html) {
+/** Перенос без таблиц: каждая ячейка — отдельной строкой (так работал первый перенос). */
+function flatMarkup(html) {
   const source = String(html ?? '')
   if (!source.trim()) return ''
   const text = source
@@ -58,5 +60,57 @@ export function htmlToMarkup(html) {
       .replace(/^((?!- ).+)\n(?=- )/gm, `$1${BLOCK_BREAK}`)
       .replace(/\n{3,}/g, BLOCK_BREAK)
       .trim()
+  )
+}
+
+/** Ячейка таблицы в одну строку: пункты списка через «; », картинки (значки) не переносятся. */
+const cellText = (html) =>
+  inline(
+    String(html)
+      .replace(/<\/li\s*>/gi, '; ')
+      .replace(/<br\s*\/?>/gi, '; '),
+  )
+    .replace(/(\s*;\s*)+/g, '; ')
+    .replace(/^;\s*|;\s*$/g, '')
+
+/**
+ * Таблицы данных в HTML описания: [{ start, end, flat, markup }]. flat — как таблица выглядела
+ * после первого переноса (ячейка в строку), markup — таблица разметкой «| … |» (src/domain/
+ * tables.mjs). Таблицы-раскладки (одна колонка, длинный текст, баннер) не попадают.
+ * @param {string} html
+ */
+export function descriptionTables(html) {
+  const source = String(html ?? '')
+  return outerTables(source).flatMap(({ start, end }) => {
+    const table = source.slice(start, end)
+    const rows = tableCells(table).map((row) => ({
+      header: row.header,
+      cells: row.cells.map((cell) => ({ ...cell, value: cellText(cell.html) })),
+    }))
+    const markup = tableMarkup(gridRows(rows, ''))
+    return markup ? [{ start, end, flat: flatMarkup(table), markup }] : []
+  })
+}
+
+/**
+ * Описание товара из Битрикса (HTML) → разметка поля «Описание». Таблицы данных (сравнение
+ * AutoCAD и AutoCAD LT, системные требования) — таблицами, а не ячейкой в строку.
+ * @param {string | null | undefined} html
+ */
+export function htmlToMarkup(html) {
+  const source = String(html ?? '')
+  const tables = descriptionTables(source)
+  if (!tables.length) return flatMarkup(source)
+  const MARK = 'bxtablemark'
+  const parts = []
+  let last = 0
+  tables.forEach(({ start, end }, i) => {
+    parts.push(source.slice(last, start), `<p>${MARK}${i}</p>`)
+    last = end
+  })
+  parts.push(source.slice(last))
+  return flatMarkup(parts.join('')).replace(
+    new RegExp(`^${MARK}(\\d+)$`, 'gm'),
+    (_, i) => tables[Number(i)]?.markup ?? '',
   )
 }

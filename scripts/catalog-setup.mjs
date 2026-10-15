@@ -6,7 +6,7 @@
 // — кнопкой «Обновить версию»; пакеты и девять задач GEO5 в каталоге; блок «Официальный партнёр» на главной;
 // каталог по CRM (САПР и черчение, широкоформат, сценарии покупки, популярные решения);
 // дополнения к AutoCAD, Revit, Inventor (Требуется базовое ПО) и AutoCAD LT; политика
-// конфиденциальности со старого сайта; страница «Внедрение BIM»; иллюстрации тем новостей; готовые виды
+// конфиденциальности со старого сайта; таблицы в описаниях товаров со старого сайта; страница «Внедрение BIM»; иллюстрации тем новостей; готовые виды
 // списков в админке; отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
@@ -29,6 +29,7 @@ import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
 import { setupPresets, setupQuality } from '../src/lib/presetsSetup.ts'
 import { setupPriorities } from '../src/lib/prioritySetup.ts'
 import { setupPrivacyPage } from '../src/lib/privacySetup.ts'
+import { setupProductTables } from '../src/lib/productTablesSetup.ts'
 import { setupFamilyRenew } from '../src/lib/renewSetup.ts'
 import { setupSearchAliases } from '../src/lib/searchSetup.ts'
 import { setupMepTasks } from '../src/lib/tasksSetup.ts'
@@ -147,6 +148,17 @@ try {
   else for (const line of addons) console.log(`Дополнения — ${line}`)
   const privacy = await setupPrivacyPage(payload)
   console.log(privacy ?? 'Политика конфиденциальности уже перенесена.')
+  const productTables = await setupProductTables(payload)
+  if (!productTables) console.log('Таблицы в описаниях товаров уже восстановлены.')
+  else {
+    console.log(
+      `Таблицы в описаниях товаров: проверено ${productTables.checked}, таблиц ${productTables.tables} в ${productTables.updated.length} товарах` +
+        (productTables.failed
+          ? `; старый сайт не ответил для ${productTables.failed} — повторим при следующей сборке`
+          : ''),
+    )
+    for (const line of productTables.updated) console.log(`  ${line}`)
+  }
   const bim = await setupBimPage(payload)
   console.log(bim ?? 'Страница «Внедрение BIM» уже создана.')
   const covers = await setupNewsCovers(payload)

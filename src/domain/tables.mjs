@@ -219,7 +219,15 @@ const LINK = /(?<!!)\[([^\]]*)\]\(([^)\s]*)\)/g
  * @param {string} block
  */
 function plain(block) {
-  return block.replace(PICTURE, ' ').replace(LINK, '$1').replace(/\s+/g, ' ').trim()
+  return (
+    block
+      .replace(PICTURE, ' ')
+      .replace(LINK, '$1')
+      // Галочки сравнения старый сайт писал по-разному: ✔, ✓, ✅.
+      .replace(/[✔✅]/g, '✓')
+      .replace(/\s+/g, ' ')
+      .trim()
+  )
 }
 
 /**
