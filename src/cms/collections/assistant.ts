@@ -10,7 +10,7 @@ import { isEditor, nobody } from '../access'
 export const priceTables: CollectionConfig = {
   slug: 'price-tables',
   labels: { singular: 'Прайс для Кадди', plural: 'Прайсы для Кадди' },
-  admin: { group: 'Система', hidden: true },
+  admin: { hidden: true },
   access: { read: isEditor, create: nobody, update: nobody, delete: nobody },
   fields: [
     { name: 'state', type: 'text', required: true, index: true },
@@ -29,7 +29,6 @@ export const assistantKnowledge: CollectionConfig = {
   slug: 'assistant-knowledge',
   labels: { singular: 'Запись базы знаний Кадди', plural: 'База знаний Кадди' },
   admin: {
-    group: 'Кадди',
     useAsTitle: 'text',
     defaultColumns: ['text', 'product', 'active'],
     description:

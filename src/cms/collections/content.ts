@@ -4,6 +4,13 @@ import { everyone, isAdmin, isEditor } from '../access'
 import { contentCollection, legacyFields, seoField, slugField, textField } from '../fields'
 import { publicationDefaults } from '../hooks/publicationDefaults'
 
+const KINDS = ['article', 'news', 'promotion'] as const
+
+/** Тип новой публикации из адреса: /admin/collections/publications/create?kind=promotion. */
+function kindFromQuery(value: unknown): (typeof KINDS)[number] {
+  return KINDS.find((kind) => kind === value) ?? 'news'
+}
+
 /** Длинная статья с таблицами — до ~70 000 знаков; запас на редкие большие тексты. */
 const BODY_MAX_LENGTH = 300_000
 
@@ -58,7 +65,8 @@ export const publications: CollectionConfig = {
         label: 'Тип',
         type: 'select',
         required: true,
-        defaultValue: 'news',
+        // «+ Акция» и «+ Статья» на главной админки открывают новую публикацию с ?kind=…
+        defaultValue: ({ req }) => kindFromQuery(req.query?.kind),
         options: [
           { label: 'Статья', value: 'article' },
           { label: 'Новость', value: 'news' },

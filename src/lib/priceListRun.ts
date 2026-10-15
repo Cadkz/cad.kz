@@ -1,6 +1,8 @@
 import type { Payload } from 'payload'
+import { priceListSummary } from '@/domain/activity.mjs'
 import type { Offer, Product } from '../../payload-types'
 import { codeName, matchRows, nameKey, type PriceRow } from '../domain/priceList.mjs'
+import { logActivity } from './activity'
 import { formatKzt } from './format'
 import { loadPricingContext, type PricingContext, quoteOffer } from './pricing'
 import { relId } from './rel'
@@ -327,6 +329,13 @@ export async function applyPriceList(
       snapshot: { kind: 'price-list', user: userId, ...report, changes },
     },
     ...opts,
+  })
+  await logActivity(payload, {
+    action: 'price-list',
+    summary: priceListSummary(report),
+    userId,
+    link: '/admin/price-list',
+    details: { changes: changes.slice(0, 200) },
   })
   return { ok: true, changed: report.changed, same: report.same, missing: report.missing }
 }

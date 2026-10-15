@@ -7,7 +7,6 @@ function journal(slug: CollectionSlug, plural: string): CollectionConfig {
   return {
     slug,
     labels: { singular: plural, plural },
-    admin: { group: 'Система' },
     access: { read: isAdmin, create: nobody, update: nobody, delete: nobody },
     fields: [
       { name: 'idempotencyKey', type: 'text', unique: true, required: true },
@@ -23,7 +22,7 @@ export const importRuns = journal('import-runs', 'Запуски импорта'
 export const redirects: CollectionConfig = {
   slug: 'redirects',
   labels: { singular: 'Перенаправление', plural: 'Перенаправления' },
-  admin: { group: 'Система', useAsTitle: 'from' },
+  admin: { useAsTitle: 'from' },
   access: { read: isAdmin, create: isAdmin, update: isAdmin, delete: isAdmin },
   fields: [
     { name: 'from', label: 'Старый адрес', type: 'text', unique: true, required: true },

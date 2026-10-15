@@ -1,6 +1,7 @@
 import { APIError, type CollectionBeforeDeleteHook, type CollectionConfig } from 'payload'
 import { isAdmin, nobody } from '../access'
 import { relationField, textField } from '../fields'
+import { logCrmChange } from '../hooks/activity'
 
 /**
  * Заказ нельзя изменить и удалить ни из админки, ни из кода: снимок цены должен остаться таким,
@@ -27,7 +28,6 @@ export const orders: CollectionConfig = {
   slug: 'orders',
   labels: { singular: 'Заказ', plural: 'Заказы' },
   admin: {
-    group: 'Продажи',
     useAsTitle: 'number',
     defaultColumns: ['number', 'createdAt', 'contactName', 'buyerType', 'totalKzt', 'mode'],
   },
@@ -112,12 +112,12 @@ export const crmDeliveries: CollectionConfig = {
   slug: 'crm-deliveries',
   labels: { singular: 'Передача в CRM', plural: 'Передача в CRM' },
   admin: {
-    group: 'Система',
     useAsTitle: 'idempotencyKey',
     defaultColumns: ['order', 'request', 'state', 'attempts', 'updatedAt'],
   },
   defaultSort: '-createdAt',
   access: { read: isAdmin, create: nobody, update: nobody, delete: nobody },
+  hooks: { afterChange: [logCrmChange] },
   fields: [
     { name: 'idempotencyKey', label: 'Ключ повтора', type: 'text', unique: true, required: true },
     relationField('order', 'Заказ', 'orders'),
@@ -155,7 +155,6 @@ export const siteRequests: CollectionConfig = {
   slug: 'site-requests',
   labels: { singular: 'Заявка без корзины', plural: 'Заявки без корзины' },
   admin: {
-    group: 'Продажи',
     useAsTitle: 'number',
     defaultColumns: ['number', 'createdAt', 'kind', 'productTitle', 'button', 'contactName'],
   },

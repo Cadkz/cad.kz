@@ -2,6 +2,7 @@ import type { Where } from 'payload'
 import { cache } from 'react'
 import type { NewsCardData } from '@/components/NewsCard/NewsCard'
 import type { Media, Publication, Topic } from '../../payload-types'
+import { PROMO_FRESH_DAYS } from '../domain/adminQueue.mjs'
 import { NEWS_VENDORS, newsVendor, vendorWhere } from '../domain/newsVendors.mjs'
 import { formatDate } from './format'
 import { newsHref } from './navigationHrefs'
@@ -135,9 +136,6 @@ export async function getPublications({
   })
   return { docs: result.docs, totalPages: result.totalPages, page: result.page ?? 1 }
 }
-
-/** Сколько дней акция без даты окончания считается действующей. */
-const PROMO_FRESH_DAYS = 180
 
 export type PromoState = 'current' | 'archive'
 

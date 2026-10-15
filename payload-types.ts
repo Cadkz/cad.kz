@@ -70,23 +70,24 @@ export interface Config {
     products: Product;
     offers: Offer;
     sections: Section;
-    'section-rules': SectionRule;
     manufacturers: Manufacturer;
     'product-lines': ProductLine;
+    'section-rules': SectionRule;
+    'exchange-rates': ExchangeRate;
     publications: Publication;
     topics: Topic;
     pages: Page;
     media: Media;
-    'exchange-rates': ExchangeRate;
-    users: User;
     orders: Order;
     'site-requests': SiteRequest;
-    conversations: Conversation;
-    'assistant-knowledge': AssistantKnowledge;
-    'price-tables': PriceTable;
     'crm-deliveries': CrmDelivery;
-    'import-runs': ImportRun;
+    'assistant-knowledge': AssistantKnowledge;
+    conversations: Conversation;
+    'price-tables': PriceTable;
+    'activity-log': ActivityLog;
     redirects: Redirect;
+    'import-runs': ImportRun;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -97,23 +98,24 @@ export interface Config {
     products: ProductsSelect<false> | ProductsSelect<true>;
     offers: OffersSelect<false> | OffersSelect<true>;
     sections: SectionsSelect<false> | SectionsSelect<true>;
-    'section-rules': SectionRulesSelect<false> | SectionRulesSelect<true>;
     manufacturers: ManufacturersSelect<false> | ManufacturersSelect<true>;
     'product-lines': ProductLinesSelect<false> | ProductLinesSelect<true>;
+    'section-rules': SectionRulesSelect<false> | SectionRulesSelect<true>;
+    'exchange-rates': ExchangeRatesSelect<false> | ExchangeRatesSelect<true>;
     publications: PublicationsSelect<false> | PublicationsSelect<true>;
     topics: TopicsSelect<false> | TopicsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    'exchange-rates': ExchangeRatesSelect<false> | ExchangeRatesSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
     'site-requests': SiteRequestsSelect<false> | SiteRequestsSelect<true>;
-    conversations: ConversationsSelect<false> | ConversationsSelect<true>;
-    'assistant-knowledge': AssistantKnowledgeSelect<false> | AssistantKnowledgeSelect<true>;
-    'price-tables': PriceTablesSelect<false> | PriceTablesSelect<true>;
     'crm-deliveries': CrmDeliveriesSelect<false> | CrmDeliveriesSelect<true>;
-    'import-runs': ImportRunsSelect<false> | ImportRunsSelect<true>;
+    'assistant-knowledge': AssistantKnowledgeSelect<false> | AssistantKnowledgeSelect<true>;
+    conversations: ConversationsSelect<false> | ConversationsSelect<true>;
+    'price-tables': PriceTablesSelect<false> | PriceTablesSelect<true>;
+    'activity-log': ActivityLogSelect<false> | ActivityLogSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
+    'import-runs': ImportRunsSelect<false> | ImportRunsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -125,13 +127,13 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'pricing-settings': PricingSetting;
-    'site-settings': SiteSetting;
     'home-page': HomePage;
+    'site-settings': SiteSetting;
   };
   globalsSelect: {
     'pricing-settings': PricingSettingsSelect<false> | PricingSettingsSelect<true>;
-    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'home-page': HomePageSelect<false> | HomePageSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -310,6 +312,10 @@ export interface Product {
   };
   legacyKey?: string | null;
   legacyUrl?: string | null;
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -332,6 +338,10 @@ export interface Manufacturer {
   image?: (number | null) | Media;
   legacyKey?: string | null;
   legacyUrl?: string | null;
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -355,6 +365,33 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  role: 'admin' | 'editor';
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * Группы товаров внутри производителя. Товар попадает в линейку полем «Линейка» в карточке товара. Линейка без опубликованных товаров на сайте не показывается.
@@ -451,6 +488,10 @@ export interface Section {
   crossSections?: (number | Section)[] | null;
   legacyKey?: string | null;
   legacyUrl?: string | null;
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -479,6 +520,10 @@ export interface Offer {
   priceNames?: string[] | null;
   legacyKey?: string | null;
   legacyUrl?: string | null;
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -513,6 +558,22 @@ export interface SectionRule {
    * Подходящие товары снимаются с публикации. Старые ссылки на них ведут на товары производителя.
    */
   retire?: boolean | null;
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exchange-rates".
+ */
+export interface ExchangeRate {
+  id: number;
+  currency: 'USD' | 'EUR' | 'RUB';
+  kztPerUnit: string;
+  effectiveAt: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -561,6 +622,10 @@ export interface Publication {
   };
   legacyKey?: string | null;
   legacyUrl?: string | null;
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -606,47 +671,12 @@ export interface Page {
   };
   legacyKey?: string | null;
   legacyUrl?: string | null;
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "exchange-rates".
- */
-export interface ExchangeRate {
-  id: number;
-  currency: 'USD' | 'EUR' | 'RUB';
-  kztPerUnit: string;
-  effectiveAt: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  role: 'admin' | 'editor';
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  resetPasswordRequestedAt?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -725,11 +755,19 @@ export interface SiteRequest {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "conversations".
+ * via the `definition` "crm-deliveries".
  */
-export interface Conversation {
+export interface CrmDelivery {
   id: number;
   idempotencyKey: string;
+  order?: (number | null) | Order;
+  request?: (number | null) | SiteRequest;
+  state: 'pending' | 'processing' | 'not-sent-demo' | 'sent' | 'failed' | 'dead';
+  attempts?: number | null;
+  nextAttemptAt?: string | null;
+  ambiguous?: boolean | null;
+  lastError?: string | null;
+  externalId?: string | null;
   snapshot:
     | {
         [k: string]: unknown;
@@ -739,7 +777,6 @@ export interface Conversation {
     | number
     | boolean
     | null;
-  state: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -758,6 +795,30 @@ export interface AssistantKnowledge {
   product?: string | null;
   active?: boolean | null;
   position?: number | null;
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conversations".
+ */
+export interface Conversation {
+  id: number;
+  idempotencyKey: string;
+  snapshot:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  state: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -790,21 +851,24 @@ export interface PriceTable {
   createdAt: string;
 }
 /**
+ * Кто и когда менял курсы, НДС и цены, загружал прайсы, запускал импорт, удалял записи. Что именно поменялось в товаре или публикации — во вкладке «Версии» самой записи.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "crm-deliveries".
+ * via the `definition` "activity-log".
  */
-export interface CrmDelivery {
+export interface ActivityLog {
   id: number;
-  idempotencyKey: string;
-  order?: (number | null) | Order;
-  request?: (number | null) | SiteRequest;
-  state: 'pending' | 'processing' | 'not-sent-demo' | 'sent' | 'failed' | 'dead';
-  attempts?: number | null;
-  nextAttemptAt?: string | null;
-  ambiguous?: boolean | null;
-  lastError?: string | null;
-  externalId?: string | null;
-  snapshot:
+  action: 'rate' | 'vat' | 'price-list' | 'import' | 'crm' | 'delete' | 'users' | 'kaddi';
+  summary: string;
+  /**
+   * Пусто — сайт сам (очередь CRM, автонастройка).
+   */
+  user?: (number | null) | User;
+  /**
+   * Адрес в админке: запись или страница, к которой относится действие.
+   */
+  link?: string | null;
+  details?:
     | {
         [k: string]: unknown;
       }
@@ -813,6 +877,19 @@ export interface CrmDelivery {
     | number
     | boolean
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects".
+ */
+export interface Redirect {
+  id: number;
+  from: string;
+  to: string;
+  legacyKey?: string | null;
+  legacyUrl?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -833,19 +910,6 @@ export interface ImportRun {
     | boolean
     | null;
   state: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects".
- */
-export interface Redirect {
-  id: number;
-  from: string;
-  to: string;
-  legacyKey?: string | null;
-  legacyUrl?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -886,16 +950,20 @@ export interface PayloadLockedDocument {
         value: number | Section;
       } | null)
     | ({
-        relationTo: 'section-rules';
-        value: number | SectionRule;
-      } | null)
-    | ({
         relationTo: 'manufacturers';
         value: number | Manufacturer;
       } | null)
     | ({
         relationTo: 'product-lines';
         value: number | ProductLine;
+      } | null)
+    | ({
+        relationTo: 'section-rules';
+        value: number | SectionRule;
+      } | null)
+    | ({
+        relationTo: 'exchange-rates';
+        value: number | ExchangeRate;
       } | null)
     | ({
         relationTo: 'publications';
@@ -914,14 +982,6 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'exchange-rates';
-        value: number | ExchangeRate;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: number | User;
-      } | null)
-    | ({
         relationTo: 'orders';
         value: number | Order;
       } | null)
@@ -930,28 +990,36 @@ export interface PayloadLockedDocument {
         value: number | SiteRequest;
       } | null)
     | ({
-        relationTo: 'conversations';
-        value: number | Conversation;
+        relationTo: 'crm-deliveries';
+        value: number | CrmDelivery;
       } | null)
     | ({
         relationTo: 'assistant-knowledge';
         value: number | AssistantKnowledge;
       } | null)
     | ({
+        relationTo: 'conversations';
+        value: number | Conversation;
+      } | null)
+    | ({
         relationTo: 'price-tables';
         value: number | PriceTable;
       } | null)
     | ({
-        relationTo: 'crm-deliveries';
-        value: number | CrmDelivery;
+        relationTo: 'activity-log';
+        value: number | ActivityLog;
+      } | null)
+    | ({
+        relationTo: 'redirects';
+        value: number | Redirect;
       } | null)
     | ({
         relationTo: 'import-runs';
         value: number | ImportRun;
       } | null)
     | ({
-        relationTo: 'redirects';
-        value: number | Redirect;
+        relationTo: 'users';
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1090,6 +1158,7 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   legacyKey?: T;
   legacyUrl?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1111,6 +1180,7 @@ export interface OffersSelect<T extends boolean = true> {
   priceNames?: T;
   legacyKey?: T;
   legacyUrl?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1135,22 +1205,7 @@ export interface SectionsSelect<T extends boolean = true> {
   crossSections?: T;
   legacyKey?: T;
   legacyUrl?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "section-rules_select".
- */
-export interface SectionRulesSelect<T extends boolean = true> {
-  title?: T;
-  order?: T;
-  manufacturer?: T;
-  kind?: T;
-  words?: T;
-  mainSection?: T;
-  extraSections?: T;
-  retire?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1166,6 +1221,7 @@ export interface ManufacturersSelect<T extends boolean = true> {
   image?: T;
   legacyKey?: T;
   legacyUrl?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1196,6 +1252,34 @@ export interface ProductLinesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "section-rules_select".
+ */
+export interface SectionRulesSelect<T extends boolean = true> {
+  title?: T;
+  order?: T;
+  manufacturer?: T;
+  kind?: T;
+  words?: T;
+  mainSection?: T;
+  extraSections?: T;
+  retire?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exchange-rates_select".
+ */
+export interface ExchangeRatesSelect<T extends boolean = true> {
+  currency?: T;
+  kztPerUnit?: T;
+  effectiveAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "publications_select".
  */
 export interface PublicationsSelect<T extends boolean = true> {
@@ -1219,6 +1303,7 @@ export interface PublicationsSelect<T extends boolean = true> {
       };
   legacyKey?: T;
   legacyUrl?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1255,6 +1340,7 @@ export interface PagesSelect<T extends boolean = true> {
       };
   legacyKey?: T;
   legacyUrl?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1277,41 +1363,6 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "exchange-rates_select".
- */
-export interface ExchangeRatesSelect<T extends boolean = true> {
-  currency?: T;
-  kztPerUnit?: T;
-  effectiveAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
- */
-export interface UsersSelect<T extends boolean = true> {
-  role?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  resetPasswordRequestedAt?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1376,40 +1427,6 @@ export interface SiteRequestsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "conversations_select".
- */
-export interface ConversationsSelect<T extends boolean = true> {
-  idempotencyKey?: T;
-  snapshot?: T;
-  state?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "assistant-knowledge_select".
- */
-export interface AssistantKnowledgeSelect<T extends boolean = true> {
-  text?: T;
-  product?: T;
-  active?: T;
-  position?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "price-tables_select".
- */
-export interface PriceTablesSelect<T extends boolean = true> {
-  state?: T;
-  summary?: T;
-  snapshot?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "crm-deliveries_select".
  */
 export interface CrmDeliveriesSelect<T extends boolean = true> {
@@ -1428,12 +1445,49 @@ export interface CrmDeliveriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "import-runs_select".
+ * via the `definition` "assistant-knowledge_select".
  */
-export interface ImportRunsSelect<T extends boolean = true> {
+export interface AssistantKnowledgeSelect<T extends boolean = true> {
+  text?: T;
+  product?: T;
+  active?: T;
+  position?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conversations_select".
+ */
+export interface ConversationsSelect<T extends boolean = true> {
   idempotencyKey?: T;
   snapshot?: T;
   state?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "price-tables_select".
+ */
+export interface PriceTablesSelect<T extends boolean = true> {
+  state?: T;
+  summary?: T;
+  snapshot?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity-log_select".
+ */
+export interface ActivityLogSelect<T extends boolean = true> {
+  action?: T;
+  summary?: T;
+  user?: T;
+  link?: T;
+  details?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1448,6 +1502,41 @@ export interface RedirectsSelect<T extends boolean = true> {
   legacyUrl?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "import-runs_select".
+ */
+export interface ImportRunsSelect<T extends boolean = true> {
+  idempotencyKey?: T;
+  snapshot?: T;
+  state?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  role?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1496,39 +1585,10 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface PricingSetting {
   id: number;
   vat: string;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "site-settings".
- */
-export interface SiteSetting {
-  id: number;
-  phones?:
-    | {
-        label: string;
-        tel: string;
-        id?: string | null;
-      }[]
-    | null;
-  whatsapp?: string | null;
-  telegram?: string | null;
-  email?: string | null;
   /**
-   * Показывается на странице «Контакты».
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
    */
-  address?: string | null;
-  hours?: string | null;
-  mapUrl?: string | null;
-  socials?:
-    | {
-        network: 'instagram' | 'facebook' | 'youtube' | 'telegram' | 'linkedin';
-        url: string;
-        id?: string | null;
-      }[]
-    | null;
-  footerText?: string | null;
+  updatedBy?: (number | null) | User;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1646,6 +1706,47 @@ export interface HomePage {
     linkLabel?: string | null;
     linkHref?: string | null;
   };
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  phones?:
+    | {
+        label: string;
+        tel: string;
+        id?: string | null;
+      }[]
+    | null;
+  whatsapp?: string | null;
+  telegram?: string | null;
+  email?: string | null;
+  /**
+   * Показывается на странице «Контакты».
+   */
+  address?: string | null;
+  hours?: string | null;
+  mapUrl?: string | null;
+  socials?:
+    | {
+        network: 'instagram' | 'facebook' | 'youtube' | 'telegram' | 'linkedin';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  footerText?: string | null;
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1655,36 +1756,7 @@ export interface HomePage {
  */
 export interface PricingSettingsSelect<T extends boolean = true> {
   vat?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "site-settings_select".
- */
-export interface SiteSettingsSelect<T extends boolean = true> {
-  phones?:
-    | T
-    | {
-        label?: T;
-        tel?: T;
-        id?: T;
-      };
-  whatsapp?: T;
-  telegram?: T;
-  email?: T;
-  address?: T;
-  hours?: T;
-  mapUrl?: T;
-  socials?:
-    | T
-    | {
-        network?: T;
-        url?: T;
-        id?: T;
-      };
-  footerText?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1794,6 +1866,38 @@ export interface HomePageSelect<T extends boolean = true> {
         linkLabel?: T;
         linkHref?: T;
       };
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  phones?:
+    | T
+    | {
+        label?: T;
+        tel?: T;
+        id?: T;
+      };
+  whatsapp?: T;
+  telegram?: T;
+  email?: T;
+  address?: T;
+  hours?: T;
+  mapUrl?: T;
+  socials?:
+    | T
+    | {
+        network?: T;
+        url?: T;
+        id?: T;
+      };
+  footerText?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

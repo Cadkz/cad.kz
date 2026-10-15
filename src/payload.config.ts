@@ -4,16 +4,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { ru } from '@payloadcms/translations/languages/ru'
 import { buildConfig } from 'payload'
-import { assistantKnowledge, priceTables } from './cms/collections/assistant'
-import { manufacturers, offers, productLines, products, sections } from './cms/collections/catalog'
-import { media, pages, publications, topics } from './cms/collections/content'
-import { crmDeliveries, orders, siteRequests } from './cms/collections/orders'
-import { exchangeRates, pricingSettings } from './cms/collections/pricing'
-import { sectionRules } from './cms/collections/sectionRules'
-import { conversations, importRuns, redirects } from './cms/collections/system'
-import { users } from './cms/collections/users'
-import { homePage } from './cms/globals/homePage'
-import { siteSettings } from './cms/globals/siteSettings'
+import { menuCollections, menuGlobals } from './cms/menu'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -39,14 +30,18 @@ export default buildConfig({
   }),
   admin: {
     user: 'users',
+    // Даты в списках и версиях — привычно: 15.10.2026 13:18.
+    dateFormat: 'dd.MM.yyyy HH:mm',
     // Пути к компонентам админки (/components/…) отсчитываются от src. Карта лежит одним файлом .ts.
     importMap: {
       baseDir: dirname,
       importMapFile: path.resolve(dirname, 'app/(payload)/admin/importMap.ts'),
     },
     components: {
-      afterNavLinks: ['/components/ImportNavLink/ImportNavLink#ImportNavLink'],
-      beforeDashboard: ['/components/ImportDashboardLink/ImportDashboardLink#ImportDashboardLink'],
+      // Меню: группы и порядок — src/cms/menu.ts, свои страницы — группа «Инструменты».
+      afterNavLinks: ['/components/AdminNavTools/AdminNavTools#AdminNavTools'],
+      // Главная админки — очередь работы, ниже все разделы по группам меню.
+      beforeDashboard: ['/components/AdminHome/AdminHome#AdminHome'],
       views: {
         bitrixImport: {
           Component: '/components/BitrixImportView/BitrixImportView#BitrixImportView',
@@ -77,29 +72,8 @@ export default buildConfig({
     },
   },
   i18n: { supportedLanguages: { ru }, fallbackLanguage: 'ru' },
-  collections: [
-    products,
-    offers,
-    sections,
-    sectionRules,
-    manufacturers,
-    productLines,
-    publications,
-    topics,
-    pages,
-    media,
-    exchangeRates,
-    users,
-    orders,
-    siteRequests,
-    conversations,
-    assistantKnowledge,
-    priceTables,
-    crmDeliveries,
-    importRuns,
-    redirects,
-  ],
-  globals: [pricingSettings, siteSettings, homePage],
+  collections: menuCollections,
+  globals: menuGlobals,
   plugins: [
     vercelBlobStorage({
       enabled: useBlob,

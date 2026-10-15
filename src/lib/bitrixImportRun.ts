@@ -10,6 +10,7 @@ import {
   writeProducts,
 } from '@/domain/bitrixImport.mjs'
 import { readItems, readKeys, readManufacturers } from '@/domain/bitrixImportInput.mjs'
+import { logActivity } from './activity'
 
 /**
  * Запуск импорта из Битрикса со страницы админки. Браузер присылает план частями, сервер пишет
@@ -199,6 +200,12 @@ export async function finishRun(payload: Payload, body: Record<string, unknown>)
 
   keepIssues(addResult(snapshot.result, await finishImport(payload, keys.items)))
   await saveRun(payload, run.id, snapshot, 'done')
+  await logActivity(payload, {
+    action: 'import',
+    summary: `Импорт из Битрикса закончен: товаров ${planned.products}, вариантов ${planned.offers}`,
+    userId: snapshot.startedBy,
+    link: `/admin/collections/import-runs/${run.id}`,
+  })
   return { ok: true, runId: run.id, snapshot } satisfies RunReply
 }
 

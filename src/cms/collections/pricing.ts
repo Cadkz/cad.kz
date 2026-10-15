@@ -1,6 +1,7 @@
 import type { CollectionConfig, GlobalConfig } from 'payload'
 import { isAdmin, isEditor } from '../access'
 import { textField } from '../fields'
+import { logRateChange, logVatChange } from '../hooks/activity'
 
 /**
  * История курсов. Маркетолог добавляет новую запись с датой — старые не правятся,
@@ -11,6 +12,7 @@ export const exchangeRates: CollectionConfig = {
   labels: { singular: 'Курс', plural: 'Курсы валют' },
   admin: { useAsTitle: 'currency', defaultColumns: ['currency', 'kztPerUnit', 'effectiveAt'] },
   access: { read: isEditor, create: isEditor, update: isAdmin, delete: isAdmin },
+  hooks: { afterChange: [logRateChange] },
   fields: [
     {
       name: 'currency',
@@ -28,5 +30,6 @@ export const pricingSettings: GlobalConfig = {
   slug: 'pricing-settings',
   label: 'Настройки цены',
   access: { read: isAdmin, update: isAdmin },
+  hooks: { afterChange: [logVatChange] },
   fields: [{ name: 'vat', label: 'НДС, %', type: 'text', defaultValue: '16', required: true }],
 }

@@ -20,6 +20,7 @@ import * as migration_20261012_095832_popular_tiles from './20261012_095832_popu
 import * as migration_20261013_061127_yuki_price_knowledge from './20261013_061127_yuki_price_knowledge'
 import * as migration_20261013_065601_topic_covers from './20261013_065601_topic_covers'
 import * as migration_20261015_065936_publication_dates from './20261015_065936_publication_dates'
+import * as migration_20261015_081601_admin_history from './20261015_081601_admin_history'
 
 export const migrations = [
   {
@@ -131,5 +132,10 @@ export const migrations = [
     up: migration_20261015_065936_publication_dates.up,
     down: migration_20261015_065936_publication_dates.down,
     name: '20261015_065936_publication_dates',
+  },
+  {
+    up: migration_20261015_081601_admin_history.up,
+    down: migration_20261015_081601_admin_history.down,
+    name: '20261015_081601_admin_history',
   },
 ]

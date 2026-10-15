@@ -1,12 +1,14 @@
 import type { CollectionConfig } from 'payload'
 import { adminOrSelf, isAdmin } from '../access'
+import { logUserChange } from '../hooks/activity'
 
 export const users: CollectionConfig = {
   slug: 'users',
   labels: { singular: 'Пользователь', plural: 'Пользователи' },
   auth: true,
-  admin: { useAsTitle: 'email', group: 'Система' },
+  admin: { useAsTitle: 'email' },
   access: { read: adminOrSelf, create: isAdmin, update: isAdmin, delete: isAdmin },
+  hooks: { afterChange: [logUserChange] },
   fields: [
     {
       name: 'role',

@@ -1,4 +1,5 @@
 import { validateKnowledge, validatePriceRows } from '@/domain/priceTable.mjs'
+import { logActivity } from '@/lib/activity'
 import { adminRequest, reply } from '@/lib/adminApi'
 import { loadPriceTable, replaceKnowledge, savePriceTable } from '@/lib/assistant/priceTable'
 import { priceByCode, searchPrice } from '@/lib/assistant/tools'
@@ -61,12 +62,24 @@ export async function POST(request: Request) {
         uploadedBy: String((user as { email?: string }).email ?? user.id),
       })
       parts.push(`прайс — ${rows.length.toLocaleString('ru-RU')} строк`)
+      await logActivity(payload, {
+        action: 'kaddi',
+        summary: `Прайс Кадди: ${short(price.fileName, 120) || 'без имени'}, строк ${rows.length}`,
+        userId: user.id,
+        link: '/admin/kaddi-data',
+      })
     }
     if (data.knowledge) {
       const entries = validateKnowledge(data.knowledge)
       if (typeof entries === 'string') return reply({ error: entries }, 400)
       const saved = await replaceKnowledge(payload, entries)
       parts.push(`база знаний — ${saved} записей`)
+      await logActivity(payload, {
+        action: 'kaddi',
+        summary: `База знаний Кадди заменена из файла: записей ${saved}`,
+        userId: user.id,
+        link: '/admin/collections/assistant-knowledge',
+      })
     }
     if (!parts.length) return reply({ error: 'Нечего загружать' }, 400)
     return reply({ message: `Готово: ${parts.join(', ')}. Кадди уже отвечает по новым данным.` })

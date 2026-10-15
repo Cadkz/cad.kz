@@ -1,8 +1,8 @@
 import { SlugField as SlugField_be3cdb29464280a3be9c774b7bee1336 } from '../../../components/SlugField/SlugField'
 import { BodyEditor as BodyEditor_86c0a066958e23b9e3a1c929a5761694 } from '../../../components/BodyEditor/BodyEditor'
 import { OrderSnapshotView as OrderSnapshotView_9b9a473c4b75963e2326a4b6719d162f } from '../../../components/OrderSnapshotView/OrderSnapshotView'
-import { ImportNavLink as ImportNavLink_7bbeaaa5cd524cf4b63c7d575feb3ba8 } from '../../../components/ImportNavLink/ImportNavLink'
-import { ImportDashboardLink as ImportDashboardLink_91c324b4ec9b03a0b8447930f203df72 } from '../../../components/ImportDashboardLink/ImportDashboardLink'
+import { AdminNavTools as AdminNavTools_2fc225efb0c4d89686d274717840deee } from '../../../components/AdminNavTools/AdminNavTools'
+import { AdminHome as AdminHome_d6cd5d3bc8e724441d928f41cd54e087 } from '../../../components/AdminHome/AdminHome'
 import { BitrixImportView as BitrixImportView_31f0a3e387f2bd8b4181ac01e9918aee } from '../../../components/BitrixImportView/BitrixImportView'
 import { PriceListView as PriceListView_94d00816e844af2d5fa87147e72feb4f } from '../../../components/PriceListView/PriceListView'
 import { KaddiDataView as KaddiDataView_e4069d6241b6244bfa3b65ac2def2f14 } from '../../../components/KaddiDataView/KaddiDataView'
@@ -16,8 +16,8 @@ export const importMap = {
   "/components/SlugField/SlugField#SlugField": SlugField_be3cdb29464280a3be9c774b7bee1336,
   "/components/BodyEditor/BodyEditor#BodyEditor": BodyEditor_86c0a066958e23b9e3a1c929a5761694,
   "/components/OrderSnapshotView/OrderSnapshotView#OrderSnapshotView": OrderSnapshotView_9b9a473c4b75963e2326a4b6719d162f,
-  "/components/ImportNavLink/ImportNavLink#ImportNavLink": ImportNavLink_7bbeaaa5cd524cf4b63c7d575feb3ba8,
-  "/components/ImportDashboardLink/ImportDashboardLink#ImportDashboardLink": ImportDashboardLink_91c324b4ec9b03a0b8447930f203df72,
+  "/components/AdminNavTools/AdminNavTools#AdminNavTools": AdminNavTools_2fc225efb0c4d89686d274717840deee,
+  "/components/AdminHome/AdminHome#AdminHome": AdminHome_d6cd5d3bc8e724441d928f41cd54e087,
   "/components/BitrixImportView/BitrixImportView#BitrixImportView": BitrixImportView_31f0a3e387f2bd8b4181ac01e9918aee,
   "/components/PriceListView/PriceListView#PriceListView": PriceListView_94d00816e844af2d5fa87147e72feb4f,
   "/components/KaddiDataView/KaddiDataView#KaddiDataView": KaddiDataView_e4069d6241b6244bfa3b65ac2def2f14,
