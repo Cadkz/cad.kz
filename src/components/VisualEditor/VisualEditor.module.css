@@ -1,0 +1,99 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.root {
+  overflow: hidden;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-m);
+  background: var(--theme-input-bg);
+}
+
+.editor {
+  /* Кегли заголовков в редакторе — примерно как на сайте, относительно текста админки. */
+  --editor-h2: 1.375em;
+  --editor-h3: 1.125em;
+
+  max-height: 70vh;
+  min-height: 320px;
+  overflow-y: auto;
+  padding: var(--base);
+  color: var(--theme-elevation-800);
+  line-height: 1.6;
+  outline: none;
+}
+
+.editor:focus-visible {
+  outline: 2px solid var(--theme-success-500);
+  outline-offset: -2px;
+}
+
+.editor > * {
+  max-width: 760px;
+  margin: 0 0 calc(var(--base) * 0.75);
+}
+
+.editor h2 {
+  margin-top: calc(var(--base) * 1.5);
+  font-size: var(--editor-h2);
+}
+
+.editor h3 {
+  margin-top: var(--base);
+  font-size: var(--editor-h3);
+}
+
+.editor ul,
+.editor ol {
+  padding-left: calc(var(--base) * 1.5);
+}
+
+.editor blockquote {
+  padding: calc(var(--base) / 2) var(--base);
+  border-left: 4px solid var(--theme-success-500);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-elevation-50);
+}
+
+.editor a {
+  color: var(--theme-success-750);
+  text-decoration: underline;
+}
+
+.editor img {
+  display: block;
+  max-width: 100%;
+  max-height: 360px;
+  height: auto;
+  border-radius: var(--style-radius-s);
+}
+
+.editor table {
+  border-collapse: collapse;
+}
+
+.editor th,
+.editor td {
+  min-width: 80px;
+  padding: calc(var(--base) / 4) calc(var(--base) / 2);
+  border: 1px solid var(--theme-elevation-200);
+  vertical-align: top;
+}
+
+.editor th {
+  background: var(--theme-elevation-50);
+  font-weight: bold;
+  text-align: left;
+}
+
+.editor figure {
+  display: grid;
+  gap: calc(var(--base) / 4);
+  padding: var(--base);
+  border: 1px dashed var(--theme-elevation-300);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-elevation-50);
+  user-select: none;
+}
+
+.editor figure small {
+  color: var(--theme-elevation-500);
+  word-break: break-all;
+}

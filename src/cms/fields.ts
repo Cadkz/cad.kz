@@ -1,4 +1,4 @@
-import type { CollectionConfig, CollectionSlug, Field } from 'payload'
+import type { CollectionConfig, CollectionSlug, Field, SelectField, TextField } from 'payload'
 import { isAdmin, isEditor, publishedOrSignedIn } from './access'
 
 export function textField(name: string, label: string, required = false): Field {
@@ -16,7 +16,7 @@ export function relationField(
     : { name, label, type: 'relationship', relationTo, hasMany: false }
 }
 
-export function slugField(label = 'Адрес'): Field {
+export function slugField(label = 'Адрес'): TextField {
   return { name: 'slug', label, type: 'text', unique: true, required: true, index: true }
 }
 
@@ -44,7 +44,7 @@ export const legacyFields: Field[] = [
   textField('legacyUrl', 'Прежний адрес'),
 ]
 
-export const statusField: Field = {
+export const statusField: SelectField = {
   name: 'status',
   label: 'Публикация',
   type: 'select',
@@ -61,6 +61,8 @@ type ContentCollection = {
   singular: string
   plural: string
   fields: Field[]
+  /** Статус публикации справа, рядом с датами, а не под названием. */
+  statusInSidebar?: boolean
 }
 
 /** Публичная коллекция контента: заголовок, статус публикации, поля импорта. */
@@ -69,12 +71,16 @@ export function contentCollection({
   singular,
   plural,
   fields,
+  statusInSidebar = false,
 }: ContentCollection): CollectionConfig {
+  const status: SelectField = statusInSidebar
+    ? { ...statusField, admin: { position: 'sidebar' } }
+    : statusField
   return {
     slug,
     labels: { singular, plural },
     admin: { useAsTitle: 'title', defaultColumns: ['title', 'status', 'updatedAt'] },
     access: { read: publishedOrSignedIn, create: isEditor, update: isEditor, delete: isAdmin },
-    fields: [textField('title', 'Название', true), statusField, ...fields, ...legacyFields],
+    fields: [textField('title', 'Название', true), status, ...fields, ...legacyFields],
   }
 }

@@ -1,14 +1,8 @@
 import type { CollectionConfig } from 'payload'
 import { UPLOAD_MIME_TYPES } from '../../domain/mediaTypes.mjs'
 import { everyone, isAdmin, isEditor } from '../access'
-import {
-  contentCollection,
-  legacyFields,
-  relationField,
-  seoField,
-  slugField,
-  textField,
-} from '../fields'
+import { contentCollection, legacyFields, seoField, slugField, textField } from '../fields'
+import { publicationDefaults } from '../hooks/publicationDefaults'
 
 /** Длинная статья с таблицами — до ~70 000 знаков; запас на редкие большие тексты. */
 const BODY_MAX_LENGTH = 300_000
@@ -45,66 +39,114 @@ export const topics: CollectionConfig = {
   admin: { useAsTitle: 'title', defaultColumns: ['title', 'slug', 'order', 'status'] },
 }
 
-export const publications = contentCollection({
-  slug: 'publications',
-  singular: 'Публикация',
-  plural: 'Новости, статьи, акции',
-  fields: [
-    slugField(),
-    {
-      name: 'kind',
-      label: 'Тип',
-      type: 'select',
-      required: true,
-      options: [
-        { label: 'Статья', value: 'article' },
-        { label: 'Новость', value: 'news' },
-        { label: 'Акция', value: 'promotion' },
-      ],
-    },
-    { name: 'excerpt', label: 'Анонс для карточки', type: 'textarea' },
-    {
-      name: 'theme',
-      label: 'Тема',
-      type: 'relationship',
-      relationTo: 'topics',
-      index: true,
-      admin: {
-        position: 'sidebar',
-        description: 'Выберите из списка. Новая тема добавляется в «Темы новостей и статей».',
+/** Поле «Текст» публикаций и страниц: свой редактор (визуальный и HTML), хранится разметкой. */
+const BODY_EDITOR = '/components/BodyEditor/BodyEditor#BodyEditor'
+
+export const publications: CollectionConfig = {
+  ...contentCollection({
+    slug: 'publications',
+    singular: 'Публикация',
+    plural: 'Новости, статьи, акции',
+    statusInSidebar: true,
+    fields: [
+      {
+        ...slugField(),
+        admin: { components: { Field: '/components/SlugField/SlugField#SlugField' } },
       },
-    },
-    // Прежняя тема текстом: перенесена в «Тему», оставлена только для истории.
-    { name: 'topic', label: 'Тематика (старое поле)', type: 'text', admin: { hidden: true } },
-    {
-      name: 'body',
-      label: 'Текст',
-      type: 'textarea',
-      // Payload по умолчанию режет текст на 40 000 знаков, а длинные статьи старого сайта больше.
-      maxLength: BODY_MAX_LENGTH,
-      admin: {
-        description:
-          'Пустая строка — новый абзац, «## » — раздел (в оглавлении, не больше пяти), «### » — подзаголовок, «- » — пункт списка, «> » — выноска, ' +
-          '[текст](адрес) — ссылка, ![описание](адрес картинки) — картинка отдельной строкой.',
+      {
+        name: 'kind',
+        label: 'Тип',
+        type: 'select',
+        required: true,
+        defaultValue: 'news',
+        options: [
+          { label: 'Статья', value: 'article' },
+          { label: 'Новость', value: 'news' },
+          { label: 'Акция', value: 'promotion' },
+        ],
       },
-    },
-    relationField('cover', 'Обложка', 'media'),
-    { name: 'publishedAt', label: 'Дата публикации', type: 'date' },
-    {
-      name: 'endsAt',
-      label: 'Акция действует до',
-      type: 'date',
-      admin: {
-        position: 'sidebar',
-        condition: (data) => data?.kind === 'promotion',
-        description:
-          'После этой даты акция пропадает с главной (в списке акций остаётся). Пусто — ' +
-          'показывается полгода от даты публикации.',
+      {
+        name: 'publishedAt',
+        label: 'Начало показа',
+        type: 'date',
+        defaultValue: () => new Date().toISOString(),
+        admin: {
+          position: 'sidebar',
+          date: { pickerAppearance: 'dayAndTime', displayFormat: 'dd.MM.yyyy HH:mm' },
+          description:
+            'Дата публикации на сайте. Будущая дата — публикация появится сама в это время ' +
+            '(статус при этом «Опубликовано»).',
+        },
       },
-    },
-    seoField,
-  ],
-})
+      {
+        name: 'hideAfter',
+        label: 'Окончание показа',
+        type: 'date',
+        admin: {
+          position: 'sidebar',
+          date: { pickerAppearance: 'dayAndTime', displayFormat: 'dd.MM.yyyy HH:mm' },
+          description:
+            'Необязательно. После этой даты публикация пропадёт с сайта, в админке останется.',
+        },
+      },
+      {
+        name: 'endsAt',
+        label: 'Акция действует до',
+        type: 'date',
+        admin: {
+          position: 'sidebar',
+          condition: (data) => data?.kind === 'promotion',
+          date: { displayFormat: 'dd.MM.yyyy' },
+          description:
+            'После этой даты акция пропадает с главной и уходит в «Архивные» (на сайте ' +
+            'остаётся). Пусто — действует полгода от начала показа.',
+        },
+      },
+      {
+        name: 'theme',
+        label: 'Тема',
+        type: 'relationship',
+        relationTo: 'topics',
+        index: true,
+        admin: {
+          position: 'sidebar',
+          description: 'Выберите из списка. Новая тема добавляется в «Темы новостей и статей».',
+        },
+      },
+      // Прежняя тема текстом: перенесена в «Тему», оставлена только для истории.
+      { name: 'topic', label: 'Тематика (старое поле)', type: 'text', admin: { hidden: true } },
+      {
+        name: 'excerpt',
+        label: 'Анонс для карточки',
+        type: 'textarea',
+        admin: {
+          description: 'Одно-два предложения: видны в карточке в списке новостей и на главной.',
+        },
+      },
+      {
+        name: 'cover',
+        label: 'Обложка',
+        type: 'upload',
+        relationTo: 'media',
+        admin: {
+          description:
+            'Картинка 16 : 9, например 1920 × 1080, без мелкого текста. Нет — в карточке ' +
+            'будет обложка темы.',
+        },
+      },
+      {
+        name: 'body',
+        label: 'Текст',
+        type: 'textarea',
+        // Payload по умолчанию режет текст на 40 000 знаков, а длинные статьи старого сайта больше.
+        maxLength: BODY_MAX_LENGTH,
+        admin: { components: { Field: BODY_EDITOR } },
+      },
+      seoField,
+    ],
+  }),
+  hooks: { beforeValidate: [publicationDefaults] },
+}
 
 /** Простые текстовые страницы: «О компании» и т. п. Адрес страницы задаёт код. */
 export const pages = contentCollection({
@@ -121,9 +163,7 @@ export const pages = contentCollection({
       // Payload по умолчанию режет текст на 40 000 знаков, а длинные статьи старого сайта больше.
       maxLength: BODY_MAX_LENGTH,
       admin: {
-        description:
-          'Пустая строка — новый абзац, «## » — подзаголовок, «- » — пункт списка, «> » — выноска, ' +
-          '[текст](адрес) — ссылка, ![описание](адрес картинки) — картинка отдельной строкой.',
+        components: { Field: BODY_EDITOR },
       },
     },
     seoField,
@@ -133,6 +173,8 @@ export const pages = contentCollection({
 export const media: CollectionConfig = {
   slug: 'media',
   labels: { singular: 'Изображение', plural: 'Медиа' },
+  // Служебные поля импорта в списке не нужны: в окне выбора картинки — файл и описание.
+  admin: { defaultColumns: ['filename', 'alt', 'updatedAt'] },
   upload: {
     staticDir: 'media',
     mimeTypes: UPLOAD_MIME_TYPES,

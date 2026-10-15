@@ -1,3 +1,5 @@
+import { SlugField as SlugField_be3cdb29464280a3be9c774b7bee1336 } from '../../../components/SlugField/SlugField'
+import { BodyEditor as BodyEditor_86c0a066958e23b9e3a1c929a5761694 } from '../../../components/BodyEditor/BodyEditor'
 import { OrderSnapshotView as OrderSnapshotView_9b9a473c4b75963e2326a4b6719d162f } from '../../../components/OrderSnapshotView/OrderSnapshotView'
 import { ImportNavLink as ImportNavLink_7bbeaaa5cd524cf4b63c7d575feb3ba8 } from '../../../components/ImportNavLink/ImportNavLink'
 import { ImportDashboardLink as ImportDashboardLink_91c324b4ec9b03a0b8447930f203df72 } from '../../../components/ImportDashboardLink/ImportDashboardLink'
@@ -11,6 +13,8 @@ import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/components/SlugField/SlugField#SlugField": SlugField_be3cdb29464280a3be9c774b7bee1336,
+  "/components/BodyEditor/BodyEditor#BodyEditor": BodyEditor_86c0a066958e23b9e3a1c929a5761694,
   "/components/OrderSnapshotView/OrderSnapshotView#OrderSnapshotView": OrderSnapshotView_9b9a473c4b75963e2326a4b6719d162f,
   "/components/ImportNavLink/ImportNavLink#ImportNavLink": ImportNavLink_7bbeaaa5cd524cf4b63c7d575feb3ba8,
   "/components/ImportDashboardLink/ImportDashboardLink#ImportDashboardLink": ImportDashboardLink_91c324b4ec9b03a0b8447930f203df72,

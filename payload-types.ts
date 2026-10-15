@@ -526,22 +526,32 @@ export interface Publication {
   status: 'draft' | 'published';
   slug: string;
   kind: 'article' | 'news' | 'promotion';
-  excerpt?: string | null;
+  /**
+   * Дата публикации на сайте. Будущая дата — публикация появится сама в это время (статус при этом «Опубликовано»).
+   */
+  publishedAt?: string | null;
+  /**
+   * Необязательно. После этой даты публикация пропадёт с сайта, в админке останется.
+   */
+  hideAfter?: string | null;
+  /**
+   * После этой даты акция пропадает с главной и уходит в «Архивные» (на сайте остаётся). Пусто — действует полгода от начала показа.
+   */
+  endsAt?: string | null;
   /**
    * Выберите из списка. Новая тема добавляется в «Темы новостей и статей».
    */
   theme?: (number | null) | Topic;
   topic?: string | null;
   /**
-   * Пустая строка — новый абзац, «## » — раздел (в оглавлении, не больше пяти), «### » — подзаголовок, «- » — пункт списка, «> » — выноска, [текст](адрес) — ссылка, ![описание](адрес картинки) — картинка отдельной строкой.
+   * Одно-два предложения: видны в карточке в списке новостей и на главной.
    */
-  body?: string | null;
-  cover?: (number | null) | Media;
-  publishedAt?: string | null;
+  excerpt?: string | null;
   /**
-   * После этой даты акция пропадает с главной (в списке акций остаётся). Пусто — показывается полгода от даты публикации.
+   * Картинка 16 : 9, например 1920 × 1080, без мелкого текста. Нет — в карточке будет обложка темы.
    */
-  endsAt?: string | null;
+  cover?: (number | null) | Media;
+  body?: string | null;
   /**
    * Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.
    */
@@ -586,9 +596,6 @@ export interface Page {
   status: 'draft' | 'published';
   slug: string;
   lead?: string | null;
-  /**
-   * Пустая строка — новый абзац, «## » — подзаголовок, «- » — пункт списка, «> » — выноска, [текст](адрес) — ссылка, ![описание](адрес картинки) — картинка отдельной строкой.
-   */
   body?: string | null;
   /**
    * Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.
@@ -1196,13 +1203,14 @@ export interface PublicationsSelect<T extends boolean = true> {
   status?: T;
   slug?: T;
   kind?: T;
-  excerpt?: T;
+  publishedAt?: T;
+  hideAfter?: T;
+  endsAt?: T;
   theme?: T;
   topic?: T;
-  body?: T;
+  excerpt?: T;
   cover?: T;
-  publishedAt?: T;
-  endsAt?: T;
+  body?: T;
   seo?:
     | T
     | {

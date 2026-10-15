@@ -2,6 +2,7 @@ import Image from 'next/image'
 import type { Picture } from '@/lib/pictures'
 import type { Block } from '@/lib/richText'
 import { ArticleTable } from '../ArticleTable/ArticleTable'
+import { ArticleVideo } from '../ArticleVideo/ArticleVideo'
 import { ImageGallery } from '../ImageGallery/ImageGallery'
 import { InlineText as Text } from '../InlineText/InlineText'
 import styles from './ArticleBody.module.css'
@@ -24,7 +25,7 @@ function uniqueKeys(items: string[]): [string, string][] {
 
 /**
  * Текст статьи: абзацы, заголовки разделов с якорями для оглавления, подзаголовки, списки,
- * нумерованные шаги, таблицы «подпись — значение» (реквизиты), таблицы, выноски, картинки.
+ * нумерованные шаги, таблицы «подпись — значение» (реквизиты), таблицы, выноски, картинки, видео.
  */
 export function ArticleBody({ blocks, pictures }: Props) {
   return (
@@ -91,6 +92,10 @@ export function ArticleBody({ blocks, pictures }: Props) {
               <div key={key} role="note" className={styles.note}>
                 <Text text={block.text} />
               </div>
+            )
+          case 'video':
+            return (
+              <ArticleVideo key={key} title={block.title} embed={block.embed} watch={block.watch} />
             )
           case 'gallery': {
             const found = block.images.flatMap((image) => {

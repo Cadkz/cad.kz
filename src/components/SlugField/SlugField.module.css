@@ -1,0 +1,26 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.root {
+  display: grid;
+  gap: calc(var(--base) / 4);
+  margin-bottom: var(--spacing-field);
+}
+
+.root :global(.field-type) {
+  margin-bottom: 0;
+}
+
+.hint {
+  margin: 0;
+  color: var(--theme-elevation-500);
+}
+
+.link {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--theme-success-750);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

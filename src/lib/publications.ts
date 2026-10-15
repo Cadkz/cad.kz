@@ -81,6 +81,21 @@ export function toCard(publication: Publication, topicCovers?: TopicCovers): New
   }
 }
 
+/**
+ * Публикация видна на сайте: «Опубликовано», начало показа наступило (или не задано),
+ * окончание показа не наступило (или не задано). Будущая дата начала — отложенная публикация.
+ */
+export function visibleWhere(now = new Date()): Where {
+  const at = now.toISOString()
+  return {
+    and: [
+      { status: { equals: 'published' } },
+      { or: [{ publishedAt: { exists: false } }, { publishedAt: { less_than_equal: at } }] },
+      { or: [{ hideAfter: { exists: false } }, { hideAfter: { greater_than: at } }] },
+    ],
+  }
+}
+
 /** Опубликованные материалы, новые сверху. */
 export async function getPublications({
   kinds = ['news'],
@@ -106,7 +121,7 @@ export async function getPublications({
     collection: 'publications',
     where: {
       and: [
-        { status: { equals: 'published' } },
+        visibleWhere(),
         { kind: { in: kinds } },
         ...(topic ? [{ 'theme.slug': { equals: topic } }] : []),
         ...(byVendor ? [vendorWhere(byVendor)] : []),
@@ -177,7 +192,7 @@ export async function getNewsVendors(kinds: PublicationKind[], promo?: PromoStat
         collection: 'publications',
         where: {
           and: [
-            { status: { equals: 'published' } },
+            visibleWhere(),
             { kind: { in: kinds } },
             vendorWhere(vendor),
             ...(promo ? [promoWhere(promo)] : []),
@@ -195,7 +210,7 @@ export async function getPublication(slug: string) {
   const payload = await cms()
   const { docs } = await payload.find({
     collection: 'publications',
-    where: { and: [{ status: { equals: 'published' } }, { slug: { equals: slug } }] },
+    where: { and: [visibleWhere(), { slug: { equals: slug } }] },
     limit: 1,
     depth: 1,
   })
@@ -217,11 +232,7 @@ export async function getTopics(kinds: PublicationKind[]) {
       payload.count({
         collection: 'publications',
         where: {
-          and: [
-            { status: { equals: 'published' } },
-            { kind: { in: kinds } },
-            { theme: { equals: topic.id } },
-          ],
+          and: [visibleWhere(), { kind: { in: kinds } }, { theme: { equals: topic.id } }],
         },
       }),
     ),
@@ -235,10 +246,7 @@ export async function getTopics(kinds: PublicationKind[]) {
 export async function getNeighbors(publication: Publication) {
   if (!publication.publishedAt) return { previous: null, next: null }
   const payload = await cms()
-  const base: Where[] = [
-    { status: { equals: 'published' } },
-    { kind: { equals: publication.kind } },
-  ]
+  const base: Where[] = [visibleWhere(), { kind: { equals: publication.kind } }]
   const [older, newer] = await Promise.all([
     payload.find({
       collection: 'publications',

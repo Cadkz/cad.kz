@@ -20,6 +20,9 @@ importers:
       '@payloadcms/translations':
         specifier: 3.90.2
         version: 3.90.2
+      '@payloadcms/ui':
+        specifier: 3.90.2
+        version: 3.90.2(@types/react@19.2.0)(monaco-editor@0.57.0)(next@16.3.3(@types/node@22.18.6)(babel-plugin-macros@3.1.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.77.4))(payload@3.90.2(graphql@16.11.0)(typescript@5.9.3))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
       graphql:
         specifier: 16.11.0
         version: 16.11.0

@@ -3,7 +3,8 @@
  * абзацы разделяются пустой строкой, «## » в начале — заголовок раздела (попадает в оглавление),
  * «### » — подзаголовок внутри раздела, строки «| ячейка | ячейка |» — таблица,
  * строки с «- » — список, «> » — выноска, «![описание](адрес)» отдельным абзацем — картинка
- * из «Медиа», «[текст](адрес)» внутри текста — ссылка. Без HTML: безопасно выводить как есть.
+ * из «Медиа» или видео (YouTube, Rutube, VK, Vimeo — `domain/video.mjs`), «[текст](адрес)»
+ * внутри текста — ссылка. Без HTML: безопасно выводить как есть.
  */
 
 import { headingCase, headingLevels } from '../domain/outline.mjs'
@@ -15,6 +16,7 @@ import {
   looksLikeHeading,
   splitParagraph,
 } from '../domain/typography.mjs'
+import { videoEmbed } from '../domain/video.mjs'
 
 export type Block =
   /** level 2 — раздел (в оглавлении), 3 — подзаголовок внутри раздела. */
@@ -31,6 +33,8 @@ export type Block =
   | { type: 'gallery'; images: { alt: string; src: string }[] }
   | { type: 'note'; text: string }
   | { type: 'image'; alt: string; src: string }
+  /** Ролик: embed — адрес плеера, watch — страница ролика. */
+  | { type: 'video'; title: string; embed: string; watch: string }
 
 /** Кусок строки текста: обычный текст или ссылка. */
 export type Inline = { text: string; href?: string }
@@ -106,6 +110,8 @@ export function parseBody(body: string | null | undefined, title?: string | null
       if (chunk.startsWith('### ')) return [heading(chunk.slice(4).trim(), 3)]
       if (chunk.startsWith('## ')) return [heading(chunk.slice(3).trim())]
       const image = IMAGE.exec(chunk)
+      const video = image ? videoEmbed(image[2]) : null
+      if (video) return [{ type: 'video', title: image?.[1] || 'Видео', ...video }]
       const src = image ? safeHref(image[2] ?? '') : null
       if (image && src) return [{ type: 'image', alt: image[1] ?? '', src }]
       const lines = chunk.split('\n').map((line) => line.trim())
@@ -286,7 +292,7 @@ function blockLength(block: Block) {
   if (block.type === 'list' || block.type === 'steps') return block.items.join(' ').length
   if (block.type === 'fields') return block.items.map((f) => f.label + f.value).join(' ').length
   if (block.type === 'table') return block.rows.flat().join(' ').length
-  if (block.type === 'image' || block.type === 'gallery') return 0
+  if (block.type === 'image' || block.type === 'gallery' || block.type === 'video') return 0
   return block.text.length
 }
 

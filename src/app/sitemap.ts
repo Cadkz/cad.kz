@@ -3,6 +3,7 @@ import { familyLines } from '@/lib/families'
 import { newsHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
 import { productPath } from '@/lib/productPath'
+import { visibleWhere } from '@/lib/publications'
 import { siteUrl } from '@/lib/seo'
 
 /** Карта сайта строится из базы при каждом запросе: новые товары и новости попадают сразу. */
@@ -28,7 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
     payload.find({
       collection: 'publications',
-      where: published,
+      where: visibleWhere(),
       limit: 5000,
       depth: 0,
       pagination: false,
