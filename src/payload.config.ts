@@ -53,6 +53,16 @@ export default buildConfig({
           path: '/price-list',
           meta: { title: 'Загрузить прайс' },
         },
+        prices: {
+          Component: '/components/PricesView/PricesView#PricesView',
+          path: '/prices',
+          meta: { title: 'Цены таблицей' },
+        },
+        rates: {
+          Component: '/components/RatesView/RatesView#RatesView',
+          path: '/rates',
+          meta: { title: 'Курсы валют' },
+        },
         kaddiData: {
           Component: '/components/KaddiDataView/KaddiDataView#KaddiDataView',
           path: '/kaddi-data',

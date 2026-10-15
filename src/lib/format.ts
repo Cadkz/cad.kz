@@ -42,3 +42,10 @@ export function formatKztMinor(value: string) {
   const fraction = (minor % 100n).toString().padStart(2, '0')
   return `${money.format(minor / 100n)},${fraction} ₸`
 }
+
+/** Цена в исходной валюте, как её хранит база («1145337.6»), для глаз: «1 145 337,6». */
+export function formatAmount(value: string) {
+  const [whole, fraction] = value.split('.')
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  return fraction ? `${grouped},${fraction}` : grouped
+}

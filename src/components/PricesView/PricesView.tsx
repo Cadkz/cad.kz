@@ -1,0 +1,49 @@
+import { DefaultTemplate } from '@payloadcms/next/templates'
+import type { AdminViewServerProps } from 'payload'
+import { PriceGrid } from '@/components/PriceGrid/PriceGrid'
+import { loadPriceGrid } from '@/lib/offerPrices'
+import styles from './PricesView.module.css'
+
+/** Страница «Цены таблицей» в админке: администратор и маркетолог. */
+export async function PricesView({ initPageResult, params, searchParams }: AdminViewServerProps) {
+  const { req, visibleEntities, permissions, locale } = initPageResult
+  const { payload, user, i18n } = req
+  const template = {
+    i18n,
+    locale,
+    params,
+    payload,
+    permissions,
+    searchParams,
+    user: user ?? undefined,
+    visibleEntities,
+  }
+  const allowed = user?.role === 'admin' || user?.role === 'editor'
+  const data = allowed ? await loadPriceGrid(payload) : null
+
+  return (
+    <DefaultTemplate {...template}>
+      <div className={styles.root}>
+        <h1 className={styles.title}>Цены таблицей</h1>
+        {data ? (
+          <>
+            <p className={styles.lead}>
+              Все предложения на одной странице. Найдите нужные фильтрами, впишите новую цену прямо
+              в таблицу — справа сразу видно, какой она станет на сайте. Ничего не меняется, пока вы
+              не проверите сводку и не нажмёте «Применить».
+            </p>
+            <p className={styles.note}>
+              Цена на сайте = цена в валюте × курс + НДС {data.vat} %, вверх до тенге. Курсы:{' '}
+              {data.rates.map((rate) => `${rate.currency} ${rate.value} ₸`).join(', ') ||
+                'не заданы'}{' '}
+              — <a href="/admin/rates">курсы одной страницей</a>.
+            </p>
+            <PriceGrid data={data} />
+          </>
+        ) : (
+          <p>Эта страница доступна администратору и маркетологу.</p>
+        )}
+      </div>
+    </DefaultTemplate>
+  )
+}

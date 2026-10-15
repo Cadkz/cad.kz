@@ -1,0 +1,66 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.root {
+  display: grid;
+  gap: calc(var(--base) / 2);
+}
+
+.fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: calc(var(--base) / 2) var(--base);
+}
+
+.field {
+  display: grid;
+  gap: calc(var(--base) / 4);
+  min-width: 0;
+}
+
+.field select {
+  max-width: calc(var(--base) * 14);
+}
+
+.search {
+  width: calc(var(--base) * 16);
+  max-width: 100%;
+}
+
+.toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--base) / 2) var(--base);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--base) / 3);
+  cursor: pointer;
+}
+
+.count {
+  color: var(--theme-elevation-500);
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--theme-success-750);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Поля в виде полей самой админки. */
+.field input,
+.field select {
+  min-height: calc(var(--base) * 1.6);
+  padding: 0 calc(var(--base) / 3);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-input-bg);
+  color: var(--theme-elevation-800);
+  font: inherit;
+}

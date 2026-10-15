@@ -1,0 +1,88 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.root {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  gap: var(--base);
+  padding: var(--base);
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-m);
+  background: var(--theme-elevation-0);
+}
+
+.review {
+  display: grid;
+  gap: calc(var(--base) / 2);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.title {
+  margin: 0;
+}
+
+.line {
+  margin: 0;
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: calc(var(--base) / 4) calc(var(--base) / 2);
+  border-bottom: 1px solid var(--theme-elevation-100);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  color: var(--theme-elevation-500);
+  white-space: nowrap;
+}
+
+.table td:nth-child(n + 2) {
+  white-space: nowrap;
+}
+
+.big {
+  background: var(--theme-warning-100);
+}
+
+.confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--base) / 2);
+  padding: calc(var(--base) / 2);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-warning-100);
+  cursor: pointer;
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--base) / 2) var(--base);
+}
+
+.count {
+  font-weight: bold;
+}
+
+.alert {
+  color: var(--theme-error-750);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--base) / 2);
+}

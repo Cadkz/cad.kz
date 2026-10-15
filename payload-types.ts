@@ -858,7 +858,7 @@ export interface PriceTable {
  */
 export interface ActivityLog {
   id: number;
-  action: 'rate' | 'vat' | 'price-list' | 'import' | 'crm' | 'delete' | 'users' | 'kaddi';
+  action: 'rate' | 'vat' | 'price-list' | 'import' | 'crm' | 'delete' | 'users' | 'kaddi' | 'prices';
   summary: string;
   /**
    * Пусто — сайт сам (очередь CRM, автонастройка).

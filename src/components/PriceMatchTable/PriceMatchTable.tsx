@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { priceChange } from '@/domain/priceEdit.mjs'
 import type { MatchRow, Preview } from '@/lib/usePriceList'
 import styles from './PriceMatchTable.module.css'
 
@@ -22,13 +23,10 @@ const STATUS: Record<MatchRow['status'], string> = {
 
 const attention = (row: MatchRow) => ['check', 'none'].includes(row.status)
 
-/** Сколько процентов изменилась цена в тенге: «+12%», «−3%». */
+/** Сколько процентов изменилась цена в тенге: «+12 %», «−3 %»; больше 30 % — выделяется. */
 function change(row: MatchRow) {
-  const from = Number(row.oldKzt?.replace(/\D/g, ''))
-  const to = Number(row.newKzt?.replace(/\D/g, ''))
-  if (!from || !to || from === to) return null
-  const percent = Math.round(((to - from) / from) * 100)
-  return { text: `${percent > 0 ? '+' : '−'}${Math.abs(percent)}%`, big: Math.abs(percent) >= 30 }
+  const digits = (value: string | null) => value?.replace(/\D/g, '') || null
+  return priceChange(digits(row.oldKzt), digits(row.newKzt))
 }
 
 /**

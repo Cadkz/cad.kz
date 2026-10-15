@@ -85,13 +85,13 @@ export async function loadRatesCard(payload: Payload): Promise<QueueCard> {
   return {
     key: 'rates',
     title: 'Курсы и НДС',
-    hint: 'Новый курс — новой записью с датой: старые не правятся, у каждой цены остаётся свой курс.',
+    hint: 'Новый курс — на странице «Курсы валют»: там же видно, как изменятся цены.',
     total: 0,
     tone: 'normal',
     always: true,
     items,
     empty: 'Курсы не заданы — цены в валюте не считаются.',
-    more: { label: 'Добавить курс', href: '/admin/collections/exchange-rates/create' },
+    more: { label: 'Курсы валют', href: '/admin/rates' },
   }
 }
 

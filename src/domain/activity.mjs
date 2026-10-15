@@ -11,6 +11,7 @@ export const ACTIVITY_ACTIONS = [
   { value: 'delete', label: 'Удаление' },
   { value: 'users', label: 'Пользователи' },
   { value: 'kaddi', label: 'Прайс и база Кадди' },
+  { value: 'prices', label: 'Цены таблицей' },
 ]
 
 /** Подпись вида действия для списка на главной админки. */
