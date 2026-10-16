@@ -56,7 +56,7 @@ function Waiting() {
   }, [])
   return (
     <div className={styles.thinking} role="status">
-      <Mascot pose={long ? 'laptop' : 'think'} size="avatar" />
+      <Mascot pose={long ? 'laptop' : 'think'} size="avatar" stage={false} />
       <span className={styles.dots}>
         {long ? 'Ещё немного, собираю ответ' : 'Проверю, что подойдёт для вашей задачи'}
       </span>
@@ -65,9 +65,10 @@ function Waiting() {
 }
 
 /**
- * Лента разговора. Пусто — Кадди с ноутбуком (крупно), приветствие и быстрые действия; после
- * первого вопроса Кадди мельче — место под сообщения. Пока ждём ответ — Кадди думает (лапа у
- * подбородка). Кадди слева и смотрит вправо, на сообщения.
+ * Лента разговора. Пусто — Кадди с ноутбуком (крупно), приветствие и быстрые действия. После
+ * первого вопроса Кадди у приветствия уходит: в окне один Кадди (решение владельца 16.10.2026) —
+ * пока ждём ответ, он думает (лапа у подбородка) внизу ленты, у ответа. Кадди слева и смотрит
+ * вправо, на сообщения.
  * Новые сообщения объявляются скринридеру (role="log").
  */
 export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
@@ -85,7 +86,7 @@ export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
   return (
     <div className={styles.feed} role="log" aria-live="polite" aria-relevant="additions">
       <div className={styles.intro}>
-        <Mascot pose={sulky ? 'grumpy' : 'laptop'} size={count ? 'avatar' : 'sm'} eager />
+        {!count && <Mascot pose={sulky ? 'grumpy' : 'laptop'} size="sm" eager stage={false} />}
         <div className={styles.introText}>
           <p className={styles.bot}>{sulky ? ASSISTANT_GREETING_GRUMPY : ASSISTANT_GREETING}</p>
           {!count && (

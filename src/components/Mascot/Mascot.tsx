@@ -79,6 +79,12 @@ type Props = {
   eager?: boolean
   /** Своя реакция на наведение (наклон и лишнее моргание). false — реакцию задаёт родитель. */
   hover?: boolean
+  /**
+   * Участвует в правиле «на экране один Кадди» (KaddiStage): пока виден другой Кадди, этот прячется.
+   * По умолчанию — все Кадди страниц, кроме головы-значка в кнопках. false — Кадди окна чата,
+   * угла экрана (их показ решают сами окно и кнопка) и витрины поз /kaddi.
+   */
+  stage?: boolean
   className?: string
 }
 
@@ -88,7 +94,14 @@ type Props = {
  * Появляется один раз, моргает раз в несколько секунд и при наведении; при prefers-reduced-motion — без движения.
  * Стоит справа от текста и смотрит влево, на текст и кнопки (позы search, empty-cart, not-found отражены).
  */
-export function Mascot({ pose, size = 'md', eager = false, hover = true, className }: Props) {
+export function Mascot({
+  pose,
+  size = 'md',
+  eager = false,
+  hover = true,
+  stage = pose !== 'head',
+  className,
+}: Props) {
   const { src, blink } = POSES[pose]
   const height = HEIGHT[size]
   const width = Math.round((src.width * height) / src.height)
@@ -97,7 +110,7 @@ export function Mascot({ pose, size = 'md', eager = false, hover = true, classNa
     .filter(Boolean)
     .join(' ')
   return (
-    <span className={classes} aria-hidden="true">
+    <span className={classes} aria-hidden="true" data-kaddi={stage ? 'stage' : undefined}>
       <span className={styles.pose}>
         <Image
           src={src}

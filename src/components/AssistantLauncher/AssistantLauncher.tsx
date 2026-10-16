@@ -38,6 +38,7 @@ type Props = {
  * «Спросить Кадди», не двигаясь; при нажатии пружинит. Раз за посещение сам моргает и
  * спрашивает «Помочь с выбором?». Если чат дёргают (grumpy) — сидит недовольный.
  * Пока окно чата открыто, Кадди прячется: окно стоит на его месте.
+ * Пока в экране Кадди страницы (KaddiStage — на экране один Кадди), съезжает вниз за край экрана.
  * Со строкой подбора внизу (до 960 px) поднимается над ней.
  */
 export function AssistantLauncher({ open, grumpy, onClick }: Props) {
@@ -46,11 +47,17 @@ export function AssistantLauncher({ open, grumpy, onClick }: Props) {
   useEffect(() => {
     if (open || hintAlreadyShown()) return
     let hide: ReturnType<typeof setTimeout> | undefined
-    const show = setTimeout(() => {
-      rememberHint()
-      setHint(true)
-      hide = setTimeout(() => setHint(false), HINT_SHOW_MS)
-    }, HINT_DELAY_MS)
+    let show: ReturnType<typeof setTimeout> | undefined
+    const wait = () => {
+      show = setTimeout(() => {
+        // Кадди в углу сейчас уступил место Кадди страницы (KaddiStage) — спросим позже.
+        if (document.documentElement.dataset.kaddiPage) return wait()
+        rememberHint()
+        setHint(true)
+        hide = setTimeout(() => setHint(false), HINT_SHOW_MS)
+      }, HINT_DELAY_MS)
+    }
+    wait()
     return () => {
       clearTimeout(show)
       clearTimeout(hide)
@@ -76,8 +83,14 @@ export function AssistantLauncher({ open, grumpy, onClick }: Props) {
         {grumpy ? 'Я никуда не убегаю' : hint ? 'Помочь с выбором?' : 'Спросить Кадди'}
       </span>
       <span className={styles.cat}>
-        <Mascot pose="blueprint" size="launcher" eager className={styles.rest} />
-        <Mascot pose="grumpy" size="launcher" hover={false} className={styles.grumpy} />
+        <Mascot pose="blueprint" size="launcher" eager stage={false} className={styles.rest} />
+        <Mascot
+          pose="grumpy"
+          size="launcher"
+          hover={false}
+          stage={false}
+          className={styles.grumpy}
+        />
       </span>
     </button>
   )

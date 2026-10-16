@@ -6,6 +6,24 @@
   animation: appear var(--duration-base) var(--ease) backwards;
 }
 
+/* На экране один Кадди (KaddiStage, решение владельца 16.10.2026): пока виден другой Кадди —
+   в углу, в окне чата или выше на странице, — этот уходит вниз и тает. Место под ним остаётся,
+   страница не прыгает. Возвращается чуть позже, чем уходит другой: сначала уходит тот, потом
+   появляется этот — кажется, что Кадди перебежал. */
+.mascot[data-kaddi-shown="false"] {
+  opacity: 0;
+  transform: translateY(var(--space-2));
+  transition:
+    opacity var(--duration-exit) var(--ease),
+    transform var(--duration-exit) var(--ease);
+}
+
+.mascot[data-kaddi-shown="true"] {
+  transition:
+    opacity var(--duration-base) var(--ease) var(--duration-base),
+    transform var(--duration-base) var(--ease) var(--duration-base);
+}
+
 /* Слой фигуры и глаз. При наведении фигура стоит на месте (решение владельца 13.10:
    только моргает, без сдвигов и наклонов). */
 .pose {

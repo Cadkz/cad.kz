@@ -50,6 +50,26 @@
     visibility 0s linear var(--duration-exit);
 }
 
+/* На экране один Кадди (KaddiStage, решение владельца 16.10.2026): пока в экране Кадди страницы
+   (баннер, пустая корзина, 404…), Кадди в углу съезжает вниз за край экрана, а когда тот уходит
+   из экрана — выезжает обратно. До первого расчёта (data-kaddi-stage) не показывается совсем,
+   чтобы не выскочить и тут же не убежать. */
+:global(html:not([data-kaddi-stage])) .launcher {
+  visibility: hidden;
+  opacity: 0;
+  transition: none;
+}
+
+:global(html[data-kaddi-page]) .launcher:not([data-open="true"]) {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(calc(100% + var(--space-6)));
+  transition:
+    opacity var(--duration-base) var(--ease),
+    transform var(--duration-base) var(--ease),
+    visibility 0s linear var(--duration-base);
+}
+
 /* Фигура: место занято Кадди с чертежами; «недовольный» кладётся поверх.
    Курсор всегда попадает на основную позу (верхний слой его пропускает) — от наведения
    Кадди моргает (Mascot с hover). */

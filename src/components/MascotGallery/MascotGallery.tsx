@@ -50,7 +50,7 @@ export function MascotGallery() {
       {ITEMS.map((item) => (
         <li key={item.pose} className={styles.item}>
           <div className={styles.stage}>
-            <Mascot pose={item.pose} size={item.size} />
+            <Mascot pose={item.pose} size={item.size} stage={false} />
           </div>
           <p className={styles.title}>{item.title}</p>
           <p className={styles.where}>{item.where}</p>

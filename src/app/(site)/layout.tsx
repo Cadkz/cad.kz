@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { preload } from 'react-dom'
 import { CartProvider } from '@/components/CartProvider/CartProvider'
+import { KaddiStage } from '@/components/KaddiStage/KaddiStage'
 import { RevealObserver } from '@/components/RevealObserver/RevealObserver'
 import { SiteFooter } from '@/components/SiteFooter/SiteFooter'
 import { SiteHeader } from '@/components/SiteHeader/SiteHeader'
@@ -48,6 +49,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <SiteFooter />
         </CartProvider>
         <RevealObserver />
+        <KaddiStage />
       </body>
     </html>
   )
