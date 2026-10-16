@@ -4,6 +4,7 @@ import {
   type AssistantVariant,
   checkHandoff,
   type HandoffDraft,
+  sitePageCard,
 } from '@/domain/assistant.mjs'
 import { normalizePhone } from '@/domain/order.mjs'
 import {
@@ -38,6 +39,8 @@ export type ToolRunner = {
   variants: AssistantVariant[]
   /** Модель подготовила передачу менеджеру: данные для кнопки подтверждения под ответом. */
   handoff: () => HandoffDraft | null
+  /** Разделы сайта (корзина, реквизиты…), которые модель попросила показать кнопкой. */
+  pages: AssistantCard[]
 }
 
 function field(input: unknown, name: string) {
@@ -192,6 +195,7 @@ export function totalByCode(table: LoadedPriceTable, input: unknown) {
 export function createTools(payload: Payload): ToolRunner {
   const found: AssistantCard[] = []
   const variants: AssistantVariant[] = []
+  const pages: AssistantCard[] = []
   let table: Promise<LoadedPriceTable | null> | null = null
   let handoff: HandoffDraft | null = null
   const priceTable = () => {
@@ -248,16 +252,25 @@ export function createTools(payload: Payload): ToolRunner {
     }
   }
 
+  async function showSitePage(input: unknown) {
+    const card = sitePageCard(field(input, 'page'))
+    if (!card) return { error: 'Нет такого раздела' }
+    if (!pages.some((p) => p.href === card.href)) pages.push(card)
+    return { status: 'shown', title: card.title, note: 'Под ответом кнопка на этот раздел.' }
+  }
+
   const tools: Record<string, (input: unknown) => Promise<unknown>> = {
     searchProducts,
     searchPriceList: (input) => withTable((loaded) => searchPrice(loaded, input)),
     getPrice: (input) => withTable((loaded) => priceByCode(loaded, input)),
     priceTotal: (input) => withTable((loaded) => totalByCode(loaded, input)),
     handoffToManager,
+    showSitePage,
   }
   return {
     found,
     variants,
+    pages,
     handoff: () => handoff,
     run(name, input) {
       const tool = tools[name]

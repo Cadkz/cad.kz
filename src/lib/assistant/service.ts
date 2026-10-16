@@ -64,6 +64,12 @@ export function handoffPrefill(draft: HandoffDraft): HandoffPrefill {
   }
 }
 
+/** Разделы сайта после карточек товаров, без повторов; всего под ответом не больше шести. */
+function withPages(cards: AssistantCard[], pages: AssistantCard[]) {
+  const extra = pages.filter((page) => !cards.some((card) => card.href === page.href))
+  return [...cards, ...extra.slice(0, 2)].slice(0, 6)
+}
+
 async function modelAnswer(
   payload: Payload,
   messages: StoredMessage[],
@@ -99,7 +105,8 @@ async function modelAnswer(
   const reply = cleanReply(text, promptLinks(system[0]))
   return {
     reply,
-    cards: mentionedCards(reply, tools.found, { variants: tools.variants }),
+    // Товары и варианты, названные в ответе, затем разделы сайта, которые модель попросила показать.
+    cards: withPages(mentionedCards(reply, tools.found, { variants: tools.variants }), tools.pages),
     handoff: tools.handoff(),
   }
 }

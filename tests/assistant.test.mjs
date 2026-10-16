@@ -16,6 +16,8 @@ import {
   QUICK_ACTIONS,
   quickAction,
   RENEW_CARD,
+  SITE_PAGES,
+  sitePageCard,
   systemPrompt,
   validateChat,
   wantsRenewal,
@@ -224,8 +226,11 @@ test('правила владельца и характер Кадди: роль
   assert.match(rules, /Ты — Кадди, виртуальный ассистент компании CAD\.kz/)
   assert.match(rules, /без рода/)
   assert.doesNotMatch(rules, /Зафиксировал|Я передал|гендер мужской/)
-  assert.match(rules, /в пределах 10 слов, либо 2–3 коротких предложения/)
-  assert.match(rules, /имя → телефон → почта → компания/)
+  assert.match(rules, /2–5 коротких предложений/)
+  assert.match(rules, /довести его до следующего шага покупки/)
+  assert.match(rules, /Имя и телефон спрашивай только перед передачей менеджеру/)
+  assert.match(rules, /задай ровно один вопрос/)
+  assert.doesNotMatch(rules, /имя → телефон → почта → компания|в течение часа, чтобы/)
   assert.match(rules, /ул\. А\. Пушкина, дом 6\/1, ВП-1/)
   // Характер Кадди поверх.
   assert.match(rules, /Без «мяу»/)
@@ -246,8 +251,32 @@ test('правила владельца и характер Кадди: роль
   assert.match(state, /Передачу менеджеру не готовили/)
   assert.deepEqual(
     ASSISTANT_TOOLS.map((t) => t.name),
-    ['searchProducts', 'searchPriceList', 'getPrice', 'priceTotal', 'handoffToManager'],
+    [
+      'searchProducts',
+      'searchPriceList',
+      'getPrice',
+      'priceTotal',
+      'handoffToManager',
+      'showSitePage',
+    ],
   )
+})
+
+test('разделы сайта кнопкой: известный раздел — карточка с подписью, неизвестный — нет', () => {
+  assert.deepEqual(sitePageCard('requisites'), {
+    id: 0,
+    title: 'Реквизиты',
+    href: '/about/requisites',
+    vendor: null,
+    price: null,
+    note: SITE_PAGES.requisites.note,
+  })
+  assert.equal(sitePageCard('cart')?.href, '/cart')
+  assert.equal(sitePageCard('toString'), null)
+  assert.equal(sitePageCard('https://example.com'), null)
+  assert.equal(sitePageCard(5), null)
+  const tool = ASSISTANT_TOOLS.find((t) => t.name === 'showSitePage')
+  assert.deepEqual(tool?.input_schema.properties.page.enum, Object.keys(SITE_PAGES))
 })
 
 test('состояние разговора: нет прайса, обед, передача подготовлена, отправлена', () => {
