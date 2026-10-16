@@ -20,3 +20,13 @@ export function openAssistant(message?: string): boolean {
 export function assistantOn() {
   return document.documentElement.dataset.assistant === 'on'
 }
+
+/** Событие, которым чат сообщает, что окно открылось или закрылось (карточка на главной сворачивается). */
+export const ASSISTANT_STATE_EVENT = 'kaddi:state'
+
+export type AssistantStateDetail = { open: boolean }
+
+/** Окно чата сейчас открыто. */
+export function assistantOpen() {
+  return document.documentElement.dataset.assistantOpen === 'true'
+}

@@ -21,7 +21,7 @@ import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
 import { setupGeo5Catalog } from '../src/lib/geoSetup.ts'
-import { setupHomeHero, setupHomeTrust } from '../src/lib/homeSetup.ts'
+import { setupHomeHero, setupHomeHeroV2, setupHomeTrust } from '../src/lib/homeSetup.ts'
 import { setupNewsCovers } from '../src/lib/newsCoversSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
@@ -136,6 +136,8 @@ try {
   console.log(trust ?? 'Блок «Официальный партнёр» на главной уже настроен.')
   const hero = await setupHomeHero(payload)
   console.log(hero ?? 'Первый экран «Подбор по задаче» уже настроен.')
+  const heroV2 = await setupHomeHeroV2(payload)
+  console.log(heroV2 ?? 'Тексты первого экрана (вторая редакция) уже обновлены.')
   const crm = await setupCrmCatalog(payload)
   if (!crm) console.log('Каталог по CRM уже настроен.')
   else for (const line of crm) console.log(`Каталог по CRM — ${line}`)

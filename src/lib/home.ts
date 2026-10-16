@@ -35,8 +35,7 @@ export async function getHome() {
     /** Первый экран «Подбор по задаче»: тексты и кнопки задач для Кадди. */
     hero: {
       lead: page.hero?.lead ?? null,
-      button: page.hero?.button || 'Подобрать по задаче',
-      cardTitle: page.hero?.cardTitle || 'С чего начнём?',
+      cardTitle: page.hero?.cardTitle || 'Кадди поможет выбрать программу',
       placeholder: page.hero?.placeholder || 'Опишите задачу',
       tasks: (page.hero?.tasks ?? []).map((task) => ({
         label: task.label,

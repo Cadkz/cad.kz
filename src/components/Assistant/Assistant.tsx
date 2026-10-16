@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { OPEN_ASSISTANT_EVENT, type OpenAssistantDetail } from '@/lib/openAssistant'
+import {
+  ASSISTANT_STATE_EVENT,
+  type AssistantStateDetail,
+  OPEN_ASSISTANT_EVENT,
+  type OpenAssistantDetail,
+} from '@/lib/openAssistant'
 import { useAssistant } from '@/lib/useAssistant'
 import { AssistantLauncher } from '../AssistantLauncher/AssistantLauncher'
 import { AssistantPanel } from '../AssistantPanel/AssistantPanel'
@@ -79,6 +84,17 @@ export function Assistant({ demo, whatsappHref }: Props) {
       clearTimeout(calm.current)
     }
   }, [show])
+
+  // Открыто ли окно — для частей страницы, которые не должны показывать второе поле ввода
+  // (карточка «Подбор по задаче» на главной сворачивается, пока идёт разговор).
+  useEffect(() => {
+    const root = document.documentElement
+    if (open) root.dataset.assistantOpen = 'true'
+    else delete root.dataset.assistantOpen
+    window.dispatchEvent(
+      new CustomEvent<AssistantStateDetail>(ASSISTANT_STATE_EVENT, { detail: { open } }),
+    )
+  }, [open])
 
   const toggle = (from: HTMLElement) => (open ? close() : show(from))
 

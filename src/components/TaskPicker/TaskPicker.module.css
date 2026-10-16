@@ -23,6 +23,34 @@
   line-height: var(--leading-tight);
 }
 
+/* Поле и задачи; пока открыто окно чата, они скрыты, а на их месте — строка о разговоре. */
+.body {
+  position: relative;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.controls[data-hidden] {
+  visibility: hidden;
+}
+
+.status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-blue-soft);
+  color: var(--color-navy);
+  font-size: var(--text-body);
+  line-height: var(--leading-snug);
+}
+
 /* Поле и кнопка отправки в одной рамке — как строка ввода в чате Кадди. */
 .form {
   display: flex;

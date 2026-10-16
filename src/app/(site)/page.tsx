@@ -47,7 +47,7 @@ export default async function Home({ searchParams }: Props) {
   return (
     <main>
       <CatalogHashRedirect />
-      <Hero home={home} directions={directions} />
+      <Hero home={home} />
       {/* Блок «Официальный партнёр» скрыт (замечание владельца 12.10.2026: меньше шума), данные
           остались в админке — вернуть: <TrustBand trust={home.trust} />. */}
       <Section

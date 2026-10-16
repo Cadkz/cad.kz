@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import { HOME_HERO } from '../domain/homeHero'
+import { HOME_HERO, HOME_HERO_V1 } from '../domain/homeHero'
 import { TRUST_DATA, TRUST_SEED, TRUST_SEED_V1_VENDORS } from '../domain/homeTrust.mjs'
 import { mediaFor, oldSite } from './legacyContentRun'
 
@@ -95,4 +95,37 @@ export async function setupHomeHero(payload: Payload): Promise<string | null> {
   await payload.updateGlobal({ slug: 'home-page', data: HOME_HERO, ...opts })
   await mark(payload, HOME_HERO_KEY, { hero: 'filled', previousTitle: home.title })
   return `Первый экран «Подбор по задаче»: ${HOME_HERO.hero.tasks.length} задач (было: «${home.title}»)`
+}
+
+/** Ключ записи в журнале «Запуски импорта»: вторая редакция текстов первого экрана, один раз. */
+export const HOME_HERO_V2_KEY = 'home-setup:hero-tasks-v2'
+
+/**
+ * Тексты первого экрана по замечаниям ChatGPT 16.10.2026: плашка, подзаголовок, заголовок
+ * карточки и подсказка в поле. Меняет только поля, в которых ещё первая редакция (HOME_HERO_V1),
+ * — правленное в админке не трогает. Кнопки задач не меняются.
+ */
+export async function setupHomeHeroV2(payload: Payload): Promise<string | null> {
+  if (await done(payload, HOME_HERO_V2_KEY)) return null
+  const home = await payload.findGlobal({ slug: 'home-page', ...opts })
+  const changed: string[] = []
+  const eyebrow = home.eyebrow === HOME_HERO_V1.eyebrow ? HOME_HERO.eyebrow : home.eyebrow
+  if (eyebrow !== home.eyebrow) changed.push('плашка')
+  const hero = { ...home.hero }
+  const names = {
+    lead: 'подзаголовок',
+    cardTitle: 'заголовок карточки',
+    placeholder: 'подсказка в поле',
+  }
+  for (const key of ['lead', 'cardTitle', 'placeholder'] as const) {
+    if (hero[key] !== HOME_HERO_V1[key]) continue
+    hero[key] = HOME_HERO.hero[key]
+    changed.push(names[key])
+  }
+  if (changed.length)
+    await payload.updateGlobal({ slug: 'home-page', data: { eyebrow, hero }, ...opts })
+  await mark(payload, HOME_HERO_V2_KEY, { changed })
+  return changed.length
+    ? `Первый экран, вторая редакция текстов: ${changed.join(', ')}`
+    : 'Тексты первого экрана правили в админке, не трогаем.'
 }
