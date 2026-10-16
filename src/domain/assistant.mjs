@@ -389,10 +389,16 @@ export function mentionedCards(reply, found, { variants = [], limit = 4 } = {}) 
     taken.some((t) => t.id !== parent && t.from <= at && at <= t.to)
   const picked = variantHits(reply, variants, named, found, blocked)
   const replaced = new Set(picked.map((h) => h.parent))
-  return [
+  const all = [
     ...hits.filter((h) => !replaced.has(h.card.id)),
     ...picked.map(({ card, at }) => ({ card, at })),
   ]
+  // После названной коллекции Autodesk Revit и AutoCAD — это её состав, а не отдельный совет:
+  // карточка одна, коллекция (решение владельца 16.10.2026).
+  const isCollection = (/** @type {AssistantCard} */ card) => /\bcollection\b/i.test(card.title)
+  const collectionAt = Math.min(...all.filter((h) => isCollection(h.card)).map((h) => h.at))
+  return all
+    .filter((h) => isCollection(h.card) || h.at < collectionAt)
     .sort((a, b) => a.at - b.at)
     .slice(0, limit)
     .map((h) => h.card)

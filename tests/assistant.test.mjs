@@ -627,6 +627,20 @@ test('отчёт 16.10 (2): название внутри другого наз�
     mentionedCards('Подойдёт AEC Collection.', aec).map((c) => c.title),
     ['Architecture Engineering & Construction Collection'],
   )
+  assert.deepEqual(
+    mentionedCards('Подойдёт AEC Collection: в ней полные Revit и AutoCAD.', [
+      ...aec,
+      ...found,
+    ]).map((c) => c.title),
+    ['Architecture Engineering & Construction Collection'],
+  )
+  assert.deepEqual(
+    mentionedCards('Revit — 1 796 287 ₸. С AutoCAD выгоднее AEC Collection.', [
+      ...aec,
+      ...found,
+    ]).map((c) => c.title),
+    ['Revit', 'AutoCAD', 'Architecture Engineering & Construction Collection'],
+  )
   assert.equal(
     cleanReply('Стоимость уточнит менеджер.\n\n[ЛИРА - FEM (ЛИРА САПР) Грунт]'),
     'Стоимость уточнит менеджер.',
