@@ -11,13 +11,14 @@ type Props = { slides: Slide[]; news: Publication[]; covers: TopicCovers }
 
 /**
  * «Новости и акции» на главной (замечание владельца 13.10.2026, вечер): слева баннер-слайдер
- * действующих акций и предложений, справа две последние новости. Отдельного блока акций
+ * действующих акций и предложений не выше 16:9 (замечание 16.10.2026: был «гигантский квадрат»),
+ * справа три последние новости строками. Отдельного блока акций
  * на главной больше нет (все акции — в слайдере и на /news?kind=promotion). Действующих акций
  * нет — слева крупно самая свежая новость.
  */
 export function HomeNews({ slides, news, covers }: Props) {
   const feature = slides.length ? null : (news[0] ?? null)
-  const side = (feature ? news.slice(1) : news).slice(0, 2)
+  const side = (feature ? news.slice(1) : news).slice(0, 3)
   if (!slides.length && !feature) return null
   return (
     <Section id="news" title="Новости и акции" action={{ href: '/news', label: 'Все новости' }}>
@@ -31,7 +32,11 @@ export function HomeNews({ slides, news, covers }: Props) {
         </Reveal>
         {side.map((item, i) => (
           <Reveal as="li" key={item.id} step={i + 1} className={styles.side}>
-            <NewsCard news={toCard(item, covers)} tone={i ? 'deep' : 'graphite'} />
+            <NewsCard
+              news={toCard(item, covers)}
+              tone={i % 2 ? 'deep' : 'graphite'}
+              size="compact"
+            />
           </Reveal>
         ))}
       </ul>

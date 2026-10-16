@@ -101,3 +101,32 @@
     flex: 0 0 auto;
   }
 }
+
+/* Строка (главная, «Новости и акции» рядом со слайдером): квадратная обложка слева. */
+.compact {
+  flex-direction: row;
+}
+
+.compact .thumb {
+  width: calc(var(--control-height) * 2);
+  aspect-ratio: 1;
+}
+
+.compact .body {
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.compact .title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--text-body);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+@media (min-width: 1200px) {
+  .compact .thumb {
+    width: calc(var(--control-height) * 3);
+  }
+}

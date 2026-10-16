@@ -1,9 +1,10 @@
-/* 8 + 4 колонки: слайдер акций (или крупная новость) слева на две строки, справа две новости
-   друг под другом. */
+/* Слайдер акций (или крупная новость) — не выше 16:9 (замечание владельца 16.10.2026); от 960 px
+   8 + 4 колонки: справа три новости строками, сверху вниз. */
 .grid {
   display: grid;
   grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-  gap: var(--grid-gap);
+  gap: var(--space-4) var(--grid-gap);
+  align-items: start;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -15,14 +16,14 @@
 }
 
 @media (min-width: 640px) {
-  .side {
-    grid-column: span 6;
+  .main {
+    aspect-ratio: 16 / 9;
   }
 }
 
 @media (min-width: 960px) {
   .main {
-    grid-row: span 2;
+    grid-row: span 3;
     grid-column: span 8;
   }
 
