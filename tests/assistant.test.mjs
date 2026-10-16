@@ -593,3 +593,29 @@ test('отчёт 16.10: карточки по короткому названи�
     ['GEO5 Устойчивость откоса'],
   )
 })
+
+test('отчёт 16.10 (2): название внутри другого названия и строка-метка в скобках', () => {
+  const card = (id, title) => ({ id, title, href: `/p/${id}`, vendor: null, price: null })
+  const found = [card(1, 'Revit'), card(2, 'AutoCAD Revit LT Suite'), card(3, 'AutoCAD')]
+  const variants = [
+    {
+      id: -4,
+      parent: 3,
+      label: 'LT',
+      title: 'AutoCAD LT',
+      href: '/v/4',
+      vendor: null,
+      price: null,
+    },
+  ]
+  assert.deepEqual(
+    mentionedCards('Revit — 5 388 860 ₸. Дешевле AutoCAD Revit LT Suite.', found, {
+      variants,
+    }).map((c) => c.title),
+    ['Revit', 'AutoCAD Revit LT Suite'],
+  )
+  assert.equal(
+    cleanReply('Стоимость уточнит менеджер.\n\n[ЛИРА - FEM (ЛИРА САПР) Грунт]'),
+    'Стоимость уточнит менеджер.',
+  )
+})

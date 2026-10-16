@@ -243,6 +243,7 @@ export function cleanReply(text, allowed = []) {
       // Служебная разметка, которую модель иногда придумывает («[[PRODUCT:AutoCAD|LT]]»):
       // карточки сайт строит сам по названиям в тексте (отчёт «Проверки Кадди» 16.10.2026).
       .replace(/[ \t]*\[\[[^\]\n]*\]\][ \t]*/g, ' ')
+      .replace(/^[ \t]*\[[^\]\n]{2,120}\][ \t]*$/gm, '')
       .replace(/[ \t]+$/gm, ''),
     allowed,
   )
@@ -349,16 +350,44 @@ function dropLink(sentence, ok) {
  */
 export function mentionedCards(reply, found, { variants = [], limit = 4 } = {}) {
   const { text, pos } = squashMap(reply)
+  // Где в тексте названо каждое название товара (в сжатом тексте, от и до).
+  const spans = found.map((card) => {
+    const keys = [...titleKeys(card.title), ...modelCodes(card.title)]
+    /** @type {{ from: number, to: number }[]} */
+    const list = []
+    for (const key of keys)
+      for (let i = text.indexOf(key); i >= 0; i = text.indexOf(key, i + 1))
+        list.push({ from: i, to: i + key.length })
+    return { card, list }
+  })
+  // Название внутри более длинного названия другого товара не считается: «AutoCAD» в
+  // «AutoCAD Revit LT Suite» — это Suite, а не AutoCAD (отчёт 16.10.2026).
+  const inside = (/** @type {{ from: number, to: number }} */ span, /** @type {number} */ id) =>
+    spans.some(
+      (other) =>
+        other.card.id !== id &&
+        other.list.some(
+          (o) => o.from <= span.from && o.to >= span.to && o.to - o.from > span.to - span.from,
+        ),
+    )
   /** @type {{ card: AssistantCard, at: number }[]} */
   const hits = []
-  for (const card of found) {
+  /** @type {{ id: number, from: number, to: number }[]} */
+  const taken = []
+  for (const { card, list } of spans) {
     if (hits.some((h) => h.card.id === card.id)) continue
-    const keys = [...titleKeys(card.title), ...modelCodes(card.title)]
-    const at = Math.min(...keys.map((k) => text.indexOf(k)).filter((i) => i >= 0))
-    if (Number.isFinite(at)) hits.push({ card, at: pos[at] ?? 0 })
+    const own = list.filter((span) => !inside(span, card.id)).sort((a, b) => a.from - b.from)
+    const first = own[0]
+    if (!first) continue
+    hits.push({ card, at: pos[first.from] ?? 0 })
+    for (const span of own)
+      taken.push({ id: card.id, from: pos[span.from] ?? 0, to: pos[span.to - 1] ?? 0 })
   }
   const named = new Set(hits.map((h) => h.card.id))
-  const picked = variantHits(reply, variants, named, found)
+  // Слово варианта внутри названия другого товара («LT» в «AutoCAD Revit LT Suite») — не вариант.
+  const blocked = (/** @type {number} */ at, /** @type {number} */ parent) =>
+    taken.some((t) => t.id !== parent && t.from <= at && at <= t.to)
+  const picked = variantHits(reply, variants, named, found, blocked)
   const replaced = new Set(picked.map((h) => h.parent))
   return [
     ...hits.filter((h) => !replaced.has(h.card.id)),
@@ -397,8 +426,9 @@ function titleKeys(/** @type {string} */ title) {
  * @param {AssistantVariant[]} variants
  * @param {Set<number>} named  Товары, названные в ответе.
  * @param {AssistantCard[]} found  Товары из поиска: по ним узнаётся основной вариант.
+ * @param {(at: number, parent: number) => boolean} blocked  Место занято названием другого товара.
  */
-function variantHits(reply, variants, named, found) {
+function variantHits(reply, variants, named, found, blocked) {
   const words = wordsOf(reply)
   /** @type {Set<number>} */
   const used = new Set()
@@ -417,7 +447,7 @@ function variantHits(reply, variants, named, found) {
     const start = findRun(words, keys, used)
     if (start < 0) continue
     const first = words[start]
-    if (!first) continue
+    if (!first || blocked(first.at, variant.parent)) continue
     if (keys.length === 1 && !(named.has(variant.parent) && /^[A-ZА-ЯЁ0-9]/.test(first.raw)))
       continue
     for (let i = start; i < start + keys.length; i += 1) used.add(i)
@@ -763,7 +793,7 @@ const RULES = `Ты — Кадди, виртуальный ассистент к
 — Отвечай на последний вопрос клиента. Цену и сведения, которые уже назвал раньше, не повторяй, если клиент о них снова не спрашивает.
 — Не подставляй параметры, которые влияют на выбор или цену, по предположению.
 — Контекст прошлых сделок, проектов и обсуждений используй только тогда, когда клиент прямо ссылается на него.
-— Перед передачей менеджеру спрашивай по одному: сначала имя («Как к вам обращаться?»), в следующем сообщении — телефон. Имя и телефон в одном сообщении не спрашивай. Почту и компанию — только если клиент сам дал или они нужны для повода (КП на организацию, техподдержка); отказался — не настаивай.
+— Перед передачей менеджеру спрашивай по одному: сначала имя («Как к вам обращаться?»), в следующем сообщении — телефон. Имя и телефон в одном сообщении не спрашивай. Пример: «Передам менеджеру запрос с вашей задачей. Как к вам обращаться?» — и только в следующем ответе: «Подскажите номер телефона для связи». Почту и компанию — только если клиент сам дал или они нужны для повода (КП на организацию, техподдержка); отказался — не настаивай.
 — В чате сайта не спрашивай ИИН, адрес проживания, пароли и данные карты, даже если о них есть в базе знаний: их для счёта и лицензии запросит менеджер.
 
 2. Когда нужен менеджер
@@ -781,8 +811,8 @@ const RULES = `Ты — Кадди, виртуальный ассистент к
 2а. Предложение связи — один раз за разговор (решение владельца 16.10.2026: лиду нужен телефон, иначе менеджеру некому написать)
 Предложи деликатно, одной последней фразой ответа, в одном из двух случаев:
 — ты назвал цену или посчитал сумму: «Если удобно, менеджер пришлёт этот расчёт вам в WhatsApp, чтобы не потерялся. Как к вам обращаться?»;
-— разговор длинный (клиент написал 4 сообщения и больше), интерес к конкретному продукту понятен, а к корзине или оформлению клиент не идёт: «Если удобнее, менеджер подготовит предложение и пришлёт его вам. Как к вам обращаться?»
-Не предлагай: если в разговоре уже предлагал связь, спрашивал имя или телефон или готовил передачу; если клиент сам идёт в корзину или оформляет заказ; если клиент отказался или промолчал — больше не возвращайся к этому. Ответ по существу всегда важнее предложения: сначала цена или совет, потом одна фраза о связи (она и будет единственным вопросом ответа).
+— разговор длинный (клиент написал 4 сообщения и больше) или клиент откладывает решение («подумаю», «посоветуюсь», «пока не готов»), интерес к конкретному продукту понятен, а к корзине или оформлению клиент не идёт: «Если удобнее, менеджер подготовит предложение и пришлёт его вам. Как к вам обращаться?»
+Не предлагай: если в разговоре уже предлагал связь, спрашивал имя или телефон или готовил передачу; если клиент сам идёт в корзину или оформляет заказ; если клиент отказался или промолчал — больше не возвращайся к этому. Фраза «менеджер пришлёт счёт» после оформления — не предложение связи: после цены отдельной последней фразой всё равно предложи прислать расчёт. Ответ по существу всегда важнее предложения: сначала цена или совет, потом одна фраза о связи (она и будет единственным вопросом ответа).
 Клиент согласился — дальше как при передаче: имя, затем телефон, затем handoffToManager с reason «Прислать расчёт в WhatsApp» или «Подготовить предложение», продуктом с вариантом, количеством и суммой, если она была. Сам ничего не отправляешь — присылает менеджер.
 
 Как передать:
