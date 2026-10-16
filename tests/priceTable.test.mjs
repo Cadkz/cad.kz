@@ -272,6 +272,37 @@ test('поиск: разговорные названия, все слова, ф
   assert.equal(limited.rows.length, 2)
 })
 
+test('фильтр редакции прощает опечатку прайса GEO5 «Persoanal»', () => {
+  const row = (code, edition) => ({
+    code,
+    article: code,
+    family: 'GEO5',
+    fullName: `Geo 5, модуль Устойчивость откоса подписка на 1 год ${edition}`,
+    shortName: 'GEO5 Устойчивость откоса',
+    purchase: 'Новая лицензия',
+    term: 12,
+    edition,
+    license: '',
+    seats: '',
+    tiyn: 100,
+    status: 'price',
+    delivery: '',
+    vat: '',
+    updated: '',
+  })
+  const index = indexPriceRows(
+    /** @type {any[]} */ ([
+      row('g-1', 'Business'),
+      row('g-2', 'Persoanal'),
+      row('g-3', 'Enterprise'),
+    ]),
+  )
+  const codes = searchPriceIndex(index, { query: 'GEO5 откоса', edition: 'Personal' }).rows.map(
+    (r) => r.code,
+  )
+  assert.deepEqual(codes, ['g-2'])
+})
+
 test('цену называет Кадди только для новой лицензии ПО с числовой ценой', () => {
   const table = parsePriceTable(SHEETS)
   assert.ok(table)

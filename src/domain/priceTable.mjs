@@ -46,6 +46,11 @@ function norm(/** @type {string} */ value) {
   return value.toLowerCase().replaceAll('ё', 'е').replace(/\s+/g, ' ').trim()
 }
 
+/** Редакция для фильтра: опечатка прайса Fine/GEO5 «Persoanal» = «Personal» (отчёт 16.10.2026). */
+function editionKey(/** @type {string} */ value) {
+  return norm(value).replaceAll('persoanal', 'personal')
+}
+
 /**
  * Цена из ячейки в тиынах: «12,500.00», «12 500,00», «1145337.6», «12500». Пусто, ноль и
  * непонятное — null: такая ячейка не означает бесплатную поставку.
@@ -430,7 +435,7 @@ export function searchPriceIndex(index, filters, limit = 12) {
   const byId = exact.length >= 4 ? index.filter((item) => item.ids.has(exact)) : []
   const terms = queryWords(query)
   const purchase = filters.purchase ? norm(filters.purchase) : ''
-  const edition = filters.edition ? norm(filters.edition) : ''
+  const edition = filters.edition ? editionKey(filters.edition) : ''
   const license = filters.license ? norm(filters.license) : ''
   /** @type {{ row: PriceRow, score: number }[]} */
   const found = []
@@ -438,7 +443,7 @@ export function searchPriceIndex(index, filters, limit = 12) {
     const { row } = item
     if (purchase && !norm(row.purchase).includes(purchase.slice(0, 6))) continue
     if (filters.term !== undefined && row.term !== filters.term) continue
-    if (edition && !norm(row.edition).includes(edition)) continue
+    if (edition && !editionKey(row.edition || row.fullName).includes(edition)) continue
     if (license && !norm(row.license).includes(license)) continue
     let score = 0
     let all = true
