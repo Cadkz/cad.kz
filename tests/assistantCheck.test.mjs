@@ -160,3 +160,22 @@ test('обращение к инструменту словами', () => {
     'getOffers(3) → ошибка: Нужен ID',
   )
 })
+
+test('отчёт 16.10: часы работы — не срок, имя с телефоном сразу — флаг, кнопка раздела в журнале', () => {
+  const texts = (reply) =>
+    checkReply(reply, [])
+      .map((f) => f.text)
+      .join(' | ')
+  assert.doesNotMatch(texts('Специалисты на связи с 09:00 до 18:00 в рабочие дни.'), /срок/)
+  assert.match(texts('Поставим за 5 рабочих дней.'), /срок поставки без прайса/)
+  assert.match(texts('Передам менеджеру: подскажите имя и телефон.'), /имя и телефон сразу/)
+  assert.doesNotMatch(texts('Передам менеджеру. Как к вам обращаться?'), /сразу/)
+  assert.equal(
+    describeCall({
+      name: 'showSitePage',
+      input: { page: 'cart' },
+      result: { status: 'shown', title: 'Корзина' },
+    }),
+    'showSitePage(cart) → кнопка раздела «Корзина»',
+  )
+})

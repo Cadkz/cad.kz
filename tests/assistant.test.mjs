@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { anthropicReply, ModelError } from '../src/domain/anthropicChat.mjs'
+import { anthropicReply, ModelError, wholeSentences } from '../src/domain/anthropicChat.mjs'
 import {
   ASSISTANT_LIMITS,
   ASSISTANT_TOOLS,
@@ -532,4 +532,60 @@ test('текст для WhatsApp: вопрос клиента и итог Кад
   )
   // Пустой разговор — только приветствие.
   assert.equal(whatsappMessage([]), 'Здравствуйте! Пишу с сайта cad.kz после чата с Кадди.')
+})
+
+test('отчёт 16.10: служебная разметка убирается, оборванный ответ — до целого предложения', () => {
+  assert.equal(
+    cleanReply('Подойдёт AutoCAD LT.\n\nЭто новая лицензия?\n\n[[PRODUCT:AutoCAD|LT]]'),
+    'Подойдёт AutoCAD LT.\n\nЭто новая лицензия?',
+  )
+  assert.equal(cleanReply('Смотрите [[CARD:1]] ниже.'), 'Смотрите ниже.')
+  assert.equal(
+    wholeSentences('Сколько рабочих мест нужно? Тогда подскажу комплект и подготовлю'),
+    'Сколько рабочих мест нужно?',
+  )
+  assert.equal(wholeSentences('Без точки вообще'), 'Без точки вообще')
+})
+
+test('отчёт 16.10: карточки по короткому названию, без дублей и лишнего основного варианта', () => {
+  const card = (id, title) => ({ id, title, href: `/p/${id}`, vendor: null, price: null })
+  const variant = (id, parent, label, title) => ({
+    id,
+    parent,
+    label,
+    title,
+    href: `/v/${-id}`,
+    vendor: null,
+    price: null,
+  })
+  const found = [
+    card(1, 'ЛИРА - FEM (ЛИРА САПР)'),
+    card(2, 'SCAD Office v. 25.1'),
+    card(3, 'AutoCAD'),
+    card(4, 'GEO5'),
+  ]
+  const variants = [
+    variant(-1, 1, 'Pro', 'ЛИРА - FEM (ЛИРА САПР) Pro'),
+    variant(-2, 2, 'Металл', 'SCAD Office v. 25.1 Металл'),
+    variant(-3, 3, 'AutoCAD', 'AutoCAD'),
+    variant(-4, 3, 'LT', 'AutoCAD LT'),
+    variant(-5, 4, 'Устойчивость откоса', 'GEO5 Устойчивость откоса'),
+    variant(-6, 4, 'Устойчивость откоса', 'GEO5 Устойчивость откоса'),
+  ]
+  const titles = (/** @type {string} */ reply) =>
+    mentionedCards(reply, found, { variants }).map((c) => c.title)
+  assert.deepEqual(titles('Для каркаса подойдёт ЛИРА-FEM, редакция Pro.'), [
+    'ЛИРА - FEM (ЛИРА САПР) Pro',
+  ])
+  assert.deepEqual(titles('Подойдёт SCAD Office, вариант «Металл».'), [
+    'SCAD Office v. 25.1 Металл',
+  ])
+  assert.deepEqual(titles('Подойдёт AutoCAD LT: это бюджетная версия AutoCAD только для 2D.'), [
+    'AutoCAD LT',
+  ])
+  assert.deepEqual(titles('Полный AutoCAD — для 3D.'), ['AutoCAD'])
+  assert.deepEqual(
+    titles('Модуль GEO5 «Устойчивость откоса»… Нужна устойчивость откоса или сваи?'),
+    ['GEO5 Устойчивость откоса'],
+  )
 })

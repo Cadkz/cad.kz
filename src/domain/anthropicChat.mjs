@@ -45,7 +45,7 @@ export class ModelError extends Error {
  * @returns {Promise<{ text: string, toolCalls: number }>}
  */
 export async function anthropicReply(options) {
-  const { fetchImpl, apiKey, model, tools, runTool, signal, maxTokens = 800 } = options
+  const { fetchImpl, apiKey, model, tools, runTool, signal, maxTokens = 1500 } = options
   // Правила частями: первая (постоянная) кешируется у Anthropic — дешевле и быстрее повторные
   // запросы; вторая — состояние разговора, меняется каждый раз.
   const system = Array.isArray(options.system)
@@ -95,7 +95,7 @@ export async function anthropicReply(options) {
         .join('\n')
         .trim()
       if (!text) throw new ModelError('Модель вернула пустой ответ')
-      return { text, toolCalls }
+      return { text: data.stop_reason === 'max_tokens' ? wholeSentences(text) : text, toolCalls }
     }
     messages.push({ role: 'assistant', content })
     /** @type {object[]} */
@@ -118,4 +118,14 @@ export async function anthropicReply(options) {
     messages.push({ role: 'user', content: results })
   }
   throw new ModelError('Модель не закончила ответ')
+}
+
+/**
+ * Ответ оборвался на лимите длины (в отчёте 16.10.2026 — «…и подготовлю», «Толық нұсқада
+ * архитектурал»): оставляем целые предложения, а не обрывок слова.
+ * @param {string} text
+ */
+export function wholeSentences(text) {
+  const end = Math.max(...['.', '!', '?', '…'].map((mark) => text.lastIndexOf(mark)))
+  return end > 0 ? text.slice(0, end + 1).trim() : text
 }

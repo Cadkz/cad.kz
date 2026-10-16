@@ -45,19 +45,35 @@ function save(text: string) {
 
 type Turn = { question: string; reply: string }
 
-async function ask(question: string, history: Turn[]): Promise<Row> {
+async function askOnce(question: string, history: Turn[]): Promise<Row & { retry?: true }> {
+  let response: Response
   try {
-    const response = await fetch('/api/admin/assistant-check', {
+    response = await fetch('/api/admin/assistant-check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question, history }),
     })
-    const data = await response.json()
-    if (!response.ok) return { question, error: data.error || `Ошибка ${response.status}` }
-    return { question, ...data }
   } catch {
-    return { question, error: 'Нет связи с сервером' }
+    return { question, error: 'Нет связи с сервером', retry: true }
   }
+  let data: { error?: string }
+  try {
+    data = await response.json()
+  } catch {
+    // Вместо ответа — страница ошибки хостинга (обычно сервер не уложился во время).
+    return { question, error: `Сервер не ответил (код ${response.status})`, retry: true }
+  }
+  if (!response.ok) return { question, error: data.error || `Ошибка ${response.status}` }
+  return { question, ...data }
+}
+
+/** Сбой связи или хостинга — ещё одна попытка через пару секунд, ошибки модели — сразу в отчёт. */
+async function ask(question: string, history: Turn[]): Promise<Row> {
+  const first = await askOnce(question, history)
+  if (!first.retry) return first
+  await new Promise((resolve) => setTimeout(resolve, 2000))
+  const { retry: _, ...second } = await askOnce(question, history)
+  return second
 }
 
 /**

@@ -191,8 +191,11 @@ export function checkReply(reply, trace) {
   for (const rule of RULES)
     if (rule.test.test(reply)) flags.push({ level: rule.level, text: rule.text })
   // Срок поставки — только из getPrice/priceTotal: там условия компании (раздел 7 правил).
+  // Нужно число: «в рабочие дни с 09:00» — это часы работы, а не срок (отчёт 16.10.2026).
   const term =
-    /(рабоч\S*|календарн\S*)\s+дн|в течение\s+\d+\s*(дн|недел)|за\s+\d+\s*(дн|недел)/i.test(reply)
+    /(\d|двух|трёх|трех|пяти|семи|десяти)\s*(?:[–-]\s*\d+\s*)?(рабоч\S*|календарн\S*)\s+дн|в течение\s+\d+\s*(дн|недел)|за\s+\d+\s*(дн|недел)/i.test(
+      reply,
+    )
   if (term && !trace.some((t) => PRICE_TOOLS.includes(t.name)))
     flags.push({
       level: 'warn',
@@ -221,7 +224,15 @@ export function checkReply(reply, trace) {
       text: `Вопросов в ответе: ${questions} (правило — не больше одного)`,
     })
   // Контакты спрашивают только перед передачей менеджеру.
-  if (/как вас зовут|ваше имя|номер телефона|ваш телефон|вашу почту|название компании/i.test(reply))
+  const asksName = /как вас зовут|ваше имя|как к вам обращаться|как его зовут/i.test(reply)
+  const asksPhone =
+    /телефон/i.test(reply) && /подскажите|нужен|нужны|укажите|напишите|оставьте/i.test(reply)
+  if ((asksName && asksPhone) || /имя и (номер )?телефон/i.test(reply))
+    flags.push({
+      level: 'warn',
+      text: 'Просит имя и телефон сразу — по правилам по одному: сначала имя, потом телефон',
+    })
+  if (asksName || /номер телефона|ваш телефон|вашу почту|название компании/i.test(reply))
     flags.push({
       level: 'info',
       text: 'Спрашивает контакты — проверьте, что здесь правда нужен менеджер',
@@ -285,6 +296,10 @@ export function describeCall({ name, input, result }) {
       typeof data.price === 'string'
         ? `${data.price} ${data.unit ?? ''}, поставка: ${data.delivery ?? '—'}`
         : `без цены: ${data.note ?? ''}`
-  else if (data.status === 'shown') outcome = 'клиенту показана кнопка передачи менеджеру'
+  else if (data.status === 'shown')
+    outcome =
+      name === 'showSitePage'
+        ? `кнопка раздела «${typeof data.title === 'string' ? data.title : '?'}»`
+        : 'клиенту показана кнопка передачи менеджеру'
   return `${name}(${args}) → ${outcome || 'ответ получен'}`
 }
