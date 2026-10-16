@@ -7,7 +7,7 @@ import { DirectionCard } from '@/components/DirectionCard/DirectionCard'
 import { Faq } from '@/components/Faq/Faq'
 import { FaqHelp } from '@/components/FaqHelp/FaqHelp'
 import { Col, Grid } from '@/components/Grid/Grid'
-import { Hero } from '@/components/Hero/Hero'
+import { HiddenTitle } from '@/components/HiddenTitle/HiddenTitle'
 import { HomeNews } from '@/components/HomeNews/HomeNews'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
 import { Reveal } from '@/components/Reveal/Reveal'
@@ -25,9 +25,10 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 export const metadata = { alternates: { canonical: '/' } }
 
 /**
- * Главная — шаблон «Витрина»: первый экран «Подбор по задаче» с Кадди (16.10.2026; блок партнёров скрыт; «Популярные
- * решения» переехали в меню «Каталог» первой вкладкой — решение владельца 16.10.2026), направления и под ними каталог с фильтром (полный каталог — /catalog),
- * BIM сразу после каталога, как мы работаем (с карточками «ТЗ» и «госзакупки»), «Новости и
+ * Главная — шаблон «Витрина»: первым блоком BIM (решение владельца 16.10.2026, вечер: первый баннер
+ * «Подбор по задаче» убран, компонент Hero оставлен для возврата; h1 из админки «Главная» скрыт
+ * визуально), затем направления и каталог с фильтром (полный каталог — /catalog; блок партнёров
+ * скрыт; «Популярные решения» — в меню «Каталог»), как мы работаем (с карточками «ТЗ» и «госзакупки»), «Новости и
  * акции» (слайдер акций + две новости), вопросы. Продление лицензий — только в меню.
  * Порядок и состав — по замечаниям владельца 13.10.2026, вечер.
  */
@@ -47,7 +48,8 @@ export default async function Home({ searchParams }: Props) {
   return (
     <main>
       <CatalogHashRedirect />
-      <Hero home={home} />
+      {home.title && <HiddenTitle>{home.title}</HiddenTitle>}
+      <BimBand bim={home.bim} more={{ href: '/bim', label: 'Подробнее о внедрении' }} priority />
       {/* Блок «Официальный партнёр» скрыт (замечание владельца 12.10.2026: меньше шума), данные
           остались в админке — вернуть: <TrustBand trust={home.trust} />. */}
       <Section
@@ -77,9 +79,6 @@ export default async function Home({ searchParams }: Props) {
           initial={emptyFilter}
         />
       </Section>
-      <Reveal>
-        <BimBand bim={home.bim} more={{ href: '/bim', label: 'Подробнее о внедрении' }} />
-      </Reveal>
       {home.process.length > 0 && (
         <Section
           id="process"

@@ -14,10 +14,12 @@ type Props = {
   more?: { href: string; label: string }
   /** На странице /bim блок сразу под хлебными крошками — без верхнего отступа секции. */
   flush?: boolean
+  /** Блок первым на экране (главная с 16.10.2026) — картинка грузится сразу, для LCP. */
+  priority?: boolean
 }
 
 /** Тёмный блок «Внедрение BIM»: вводный текст, четыре этапа, кнопки и ключевые цифры. */
-export function BimBand({ bim, level = 2, more, flush = false }: Props) {
+export function BimBand({ bim, level = 2, more, flush = false, priority = false }: Props) {
   if (!bim.title) return null
   const Heading = level === 1 ? 'h1' : 'h2'
   return (
@@ -32,6 +34,7 @@ export function BimBand({ bim, level = 2, more, flush = false }: Props) {
             alt=""
             sizes="(min-width: 1200px) 720px, (min-width: 960px) 60vw, 100vw"
             className={styles.image}
+            priority={priority}
           />
           {bim.eyebrow && <Badge tone="onDark">{bim.eyebrow}</Badge>}
           <Heading id="bim-title" className={styles.title}>
