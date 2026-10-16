@@ -9,9 +9,16 @@ import styles from './PopularCard.module.css'
  * У известных программ (AutoCAD, Revit, GEO5…) — логотип с сайта производителя, остальные —
  * картинка товара или значок раздела.
  */
-export function PopularCard({ card }: { card: PopularCardData }) {
+export function PopularCard({
+  card,
+  onNavigate,
+}: {
+  card: PopularCardData
+  /** В меню «Каталог»: закрыть меню при переходе. */
+  onNavigate?: () => void
+}) {
   return (
-    <Link href={card.href} className={styles.tile}>
+    <Link href={card.href} className={styles.tile} onClick={onNavigate}>
       <span className={styles.logo}>
         {card.brand ? (
           <Image

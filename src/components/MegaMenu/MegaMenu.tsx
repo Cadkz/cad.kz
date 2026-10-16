@@ -3,34 +3,47 @@
 import { MessageCircle } from 'lucide-react'
 import { type PointerEventHandler, useState } from 'react'
 import type { MenuTab } from '@/lib/navigation'
+import type { PopularCardData } from '@/lib/popular'
+import { MenuPopular } from '../MenuPopular/MenuPopular'
 import { MenuSections } from '../MenuSections/MenuSections'
 import styles from './MegaMenu.module.css'
 
 type Props = {
   id: string
   tabs: MenuTab[]
+  popular: PopularCardData[]
   onNavigate: () => void
   whatsappHref: string | null
   onPointerEnter: PointerEventHandler
   onPointerLeave: PointerEventHandler
 }
 
+/** Ключ вкладки «Популярные решения»: она первая и открыта сразу (решение владельца 16.10.2026). */
+const POPULAR = 'popular'
+
 /**
- * Мегаменю каталога. Слева на тёмной чертёжной сетке — группы (программы, оборудование, услуги)
- * и предложение подбора; дальше разделы группы и популярные товары раздела под курсором.
- * Показывается один раздел за раз, поэтому меню всегда помещается в экран.
+ * Мегаменю каталога. Слева на тёмной чертёжной сетке — «Популярные решения» и группы
+ * (программы, оборудование, услуги), внизу предложение подбора; справа — плитки популярных
+ * решений или разделы группы и товары раздела под курсором. Показывается одна вкладка за раз,
+ * поэтому меню всегда помещается в экран.
  */
 export function MegaMenu({
   id,
   tabs,
+  popular,
   onNavigate,
   whatsappHref,
   onPointerEnter,
   onPointerLeave,
 }: Props) {
-  const [active, setActive] = useState(tabs[0]?.key ?? '')
-  const tab = tabs.find((item) => item.key === active) ?? tabs[0]
-  if (!tab) return null
+  const segments = [
+    ...(popular.length ? [{ key: POPULAR, label: 'Популярные решения' }] : []),
+    ...tabs.map(({ key, label }) => ({ key, label })),
+  ]
+  const [active, setActive] = useState(segments[0]?.key ?? '')
+  const current = segments.find((item) => item.key === active) ?? segments[0]
+  if (!current) return null
+  const tab = tabs.find((item) => item.key === current.key)
   return (
     <div
       id={id}
@@ -40,13 +53,13 @@ export function MegaMenu({
     >
       <div className={styles.rail}>
         <div className={styles.segments} role="tablist" aria-label="Группы каталога">
-          {tabs.map((item) => (
+          {segments.map((item) => (
             <button
               key={item.key}
               type="button"
               role="tab"
               id={`${id}-tab-${item.key}`}
-              aria-selected={item.key === tab.key}
+              aria-selected={item.key === current.key}
               aria-controls={`${id}-panel`}
               className={styles.segment}
               onClick={() => setActive(item.key)}
@@ -70,13 +83,17 @@ export function MegaMenu({
         </div>
       </div>
       <div
-        key={tab.key}
+        key={current.key}
         id={`${id}-panel`}
         role="tabpanel"
-        aria-labelledby={`${id}-tab-${tab.key}`}
+        aria-labelledby={`${id}-tab-${current.key}`}
         className={styles.panel}
       >
-        <MenuSections tab={tab} onNavigate={onNavigate} />
+        {tab ? (
+          <MenuSections tab={tab} onNavigate={onNavigate} />
+        ) : (
+          <MenuPopular cards={popular} onNavigate={onNavigate} />
+        )}
       </div>
     </div>
   )

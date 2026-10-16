@@ -9,7 +9,6 @@ import { FaqHelp } from '@/components/FaqHelp/FaqHelp'
 import { Col, Grid } from '@/components/Grid/Grid'
 import { Hero } from '@/components/Hero/Hero'
 import { HomeNews } from '@/components/HomeNews/HomeNews'
-import { PopularRow } from '@/components/PopularRow/PopularRow'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { Section } from '@/components/Section/Section'
@@ -18,7 +17,6 @@ import { emptyFilter, fromParams, toQuery } from '@/lib/catalogFilter'
 import { getHome } from '@/lib/home'
 import { getContacts } from '@/lib/navigation'
 import { CATALOG_PATH, catalogHref } from '@/lib/navigationHrefs'
-import { popularCards } from '@/lib/popular'
 import { getPublications, getTopicCovers } from '@/lib/publications'
 import { directionExtras } from '@/lib/siteNav'
 
@@ -27,8 +25,8 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 export const metadata = { alternates: { canonical: '/' } }
 
 /**
- * Главная — шаблон «Витрина»: первый экран с тремя действиями, популярные решения в один ряд
- * (блок партнёров скрыт), направления и под ними каталог с фильтром (полный каталог — /catalog),
+ * Главная — шаблон «Витрина»: первый экран с тремя действиями (блок партнёров скрыт; «Популярные
+ * решения» переехали в меню «Каталог» первой вкладкой — решение владельца 16.10.2026), направления и под ними каталог с фильтром (полный каталог — /catalog),
  * BIM сразу после каталога, как мы работаем (с карточками «ТЗ» и «госзакупки»), «Новости и
  * акции» (слайдер акций + две новости), вопросы. Продление лицензий — только в меню.
  * Порядок и состав — по замечаниям владельца 13.10.2026, вечер.
@@ -46,28 +44,17 @@ export default async function Home({ searchParams }: Props) {
     getCatalog(),
     getTopicCovers(),
   ])
-  const popular = popularCards(home.popular.items, catalog.items)
   return (
     <main>
       <CatalogHashRedirect />
       <Hero home={home} directions={directions} />
       {/* Блок «Официальный партнёр» скрыт (замечание владельца 12.10.2026: меньше шума), данные
           остались в админке — вернуть: <TrustBand trust={home.trust} />. */}
-      {popular.length > 0 && (
-        <Section
-          id="popular"
-          title={home.popular.title}
-          sub={home.popular.lead ?? undefined}
-          action={{ href: catalogHref(), label: 'Весь каталог' }}
-        >
-          <PopularRow cards={popular} />
-        </Section>
-      )}
       <Section
         id="directions"
         title="Выберите направление"
         sub="Карточка открывает каталог этого направления."
-        action={popular.length ? undefined : { href: catalogHref(), label: 'Весь каталог' }}
+        action={{ href: catalogHref(), label: 'Весь каталог' }}
       >
         <Grid as="ul" span={{ base: 12, sm: 6, md: 3 }}>
           {[...directions, ...directionExtras].map((direction, i) => (

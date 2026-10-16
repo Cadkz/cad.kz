@@ -14,13 +14,13 @@ export type PopularCardData = {
 }
 
 /**
- * Плитки «Популярных решений» на главной: маленький логотип с товара (тот же набор, что
+ * Плитки «Популярных решений» (первая вкладка меню «Каталог»): маленький логотип с товара (тот же набор, что
  * в каталоге) и название. Своя ссылка из админки важнее ссылки товара: «Inventor и Fusion»
  * ведёт в каталог, а не на один Inventor. Без товара и без ссылки плитка не показывается.
  */
 export function popularCards(
   items: Home['popular']['items'],
-  catalog: CatalogItem[],
+  catalog: Pick<CatalogItem, 'id' | 'href' | 'title' | 'picture' | 'icon'>[],
 ): PopularCardData[] {
   const byId = new Map(catalog.filter((item) => item.id > 0).map((item) => [item.id, item]))
   return items.flatMap((item) => {

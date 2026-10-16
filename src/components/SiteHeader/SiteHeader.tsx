@@ -1,3 +1,4 @@
+import { getMenuPopular } from '@/lib/menuPopular'
 import { getContacts, getMenu, mobilePhone } from '@/lib/navigation'
 import { searchHints, typingHints } from '@/lib/siteNav'
 import { AssistantSlot } from '../AssistantSlot/AssistantSlot'
@@ -21,7 +22,7 @@ import styles from './SiteHeader.module.css'
  * Уже 960 px: меню, логотип, поиск, WhatsApp, корзина; разделы — в меню.
  */
 export async function SiteHeader() {
-  const [menu, contacts] = await Promise.all([getMenu(), getContacts()])
+  const [menu, popular, contacts] = await Promise.all([getMenu(), getMenuPopular(), getContacts()])
   const contactList = <ContactList contacts={contacts} socials={false} />
   return (
     <>
@@ -29,11 +30,12 @@ export async function SiteHeader() {
         <Container className={styles.bar}>
           <MobileMenu
             menu={menu}
+            popular={popular}
             contacts={<ContactList contacts={contacts} socials={false} whatsapp={false} />}
             whatsappHref={contacts.whatsappHref}
           />
           <Logo variant="mark" />
-          <CatalogNav menu={menu} whatsappHref={contacts.whatsappHref} />
+          <CatalogNav menu={menu} popular={popular} whatsappHref={contacts.whatsappHref} />
           <SiteSearch
             hints={searchHints}
             typingHints={typingHints}

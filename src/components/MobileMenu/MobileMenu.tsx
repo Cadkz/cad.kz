@@ -5,23 +5,40 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
 import type { MenuTab } from '@/lib/navigation'
+import type { PopularCardData } from '@/lib/popular'
 import { aboutColumns, sectionLinks } from '@/lib/siteNav'
 import { Drawer } from '../Drawer/Drawer'
 import { HeaderAction } from '../HeaderAction/HeaderAction'
 import { WhatsappIcon } from '../icons/icons'
+import { MenuPopular } from '../MenuPopular/MenuPopular'
 import { MobileVendors } from '../MobileVendors/MobileVendors'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './MobileMenu.module.css'
 
-type Props = { menu: MenuTab[]; contacts: ReactNode; whatsappHref: string | null }
+type Props = {
+  menu: MenuTab[]
+  popular: PopularCardData[]
+  contacts: ReactNode
+  whatsappHref: string | null
+}
 
 /** Группы каталога, которые в меню телефона видны сразу. Обучение и внедрение — ссылками ниже. */
 const PRODUCT_GROUPS = ['software', 'hardware']
 
 /** Раскрывающаяся строка. Одно имя у соседних — открыта только одна, экран не тонет в списках. */
-function Group({ title, name, children }: { title: string; name: string; children: ReactNode }) {
+function Group({
+  title,
+  name,
+  open,
+  children,
+}: {
+  title: string
+  name: string
+  open?: boolean
+  children: ReactNode
+}) {
   return (
-    <details className={styles.group} name={name}>
+    <details className={styles.group} name={name} open={open}>
       <summary className={styles.summary}>
         {title}
         <ChevronDown size={20} strokeWidth={1.75} className={styles.chevron} aria-hidden="true" />
@@ -33,10 +50,11 @@ function Group({ title, name, children }: { title: string; name: string; childre
 
 /**
  * Меню для экранов уже 960 px: кнопка слева от логотипа, панель выезжает слева.
- * Сверху сразу «Программное обеспечение» и «Оборудование» (разделы → производители → товары),
+ * Сверху «Популярные решения» (раскрыты сразу), затем «Программное обеспечение» и «Оборудование»
+ * (разделы → производители → товары),
  * ниже разделы сайта, «О компании», контакты и WhatsApp.
  */
-export function MobileMenu({ menu, contacts, whatsappHref }: Props) {
+export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [])
   const pathname = usePathname()
@@ -56,6 +74,11 @@ export function MobileMenu({ menu, contacts, whatsappHref }: Props) {
       />
       <Drawer open={open} onClose={close} title="Меню" side="left">
         <nav aria-label="Меню сайта" className={styles.nav}>
+          {popular.length > 0 && (
+            <Group title="Популярные решения" name="mobile-menu" open>
+              <MenuPopular cards={popular} onNavigate={close} compact />
+            </Group>
+          )}
           {groups.map((tab) => (
             <Group key={tab.key} title={tab.label} name="mobile-menu">
               {tab.columns.map((column) => (
