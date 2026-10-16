@@ -614,6 +614,13 @@ test('отчёт 16.10 (2): название внутри другого наз�
     }).map((c) => c.title),
     ['Revit', 'AutoCAD Revit LT Suite'],
   )
+  // Отчёт 16.10 (3): Кадди написал «Revit LT Suite» без «AutoCAD» — карточки Suite не было.
+  assert.deepEqual(
+    mentionedCards('Revit — 5 388 860 ₸. Если хватит Revit LT Suite — 1 154 525 ₸.', found, {
+      variants,
+    }).map((c) => c.title),
+    ['Revit', 'AutoCAD Revit LT Suite'],
+  )
   assert.equal(
     cleanReply('Стоимость уточнит менеджер.\n\n[ЛИРА - FEM (ЛИРА САПР) Грунт]'),
     'Стоимость уточнит менеджер.',
