@@ -1692,6 +1692,26 @@ export interface HomePage {
   id: number;
   eyebrow?: string | null;
   title: string;
+  /**
+   * Слева подзаголовок и главная кнопка (открывает чат с Кадди), справа карточка: поле «опишите задачу» и кнопки задач. Нажатие на задачу сразу задаёт Кадди вопрос из поля «Вопрос Кадди». Если консультант выключен, вопрос уходит в WhatsApp. Заголовок до 50 знаков — в две строки, подзаголовок до 140.
+   */
+  hero?: {
+    lead?: string | null;
+    button?: string | null;
+    cardTitle?: string | null;
+    placeholder?: string | null;
+    /**
+     * Короткое название (одно-два слова) и вопрос, который уйдёт Кадди.
+     */
+    tasks?:
+      | {
+          label: string;
+          question: string;
+          id?: string | null;
+        }[]
+      | null;
+    note?: string | null;
+  };
   sideCards?:
     | {
         title: string;
@@ -1860,6 +1880,22 @@ export interface PricingSettingsSelect<T extends boolean = true> {
 export interface HomePageSelect<T extends boolean = true> {
   eyebrow?: T;
   title?: T;
+  hero?:
+    | T
+    | {
+        lead?: T;
+        button?: T;
+        cardTitle?: T;
+        placeholder?: T;
+        tasks?:
+          | T
+          | {
+              label?: T;
+              question?: T;
+              id?: T;
+            };
+        note?: T;
+      };
   sideCards?:
     | T
     | {

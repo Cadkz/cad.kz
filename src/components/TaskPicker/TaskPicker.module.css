@@ -1,0 +1,126 @@
+/* Белая карточка на тёмном баннере первого экрана. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-float);
+  color: var(--color-text);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.title {
+  color: var(--color-navy);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+/* Поле и кнопка отправки в одной рамке — как строка ввода в чате Кадди. */
+.form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  transition: border-color var(--duration-fast) var(--ease);
+}
+
+.form:hover {
+  border-color: var(--color-blue-mid);
+}
+
+.form:focus-within {
+  border-color: var(--color-blue);
+  background: var(--color-surface);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+}
+
+.input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Рамка подсвечивается у всей строки (focus-within), у самого поля обводки нет. */
+.input:focus-visible {
+  outline: none;
+}
+
+.send {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-navy);
+  color: var(--color-text-inverse);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease);
+}
+
+.send:hover {
+  background: var(--color-blue);
+}
+
+.tasks {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.task {
+  min-height: var(--control-height-sm);
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--color-blue-soft);
+  color: var(--color-navy);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease),
+    border-color var(--duration-fast) var(--ease);
+}
+
+.task:hover {
+  border-color: var(--color-blue-mid);
+  background: var(--color-blue-mid);
+}
+
+.note {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+@media (min-width: 640px) {
+  .card {
+    padding: var(--space-6);
+  }
+}

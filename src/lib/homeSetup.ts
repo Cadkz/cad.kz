@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { HOME_HERO } from '../domain/homeHero'
 import { TRUST_DATA, TRUST_SEED, TRUST_SEED_V1_VENDORS } from '../domain/homeTrust.mjs'
 import { mediaFor, oldSite } from './legacyContentRun'
 
@@ -74,4 +75,24 @@ export async function setupHomeTrust(payload: Payload): Promise<string | null> {
   await mark(payload, HOME_TRUST_V2_KEY, { trust: 'filled', withLogo, failed })
   if (!(await done(payload, HOME_TRUST_KEY))) await mark(payload, HOME_TRUST_KEY, {})
   return `Блок «Официальный партнёр»: ${partners.length} производителей, с логотипом ${withLogo}${failed.length ? `; не скачалось: ${failed.join('; ')}` : ''}`
+}
+
+/** Ключ записи в журнале «Запуски импорта»: первый экран «Подбор по задаче», один раз. */
+export const HOME_HERO_KEY = 'home-setup:hero-tasks-v1'
+
+/**
+ * Первый экран главной «Подбор по задаче» (решение владельца 16.10.2026): прежние плашка и
+ * заголовок о компании заменяются один раз — их и просили убрать. Если кнопки задач уже
+ * заполнили в админке, первый экран не трогаем.
+ */
+export async function setupHomeHero(payload: Payload): Promise<string | null> {
+  if (await done(payload, HOME_HERO_KEY)) return null
+  const home = await payload.findGlobal({ slug: 'home-page', ...opts })
+  if (home.hero?.tasks?.length) {
+    await mark(payload, HOME_HERO_KEY, { hero: 'kept' })
+    return 'Первый экран «Подбор по задаче» уже заполнили в админке, не трогаем.'
+  }
+  await payload.updateGlobal({ slug: 'home-page', data: HOME_HERO, ...opts })
+  await mark(payload, HOME_HERO_KEY, { hero: 'filled', previousTitle: home.title })
+  return `Первый экран «Подбор по задаче»: ${HOME_HERO.hero.tasks.length} задач (было: «${home.title}»)`
 }

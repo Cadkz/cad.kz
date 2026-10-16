@@ -2,15 +2,12 @@
   padding-top: var(--space-6);
 }
 
-/* Обёртка баннера. */
-.frame {
-  position: relative;
-  isolation: isolate;
-}
-
+/* Баннер: на телефоне текст, под ним карточка задач; от 960 — сетка 7 + 5 колонок. */
 .band {
   position: relative;
-  padding: var(--space-8) var(--space-6);
+  display: grid;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-5);
   overflow: hidden;
   border-radius: var(--radius-lg);
   isolation: isolate;
@@ -29,10 +26,6 @@
   mask-image: var(--blueprint-fade);
 }
 
-.art {
-  display: none;
-}
-
 .content {
   display: flex;
   flex-direction: column;
@@ -47,48 +40,61 @@
 
 .lead {
   color: var(--color-text-on-dark);
-  font-size: var(--text-body);
+  font-size: var(--text-lead);
 }
 
+/* Главная кнопка и ссылка в каталог текстом: одно главное действие. */
 .actions {
   display: flex;
-  flex-direction: column;
-  align-self: stretch;
-  gap: var(--space-3);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
   margin-top: var(--space-2);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  color: var(--color-text-inverse);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}
+
+.link:hover {
+  color: var(--color-sky);
+}
+
+.picker {
+  min-width: 0;
 }
 
 @media (min-width: 640px) {
   .band {
     padding: var(--space-10);
   }
-
-  /* От 640 кнопки в ряд по своей ширине; на телефоне — столбиком во всю ширину. */
-  .actions {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-self: flex-start;
-  }
 }
 
 @media (min-width: 960px) {
   .band {
-    padding: var(--space-16) var(--space-10);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--grid-gap);
+    align-items: center;
+    padding: var(--space-12) var(--space-10);
   }
 
-  /* Чертёж — в правой части баннера, по центру высоты; текст на него не заходит. */
-  .art {
-    position: absolute;
-    top: 50%;
-    right: var(--space-10);
-    z-index: var(--z-below);
-    display: block;
-    width: calc(var(--control-height) * 6);
-    transform: translateY(-50%);
-  }
-
-  /* Текст не заходит на чертёж. */
   .content {
-    max-width: min(var(--measure), calc(100% - var(--control-height) * 6 - var(--space-10)));
+    grid-column: span 7;
+  }
+
+  .picker {
+    grid-column: span 5;
+  }
+}
+
+@media (min-width: 1200px) {
+  .band {
+    padding: var(--space-16) var(--space-10);
   }
 }

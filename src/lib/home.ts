@@ -29,9 +29,21 @@ export async function getHome() {
   const wa = contacts.whatsappHref
   return {
     eyebrow: page.eyebrow ?? null,
-    /** Номер WhatsApp из контактов: главная кнопка первого экрана. */
+    /** Номер WhatsApp из контактов: запасной путь первого экрана, если Кадди выключен. */
     whatsappHref: wa,
     title: page.title,
+    /** Первый экран «Подбор по задаче»: тексты и кнопки задач для Кадди. */
+    hero: {
+      lead: page.hero?.lead ?? null,
+      button: page.hero?.button || 'Подобрать по задаче',
+      cardTitle: page.hero?.cardTitle || 'С чего начнём?',
+      placeholder: page.hero?.placeholder || 'Опишите задачу',
+      tasks: (page.hero?.tasks ?? []).map((task) => ({
+        label: task.label,
+        question: task.question,
+      })),
+      note: page.hero?.note ?? null,
+    },
     slides: promotions.map(
       (item): Slide => ({
         title: item.title,

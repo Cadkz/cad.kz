@@ -4,6 +4,7 @@
  * Цены, сроки и описания учебные: перед публикацией их проверяет редактор.
  */
 
+import { HOME_HERO } from './homeHero'
 import { TRUST_DATA } from './homeTrust.mjs'
 
 type Icon = 'building' | 'columns' | 'layers' | 'route' | 'wrench' | 'droplet' | 'cog'
@@ -561,8 +562,7 @@ export const demoSettings = {
 
 /** Тексты главной по макету. Обещания и сроки — учебные, их подтверждает редактор. */
 export const demoHome = {
-  eyebrow: 'Более 5 000 решений для проектировщиков',
-  title: 'Софт, оборудование и обучение для проектных организаций и частных специалистов',
+  ...HOME_HERO,
   trust: TRUST_DATA,
   sideCards: [
     {

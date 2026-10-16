@@ -23,6 +23,7 @@ import * as migration_20261015_065936_publication_dates from './20261015_065936_
 import * as migration_20261015_081601_admin_history from './20261015_081601_admin_history'
 import * as migration_20261015_103001_activity_prices from './20261015_103001_activity_prices'
 import * as migration_20261015_110918_quality_presets from './20261015_110918_quality_presets'
+import * as migration_20261016_063853_hero_tasks from './20261016_063853_hero_tasks'
 
 export const migrations = [
   {
@@ -149,5 +150,10 @@ export const migrations = [
     up: migration_20261015_110918_quality_presets.up,
     down: migration_20261015_110918_quality_presets.down,
     name: '20261015_110918_quality_presets',
+  },
+  {
+    up: migration_20261016_063853_hero_tasks.up,
+    down: migration_20261016_063853_hero_tasks.down,
+    name: '20261016_063853_hero_tasks',
   },
 ]

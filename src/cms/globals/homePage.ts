@@ -13,8 +13,46 @@ export const homePage: GlobalConfig = {
   label: 'Главная страница',
   access: { read: everyone, update: isEditor },
   fields: [
-    textField('eyebrow', 'Плашка над баннером'),
-    textField('title', 'Заголовок страницы (h1)', true),
+    textField('eyebrow', 'Первый экран: плашка над заголовком'),
+    textField('title', 'Первый экран: заголовок страницы (h1)', true),
+    {
+      name: 'hero',
+      label: 'Первый экран: подбор по задаче',
+      type: 'group',
+      admin: {
+        description:
+          'Слева подзаголовок и главная кнопка (открывает чат с Кадди), справа карточка: поле ' +
+          '«опишите задачу» и кнопки задач. Нажатие на задачу сразу задаёт Кадди вопрос из поля ' +
+          '«Вопрос Кадди». Если консультант выключен, вопрос уходит в WhatsApp. Заголовок до ' +
+          '50 знаков — в две строки, подзаголовок до 140.',
+      },
+      fields: [
+        { name: 'lead', label: 'Подзаголовок', type: 'textarea' },
+        textField('button', 'Главная кнопка (пусто — «Подобрать по задаче»)'),
+        textField('cardTitle', 'Карточка справа: заголовок (пусто — «С чего начнём?»)'),
+        textField('placeholder', 'Подсказка в поле ввода'),
+        {
+          name: 'tasks',
+          label: 'Кнопки задач',
+          type: 'array',
+          maxRows: 8,
+          labels: { singular: 'Задача', plural: 'Задачи' },
+          admin: {
+            description: 'Короткое название (одно-два слова) и вопрос, который уйдёт Кадди.',
+          },
+          fields: [
+            textField('label', 'Название на кнопке', true),
+            {
+              name: 'question',
+              label: 'Вопрос Кадди',
+              type: 'textarea',
+              required: true,
+            },
+          ],
+        },
+        { name: 'note', label: 'Подпись под карточкой', type: 'textarea' },
+      ],
+    },
     {
       name: 'sideCards',
       label: 'Карточки в блоке «Как мы работаем»',
