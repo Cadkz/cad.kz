@@ -12,7 +12,7 @@ type Props = { slides: Slide[]; news: Publication[]; covers: TopicCovers }
 /**
  * «Новости и акции» на главной (замечание владельца 13.10.2026, вечер): слева баннер-слайдер
  * действующих акций и предложений не выше 16:9 (замечание 16.10.2026: был «гигантский квадрат»),
- * справа три последние новости строками. Отдельного блока акций
+ * справа три последние новости текстом, без картинок, ровно на высоту слайдера. Отдельного блока акций
  * на главной больше нет (все акции — в слайдере и на /news?kind=promotion). Действующих акций
  * нет — слева крупно самая свежая новость.
  */
@@ -30,15 +30,17 @@ export function HomeNews({ slides, news, covers }: Props) {
             <HeroSlider slides={slides} />
           )}
         </Reveal>
-        {side.map((item, i) => (
-          <Reveal as="li" key={item.id} step={i + 1} className={styles.side}>
-            <NewsCard
-              news={toCard(item, covers)}
-              tone={i % 2 ? 'deep' : 'graphite'}
-              size="compact"
-            />
-          </Reveal>
-        ))}
+        {side.length > 0 && (
+          <li className={styles.side}>
+            <ul className={styles.list}>
+              {side.map((item, i) => (
+                <Reveal as="li" key={item.id} step={i + 1} className={styles.item}>
+                  <NewsCard news={toCard(item, covers)} size="text" />
+                </Reveal>
+              ))}
+            </ul>
+          </li>
+        )}
       </ul>
     </Section>
   )

@@ -1,10 +1,10 @@
 /* Слайдер акций (или крупная новость) — не выше 16:9 (замечание владельца 16.10.2026); от 960 px
-   8 + 4 колонки: справа три новости строками, сверху вниз. */
+   8 + 4 колонки: справа три новости текстом, столбик ровно на высоту слайдера, новости делят её
+   поровну. */
 .grid {
   display: grid;
   grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-  gap: var(--space-4) var(--grid-gap);
-  align-items: start;
+  gap: var(--grid-gap);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -15,6 +15,25 @@
   grid-column: span 12;
 }
 
+/* Слайдер держит пропорцию 16:9, столбик новостей тянется на высоту строки. */
+.side {
+  align-self: stretch;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  flex: 1;
+}
+
 @media (min-width: 640px) {
   .main {
     aspect-ratio: 16 / 9;
@@ -23,7 +42,6 @@
 
 @media (min-width: 960px) {
   .main {
-    grid-row: span 3;
     grid-column: span 8;
   }
 
