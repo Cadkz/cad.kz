@@ -1,5 +1,10 @@
 import type { Payload } from 'payload'
-import { type AssistantCard, checkHandoff, type HandoffDraft } from '@/domain/assistant.mjs'
+import {
+  type AssistantCard,
+  type AssistantVariant,
+  checkHandoff,
+  type HandoffDraft,
+} from '@/domain/assistant.mjs'
 import { normalizePhone } from '@/domain/order.mjs'
 import {
   canTellPrice,
@@ -14,6 +19,7 @@ import {
   totalItems,
   vatText,
 } from '@/domain/priceTable.mjs'
+import { getCatalog } from '../catalog'
 import { searchCatalog } from '../search'
 import { type LoadedPriceTable, loadPriceTable } from './priceTable'
 
@@ -21,11 +27,15 @@ import { type LoadedPriceTable, loadPriceTable } from './priceTable'
 const SEARCH_LIMIT = 6
 /** Сколько строк прайса показывать модели за раз; остальное — числом и вариантами. */
 const PRICE_ROWS_LIMIT = 12
+/** Сколько вариантов одного товара (модули GEO5 — около 45) отдавать модели. */
+const VARIANTS_LIMIT = 60
 
 export type ToolRunner = {
   run: (name: string, input: unknown) => Promise<unknown>
   /** Товары, которые находил поиск в этом ответе: из них собираются ссылки под ответом. */
   found: AssistantCard[]
+  /** Варианты найденных товаров (модули, пакеты): ссылка сразу на выбранный вариант. */
+  variants: AssistantVariant[]
   /** Модель подготовила передачу менеджеру: данные для кнопки подтверждения под ответом. */
   handoff: () => HandoffDraft | null
 }
@@ -44,13 +54,17 @@ export function toCard({ id, title, href, vendor, price }: AssistantCard): Assis
   return { id, title, href, vendor, price }
 }
 
-/** Поиск по каталогу тем же поиском, что в шапке сайта (src/lib/search.ts). */
-export async function findCards(
-  query: string,
-): Promise<(AssistantCard & { summary: string | null })[]> {
+export type FoundCard = AssistantCard & { summary: string | null; variants: AssistantVariant[] }
+
+/**
+ * Поиск по каталогу тем же поиском, что в шапке сайта (src/lib/search.ts). У товара с подбором
+ * или семейства — его варианты (src/lib/catalogVariants.ts): модули, пакеты, редакции.
+ */
+export async function findCards(query: string): Promise<FoundCard[]> {
   const value = query.replace(/\s+/g, ' ').trim().slice(0, 120)
   if (value.length < 2) return []
-  const { items } = await searchCatalog(value)
+  const catalog = getCatalog()
+  const [{ items }, { variants }] = await Promise.all([searchCatalog(value, catalog), catalog])
   return items.slice(0, SEARCH_LIMIT).map((item) => ({
     id: item.id,
     title: item.title,
@@ -58,6 +72,19 @@ export async function findCards(
     vendor: item.manufacturer,
     price: item.priceFrom ? `от ${item.priceFrom}` : null,
     summary: item.summary,
+    variants: variants
+      .filter((variant) => variant.parent === item.id)
+      .slice(0, VARIANTS_LIMIT)
+      .map((variant) => ({
+        id: variant.id,
+        title: variant.title,
+        href: variant.href,
+        vendor: item.manufacturer,
+        price: variant.priceFrom ? `от ${variant.priceFrom}` : null,
+        parent: item.id,
+        label: variant.label,
+        about: variant.about,
+      })),
   }))
 }
 
@@ -164,6 +191,7 @@ export function totalByCode(table: LoadedPriceTable, input: unknown) {
  */
 export function createTools(payload: Payload): ToolRunner {
   const found: AssistantCard[] = []
+  const variants: AssistantVariant[] = []
   let table: Promise<LoadedPriceTable | null> | null = null
   let handoff: HandoffDraft | null = null
   const priceTable = () => {
@@ -175,8 +203,13 @@ export function createTools(payload: Payload): ToolRunner {
     const query = field(input, 'query')
     if (typeof query !== 'string') return { error: 'Нужен текст запроса' }
     const cards = await findCards(query)
-    for (const card of cards) if (!found.some((f) => f.id === card.id)) found.push(toCard(card))
+    for (const card of cards) {
+      if (found.some((f) => f.id === card.id)) continue
+      found.push(toCard(card))
+      variants.push(...card.variants)
+    }
     if (!cards.length) return { products: [], note: 'Ничего не нашлось' }
+    const withVariants = cards.some((card) => card.variants.length)
     return {
       products: cards.map((card) => ({
         id: card.id,
@@ -184,7 +217,19 @@ export function createTools(payload: Payload): ToolRunner {
         vendor: card.vendor,
         family: card.id < 0,
         summary: card.summary?.slice(0, 240) ?? null,
+        ...(card.variants.length
+          ? {
+              variants: card.variants.map((v) =>
+                v.about ? { name: v.label, about: v.about } : { name: v.label },
+              ),
+            }
+          : {}),
       })),
+      ...(withVariants
+        ? {
+            note: 'variants — модули, пакеты и редакции внутри товара. Советуй один вариант под задачу и пиши его с названием товара, точно как name: «GEO5 Устойчивость откоса». Под ответом будет ссылка сразу на этот вариант.',
+          }
+        : {}),
     }
   }
 
@@ -212,6 +257,7 @@ export function createTools(payload: Payload): ToolRunner {
   }
   return {
     found,
+    variants,
     handoff: () => handoff,
     run(name, input) {
       const tool = tools[name]

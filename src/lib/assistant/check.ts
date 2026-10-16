@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 import { ModelError } from '@/domain/anthropicChat.mjs'
 import { validateChat } from '@/domain/assistant.mjs'
-import { checkReply, describeCall } from '@/domain/assistantCheck.mjs'
+import { checkReply, describeCall, parseHistory } from '@/domain/assistantCheck.mjs'
 import { assistantMode, modelSettings } from './provider'
 import { answerMessages, type ToolCall } from './service'
 
@@ -28,19 +28,33 @@ export type CheckResult =
 /**
  * Один вопрос со страницы «Проверка Кадди»: тот же ответ, что получил бы клиент (правила, инструменты,
  * цены сервера), но разговор не сохраняется и в журнал «Диалоги консультанта» не попадает.
+ * history — прошлые шаги разговора («основания → обычные откосы»): Кадди отвечает, помня их.
  */
-export async function checkQuestion(payload: Payload, question: unknown): Promise<CheckResult> {
+export async function checkQuestion(
+  payload: Payload,
+  question: unknown,
+  history?: unknown,
+): Promise<CheckResult> {
   const mode = assistantMode()
   if (!mode) return { ok: false, error: 'Консультант выключен (MODEL_PROVIDER)', status: 409 }
   const checked = validateChat({ conversationId: crypto.randomUUID(), message: question })
   if (!checked.ok) return { ok: false, error: checked.error, status: 400 }
+  const previous = parseHistory(history)
+  if (!previous) return { ok: false, error: 'Прошлые шаги разговора не того вида', status: 400 }
+  const at = new Date().toISOString()
   const calls: ToolCall[] = []
   const started = Date.now()
   try {
     const answer = await answerMessages(
       payload,
       mode,
-      [{ role: 'user', content: checked.value.message, at: new Date().toISOString() }],
+      [
+        ...previous.flatMap((turn) => [
+          { role: 'user' as const, content: turn.question, at },
+          { role: 'assistant' as const, content: turn.reply, at },
+        ]),
+        { role: 'user', content: checked.value.message, at },
+      ],
       { onTool: (call) => calls.push(call) },
     )
     return {

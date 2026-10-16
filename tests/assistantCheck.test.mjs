@@ -5,8 +5,10 @@ import {
   CHECK_QUESTIONS,
   checkReply,
   describeCall,
+  parseHistory,
   parseQuestions,
   pricesIn,
+  splitChain,
 } from '../src/domain/assistantCheck.mjs'
 
 test('вопросы из поля: по строке, без пустых и повторов, не больше лимита', () => {
@@ -20,6 +22,22 @@ test('вопросы из поля: по строке, без пустых и п
   )
   assert.deepEqual(parseQuestions(null), [])
   assert.ok(CHECK_QUESTIONS.length >= 20 && CHECK_QUESTIONS.length <= CHECK_LIMIT)
+})
+
+test('разговор в одной строке: реплики через стрелку, прошлые шаги проверяются', () => {
+  assert.deepEqual(splitChain('Нужна программа для оснований → Обычные откосы -> На год'), [
+    'Нужна программа для оснований',
+    'Обычные откосы',
+    'На год',
+  ])
+  assert.deepEqual(splitChain('Сколько стоит GEO5?'), ['Сколько стоит GEO5?'])
+  assert.deepEqual(parseHistory(undefined), [])
+  assert.deepEqual(parseHistory([{ question: ' Основания ', reply: 'Что считаете?' }]), [
+    { question: 'Основания', reply: 'Что считаете?' },
+  ])
+  assert.equal(parseHistory([{ question: 'Основания' }]), null)
+  assert.equal(parseHistory('текст'), null)
+  assert.ok(CHECK_QUESTIONS.some((line) => splitChain(line).length > 1))
 })
 
 test('суммы в тенге: пробелы и неразрывные пробелы внутри числа', () => {

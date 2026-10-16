@@ -84,3 +84,7 @@
   margin: 0;
   color: var(--theme-error-750);
 }
+
+.step {
+  color: var(--theme-elevation-500);
+}

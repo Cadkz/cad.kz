@@ -6,6 +6,7 @@ import { cheapestTotal } from '../domain/picker.mjs'
 import { compareInSection, priorityRank } from '../domain/priority.mjs'
 import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
 import { catalogExtras } from './catalogExtras'
+import { type CatalogVariant, catalogVariants } from './catalogVariants'
 import { familyLines } from './families'
 import { withFamilies } from './familyCards'
 import { formatKzt } from './format'
@@ -174,6 +175,8 @@ async function loadCatalog(): Promise<{
   items: CatalogItem[]
   /** Дополнительные карточки только для страницы каталога (src/lib/catalogExtras.ts). */
   extras: CatalogItem[]
+  /** Модули, пакеты и программы семейств внутри карточек — для Кадди (src/lib/catalogVariants.ts). */
+  variants: CatalogVariant[]
   facets: Facet[]
   lines: CatalogLine[]
 }> {
@@ -293,6 +296,13 @@ async function loadCatalog(): Promise<{
     priceOf: (list) => cheapest(list, context),
     cartOf: (list) => singleOffer(list, context),
   })
+  const variants = catalogVariants({
+    items,
+    products: products.docs,
+    offersByProduct,
+    families,
+    priceOf: (list) => cheapest(list, context),
+  })
   const listed = withFamilies(items, hidden, families, (ids) => {
     const list = ids.flatMap((id) => offersByProduct.get(id) ?? [])
     return { priceFrom: cheapest(list, context), offers: list.length }
@@ -325,5 +335,5 @@ async function loadCatalog(): Promise<{
         ]
       : []
   })
-  return { items: listed, extras, facets, lines }
+  return { items: listed, extras, variants, facets, lines }
 }

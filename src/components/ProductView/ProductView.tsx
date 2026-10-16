@@ -105,7 +105,7 @@ export async function ProductView({
             { title: product.title },
           ]}
         />
-        <PickerProvider view={product.picker} meta={meta} pick={pick}>
+        <PickerProvider key={String(pick)} view={product.picker} meta={meta} pick={pick}>
           <ProductLayout
             asideLast
             header={

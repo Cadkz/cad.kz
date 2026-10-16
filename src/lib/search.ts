@@ -16,9 +16,13 @@ export type CatalogSearch = {
  * Поиск по каталогу: те же карточки, что в каталоге (с семействами вместо скрытых товаров).
  * Разделы, состав и описание товара поиску даёт getSearchExtras, в карточки они не попадают.
  */
-export async function searchCatalog(query: string): Promise<CatalogSearch> {
+export async function searchCatalog(
+  query: string,
+  /** Уже загруженный каталог (Кадди берёт из него и варианты), чтобы не грузить второй раз. */
+  catalog?: Promise<Awaited<ReturnType<typeof getCatalog>>>,
+): Promise<CatalogSearch> {
   if (!query.trim()) return { items: [], partial: false, addons: [], bases: [] }
-  const [{ items }, extras] = await Promise.all([getCatalog(), getSearchExtras()])
+  const [{ items }, extras] = await Promise.all([catalog ?? getCatalog(), getSearchExtras()])
   const searchable = items.map((item) => ({
     ...item,
     // У карточки семейства id — минус id линейки (src/lib/familyCards.ts).

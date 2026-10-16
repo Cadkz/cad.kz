@@ -12,6 +12,7 @@ import {
   isQuickAction,
   mentionedCards,
   modelHistory,
+  promptLinks,
   QUICK_ACTIONS,
   quickAction,
   RENEW_CARD,
@@ -99,6 +100,76 @@ test('ссылка находится, если Кадди написал мод
   )
   // Год сам по себе не код модели: «2027» не тянет за собой AutoCAD LT.
   assert.deepEqual(mentionedCards('Revit 2027 — 5 388 860 ₸.', found), [])
+})
+
+test('назван вариант товара — карточка ведёт на него вместо общей карточки', () => {
+  const found = [
+    { id: 5, title: 'GEO5', href: '/catalog/geo5/', vendor: 'Fine', price: 'от 893 200 ₸' },
+    { id: 7, title: 'ЛИРА-FEM', href: '/catalog/lira/', vendor: 'ЛИРА софт', price: null },
+  ]
+  const variant = (id, parent, label, title) => ({
+    id,
+    parent,
+    label,
+    title,
+    href: `/v/${-id}`,
+    vendor: null,
+    price: null,
+  })
+  const variants = [
+    variant(-1, 5, 'Устойчивость откоса', 'GEO5 Устойчивость откоса'),
+    variant(-2, 5, 'Устойчивость откоса - Фильтрация', 'GEO5 Устойчивость откоса - Фильтрация'),
+    variant(-3, 5, 'Базовый', 'GEO5 Базовый'),
+    variant(-4, 5, 'Устой', 'GEO5 Устой'),
+    variant(-5, 7, 'Грунт', 'ЛИРА-FEM Грунт'),
+    variant(-6, 7, 'Pro', 'ЛИРА-FEM Pro'),
+  ]
+  const titles = (/** @type {string} */ reply) =>
+    mentionedCards(reply, found, { variants }).map((c) => c.title)
+  // Другое окончание («откосов») — тот же модуль; общая карточка GEO5 заменяется.
+  assert.deepEqual(titles('Для обычных откосов подойдёт модуль GEO5 «Устойчивость откосов».'), [
+    'GEO5 Устойчивость откоса',
+  ])
+  // Длинное название не даёт лишней карточки короткого.
+  assert.deepEqual(titles('Подойдёт GEO5 Устойчивость откоса - Фильтрация.'), [
+    'GEO5 Устойчивость откоса - Фильтрация',
+  ])
+  assert.deepEqual(titles('Если задач несколько — пакет GEO5 Базовый.'), ['GEO5 Базовый'])
+  // Слово из одного варианта в обычной фразе («грунта») карточки не даёт, «Pro» с товаром — даёт.
+  assert.deepEqual(titles('Для грунта в ЛИРА-FEM нужна редакция Pro.'), ['ЛИРА-FEM Pro'])
+  // «Устой» внутри «устойчивость» — не вариант.
+  assert.deepEqual(titles('GEO5 считает устойчивость.'), ['GEO5'])
+  assert.deepEqual(titles('GEO5 — линейка программ.'), ['GEO5'])
+})
+
+test('адреса чужих сайтов убираются, cad.kz и адреса из правил остаются', () => {
+  const allowed = promptLinks(
+    'Дистрибутив: https://abccenter.kz/download-kz/. Почта office@cad.kz.',
+  )
+  assert.deepEqual(allowed, ['abccenter.kz/download-kz'])
+  assert.equal(
+    cleanReply(
+      'Подойдёт модуль GEO5 «Устойчивость откоса», подробнее: https://geo5.kz/solutions. Это новая лицензия?',
+      allowed,
+    ),
+    'Подойдёт модуль GEO5 «Устойчивость откоса». Это новая лицензия?',
+  )
+  assert.equal(
+    cleanReply('Подойдёт GEO5.\nПодробнее на сайте geo5.kz/solutions.', allowed),
+    'Подойдёт GEO5.',
+  )
+  assert.equal(
+    cleanReply('Скачайте дистрибутив: https://abccenter.kz/download-kz/ и установите.', allowed),
+    'Скачайте дистрибутив: https://abccenter.kz/download-kz/ и установите.',
+  )
+  assert.equal(
+    cleanReply('Пишите на office@cad.kz или смотрите cad.kz/catalog.', allowed),
+    'Пишите на office@cad.kz или смотрите cad.kz/catalog.',
+  )
+  assert.equal(
+    cleanReply('Нормы СП РК 5.01-102, версия 25.1.', allowed),
+    'Нормы СП РК 5.01-102, версия 25.1.',
+  )
 })
 
 test('демо-режим честно говорит, что ИИ не подключён', () => {

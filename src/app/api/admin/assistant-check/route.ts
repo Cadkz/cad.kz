@@ -8,9 +8,9 @@ import { checkQuestion } from '@/lib/assistant/check'
 export const maxDuration = 60
 
 export async function POST(request: Request) {
-  const checked = await adminRequest(request, 4000, ['admin', 'editor'])
+  const checked = await adminRequest(request, 16000, ['admin', 'editor'])
   if ('error' in checked) return checked.error
-  const result = await checkQuestion(checked.payload, checked.data.question)
+  const result = await checkQuestion(checked.payload, checked.data.question, checked.data.history)
   if (!result.ok) return reply({ error: result.error }, result.status)
   return reply(result)
 }

@@ -2,13 +2,20 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { AdminButton } from '@/components/AdminButton/AdminButton'
-import { CHECK_LIMIT, CHECK_QUESTIONS, parseQuestions } from '@/domain/assistantCheck.mjs'
+import {
+  CHECK_LIMIT,
+  CHECK_QUESTIONS,
+  parseQuestions,
+  splitChain,
+} from '@/domain/assistantCheck.mjs'
 import { downloadText, toCsv } from '@/lib/bitrixImportClient'
 import styles from './AssistantCheck.module.css'
 
 type Flag = { level: 'warn' | 'info'; text: string }
 type Row = {
   question: string
+  /** Шаг разговора из строки «вопрос → ответ клиента → …»: «2 из 3». */
+  step?: string
   reply?: string
   cards?: { title: string; href: string }[]
   calls?: string[]
@@ -36,12 +43,14 @@ function save(text: string) {
   }
 }
 
-async function ask(question: string): Promise<Row> {
+type Turn = { question: string; reply: string }
+
+async function ask(question: string, history: Turn[]): Promise<Row> {
   try {
     const response = await fetch('/api/admin/assistant-check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question }),
+      body: JSON.stringify({ question, history }),
     })
     const data = await response.json()
     if (!response.ok) return { question, error: data.error || `Ошибка ${response.status}` }
@@ -67,16 +76,26 @@ export function AssistantCheck() {
   }, [])
 
   const questions = parseQuestions(text)
+  const steps = questions.reduce((sum, line) => sum + splitChain(line).length, 0)
 
   async function run() {
     save(text)
     stop.current = false
     setBusy(true)
     setRows([])
-    for (const question of questions) {
+    for (const line of questions) {
+      // Строка с «→» — разговор: Кадди отвечает на каждую реплику, помня предыдущие.
+      const parts = splitChain(line)
+      const history: Turn[] = []
+      for (const [index, question] of parts.entries()) {
+        if (stop.current) break
+        const step = parts.length > 1 ? `${index + 1} из ${parts.length}` : undefined
+        const row = { ...(await ask(question, history)), step }
+        setRows((list) => [...list, row])
+        if (row.error || row.reply === undefined) break
+        history.push({ question, reply: row.reply })
+      }
       if (stop.current) break
-      const row = await ask(question)
-      setRows((list) => [...list, row])
     }
     setBusy(false)
   }
@@ -84,6 +103,7 @@ export function AssistantCheck() {
   function report() {
     const head = [
       'Вопрос',
+      'Шаг разговора',
       'Ответ Кадди',
       'Ссылки под ответом',
       'Обращения к каталогу',
@@ -92,8 +112,9 @@ export function AssistantCheck() {
     ]
     const body = rows.map((row) => [
       row.question,
+      row.step ?? '',
       row.error ? `Ошибка: ${row.error}` : (row.reply ?? ''),
-      (row.cards ?? []).map((c) => c.title).join('; '),
+      (row.cards ?? []).map((c) => `${c.title} (${c.href})`).join('; '),
       (row.calls ?? []).join('\n'),
       (row.flags ?? []).map((f) => f.text).join('\n'),
       row.ms ? (row.ms / 1000).toFixed(1) : '',
@@ -106,7 +127,10 @@ export function AssistantCheck() {
   return (
     <div className={styles.root}>
       <label className={styles.field}>
-        <span>Вопросы клиентов — по одному в строке, до {CHECK_LIMIT}</span>
+        <span>
+          Вопросы клиентов — по одному в строке, до {CHECK_LIMIT}. Разговор в несколько шагов — в
+          одной строке через «→»: «Нужна программа для оснований → Обычные откосы»
+        </span>
         <textarea
           className={styles.questions}
           value={text}
@@ -117,7 +141,7 @@ export function AssistantCheck() {
       </label>
       <div className={styles.actions}>
         <AdminButton disabled={busy || !questions.length} onClick={run}>
-          Проверить {questions.length} вопр.
+          Проверить {questions.length} вопр.{steps > questions.length ? ` (${steps} шагов)` : ''}
         </AdminButton>
         {busy && (
           <AdminButton secondary onClick={() => (stop.current = true)}>
@@ -139,15 +163,17 @@ export function AssistantCheck() {
       </div>
       {rows.length > 0 && (
         <p className={styles.summary} aria-live="polite">
-          {busy ? `Проверено ${rows.length} из ${questions.length}…` : `Проверено ${rows.length}.`}{' '}
-          С флагами или ошибкой: {warnings}.
+          {busy ? `Проверено ${rows.length} из ${steps}…` : `Проверено ${rows.length}.`} С флагами
+          или ошибкой: {warnings}.
         </p>
       )}
       {rows.length > 0 && (
         <ol className={styles.list}>
-          {rows.map((row) => (
-            <li key={row.question} className={styles.item}>
+          {rows.map((row, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: список только дополняется, порядок не меняется
+            <li key={index} className={styles.item}>
               <p className={styles.question}>
+                {row.step && <span className={styles.step}>Шаг {row.step} · </span>}
                 <strong>{row.question}</strong>
               </p>
               {row.error ? (
@@ -157,7 +183,15 @@ export function AssistantCheck() {
                   <p className={styles.reply}>{row.reply}</p>
                   {row.cards && row.cards.length > 0 && (
                     <p className={styles.meta}>
-                      Под ответом: {row.cards.map((c) => c.title).join('; ')}
+                      Под ответом:{' '}
+                      {row.cards.map((card, n) => (
+                        <span key={card.href}>
+                          {n > 0 && '; '}
+                          <a href={card.href} target="_blank" rel="noreferrer">
+                            {card.title}
+                          </a>
+                        </span>
+                      ))}
                     </p>
                   )}
                   {row.calls && row.calls.length > 0 && (

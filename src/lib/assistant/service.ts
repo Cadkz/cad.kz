@@ -12,6 +12,7 @@ import {
   handoffDetails,
   mentionedCards,
   modelHistory,
+  promptLinks,
   quickAction,
   RENEW_CARD,
   type StoredMessage,
@@ -77,24 +78,30 @@ async function modelAnswer(
     onTool?.({ name, input, result })
     return result
   }
+  const system = systemPrompt({
+    now: new Date(),
+    knowledge,
+    price,
+    handoff,
+    time: workTime(new Date()),
+  })
   const { text } = await anthropicReply({
     fetchImpl: fetch,
     apiKey,
     model,
-    system: systemPrompt({
-      now: new Date(),
-      knowledge,
-      price,
-      handoff,
-      time: workTime(new Date()),
-    }),
+    system,
     messages: modelHistory(messages),
     tools: ASSISTANT_TOOLS,
     runTool,
     signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
   })
-  const reply = cleanReply(text)
-  return { reply, cards: mentionedCards(reply, tools.found), handoff: tools.handoff() }
+  // Ссылки — только cad.kz и адреса из правил и базы знаний; остальное сайт показывает карточками.
+  const reply = cleanReply(text, promptLinks(system[0]))
+  return {
+    reply,
+    cards: mentionedCards(reply, tools.found, { variants: tools.variants }),
+    handoff: tools.handoff(),
+  }
 }
 
 /**

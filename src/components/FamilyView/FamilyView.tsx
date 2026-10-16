@@ -65,7 +65,7 @@ export async function FamilyView({
             { title: family.title },
           ]}
         />
-        <PickerProvider view={family.picker} meta={meta} pick={pick}>
+        <PickerProvider key={String(pick)} view={family.picker} meta={meta} pick={pick}>
           <ProductLayout
             asideLast
             header={
