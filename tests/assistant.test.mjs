@@ -621,6 +621,12 @@ test('отчёт 16.10 (2): название внутри другого наз�
     }).map((c) => c.title),
     ['Revit', 'AutoCAD Revit LT Suite'],
   )
+  // Revit и AutoCAD вместе — AEC Collection (решение владельца 16.10.2026), Кадди пишет сокращённо.
+  const aec = [card(5, 'Architecture Engineering & Construction Collection')]
+  assert.deepEqual(
+    mentionedCards('Подойдёт AEC Collection.', aec).map((c) => c.title),
+    ['Architecture Engineering & Construction Collection'],
+  )
   assert.equal(
     cleanReply('Стоимость уточнит менеджер.\n\n[ЛИРА - FEM (ЛИРА САПР) Грунт]'),
     'Стоимость уточнит менеджер.',

@@ -401,7 +401,8 @@ export function mentionedCards(reply, found, { variants = [], limit = 4 } = {}) 
 /**
  * Как ещё Кадди может написать название товара: без пояснения в скобках и номера версии
  * («ЛИРА - FEM (ЛИРА САПР)» → «ЛИРА-FEM», «SCAD Office v. 25.1» → «SCAD Office»), само пояснение
- * («ЛИРА САПР»), у названия из четырёх слов и длиннее — без первого слова («Revit LT Suite»).
+ * («ЛИРА САПР»), у названия из четырёх слов и длиннее — без первого слова («Revit LT Suite»),
+ * у коллекций Autodesk — сокращение («AEC Collection»).
  * Ключи — сжатые (squash), короче четырёх знаков не берутся.
  */
 function titleKeys(/** @type {string} */ title) {
@@ -411,7 +412,11 @@ function titleKeys(/** @type {string} */ title) {
   // Длинное название без первого слова: «AutoCAD Revit LT Suite» → «Revit LT Suite» (отчёт 16.10.2026, 3).
   const words = noVersion.split(/\s+/)
   const tail = words.length >= 4 ? words.slice(1).join(' ') : ''
-  const keys = [title, base, noVersion, tail].map(squash).filter((k) => k.length >= 4)
+  // Коллекции Autodesk пишут сокращённо: «Architecture Engineering & Construction Collection» → «AEC Collection».
+  const at = words.findIndex((w) => /^collection$/i.test(w))
+  const lead = words.slice(0, Math.max(at, 0)).filter((w) => /^[A-Z]/.test(w))
+  const short = at >= 2 && lead.length >= 2 ? `${lead.map((w) => w[0]).join('')} Collection` : ''
+  const keys = [title, base, noVersion, tail, short].map(squash).filter((k) => k.length >= 4)
   const extra = inner.map(squash).filter((k) => k.length >= 5)
   return [...new Set([...keys, ...extra])]
 }
@@ -847,6 +852,7 @@ const RULES = `Ты — Кадди, виртуальный ассистент к
 — клиент спрашивал цену — найди вариант в прайсе (раздел 5); не спрашивал — покажи следующий шаг: карточка под ответом откроет страницу, где этот вариант уже выбран, оттуда — в корзину.
 Пример: «Для обычных откосов подойдёт GEO5 Устойчивость откоса: считает запас устойчивости откоса разными методами. По карточке ниже он уже выбран — можно сразу добавить в корзину.»
 Сравнение. Клиент выбирает между двумя продуктами или редакциями — сравни коротко по тому, что важно для его задачи, и закончи рекомендацией; не хватает одного факта — один вопрос.
+Revit и AutoCAD вместе («Revit и AutoCAD», «комплект», «набор Autodesk», «Revit + AutoCAD в одном») — советуй Architecture Engineering & Construction Collection (пиши это название, можно добавить «AEC Collection»): в ней полные Revit и AutoCAD, их обычно и берут (решение владельца 16.10.2026). Найди её через searchProducts и searchPriceList. AutoCAD Revit LT Suite предлагай, только если клиент сам назвал LT или Suite или спросил вариант дешевле; сам как альтернативу к Revit или AutoCAD не добавляй.
 «Есть дешевле?» — это не просьба о скидке: найди более простой вариант, который всё ещё решает задачу (например, AutoCAD LT, если нужны только 2D-чертежи). Скидка — к менеджеру.
 Шаг 1. Продукт. Распознавай разговорные названия («фьюжен», «ревит», «автокад») — это семейство, а не конкретная лицензия. Продукт не указан, а спрашивают цену: «Стоимость какой программы или оборудования вас интересует?» Известен — не проси назвать повторно.
 Шаг 2. Редакция, если есть выбор и он влияет на ответ: «Вам нужен полный AutoCAD или AutoCAD LT?» Клиент не знает различий — объясни одной-двумя фразами по описанию из каталога и базе знаний и посоветуй.
