@@ -37,8 +37,8 @@ type Props = {
 /**
  * Окно чата с Кадди. От 640 px — окно в правом нижнем углу, на месте Кадди: страницу можно листать,
  * не закрывая разговор. На телефоне — на весь экран, страница под ним не прокручивается.
- * Escape и клик мимо окна (от 640 px) закрывают его; форма передачи менеджеру открывается
- * вместо поля ввода.
+ * Escape и клик мимо окна (от 640 px) закрывают его, на телефоне — ещё и переход по ссылке
+ * на страницу сайта; форма передачи менеджеру открывается вместо поля ввода.
  */
 export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Props) {
   const titleId = useId()
@@ -86,12 +86,26 @@ export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Pr
       if (target === root || panel.current?.contains(target)) return
       onClose(false)
     }
+    // Телефон: окно на весь экран, и переход по ссылке из чата (карточка товара, «Корзина»)
+    // шёл за ним незаметно — казалось, что ссылка не работает (замечание владельца 20.10.2026).
+    // Ссылка на страницу сайта закрывает окно, страница видна сразу; разговор сохраняется,
+    // голова Кадди в шапке открывает его снова. WhatsApp и другие сайты — как обычно.
+    function onLinkClick(event: MouseEvent) {
+      if (!phone.matches || !(event.target instanceof Element)) return
+      const link = event.target.closest('a[href]')
+      if (!(link instanceof HTMLAnchorElement) || link.target === '_blank') return
+      if (link.origin !== window.location.origin) return
+      onClose(false)
+    }
+    const node = panel.current
     document.addEventListener('keydown', onKey)
     document.addEventListener('pointerdown', onPointerDown)
+    node?.addEventListener('click', onLinkClick)
     return () => {
       phone.removeEventListener('change', lock)
       document.removeEventListener('keydown', onKey)
       document.removeEventListener('pointerdown', onPointerDown)
+      node?.removeEventListener('click', onLinkClick)
       delete root.dataset.scrollLocked
     }
   }, [onClose])
