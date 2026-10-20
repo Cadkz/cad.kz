@@ -1,6 +1,7 @@
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
 import { Faq } from '@/components/Faq/Faq'
+import { JsonLd } from '@/components/JsonLd/JsonLd'
 import { PickerBar } from '@/components/PickerBar/PickerBar'
 import { PickerHelp } from '@/components/PickerHelp/PickerHelp'
 import { PickerProvider } from '@/components/PickerProvider/PickerProvider'
@@ -15,6 +16,7 @@ import { ProductSection } from '@/components/ProductSection/ProductSection'
 import { PropertyList } from '@/components/PropertyList/PropertyList'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { kindProfile } from '@/domain/productKind.mjs'
+import { productLd } from '@/domain/structuredData.mjs'
 import { getCatalog } from '@/lib/catalog'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
@@ -22,6 +24,7 @@ import { cms } from '@/lib/payload'
 import type { PickTarget, ProductPage, RelatedProduct } from '@/lib/product'
 import { getRecommendations } from '@/lib/recommendations'
 import { parseBody } from '@/lib/richText'
+import { shortDescription, siteUrl } from '@/lib/seo'
 import type { PickItem } from '../PickRow/PickRow'
 
 const groupLabels = {
@@ -73,6 +76,19 @@ export async function ProductView({
   const direction = product.sections.find((s) => s.isDirection)
   const guided = product.pageView === 'picker'
   const profile = kindProfile(product.kind)
+  // Цена для поисковиков — та же «от», что в каталоге и в итоге подбора на этой странице.
+  const listed = byHref.get(product.path)
+  const structured = productLd({
+    base: siteUrl(),
+    path: product.path,
+    title: product.title,
+    description: shortDescription(product.summary || product.description, 300),
+    images: product.pictures.map((picture) => picture.url),
+    vendor: product.vendor,
+    category: direction?.title ?? product.sections[0]?.title,
+    priceFrom: listed?.priceFrom ?? null,
+    offersCount: listed?.offersCount ?? 0,
+  })
   const meta = {
     productId: product.id,
     kind: product.kind,
@@ -91,6 +107,7 @@ export async function ProductView({
 
   return (
     <main>
+      <JsonLd data={structured} />
       <Container>
         <Breadcrumbs
           items={[

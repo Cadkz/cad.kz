@@ -6,11 +6,13 @@ import { Badge } from '@/components/Badge/Badge'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
 import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
+import { JsonLd } from '@/components/JsonLd/JsonLd'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
 import { PrevNext } from '@/components/PrevNext/PrevNext'
 import { ReadingLayout } from '@/components/ReadingLayout/ReadingLayout'
 import { RelatedList } from '@/components/RelatedList/RelatedList'
 import { Toc } from '@/components/Toc/Toc'
+import { articleLd } from '@/domain/structuredData.mjs'
 import { formatDate } from '@/lib/format'
 import { getHome } from '@/lib/home'
 import { newsHref } from '@/lib/navigationHrefs'
@@ -27,7 +29,7 @@ import {
   toCard,
 } from '@/lib/publications'
 import { imageSources, parseBody } from '@/lib/richText'
-import { pageMetadata } from '@/lib/seo'
+import { pageMetadata, siteUrl } from '@/lib/seo'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -60,7 +62,7 @@ export default async function PublicationPage({ params }: Props) {
   if (!publication) notFound()
   const blocks = parseBody(publication.body, publication.title)
   const theme = themeOf(publication)
-  const [neighbors, sameTopic, latest, home, pictures] = await Promise.all([
+  const [neighbors, sameTopic, latest, home, pictures, topicCovers] = await Promise.all([
     getNeighbors(publication),
     theme?.slug
       ? getPublications({ kinds: [publication.kind], topic: theme.slug, limit: 6 })
@@ -68,6 +70,7 @@ export default async function PublicationPage({ params }: Props) {
     getPublications({ kinds: [publication.kind], limit: 6 }),
     getHome(),
     cms().then((payload) => bodyPictures(payload, imageSources(blocks))),
+    getTopicCovers(),
   ])
   // Оглавление — только разделы (h2), их не больше пяти (правило `domain/outline.mjs`).
   const toc = blocks.flatMap((b) =>
@@ -83,8 +86,21 @@ export default async function PublicationPage({ params }: Props) {
   const topicHref = (slug: string) =>
     publication.kind === 'article' ? `/articles?topic=${slug}` : `/news?topic=${slug}`
 
+  // Разметка для поисковиков: заголовок, дата и обложка (та же, что для соцсетей).
+  const structured = articleLd({
+    base: siteUrl(),
+    path: newsHref(publication.slug),
+    title: publication.title,
+    description: excerptOf(publication),
+    image: coverOf(publication, topicCovers)?.url,
+    publishedAt: publication.publishedAt,
+    updatedAt: publication.updatedAt,
+    kind: publication.kind,
+  })
+
   return (
     <main>
+      <JsonLd data={structured} />
       <Container>
         <Breadcrumbs
           items={[

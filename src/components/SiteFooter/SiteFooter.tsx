@@ -1,20 +1,38 @@
 import Link from 'next/link'
+import { organizationLd, websiteLd } from '@/domain/structuredData.mjs'
 import { getContacts } from '@/lib/navigation'
+import { siteUrl } from '@/lib/seo'
 import { footerColumns } from '@/lib/siteNav'
 import { ContactList } from '../ContactList/ContactList'
 import { Container } from '../Container/Container'
+import { JsonLd } from '../JsonLd/JsonLd'
 import { Logo } from '../Logo/Logo'
 import styles from './SiteFooter.module.css'
 
+/** Логотип для поисковиков (карточка компании в выдаче). */
+const LOGO = '/images/brand/cad-kz-logo.png'
+
 /**
  * Общий подвал сайта: на всех страницах одинаковый, многоколоночный. Белая карточка
- * с мягкой тенью на фоне страницы.
+ * с мягкой тенью на фоне страницы. Здесь же разметка компании и сайта для поисковиков —
+ * из тех же контактов, что в подвале.
  */
 export async function SiteFooter() {
   const contacts = await getContacts()
   const year = new Date().getFullYear()
+  const base = siteUrl()
   return (
     <footer className={styles.footer}>
+      <JsonLd
+        data={organizationLd({
+          base,
+          name: 'CAD.kz',
+          logo: LOGO,
+          description: contacts.footerText,
+          contacts,
+        })}
+      />
+      <JsonLd data={websiteLd({ base, name: 'CAD.kz' })} />
       <Container>
         <div className={styles.card}>
           <div className={styles.brand}>
