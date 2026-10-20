@@ -87,6 +87,7 @@ export interface Config {
     'activity-log': ActivityLog;
     redirects: Redirect;
     'import-runs': ImportRun;
+    integrations: Integration;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -116,6 +117,7 @@ export interface Config {
     'activity-log': ActivityLogSelect<false> | ActivityLogSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'import-runs': ImportRunsSelect<false> | ImportRunsSelect<true>;
+    integrations: IntegrationsSelect<false> | IntegrationsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -919,6 +921,25 @@ export interface ImportRun {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "integrations".
+ */
+export interface Integration {
+  id: number;
+  key: string;
+  state:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1020,6 +1041,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'import-runs';
         value: number | ImportRun;
+      } | null)
+    | ({
+        relationTo: 'integrations';
+        value: number | Integration;
       } | null)
     | ({
         relationTo: 'users';
@@ -1565,6 +1590,16 @@ export interface RedirectsSelect<T extends boolean = true> {
 export interface ImportRunsSelect<T extends boolean = true> {
   idempotencyKey?: T;
   snapshot?: T;
+  state?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "integrations_select".
+ */
+export interface IntegrationsSelect<T extends boolean = true> {
+  key?: T;
   state?: T;
   updatedAt?: T;
   createdAt?: T;

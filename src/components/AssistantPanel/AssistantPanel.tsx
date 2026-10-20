@@ -148,6 +148,14 @@ export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Pr
           Демоверсия: ИИ не подключён, Кадди ищет по каталогу.
         </p>
       )}
+      {chat.live && (
+        <p className={styles.note}>
+          <Info size={16} strokeWidth={1.75} aria-hidden="true" />
+          {chat.manager
+            ? 'Вам отвечает менеджер CAD.kz. Кадди пока молчит.'
+            : 'Разговор видят менеджеры CAD.kz и могут подключиться.'}
+        </p>
+      )}
       {handoff ? (
         <AssistantHandoff
           conversationId={chat.conversationId}
@@ -167,6 +175,7 @@ export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Pr
           />
           <AssistantComposer
             disabled={chat.waiting || !chat.conversationId}
+            manager={chat.manager}
             onSend={chat.send}
             onHandoff={() => setHandoff({})}
           />

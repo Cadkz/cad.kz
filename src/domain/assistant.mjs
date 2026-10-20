@@ -84,6 +84,11 @@ export function wantsRenewal(/** @type {string} */ message) {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
+/** Ключ разговора из браузера (UUID) в едином виде или null, если он не похож на ключ. */
+export function conversationKey(/** @type {unknown} */ value) {
+  return typeof value === 'string' && UUID.test(value) ? value.toLowerCase() : null
+}
+
 /** Управляющие символы, кроме табуляции и перевода строки, — признак мусора или попытки подмены. */
 function hasControl(/** @type {string} */ value) {
   for (const char of value) {
@@ -135,11 +140,13 @@ export function validateChat(raw) {
  * варианта («Устойчивость откоса»), title — полное («GEO5 Устойчивость откоса»).
  *
  * @typedef {object} StoredMessage
- * @property {'user' | 'assistant'} role
+ * @property {'user' | 'assistant' | 'manager'} role  manager — менеджер ответил из открытой линии Битрикс24.
  * @property {string} content
  * @property {string} at
  * @property {AssistantCard[]} [cards]
  * @property {string[]} [replies]  Кнопки быстрых ответов под вопросом Кадди (quickReplies.mjs).
+ * @property {string} [name]  Имя менеджера (у сообщений менеджера).
+ * @property {string} [ref]  Номер сообщения в Битрикс24: событие могут прислать дважды.
  */
 
 /** Сообщение — текст кнопки быстрого действия (а не вопрос, написанный клиентом). */
@@ -164,15 +171,17 @@ export function countTurns(/** @type {StoredMessage[]} */ messages) {
  * @returns {{ role: 'user' | 'assistant', content: string }[]}
  */
 export function modelHistory(messages, limit = ASSISTANT_LIMITS.historyMessages) {
-  const recent = messages.slice(-limit)
+  // Реплики менеджера модели не показываем: пока он в разговоре, Кадди молчит.
+  const recent = messages.filter((m) => m.role !== 'manager').slice(-limit)
   const start = recent.findIndex((m) => m.role === 'user')
   /** @type {{ role: 'user' | 'assistant', content: string }[]} */
   const history = []
   for (const message of start < 0 ? [] : recent.slice(start)) {
     const last = history[history.length - 1]
     // Два сообщения одной стороны подряд (например, ответ не сохранился) склеиваем.
-    if (last && last.role === message.role) last.content += `\n\n${message.content}`
-    else history.push({ role: message.role, content: message.content })
+    const role = message.role === 'user' ? 'user' : 'assistant'
+    if (last && last.role === role) last.content += `\n\n${message.content}`
+    else history.push({ role, content: message.content })
   }
   return history
 }
@@ -195,7 +204,7 @@ function clip(/** @type {string} */ text, /** @type {number} */ max) {
  * суть, а не «здравствуйте». Коротко и по-человечески: что собрал Кадди (продукт, задача), вопрос
  * клиента и посчитанные Кадди суммы — итог, если он был, иначе до двух цен. Цены берутся только
  * из ответов Кадди (а он называет их только из прайса).
- * @param {{ role: 'user' | 'assistant', content: string }[]} messages
+ * @param {{ role: 'user' | 'assistant' | 'manager', content: string }[]} messages
  * @param {{ name?: string, details?: { title: string, value: string }[] }} [prefill]
  */
 export function whatsappMessage(messages, prefill) {

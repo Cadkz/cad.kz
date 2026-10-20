@@ -2,7 +2,8 @@
  * Сообщение диалога с ИИ-консультантом в лиде. Сам консультант — src/lib/assistant/ (адаптер модели
  * по MODEL_PROVIDER, инструменты поиска и цены, демо-режим без модели).
  */
-export type Message = { role: 'user' | 'assistant'; content: string }
+/** manager — менеджер ответил клиенту из открытой линии Битрикс24 (name — его имя). */
+export type Message = { role: 'user' | 'assistant' | 'manager'; content: string; name?: string }
 export type CrmLead = {
   idempotencyKey: string
   orderNumber: string

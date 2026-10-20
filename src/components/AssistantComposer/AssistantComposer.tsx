@@ -7,6 +7,8 @@ import styles from './AssistantComposer.module.css'
 
 type Props = {
   disabled: boolean
+  /** Менеджер уже в разговоре (открытая линия): пишем ему, передавать некому. */
+  manager?: boolean
   onSend: (text: string) => void
   onHandoff: () => void
 }
@@ -18,7 +20,7 @@ const WARN_AT = ASSISTANT_LIMITS.messageChars - 100
  * Поле вопроса: Enter — отправить, Shift+Enter — новая строка. Пока Кадди отвечает, отправить
  * нельзя, но печатать можно. Под полем — «Передать менеджеру».
  */
-export function AssistantComposer({ disabled, onSend, onHandoff }: Props) {
+export function AssistantComposer({ disabled, manager = false, onSend, onHandoff }: Props) {
   const [text, setText] = useState('')
   const fieldId = useId()
   const counterId = useId()
@@ -39,14 +41,14 @@ export function AssistantComposer({ disabled, onSend, onHandoff }: Props) {
     <form className={styles.composer} onSubmit={submit}>
       <div className={styles.row}>
         <label htmlFor={fieldId} className="visually-hidden">
-          Ваш вопрос Кадди
+          {manager ? 'Сообщение менеджеру' : 'Ваш вопрос Кадди'}
         </label>
         <textarea
           id={fieldId}
           className={styles.field}
           rows={2}
           maxLength={ASSISTANT_LIMITS.messageChars}
-          placeholder="Например, нужен расчёт металлоконструкций"
+          placeholder={manager ? 'Напишите менеджеру' : 'Например, нужен расчёт металлоконструкций'}
           value={text}
           onChange={(event) => setText(event.target.value)}
           onKeyDown={onKeyDown}
@@ -62,10 +64,12 @@ export function AssistantComposer({ disabled, onSend, onHandoff }: Props) {
         </button>
       </div>
       <div className={styles.bottom}>
-        <button type="button" className={styles.handoff} onClick={onHandoff}>
-          <Headset size={16} strokeWidth={1.75} aria-hidden="true" />
-          Передать менеджеру
-        </button>
+        {!manager && (
+          <button type="button" className={styles.handoff} onClick={onHandoff}>
+            <Headset size={16} strokeWidth={1.75} aria-hidden="true" />
+            Передать менеджеру
+          </button>
+        )}
         {text.length > WARN_AT && (
           <span id={counterId} className={styles.counter}>
             Осталось знаков: {ASSISTANT_LIMITS.messageChars - text.length}

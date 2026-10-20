@@ -115,7 +115,22 @@ export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
           key={index}
           className={message.role === 'user' ? styles.userRow : styles.botRow}
         >
-          <p className={message.role === 'user' ? styles.user : styles.bot}>{message.content}</p>
+          {message.role === 'manager' && (
+            <span className={styles.who}>
+              {message.name ? `Менеджер ${message.name}` : 'Менеджер CAD.kz'}
+            </span>
+          )}
+          <p
+            className={
+              message.role === 'user'
+                ? styles.user
+                : message.role === 'manager'
+                  ? styles.manager
+                  : styles.bot
+            }
+          >
+            {message.content}
+          </p>
           {index === quick && message.replies && message.replies.length > 0 && (
             <div className={styles.actions}>
               {message.replies.map((reply) => (

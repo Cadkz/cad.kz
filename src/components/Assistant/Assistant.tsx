@@ -38,7 +38,7 @@ export function Assistant({ demo, whatsappHref }: Props) {
   const [grumpy, setGrumpy] = useState(false)
   // Буханка и окно выносятся в body: внутри шапки (backdrop-filter) fixed считался бы от неё.
   const [mounted, setMounted] = useState(false)
-  const chat = useAssistant()
+  const chat = useAssistant(open)
   const opener = useRef<HTMLElement | null>(null)
   const opens = useRef<number[]>([])
   const calm = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -95,6 +95,17 @@ export function Assistant({ demo, whatsappHref }: Props) {
       new CustomEvent<AssistantStateDetail>(ASSISTANT_STATE_EVENT, { detail: { open } }),
     )
   }, [open])
+
+  // Менеджер ответил из открытой линии, а окно закрыто — от 640 px открываем его сами, чтобы ответ
+  // не потерялся. На телефоне окно на весь экран: не перекрываем страницу, ответ ждёт в чате.
+  const managers = chat.messages.filter((m) => m.role === 'manager').length
+  const seenManagers = useRef<number | null>(null)
+  useEffect(() => {
+    const before = seenManagers.current
+    seenManagers.current = managers
+    if (before === null || managers <= before || open) return
+    if (window.matchMedia('(min-width: 640px)').matches) show(null)
+  }, [managers, open, show])
 
   const toggle = (from: HTMLElement) => (open ? close() : show(from))
 

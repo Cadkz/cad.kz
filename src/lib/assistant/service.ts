@@ -21,7 +21,12 @@ import {
 } from '@/domain/assistant.mjs'
 import { workTime } from '@/domain/priceTable.mjs'
 import { splitQuickReplies } from '@/domain/quickReplies.mjs'
-import { type ConversationSnapshot, findConversation, saveConversation } from './conversation'
+import {
+  type ConversationSnapshot,
+  findConversation,
+  type StoredConversation,
+  saveConversation,
+} from './conversation'
 import { loadKnowledge, priceSummary } from './priceTable'
 import { type AssistantMode, leadsReachManagers, modelSettings } from './provider'
 import { createTools, findCards, toCard } from './tools'
@@ -40,8 +45,15 @@ export type AssistantAnswer =
       replies: string[]
       demo: boolean
       handoff?: HandoffPrefill
+      /** Разговор идёт в открытую линию Битрикс24: окно чата ждёт ответов менеджера. */
+      live: boolean
     }
+  /** Менеджер уже в разговоре: Кадди молчит, сообщение ушло менеджеру в открытую линию. */
+  | { status: 'forwarded'; live: true }
   | { status: 'limit' | 'busy' | 'failed'; error: string }
+
+/** Сообщение менеджера для окна чата. */
+export type ManagerMessage = { content: string; name: string; at: string }
 
 const FAILED =
   'Не получилось получить ответ. Попробуйте ещё раз через минуту или передайте вопрос менеджеру.'
@@ -157,29 +169,87 @@ export async function answerMessages(
   return answer
 }
 
+type TurnExtra = { mode: AssistantMode; clientHash: string; handoff?: HandoffDraft | null }
+
+/**
+ * Сохраняет новые сообщения разговора. Если разговор успели изменить параллельно ответ менеджера
+ * из открытой линии или отметка об отправке в линию — дописываем к свежей версии. Новый вопрос
+ * клиента параллельно — false: на прошлый вопрос ответ ещё готовится.
+ */
+async function saveTurn(
+  payload: Payload,
+  key: string,
+  stored: StoredConversation | null,
+  added: StoredMessage[],
+  extra: TurnExtra,
+) {
+  const build = (base: StoredConversation | null): ConversationSnapshot => {
+    const snapshot = base?.snapshot
+    const handoff = extra.handoff ?? snapshot?.handoff
+    return {
+      version: 1,
+      mode: extra.mode,
+      messages: [...(snapshot?.messages ?? []), ...added],
+      clientHash: snapshot?.clientHash || extra.clientHash,
+      ...(snapshot?.requestNumber ? { requestNumber: snapshot.requestNumber } : {}),
+      // Последние данные передачи менеджеру: форма подтверждения и лид берут их отсюда, а не из браузера.
+      ...(handoff ? { handoff } : {}),
+      ...(snapshot?.line ? { line: snapshot.line } : {}),
+    }
+  }
+  if (await saveConversation(payload, key, stored, build(stored))) return true
+  const before = stored?.snapshot.messages.length ?? 0
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const latest = await findConversation(payload, key)
+    if (!latest || latest.snapshot.messages.length < before) return false
+    if (latest.snapshot.messages.slice(before).some((m) => m.role === 'user')) return false
+    if (await saveConversation(payload, key, latest, build(latest))) return true
+  }
+  return false
+}
+
 /**
  * Вопрос клиента → ответ Кадди. Сообщение клиента сохраняется и тогда, когда модель не ответила:
- * менеджер увидит вопрос в лиде, если клиент передаст разговор.
+ * менеджер увидит вопрос в лиде, если клиент передаст разговор. live — открытая линия подключена:
+ * если менеджер уже написал клиенту из линии, Кадди молчит и сообщение просто сохраняется (в линию
+ * его отправит маршрут после ответа).
  */
 export async function askAssistant(
   payload: Payload,
   mode: AssistantMode,
   input: { conversationId: string; message: string },
   clientHash: string,
+  live = false,
 ): Promise<AssistantAnswer> {
   const stored = await findConversation(payload, input.conversationId)
   const previous = stored?.snapshot.messages ?? []
-  if (countTurns(previous) >= ASSISTANT_LIMITS.turns)
+  const manager = live && Boolean(stored?.snapshot.line?.manager)
+  if (!manager && countTurns(previous) >= ASSISTANT_LIMITS.turns)
     return {
       status: 'limit',
       error: 'Разговор получился длинным. Передайте его менеджеру — он продолжит с этого места.',
     }
-  const now = new Date().toISOString()
-  const messages: StoredMessage[] = [...previous, { role: 'user', content: input.message, at: now }]
+  const question: StoredMessage = {
+    role: 'user',
+    content: input.message,
+    at: new Date().toISOString(),
+  }
+  const busy = {
+    status: 'busy',
+    error: 'Ответ на прошлый вопрос ещё готовится. Подождите немного.',
+  } as const
+
+  if (manager) {
+    const saved = await saveTurn(payload, input.conversationId, stored, [question], {
+      mode,
+      clientHash,
+    })
+    return saved ? { status: 'forwarded', live: true } : busy
+  }
 
   let answer: Answer | null = null
   try {
-    answer = await answerMessages(payload, mode, messages, {
+    answer = await answerMessages(payload, mode, [...previous, question], {
       handoff: handoffState(stored?.snapshot),
     })
   } catch (error) {
@@ -188,29 +258,21 @@ export async function askAssistant(
     console.error('Консультант не ответил', error instanceof Error ? error.name : 'Error', status)
   }
 
+  const added: StoredMessage[] = [question]
   if (answer)
-    messages.push({
+    added.push({
       role: 'assistant',
       content: answer.reply,
       at: new Date().toISOString(),
       ...(answer.cards.length ? { cards: answer.cards } : {}),
       ...(answer.replies.length ? { replies: answer.replies } : {}),
     })
-  const saved = await saveConversation(payload, input.conversationId, stored, {
-    version: 1,
+  const saved = await saveTurn(payload, input.conversationId, stored, added, {
     mode,
-    messages,
-    clientHash: stored?.snapshot.clientHash || clientHash,
-    ...(stored?.snapshot.requestNumber ? { requestNumber: stored.snapshot.requestNumber } : {}),
-    // Последние данные передачи менеджеру: форма подтверждения и лид берут их отсюда, а не из браузера.
-    ...(answer?.handoff
-      ? { handoff: answer.handoff }
-      : stored?.snapshot.handoff
-        ? { handoff: stored.snapshot.handoff }
-        : {}),
+    clientHash,
+    handoff: answer?.handoff,
   })
-  if (!saved)
-    return { status: 'busy', error: 'Ответ на прошлый вопрос ещё готовится. Подождите немного.' }
+  if (!saved) return busy
   if (!answer) return { status: 'failed', error: FAILED }
   return {
     status: 'ok',
@@ -218,6 +280,21 @@ export async function askAssistant(
     cards: answer.cards,
     replies: answer.replies,
     demo: mode === 'demo',
+    live,
     ...(answer.handoff ? { handoff: handoffPrefill(answer.handoff) } : {}),
   }
+}
+
+/**
+ * Ответы менеджера, которых ещё нет в окне чата: known — сколько их окно уже показало. Окно
+ * спрашивает раз в несколько секунд, пока разговор идёт в открытую линию.
+ */
+export function managerMessages(
+  stored: StoredConversation | null,
+  known: number,
+): ManagerMessage[] {
+  return (stored?.snapshot.messages ?? [])
+    .filter((m) => m.role === 'manager')
+    .slice(known)
+    .map((m) => ({ content: m.content, name: m.name ?? '', at: m.at }))
 }

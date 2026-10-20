@@ -328,7 +328,7 @@ export function makeRequestNumber(
  * анализ CRM видел, откуда пришла сделка, а не только её название.
  * Из чата с Кадди — вся переписка (`messages`): менеджер продолжает разговор с того же места.
  * Почта — если её собрал Кадди в чате (клиент подтвердил передачу с этими данными).
- * @param {{ number: string, idempotencyKey: string, kind: RequestKind, pageTitle: string, choices: { title: string, value: string }[], name: string, phone: string, email?: string, comment: string, consentAt: string, lines: ResolvedLine[], totalKzt: string | null, source?: { button: string, product: string | null, section: string | null, scenario: string | null, page: string | null }, messages?: { role: 'user' | 'assistant', content: string }[], summary?: { title: string, value: string }[] }} request
+ * @param {{ number: string, idempotencyKey: string, kind: RequestKind, pageTitle: string, choices: { title: string, value: string }[], name: string, phone: string, email?: string, comment: string, consentAt: string, lines: ResolvedLine[], totalKzt: string | null, source?: { button: string, product: string | null, section: string | null, scenario: string | null, page: string | null }, messages?: { role: 'user' | 'assistant' | 'manager', content: string, name?: string }[], summary?: { title: string, value: string }[] }} request
  */
 export function toCrmRequest(request) {
   return {
@@ -360,6 +360,10 @@ export function toCrmRequest(request) {
       totalKzt: line.totalKzt ?? '',
     })),
     totalKzt: request.totalKzt ?? '0',
-    messages: (request.messages ?? []).map((m) => ({ role: m.role, content: m.content })),
+    messages: (request.messages ?? []).map((m) => ({
+      role: m.role,
+      content: m.content,
+      ...(m.role === 'manager' && m.name ? { name: m.name } : {}),
+    })),
   }
 }

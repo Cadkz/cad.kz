@@ -6,7 +6,7 @@ import { media, pages, publications, topics } from './collections/content'
 import { crmDeliveries, orders, siteRequests } from './collections/orders'
 import { exchangeRates, pricingSettings } from './collections/pricing'
 import { sectionRules } from './collections/sectionRules'
-import { conversations, importRuns, redirects } from './collections/system'
+import { conversations, importRuns, integrations, redirects } from './collections/system'
 import { users } from './collections/users'
 import { homePage } from './globals/homePage'
 import { siteSettings } from './globals/siteSettings'
@@ -34,7 +34,7 @@ const MENU: { group: string; collections: CollectionConfig[]; globals: GlobalCon
   { group: 'Кадди', collections: [assistantKnowledge, conversations, priceTables], globals: [] },
   {
     group: 'Служебное',
-    collections: [activityLog, redirects, importRuns, users],
+    collections: [activityLog, redirects, importRuns, integrations, users],
     globals: [],
   },
 ]

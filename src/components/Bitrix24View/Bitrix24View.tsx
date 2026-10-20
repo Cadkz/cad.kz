@@ -3,6 +3,7 @@ import type { AdminViewServerProps } from 'payload'
 import { Bitrix24Actions } from '@/components/Bitrix24Actions/Bitrix24Actions'
 import { type Bitrix24Status, loadBitrix24Status } from '@/lib/bitrix24Run'
 import { formatDateTime } from '@/lib/format'
+import { type OpenLineStatus, openLineStatus } from '@/lib/openLine/store'
 import styles from './Bitrix24View.module.css'
 
 function Connection({ status }: { status: Bitrix24Status }) {
@@ -67,6 +68,48 @@ function Queue({ status }: { status: Bitrix24Status }) {
   )
 }
 
+function openLineSummary(line: OpenLineStatus) {
+  if (!line.keys)
+    return 'Выключена: в Vercel нет ключей приложения BITRIX24_APP_CLIENT_ID и BITRIX24_APP_CLIENT_SECRET.'
+  if (!line.installed)
+    return 'Ключи вписаны, но приложение «Кадди на сайте» ещё не установлено на портале (Разработчикам → Другое → Локальное приложение).'
+  if (!line.registered)
+    return `Приложение установлено на ${line.domain}, но канал не зарегистрирован — откройте приложение в Битрикс24 ещё раз.`
+  if (!line.line)
+    return `Приложение установлено на ${line.domain}. Осталось подключить канал к линии: Контакт-центр → «Сайт cad.kz — Кадди» → Подключить.`
+  if (!line.line.active)
+    return `Канал отключён от линии № ${line.line.id} на ${line.domain}: разговоры в Битрикс24 не идут.`
+  return `Работает: разговоры с Кадди идут в открытую линию № ${line.line.id} на ${line.domain}. Менеджер видит их и может ответить клиенту — тогда Кадди молчит.`
+}
+
+function OpenLine({ line }: { line: OpenLineStatus }) {
+  return (
+    <section className={styles.section} aria-labelledby="bitrix24-line">
+      <h2 className={styles.heading} id="bitrix24-line">
+        Открытая линия: Кадди
+      </h2>
+      <p className={styles.lead}>{openLineSummary(line)}</p>
+      {line.installed && (
+        <ul className={styles.list}>
+          <li>
+            Последняя отправка в линию:{' '}
+            {line.lastSentAt ? formatDateTime(line.lastSentAt) : 'ещё не было'}
+          </li>
+          <li>
+            Последнее событие из Битрикс24 (ответ менеджера):{' '}
+            {line.lastEventAt ? formatDateTime(line.lastEventAt) : 'ещё не было'}
+          </li>
+          {line.lastError && (
+            <li>
+              Ошибка {formatDateTime(line.lastError.at)}: {line.lastError.text}
+            </li>
+          )}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 /** Страница «Битрикс24» в админке: подключение, проверка связи, тестовый лид, очередь передачи. */
 export async function Bitrix24View({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
@@ -81,7 +124,10 @@ export async function Bitrix24View({ initPageResult, params, searchParams }: Adm
     user: user ?? undefined,
     visibleEntities,
   }
-  const status = user?.role === 'admin' ? await loadBitrix24Status(payload) : null
+  const admin = user?.role === 'admin'
+  const [status, line] = admin
+    ? await Promise.all([loadBitrix24Status(payload), openLineStatus(payload)])
+    : [null, null]
 
   return (
     <DefaultTemplate {...template}>
@@ -92,6 +138,7 @@ export async function Bitrix24View({ initPageResult, params, searchParams }: Adm
             <Connection status={status} />
             {status.connected && <Bitrix24Actions />}
             <Queue status={status} />
+            {line && <OpenLine line={line} />}
           </>
         ) : (
           <p>Эта страница доступна администратору.</p>

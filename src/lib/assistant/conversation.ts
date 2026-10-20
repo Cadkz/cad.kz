@@ -17,6 +17,17 @@ export type ConversationSnapshot = {
   requestNumber?: string
   /** Что Кадди собрал для передачи менеджеру (инструмент handoffToManager): почта, компания, задача… */
   handoff?: HandoffDraft
+  /** Разговор в открытой линии Битрикс24 (src/lib/openLine/). */
+  line?: ConversationLine
+}
+
+export type ConversationLine = {
+  /** Сколько сообщений разговора уже отправлено в линию. */
+  sent: number
+  /** Номер чата линии в Битрикс24 — для проверки и поиска. */
+  chatId?: number
+  /** Менеджер написал клиенту из линии: Кадди больше не отвечает в этом разговоре. */
+  manager?: { id: number; name: string }
 }
 
 export type ConversationState = 'open' | 'handed-off'
@@ -92,4 +103,25 @@ export async function saveConversation(
     ...options,
   })
   return updated.docs.length > 0
+}
+
+/**
+ * Меняет сохранённый разговор: mutate получает свежий снимок и возвращает новый (null — без
+ * изменений). Если разговор успели изменить параллельно (ответ менеджера, отправка в линию),
+ * перечитываем и повторяем. Разговора нет — null.
+ */
+export async function updateConversation(
+  payload: Payload,
+  key: string,
+  mutate: (stored: StoredConversation) => ConversationSnapshot | null,
+  attempts = 5,
+): Promise<StoredConversation | null> {
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    const stored = await findConversation(payload, key)
+    if (!stored) return null
+    const next = mutate(stored)
+    if (!next) return stored
+    if (await saveConversation(payload, key, stored, next)) return { ...stored, snapshot: next }
+  }
+  throw new Error('Разговор всё время меняется — изменение не сохранилось')
 }

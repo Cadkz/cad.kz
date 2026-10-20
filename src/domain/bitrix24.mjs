@@ -80,7 +80,12 @@ export const DIALOG_MARK = 'Переписка с Кадди на сайте'
 export function dialogText(lead) {
   if (!lead.messages.length) return ''
   const lines = lead.messages.map((message) => {
-    const who = message.role === 'user' ? 'Клиент' : 'Кадди'
+    const who =
+      message.role === 'user'
+        ? 'Клиент'
+        : message.role === 'manager'
+          ? `Менеджер${message.name ? ` ${message.name}` : ''}`
+          : 'Кадди'
     return `[b]${who}:[/b] ${message.content.replaceAll('[', '(').replaceAll(']', ')')}`
   })
   return [`[b]${DIALOG_MARK}[/b]`, '', ...lines].join('\n')
