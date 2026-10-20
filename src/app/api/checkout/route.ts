@@ -3,8 +3,7 @@ import { getPayload, type Payload } from 'payload'
 import { type CheckoutResult, submitCheckout } from '@/domain/checkout.mjs'
 import { createRateLimiter } from '@/domain/rateLimit.mjs'
 import { clientHash, createCheckoutDeps } from '@/lib/checkout'
-import { bitrix24TestGateway } from '@/lib/crm/bitrix24Test'
-import { deliverByKey } from '@/lib/crm/outbox'
+import { type CrmState, crmStateByKey, passToCrm } from '@/lib/crm/pass'
 import { PricingError } from '@/lib/pricing'
 
 const MAX_BODY = 16000
@@ -53,17 +52,7 @@ async function readJson(request: Request): Promise<{ body: unknown } | { failure
   }
 }
 
-/** Передача в CRM идёт уже после сохранения, её сбой не отменяет заказ. */
-async function passToCrm(payload: Payload, idempotencyKey: string) {
-  try {
-    // Ждём результат: на хостинге с функциями работа после ответа может не завершиться.
-    await deliverByKey(payload, idempotencyKey, bitrix24TestGateway)
-  } catch (error) {
-    console.error('Не удалось обработать очередь CRM', error)
-  }
-}
-
-async function respond(result: CheckoutResult, payload: Payload) {
+async function respond(result: CheckoutResult, payload: Payload, key: string) {
   switch (result.status) {
     case 'invalid':
       return reply({ status: 'invalid', errors: result.errors }, 422)
@@ -96,30 +85,35 @@ async function respond(result: CheckoutResult, payload: Payload) {
         429,
         { 'Retry-After': String(result.retryAfterSeconds) },
       )
-    case 'created':
-      await passToCrm(payload, result.idempotencyKey)
+    case 'created': {
+      // Передача в CRM идёт уже после сохранения, её сбой не отменяет заказ.
+      const crm = await passToCrm(payload, result.idempotencyKey)
       return reply(
-        { status: 'created', mode: result.order.mode, order: publicOrder(result.order) },
+        { status: 'created', mode: result.order.mode, order: publicOrder(result.order, crm) },
         201,
       )
-    case 'repeated':
+    }
+    case 'repeated': {
+      const crm = await crmStateByKey(payload, key)
       return reply(
-        { status: 'repeated', mode: result.order.mode, order: publicOrder(result.order) },
+        { status: 'repeated', mode: result.order.mode, order: publicOrder(result.order, crm) },
         200,
       )
+    }
   }
 }
 
-function publicOrder({
-  number,
-  totalKzt,
-  savedAt,
-}: {
-  number: string
-  totalKzt: string
-  savedAt: string
-}) {
-  return { number, totalKzt, savedAt }
+function publicOrder(
+  { number, totalKzt, savedAt }: { number: string; totalKzt: string; savedAt: string },
+  crm?: CrmState,
+) {
+  return { number, totalKzt, savedAt, crm }
+}
+
+/** Ключ повтора из запроса: по нему находим состояние передачи уже сохранённой заявки. */
+function requestKey(body: unknown) {
+  const key = (body as { idempotencyKey?: unknown } | null)?.idempotencyKey
+  return typeof key === 'string' ? key : ''
 }
 
 export async function POST(request: Request) {
@@ -134,7 +128,7 @@ export async function POST(request: Request) {
     const result = await submitCheckout(parsed.body, createCheckoutDeps(payload), {
       clientHash: hash,
     })
-    return await respond(result, payload)
+    return await respond(result, payload, requestKey(parsed.body))
   } catch (error) {
     if (error instanceof PricingError)
       return reply(

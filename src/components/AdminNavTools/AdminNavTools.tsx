@@ -12,13 +12,14 @@ const TOOLS: Tool[] = [
   { label: 'Загрузить прайс', href: '/admin/price-list' },
   { label: 'Прайс и база Кадди', href: '/admin/kaddi-data' },
   { label: 'Проверка Кадди', href: '/admin/assistant-check' },
+  { label: 'Битрикс24', href: '/admin/bitrix24', adminOnly: true },
   { label: 'Импорт из Битрикса', href: '/admin/import-bitrix', adminOnly: true },
   { label: 'Перенос со старого сайта', href: '/admin/legacy-content', adminOnly: true },
 ]
 
 /**
  * Группа «Инструменты» в конце меню: контроль качества, цены, курсы, загрузка прайса и страницы Кадди — администратору и
- * маркетологу, импорт и перенос — только администратору.
+ * маркетологу, Битрикс24, импорт и перенос — только администратору.
  */
 export function AdminNavTools({ user }: ServerProps) {
   if (user?.role !== 'admin' && user?.role !== 'editor') return null

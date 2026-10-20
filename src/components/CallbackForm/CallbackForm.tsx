@@ -2,6 +2,7 @@
 
 import { type FormEvent, useRef, useState } from 'react'
 import { CONSENT_TEXT, type RequestKind, validateContact } from '@/domain/siteRequest.mjs'
+import { type CrmState, crmDoneText } from '@/lib/crmNotice'
 import { Button } from '../Button/Button'
 import { CheckboxField } from '../CheckboxField/CheckboxField'
 import { TextAreaField, TextField } from '../Field/Field'
@@ -21,7 +22,7 @@ type Props = {
   note?: string
 }
 
-type Sent = { number: string }
+type Sent = { number: string; crm: CrmState }
 
 /**
  * «Перезвоните мне»: имя, телефон, комментарий и согласие. Заявку сохраняет сервер
@@ -68,7 +69,7 @@ export function CallbackForm(props: Props) {
         }),
       })
       const result = await response.json()
-      if (response.ok) setSent({ number: result.number })
+      if (response.ok) setSent({ number: result.number, crm: result.crm ?? 'demo' })
       else if (result.errors) setErrors(result.errors)
       else setFormError(result.error || 'Не удалось отправить заявку')
     } catch {
@@ -82,7 +83,7 @@ export function CallbackForm(props: Props) {
     return (
       <div className={styles.done} role="status">
         <p className={styles.doneTitle}>Заявка {sent.number} сохранена</p>
-        <p>В демоверсии она не передаётся менеджерам.</p>
+        <p>{crmDoneText(sent.crm)}</p>
       </div>
     )
 

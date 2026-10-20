@@ -3,8 +3,7 @@ import { getPayload } from 'payload'
 import { createRateLimiter } from '@/domain/rateLimit.mjs'
 import { validateRequest } from '@/domain/siteRequest.mjs'
 import { clientHash } from '@/lib/checkout'
-import { bitrix24TestGateway } from '@/lib/crm/bitrix24Test'
-import { deliverByKey } from '@/lib/crm/outbox'
+import { crmStateByKey, passToCrm } from '@/lib/crm/pass'
 import { saveSiteRequest } from '@/lib/siteRequest'
 
 const MAX_BODY = 8000
@@ -18,7 +17,7 @@ function reply(body: Record<string, unknown>, status: number) {
 
 /**
  * Заявка без корзины: «Перезвоните мне» на странице товара или семейства. Сохраняется вместе
- * с записью очереди CRM; в демо менеджерам не передаётся, и ответ говорит об этом честно.
+ * с записью очереди CRM. Ответ честно говорит, ушла ли заявка в Битрикс24 (`crm`).
  */
 export async function POST(request: Request) {
   if (process.env.APP_MODE !== 'demo')
@@ -50,15 +49,11 @@ export async function POST(request: Request) {
       },
       429,
     )
-  if (!saved.repeated) {
-    try {
-      await deliverByKey(payload, saved.idempotencyKey, bitrix24TestGateway)
-    } catch (error) {
-      console.error('Не удалось обработать очередь CRM', error)
-    }
-  }
+  const crm = saved.repeated
+    ? await crmStateByKey(payload, saved.idempotencyKey)
+    : await passToCrm(payload, saved.idempotencyKey)
   return reply(
-    { status: 'created', mode: 'demo', number: saved.number },
+    { status: 'created', mode: 'demo', number: saved.number, crm },
     saved.repeated ? 200 : 201,
   )
 }

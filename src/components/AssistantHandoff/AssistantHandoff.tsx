@@ -3,6 +3,7 @@
 import { ArrowLeft } from 'lucide-react'
 import { type FormEvent, useRef, useState } from 'react'
 import { CONSENT_TEXT, validateContact } from '@/domain/siteRequest.mjs'
+import { type CrmState, crmDoneText } from '@/lib/crmNotice'
 import type { HandoffPrefill } from '@/lib/useAssistant'
 import { Button, ButtonLink } from '../Button/Button'
 import { CheckboxField } from '../CheckboxField/CheckboxField'
@@ -30,7 +31,7 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState('')
   const [sending, setSending] = useState(false)
-  const [sent, setSent] = useState<{ number: string; demo: boolean } | null>(null)
+  const [sent, setSent] = useState<{ number: string; crm: CrmState } | null>(null)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -63,7 +64,7 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
         }),
       })
       const result = await response.json()
-      if (response.ok) setSent({ number: result.number, demo: result.mode === 'demo' })
+      if (response.ok) setSent({ number: result.number, crm: result.crm ?? 'demo' })
       else if (result.errors) setErrors(result.errors)
       else setFormError(result.error || 'Не удалось отправить заявку')
     } catch {
@@ -83,8 +84,8 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
         <div className={styles.done} role="status">
           <p className={styles.doneTitle}>Заявка {sent.number} сохранена вместе с перепиской</p>
           <p>
-            {sent.demo
-              ? 'В демоверсии она не передаётся менеджерам.'
+            {sent.crm === 'demo'
+              ? crmDoneText(sent.crm)
               : 'Менеджер увидит весь разговор и свяжется с вами.'}
           </p>
         </div>

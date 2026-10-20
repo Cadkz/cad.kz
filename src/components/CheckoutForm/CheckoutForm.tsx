@@ -29,6 +29,8 @@ type Props = {
   formError: string
   priceNotice: string
   onSubmit: (values: FormValues) => void
+  /** Демоверсия без CRM: предупредить, что заявка менеджерам не уходит. */
+  demo?: boolean
 }
 
 function readForm(form: HTMLFormElement, type: string) {
@@ -60,6 +62,7 @@ export function CheckoutForm({
   formError,
   priceNotice,
   onSubmit,
+  demo = true,
 }: Props) {
   const form = useRef<HTMLFormElement>(null)
   const [company, setCompany] = useState(false)
@@ -161,10 +164,12 @@ export function CheckoutForm({
           {priceNotice}
         </p>
       )}
-      <p className={styles.demo}>
-        <Info size={16} strokeWidth={1.75} aria-hidden="true" />
-        Демоверсия: заявка сохранится в учебной базе и менеджерам не передаётся.
-      </p>
+      {demo && (
+        <p className={styles.demo}>
+          <Info size={16} strokeWidth={1.75} aria-hidden="true" />
+          Демоверсия: заявка сохранится в учебной базе и менеджерам не передаётся.
+        </p>
+      )}
       <Button type="submit" disabled={sending || !canSubmit}>
         {sending ? 'Отправляем…' : confirmPrice ? 'Подтвердить новую сумму' : 'Отправить заявку'}
       </Button>

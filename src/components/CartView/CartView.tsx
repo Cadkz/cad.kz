@@ -16,7 +16,14 @@ import styles from './CartView.module.css'
  * Без подборок: только проверка состава и отправка заявки. Состав можно скопировать текстом —
  * для согласования внутри компании.
  */
-export function CartView({ whatsappHref = null }: { whatsappHref?: string | null }) {
+export function CartView({
+  whatsappHref = null,
+  crmLive = false,
+}: {
+  whatsappHref?: string | null
+  /** Заявки уходят в Битрикс24 — без пометки демоверсии. */
+  crmLive?: boolean
+}) {
   const { items, ready, remove, setQuantity } = useCart()
   const { quote, error, busy, retry } = useCartQuote(items, ready)
   const [copied, setCopied] = useState(false)
@@ -102,8 +109,9 @@ export function CartView({ whatsappHref = null }: { whatsappHref?: string | null
             {copied ? 'Состав скопирован' : 'Скопировать состав'}
           </Button>
           <p className={styles.note}>
-            Демоверсия: заявка сохранится в учебной базе и менеджерам не передаётся. Разные
-            комплектации одного товара хранятся отдельными строками.
+            {crmLive
+              ? 'Разные комплектации одного товара хранятся отдельными строками.'
+              : 'Демоверсия: заявка сохранится в учебной базе и менеджерам не передаётся. Разные комплектации одного товара хранятся отдельными строками.'}
           </p>
           <ButtonLink href={catalogHref()} variant="outline" block>
             Продолжить подбор

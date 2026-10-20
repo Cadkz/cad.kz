@@ -2,6 +2,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { CartView } from '@/components/CartView/CartView'
 import { Container } from '@/components/Container/Container'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
+import { crmLive } from '@/lib/crm/gateway'
 import { getContacts } from '@/lib/navigation'
 
 export const metadata = { title: 'Корзина — CAD.kz', robots: { index: false, follow: false } }
@@ -13,7 +14,7 @@ export default async function CartPage() {
       <Container>
         <Breadcrumbs items={[{ title: 'Главная', href: '/' }, { title: 'Корзина' }]} />
         <PageIntro title="Корзина" />
-        <CartView whatsappHref={contacts.whatsappHref} />
+        <CartView whatsappHref={contacts.whatsappHref} crmLive={crmLive()} />
       </Container>
     </main>
   )

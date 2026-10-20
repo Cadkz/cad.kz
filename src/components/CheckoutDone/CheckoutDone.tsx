@@ -2,16 +2,17 @@
 
 import { CircleCheck } from 'lucide-react'
 import { useEffect, useRef } from 'react'
+import { type CrmState, crmDoneText } from '@/lib/crmNotice'
 import { formatDateTime, formatKzt } from '@/lib/format'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { ButtonLink } from '../Button/Button'
 import styles from './CheckoutDone.module.css'
 
-export type DoneOrder = { number: string; totalKzt: string; savedAt: string }
+export type DoneOrder = { number: string; totalKzt: string; savedAt: string; crm?: CrmState }
 
 /**
- * Экран после отправки. Честный статус демоверсии: заявка сохранена, но менеджерам не передана.
- * Обещаний вроде «менеджер свяжется» здесь быть не должно.
+ * Экран после отправки. Честный статус: «менеджер свяжется» — только если заявка ушла в Битрикс24
+ * или стоит в очереди на повтор; в демо без CRM — что менеджерам она не передаётся.
  */
 export function CheckoutDone({ order }: { order: DoneOrder }) {
   const title = useRef<HTMLHeadingElement>(null)
@@ -24,7 +25,7 @@ export function CheckoutDone({ order }: { order: DoneOrder }) {
           Заявка сохранена
         </h2>
         <p className={styles.lead} role="status">
-          В демоверсии она не передаётся менеджерам.
+          {crmDoneText(order.crm)}
         </p>
       </div>
       <dl className={styles.facts}>

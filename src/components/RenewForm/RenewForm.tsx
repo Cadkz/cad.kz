@@ -7,6 +7,7 @@ import {
   RENEW_PROGRAMS,
   validateRenewal,
 } from '@/domain/siteRequest.mjs'
+import { type CrmState, crmDoneText } from '@/lib/crmNotice'
 import { Button } from '../Button/Button'
 import { CheckboxField } from '../CheckboxField/CheckboxField'
 import { SelectField, TextAreaField, TextField } from '../Field/Field'
@@ -34,7 +35,7 @@ export function RenewForm({ program: initial }: { program: string | null }) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState('')
   const [sending, setSending] = useState(false)
-  const [sent, setSent] = useState<string | null>(null)
+  const [sent, setSent] = useState<{ number: string; crm: CrmState } | null>(null)
 
   const choose = (value: string) => {
     setProgram(value)
@@ -79,7 +80,7 @@ export function RenewForm({ program: initial }: { program: string | null }) {
         }),
       })
       const result = await response.json()
-      if (response.ok) setSent(result.number)
+      if (response.ok) setSent({ number: result.number, crm: result.crm ?? 'demo' })
       else if (result.errors) setErrors(result.errors)
       else setFormError(result.error || 'Не удалось отправить заявку')
     } catch {
@@ -92,8 +93,8 @@ export function RenewForm({ program: initial }: { program: string | null }) {
   if (sent)
     return (
       <div className={styles.done} role="status">
-        <p className={styles.doneTitle}>Заявка {sent} сохранена</p>
-        <p>В демоверсии она не передаётся менеджерам.</p>
+        <p className={styles.doneTitle}>Заявка {sent.number} сохранена</p>
+        <p>{crmDoneText(sent.crm)}</p>
       </div>
     )
 

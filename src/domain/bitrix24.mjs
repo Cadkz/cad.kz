@@ -1,6 +1,5 @@
-// Черновое сопоставление заявки с полями лида Битрикс24 (метод crm.lead.add).
-// Только собирает запрос, сеть не трогает. Окончательный состав полей и воронку согласуем
-// отдельно на тестовой воронке, до этого реальные отправки выключены.
+// Сопоставление заявки с лидом Битрикс24: поля лида (crm.lead.add) и строки товаров
+// (crm.lead.productrows.set). Только собирает запросы, сеть не трогает — она в src/lib/crm/bitrix24.ts.
 
 const money = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 })
 
@@ -54,17 +53,26 @@ function describe(lead) {
   return parts.join('\n')
 }
 
+/** Метка заявок с демоверсии: менеджер сразу видит, что это проверка, а не клиент. */
+export const TEST_MARK = 'ТЕСТ сайта'
+
+/** Откуда пришёл лид: по этой паре при неясном ответе ищем уже созданный лид, а не создаём второй. */
+export const ORIGINATOR = 'cad.kz'
+
 /**
  * @param {object} lead Данные из toCrmLead.
+ * @param {{ test?: boolean, responsibleId?: string }} [options] test — пометить лид как проверку
+ *   (демоверсия сайта); responsibleId — ID пользователя Битрикс24, на которого ставить лид.
  */
-export function toBitrix24Lead(lead) {
+export function toBitrix24Lead(lead, options = {}) {
+  const title = lead.kindLabel
+    ? `${lead.kindLabel}: ${lead.pageTitle} (${lead.orderNumber})`
+    : `Заявка с сайта ${lead.orderNumber}`
   return {
     method: 'crm.lead.add',
     params: {
       fields: {
-        TITLE: lead.kindLabel
-          ? `${lead.kindLabel}: ${lead.pageTitle} (${lead.orderNumber})`
-          : `Заявка с сайта ${lead.orderNumber}`,
+        TITLE: options.test ? `${TEST_MARK} · ${title}` : title,
         NAME: lead.contact.name,
         COMPANY_TITLE: lead.buyer.type === 'company' ? lead.buyer.companyName : undefined,
         PHONE: lead.contact.phone ? [{ VALUE: lead.contact.phone, VALUE_TYPE: 'WORK' }] : undefined,
@@ -74,11 +82,54 @@ export function toBitrix24Lead(lead) {
         COMMENTS: describe(lead),
         SOURCE_ID: 'WEB',
         SOURCE_DESCRIPTION: sourceLine(lead) || undefined,
-        // По этим двум полям при неясном ответе ищем уже созданный лид, а не создаём второй.
-        ORIGINATOR_ID: 'cad.kz',
+        ORIGINATOR_ID: ORIGINATOR,
         ORIGIN_ID: lead.idempotencyKey,
+        ASSIGNED_BY_ID: options.responsibleId || undefined,
       },
       params: { REGISTER_SONET_EVENT: 'N' },
     },
   }
+}
+
+const NAME_LIMIT = 255
+
+/**
+ * Строки товаров лида: название с комплектацией и лицензией, цена за единицу с НДС, количество.
+ * Товары не привязываются к каталогу Битрикс24 (PRODUCT_ID 0): каталоги сайта и портала разные,
+ * а менеджеру нужно видеть ровно то, что выбрал клиент. Без цены (заявка без корзины) — 0.
+ */
+export function toBitrix24Rows(lead) {
+  return lead.items.map((item) => {
+    const options = [item.configuration, item.license].filter((v) => v && v !== '—')
+    const name = [item.title, ...options].join(', ')
+    return {
+      PRODUCT_ID: 0,
+      PRODUCT_NAME: name.length > NAME_LIMIT ? `${name.slice(0, NAME_LIMIT - 1)}…` : name,
+      PRICE: item.unitKzt || '0',
+      QUANTITY: item.quantity,
+      MEASURE_CODE: 796,
+      MEASURE_NAME: 'шт',
+    }
+  })
+}
+
+/** Поиск лида по ключу заявки (crm.lead.list): сверка после обрыва связи и защита от дублей. */
+export function findLeadQuery(idempotencyKey) {
+  return {
+    filter: { ORIGINATOR_ID: ORIGINATOR, ORIGIN_ID: idempotencyKey },
+    select: ['ID', 'ORIGINATOR_ID', 'ORIGIN_ID'],
+    order: { ID: 'DESC' },
+  }
+}
+
+/**
+ * ID лида из ответа поиска — только если ключ совпал. Если портал не умеет фильтровать по ключу
+ * и вернёт все лиды подряд, чужой лид не будет принят за наш.
+ */
+export function pickFoundLead(result, idempotencyKey) {
+  if (!Array.isArray(result)) return null
+  const found = result.find(
+    (row) => row?.ORIGINATOR_ID === ORIGINATOR && row?.ORIGIN_ID === idempotencyKey,
+  )
+  return found?.ID ? String(found.ID) : null
 }

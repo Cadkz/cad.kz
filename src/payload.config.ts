@@ -79,6 +79,11 @@ export default buildConfig({
           path: '/assistant-check',
           meta: { title: 'Проверка Кадди' },
         },
+        bitrix24: {
+          Component: '/components/Bitrix24View/Bitrix24View#Bitrix24View',
+          path: '/bitrix24',
+          meta: { title: 'Битрикс24' },
+        },
         legacyContent: {
           Component: '/components/LegacyContentView/LegacyContentView#LegacyContentView',
           path: '/legacy-content',
