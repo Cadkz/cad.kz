@@ -20,6 +20,7 @@ import {
   wantsRenewal,
 } from '@/domain/assistant.mjs'
 import { workTime } from '@/domain/priceTable.mjs'
+import { splitQuickReplies } from '@/domain/quickReplies.mjs'
 import { type ConversationSnapshot, findConversation, saveConversation } from './conversation'
 import { loadKnowledge, priceSummary } from './priceTable'
 import { type AssistantMode, leadsReachManagers, modelSettings } from './provider'
@@ -35,6 +36,8 @@ export type AssistantAnswer =
       status: 'ok'
       reply: string
       cards: AssistantCard[]
+      /** Кнопки быстрых ответов под уточняющим вопросом. */
+      replies: string[]
       demo: boolean
       handoff?: HandoffPrefill
     }
@@ -46,7 +49,12 @@ const FAILED =
 /** Обращение модели к инструменту — для страницы проверки ответов в админке. */
 export type ToolCall = { name: string; input: unknown; result: unknown }
 
-type Answer = { reply: string; cards: AssistantCard[]; handoff: HandoffDraft | null }
+type Answer = {
+  reply: string
+  cards: AssistantCard[]
+  replies: string[]
+  handoff: HandoffDraft | null
+}
 
 /** Что модель знает о передаче менеджеру: по снимку разговора на сервере. */
 export function handoffState(snapshot: ConversationSnapshot | null | undefined): HandoffState {
@@ -101,10 +109,14 @@ async function modelAnswer(
     runTool,
     signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
   })
+  // Строка «Кнопки: …» — варианты ответа кнопками под вопросом, в тексте её нет.
+  const quick = splitQuickReplies(text)
   // Ссылки — только cad.kz и адреса из правил и базы знаний; остальное сайт показывает карточками.
-  const reply = cleanReply(text, promptLinks(system[0]))
+  const reply = cleanReply(quick.text, promptLinks(system[0]))
   return {
     reply,
+    // Передача менеджеру подготовлена — под ответом кнопка подтверждения, вариантов не нужно.
+    replies: tools.handoff() ? [] : quick.replies,
     // Товары и варианты, названные в ответе, затем разделы сайта, которые модель попросила показать.
     cards: withPages(mentionedCards(reply, tools.found, { variants: tools.variants }), tools.pages),
     handoff: tools.handoff(),
@@ -131,7 +143,7 @@ export async function answerMessages(
       quick: Boolean(action),
       quickText: action?.demo,
     })
-    answer = { reply: text, cards, handoff: null }
+    answer = { reply: text, cards, replies: [], handoff: null }
   } else
     answer = await modelAnswer(
       payload,
@@ -182,6 +194,7 @@ export async function askAssistant(
       content: answer.reply,
       at: new Date().toISOString(),
       ...(answer.cards.length ? { cards: answer.cards } : {}),
+      ...(answer.replies.length ? { replies: answer.replies } : {}),
     })
   const saved = await saveConversation(payload, input.conversationId, stored, {
     version: 1,
@@ -203,6 +216,7 @@ export async function askAssistant(
     status: 'ok',
     reply: answer.reply,
     cards: answer.cards,
+    replies: answer.replies,
     demo: mode === 'demo',
     ...(answer.handoff ? { handoff: handoffPrefill(answer.handoff) } : {}),
   }

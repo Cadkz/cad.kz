@@ -19,6 +19,7 @@ export type CheckResult =
       ok: true
       reply: string
       cards: { title: string; href: string }[]
+      replies: string[]
       calls: string[]
       flags: ReturnType<typeof checkReply>
       ms: number
@@ -61,6 +62,7 @@ export async function checkQuestion(
       ok: true,
       reply: answer.reply,
       cards: answer.cards.map(({ title, href }) => ({ title, href })),
+      replies: answer.replies,
       calls: calls.map(describeCall),
       flags: checkReply(answer.reply, calls),
       ms: Date.now() - started,

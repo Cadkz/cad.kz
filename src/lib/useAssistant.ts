@@ -14,6 +14,8 @@ export type ChatMessage = {
   role: 'user' | 'assistant'
   content: string
   cards?: AssistantCard[]
+  /** Кнопки быстрых ответов под уточняющим вопросом: нажатие отправляет текст кнопки. */
+  replies?: string[]
   handoff?: HandoffPrefill
 }
 
@@ -91,6 +93,9 @@ export function useAssistant() {
               role: 'assistant',
               content: result.reply,
               cards: result.cards ?? [],
+              ...(Array.isArray(result.replies) && result.replies.length
+                ? { replies: result.replies.filter((r: unknown) => typeof r === 'string') }
+                : {}),
               ...(result.handoff ? { handoff: result.handoff } : {}),
             },
           ])

@@ -18,6 +18,8 @@ type Row = {
   step?: string
   reply?: string
   cards?: { title: string; href: string }[]
+  /** Кнопки быстрых ответов под вопросом Кадди. */
+  replies?: string[]
   calls?: string[]
   flags?: Flag[]
   ms?: number
@@ -121,6 +123,7 @@ export function AssistantCheck() {
       'Вопрос',
       'Шаг разговора',
       'Ответ Кадди',
+      'Кнопки ответа',
       'Ссылки под ответом',
       'Обращения к каталогу',
       'Флаги',
@@ -130,6 +133,7 @@ export function AssistantCheck() {
       row.question,
       row.step ?? '',
       row.error ? `Ошибка: ${row.error}` : (row.reply ?? ''),
+      (row.replies ?? []).join(' | '),
       (row.cards ?? []).map((c) => `${c.title} (${c.href})`).join('; '),
       (row.calls ?? []).join('\n'),
       (row.flags ?? []).map((f) => f.text).join('\n'),
@@ -197,6 +201,9 @@ export function AssistantCheck() {
               ) : (
                 <>
                   <p className={styles.reply}>{row.reply}</p>
+                  {row.replies && row.replies.length > 0 && (
+                    <p className={styles.meta}>Кнопки ответа: {row.replies.join(' · ')}</p>
+                  )}
                   {row.cards && row.cards.length > 0 && (
                     <p className={styles.meta}>
                       Под ответом:{' '}

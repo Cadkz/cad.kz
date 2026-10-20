@@ -77,6 +77,8 @@ export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
   const sulky = grumpy && !count
   // Кнопка передачи — только у последнего ответа, где Кадди её подготовил: данные там самые свежие.
   const lastHandoff = chat.messages.findLastIndex((m) => m.handoff)
+  // Кнопки быстрых ответов — только у последнего сообщения разговора, пока клиент не ответил.
+  const quick = chat.messages[count - 1]?.role === 'assistant' ? count - 1 : -1
 
   // Новое сообщение или ожидание — лента прокручивается к концу.
   useEffect(() => {
@@ -114,6 +116,21 @@ export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
           className={message.role === 'user' ? styles.userRow : styles.botRow}
         >
           <p className={message.role === 'user' ? styles.user : styles.bot}>{message.content}</p>
+          {index === quick && message.replies && message.replies.length > 0 && (
+            <div className={styles.actions}>
+              {message.replies.map((reply) => (
+                <Button
+                  key={reply}
+                  variant="outline"
+                  size="sm"
+                  disabled={chat.waiting}
+                  onClick={() => chat.send(reply)}
+                >
+                  {reply}
+                </Button>
+              ))}
+            </div>
+          )}
           {message.cards && message.cards.length > 0 && <Cards cards={message.cards} />}
           {message.handoff && index === lastHandoff && (
             <Button size="sm" onClick={() => onHandoff(message.handoff)}>
