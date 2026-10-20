@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { toBitrix24Lead } from '../src/domain/bitrix24.mjs'
+import { dialogText, toBitrix24Lead } from '../src/domain/bitrix24.mjs'
 import { buildOrderSnapshot, toCrmLead } from '../src/domain/order.mjs'
 import {
   AmbiguousDeliveryError,
@@ -148,16 +148,19 @@ test('ограничитель не растёт без предела', () => {
   assert.equal(limiter.check('ip-9', 1002).allowed, false)
 })
 
-test('диалог с консультантом попадает в комментарий лида целиком', async () => {
-  const source = await lead()
-  const { fields } = toBitrix24Lead({
-    ...source,
+test('диалог с консультантом — целиком в записи ленты, в комментарии только ссылка на неё', async () => {
+  const source = {
+    ...(await lead()),
     messages: [
-      { role: 'user', content: 'Подойдёт ли GEO5 для подпорных стен?' },
+      { role: 'user', content: 'Подойдёт ли GEO5 для [подпорных] стен?' },
       { role: 'assistant', content: 'Да, есть модуль для подпорных стен.' },
     ],
-  }).params
-  assert.match(fields.COMMENTS, /Диалог с консультантом на сайте:/)
-  assert.match(fields.COMMENTS, /Клиент: Подойдёт ли GEO5/)
-  assert.match(fields.COMMENTS, /Консультант: Да, есть модуль/)
+  }
+  const { fields } = toBitrix24Lead(source).params
+  assert.match(fields.COMMENTS, /Переписка с Кадди — в ленте лида справа/)
+  const dialog = dialogText(source)
+  assert.match(dialog, /^\[b\]Переписка с Кадди на сайте\[\/b\]/)
+  // Квадратные скобки клиента не превращаются в разметку ленты.
+  assert.match(dialog, /\[b\]Клиент:\[\/b\] Подойдёт ли GEO5 для \(подпорных\) стен\?/)
+  assert.match(dialog, /\[b\]Кадди:\[\/b\] Да, есть модуль/)
 })

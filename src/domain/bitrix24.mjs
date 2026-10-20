@@ -25,32 +25,65 @@ export function sourceLine(lead) {
     .join('; ')
 }
 
-/** Состав заявки текстом для комментария лида: менеджер видит всё, не открывая CMS. */
+/** Откуда заявка — по-человечески, для комментария: кнопка и страница. */
+function whereFrom(lead) {
+  const source = lead.source
+  if (!source) return ''
+  const page = source.page ? `страница ${source.page}` : ''
+  return [source.button, page].filter(Boolean).join(', ')
+}
+
+/** Строка товара: название с комплектацией, количество и цена. */
+function itemLine(item) {
+  const options = [item.configuration, item.license].filter((v) => v && v !== '—').join(', ')
+  const what = options ? `${item.title}, ${options}` : item.title
+  if (!item.unitKzt) return `— ${what}: ${item.quantity} шт., цена по запросу`
+  return `— ${what}: ${item.quantity} шт. × ${kzt(item.unitKzt)} = ${kzt(item.totalKzt)}`
+}
+
+/**
+ * Комментарий лида — короткая выжимка, чтобы менеджер за 10 секунд понял, что нужно: что собрал
+ * Кадди, товары, слова клиента, откуда пришла заявка. Переписка целиком — отдельной записью в ленте
+ * лида (`dialogText`), чтобы не растягивать карточку.
+ */
 function describe(lead) {
-  const rows = lead.items.map((item) => {
-    const options = [item.configuration, item.license].filter((v) => v && v !== '—').join(', ')
-    const where = [item.section, item.scenario].filter(Boolean).join(', ')
-    const what = `${options ? `${item.title}, ${options}` : item.title}${where ? ` [${where}]` : ''}`
-    if (!item.unitKzt) return `${what}: ${item.quantity} шт., цена по запросу`
-    return `${what}: ${item.quantity} шт. × ${kzt(item.unitKzt)} = ${kzt(item.totalKzt)}`
-  })
-  const head = lead.kindLabel
-    ? [`${lead.kindLabel}. Страница: ${lead.pageTitle}. Клиент просит перезвонить.`, '']
-    : []
-  const total = BigInt(lead.totalKzt || '0') > 0n ? [`Итого с НДС: ${kzt(lead.totalKzt)}`] : []
-  const parts = [...head, ...rows, ...total]
-  if (lead.buyer.type === 'company' && lead.buyer.bin) parts.push(`БИН: ${lead.buyer.bin}`)
-  if (lead.comment) parts.push(`Комментарий покупателя: ${lead.comment}`)
-  const source = sourceLine(lead)
-  if (source) parts.push(`Источник: ${source}`)
-  if (lead.messages.length) {
-    parts.push('', 'Диалог с консультантом на сайте:')
-    for (const message of lead.messages) {
-      const who = message.role === 'user' ? 'Клиент' : 'Консультант'
-      parts.push(`${who}: ${message.content}`)
-    }
+  const blocks = []
+  if (lead.summary?.length)
+    blocks.push([
+      'Что нужно клиенту (собрал Кадди):',
+      ...lead.summary.map((d) => `— ${d.title}: ${d.value}`),
+    ])
+  if (lead.items.length) {
+    const total = BigInt(lead.totalKzt || '0') > 0n ? [`Итого с НДС: ${kzt(lead.totalKzt)}`] : []
+    blocks.push(['Товары:', ...lead.items.map(itemLine), ...total])
   }
-  return parts.join('\n')
+  const client = []
+  if (lead.buyer.type === 'company' && lead.buyer.bin) client.push(`БИН: ${lead.buyer.bin}`)
+  if (lead.comment) client.push(`Комментарий клиента: ${lead.comment}`)
+  if (client.length) blocks.push(client)
+  const footer = []
+  const where = whereFrom(lead)
+  if (where) footer.push(`Откуда: ${where}`)
+  if (lead.kindLabel) footer.push('Клиент ждёт звонка.')
+  if (lead.messages.length) footer.push('Переписка с Кадди — в ленте лида справа.')
+  if (footer.length) blocks.push(footer)
+  return blocks.map((block) => block.join('\n')).join('\n\n')
+}
+
+/** Метка записи с перепиской в ленте лида: по ней повтор понимает, что запись уже есть. */
+export const DIALOG_MARK = 'Переписка с Кадди на сайте'
+
+/**
+ * Переписка для записи в ленте лида (crm.timeline.comment.add), с жирными «Клиент» и «Кадди»
+ * (BB-коды ленты Битрикс24). Пусто, если переписки нет.
+ */
+export function dialogText(lead) {
+  if (!lead.messages.length) return ''
+  const lines = lead.messages.map((message) => {
+    const who = message.role === 'user' ? 'Клиент' : 'Кадди'
+    return `[b]${who}:[/b] ${message.content.replaceAll('[', '(').replaceAll(']', ')')}`
+  })
+  return [`[b]${DIALOG_MARK}[/b]`, '', ...lines].join('\n')
 }
 
 /** Метка заявок с демоверсии: менеджер сразу видит, что это проверка, а не клиент. */
@@ -68,7 +101,13 @@ const TITLE_LIMIT = 200
  */
 export function leadTitle(lead) {
   let what
-  if (lead.kindLabel) what = `${lead.kindLabel} с сайта cad.kz: ${lead.pageTitle}`
+  // Из чата с Кадди страница всегда одна, а продукт он собрал сам — он и говорит, что нужно.
+  const product = lead.summary
+    ?.find((d) => d.title === 'Продукт')
+    ?.value.replace(/\s*\([^)]*\)/g, '')
+    .trim()
+  if (lead.kindLabel && product) what = `${lead.kindLabel} из чата с Кадди: ${product}`
+  else if (lead.kindLabel) what = `${lead.kindLabel} с сайта cad.kz: ${lead.pageTitle}`
   else {
     const [first, ...rest] = lead.items
     const more = rest.length ? ` и ещё ${rest.length}` : ''

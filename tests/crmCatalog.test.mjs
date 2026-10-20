@@ -314,6 +314,9 @@ test('Битрикс24: источник заявки в комментарии 
     fields.SOURCE_DESCRIPTION,
     /Кнопка: Записаться на демонстрацию; Товар: Artec Leo; Раздел: 3D-сканирование; Сценарий: Оборудование/,
   )
-  assert.match(fields.COMMENTS, /Источник: Кнопка: Записаться на демонстрацию/)
+  assert.match(
+    fields.COMMENTS,
+    /Откуда: Записаться на демонстрацию, страница \/catalog\/3d_skanery_artec\/artec_leo\//,
+  )
   assert.equal(lead.kindLabel, 'Демонстрация')
 })

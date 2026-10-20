@@ -26,6 +26,8 @@ export type CrmLead = {
   contact: { name: string; email?: string; phone?: string }
   buyer: { type: 'individual' } | { type: 'company'; companyName: string; bin: string }
   comment?: string
+  /** Что Кадди собрал в чате для менеджера (продукт, задача, сроки) — отдельно от слов клиента. */
+  summary?: { title: string; value: string }[]
   items: {
     offerId: string
     title: string

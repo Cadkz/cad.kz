@@ -2,8 +2,10 @@
 // можно было проверить без портала. Адрес вебхука — секрет: в ошибки и журнал он не попадает.
 
 import {
+  DIALOG_MARK,
   describeLeadFields,
   describeSources,
+  dialogText,
   findLeadQuery,
   pickFoundLead,
   toBitrix24Lead,
@@ -103,6 +105,29 @@ export function createBitrix24Client(options) {
   }
 
   /**
+   * Переписка с Кадди — записью в ленте лида. При повторе (лид уже был) сначала смотрим, нет ли
+   * уже такой записи, чтобы переписка не задвоилась.
+   */
+  async function addDialog(id, lead, repeat) {
+    const text = dialogText(lead)
+    if (!text) return
+    if (repeat) {
+      const list = await call('crm.timeline.comment.list', {
+        filter: { ENTITY_ID: id, ENTITY_TYPE: 'lead' },
+        select: ['ID', 'COMMENT'],
+      })
+      if (
+        Array.isArray(list) &&
+        list.some((row) => String(row?.COMMENT ?? '').includes(DIALOG_MARK))
+      )
+        return
+    }
+    await call('crm.timeline.comment.add', {
+      fields: { ENTITY_ID: id, ENTITY_TYPE: 'lead', COMMENT: text },
+    })
+  }
+
+  /**
    * Лид с товарами. Сначала ищем лид по ключу: если прошлая попытка создала его, но ответ не
    * дошёл, второй не создаётся. Строки товаров задаются целиком, повтор их не удваивает.
    */
@@ -120,6 +145,7 @@ export function createBitrix24Client(options) {
     }
     const rows = toBitrix24Rows(lead)
     if (rows.length) await call('crm.lead.productrows.set', { id, rows })
+    await addDialog(id, lead, Boolean(existing))
     return { status: /** @type {const} */ ('sent'), externalId: id }
   }
 

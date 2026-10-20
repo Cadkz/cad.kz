@@ -268,7 +268,9 @@ export async function saveSiteRequest(
     name: request.name,
     phone: request.phone,
     ...(draft?.email ? { email: draft.email } : {}),
-    comment,
+    // В CRM слова клиента и собранное Кадди идут разными блоками; в базе сайта — одной записью.
+    comment: request.comment,
+    summary: details,
     consentAt: now.toISOString(),
     lines,
     totalKzt,

@@ -22,7 +22,7 @@ import {
   validateChat,
   wantsRenewal,
 } from '../src/domain/assistant.mjs'
-import { toBitrix24Lead } from '../src/domain/bitrix24.mjs'
+import { dialogText, toBitrix24Lead } from '../src/domain/bitrix24.mjs'
 import { normalizePhone } from '../src/domain/order.mjs'
 import { toCrmRequest, validateRequest } from '../src/domain/siteRequest.mjs'
 
@@ -489,7 +489,8 @@ test('передача менеджеру из чата: заявка «Конс
     name: 'Анна',
     phone: '+77011234567',
     email: 'anna@example.kz',
-    comment: 'Собрал Кадди в чате:\nКомпания: ТОО Проект',
+    comment: '',
+    summary: [{ title: 'Компания', value: 'ТОО Проект' }],
     consentAt: '2026-10-12T10:00:00Z',
     lines: [],
     totalKzt: null,
@@ -502,10 +503,12 @@ test('передача менеджеру из чата: заявка «Конс
   const fields = toBitrix24Lead(lead).params.fields
   assert.deepEqual(fields.EMAIL, [{ VALUE: 'anna@example.kz', VALUE_TYPE: 'WORK' }])
   const comments = fields.COMMENTS
-  assert.match(comments, /Компания: ТОО Проект/)
-  assert.match(comments, /Диалог с консультантом на сайте:/)
-  assert.match(comments, /Клиент: Нужен AutoCAD на 3 места/)
-  assert.match(comments, /Консультант: Подойдёт AutoCAD, 1 год\./)
+  assert.match(comments, /Что нужно клиенту \(собрал Кадди\):\n— Компания: ТОО Проект/)
+  assert.match(comments, /Переписка с Кадди — в ленте лида справа\./)
+  assert.doesNotMatch(comments, /Нужен AutoCAD на 3 места/)
+  const dialog = dialogText(lead)
+  assert.match(dialog, /\[b\]Клиент:\[\/b\] Нужен AutoCAD на 3 места/)
+  assert.match(dialog, /\[b\]Кадди:\[\/b\] Подойдёт AutoCAD, 1 год\./)
 })
 
 test('текст для WhatsApp: вопрос клиента и итог Кадди, коротко', async () => {

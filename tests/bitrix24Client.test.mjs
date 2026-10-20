@@ -255,3 +255,38 @@ test('название лида: товар корзины и «ещё N», за
     'Запрос цены с сайта cad.kz: AutoCAD LT (CAD-20261020-ABCDE)',
   )
 })
+
+test('переписка — запись в ленте лида, при повторе не задваивается', async () => {
+  const timeline = []
+  const portal = fakePortal({
+    'crm.timeline.comment.add': (params) => {
+      timeline.push(params.fields)
+      return new Response(JSON.stringify({ result: timeline.length }))
+    },
+    'crm.timeline.comment.list': () =>
+      new Response(JSON.stringify({ result: timeline.map((row, i) => ({ ID: i, ...row })) })),
+  })
+  const client = createBitrix24Client({ webhookUrl: WEBHOOK, fetch: portal.fetch })
+  const chat = lead({ messages: [{ role: 'user', content: 'Нужен AutoCAD' }] })
+  await client.deliver(chat)
+  await client.deliver(chat)
+  assert.equal(timeline.length, 1)
+  assert.deepEqual([timeline[0].ENTITY_TYPE, timeline[0].ENTITY_ID], ['lead', '100'])
+  assert.match(timeline[0].COMMENT, /Нужен AutoCAD/)
+})
+
+test('название лида из чата: продукт, который собрал Кадди, без уточнений в скобках', () => {
+  const fields = toBitrix24Lead(
+    lead({
+      kindLabel: 'Консультация',
+      pageTitle: 'Чат с Кадди на сайте',
+      summary: [
+        { title: 'Продукт', value: 'АВС, продление лицензии (вариант и срок уточнит менеджер)' },
+      ],
+    }),
+  ).params.fields
+  assert.equal(
+    fields.TITLE,
+    'Консультация из чата с Кадди: АВС, продление лицензии (CAD-20261020-ABCDE)',
+  )
+})
