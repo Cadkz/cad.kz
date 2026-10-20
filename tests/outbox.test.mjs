@@ -38,7 +38,10 @@ test('лид Битрикс24 собирается из заявки и соде
   const { method, params } = toBitrix24Lead(source)
   const { fields } = params
   assert.equal(method, 'crm.lead.add')
-  assert.equal(fields.TITLE, 'Заявка с сайта CAD-20261008-AAAAA')
+  assert.equal(
+    fields.TITLE,
+    `Заказ из корзины cad.kz: ${source.items[0].title} (CAD-20261008-AAAAA)`,
+  )
   assert.equal(fields.COMPANY_TITLE, 'ТОО Проект-Сервис')
   assert.deepEqual(fields.PHONE, [{ VALUE: '+77011234567', VALUE_TYPE: 'WORK' }])
   assert.equal(fields.OPPORTUNITY, '5846400')

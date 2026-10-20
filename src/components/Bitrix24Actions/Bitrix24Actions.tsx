@@ -6,11 +6,12 @@ import { adminCall } from '@/lib/adminCall'
 import styles from './Bitrix24Actions.module.css'
 
 type Result = { message: string; link?: string; details?: string[] }
-type Action = 'check' | 'testLead' | 'retry'
+type Action = 'check' | 'testLead' | 'fields' | 'retry'
 
 const LABELS: Record<Action, [string, string]> = {
   check: ['Проверить связь', 'Проверяю…'],
   testLead: ['Отправить тестовый лид', 'Отправляю…'],
+  fields: ['Поля лида портала', 'Читаю…'],
   retry: ['Дослать отложенные', 'Досылаю…'],
 }
 

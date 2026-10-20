@@ -166,6 +166,22 @@ export async function sendTestLead(): Promise<Bitrix24Reply> {
   }
 }
 
+/** «Поля лида портала»: свои поля и источники — их коды нужны, чтобы заполнять лиды как привыкли менеджеры. */
+export async function readLeadFields(): Promise<Bitrix24Reply> {
+  const client = bitrix24Client()
+  if (!client) return NOT_CONNECTED
+  try {
+    const { fields, sources } = await client.leadFields()
+    return {
+      ok: true,
+      message: `Своих и обязательных полей лида: ${fields.length}, источников: ${sources.length}. Скопируйте этот текст разработчику.`,
+      details: ['Поля:', ...fields, 'Источники:', ...sources],
+    }
+  } catch (error) {
+    return failure(error)
+  }
+}
+
 /** «Дослать отложенные»: заявки с ошибкой и подошедшим временем повтора. */
 export async function retryDue(payload: Payload): Promise<Bitrix24Reply> {
   if (!bitrix24Client()) return NOT_CONNECTED

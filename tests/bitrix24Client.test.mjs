@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { TEST_MARK, toBitrix24Rows } from '../src/domain/bitrix24.mjs'
+import { TEST_MARK, toBitrix24Lead, toBitrix24Rows } from '../src/domain/bitrix24.mjs'
 import {
   Bitrix24Error,
   createBitrix24Client,
@@ -84,7 +84,7 @@ test('лид с товарами: создаётся лид, затем стро
     ['crm.lead.list', 'crm.lead.add', 'crm.lead.productrows.set'],
   )
   const saved = portal.leads[0]
-  assert.equal(saved.TITLE, 'Заявка с сайта CAD-20261020-ABCDE')
+  assert.equal(saved.TITLE, 'Заказ из корзины cad.kz: GEO5 Сваи (CAD-20261020-ABCDE)')
   assert.equal(saved.ORIGIN_ID, KEY)
   assert.deepEqual(saved.rows, [
     {
@@ -211,4 +211,47 @@ test('проверка связи: права вебхука и пользова
     admin: false,
   })
   assert.equal(client.leadUrl('100'), 'https://cadkz.bitrix24.kz/crm/lead/details/100/')
+})
+
+test('поля лида портала: свои и обязательные поля с вариантами списков, источники', async () => {
+  const portal = fakePortal({
+    'crm.lead.fields': () =>
+      new Response(
+        JSON.stringify({
+          result: {
+            TITLE: { type: 'string', isRequired: false, title: 'Название' },
+            UF_CRM_FORMNAME: { type: 'string', isRequired: false, formLabel: 'Форма' },
+            UF_CRM_TOPIC: {
+              type: 'enumeration',
+              isRequired: false,
+              listLabel: 'Тема обращения',
+              items: [{ ID: '51', VALUE: 'Autodesk (Autocad)' }],
+            },
+          },
+        }),
+      ),
+    'crm.status.list': () =>
+      new Response(JSON.stringify({ result: [{ STATUS_ID: 'WEB', NAME: 'Веб-сайт' }] })),
+  })
+  const client = createBitrix24Client({ webhookUrl: WEBHOOK, fetch: portal.fetch })
+  assert.deepEqual(await client.leadFields(), {
+    fields: [
+      'UF_CRM_FORMNAME — Форма (строка)',
+      'UF_CRM_TOPIC — Тема обращения (список): 51 = Autodesk (Autocad)',
+    ],
+    sources: ['WEB = Веб-сайт'],
+  })
+})
+
+test('название лида: товар корзины и «ещё N», заявка — тип и страница, номер в конце', () => {
+  const items = lead().items
+  assert.equal(
+    toBitrix24Lead(lead({ items: [...items, { ...items[0], title: 'Artec Leo' }] })).params.fields
+      .TITLE,
+    'Заказ из корзины cad.kz: GEO5 Сваи и ещё 1 (CAD-20261020-ABCDE)',
+  )
+  assert.equal(
+    toBitrix24Lead(lead({ kindLabel: 'Запрос цены', pageTitle: 'AutoCAD LT' })).params.fields.TITLE,
+    'Запрос цены с сайта cad.kz: AutoCAD LT (CAD-20261020-ABCDE)',
+  )
 })

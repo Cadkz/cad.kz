@@ -1,7 +1,13 @@
 import { adminRequest, reply } from '@/lib/adminApi'
-import { type Bitrix24Reply, checkBitrix24, retryDue, sendTestLead } from '@/lib/bitrix24Run'
+import {
+  type Bitrix24Reply,
+  checkBitrix24,
+  readLeadFields,
+  retryDue,
+  sendTestLead,
+} from '@/lib/bitrix24Run'
 
-/** Страница «Битрикс24» в админке, только администратор: проверка связи, тестовый лид, повтор очереди. */
+/** Страница «Битрикс24» в админке, только администратор: проверка связи, тестовый лид, поля лида портала, повтор очереди. */
 const MAX_BODY = 1000
 
 function send(result: Bitrix24Reply) {
@@ -19,6 +25,8 @@ export async function POST(request: Request) {
         return send(await checkBitrix24())
       case 'testLead':
         return send(await sendTestLead())
+      case 'fields':
+        return send(await readLeadFields())
       case 'retry':
         return send(await retryDue(payload))
       default:

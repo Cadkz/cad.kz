@@ -59,15 +59,33 @@ export const TEST_MARK = 'ТЕСТ сайта'
 /** Откуда пришёл лид: по этой паре при неясном ответе ищем уже созданный лид, а не создаём второй. */
 export const ORIGINATOR = 'cad.kz'
 
+const TITLE_LIMIT = 200
+
+/**
+ * Название лида, как привыкли менеджеры: что за заявка, откуда и что хотят — видно в списке лидов
+ * без открытия карточки. Номер заявки в конце — для поиска. Заказ из корзины: первый товар и
+ * «ещё N»; заявка со страницы: тип и страница (товар, семейство, чат с Кадди).
+ */
+export function leadTitle(lead) {
+  let what
+  if (lead.kindLabel) what = `${lead.kindLabel} с сайта cad.kz: ${lead.pageTitle}`
+  else {
+    const [first, ...rest] = lead.items
+    const more = rest.length ? ` и ещё ${rest.length}` : ''
+    what = first ? `Заказ из корзины cad.kz: ${first.title}${more}` : 'Заказ из корзины cad.kz'
+  }
+  const tail = ` (${lead.orderNumber})`
+  const room = TITLE_LIMIT - tail.length
+  return `${what.length > room ? `${what.slice(0, room - 1)}…` : what}${tail}`
+}
+
 /**
  * @param {object} lead Данные из toCrmLead.
  * @param {{ test?: boolean, responsibleId?: string }} [options] test — пометить лид как проверку
  *   (демоверсия сайта); responsibleId — ID пользователя Битрикс24, на которого ставить лид.
  */
 export function toBitrix24Lead(lead, options = {}) {
-  const title = lead.kindLabel
-    ? `${lead.kindLabel}: ${lead.pageTitle} (${lead.orderNumber})`
-    : `Заявка с сайта ${lead.orderNumber}`
+  const title = leadTitle(lead)
   return {
     method: 'crm.lead.add',
     params: {
@@ -132,4 +150,42 @@ export function pickFoundLead(result, idempotencyKey) {
     (row) => row?.ORIGINATOR_ID === ORIGINATOR && row?.ORIGIN_ID === idempotencyKey,
   )
   return found?.ID ? String(found.ID) : null
+}
+
+const FIELD_TYPES = {
+  string: 'строка',
+  integer: 'число',
+  double: 'число',
+  enumeration: 'список',
+  boolean: 'да/нет',
+  date: 'дата',
+  datetime: 'дата и время',
+  crm_status: 'справочник',
+  url: 'ссылка',
+}
+
+/**
+ * Поля лида портала строками для админки: свои поля (UF_CRM_…) и обязательные, у списков — варианты.
+ * Нужно, чтобы заполнить поля, по которым у компании работают отчёты и роботы.
+ * @param {Record<string, any>} fields Ответ crm.lead.fields.
+ */
+export function describeLeadFields(fields) {
+  if (!fields || typeof fields !== 'object') return []
+  return Object.entries(fields)
+    .filter(([code, field]) => code.startsWith('UF_CRM_') || field?.isRequired)
+    .map(([code, field]) => {
+      const name = field?.formLabel || field?.listLabel || field?.title || code
+      const type = FIELD_TYPES[field?.type] ?? field?.type ?? ''
+      const items = Array.isArray(field?.items)
+        ? `: ${field.items.map((item) => `${item.ID} = ${item.VALUE}`).join('; ')}`
+        : ''
+      const required = field?.isRequired ? ', обязательное' : ''
+      return `${code} — ${name} (${type}${required})${items}`
+    })
+}
+
+/** Источники лида портала строками: «ID = название». Ответ crm.status.list для SOURCE. */
+export function describeSources(statuses) {
+  if (!Array.isArray(statuses)) return []
+  return statuses.map((row) => `${row.STATUS_ID} = ${row.NAME}`)
 }

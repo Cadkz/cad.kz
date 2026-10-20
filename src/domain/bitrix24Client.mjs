@@ -1,7 +1,14 @@
 // Передача заявок в Битрикс24 через входящий вебхук. Сеть подаётся снаружи (fetch), чтобы логику
 // можно было проверить без портала. Адрес вебхука — секрет: в ошибки и журнал он не попадает.
 
-import { findLeadQuery, pickFoundLead, toBitrix24Lead, toBitrix24Rows } from './bitrix24.mjs'
+import {
+  describeLeadFields,
+  describeSources,
+  findLeadQuery,
+  pickFoundLead,
+  toBitrix24Lead,
+  toBitrix24Rows,
+} from './bitrix24.mjs'
 import { AmbiguousDeliveryError } from './outbox.mjs'
 
 const TIMEOUT_MS = 10_000
@@ -134,5 +141,12 @@ export function createBitrix24Client(options) {
     }
   }
 
-  return { call, find, deliver, leadUrl, check, host: parsed.host }
+  /** Свои поля лида и источники портала — чтобы сопоставить их с заявками сайта. */
+  async function leadFields() {
+    const fields = await call('crm.lead.fields')
+    const sources = await call('crm.status.list', { filter: { ENTITY_ID: 'SOURCE' } })
+    return { fields: describeLeadFields(fields), sources: describeSources(sources) }
+  }
+
+  return { call, find, deliver, leadUrl, check, leadFields, host: parsed.host }
 }
