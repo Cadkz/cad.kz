@@ -65,10 +65,10 @@ test('регистрация канала: код без точки, обраб�
   assert.equal(params.EDIT_INTERNAL_MESSAGES, false)
 })
 
-test('ответ Кадди для оператора: жирный и ссылки — BB-кодами, лишние скобки — круглыми', () => {
+test('ответ Кадди для оператора: жирный — BB-кодом, ссылки — подписью, лишние скобки — круглыми', () => {
   assert.equal(
     kaddiText('**AutoCAD LT** на год — [карточка](https://cad.kz/autocad) [скидка]'),
-    '[b]AutoCAD LT[/b] на год — [url=https://cad.kz/autocad]карточка[/url] (скидка)',
+    '[b]AutoCAD LT[/b] на год — карточка (скидка)',
   )
 })
 
@@ -103,10 +103,8 @@ test('разговор в линию: клиент как есть, Кадди �
   assert.equal(all[0].user.name, 'Посетитель сайта')
   const kaddi = all[1].message.text
   assert.match(kaddi, /^\[b\]Кадди \(ИИ\):\[\/b\] Подойдёт \[b\]AutoCAD LT\[\/b\]/)
-  assert.match(
-    kaddi,
-    /\[url=https:\/\/cad-kz\.vercel\.app\/catalog\/autocad-lt\]AutoCAD LT\[\/url\] — от 313 621 ₸/,
-  )
+  assert.match(kaddi, /Товары под ответом:\[\/i\] AutoCAD LT — от 313 621 ₸/)
+  assert.doesNotMatch(kaddi, /\[url|https?:/)
   assert.match(kaddi, /Кнопки ответа:\[\/i\] Новая \| Продление/)
   assert.equal(all[2].message.id, '3')
   // Уже отправленные не повторяются.

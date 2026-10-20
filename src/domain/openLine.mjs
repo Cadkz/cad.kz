@@ -113,48 +113,31 @@ function plainForBitrix(text) {
 }
 
 /**
- * Ответ Кадди для оператора: **жирный** и [ссылки](адрес) — в BB-коды Битрикс24, остальные
- * квадратные скобки — круглыми.
+ * Ответ Кадди для оператора: **жирный** — в BB-код Битрикс24, [ссылки](адрес) — только подписью,
+ * остальные квадратные скобки — круглыми. Ссылки не передаём: Битрикс24 разворачивает каждую в
+ * большое превью, и ответ в линии растягивается на экран (замечание владельца 21.10.2026).
  */
 export function kaddiText(text) {
-  /** @type {string[]} */
-  const links = []
-  const marked = String(text).replace(
-    /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g,
-    (_, label, url) => {
-      links.push(`[url=${url}]${plainForBitrix(label)}[/url]`)
-      return `\uE000${links.length - 1}\uE000`
-    },
-  )
-  return plainForBitrix(marked)
-    .replace(/\*\*([^*\n]+)\*\*/g, '[b]$1[/b]')
-    .replace(/\uE000(\d+)\uE000/g, (_, index) => links[Number(index)] ?? '')
-}
-
-/** Адрес на сайте — полным: в Битрикс24 относительная ссылка не откроется. */
-function absolute(href, siteUrl) {
-  try {
-    return new URL(href, siteUrl).toString()
-  } catch {
-    return siteUrl
-  }
+  return plainForBitrix(
+    String(text).replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, label) => label),
+  ).replace(/\*\*([^*\n]+)\*\*/g, '[b]$1[/b]')
 }
 
 /**
- * Реплика разговора текстом для линии. Клиент — как есть; Кадди — с пометкой, карточками товаров
- * под ответом и кнопками быстрых ответов, чтобы менеджер видел ровно то, что видел клиент.
+ * Реплика разговора текстом для линии. Клиент — как есть; Кадди — с пометкой, товарами под
+ * ответом (название и цена, без ссылок) и кнопками быстрых ответов, чтобы менеджер видел то же,
+ * что клиент. Адрес страницы, откуда пишет клиент, Битрикс24 показывает в данных чата.
  * @param {{ role: string, content: string, cards?: { title: string, href: string, price?: string | null }[], replies?: string[] }} message
- * @param {string} siteUrl
  */
-export function lineText(message, siteUrl) {
+export function lineText(message) {
   if (message.role === 'user') return plainForBitrix(message.content)
   const parts = [`[b]Кадди (ИИ):[/b] ${kaddiText(message.content)}`]
   if (message.cards?.length)
     parts.push(
-      `[i]Карточки под ответом:[/i] ${message.cards
+      `[i]Товары под ответом:[/i] ${message.cards
         .map((card) => {
           const price = card.price ? ` — ${plainForBitrix(card.price)}` : ''
-          return `[url=${absolute(card.href, siteUrl)}]${plainForBitrix(card.title)}[/url]${price}`
+          return `${plainForBitrix(card.title)}${price}`
         })
         .join('; ')}`,
     )
@@ -205,7 +188,7 @@ export function lineMessages(input) {
         message: {
           id: String(index),
           date: Math.floor((Number.isFinite(at) ? at : Date.now()) / 1000),
-          text: lineText(message, input.siteUrl),
+          text: lineText(message),
         },
         chat,
       }
