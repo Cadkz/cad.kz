@@ -39,23 +39,26 @@
 }
 
 .place {
+  display: flex;
+  flex-direction: column;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
 }
 
+/* шесть значков в одну строку и в узкой колонке контактов на 960 px */
 .icons {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
 .icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--control-height);
-  height: var(--control-height);
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
   border-radius: var(--radius-md);
   background: var(--color-navy);
   color: var(--color-text-inverse);

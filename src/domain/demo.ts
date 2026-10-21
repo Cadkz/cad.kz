@@ -544,7 +544,6 @@ export const demoRates = [
 
 export const demoSettings = {
   phones: [
-    { label: '+7 (7172) 57-70-75', tel: '+77172577075' },
     { label: '+7 (7172) 578-028', tel: '+77172578028' },
     { label: '+7 (771) 936-50-20', tel: '+77719365020' },
   ],
@@ -552,14 +551,16 @@ export const demoSettings = {
   telegram: 'https://t.me/cadkz',
   email: 'office@cad.kz',
   address: 'г. Астана, ул. Пушкина, 6/1',
+  hours: 'Пн–Пт 9:00–18:00',
   socials: [
     { network: 'instagram' as const, url: 'https://www.instagram.com/cad.kz_inst' },
     { network: 'youtube' as const, url: 'https://www.youtube.com/@CADkz-gc2rp' },
     { network: 'telegram' as const, url: 'https://t.me/cadkz' },
     { network: 'facebook' as const, url: 'https://www.facebook.com/CADkz.old.page' },
+    { network: 'linkedin' as const, url: 'https://www.linkedin.com/company/тоо-cad-kz/' },
   ],
   footerText:
-    'Программы для проектирования, оборудование и обучение для проектных организаций Казахстана. Официальный партнёр Autodesk, SCAD Soft, Fine.',
+    'Программы для проектирования, оборудование и обучение для проектных организаций Казахстана.',
 }
 
 /** Тексты главной по макету. Обещания и сроки — учебные, их подтверждает редактор. */

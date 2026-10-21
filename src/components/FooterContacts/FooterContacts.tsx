@@ -1,4 +1,4 @@
-import { footerSocials, formatKzPhone } from '@/domain/footerContacts.mjs'
+import { footerSocials } from '@/domain/footerContacts.mjs'
 import type { Contacts } from '@/lib/navigation'
 import { socialIcons, socialNames, TelegramIcon, WhatsappIcon } from '../icons/icons'
 import styles from './FooterContacts.module.css'
@@ -6,13 +6,11 @@ import styles from './FooterContacts.module.css'
 type Props = { contacts: Contacts }
 
 /**
- * Контакты в подвале (аудит 21.10.2026, М5, Г9): номера цифрами — городские и WhatsApp,
- * почта, адрес и часы; Telegram и соцсети — одной строкой значков.
+ * Контакты в подвале (аудит 21.10.2026, М5, Г9): два номера цифрами (решение владельца —
+ * больше не нужно), почта, адрес и часы; WhatsApp, Telegram и соцсети — строкой значков.
  */
 export function FooterContacts({ contacts }: Props) {
-  const whatsapp = contacts.whatsappHref?.replace('https://wa.me/', '') ?? ''
   const socials = footerSocials(contacts.socials, contacts.telegramHref)
-  const place = [contacts.address, contacts.hours].filter(Boolean).join(' · ')
   return (
     <div className={styles.contacts}>
       <div className={styles.numbers}>
@@ -21,26 +19,30 @@ export function FooterContacts({ contacts }: Props) {
             {phone.label}
           </a>
         ))}
-        {contacts.whatsappHref && (
-          <a
-            href={contacts.whatsappHref}
-            className={styles.phone}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={`Написать в WhatsApp ${formatKzPhone(whatsapp)}`}
-          >
-            <WhatsappIcon size={16} />
-            {formatKzPhone(whatsapp)}
-          </a>
-        )}
         {contacts.email && (
           <a href={`mailto:${contacts.email}`} className={styles.mail}>
             {contacts.email}
           </a>
         )}
       </div>
-      {place && <p className={styles.place}>{place}</p>}
+      {(contacts.address || contacts.hours) && (
+        <p className={styles.place}>
+          {contacts.address && <span>{contacts.address}</span>}
+          {contacts.hours && <span>{contacts.hours}</span>}
+        </p>
+      )}
       <div className={styles.icons}>
+        {contacts.whatsappHref && (
+          <a
+            href={contacts.whatsappHref}
+            className={styles.icon}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Написать в WhatsApp"
+          >
+            <WhatsappIcon size={20} />
+          </a>
+        )}
         {contacts.telegramHref && (
           <a
             href={contacts.telegramHref}

@@ -1,13 +1,17 @@
 import type { Payload } from 'payload'
 import { footerSettingsPatch } from '../domain/footerContacts.mjs'
 
-/** Ключ записи в журнале «Запуски импорта»: настройка выполняется один раз. */
-export const FOOTER_AUDIT_KEY = 'footer-setup:audit-v1'
+/**
+ * Ключ записи в журнале «Запуски импорта»: настройка выполняется один раз. v2 — по правкам
+ * владельца 21.10.2026: без номера 57-70-75 и перечня партнёров, с часами и LinkedIn.
+ */
+export const FOOTER_AUDIT_KEY = 'footer-setup:audit-v2'
 const opts = { overrideAccess: true, depth: 0 } as const
 
 /**
- * «Контакты и подвал» по аудиту 21.10.2026 (Г9, Т3): основной городской номер и адрес
- * офиса со старого cad.kz, новое описание компании. Правленное в админке не трогает.
+ * «Контакты и подвал» по аудиту 21.10.2026 (Г9, Т3): адрес офиса со старого cad.kz, часы,
+ * LinkedIn, новое описание компании; номер, дописанный первой версией, убирает.
+ * Правленное в админке не трогает.
  * Возвращает строки для журнала сборки или null, если уже выполнялась.
  */
 export async function setupFooterAudit(payload: Payload): Promise<string[] | null> {

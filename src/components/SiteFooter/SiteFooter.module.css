@@ -92,10 +92,19 @@
   }
 }
 
+/* от 960 px: 3 + 3 + 2 + 4 — короткой «Компании» хватает двух колонок, контактам нужна
+   ширина, чтобы значки встали в одну строку */
 @media (min-width: 960px) {
   .brand,
-  .column,
-  .contacts {
+  .column {
     grid-column: span 3;
+  }
+
+  .column + .column {
+    grid-column: span 2;
+  }
+
+  .contacts {
+    grid-column: span 4;
   }
 }
