@@ -3,6 +3,7 @@
 import type { CatalogGroup } from '@/lib/catalog'
 import type { FilterState, facetOptions } from '@/lib/catalogFilter'
 import { Chip } from '../Chip/Chip'
+import { FilterChecks } from '../FilterChecks/FilterChecks'
 import styles from './FilterPanel.module.css'
 
 type Options = ReturnType<typeof facetOptions>
@@ -23,35 +24,11 @@ function toggle(list: string[], value: string) {
   return list.includes(value) ? list.filter((item) => item !== value) : [...list, value]
 }
 
-function Checks({
-  title,
-  options,
-  selected,
-  onToggle,
-}: {
-  title: string
-  options: Options['vendors']
-  selected: string[]
-  onToggle: (value: string) => void
-}) {
-  if (!options.length) return null
-  return (
-    <fieldset className={styles.group}>
-      <legend className={styles.title}>{title}</legend>
-      {options.map((option) => (
-        <label key={option.value} className={styles.check}>
-          <input
-            type="checkbox"
-            checked={selected.includes(option.value)}
-            disabled={option.count === 0 && !selected.includes(option.value)}
-            onChange={() => onToggle(option.value)}
-          />
-          <span className={styles.checkLabel}>{option.label}</span>
-        </label>
-      ))}
-    </fieldset>
-  )
-}
+/**
+ * Сколько производителей видно сразу (замечание владельца 22.10.2026): на компьютере фильтр
+ * заканчивается примерно на уровне номеров страниц под карточками, остальные — по «Ещё».
+ */
+const VENDORS_SHOWN = 8
 
 /**
  * Панель условий фильтра: группа, направление или тип, производитель, задачи.
@@ -107,17 +84,18 @@ export function FilterPanel({ state, options, onChange, onReset }: Props) {
         </fieldset>
       )}
       {(!(state.direction || state.type) || state.vendors.length > 1) && (
-        <Checks
+        <FilterChecks
           title="Производитель"
           options={options.vendors}
           selected={state.vendors}
           onToggle={(value) => onChange({ vendors: toggle(state.vendors, value) })}
+          limit={VENDORS_SHOWN}
         />
       )}
       {options.tasks.length > 0 && (
         <details className={styles.more} open={state.tasks.length > 0}>
           <summary className={styles.summary}>Уточнить по задачам</summary>
-          <Checks
+          <FilterChecks
             title="Задачи"
             options={options.tasks}
             selected={state.tasks}

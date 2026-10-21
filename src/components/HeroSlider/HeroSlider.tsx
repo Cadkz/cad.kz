@@ -12,6 +12,8 @@ const INTERVAL = 4000
 /**
  * Баннер с акциями из CMS. Листается стрелками и точками; автопрокрутка останавливается
  * при наведении и фокусе и отключена при prefers-reduced-motion.
+ * Все слайды лежат друг на друге в одной ячейке, виден один: высота баннера — по самому
+ * длинному слайду и не меняется при листании (замечание владельца 22.10.2026, телефон).
  */
 export function HeroSlider({ slides }: { slides: Slide[] }) {
   const [index, setIndex] = useState(0)
@@ -40,12 +42,21 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
       onBlur={() => setPaused(false)}
     >
       <BannerArt name="tag" className={styles.art} onScroll />
-      <div key={index} className={styles.content} aria-live={paused ? 'polite' : 'off'}>
-        <p className={styles.title}>{slide.title}</p>
-        {slide.text && <p className={styles.text}>{slide.text}</p>}
-        <Link href={slide.href} className={styles.cta}>
-          Подробнее
-        </Link>
+      <div className={styles.slides} aria-live={paused ? 'polite' : 'off'}>
+        {slides.map((item, i) => (
+          <div
+            key={item.href}
+            className={i === index ? `${styles.content} ${styles.active}` : styles.content}
+            aria-hidden={i !== index}
+            inert={i !== index}
+          >
+            <p className={styles.title}>{item.title}</p>
+            {item.text && <p className={styles.text}>{item.text}</p>}
+            <Link href={item.href} className={styles.cta}>
+              Подробнее
+            </Link>
+          </div>
+        ))}
       </div>
       {count > 1 && (
         <div className={styles.controls}>

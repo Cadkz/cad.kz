@@ -55,13 +55,24 @@
   }
 }
 
+/* Слайды в одной ячейке сетки: высота — по самому длинному, невидимые место держат. */
+.slides {
+  display: grid;
+}
+
 .content {
-  animation: swap var(--duration-base) var(--ease);
+  grid-area: 1 / 1;
+  visibility: hidden;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
   max-width: var(--measure);
+}
+
+.active {
+  animation: swap var(--duration-base) var(--ease);
+  visibility: visible;
 }
 
 .title {
