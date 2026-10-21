@@ -55,3 +55,14 @@
 .action:hover {
   color: var(--color-navy);
 }
+
+/* Секция только для компьютера: на телефоне и планшете не показывается. */
+.desktopOnly {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .desktopOnly {
+    display: block;
+  }
+}

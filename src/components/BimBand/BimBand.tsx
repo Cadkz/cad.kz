@@ -16,12 +16,8 @@ type Props = {
   flush?: boolean
   /** Блок первым на экране (главная с 16.10.2026) — картинка грузится сразу, для LCP. */
   priority?: boolean
-  /**
-   * Короткий вид для главной (аудит 21.10.2026, «меньше воды»): заголовок, названия этапов
-   * и кнопки — без плашки, вводного текста (он повторял этапы), описаний этапов и цифр.
-   * Полный текст — на странице /bim.
-   */
-  compact?: boolean
+  /** Без плашки над заголовком: на главной она не нужна (решение владельца 21.10.2026). */
+  noEyebrow?: boolean
 }
 
 /** Тёмный блок «Внедрение BIM»: вводный текст, четыре этапа, кнопки и ключевые цифры. */
@@ -31,15 +27,13 @@ export function BimBand({
   more,
   flush = false,
   priority = false,
-  compact = false,
+  noEyebrow = false,
 }: Props) {
   if (!bim.title) return null
   const Heading = level === 1 ? 'h1' : 'h2'
   return (
     <section
-      className={[styles.section, flush ? styles.flush : '', compact ? styles.compact : '']
-        .filter(Boolean)
-        .join(' ')}
+      className={flush ? `${styles.section} ${styles.flush}` : styles.section}
       aria-labelledby="bim-title"
     >
       <Container>
@@ -51,18 +45,18 @@ export function BimBand({
             className={styles.image}
             priority={priority}
           />
-          {bim.eyebrow && !compact && <Badge tone="onDark">{bim.eyebrow}</Badge>}
+          {bim.eyebrow && !noEyebrow && <Badge tone="onDark">{bim.eyebrow}</Badge>}
           <Heading id="bim-title" className={styles.title}>
             {bim.title}
           </Heading>
-          {bim.lead && !compact && <p className={styles.lead}>{bim.lead}</p>}
+          {bim.lead && <p className={styles.lead}>{bim.lead}</p>}
           {bim.stages.length > 0 && (
             <ol className={styles.stages}>
               {bim.stages.map((stage, i) => (
                 <li key={stage.title} className={styles.stage}>
                   <span className={styles.num}>{String(i + 1).padStart(2, '0')}</span>
                   <h3 className={styles.stageTitle}>{stage.title}</h3>
-                  {stage.text && !compact && <p className={styles.stageText}>{stage.text}</p>}
+                  {stage.text && <p className={styles.stageText}>{stage.text}</p>}
                 </li>
               ))}
             </ol>
@@ -80,7 +74,7 @@ export function BimBand({
                 </ButtonLink>
               )}
             </div>
-            {bim.stats.length > 0 && !compact && (
+            {bim.stats.length > 0 && (
               <dl className={styles.stats}>
                 {bim.stats.map((stat) => (
                   <div key={stat.label} className={styles.stat}>

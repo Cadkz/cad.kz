@@ -11,6 +11,8 @@ type Props = {
   id?: string
   /** tint — голубая подложка во всю ширину экрана с фирменным узором. */
   tone?: 'plain' | 'tint'
+  /** Только от 960 px: на телефоне и планшете секции нет (каталог на главной, решение владельца 21.10.2026). */
+  desktopOnly?: boolean
   children: ReactNode
 }
 
@@ -18,9 +20,17 @@ type Props = {
  * Секция страницы: заголовок h2, подзаголовок, ссылка «Все …» и содержимое в рамке сайта.
  * Штриха над заголовком нет (решение владельца 13.10.2026: лишний декор).
  */
-export function Section({ title, sub, action, id, tone = 'plain', children }: Props) {
+export function Section({
+  title,
+  sub,
+  action,
+  id,
+  tone = 'plain',
+  desktopOnly = false,
+  children,
+}: Props) {
   const headingId = id ? `${id}-title` : undefined
-  const classes = [styles.section, styles[tone]]
+  const classes = [styles.section, styles[tone], desktopOnly ? styles.desktopOnly : '']
   return (
     <section id={id} className={classes.filter(Boolean).join(' ')} aria-labelledby={headingId}>
       <Container>
