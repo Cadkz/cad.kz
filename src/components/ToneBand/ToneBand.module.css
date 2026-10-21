@@ -4,49 +4,101 @@
   isolation: isolate;
 }
 
-/* Тёмный блок: свой фон во всю ширину экрана. Края растворяются на двойной отступ секции,
-   и тёмное плавно перетекает в оттенок соседнего светлого блока. Текст в зоне растворения
-   не стоит: сверху и снизу добавлен такой же запас. */
+/* Тёмная панель во всю ширину экрана с чёткими краями. Где браузер умеет анимацию по
+   прокрутке, панель въезжает в экран скруглённой карточкой и разворачивается до краёв экрана,
+   а уходя — сворачивается обратно. Без поддержки или при «уменьшить движение» — просто
+   тёмная полоса во всю ширину. */
 .night {
-  padding-top: var(--section-gap);
-  padding-bottom: calc(var(--section-gap) * 2);
+  margin-top: var(--section-gap);
+  padding-top: calc(var(--section-gap) / 2);
+  padding-bottom: calc(var(--section-gap) * 1.5);
+  background: var(--tone-night);
   color: var(--color-text-inverse);
 }
 
+/* Глубина: чертёжная сетка растворяется от центра, сверху — мягкий свет. */
 .night::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: var(--z-below);
-  background: var(--tone-night);
-  /* Плотность по S-кривой 0 → 15 → 50 → 85 → 100 %: без заметной ступеньки на краях. */
-  mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    color-mix(in srgb, black 15%, transparent) calc(var(--section-gap) * 0.5),
-    color-mix(in srgb, black 50%, transparent) var(--section-gap),
-    color-mix(in srgb, black 85%, transparent) calc(var(--section-gap) * 1.5),
-    black calc(var(--section-gap) * 2),
-    black calc(100% - var(--section-gap) * 2),
-    color-mix(in srgb, black 85%, transparent) calc(100% - var(--section-gap) * 1.5),
-    color-mix(in srgb, black 50%, transparent) calc(100% - var(--section-gap)),
-    color-mix(in srgb, black 15%, transparent) calc(100% - var(--section-gap) * 0.5),
-    transparent
-  );
+  background-image: var(--blueprint-dark);
+  background-size: var(--blueprint-size);
+  background-position: center top;
+  mask-image: radial-gradient(ellipse 70% 80% at 50% 0%, black, transparent 75%);
 }
 
-/* Первый на странице: сверху сразу тёмный, под шапкой без светлой полосы. */
+.night::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, var(--color-glow), transparent 70%);
+  opacity: 0.6;
+}
+
+/* Первая на странице — первый экран: сразу под шапкой, без отступа сверху. */
 .first {
+  margin-top: 0;
   padding-top: 0;
+  padding-bottom: calc(var(--section-gap) * 1.5);
 }
 
-.first::before {
-  mask-image: linear-gradient(
-    to bottom,
-    black calc(100% - var(--section-gap) * 2),
-    color-mix(in srgb, black 85%, transparent) calc(100% - var(--section-gap) * 1.5),
-    color-mix(in srgb, black 50%, transparent) calc(100% - var(--section-gap)),
-    color-mix(in srgb, black 15%, transparent) calc(100% - var(--section-gap) * 0.5),
-    transparent
-  );
+.first::after {
+  background: radial-gradient(ellipse 50% 60% at 80% 30%, var(--color-glow), transparent 70%);
+  opacity: 0.35;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .night {
+      animation:
+        panelOpen linear both,
+        panelClose linear forwards;
+      animation-timeline: view(), view();
+      animation-range:
+        entry 0% entry 90%,
+        exit 30% exit 100%;
+    }
+
+    /* Первый экран не въезжает (он уже на месте), а уходя — сворачивается и отдаляется. */
+    .first {
+      animation: heroLeave linear forwards;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+      transform-origin: 50% 0%;
+    }
+  }
+}
+
+@keyframes panelOpen {
+  from {
+    clip-path: inset(0 var(--panel-inset) round var(--radius-lg));
+  }
+
+  to {
+    clip-path: inset(0 0 round 0);
+  }
+}
+
+@keyframes panelClose {
+  from {
+    clip-path: inset(0 0 round 0);
+  }
+
+  to {
+    clip-path: inset(0 var(--panel-inset) round var(--radius-lg));
+  }
+}
+
+@keyframes heroLeave {
+  from {
+    clip-path: inset(0 0 round 0);
+    transform: scale(1);
+  }
+
+  to {
+    clip-path: inset(0 var(--panel-inset) round var(--radius-lg));
+    transform: scale(0.94);
+  }
 }
