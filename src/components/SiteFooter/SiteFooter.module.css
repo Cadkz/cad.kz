@@ -1,17 +1,38 @@
+/* Тёмный лист во всю ширину экрана со скруглённым верхом: страница заканчивается им, как
+   обложкой. Содержимое — в общей рамке --container. Фон кодом: чертёжная сетка, растворяется
+   книзу. Свечения нет (решение владельца 13.10.2026). */
 .footer {
-  padding: var(--section-gap) 0 var(--space-10);
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  margin-top: var(--section-gap);
+  padding: var(--space-10) 0 var(--space-6);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--gradient-deep);
+  color: var(--color-text-on-dark);
 }
 
-/* телефон: логотип, ссылки в две колонки, контакты; описание компании скрыто */
-.card {
+.footer::before {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--blueprint-dark);
+  background-size: var(--blueprint-size);
+  background-position: center top;
+  mask-image: linear-gradient(to bottom, black, transparent 70%);
+  content: "";
+}
+
+/* на тёмном синяя рамка фокуса не видна — голубая */
+.footer :focus-visible {
+  outline-color: var(--color-sky);
+}
+
+/* телефон: ссылки в две колонки, контакты; описание компании скрыто */
+.grid {
   display: grid;
   grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
   gap: var(--space-6) var(--grid-gap);
-  padding: var(--space-6);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-float);
 }
 
 .brand,
@@ -19,20 +40,17 @@
   grid-column: span 12;
 }
 
+.brand {
+  display: none;
+}
+
 .column {
   grid-column: span 6;
 }
 
-.brand {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
 .text {
-  display: none;
   max-width: var(--sidebar);
-  color: var(--color-text-muted);
+  color: var(--color-text-on-dark);
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
 }
@@ -46,7 +64,7 @@
 
 .title {
   margin-bottom: var(--space-2);
-  color: var(--color-navy);
+  color: var(--color-text-inverse);
   font-family: var(--font-heading);
   font-size: var(--text-body);
   font-weight: var(--weight-bold);
@@ -57,32 +75,48 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--control-height-sm);
-  color: var(--color-text-muted);
+  color: var(--color-text-on-dark);
   font-size: var(--text-sm);
+  transition: color var(--duration-fast) var(--ease);
 }
 
 .link:hover {
-  color: var(--color-blue);
+  color: var(--color-sky);
+}
+
+/* Низ: надпись cad.kz слева (Кадди в правом углу её не закрывает), под ней или рядом — ©. */
+.end {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  gap: var(--space-4) var(--grid-gap);
+  margin-top: var(--space-8);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-on-dark-line);
+}
+
+.word {
+  grid-column: span 8;
 }
 
 .bottom {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-6);
-  padding-top: var(--space-6);
-  /* строка лежит на сиянии: цвет темнее обычного серого ради контраста */
-  color: var(--color-gray-700);
-  font-size: var(--text-sm);
+  grid-column: span 12;
+  gap: var(--space-1) var(--space-6);
+  color: var(--color-text-on-dark);
+  font-size: var(--text-xs);
 }
 
 @media (min-width: 640px) {
-  .card {
-    gap: var(--space-8) var(--grid-gap);
-    padding: var(--space-10);
+  .footer {
+    padding-top: var(--space-16);
   }
 
-  .text {
+  .grid {
+    gap: var(--space-8) var(--grid-gap);
+  }
+
+  .brand {
     display: block;
   }
 
@@ -90,10 +124,26 @@
   .contacts {
     grid-column: span 4;
   }
+
+  .end {
+    margin-top: var(--space-12);
+    padding-top: var(--space-10);
+  }
+
+  .word {
+    grid-column: span 6;
+  }
+
+  /* © рядом с надписью, по её нижнему краю */
+  .bottom {
+    flex-direction: column;
+    align-self: end;
+    grid-column: span 6;
+  }
 }
 
 /* от 960 px: 3 + 3 + 2 + 4 — короткой «Компании» хватает двух колонок, контактам нужна
-   ширина, чтобы значки встали в одну строку */
+   ширина, чтобы значки встали в одну строку; надпись — 5 колонок */
 @media (min-width: 960px) {
   .brand,
   .column {
@@ -106,5 +156,13 @@
 
   .contacts {
     grid-column: span 4;
+  }
+
+  .word {
+    grid-column: span 5;
+  }
+
+  .bottom {
+    grid-column: span 7;
   }
 }

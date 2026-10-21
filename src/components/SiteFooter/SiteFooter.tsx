@@ -6,17 +6,19 @@ import { footerColumns } from '@/lib/siteNav'
 import { Container } from '../Container/Container'
 import { FooterContacts } from '../FooterContacts/FooterContacts'
 import { JsonLd } from '../JsonLd/JsonLd'
-import { Logo } from '../Logo/Logo'
+import { Wordmark } from '../Wordmark/Wordmark'
 import styles from './SiteFooter.module.css'
 
 /** Логотип для поисковиков (карточка компании в выдаче). */
 const LOGO = '/images/brand/cad-kz-logo.png'
 
 /**
- * Общий подвал сайта: на всех страницах одинаковый. Белая карточка с мягкой тенью на фоне
- * страницы: описание компании, «Покупателям», «Компания» и контакты (аудит 21.10.2026,
- * пакет 3). На телефоне описание скрыто, ссылки в две колонки — подвал короче вдвое. Здесь же разметка компании и сайта для поисковиков —
- * из тех же контактов, что в подвале.
+ * Общий подвал сайта: на всех страницах одинаковый. Тёмный лист во всю ширину экрана со
+ * скруглённым верхом (21.10.2026, вид из пробной ветки redesign/home-motion): описание
+ * компании, «Покупателям», «Компания» и контакты (аудит 21.10.2026, пакет 3), внизу надпись
+ * cad.kz, буквы которой поднимаются при прокрутке (Wordmark). На телефоне описание скрыто,
+ * ссылки в две колонки. Здесь же разметка компании и сайта для поисковиков — из тех же
+ * контактов, что в подвале.
  */
 export async function SiteFooter() {
   const contacts = await getContacts()
@@ -35,11 +37,12 @@ export async function SiteFooter() {
       />
       <JsonLd data={websiteLd({ base, name: 'CAD.kz' })} />
       <Container>
-        <div className={styles.card}>
-          <div className={styles.brand}>
-            <Logo />
-            {contacts.footerText && <p className={styles.text}>{contacts.footerText}</p>}
-          </div>
+        <div className={styles.grid}>
+          {contacts.footerText && (
+            <div className={styles.brand}>
+              <p className={styles.text}>{contacts.footerText}</p>
+            </div>
+          )}
           {footerColumns.map((column) => (
             <nav key={column.title} className={styles.column} aria-label={column.title}>
               <p className={styles.title}>{column.title}</p>
@@ -61,9 +64,14 @@ export async function SiteFooter() {
             <FooterContacts contacts={contacts} />
           </div>
         </div>
-        <div className={styles.bottom}>
-          <span>CAD.kz © {year}. Все права защищены.</span>
-          {!isProduction() && <span>Тестовая версия сайта</span>}
+        <div className={styles.end}>
+          <div className={styles.word}>
+            <Wordmark />
+          </div>
+          <div className={styles.bottom}>
+            <span>CAD.kz © {year}. Все права защищены.</span>
+            {!isProduction() && <span>Тестовая версия сайта</span>}
+          </div>
         </div>
       </Container>
     </footer>

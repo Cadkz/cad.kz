@@ -1,3 +1,4 @@
+/* Контакты на тёмном листе подвала: светлый текст, значки — полупрозрачные квадраты. */
 .contacts {
   display: flex;
   flex-direction: column;
@@ -23,25 +24,25 @@
 }
 
 .phone {
-  color: var(--color-text);
+  color: var(--color-text-inverse);
   font-size: var(--text-body);
   font-weight: var(--weight-medium);
 }
 
 .mail {
-  color: var(--color-text-muted);
+  color: var(--color-text-on-dark);
   font-size: var(--text-sm);
 }
 
 .phone:hover,
 .mail:hover {
-  color: var(--color-blue);
+  color: var(--color-sky);
 }
 
 .place {
   display: flex;
   flex-direction: column;
-  color: var(--color-text-muted);
+  color: var(--color-text-on-dark);
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
 }
@@ -60,7 +61,7 @@
   width: var(--control-height-sm);
   height: var(--control-height-sm);
   border-radius: var(--radius-md);
-  background: var(--color-navy);
+  background: var(--color-on-dark-soft);
   color: var(--color-text-inverse);
   transition: background var(--duration-fast) var(--ease);
 }

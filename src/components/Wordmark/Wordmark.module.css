@@ -1,0 +1,129 @@
+/* Кегль — доля ширины самой надписи (единицы cqi): знак и шесть букв ровно во всю её ширину.
+   Ширину задаёт подвал колонками сетки. */
+.wordmark {
+  display: block;
+  container-type: inline-size;
+  color: var(--color-sky);
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  font-family: var(--font-heading);
+  font-size: var(--text-wordmark);
+  font-weight: var(--weight-heavy);
+  line-height: var(--leading-wordmark);
+  letter-spacing: var(--tracking-tight);
+  /* Книзу надпись растворяется в фоне подвала. */
+  mask-image: linear-gradient(to bottom, black 35%, color-mix(in srgb, black 15%, transparent));
+}
+
+.mark {
+  flex-shrink: 0;
+  width: auto;
+  height: 0.7em;
+  margin-bottom: 0.02em;
+  fill: currentColor;
+}
+
+.letter {
+  display: inline-block;
+  transition:
+    transform var(--duration-reveal) var(--ease-reveal),
+    color var(--duration-base) var(--ease);
+}
+
+.wordmark:hover .letter,
+.wordmark:hover .mark {
+  color: var(--color-text-inverse);
+}
+
+.letter:hover {
+  transform: translateY(-8%);
+}
+
+/* Подъём букв по прокрутке: каждая следующая начинает чуть позже. Свойство translate,
+   а не transform — чтобы подпрыгивание под мышью работало поверх. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .mark,
+    .letter {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+
+    .letter:nth-of-type(1) {
+      animation-range: entry 8% entry 100%;
+    }
+
+    .letter:nth-of-type(2) {
+      animation-range: entry 16% entry 100%;
+    }
+
+    .letter:nth-of-type(3) {
+      animation-range: entry 24% entry 100%;
+    }
+
+    .letter:nth-of-type(4) {
+      animation-range: entry 32% entry 100%;
+    }
+
+    .letter:nth-of-type(5) {
+      animation-range: entry 40% entry 100%;
+    }
+
+    .letter:nth-of-type(6) {
+      animation-range: entry 48% entry 100%;
+    }
+  }
+}
+
+/* Браузеры без анимации по прокрутке (Safari, Firefox): буквы поднимаются по времени,
+   когда надпись вошла в экран (RevealObserver ставит data-reveal). */
+@supports not (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .wordmark[data-reveal="wait"] .mark,
+    .wordmark[data-reveal="wait"] .letter {
+      opacity: 0;
+      translate: 0 60%;
+    }
+
+    .wordmark[data-reveal="in"] .mark,
+    .wordmark[data-reveal="in"] .letter {
+      transition:
+        opacity var(--duration-reveal) var(--ease-reveal),
+        translate var(--duration-reveal) var(--ease-reveal),
+        transform var(--duration-reveal) var(--ease-reveal),
+        color var(--duration-base) var(--ease);
+    }
+
+    .wordmark[data-reveal="in"] .letter:nth-of-type(2) {
+      transition-delay: var(--delay-reveal-step);
+    }
+
+    .wordmark[data-reveal="in"] .letter:nth-of-type(3) {
+      transition-delay: calc(var(--delay-reveal-step) * 2);
+    }
+
+    .wordmark[data-reveal="in"] .letter:nth-of-type(4) {
+      transition-delay: calc(var(--delay-reveal-step) * 3);
+    }
+
+    .wordmark[data-reveal="in"] .letter:nth-of-type(5) {
+      transition-delay: calc(var(--delay-reveal-step) * 4);
+    }
+
+    .wordmark[data-reveal="in"] .letter:nth-of-type(6) {
+      transition-delay: calc(var(--delay-reveal-step) * 5);
+    }
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 60%;
+  }
+}
