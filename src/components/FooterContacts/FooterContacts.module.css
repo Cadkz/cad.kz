@@ -5,14 +5,15 @@
   display: flex;
   align-self: stretch;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-3);
 }
 
-/* телефон: номера по два в строку — подвал короче; от 640 px столбиком */
+/* телефон: номера по два в строку по центру — подвал короче; от 640 px столбиком */
 .numbers {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0 var(--space-4);
 }
 
@@ -45,6 +46,7 @@
 .place {
   display: flex;
   flex-direction: column;
+  align-items: center;
   color: var(--color-text-on-dark);
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
@@ -76,6 +78,11 @@
 }
 
 @media (min-width: 640px) {
+  .contacts,
+  .place {
+    align-items: flex-start;
+  }
+
   .numbers {
     flex-direction: column;
     align-items: flex-start;

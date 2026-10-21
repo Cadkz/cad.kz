@@ -58,11 +58,15 @@
   line-height: var(--leading-normal);
 }
 
+/* Телефон: всё по центру (решение владельца 21.10.2026 — левая колонка у края, правая почти
+   в центре выглядели перекосом): каждая колонка ссылок по центру своей половины, контакты
+   по центру листа. От 640 px — по левому краю, как вся страница. */
 .column,
 .contacts {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
 }
 
 .title {
@@ -130,6 +134,8 @@
   .column,
   .contacts {
     grid-column: span 4;
+    align-items: flex-start;
+    text-align: left;
   }
 
   .end {
