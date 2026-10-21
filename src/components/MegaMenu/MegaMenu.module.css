@@ -62,6 +62,16 @@
 
 .segment:hover {
   color: var(--color-text-inverse);
+  background: var(--color-on-dark-soft);
+}
+
+.segment:active {
+  background: var(--color-on-dark-hover);
+}
+
+.segment:focus-visible,
+.offerLink:focus-visible {
+  outline-color: var(--color-sky);
 }
 
 .segment[aria-selected="true"] {

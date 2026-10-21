@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { Container } from '../Container/Container'
+import { Reveal } from '../Reveal/Reveal'
 import styles from './Section.module.css'
 
 type Props = {
@@ -34,7 +35,7 @@ export function Section({
   return (
     <section id={id} className={classes.filter(Boolean).join(' ')} aria-labelledby={headingId}>
       <Container>
-        <div className={styles.head}>
+        <Reveal className={styles.head}>
           <div className={styles.text}>
             <h2 id={headingId}>{title}</h2>
             {sub && <p className={styles.sub}>{sub}</p>}
@@ -45,7 +46,7 @@ export function Section({
               <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
             </Link>
           )}
-        </div>
+        </Reveal>
         {children}
       </Container>
     </section>

@@ -2,6 +2,7 @@ import { BookOpen, FileText, MessageSquare } from 'lucide-react'
 import type { Home } from '@/lib/home'
 import { ButtonLink } from '../Button/Button'
 import { Grid } from '../Grid/Grid'
+import { Reveal } from '../Reveal/Reveal'
 import styles from './ProcessSteps.module.css'
 
 const icons = [MessageSquare, FileText, BookOpen]
@@ -20,21 +21,23 @@ export function ProcessSteps({ steps, cards }: Props) {
         {steps.map((step, i) => {
           const Icon = icons[i % icons.length] ?? MessageSquare
           return (
-            <li key={step.title} className={styles.step}>
+            <Reveal as="li" key={step.title} step={i} className={styles.step}>
               <span className={styles.num}>{i + 1}</span>
               <div className={styles.body}>
                 <h3 className={styles.title}>{step.title}</h3>
                 {step.text && <p className={styles.text}>{step.text}</p>}
               </div>
               <Icon size={20} strokeWidth={1.75} aria-hidden="true" className={styles.icon} />
-            </li>
+            </Reveal>
           )
         })}
       </Grid>
       {cards.length > 0 && (
         <Grid as="ul" span={{ base: 12, md: cards.length > 1 ? 6 : 12 }}>
-          {cards.map((card) => (
-            <li
+          {cards.map((card, i) => (
+            <Reveal
+              as="li"
+              step={i}
               key={card.title}
               className={card.dark ? `${styles.card} ${styles.dark}` : styles.card}
             >
@@ -52,7 +55,7 @@ export function ProcessSteps({ steps, cards }: Props) {
                   {card.link.label}
                 </ButtonLink>
               )}
-            </li>
+            </Reveal>
           ))}
         </Grid>
       )}

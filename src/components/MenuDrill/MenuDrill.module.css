@@ -82,11 +82,18 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: border-color var(--duration-fast) var(--ease);
+  transition:
+    border-color var(--duration-fast) var(--ease),
+    background-color var(--duration-fast) var(--ease);
 }
 
 .card:hover {
   border-color: var(--color-blue-mid);
+  background: var(--color-bg);
+}
+
+.card:active {
+  background: var(--color-blue-soft);
 }
 
 .cardTitle {

@@ -4,7 +4,7 @@
 @media (prefers-reduced-motion: no-preference) {
   .reveal[data-reveal="wait"] {
     opacity: 0;
-    transform: translateY(var(--space-6));
+    transform: translateY(var(--motion-reveal));
   }
 
   .reveal[data-reveal="in"] {
@@ -12,7 +12,10 @@
       opacity var(--duration-reveal) var(--ease-reveal),
       transform var(--duration-reveal) var(--ease-reveal);
   }
+}
 
+/* На телефоне карточки идут по одной: задержка по номеру в ряду не нужна. */
+@media (min-width: 640px) and (prefers-reduced-motion: no-preference) {
   .step1[data-reveal="in"] {
     transition-delay: var(--delay-reveal-step);
   }

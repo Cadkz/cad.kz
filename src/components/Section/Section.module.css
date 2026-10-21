@@ -46,10 +46,22 @@
 .action {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
+  min-height: var(--control-height);
   color: var(--color-blue);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
+  transition: color var(--duration-fast) var(--ease);
+}
+
+.action svg {
+  transition: transform var(--duration-base) var(--ease);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .action:hover svg {
+    transform: translateX(var(--space-1));
+  }
 }
 
 .action:hover {

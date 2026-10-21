@@ -1,5 +1,5 @@
 .section {
-  padding-top: var(--section-gap);
+  padding-top: var(--space-8);
 }
 
 .flush {
@@ -39,14 +39,6 @@
   mask-image: linear-gradient(to left, black, transparent 70%);
 }
 
-.band::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-below);
-  background: radial-gradient(circle at 100% 0%, var(--color-glow), transparent 40%);
-}
-
 /* BIM-модель (картинка): на телефоне — во всю ширину плашки сверху, растворяется книзу;
    от 960 px — справа сверху, растворяется к тексту и к этапам. Грузится лениво. */
 .image {
@@ -61,6 +53,8 @@
 .title {
   max-width: var(--measure);
   color: var(--color-text-inverse);
+  text-wrap: balance;
+  line-height: var(--leading-snug);
 }
 
 .lead {
@@ -82,27 +76,35 @@
 
 .stage {
   grid-column: span 12;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding-left: var(--space-4);
-  border-left: 2px solid var(--color-on-dark-line);
+  display: grid;
+  grid-template-columns: var(--space-8) minmax(0, 1fr);
+  align-content: start;
+  gap: var(--space-2) var(--space-3);
 }
 
 .num {
+  display: grid;
+  place-items: center;
+  align-self: flex-start;
+  width: var(--space-8);
+  height: var(--space-8);
+  border: 1px solid var(--color-on-dark-line);
+  border-radius: var(--radius-sm);
   color: var(--color-sky);
   font-family: var(--font-heading);
   font-size: var(--text-xs);
   font-weight: var(--weight-heavy);
-  letter-spacing: var(--tracking-overline);
+  font-variant-numeric: tabular-nums;
 }
 
 .stageTitle {
+  align-self: center;
   color: var(--color-text-inverse);
   font-size: var(--text-body);
 }
 
 .stageText {
+  grid-column: 2;
   color: var(--color-text-on-dark);
   font-size: var(--text-sm);
 }
@@ -145,6 +147,14 @@
 }
 
 @media (min-width: 640px) {
+  .section {
+    padding-top: var(--space-10);
+  }
+
+  .flush {
+    padding-top: 0;
+  }
+
   .band {
     padding: var(--space-12);
   }
@@ -161,11 +171,20 @@
 
 @media (min-width: 960px) {
   .band {
-    padding: var(--space-16);
+    padding: var(--space-12);
   }
 
   .stage {
     grid-column: span 3;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-4) 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--color-on-dark-line);
+  }
+
+  .stageTitle {
+    align-self: auto;
   }
 }
 

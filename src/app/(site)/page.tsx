@@ -26,7 +26,7 @@ export const metadata = { alternates: { canonical: '/' } }
 
 /**
  * Главная — шаблон «Витрина». Первым блоком BIM целиком (решение владельца 16.10 и 21.10.2026,
- * без плашки над заголовком), направления (на телефоне по две плитки в ряд), каталог с фильтром —
+ * без плашки над заголовком), направления (на телефоне по одному в ряд), каталог с фильтром —
  * только от 960 px (решение владельца 21.10.2026: на телефоне он занимал 5 экранов; полный
  * каталог там — в меню и на /catalog), «Новости и акции», «Как мы работаем», вопросы,
  * «Нашли дешевле». «Популярные решения» — в меню «Каталог», не на главной. h1 из админки
@@ -86,16 +86,16 @@ export default async function Home({ searchParams }: Props) {
       <HomeNews slides={home.slides} news={news.docs} covers={topicCovers} />
       {home.process.length > 0 && (
         <Section id="process" tone="tint" title="Как мы работаем">
-          <Reveal>
-            <ProcessSteps steps={home.process} cards={home.sideCards} />
-          </Reveal>
+          <ProcessSteps steps={home.process} cards={home.sideCards} />
         </Section>
       )}
       {home.faq.length > 0 && (
         <Section id="faq" title="Частые вопросы">
           <Grid>
             <Col span={{ base: 12, md: 8 }}>
-              <Faq items={home.faq} />
+              <Reveal>
+                <Faq items={home.faq} />
+              </Reveal>
             </Col>
             <Col span={{ base: 12, md: 4 }}>
               <FaqHelp contacts={contacts} />

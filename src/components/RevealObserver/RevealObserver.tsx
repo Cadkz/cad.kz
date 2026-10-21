@@ -18,7 +18,8 @@ const ROOT_MARGIN = '0px 0px -8% 0px'
 export function RevealObserver() {
   useEffect(() => {
     if (!('IntersectionObserver' in window)) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (motion.matches) return
 
     const io = new IntersectionObserver(
       (entries) => {
@@ -68,7 +69,30 @@ export function RevealObserver() {
     })
     mo.observe(document.body, { childList: true, subtree: true })
 
+    // Tab может перенести фокус в ещё скрытую карточку: показываем все её обёртки сразу.
+    const onFocus = (event: FocusEvent) => {
+      if (!(event.target instanceof Element)) return
+      let el = event.target.closest<HTMLElement>(SELECTOR)
+      while (el) {
+        el.dataset.reveal = 'done'
+        io.unobserve(el)
+        el = el.parentElement?.closest<HTMLElement>(SELECTOR) ?? null
+      }
+    }
+    const onMotionChange = () => {
+      if (!motion.matches) return
+      mo.disconnect()
+      io.disconnect()
+      for (const el of document.querySelectorAll<HTMLElement>(SELECTOR)) {
+        el.dataset.reveal = 'done'
+      }
+    }
+    document.addEventListener('focusin', onFocus)
+    motion.addEventListener('change', onMotionChange)
+
     return () => {
+      document.removeEventListener('focusin', onFocus)
+      motion.removeEventListener('change', onMotionChange)
       mo.disconnect()
       io.disconnect()
     }

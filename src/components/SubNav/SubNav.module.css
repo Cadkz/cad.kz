@@ -53,6 +53,11 @@
   color: var(--color-text);
 }
 
+.item:active,
+.dropLink:active {
+  background: var(--color-press);
+}
+
 .chevron {
   transition: transform var(--duration-base) var(--ease);
 }
