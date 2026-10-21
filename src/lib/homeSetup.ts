@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import { HOME_HERO, HOME_HERO_V1 } from '../domain/homeHero'
+import { HOME_HERO, HOME_HERO_V1, HOME_TEXTS_AUDIT } from '../domain/homeHero'
 import { TRUST_DATA, TRUST_SEED, TRUST_SEED_V1_VENDORS } from '../domain/homeTrust.mjs'
 import { mediaFor, oldSite } from './legacyContentRun'
 
@@ -128,4 +128,43 @@ export async function setupHomeHeroV2(payload: Payload): Promise<string | null> 
   return changed.length
     ? `Первый экран, вторая редакция текстов: ${changed.join(', ')}`
     : 'Тексты первого экрана правили в админке, не трогаем.'
+}
+
+/** Ключ записи в журнале «Запуски импорта»: тексты главной по аудиту 21.10.2026, один раз. */
+export const HOME_TEXTS_AUDIT_KEY = 'home-setup:texts-audit-v1'
+
+/**
+ * Тексты главной по аудиту 21.10.2026: скрытый заголовок h1, первый шаг «Как мы работаем»,
+ * первая карточка с действием. Меняет поле, только если в нём прежний текст из демоданных, —
+ * правленное в админке не трогает. Картинок и файлов не загружает.
+ */
+export async function setupHomeTextsAudit(payload: Payload): Promise<string | null> {
+  if (await done(payload, HOME_TEXTS_AUDIT_KEY)) return null
+  const home = await payload.findGlobal({ slug: 'home-page', ...opts })
+  const changed: string[] = []
+  const [oldTitle, newTitle] = HOME_TEXTS_AUDIT.title
+  const title = home.title === oldTitle ? newTitle : home.title
+  if (title !== home.title) changed.push('скрытый заголовок')
+  const [oldStep, newStep] = HOME_TEXTS_AUDIT.processFirst
+  const process = (home.process ?? []).map((step) => {
+    if (step.text !== oldStep) return step
+    changed.push('первый шаг «Как мы работаем»')
+    return { ...step, text: newStep }
+  })
+  const [oldCard, newCard] = HOME_TEXTS_AUDIT.sideCardFirst
+  const sideCards = (home.sideCards ?? []).map((card) => {
+    if (card.text !== oldCard) return card
+    changed.push('карточка «Подберём комплект под ваше ТЗ»')
+    return { ...card, text: newCard }
+  })
+  if (changed.length)
+    await payload.updateGlobal({
+      slug: 'home-page',
+      data: { title, process, sideCards },
+      ...opts,
+    })
+  await mark(payload, HOME_TEXTS_AUDIT_KEY, { changed })
+  return changed.length
+    ? `Тексты главной по аудиту: ${changed.join(', ')}`
+    : 'Тексты главной правили в админке, не трогаем.'
 }

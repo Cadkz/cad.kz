@@ -5,13 +5,14 @@
 }
 
 /* Компактный шаг (13.10.2026): номер слева, текст справа, значок в углу — без цветной шапки. */
+/* Телефон (аудит 21.10.2026): поля меньше, значка нет — блок короче. */
 .step {
   position: relative;
   display: flex;
   align-items: flex-start;
   gap: var(--space-4);
   height: 100%;
-  padding: var(--space-5);
+  padding: var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -37,10 +38,10 @@
   flex-direction: column;
   gap: var(--space-1);
   min-width: 0;
-  padding-right: var(--space-6);
 }
 
 .icon {
+  display: none;
   position: absolute;
   top: var(--space-5);
   right: var(--space-5);
@@ -62,9 +63,9 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-4);
+  gap: var(--space-3);
   height: 100%;
-  padding: var(--space-5) var(--space-6);
+  padding: var(--space-4);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -91,6 +92,7 @@
 }
 
 .cardText {
+  display: none;
   color: var(--color-gray-700);
   font-size: var(--text-sm);
 }
@@ -100,7 +102,21 @@
 }
 
 @media (min-width: 640px) {
+  .step {
+    padding: var(--space-5);
+  }
+
+  .body {
+    padding-right: var(--space-6);
+  }
+
+  .icon {
+    display: block;
+  }
+
   .card {
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6);
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -108,5 +124,9 @@
 
   .cardAction {
     flex-shrink: 0;
+  }
+
+  .cardText {
+    display: block;
   }
 }

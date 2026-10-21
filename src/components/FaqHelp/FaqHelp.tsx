@@ -7,7 +7,11 @@ import styles from './FaqHelp.module.css'
 /** Текст, который уже набран в WhatsApp: клиенту остаётся дописать вопрос. */
 const WHATSAPP_TEXT = 'Здравствуйте! У меня вопрос: '
 
-/** Правая колонка у частых вопросов на главной: куда спросить, если ответа в списке нет. */
+/**
+ * Правая колонка у частых вопросов на главной: куда спросить, если ответа в списке нет.
+ * На телефоне — только заголовок и кнопка WhatsApp: телефоны и почта есть в подвале сразу ниже
+ * (аудит 21.10.2026: контакты шли три раза подряд).
+ */
 export function FaqHelp({ contacts }: { contacts: Contacts }) {
   const whatsapp = contacts.whatsappHref
     ? `${contacts.whatsappHref}?text=${encodeURIComponent(WHATSAPP_TEXT)}`
@@ -17,7 +21,7 @@ export function FaqHelp({ contacts }: { contacts: Contacts }) {
       <h3 id="faq-help-title" className={styles.title}>
         Не нашли ответ?
       </h3>
-      <p className={styles.text}>
+      <p className={`${styles.text} ${styles.wide}`}>
         Спросите менеджера — подскажем по программам, лицензиям и поставке.
       </p>
       {whatsapp && (
@@ -26,7 +30,9 @@ export function FaqHelp({ contacts }: { contacts: Contacts }) {
           Спросить в WhatsApp
         </ButtonLink>
       )}
-      <ContactList contacts={contacts} socials={false} whatsapp={false} />
+      <div className={styles.wide}>
+        <ContactList contacts={contacts} socials={false} whatsapp={false} />
+      </div>
     </aside>
   )
 }
