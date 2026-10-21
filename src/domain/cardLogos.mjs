@@ -9,9 +9,6 @@
 
 /** @typedef {{ url: string, width: number, height: number }} StaticLogo */
 
-const AUTOCAD = { url: '/images/brands/autocad.webp', width: 75, height: 75 }
-const REVIT = { url: '/images/brands/revit.webp', width: 75, height: 75 }
-const FUSION = { url: '/images/brands/fusion.webp', width: 75, height: 75 }
 const GEO5 = { url: '/images/brands/geo5-full.webp', width: 294, height: 400 }
 const SCAD = { url: '/images/brands/scad.webp', width: 80, height: 80 }
 const LIRA = { url: '/images/brands/lira.webp', width: 80, height: 80 }
@@ -19,15 +16,69 @@ const ABC = { url: '/images/brands/abc.webp', width: 80, height: 80 }
 const ARTEC = { url: '/images/brands/artec.svg', width: 80, height: 70 }
 
 /**
- * Логотипы отдельных программ: первое подходящее правило. Комплекты из нескольких программ
- * (AutoCAD Revit LT Suite, коллекции) своего значка не берут — у них логотип производителя.
+ * Значок Autodesk из набора владельца (21.10.2026, public/images/brands/autodesk): PNG 75 × 75,
+ * у Revit, Inventor и коллекций AEC, M&E — SVG.
+ * @param {string} name
+ * @returns {StaticLogo}
+ */
+const adsk = (name) =>
+  name.endsWith('.svg')
+    ? { url: `/images/brands/autodesk/${name}`, width: 150, height: 150 }
+    : { url: `/images/brands/autodesk/${name}.png`, width: 75, height: 75 }
+
+/**
+ * Autodesk: название (начало) → значок. Первое подходящее; частные варианты раньше общих.
+ * @type {[RegExp, StaticLogo][]}
+ */
+const AUTODESK = [
+  [/revit lt suite/i, adsk('autocad-revit-lt-suite')],
+  [/^architecture engineering|aec collection/i, adsk('aec-collection.svg')],
+  [/^product design/i, adsk('product-design-manufacturing-collection')],
+  [/^media & entertainment/i, adsk('media-entertainment-collection.svg')],
+  [/^autocad lt\b/i, adsk('autocad-lt')],
+  [/^autocad\b/i, adsk('autocad')],
+  [/^revit\b/i, adsk('revit.svg')],
+  [/^inventor\b/i, adsk('inventor.svg')],
+  [/^fusion 360 manage/i, adsk('fusion-360-manage')],
+  [/^fusion 360 with netfabb/i, adsk('netfabb')],
+  [/^fusion 360 with powerinspect/i, adsk('powerinspect')],
+  [/^fusion 360 with powermill/i, adsk('powermill')],
+  [/^fusion 360 with powershape/i, adsk('powershape')],
+  [/^fusion\b/i, adsk('fusion-360')],
+  [/^civil 3d/i, adsk('civil-3d')],
+  [/^navisworks/i, adsk('navisworks-manage')],
+  [/^vault plm/i, adsk('vault-plm')],
+  [/^vault\b/i, adsk('vault')],
+  [/^3ds max/i, adsk('3ds-max')],
+  [/^maya\b/i, adsk('maya')],
+  [/^motionbuilder/i, adsk('motionbuilder')],
+  [/^arnold/i, adsk('arnold')],
+  [/^flame assist/i, adsk('flame-assist')],
+  [/^flame\b/i, adsk('flame')],
+  [/^flare/i, adsk('flare')],
+  [/^alias/i, adsk('alias')],
+  [/^vred/i, adsk('vred-professional')],
+  [/^advance steel/i, adsk('advance-steel')],
+  [/^infraworks/i, adsk('infraworks')],
+  [/^recap/i, adsk('recap-pro')],
+  [/^point layout/i, adsk('point-layout')],
+  [/^moldflow/i, adsk('moldflow-insight')],
+  [/^netfabb/i, adsk('netfabb')],
+  [/^camplete/i, adsk('camplete')],
+  [/^fabrication camduct/i, adsk('fabrication-camduct')],
+  [/^(autodesk )?cfd\b/i, adsk('autodesk-cfd-ultimate')],
+  [/^autodesk docs/i, adsk('autodesk-docs')],
+  [/^bim collaborate/i, adsk('autodesk-bim-collaborate-pro')],
+  [/^(bim 360 )?build\b/i, adsk('autodesk-build')],
+  [/^takeoff/i, adsk('autodesk-takeoff')],
+]
+
+/**
+ * Логотипы отдельных программ: первое подходящее правило.
  * @type {{ vendor: string, title: RegExp, logo: StaticLogo | null }[]}
  */
 export const PROGRAM_LOGOS = [
-  { vendor: 'Autodesk', title: /suite|collection/i, logo: null },
-  { vendor: 'Autodesk', title: /^AutoCAD\b/i, logo: AUTOCAD },
-  { vendor: 'Autodesk', title: /^Revit\b/i, logo: REVIT },
-  { vendor: 'Autodesk', title: /^Fusion\b/i, logo: FUSION },
+  ...AUTODESK.map(([title, logo]) => ({ vendor: 'Autodesk', title, logo })),
   { vendor: 'Fine Software', title: /^GEO5\b/i, logo: GEO5 },
   // Программы Artec в каталоге стоят рядом со сканерами и могут быть отмечены как оборудование.
   { vendor: 'Artec 3D', title: /\b(studio|cloud)\b/i, logo: ARTEC },

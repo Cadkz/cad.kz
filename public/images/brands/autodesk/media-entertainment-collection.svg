@@ -1,0 +1,24 @@
+<svg width="150" height="150" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg"><title>Media &amp; Entertainment Collection</title>
+<g clip-path="url(#clip0_7136_24359)">
+<mask id="mask0_7136_24359" mask-type="luminance" maskUnits="userSpaceOnUse" x="8" y="0" width="142" height="129">
+<path d="M150 0H8.63965V128.908H150V0Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_7136_24359)">
+<mask id="mask1_7136_24359" mask-type="luminance" maskUnits="userSpaceOnUse" x="8" y="0" width="142" height="129">
+<path d="M150 0H8.63965V128.909H150V0Z" fill="white"/>
+</mask>
+<g mask="url(#mask1_7136_24359)">
+<path d="M31.4907 0.0283203L138.561 23.7301H150V128.908H28.7389C24.533 128.905 21.0908 125.495 21.0908 121.29V110.123L31.3921 0.237745L31.4907 0.0283203Z" fill="#36697F"/>
+<path d="M139.6 105.471H31.4297V0.169749L31.492 0H131.983C136.19 0 139.6 3.3821 139.6 7.589V105.471Z" fill="#37A5CC"/>
+<path d="M8.63184 119.26L31.4837 105.462L31.4917 0L8.63987 13.7693L8.63184 119.26Z" fill="#7DC6DD"/>
+<path d="M131.988 0H79.626L31.4922 29.8342V77.2647L80.6808 46.6876H129.658C131.165 46.6876 132.521 47.8932 132.521 49.5509C132.521 50.9072 131.918 51.51 131.165 51.962L84.7906 79.7586C81.7767 81.5669 80.7215 85.1837 80.7215 87.8962V105.47H139.6V7.55903C139.601 3.35314 136.194 0 131.988 0Z" fill="#ECF6FA"/>
+<path d="M31.4915 29.834L8.63965 44.0171V91.4753L31.4915 77.2647V29.834Z" fill="#D2EAF3"/>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_7136_24359">
+<rect width="141.36" height="128.909" fill="white" transform="translate(8.63965)"/>
+</clipPath>
+</defs>
+</svg>

@@ -1,0 +1,28 @@
+<svg width="150" height="150" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg"><title>Revit</title>
+<g clip-path="url(#clip0_7136_24239)">
+<mask id="mask0_7136_24239" mask-type="luminance" maskUnits="userSpaceOnUse" x="8" y="0" width="142" height="129">
+<path d="M150 0H8.63965V128.909H150V0Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_7136_24239)">
+<mask id="mask1_7136_24239" mask-type="luminance" maskUnits="userSpaceOnUse" x="8" y="0" width="142" height="129">
+<path d="M150 0H8.63965V128.909H150V0Z" fill="white"/>
+</mask>
+<g mask="url(#mask1_7136_24239)">
+<path d="M31.4581 0.0635865L31.4916 0.00683594L138.848 23.7311H149.999V128.909H28.7081C24.5012 128.909 21.0908 125.498 21.0908 121.292V110.986L31.4581 0.0635865Z" fill="#0C3D91"/>
+<path d="M139.599 105.471H31.458V0.0634467L31.4913 0H131.981C136.188 0 139.599 3.41039 139.599 7.61729V105.471Z" fill="#186BFF"/>
+<path d="M8.63965 119.241L31.4917 105.471V0L8.63965 13.7698V119.241Z" fill="#679AE7"/>
+</g>
+<mask id="mask2_7136_24239" mask-type="luminance" maskUnits="userSpaceOnUse" x="8" y="0" width="142" height="129">
+<path d="M150 0H8.63965V128.909H150V0Z" fill="white"/>
+</mask>
+<g mask="url(#mask2_7136_24239)">
+<path d="M110.724 73.2835V82.051C109.221 82.8864 107.133 83.3032 104.878 83.3032C99.7843 83.3032 95.7766 81.8007 92.6034 75.2043L85.5893 61.0074H79.1596V82.0508H64.5459V23.5981H86.6749C99.3676 23.5981 107.885 29.6944 107.885 39.464V44.7249C107.885 50.486 104.294 54.9964 98.6156 57.8346L105.129 70.1105C106.214 72.2815 107.634 73.2836 110.056 73.2836L110.724 73.2835ZM79.1594 51.4047H85.5057C90.1814 51.4047 93.2712 48.9835 93.2712 44.4748V40.2995C93.2712 35.874 90.098 33.6197 85.5057 33.6197H79.1594V51.4047Z" fill="white"/>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_7136_24239">
+<rect width="141.36" height="128.909" fill="white" transform="translate(8.63965)"/>
+</clipPath>
+</defs>
+</svg>
