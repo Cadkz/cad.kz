@@ -15,28 +15,12 @@
   transition:
     background var(--duration-fast) var(--ease),
     border-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease),
-    transform var(--duration-fast) var(--ease);
+    color var(--duration-fast) var(--ease);
 }
 
 .button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .button:active:not(:disabled) {
-    transform: translateY(var(--motion-press));
-  }
-}
-
-.button:focus-visible {
-  outline-offset: var(--space-1);
-}
-
-.light:focus-visible,
-.ghostDark:focus-visible {
-  outline-color: var(--color-sky);
 }
 
 .md {

@@ -9,37 +9,22 @@
   padding: var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  background: var(--color-bg);
   transition:
     border-color var(--duration-base) var(--ease),
     box-shadow var(--duration-base) var(--ease),
     transform var(--duration-base) var(--ease);
 }
 
-/* Карточка сохраняет размеры и положение логотипов; движения только под точной мышью. */
-@media (hover: hover) and (pointer: fine) {
-  .card:hover {
-    border-color: var(--color-blue-mid);
-    box-shadow: var(--shadow-sm);
-  }
-}
-
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .card:hover {
-    transform: translateY(calc(-1 * var(--motion-lift)));
-  }
-
-  .card:hover .more svg {
-    transform: translateX(var(--motion-lift));
-  }
+/* Наведение как у карточек направлений на главной: подъём на 4 px, тень, голубая рамка. */
+.card:hover {
+  border-color: var(--color-blue-mid);
+  box-shadow: var(--shadow-md);
+  transform: translateY(calc(-1 * var(--space-1)));
 }
 
 .card:active {
   transform: none;
-}
-
-.card:focus-within {
-  border-color: var(--color-blue);
 }
 
 .card > * {
@@ -70,6 +55,10 @@
   height: 100%;
   object-fit: contain;
   transition: transform var(--duration-base) var(--ease);
+}
+
+.card:hover .image {
+  transform: scale(1.03);
 }
 
 /* Логотип программы: на телефоне — на всю миниатюру, от 640 px — знак --card-logo по центру
@@ -157,6 +146,10 @@
 
 .card:hover .more {
   background: var(--color-blue);
+}
+
+.card:hover .more svg {
+  transform: translateX(var(--space-1));
 }
 
 @media (prefers-reduced-motion: reduce) {

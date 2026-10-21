@@ -34,30 +34,14 @@
 }
 
 .link {
-  display: flex;
-  align-items: center;
-  min-height: var(--control-height);
   padding: var(--space-1) 0;
   color: var(--color-gray-700);
   font-size: var(--text-body);
 }
 
 .all {
-  display: flex;
-  align-items: center;
-  min-height: var(--control-height);
   padding: var(--space-1) 0;
   color: var(--color-blue);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
-}
-
-.link,
-.all {
-  transition: color var(--duration-fast) var(--ease);
-}
-
-.link:active,
-.all:active {
-  color: var(--color-blue);
 }
