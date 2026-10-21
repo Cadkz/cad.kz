@@ -96,29 +96,13 @@ export async function setupPriorities(payload: Payload): Promise<PriorityReport 
   return report
 }
 
-/** Вторая настройка: топы продаж по местам и SCAD перед ЛИРОЙ в разделах (21.10.2026). */
-export const PRIORITY_V2_KEY = 'catalog-setup:priority-v2'
+/** Места топов продаж: дозаполнение после исправленного правила СПДС (в v2 оно не сработало). */
+export const PRIORITY_V3_KEY = 'catalog-setup:priority-v3'
 
-/**
- * Решение владельца 21.10.2026: во всём каталоге первыми AutoCAD, АВС, Revit, SCAD Office, GEO5,
- * Artec, CSoft и только потом ЛИРА. Ставит «Место в топе продаж» товарам, у которых оно пустое
- * (src/domain/prioritySeed.mjs, TOP_SALES), и в порядке производителей разделов ставит SCAD Soft
- * перед ЛИРА-FEM. Один раз; дальше всё правится в админке. null — уже сделано.
- */
-export async function setupPrioritiesV2(payload: Payload): Promise<string[] | null> {
-  const done = await payload.find({
-    collection: 'import-runs',
-    where: { idempotencyKey: { equals: PRIORITY_V2_KEY } },
-    limit: 1,
-    ...opts,
-  })
-  if (done.docs.length) return null
-  const report: string[] = []
-
+/** Ставит «Место в топе продаж» по TOP_SALES товарам с пустым местом; строки «место. название». */
+async function placeTopSales(payload: Payload): Promise<string[]> {
   const vendors = await payload.find({ collection: 'manufacturers', pagination: false, ...opts })
   const titleById = new Map(vendors.docs.map((m) => [m.id, m.title]))
-  const vendorId = (title: string) => vendors.docs.find((m) => m.title === title)?.id
-
   const products = await payload.find({
     collection: 'products',
     pagination: false,
@@ -141,7 +125,54 @@ export async function setupPrioritiesV2(payload: Payload): Promise<string[] | nu
     })
     placed.push(`${place}. ${product.title}`)
   }
-  placed.sort((a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10))
+  return placed.sort((a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10))
+}
+
+/**
+ * Третья настройка (21.10.2026): дозаполняет места, которые не поставила вторая (СПДС — правило
+ * с \b не срабатывало на русских буквах). Только пустые места. null — уже сделано.
+ */
+export async function setupPrioritiesV3(payload: Payload): Promise<string[] | null> {
+  const done = await payload.find({
+    collection: 'import-runs',
+    where: { idempotencyKey: { equals: PRIORITY_V3_KEY } },
+    limit: 1,
+    ...opts,
+  })
+  if (done.docs.length) return null
+  const placed = await placeTopSales(payload)
+  const report = [`Топы продаж, дозаполнено: ${placed.join('; ') || '—'}`]
+  await payload.create({
+    collection: 'import-runs',
+    data: { idempotencyKey: PRIORITY_V3_KEY, state: 'done', snapshot: { report } },
+    ...opts,
+  })
+  return report
+}
+
+/** Вторая настройка: топы продаж по местам и SCAD перед ЛИРОЙ в разделах (21.10.2026). */
+export const PRIORITY_V2_KEY = 'catalog-setup:priority-v2'
+
+/**
+ * Решение владельца 21.10.2026: во всём каталоге первыми AutoCAD, АВС, Revit, SCAD Office, GEO5,
+ * Artec, CSoft и только потом ЛИРА. Ставит «Место в топе продаж» товарам, у которых оно пустое
+ * (src/domain/prioritySeed.mjs, TOP_SALES), и в порядке производителей разделов ставит SCAD Soft
+ * перед ЛИРА-FEM. Один раз; дальше всё правится в админке. null — уже сделано.
+ */
+export async function setupPrioritiesV2(payload: Payload): Promise<string[] | null> {
+  const done = await payload.find({
+    collection: 'import-runs',
+    where: { idempotencyKey: { equals: PRIORITY_V2_KEY } },
+    limit: 1,
+    ...opts,
+  })
+  if (done.docs.length) return null
+  const report: string[] = []
+
+  const vendors = await payload.find({ collection: 'manufacturers', pagination: false, ...opts })
+  const vendorId = (title: string) => vendors.docs.find((m) => m.title === title)?.id
+
+  const placed = await placeTopSales(payload)
   report.push(`Топы продаж: ${placed.join('; ') || '—'}`)
   const missing = TOP_SALES.filter(
     (rule) => !placed.some((line) => line.startsWith(`${rule.place}.`)),

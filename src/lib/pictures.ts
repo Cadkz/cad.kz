@@ -58,11 +58,13 @@ function chooseCard(product: CardProduct, vendor: CardVendor | undefined): Choic
   const own = relId(product.cardImage)
   const kind = product.kind ?? 'software'
   if (own != null) return { media: own, fit: kind === 'hardware' ? 'photo' : 'logo' }
+  // Логотип программы по названию — при любом типе товара: Artec Studio и Artec Cloud бывают
+  // отмечены как оборудование, но это программы.
+  const program = programLogo({ title: product.title, vendor: vendor?.title ?? null })
+  if (program) return { logo: program }
   const gallery = relId(product.gallery?.[0])
   if (kind === 'hardware') return gallery == null ? null : { media: gallery, fit: 'photo' }
   if (kind === 'software') {
-    const program = programLogo({ title: product.title, vendor: vendor?.title ?? null })
-    if (program) return { logo: program }
     const adminLogo = relId(vendor?.logo)
     if (adminLogo != null) return { media: adminLogo, fit: 'logo' }
     const fromCode = vendorLogo(vendor?.title ?? null)

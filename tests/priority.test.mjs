@@ -181,4 +181,6 @@ test('места в топе по правилам владельца', () => {
   assert.equal(seedTopPlace({ title: 'SCAD Office v. 25.1', vendor: 'SCAD Soft' }), 4)
   assert.equal(seedTopPlace({ title: 'ЛИРА - FEM (ЛИРА САПР)', vendor: 'ЛИРА-FEM' }), 8)
   assert.equal(seedTopPlace({ title: 'Inventor Professional', vendor: 'Autodesk' }), null)
+  assert.equal(seedTopPlace({ title: 'СПДС', vendor: 'Csoft Development' }), 7)
+  assert.equal(seedTopPlace({ title: 'СПДСx', vendor: 'Csoft Development' }), null)
 })

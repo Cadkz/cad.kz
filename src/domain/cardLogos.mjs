@@ -29,6 +29,8 @@ export const PROGRAM_LOGOS = [
   { vendor: 'Autodesk', title: /^Revit\b/i, logo: REVIT },
   { vendor: 'Autodesk', title: /^Fusion\b/i, logo: FUSION },
   { vendor: 'Fine Software', title: /^GEO5\b/i, logo: GEO5 },
+  // Программы Artec в каталоге стоят рядом со сканерами и могут быть отмечены как оборудование.
+  { vendor: 'Artec 3D', title: /\b(studio|cloud)\b/i, logo: ARTEC },
 ]
 
 /** Логотип производителя для всех его программ, если в админке у производителя свой не загружен. */

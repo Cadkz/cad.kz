@@ -38,7 +38,7 @@ import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
 import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
 import { setupPresets, setupQuality } from '../src/lib/presetsSetup.ts'
-import { setupPriorities, setupPrioritiesV2 } from '../src/lib/prioritySetup.ts'
+import { setupPriorities, setupPrioritiesV2, setupPrioritiesV3 } from '../src/lib/prioritySetup.ts'
 import { setupPrivacyPage } from '../src/lib/privacySetup.ts'
 import { setupProductTables } from '../src/lib/productTablesSetup.ts'
 import { setupFamilyRenew } from '../src/lib/renewSetup.ts'
@@ -193,6 +193,9 @@ try {
   const priorityV2 = await setupPrioritiesV2(payload)
   if (!priorityV2) console.log('Топы продаж по местам уже расставлены.')
   else for (const line of priorityV2) console.log(line)
+  const priorityV3 = await setupPrioritiesV3(payload)
+  if (!priorityV3) console.log('Топы продаж дозаполнены.')
+  else for (const line of priorityV3) console.log(line)
   const cardLogos = await setupCardLogos(payload)
   if (!cardLogos) console.log('Логотипы производителей для карточек уже поставлены.')
   else for (const line of cardLogos) console.log(line)

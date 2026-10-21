@@ -14,6 +14,9 @@ test('у программ Autodesk и GEO5 — свой логотип, у ко�
   assert.equal(logo('Architecture Engineering & Construction Collection', 'Autodesk'), null)
   assert.equal(logo('Inventor Professional', 'Autodesk'), null)
   assert.equal(logo('TRUSS4', 'Fine Software'), null)
+  assert.equal(logo('Artec Cloud', 'Artec 3D'), '/images/brands/artec.svg')
+  assert.equal(logo('Artec Studio 20', 'Artec 3D'), '/images/brands/artec.svg')
+  assert.equal(logo('Artec Leo', 'Artec 3D'), null)
 })
 
 test('логотип производителя из кода', () => {

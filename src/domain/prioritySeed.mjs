@@ -49,7 +49,7 @@ export const TOP_SALES = [
   { vendor: 'SCAD Soft', title: /^SCAD Office\b/i, place: 4 },
   { vendor: 'Fine Software', title: /^GEO5$/i, place: 5 },
   { vendor: 'Artec 3D', title: /^Artec (Leo|Eva)$/i, place: 6 },
-  { vendor: 'Csoft Development', title: /^СПДС\b/i, place: 7 },
+  { vendor: 'Csoft Development', title: /^СПДС(\s|$)/i, place: 7 },
   { vendor: 'ЛИРА-FEM', title: /^ЛИРА\s*-\s*FEM\b/i, place: 8 },
 ]
 
