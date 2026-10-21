@@ -16,7 +16,7 @@ function leadItems(lead: Record<string, unknown>): LeadItem[] {
 
 /**
  * Заказ из корзины для Битрикс24: у каждой строки — раздел и сценарий покупки товара, источник —
- * кнопка «Оформить заявку» в корзине. Так в сделке видно, из какого направления пришёл заказ.
+ * кнопка «Оформить заказ» в корзине. Так в сделке видно, из какого направления пришёл заказ.
  * Сбой поиска не мешает заказу: строки уходят без раздела.
  */
 export async function withOrderContext(
@@ -24,7 +24,7 @@ export async function withOrderContext(
   lead: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
   const source = {
-    button: 'Оформить заявку (корзина)',
+    button: 'Оформить заказ (корзина)',
     product: null,
     section: null,
     scenario: null,

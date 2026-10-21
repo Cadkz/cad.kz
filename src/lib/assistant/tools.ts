@@ -20,6 +20,7 @@ import {
   totalItems,
   vatText,
 } from '@/domain/priceTable.mjs'
+import { type SiteEntry, siteBlocksPrice } from '@/domain/sitePrice.mjs'
 import { getCatalog } from '../catalog'
 import { searchCatalog } from '../search'
 import { type LoadedPriceTable, loadPriceTable } from './priceTable'
@@ -93,8 +94,20 @@ export async function findCards(query: string): Promise<FoundCard[]> {
 
 const NO_PRICE_TABLE = { error: 'Прайс не загружен — стоимость уточняет менеджер' }
 
+/**
+ * Товары и варианты каталога с ценой «от» или «по запросу» — чтобы Кадди не называл число там,
+ * где сайт пишет «Цена по запросу» (src/domain/sitePrice.mjs). Каталог закеширован на запрос.
+ */
+export async function siteEntries(): Promise<SiteEntry[]> {
+  const { items, variants } = await getCatalog()
+  return [
+    ...items.map((item) => ({ title: item.title, priceFrom: item.priceFrom, variant: false })),
+    ...variants.map((v) => ({ title: v.title, priceFrom: v.priceFrom, variant: true })),
+  ]
+}
+
 /** Строка прайса для модели без цены: по ней выбирают вариант, цену дают по коду. */
-function rowBrief(row: PriceRow) {
+function rowBrief(row: PriceRow, site: SiteEntry[] = []) {
   return {
     code: row.code,
     article: row.article || null,
@@ -106,14 +119,16 @@ function rowBrief(row: PriceRow) {
     edition: row.edition || null,
     license: row.license || null,
     seats: row.seats,
-    priceStatus: { price: 'цена указана', request: 'по запросу', invalid: 'нет корректной цены' }[
-      row.status
-    ],
+    priceStatus: siteBlocksPrice(row, site)
+      ? 'по запросу (так на сайте)'
+      : { price: 'цена указана', request: 'по запросу', invalid: 'нет корректной цены' }[
+          row.status
+        ],
   }
 }
 
 /** Поиск по прайсу: строки без цен, сколько всего и чем различаются найденные. */
-export function searchPrice(table: LoadedPriceTable, input: unknown) {
+export function searchPrice(table: LoadedPriceTable, input: unknown, site: SiteEntry[] = []) {
   const query = text(input, 'query')
   if (query.length < 2) return { error: 'Нужен запрос: название, артикул или код' }
   const months = Number(field(input, 'termMonths'))
@@ -150,7 +165,7 @@ export function searchPrice(table: LoadedPriceTable, input: unknown) {
   return {
     total: result.total,
     shown: result.rows.length,
-    rows: result.rows.map(rowBrief),
+    rows: result.rows.map((row) => rowBrief(row, site)),
     options,
     ...(result.total > result.rows.length
       ? { note: 'Показана часть строк: сузь поиск фильтрами или уточни у клиента.' }
@@ -163,13 +178,24 @@ function findRow(table: LoadedPriceTable, code: string) {
   return table.rows.find((row) => row.code.toLowerCase() === key) ?? null
 }
 
+/**
+ * Можно ли назвать цену строки: правила прайса (canTellPrice), затем сайт — у товара на сайте
+ * «Цена по запросу», значит и Кадди число не называет (аудит 21.10.2026, К7).
+ */
+function tellPrice(row: PriceRow, site: SiteEntry[]) {
+  const allowed = canTellPrice(row)
+  if (!allowed.ok) return allowed
+  const blocked = siteBlocksPrice(row, site)
+  return blocked ? { ok: false as const, reason: blocked } : allowed
+}
+
 /** Строка по коду: цена — только если её можно назвать клиенту (раздел 5 правил). */
-export function priceByCode(table: LoadedPriceTable, input: unknown) {
+export function priceByCode(table: LoadedPriceTable, input: unknown, site: SiteEntry[] = []) {
   const row = findRow(table, text(input, 'code', 60))
   if (!row) return { error: 'Такого кода в прайсе нет — возьми код из searchPriceList' }
-  const allowed = canTellPrice(row)
+  const allowed = tellPrice(row, site)
   return {
-    ...rowBrief(row),
+    ...rowBrief(row, site),
     fullName: row.fullName.slice(0, 300),
     unit: priceUnit(row),
     delivery: deliveryTerm(row),
@@ -181,10 +207,10 @@ export function priceByCode(table: LoadedPriceTable, input: unknown) {
 }
 
 /** Сумма за одну или несколько позиций с количеством: точно, без округления (sumPriceRows). */
-export function totalByCode(table: LoadedPriceTable, input: unknown) {
+export function totalByCode(table: LoadedPriceTable, input: unknown, site: SiteEntry[] = []) {
   const items = totalItems(input)
   if (typeof items === 'string') return { error: items }
-  return sumPriceRows(table.rows, items, table.summary.vat)
+  return sumPriceRows(table.rows, items, table.summary.vat, (row) => siteBlocksPrice(row, site))
 }
 
 /**
@@ -197,6 +223,7 @@ export function createTools(payload: Payload): ToolRunner {
   const variants: AssistantVariant[] = []
   const pages: AssistantCard[] = []
   let table: Promise<LoadedPriceTable | null> | null = null
+  let site: Promise<SiteEntry[]> | null = null
   let handoff: HandoffDraft | null = null
   const priceTable = () => {
     table ??= loadPriceTable(payload)
@@ -237,9 +264,15 @@ export function createTools(payload: Payload): ToolRunner {
     }
   }
 
-  async function withTable(run: (loaded: LoadedPriceTable) => unknown) {
-    const loaded = await priceTable()
-    return loaded ? run(loaded) : NO_PRICE_TABLE
+  // Каталог не загрузился — цены сверяются только по прайсу, как раньше: ответ важнее сверки.
+  const catalogEntries = () => {
+    site ??= siteEntries().catch(() => [])
+    return site
+  }
+
+  async function withTable(run: (loaded: LoadedPriceTable, entries: SiteEntry[]) => unknown) {
+    const [loaded, entries] = await Promise.all([priceTable(), catalogEntries()])
+    return loaded ? run(loaded, entries) : NO_PRICE_TABLE
   }
 
   async function handoffToManager(input: unknown) {
@@ -261,9 +294,9 @@ export function createTools(payload: Payload): ToolRunner {
 
   const tools: Record<string, (input: unknown) => Promise<unknown>> = {
     searchProducts,
-    searchPriceList: (input) => withTable((loaded) => searchPrice(loaded, input)),
-    getPrice: (input) => withTable((loaded) => priceByCode(loaded, input)),
-    priceTotal: (input) => withTable((loaded) => totalByCode(loaded, input)),
+    searchPriceList: (input) => withTable((loaded, entries) => searchPrice(loaded, input, entries)),
+    getPrice: (input) => withTable((loaded, entries) => priceByCode(loaded, input, entries)),
+    priceTotal: (input) => withTable((loaded, entries) => totalByCode(loaded, input, entries)),
     handoffToManager,
     showSitePage,
   }

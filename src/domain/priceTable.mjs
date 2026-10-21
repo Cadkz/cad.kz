@@ -598,11 +598,13 @@ export function totalItems(input) {
  * Сумма по нескольким строкам прайса: точная арифметика в тиынах, без округления. Складываются
  * только строки, цену которых Кадди может назвать (canTellPrice); пакет мест — только одной штукой.
  * Остальные — в `excluded` с причиной: их стоимость уточняет менеджер, и сумма без них не полная.
+ * blocked — дополнительная причина не называть цену строки (на сайте «по запросу», src/domain/sitePrice.mjs).
  * @param {PriceRow[]} rows
  * @param {{ code: string, quantity: number }[]} items
  * @param {VatMode} vat
+ * @param {(row: PriceRow) => string | null} [blocked]
  */
-export function sumPriceRows(rows, items, vat) {
+export function sumPriceRows(rows, items, vat, blocked = () => null) {
   /** @type {{ code: string, name: string, unit: string, unitPrice: string, quantity: number, sum: string }[]} */
   const lines = []
   /** @type {{ code: string, name: string | null, reason: string }[]} */
@@ -619,7 +621,9 @@ export function sumPriceRows(rows, items, vat) {
       })
       continue
     }
-    const allowed = canTellPrice(row)
+    const checked = canTellPrice(row)
+    const reason = checked.ok ? blocked(row) : null
+    const allowed = reason ? { ok: /** @type {const} */ (false), reason } : checked
     if (!allowed.ok || !row.tiyn) {
       excluded.push({
         code,

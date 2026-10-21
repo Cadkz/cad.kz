@@ -7,9 +7,11 @@ import {
   ASSISTANT_GREETING,
   ASSISTANT_GREETING_GRUMPY,
   type AssistantCard,
+  hasPrice,
   QUICK_ACTIONS,
 } from '@/domain/assistant.mjs'
 import type { HandoffPrefill, useAssistant } from '@/lib/useAssistant'
+import { AssistantReplyActions } from '../AssistantReplyActions/AssistantReplyActions'
 import { Button } from '../Button/Button'
 import { Mascot } from '../Mascot/Mascot'
 import styles from './AssistantMessages.module.css'
@@ -20,6 +22,8 @@ type Props = {
   grumpy: boolean
   /** Открыть форму передачи менеджеру; prefill — данные, которые собрал Кадди. */
   onHandoff: (prefill?: HandoffPrefill) => void
+  /** Ссылка WhatsApp с расчётом Кадди: кнопка под последним ответом с ценой. */
+  whatsapp: string | null
 }
 
 /** Ссылки на товары, которые Кадди назвал в ответе. */
@@ -71,12 +75,16 @@ function Waiting() {
  * вправо, на сообщения.
  * Новые сообщения объявляются скринридеру (role="log").
  */
-export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
+export function AssistantMessages({ chat, grumpy, onHandoff, whatsapp }: Props) {
   const end = useRef<HTMLDivElement>(null)
   const count = chat.messages.length
   const sulky = grumpy && !count
   // Кнопка передачи — только у последнего ответа, где Кадди её подготовил: данные там самые свежие.
   const lastHandoff = chat.messages.findLastIndex((m) => m.handoff)
+  // «Прислать расчёт в WhatsApp» — под последним ответом Кадди с суммой: текст берёт её оттуда.
+  const lastPriced = chat.messages.findLastIndex(
+    (m) => m.role === 'assistant' && hasPrice(m.content),
+  )
   // Кнопки быстрых ответов — только у последнего сообщения разговора, пока клиент не ответил.
   const quick = chat.messages[count - 1]?.role === 'assistant' ? count - 1 : -1
 
@@ -147,10 +155,14 @@ export function AssistantMessages({ chat, grumpy, onHandoff }: Props) {
             </div>
           )}
           {message.cards && message.cards.length > 0 && <Cards cards={message.cards} />}
-          {message.handoff && index === lastHandoff && (
-            <Button size="sm" onClick={() => onHandoff(message.handoff)}>
-              Проверить и передать менеджеру
-            </Button>
+          {((message.handoff && index === lastHandoff) || (whatsapp && index === lastPriced)) && (
+            <div className={styles.actions}>
+              <AssistantReplyActions
+                handoff={index === lastHandoff ? message.handoff : undefined}
+                whatsapp={index === lastPriced ? whatsapp : null}
+                onHandoff={onHandoff}
+              />
+            </div>
           )}
         </div>
       ))}

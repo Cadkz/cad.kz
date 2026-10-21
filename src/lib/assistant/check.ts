@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 import { ModelError } from '@/domain/anthropicChat.mjs'
-import { validateChat } from '@/domain/assistant.mjs'
+import { hasPrice, validateChat } from '@/domain/assistant.mjs'
 import { checkReply, describeCall, parseHistory } from '@/domain/assistantCheck.mjs'
 import { assistantMode, modelSettings } from './provider'
 import { answerMessages, type ToolCall } from './service'
@@ -64,7 +64,18 @@ export async function checkQuestion(
       cards: answer.cards.map(({ title, href }) => ({ title, href })),
       replies: answer.replies,
       calls: calls.map(describeCall),
-      flags: checkReply(answer.reply, calls),
+      flags: [
+        ...checkReply(answer.reply, calls),
+        // Что увидит клиент под ответом, кроме текста и карточек (аудит 21.10.2026, Ка3 и Ка4).
+        ...(answer.form
+          ? [{ level: 'info' as const, text: 'Сразу открылась форма связи: имя и телефон' }]
+          : answer.handoff
+            ? [{ level: 'info' as const, text: 'Под ответом кнопка формы для менеджера' }]
+            : []),
+        ...(hasPrice(answer.reply)
+          ? [{ level: 'info' as const, text: 'Под ответом кнопка «Прислать расчёт в WhatsApp»' }]
+          : []),
+      ],
       ms: Date.now() - started,
     }
   } catch (error) {

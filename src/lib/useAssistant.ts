@@ -20,6 +20,8 @@ export type ChatMessage = {
   /** Кнопки быстрых ответов под уточняющим вопросом: нажатие отправляет текст кнопки. */
   replies?: string[]
   handoff?: HandoffPrefill
+  /** Клиент попросил связи: окно само открыло форму передачи менеджеру. */
+  form?: boolean
 }
 
 type Stored = { id: string; messages: ChatMessage[]; live?: boolean }
@@ -96,6 +98,7 @@ function kaddiMessage(result: Record<string, unknown>): ChatMessage {
     cards: Array.isArray(result.cards) ? (result.cards as AssistantCard[]) : [],
     ...(replies.length ? { replies } : {}),
     ...(result.handoff ? { handoff: result.handoff as HandoffPrefill } : {}),
+    ...(result.form === true ? { form: true } : {}),
   }
 }
 

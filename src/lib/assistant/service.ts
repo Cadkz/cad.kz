@@ -10,15 +10,20 @@ import {
   type HandoffDraft,
   type HandoffState,
   handoffDetails,
+  managerFormReply,
   mentionedCards,
   modelHistory,
   promptLinks,
   quickAction,
   RENEW_CARD,
+  renewCard,
+  renewProgram,
   type StoredMessage,
   systemPrompt,
+  wantsManager,
   wantsRenewal,
 } from '@/domain/assistant.mjs'
+import { normalizePhone } from '@/domain/order.mjs'
 import { workTime } from '@/domain/priceTable.mjs'
 import { splitQuickReplies } from '@/domain/quickReplies.mjs'
 import {
@@ -45,6 +50,8 @@ export type AssistantAnswer =
       replies: string[]
       demo: boolean
       handoff?: HandoffPrefill
+      /** Клиент попросил связи: окно чата само открывает форму «имя + телефон» (аудит, Ка3). */
+      form?: true
       /** Разговор идёт в открытую линию Битрикс24: окно чата ждёт ответов менеджера. */
       live: boolean
     }
@@ -66,6 +73,8 @@ type Answer = {
   cards: AssistantCard[]
   replies: string[]
   handoff: HandoffDraft | null
+  /** Сразу открыть форму передачи менеджеру. */
+  form?: boolean
 }
 
 /** Что модель знает о передаче менеджеру: по снимку разговора на сервере. */
@@ -78,8 +87,8 @@ export function handoffState(snapshot: ConversationSnapshot | null | undefined):
 /** Данные передачи для кнопки под ответом. */
 export function handoffPrefill(draft: HandoffDraft): HandoffPrefill {
   return {
-    name: draft.name,
-    phone: draft.phone,
+    name: draft.name ?? '',
+    phone: draft.phone ?? '',
     details: handoffDetails(draft),
   }
 }
@@ -147,7 +156,18 @@ export async function answerMessages(
 ): Promise<Answer> {
   const message = messages[messages.length - 1]?.content ?? ''
   let answer: Answer
-  if (mode === 'demo') {
+  if (wantsManager(message)) {
+    // «Позвоните мне», «свяжите с менеджером» — сразу форма, без модели и трёх обменов (Ка3).
+    // Телефон из сообщения подставляется в форму, остальное менеджер увидит в переписке.
+    const phone = normalizePhone(message.replace(/[^\d+]/g, ''))
+    answer = {
+      reply: managerFormReply(workTime(new Date()).state),
+      cards: [],
+      replies: [],
+      handoff: { reason: 'Связаться с менеджером', ...(phone ? { phone } : {}) },
+      form: true,
+    }
+  } else if (mode === 'demo') {
     const action = quickAction(message)
     const found = action ? [] : (await findCards(message)).map(toCard)
     const { text, cards } = demoReply(found, {
@@ -164,8 +184,14 @@ export async function answerMessages(
       options.onTool,
     )
   // Про продление — под ответом форма продления (настоящая заявка, менеджер найдёт лицензию).
-  if (wantsRenewal(message) && !answer.cards.some((c) => c.href === RENEW_CARD.href))
-    answer = { ...answer, cards: [...answer.cards, { ...RENEW_CARD }] }
+  // Программа из разговора уже выбрана в форме (аудит 21.10.2026, Ка5): «Нужно продлить Revit».
+  const renewal = answer.cards.some((c) => c.href === RENEW_CARD.href)
+  if (wantsRenewal(message) || renewal) {
+    const asked = messages.filter((m) => m.role === 'user').map((m) => m.content)
+    const card = renewCard(renewProgram(asked.reverse()))
+    const cards = answer.cards.filter((c) => c.href !== RENEW_CARD.href)
+    answer = { ...answer, cards: [...cards, card] }
+  }
   return answer
 }
 
@@ -282,6 +308,7 @@ export async function askAssistant(
     demo: mode === 'demo',
     live,
     ...(answer.handoff ? { handoff: handoffPrefill(answer.handoff) } : {}),
+    ...(answer.form ? { form: true as const } : {}),
   }
 }
 

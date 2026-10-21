@@ -6,7 +6,7 @@ import { crmLive } from '@/lib/crm/gateway'
 import { getContacts } from '@/lib/navigation'
 
 export const metadata = {
-  title: 'Оформление заявки — CAD.kz',
+  title: 'Оформление заказа — CAD.kz',
   robots: { index: false, follow: false },
 }
 
@@ -19,11 +19,11 @@ export default async function CheckoutPage() {
           items={[
             { title: 'Главная', href: '/' },
             { title: 'Корзина', href: '/cart' },
-            { title: 'Оформление заявки' },
+            { title: 'Оформление заказа' },
           ]}
         />
         <PageIntro
-          title="Оформление заявки"
+          title="Оформление заказа"
           lead="Проверьте состав и оставьте имя и телефон — менеджер подтвердит цену и наличие и свяжется с вами."
         />
         <CheckoutView whatsappHref={contacts.whatsappHref} crmLive={crmLive()} />

@@ -29,7 +29,7 @@ type Props = {
   formError: string
   priceNotice: string
   onSubmit: (values: FormValues) => void
-  /** Демоверсия без CRM: предупредить, что заявка менеджерам не уходит. */
+  /** Демоверсия без CRM: предупредить, что заказ менеджерам не уходит. */
   demo?: boolean
 }
 
@@ -167,11 +167,11 @@ export function CheckoutForm({
       {demo && (
         <p className={styles.demo}>
           <Info size={16} strokeWidth={1.75} aria-hidden="true" />
-          Демоверсия: заявка сохранится в учебной базе и менеджерам не передаётся.
+          Демоверсия: заказ сохранится в учебной базе и менеджерам не передаётся.
         </p>
       )}
       <Button type="submit" disabled={sending || !canSubmit}>
-        {sending ? 'Отправляем…' : confirmPrice ? 'Подтвердить новую сумму' : 'Отправить заявку'}
+        {sending ? 'Отправляем…' : confirmPrice ? 'Подтвердить новую сумму' : 'Отправить заказ'}
       </Button>
     </form>
   )

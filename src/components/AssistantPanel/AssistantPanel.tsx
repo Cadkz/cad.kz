@@ -46,6 +46,17 @@ export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Pr
   // false — разговор; объект — форма передачи (prefill — данные, которые собрал Кадди).
   const [handoff, setHandoff] = useState<false | { prefill?: HandoffPrefill }>(false)
   const shown = useRef(false)
+  // Сколько сообщений было, когда окно открыли: форму сам открывает только новый ответ (Ка3),
+  // а не старый из сохранённого разговора.
+  const known = useRef(chat.messages.length)
+  const count = chat.messages.length
+  const last = chat.messages[count - 1]
+
+  useEffect(() => {
+    if (count <= known.current) return
+    known.current = count
+    if (last?.role === 'assistant' && last.form) setHandoff({ prefill: last.handoff })
+  }, [count, last])
 
   // Смена экрана (чат ↔ передача менеджеру): нажатая кнопка исчезла, фокус — на новый экран.
   useEffect(() => {
@@ -172,6 +183,10 @@ export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Pr
             chat={chat}
             grumpy={grumpy}
             onHandoff={(prefill) => setHandoff({ prefill })}
+            whatsapp={
+              whatsappHref &&
+              `${whatsappHref}?text=${encodeURIComponent(whatsappMessage(chat.messages))}`
+            }
           />
           <AssistantComposer
             disabled={chat.waiting || !chat.conversationId}

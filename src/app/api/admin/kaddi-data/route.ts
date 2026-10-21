@@ -2,7 +2,7 @@ import { validateKnowledge, validatePriceRows } from '@/domain/priceTable.mjs'
 import { logActivity } from '@/lib/activity'
 import { adminRequest, reply } from '@/lib/adminApi'
 import { loadPriceTable, replaceKnowledge, savePriceTable } from '@/lib/assistant/priceTable'
-import { priceByCode, searchPrice } from '@/lib/assistant/tools'
+import { priceByCode, searchPrice, siteEntries } from '@/lib/assistant/tools'
 
 /**
  * «Прайс и база Кадди» в админке (администратор и маркетолог): запись прайса и базы знаний из файла,
@@ -27,13 +27,15 @@ export async function POST(request: Request) {
     if (data.action === 'search') {
       const table = await loadPriceTable(payload)
       if (!table) return reply({ error: 'Прайс не загружен' }, 409)
-      const found = searchPrice(table, { query: data.query, purchase: data.purchase })
+      // Как у Кадди: у товара на сайте «Цена по запросу» — и здесь цены нет, с причиной.
+      const site = await siteEntries().catch(() => [])
+      const found = searchPrice(table, { query: data.query, purchase: data.purchase }, site)
       if ('error' in found) return reply({ error: found.error }, 400)
       return reply({
         total: found.total,
         note: found.note,
         rows: found.rows.map((row) => {
-          const info = priceByCode(table, { code: row.code })
+          const info = priceByCode(table, { code: row.code }, site)
           return {
             code: row.code,
             name: row.name,

@@ -228,11 +228,9 @@ test('правила владельца и характер Кадди: роль
   assert.doesNotMatch(rules, /Зафиксировал|Я передал|гендер мужской/)
   assert.match(rules, /2–5 коротких предложений/)
   assert.match(rules, /довести его до следующего шага покупки/)
-  assert.match(
-    rules,
-    /Имя и телефон — перед передачей менеджеру \(раздел 2\) и в предложении связи \(раздел 2а\)/,
-  )
-  assert.match(rules, /Предложение связи — один раз за разговор/)
+  assert.match(rules, /Имя, телефон и другие контакты в чате не спрашивай вовсе/)
+  assert.match(rules, /кнопку «Прислать расчёт в WhatsApp»/)
+  assert.doesNotMatch(rules, /Как к вам обращаться/)
   assert.match(rules, /задай ровно один вопрос/)
   assert.doesNotMatch(rules, /имя → телефон → почта → компания|в течение часа, чтобы/)
   assert.match(rules, /ул\. А\. Пушкина, дом 6\/1, ВП-1/)
@@ -299,7 +297,7 @@ test('состояние разговора: нет прайса, обед, пе
   )
 })
 
-test('передача менеджеру от модели: имя и телефон обязательны, почта проверяется', () => {
+test('передача менеджеру от модели: повод обязателен, имя и телефон — если клиент написал', () => {
   const ok = checkHandoff(
     {
       name: ' Ирина ',
@@ -328,10 +326,19 @@ test('передача менеджеру от модели: имя и теле�
     handoffDetails(ok.draft).map((d) => d.title),
     ['Почта', 'Компания', 'Продукт', 'Сроки', 'Что нужно'],
   )
-  assert.equal(checkHandoff({ name: 'И', phone: '87011234567' }, normalizePhone).ok, false)
-  assert.equal(checkHandoff({ name: 'Ирина', phone: '123' }, normalizePhone).ok, false)
+  // Аудит 21.10.2026, Ка3: имя и телефон клиент впишет в форму — без них передача готовится.
+  assert.deepEqual(checkHandoff({ reason: 'Звонок' }, normalizePhone), {
+    ok: true,
+    draft: { reason: 'Звонок' },
+  })
+  assert.equal(checkHandoff({ name: 'Ирина', phone: '87011234567' }, normalizePhone).ok, false)
+  // Неверное имя или телефон не ошибка: в форму они не подставятся, клиент впишет сам.
+  assert.deepEqual(checkHandoff({ name: 'И', phone: '123', reason: 'КП' }, normalizePhone), {
+    ok: true,
+    draft: { reason: 'КП' },
+  })
   assert.equal(
-    checkHandoff({ name: 'Ирина', phone: '87011234567', email: 'нет' }, normalizePhone).ok,
+    checkHandoff({ name: 'Ирина', email: 'нет', reason: 'КП' }, normalizePhone).ok,
     false,
   )
 })

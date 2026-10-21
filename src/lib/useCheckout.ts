@@ -97,7 +97,7 @@ export function useCheckout(quote: Quote | null, setQuote: (quote: Quote) => voi
     if (reply.status === 'invalid' && reply.errors) return showInvalid(reply.errors)
     // Ключ с другими данными больше не подходит: следующая отправка — это новый заказ.
     if (reply.status === 'key_conflict') resetKey()
-    setFormError(reply.error ?? 'Не удалось отправить заявку. Повторите отправку.')
+    setFormError(reply.error ?? 'Не удалось отправить заказ. Повторите отправку.')
   }
 
   async function submit(values: FormValues) {
@@ -121,7 +121,7 @@ export function useCheckout(quote: Quote | null, setQuote: (quote: Quote) => voi
       })
       handle(await response.json().catch(() => ({})))
     } catch {
-      setFormError('Не удалось отправить заявку. Проверьте соединение и повторите: дубля не будет.')
+      setFormError('Не удалось отправить заказ. Проверьте соединение и повторите: дубля не будет.')
     } finally {
       setSending(false)
     }
