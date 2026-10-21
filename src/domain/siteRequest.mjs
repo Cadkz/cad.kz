@@ -57,7 +57,7 @@ function hasControl(value) {
 export const REQUEST_SOURCES = /** @type {const} */ (['product', 'home', 'renew', 'assistant'])
 
 /** Программы на странице продления: чипы формы; «Другая» — клиент пишет название сам. */
-export const RENEW_PROGRAMS = ['AutoCAD', 'АВС-KZ', 'ЛИРА-FEM', 'SCAD Office', 'GEO5']
+export const RENEW_PROGRAMS = ['AutoCAD', 'Revit', 'АВС-KZ', 'SCAD Office', 'GEO5', 'ЛИРА-FEM']
 
 /**
  * Выпадающий список «Название программы» на странице продления: сначала программы с кнопок
@@ -65,7 +65,6 @@ export const RENEW_PROGRAMS = ['AutoCAD', 'АВС-KZ', 'ЛИРА-FEM', 'SCAD Off
  */
 export const RENEW_PROGRAM_OPTIONS = [
   ...RENEW_PROGRAMS,
-  'Revit',
   'AutoCAD LT',
   'AEC Collection',
   'Civil 3D',

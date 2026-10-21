@@ -99,6 +99,7 @@
 }
 
 .phone {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -131,4 +132,14 @@
     align-items: flex-end;
     justify-content: space-between;
   }
+}
+
+/* Зона нажатия пальцем 44 px по высоте без сдвига вёрстки (аудит 21.10.2026, М8). */
+.phone::after {
+  position: absolute;
+  top: calc(50% - var(--touch-target) / 2);
+  right: 0;
+  bottom: calc(50% - var(--touch-target) / 2);
+  left: 0;
+  content: "";
 }

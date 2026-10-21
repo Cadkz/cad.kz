@@ -5,7 +5,25 @@
   background: var(--color-bg);
   transition:
     background-color var(--duration-base) var(--ease),
-    box-shadow var(--duration-base) var(--ease);
+    box-shadow var(--duration-base) var(--ease),
+    transform var(--duration-base) var(--ease);
+}
+
+/* До 960 px шапка уезжает при прокрутке вниз (М11); от 960 px всегда на месте. */
+.header[data-hidden="true"] {
+  transform: translateY(-100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header {
+    transition: none;
+  }
+}
+
+@media (min-width: 960px) {
+  .header[data-hidden="true"] {
+    transform: none;
+  }
 }
 
 /* Стекло только у закреплённой строки и только там, где браузер умеет размывать фон.

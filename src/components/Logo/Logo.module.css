@@ -12,6 +12,7 @@
 
 /* Знак без надписи в шапке: крупнее надписи, ширина целая (знак 7 : 10). */
 .mark {
+  position: relative;
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
@@ -24,4 +25,14 @@
   width: var(--logo-mark-width);
   height: var(--logo-mark-height);
   fill: currentColor;
+}
+
+/* Знак узкий (28 px): зона нажатия 44 × 44 без сдвига вёрстки (аудит 21.10.2026, М8). */
+.mark::after {
+  position: absolute;
+  top: calc(50% - var(--touch-target) / 2);
+  right: calc(50% - var(--touch-target) / 2);
+  bottom: calc(50% - var(--touch-target) / 2);
+  left: calc(50% - var(--touch-target) / 2);
+  content: "";
 }

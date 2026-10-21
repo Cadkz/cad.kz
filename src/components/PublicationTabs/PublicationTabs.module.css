@@ -10,7 +10,8 @@
 .tab {
   display: inline-flex;
   align-items: center;
-  height: var(--space-8);
+  /* На телефоне сегмент 44 px под палец (М8), от 960 px — 32 px, как было. */
+  height: var(--touch-target);
   padding: 0 var(--space-4);
   border-radius: var(--radius-sm);
   color: var(--color-text-muted);
@@ -29,4 +30,10 @@
   background: var(--color-surface);
   box-shadow: var(--shadow-popover);
   color: var(--color-text);
+}
+
+@media (min-width: 960px) {
+  .tab {
+    height: var(--space-8);
+  }
 }

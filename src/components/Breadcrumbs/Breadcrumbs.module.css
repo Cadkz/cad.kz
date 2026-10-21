@@ -28,6 +28,20 @@
   color: var(--color-gray-300);
 }
 
+.link {
+  position: relative;
+}
+
 .link:hover {
   color: var(--color-blue);
+}
+
+/* Зона нажатия пальцем 44 px по высоте без сдвига вёрстки (аудит 21.10.2026, М8). */
+.link::after {
+  position: absolute;
+  top: calc(50% - var(--touch-target) / 2);
+  right: 0;
+  bottom: calc(50% - var(--touch-target) / 2);
+  left: 0;
+  content: "";
 }

@@ -73,6 +73,10 @@
   line-height: var(--leading-snug);
 }
 
+.titleLink {
+  position: relative;
+}
+
 .titleLink:hover {
   color: var(--color-blue);
 }
@@ -164,4 +168,14 @@
   .card:hover .more svg {
     transform: none;
   }
+}
+
+/* Зона нажатия пальцем 44 px по высоте без сдвига вёрстки (аудит 21.10.2026, М8). */
+.titleLink::after {
+  position: absolute;
+  top: calc(50% - var(--touch-target) / 2);
+  right: 0;
+  bottom: calc(50% - var(--touch-target) / 2);
+  left: 0;
+  content: "";
 }

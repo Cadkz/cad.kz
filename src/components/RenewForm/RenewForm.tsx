@@ -19,12 +19,15 @@ const OTHER = 'other'
 const findProgram = (name: string | null | undefined) =>
   RENEW_PROGRAM_OPTIONS.find((p) => p.toLowerCase() === name?.trim().toLowerCase())
 
+/** Программы выпадающего списка — те, которых нет среди кнопок. */
+const MORE_PROGRAMS = RENEW_PROGRAM_OPTIONS.filter((p) => !RENEW_PROGRAMS.includes(p))
+
 /**
- * Заявка на продление (упрощена 13.10.2026 по замечанию владельца): кнопки быстрого выбора и
- * выпадающий список «Название программы» связаны — нажатие кнопки сразу ставит программу
- * в список; «Другая программа» открывает поле для своего названия. Номер лицензии и число мест
- * не спрашиваем — менеджер найдёт сам. Сохраняет сервер (/api/request, источник renew).
- * В демо честно говорим, что менеджерам заявка не уходит.
+ * Заявка на продление. Программа выбирается один раз (аудит 21.10.2026, М10): кнопки топов
+ * продаж и «Другая»; список «Название программы» появляется только после «Другая», в нём
+ * остальные частые программы и «Другая программа» — поле для своего названия. Номер лицензии
+ * и число мест не спрашиваем — менеджер найдёт сам. Сохраняет сервер (/api/request,
+ * источник renew). В демо честно говорим, что менеджерам заявка не уходит.
  */
 export function RenewForm({ program: initial }: { program: string | null }) {
   const known = findProgram(initial)
@@ -37,13 +40,14 @@ export function RenewForm({ program: initial }: { program: string | null }) {
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState<{ number: string; crm: CrmState } | null>(null)
 
-  const choose = (value: string) => {
+  // Кнопка «Другая» подсвечена для любой программы не с кнопок, в том числе пока не выбрана.
+  const chip = RENEW_PROGRAMS.includes(program) ? program : OTHER
+  const choose = (value: string) => setProgram(value === OTHER ? '' : value)
+  const pick = (value: string) => {
     setProgram(value)
     if (value === OTHER)
       requestAnimationFrame(() => document.getElementById('renew-program-name')?.focus())
   }
-  // Кнопка подсвечена, только если выбрана её программа; иные из списка — ни одна кнопка.
-  const chip = RENEW_PROGRAMS.includes(program) || program === OTHER ? program : ''
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -110,21 +114,26 @@ export function RenewForm({ program: initial }: { program: string | null }) {
         ]}
         onChange={choose}
       />
-      <SelectField
-        label="Название программы"
-        name="program-choice"
-        id="renew-program-choice"
-        value={program}
-        onChange={(event) => choose(event.target.value)}
-        error={program !== OTHER ? errors.program : undefined}
-      >
-        {RENEW_PROGRAM_OPTIONS.map((p) => (
-          <option key={p} value={p}>
-            {p}
+      {chip === OTHER && (
+        <SelectField
+          label="Название программы"
+          name="program-choice"
+          id="renew-program-choice"
+          value={program}
+          onChange={(event) => pick(event.target.value)}
+          error={program !== OTHER ? errors.program : undefined}
+        >
+          <option value="" disabled>
+            Выберите программу
           </option>
-        ))}
-        <option value={OTHER}>Другая программа</option>
-      </SelectField>
+          {MORE_PROGRAMS.map((p) => (
+            <option key={p} value={p}>
+              {p}
+            </option>
+          ))}
+          <option value={OTHER}>Другая программа</option>
+        </SelectField>
+      )}
       {program === OTHER && (
         <TextField
           label="Какая программа"

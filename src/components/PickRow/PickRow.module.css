@@ -86,7 +86,7 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: var(--control-height-sm);
+  width: var(--badge-size);
   color: var(--color-text-muted);
   transition:
     color var(--duration-fast) var(--ease),

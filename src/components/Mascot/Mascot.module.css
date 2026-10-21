@@ -87,9 +87,16 @@
   --mascot-height: var(--mascot-md);
 }
 
+/* От 960 px Кадди помещается в поле справа от рамки (аудит 21.10.2026, М12): высота — ширина
+   поля минус отступ от края, не меньше --mascot-launcher-min и не больше --mascot-launcher.
+   1366 px (частый ноутбук) — 64 px, от ~1440 px — 96 px; без лишних брейкпоинтов. */
 @media (min-width: 960px) {
   .launcher {
-    --mascot-height: var(--mascot-launcher);
+    --mascot-height: clamp(
+      var(--mascot-launcher-min),
+      calc((100vw - var(--container)) / 2 - var(--space-6)),
+      var(--mascot-launcher)
+    );
   }
 
   .lg {
