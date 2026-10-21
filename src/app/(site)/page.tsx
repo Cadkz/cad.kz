@@ -62,7 +62,7 @@ export default async function Home({ searchParams }: Props) {
         title="Выберите направление"
         action={{ href: catalogHref(), label: 'Весь каталог' }}
       >
-        <Grid as="ul" span={{ base: 6, md: 3 }}>
+        <Grid as="ul" span={{ base: 12, sm: 6, md: 3 }} dense>
           {[...directions, ...directionExtras].map((direction, i) => (
             <Reveal as="li" key={direction.slug} step={i % 4}>
               <DirectionCard direction={direction} />

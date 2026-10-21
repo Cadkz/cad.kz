@@ -470,10 +470,8 @@ export const DIRECTION_RULES = [
         sections: ['arch', 'estimate'],
       },
       { label: 'ReCap Pro', title: /recap/i, sections: ['arch', 'scanners'] },
-      // 21.10.2026, аудит К2: КЖ и КМ моделируют в Revit — он и в «Расчёте конструкций»;
-      // у Revit LT нет инструментов конструкций, он остаётся как был.
-      { label: 'Revit LT', title: /revit lt/i, sections: ['arch', 'mep'] },
-      { label: 'Revit', title: /revit/i, sections: ['arch', 'mep', 'structural'] },
+      // Revit не в «Расчёте конструкций» (решение владельца 21.10.2026, пункт К2 аудита отменён).
+      { label: 'Revit', title: /revit/i, sections: ['arch', 'mep'] },
       {
         label: 'AEC Collection',
         title: /architecture engineering|aec/i,

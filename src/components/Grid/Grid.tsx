@@ -10,15 +10,24 @@ type Props = {
   /** Сколько из 12 колонок занимает каждый блок: на телефоне, от 640, от 960 px. */
   span?: { base?: Span; sm?: Span; md?: Span }
   as?: 'div' | 'ul'
+  /** Список строками на телефоне: промежуток между строками меньше (до 640 px). */
+  dense?: boolean
 }
 
 /**
  * 12-колоночная сетка внутри рамки. Каждый прямой потомок занимает целое число колонок.
  * Например span={{ base: 12, sm: 6, md: 4 }} — одна, две, три карточки в ряд.
  */
-export function Grid({ children, className, span = { base: 12 }, as: Tag = 'div' }: Props) {
+export function Grid({
+  children,
+  className,
+  span = { base: 12 },
+  as: Tag = 'div',
+  dense = false,
+}: Props) {
   const classes = [
     styles.grid,
+    dense && styles.dense,
     styles[`base${span.base ?? 12}`],
     span.sm && styles[`sm${span.sm}`],
     span.md && styles[`md${span.md}`],

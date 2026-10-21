@@ -17,8 +17,8 @@ test('исключение внутри группы важнее раздело
   // Аудит 21.10.2026: основной SCAD Office и в BIM, сателлиты — только расчёт.
   assert.deepEqual(sw('SCAD Soft', 'SCAD Office 25.1 комплект SS'), ['structural', 'arch'])
   assert.deepEqual(sw('SCAD Soft', 'КРИСТАЛЛ'), ['structural'])
-  assert.deepEqual(sw('Autodesk', 'Revit'), ['arch', 'mep', 'structural'])
-  assert.deepEqual(sw('Autodesk', 'Revit LT'), ['arch', 'mep'])
+  // Решение владельца 21.10.2026: Revit не в «Расчёте конструкций».
+  assert.deepEqual(sw('Autodesk', 'Revit'), ['arch', 'mep'])
   assert.deepEqual(sw('НТП Трубопровод', 'ПАССАТ Колонны'), ['pipes', 'machine'])
   assert.deepEqual(sw('НТП Трубопровод', 'СТАРТ-Проф'), ['pipes', 'mep'])
   assert.deepEqual(sw('Autodesk', 'Autodesk Docs'), ['estimate'])

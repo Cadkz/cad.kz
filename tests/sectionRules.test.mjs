@@ -141,7 +141,6 @@ const samples = [
   ['Autodesk', 'software', 'BIM 360 Build'],
   ['Autodesk', 'software', 'ReCap Pro'],
   ['Autodesk', 'software', 'Revit 2024'],
-  ['Autodesk', 'software', 'Revit LT Suite'],
   ['Autodesk', 'software', 'Architecture Engineering & Construction Collection'],
   ['Autodesk', 'software', 'AutoCAD LT for Mac'],
   ['Autodesk', 'software', 'Navisworks Manage'],

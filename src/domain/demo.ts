@@ -216,7 +216,7 @@ export const demoProducts: DemoProduct[] = [
     title: 'Revit',
     kind: 'software',
     manufacturer: 'Autodesk',
-    sections: ['arch', 'structural'],
+    sections: ['arch'],
     tasks: ['Архитектура и генплан', 'BIM-координация'],
     summary: 'BIM-платформа для проектирования архитектуры и конструкций.',
     description:

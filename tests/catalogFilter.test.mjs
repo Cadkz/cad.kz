@@ -109,3 +109,10 @@ test('CAD.kz с курсами не попадает в список произ�
   const service = facetOptions(list, facets, update(emptyFilter, { group: 'service' }))
   assert.deepEqual(service.vendors, [])
 })
+
+test('курсы видны только во вкладке «Услуги»', () => {
+  const list = [...items, item(6, 'service', [], ['training'], 'CAD.kz', [])]
+  assert.equal(results(list, emptyFilter).total, items.length)
+  assert.equal(results(list, update(emptyFilter, { group: 'service' })).total, 1)
+  assert.equal(results(list, update(emptyFilter, { type: 'training' })).total, 0)
+})

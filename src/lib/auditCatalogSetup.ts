@@ -17,8 +17,9 @@ const low = (value: string | null | undefined) =>
 const words = (rule: SectionRule) => parseWords(rule.words).flat()
 
 /**
- * Пакет 2 аудита 21.10.2026 на живом каталоге (К1, К2, К4): SCAD Office — вторым разделом
- * «Архитектура и BIM», Revit (кроме Revit LT) — и в «Расчёте конструкций», курсы SCAD — в расчёте.
+ * Пакет 2 аудита 21.10.2026 на живом каталоге (К1, К4): SCAD Office — вторым разделом
+ * «Архитектура и BIM» (основной остаётся «Расчёт конструкций»), курсы SCAD — в расчёте.
+ * Revit в расчёт больше не добавляется (решение владельца 21.10.2026) — см. setupRevitBack.
  * Меняет «Правила разделов» и пересчитывает товары; товарам с ручными разделами раздел
  * добавляется напрямую. Что уже настроено вручную — не трогает. null — уже сделано.
  */
@@ -42,7 +43,6 @@ export async function setupAuditCatalog(payload: Payload): Promise<string[] | nu
   const arch = section('arch')
   const structural = section('structural')
   const scadSoft = vendor('SCAD Soft')
-  const autodesk = vendor('Autodesk')
   const rules = rulesFound.docs
   const orders = new Set(rules.map((rule) => rule.order))
   /** Свободный номер проверки сразу перед правилом (правила идут с шагом 10). */
@@ -94,46 +94,6 @@ export async function setupAuditCatalog(payload: Payload): Promise<string[] | nu
     }
   } else report.push('общее правило SCAD Soft не найдено — проверить вручную')
 
-  // К2: Revit — и в «Расчёте конструкций»; Revit LT остаётся как был.
-  const revit = rules.find(
-    (rule) => relId(rule.manufacturer) === autodesk && low(rule.words).trim() === 'revit',
-  )
-  if (revit && structural != null) {
-    const extra = relIds(revit.extraSections)
-    const hasLt = rules.some((rule) => low(rule.words).includes('revit lt'))
-    if (!hasLt) {
-      const order = before(revit.order)
-      if (order != null) {
-        await payload.create({
-          collection: 'section-rules',
-          data: {
-            title: 'Autodesk — Revit LT',
-            order,
-            manufacturer: autodesk,
-            kind: revit.kind ?? null,
-            words: 'revit lt',
-            mainSection: relId(revit.mainSection),
-            extraSections: extra,
-          },
-          context: skip,
-          ...opts,
-        })
-        orders.add(order)
-        report.push('новое правило «Revit LT»: разделы как у Revit до изменения')
-      }
-    }
-    if (!extra.includes(structural)) {
-      await payload.update({
-        collection: 'section-rules',
-        id: revit.id,
-        data: { extraSections: [...extra, structural] },
-        context: skip,
-        ...opts,
-      })
-      report.push(`правило «${revit.title}»: добавлен «Расчёт конструкций»`)
-    }
-  } else report.push('правило Revit не найдено — проверить вручную')
-
   const applied = await applySectionRules(payload)
   report.push(`товары пересчитаны по правилам: изменено ${applied.changed}`)
 
@@ -151,14 +111,9 @@ export async function setupAuditCatalog(payload: Payload): Promise<string[] | nu
     const add =
       by === scadSoft && product.kind === 'software' && title.includes('scad office')
         ? arch
-        : by === autodesk &&
-            product.kind === 'software' &&
-            title.includes('revit') &&
-            !title.includes('revit lt')
+        : product.kind === 'course' && /scad|скад/.test(title)
           ? structural
-          : product.kind === 'course' && /scad|скад/.test(title)
-            ? structural
-            : undefined
+          : undefined
     const extra = relIds(product.extraSections)
     if (add == null || relId(product.mainSection) === add || extra.includes(add)) continue
     await payload.update({
@@ -174,6 +129,85 @@ export async function setupAuditCatalog(payload: Payload): Promise<string[] | nu
   await payload.create({
     collection: 'import-runs',
     data: { idempotencyKey: AUDIT_CATALOG_KEY, state: 'done', snapshot: { report } },
+    ...opts,
+  })
+  return report
+}
+
+/** Ключ второй настройки: вернуть Revit из «Расчёта конструкций». */
+export const REVIT_BACK_KEY = 'catalog-setup:audit-catalog-v2'
+
+/**
+ * Revit не в «Расчёте конструкций» (решение владельца 21.10.2026, отмена К2): убирает правило
+ * «Revit LT» и раздел у правила Revit, добавленные первой настройкой, и раздел у товаров Revit
+ * с ручными разделами. null — уже сделано.
+ */
+export async function setupRevitBack(payload: Payload): Promise<string[] | null> {
+  const done = await payload.find({
+    collection: 'import-runs',
+    where: { idempotencyKey: { equals: REVIT_BACK_KEY } },
+    limit: 1,
+    ...opts,
+  })
+  if (done.docs.length) return null
+  const report: string[] = []
+  const [sections, vendors, rulesFound] = await Promise.all([
+    payload.find({ collection: 'sections', where: { slug: { equals: 'structural' } }, ...opts }),
+    payload.find({ collection: 'manufacturers', pagination: false, ...opts }),
+    payload.find({ collection: 'section-rules', pagination: false, ...opts }),
+  ])
+  const structural = sections.docs[0]?.id
+  const autodesk = vendors.docs.find((doc) => low(doc.title) === 'autodesk')?.id
+  for (const rule of rulesFound.docs) {
+    if (relId(rule.manufacturer) !== autodesk) continue
+    const w = low(rule.words).trim()
+    if (w === 'revit lt' && rule.title === 'Autodesk — Revit LT') {
+      await payload.delete({ collection: 'section-rules', id: rule.id, context: skip, ...opts })
+      report.push('правило «Revit LT» удалено')
+    } else if (w === 'revit' && structural != null) {
+      const extra = relIds(rule.extraSections)
+      if (!extra.includes(structural)) continue
+      await payload.update({
+        collection: 'section-rules',
+        id: rule.id,
+        data: { extraSections: extra.filter((id) => id !== structural) },
+        context: skip,
+        ...opts,
+      })
+      report.push(`правило «${rule.title}»: «Расчёт конструкций» убран`)
+    }
+  }
+  const applied = await applySectionRules(payload)
+  report.push(`товары пересчитаны по правилам: изменено ${applied.changed}`)
+  const { docs } = await payload.find({
+    collection: 'products',
+    where: { autoSections: { equals: false } },
+    pagination: false,
+    select: { title: true, kind: true, manufacturer: true, mainSection: true, extraSections: true },
+    ...opts,
+  })
+  for (const product of docs) {
+    const extra = relIds(product.extraSections)
+    if (
+      structural == null ||
+      relId(product.manufacturer) !== autodesk ||
+      !low(product.title).includes('revit') ||
+      relId(product.mainSection) === structural ||
+      !extra.includes(structural)
+    )
+      continue
+    await payload.update({
+      collection: 'products',
+      id: product.id,
+      data: { extraSections: extra.filter((id) => id !== structural) },
+      context: { [RULES_CONTEXT]: true },
+      ...opts,
+    })
+    report.push(`${product.title}: «Расчёт конструкций» убран (ручные разделы)`)
+  }
+  await payload.create({
+    collection: 'import-runs',
+    data: { idempotencyKey: REVIT_BACK_KEY, state: 'done', snapshot: { report } },
     ...opts,
   })
   return report

@@ -55,6 +55,9 @@ function visible(item: CatalogItem, state: FilterState, ignore?: Key) {
 
 export function matches(item: CatalogItem, state: FilterState, ignore?: Key) {
   if (!visible(item, state, ignore)) return false
+  // Курсы и услуги — только во вкладке «Услуги»: в общем списке и в направлениях программ они
+  // занимают место (решение владельца 21.10.2026). Курс к программе — в «С этим покупают».
+  if (item.group === 'service' && state.group !== 'service') return false
   if (ignore !== 'group' && state.group && item.group !== state.group) return false
   if (ignore !== 'direction' && state.direction && !item.directions.includes(state.direction))
     return false
@@ -88,12 +91,7 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
   const groupCounts = countBy(items, (item) => [item.group])
   const directionCounts = countBy(scope('direction'), (item) => item.directions)
   const typeCounts = countBy(scope('type'), (item) => item.types)
-  // «Производитель» — только у программ и оборудования: CAD.kz с курсами и услугами в одном
-  // списке с Autodesk и Canon выглядит как производитель программ (аудит 21.10.2026, К5).
-  const vendorCounts = countBy(
-    scope('vendors').filter((item) => item.group !== 'service'),
-    (item) => [item.vendor],
-  )
+  const vendorCounts = countBy(scope('vendors'), (item) => [item.vendor])
   const taskCounts = countBy(scope('tasks'), (item) => item.tasks)
 
   const fromFacets = (list: Facet[], counts: Map<string, number>, selected: string | null) =>
@@ -134,6 +132,7 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
             typeCounts,
             state.type,
           ),
+    // У услуг список производителей не нужен: там один CAD.kz (аудит 21.10.2026, К5).
     vendors: state.group === 'service' ? [] : fromCounts(vendorCounts, state.vendors),
     // Задачи раскрываются после выбора направления или типа: так фильтр остаётся коротким.
     tasks: (state.direction || state.type) && narrows ? taskList : [],
