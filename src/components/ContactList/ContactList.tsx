@@ -4,12 +4,13 @@ import { socialIcons, socialNames, TelegramIcon, WhatsappIcon } from '../icons/i
 import styles from './ContactList.module.css'
 
 /** whatsapp = false — строку WhatsApp не показывать: рядом уже есть своя кнопка WhatsApp. */
-type Props = { contacts: Contacts; socials?: boolean; whatsapp?: boolean }
+/** tone = dark — светлый текст для тёмного фона (подвал). */
+type Props = { contacts: Contacts; socials?: boolean; whatsapp?: boolean; tone?: 'light' | 'dark' }
 
 /** Телефоны, мессенджеры и соцсети из настроек CMS. */
-export function ContactList({ contacts, socials = true, whatsapp = true }: Props) {
+export function ContactList({ contacts, socials = true, whatsapp = true, tone = 'light' }: Props) {
   return (
-    <div className={styles.list}>
+    <div className={tone === 'dark' ? `${styles.list} ${styles.dark}` : styles.list}>
       {contacts.phones.map((phone) => (
         <a key={phone.tel} href={`tel:${phone.tel}`} className={styles.phone}>
           {phone.label}

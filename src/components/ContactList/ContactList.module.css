@@ -49,3 +49,25 @@
 .social:hover {
   background: var(--color-blue);
 }
+
+/* На тёмном фоне (подвал). */
+.dark .phone {
+  color: var(--color-text-inverse);
+}
+
+.dark .line {
+  color: var(--color-text-on-dark);
+}
+
+.dark .phone:hover,
+.dark .line:hover {
+  color: var(--color-sky);
+}
+
+.dark .social {
+  background: var(--color-on-dark-soft);
+}
+
+.dark .social:hover {
+  background: var(--color-blue);
+}

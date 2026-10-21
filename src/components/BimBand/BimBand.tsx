@@ -50,7 +50,8 @@ export function BimBand({
             className={styles.image}
             priority={priority}
           />
-          {bim.eyebrow && <Badge tone="onDark">{bim.eyebrow}</Badge>}
+          {/* На главной плашка над заголовком не нужна (решение владельца 21.10.2026). */}
+          {bim.eyebrow && !bare && <Badge tone="onDark">{bim.eyebrow}</Badge>}
           <Heading id="bim-title" className={styles.title}>
             {bim.title}
           </Heading>

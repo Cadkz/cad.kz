@@ -5,10 +5,10 @@ import { drawIsolines, type IsolineStyle, wanderPoint } from '@/lib/isolines'
 import styles from './Isolines.module.css'
 
 /** Скорость изменения рельефа и течения вбок (в секунду). */
-const TIME_SPEED = 0.05
-const DRIFT_SPEED = 9
+const TIME_SPEED = 0.022
+const DRIFT_SPEED = 3.5
 /** Насколько быстро точка света догоняет курсор (доля пути за кадр при 60 к/с). */
-const FOLLOW = 0.07
+const FOLLOW = 0.025
 /** Курсор ушёл из блока — через столько секунд свет снова блуждает сам. */
 const POINTER_IDLE = 2.5
 /** Появление линий при загрузке, секунд. */

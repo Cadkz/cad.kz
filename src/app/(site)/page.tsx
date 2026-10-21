@@ -13,7 +13,7 @@ import { Isolines } from '@/components/Isolines/Isolines'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { Section } from '@/components/Section/Section'
-import { ToneBackdrop } from '@/components/ToneBackdrop/ToneBackdrop'
+import { Spotlight } from '@/components/Spotlight/Spotlight'
 import { ToneBand } from '@/components/ToneBand/ToneBand'
 import { getCatalog, getDirections } from '@/lib/catalog'
 import { emptyFilter, fromParams, toQuery } from '@/lib/catalogFilter'
@@ -29,8 +29,8 @@ export const metadata = { alternates: { canonical: '/' } }
 
 /**
  * Пробный редизайн 21.10.2026 (ветка redesign/home-motion): тёмные и светлые блоки чередуются
- * (ToneBand), подложка страницы плавно меняет оттенок по блоку в середине экрана (ToneBackdrop),
- * в первом экране — медленные изолинии (Isolines).
+ * (ToneBand): тёмные панели разворачиваются при прокрутке, светлые блоки разного оттенка и плавно
+ * меняют его, пока проходят экран; в первом экране — живые изолинии (Isolines).
  *
  * Главная — шаблон «Витрина»: первым блоком BIM (решение владельца 16.10.2026, вечер: первый баннер
  * «Подбор по задаче» убран, компонент Hero оставлен для возврата; h1 из админки «Главная» скрыт
@@ -55,7 +55,6 @@ export default async function Home({ searchParams }: Props) {
   return (
     <main>
       <CatalogHashRedirect />
-      <ToneBackdrop initial="mist" />
       {home.title && <HiddenTitle>{home.title}</HiddenTitle>}
       <ToneBand tone="night" first decor={<Isolines />}>
         <BimBand
@@ -74,13 +73,15 @@ export default async function Home({ searchParams }: Props) {
           sub="Карточка открывает каталог этого направления."
           action={{ href: catalogHref(), label: 'Весь каталог' }}
         >
-          <Grid as="ul" span={{ base: 12, sm: 6, md: 3 }}>
-            {[...directions, ...directionExtras].map((direction, i) => (
-              <Reveal as="li" key={direction.slug} step={i}>
-                <DirectionCard direction={direction} />
-              </Reveal>
-            ))}
-          </Grid>
+          <Spotlight>
+            <Grid as="ul" span={{ base: 12, sm: 6, md: 3 }}>
+              {[...directions, ...directionExtras].map((direction, i) => (
+                <Reveal as="li" key={direction.slug} step={i}>
+                  <DirectionCard direction={direction} />
+                </Reveal>
+              ))}
+            </Grid>
+          </Spotlight>
         </Section>
       </ToneBand>
       <ToneBand tone="base">
@@ -115,8 +116,8 @@ export default async function Home({ searchParams }: Props) {
       <ToneBand tone="lilac">
         <HomeNews slides={home.slides} news={news.docs} covers={topicCovers} />
       </ToneBand>
-      {home.faq.length > 0 && (
-        <ToneBand tone="sky">
+      <ToneBand tone="base">
+        {home.faq.length > 0 && (
           <Section id="faq" title="Частые вопросы">
             <Grid>
               <Col span={{ base: 12, md: 8 }}>
@@ -127,9 +128,7 @@ export default async function Home({ searchParams }: Props) {
               </Col>
             </Grid>
           </Section>
-        </ToneBand>
-      )}
-      <ToneBand tone="base">
+        )}
         <Reveal>
           <CtaBanner cta={home.cta} />
         </Reveal>

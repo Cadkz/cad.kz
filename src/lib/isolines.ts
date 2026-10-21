@@ -73,8 +73,8 @@ const LOW = -2
 const STEP = 0.075
 const INDEX = 5
 /** Холм под курсором: высота и ширина (сигма, CSS-пиксели) — вокруг него кольца горизонталей. */
-const BUMP_HEIGHT = 0.9
-const BUMP_SIGMA = 110
+const BUMP_HEIGHT = 0.4
+const BUMP_SIGMA = 150
 
 export type IsolineStyle = {
   line: string
@@ -179,7 +179,7 @@ export function drawIsolines(ctx: CanvasRenderingContext2D, f: IsolineFrame, sty
 
   // Мягкое пятно света под линиями — будто карту подсветили фонариком.
   const spot = ctx.createRadialGradient(f.focusX, f.focusY, 0, f.focusX, f.focusY, 260)
-  spot.addColorStop(0, withAlpha(style.index, 0.2))
+  spot.addColorStop(0, withAlpha(style.index, 0.1))
   spot.addColorStop(1, withAlpha(style.index, 0))
   ctx.fillStyle = spot
   ctx.fillRect(0, 0, width, height)
@@ -187,10 +187,10 @@ export function drawIsolines(ctx: CanvasRenderingContext2D, f: IsolineFrame, sty
   ctx.lineJoin = 'round'
   ctx.lineCap = 'round'
   ctx.lineWidth = 1
-  ctx.strokeStyle = light(0.9, 0.7, 0.22, style.line, style.index)
+  ctx.strokeStyle = light(0.75, 0.6, 0.24, style.line, style.index)
   ctx.stroke(minor)
   ctx.lineWidth = 1.6
-  ctx.strokeStyle = light(1, 0.6, 0.16, style.index, style.index)
+  ctx.strokeStyle = light(0.8, 0.5, 0.18, style.index, style.index)
   ctx.stroke(major)
 
   // Появление: линии проявляются кругом, расходящимся от точки света.

@@ -3,6 +3,9 @@
    сетка 4 × 3): значок, под ним заголовок и описание;
    заголовки карточек одного ряда начинаются на одной высоте, даже если переносятся. */
 .card {
+  --spot-x: 50%;
+  --spot-y: 0%;
+
   position: relative;
   display: grid;
   grid-template-columns: var(--icon-box) minmax(0, 1fr);
@@ -11,7 +14,9 @@
   height: 100%;
   padding: var(--space-5);
   overflow: hidden;
+  border: 1px solid var(--color-on-dark-line);
   border-radius: var(--radius-lg);
+  background: var(--gradient-deep);
   color: var(--color-text-inverse);
   isolation: isolate;
   transition:
@@ -19,36 +24,59 @@
     transform var(--duration-base) var(--ease);
 }
 
+/* Свет за курсором: мягкое пятно внутри карточки. */
 .card::before {
   position: absolute;
   inset: 0;
   z-index: var(--z-below);
-  background: var(--gradient-card-shade);
+  background: radial-gradient(
+    var(--spot-size) circle at var(--spot-x) var(--spot-y),
+    var(--color-glow),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease);
+  content: "";
+}
+
+/* Подсвеченная рамка: тонкое кольцо светлеет там, где курсор. */
+.card::after {
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: radial-gradient(
+    var(--spot-size) circle at var(--spot-x) var(--spot-y),
+    var(--color-sky),
+    transparent 60%
+  );
+  opacity: 0;
+  mask:
+    linear-gradient(black, black) content-box,
+    linear-gradient(black, black);
+  mask-composite: exclude;
+  transition: opacity var(--duration-base) var(--ease);
+  pointer-events: none;
   content: "";
 }
 
 .card:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(calc(-1 * var(--space-1)));
+  transform: perspective(var(--tilt-depth)) rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg)) translateY(calc(-1 * var(--space-1)));
+}
+
+.card:hover::before,
+.card:hover::after {
+  opacity: 1;
 }
 
 .card:active {
   transform: none;
 }
 
-.navy {
-  background: var(--gradient-deep);
-}
-
-.blue {
-  background: var(--gradient-navy);
-}
-
-.graphite {
-  background: var(--gradient-graphite);
-}
-
-/* Крупная полупрозрачная иконка в углу — фирменный декор карточек направлений. */
+/* Крупная полупрозрачная иконка в углу — фирменный декор; при наведении поворачивается,
+   растёт и становится голубой. */
 .big {
   position: absolute;
   right: calc(-1 * var(--space-4));
@@ -56,8 +84,9 @@
   z-index: var(--z-below);
   opacity: 0.1;
   transition:
-    opacity var(--duration-base) var(--ease),
-    transform var(--duration-base) var(--ease);
+    opacity var(--duration-reveal) var(--ease-reveal),
+    color var(--duration-reveal) var(--ease-reveal),
+    transform var(--duration-reveal) var(--ease-reveal);
 }
 
 .big svg {
@@ -67,8 +96,10 @@
 }
 
 .card:hover .big {
-  opacity: 0.22;
-  transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1)));
+  color: var(--color-sky);
+  opacity: 0.35;
+  transform: translate(calc(-1 * var(--space-2)), calc(-1 * var(--space-2))) rotate(-8deg)
+    scale(1.15);
 }
 
 .icon {
@@ -80,6 +111,14 @@
   height: var(--icon-box);
   border-radius: var(--radius-md);
   background: var(--color-on-dark-soft);
+  transition:
+    background var(--duration-base) var(--ease),
+    color var(--duration-base) var(--ease);
+}
+
+.card:hover .icon {
+  background: var(--color-text-inverse);
+  color: var(--color-navy);
 }
 
 .title {

@@ -1,7 +1,25 @@
-/* Светлые блоки прозрачны: оттенок даёт общая подложка страницы (ToneBackdrop). */
+/* Светлые блоки: свой фон во всю ширину экрана, соседние — разного оттенка, чтобы блоки
+   не сливались (замечание владельца 21.10.2026). Снизу у светлого блока отступ секции. */
 .band {
   position: relative;
   isolation: isolate;
+  padding-bottom: var(--section-gap);
+}
+
+.base {
+  background-color: var(--tone-base);
+}
+
+.mist {
+  background-color: var(--tone-mist);
+}
+
+.lilac {
+  background-color: var(--tone-lilac);
+}
+
+.sky {
+  background-color: var(--tone-sky);
 }
 
 /* Тёмная панель во всю ширину экрана с чёткими краями. Где браузер умеет анимацию по
@@ -9,7 +27,6 @@
    а уходя — сворачивается обратно. Без поддержки или при «уменьшить движение» — просто
    тёмная полоса во всю ширину. */
 .night {
-  margin-top: var(--section-gap);
   padding-top: calc(var(--section-gap) / 2);
   padding-bottom: calc(var(--section-gap) * 1.5);
   background: var(--tone-night);
@@ -39,7 +56,6 @@
 
 /* Первая на странице — первый экран: сразу под шапкой, без отступа сверху. */
 .first {
-  margin-top: 0;
   padding-top: 0;
   padding-bottom: calc(var(--section-gap) * 1.5);
 }
@@ -51,6 +67,17 @@
 
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
+    /* Пока блок проходит экран, его оттенок плавно смещается к соседнему по палитре. */
+    .mist {
+      animation: driftMist linear both;
+      animation-timeline: view();
+    }
+
+    .lilac {
+      animation: driftLilac linear both;
+      animation-timeline: view();
+    }
+
     .night {
       animation:
         panelOpen linear both,
@@ -100,5 +127,25 @@
   to {
     clip-path: inset(0 var(--panel-inset) round var(--radius-lg));
     transform: scale(0.94);
+  }
+}
+
+@keyframes driftMist {
+  from {
+    background-color: var(--tone-sky);
+  }
+
+  to {
+    background-color: var(--tone-mist);
+  }
+}
+
+@keyframes driftLilac {
+  from {
+    background-color: var(--tone-mist);
+  }
+
+  to {
+    background-color: var(--tone-lilac);
   }
 }
