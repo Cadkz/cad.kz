@@ -108,11 +108,11 @@ export function CartView({
             <Copy size={16} strokeWidth={1.75} aria-hidden="true" />
             {copied ? 'Состав скопирован' : 'Скопировать состав'}
           </Button>
-          <p className={styles.note}>
-            {crmLive
-              ? 'Разные комплектации одного товара хранятся отдельными строками.'
-              : 'Демоверсия: заказ сохранится в учебной базе и менеджерам не передаётся. Разные комплектации одного товара хранятся отдельными строками.'}
-          </p>
+          {crmLive ? null : (
+            <p className={styles.note}>
+              Демоверсия: заказ сохранится в учебной базе и менеджерам не передаётся.
+            </p>
+          )}
           <ButtonLink href={catalogHref()} variant="outline" block>
             Продолжить подбор
           </ButtonLink>

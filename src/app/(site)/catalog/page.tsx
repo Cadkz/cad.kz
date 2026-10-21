@@ -27,7 +27,7 @@ export default async function CatalogPage({ searchParams }: Props) {
         <Breadcrumbs items={[{ title: 'Главная', href: '/' }, { title: 'Каталог' }]} />
         <PageIntro
           title="Каталог"
-          lead="Выберите направление, затем производителя. Не знаете, что подойдёт, — напишите задачу менеджеру."
+          lead="Выберите направление, затем производителя. Не знаете, что подойдёт, — спросите Кадди или напишите в WhatsApp."
         />
         <CatalogFilter
           key={JSON.stringify(initial)}

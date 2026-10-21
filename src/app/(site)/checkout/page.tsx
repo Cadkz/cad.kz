@@ -24,7 +24,7 @@ export default async function CheckoutPage() {
         />
         <PageIntro
           title="Оформление заказа"
-          lead="Проверьте состав и оставьте имя и телефон — менеджер подтвердит цену и наличие и свяжется с вами."
+          lead="Проверьте состав и оставьте имя и телефон — менеджер подтвердит цену и пришлёт счёт."
         />
         <CheckoutView whatsappHref={contacts.whatsappHref} crmLive={crmLive()} />
       </Container>

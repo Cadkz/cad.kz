@@ -87,7 +87,7 @@ export const GEO5_NO_PAGE = { vendor: 'Fine Software', title: /^GEO5\s/i, except
 export const REVIT_PICKER = {
   slug: 'autodesk-revit',
   title: 'Revit',
-  renewLabel: 'Продлить подписку',
+  renewLabel: 'Продлить лицензию',
   tasks: ['BIM-модель здания', 'Архитектура, конструкции, инженерные системы', 'Чертежи из модели'],
   switches: [
     {

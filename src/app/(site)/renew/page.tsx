@@ -12,9 +12,9 @@ import { pageMetadata } from '@/lib/seo'
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
 export const metadata: Metadata = pageMetadata({
-  title: 'Продление лицензий AutoCAD, АВС, ЛИРА, SCAD, GEO5 — CAD.kz',
+  title: 'Продление лицензий AutoCAD, Revit, АВС-KZ, ЛИРА-FEM, SCAD Office, GEO5 — CAD.kz',
   description:
-    'Продление и обновление лицензий AutoCAD, АВС, ЛИРА-FEM, SCAD Office, GEO5 и других программ. ' +
+    'Продление и обновление лицензий AutoCAD, Revit, АВС-KZ, ЛИРА-FEM, SCAD Office, GEO5 и других программ. ' +
     'Оставьте заявку — менеджер проверит лицензию и пришлёт счёт.',
   path: '/renew',
 })
@@ -39,7 +39,7 @@ export default async function RenewPage({ searchParams }: Props) {
                 contacts={contacts}
                 layout="aside"
                 title="Есть вопросы?"
-                phrase="Не помните, какая версия стоит, или сомневаетесь в редакции? Давайте попробую помочь."
+                phrase="Не помните, какая версия стоит, или сомневаетесь в редакции? Помогу разобраться."
                 message="Здравствуйте! У меня вопрос по продлению лицензии."
               />
             </>
@@ -47,7 +47,7 @@ export default async function RenewPage({ searchParams }: Props) {
         >
           <PageIntro
             title="Продление лицензий"
-            lead="Продлим подписку или обновим версию программы. Укажите, что продлить, — менеджер проверит лицензию и пришлёт счёт."
+            lead="Продлим лицензию или обновим версию программы. Укажите, что продлить, — менеджер проверит лицензию и пришлёт счёт."
           />
           <RenewForm program={program} />
         </ReadingLayout>

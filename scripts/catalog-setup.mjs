@@ -44,6 +44,7 @@ import { setupProductTables } from '../src/lib/productTablesSetup.ts'
 import { setupFamilyRenew } from '../src/lib/renewSetup.ts'
 import { setupSearchAliases } from '../src/lib/searchSetup.ts'
 import { setupMepTasks } from '../src/lib/tasksSetup.ts'
+import { setupTextsAudit } from '../src/lib/textsSetup.ts'
 import { setupVendors } from '../src/lib/vendorsSetup.ts'
 import { setupVersions } from '../src/lib/versionsSetup.ts'
 
@@ -190,6 +191,9 @@ try {
   const footer = await setupFooterAudit(payload)
   if (!footer) console.log('Контакты и подвал по аудиту уже настроены.')
   else for (const line of footer) console.log(`Подвал по аудиту — ${line}`)
+  const texts = await setupTextsAudit(payload)
+  if (!texts) console.log('Тексты по аудиту уже настроены.')
+  else for (const line of texts) console.log(`Тексты по аудиту — ${line}`)
   const priorityV2 = await setupPrioritiesV2(payload)
   if (!priorityV2) console.log('Топы продаж по местам уже расставлены.')
   else for (const line of priorityV2) console.log(line)

@@ -40,7 +40,7 @@ export const RENEW_CARD = /** @type {const} */ ({
 const RENEW_ALIASES = {
   AutoCAD: ['autocad', 'автокад', 'акад'],
   'AutoCAD LT': ['autocad lt', 'автокад lt', 'автокад лт', 'acad lt'],
-  АВС: ['авс', 'abc'],
+  'АВС-KZ': ['авс', 'abc'],
   'ЛИРА-FEM': ['лира', 'lira'],
   'SCAD Office': ['scad', 'скад'],
   GEO5: ['geo5', 'geo 5', 'гео5', 'гео 5'],

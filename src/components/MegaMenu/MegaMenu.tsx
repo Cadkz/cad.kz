@@ -72,7 +72,7 @@ export function MegaMenu({
         <div className={styles.offer}>
           <p className={styles.offerTitle}>Не знаете, что выбрать?</p>
           <p className={styles.offerText}>
-            Опишите задачи — поможем с выбором ПО или оборудования.
+            Опишите задачи — поможем с выбором программ или оборудования.
           </p>
           {whatsappHref && (
             <a href={whatsappHref} className={styles.offerLink} target="_blank" rel="noreferrer">

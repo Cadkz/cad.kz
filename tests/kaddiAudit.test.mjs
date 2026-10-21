@@ -113,7 +113,7 @@ test('цена в ответе — кнопка «Прислать расчёт�
 test('продление с выбранной программой (Ка5)', () => {
   assert.equal(renewProgram(['Нужно продлить Revit']), 'Revit')
   assert.equal(renewProgram(['продлить автокад лт на год']), 'AutoCAD LT')
-  assert.equal(renewProgram(['Хочу продлить АВС']), 'АВС')
+  assert.equal(renewProgram(['Хочу продлить АВС']), 'АВС-KZ')
   assert.equal(renewProgram(['продлить GEO 5 и ревит']), 'GEO5')
   // Последний вопрос без программы — берётся из прежних.
   assert.equal(renewProgram(['Продлить лицензию', 'Скад офис у нас']), 'SCAD Office')

@@ -191,7 +191,7 @@ export const SCAD_FAMILY = {
 export const AUTOCAD_PICKER = {
   slug: 'autocad',
   pageView: 'picker',
-  renewLabel: 'Продлить подписку',
+  renewLabel: 'Продлить лицензию',
   summary:
     'Самая популярная САПР для 2D-черчения и 3D-моделирования. Полная версия включает отраслевые ' +
     'наборы: Architecture, Mechanical, Electrical, MEP, Plant 3D, Map 3D и Raster Design.',

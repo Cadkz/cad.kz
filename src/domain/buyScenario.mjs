@@ -100,7 +100,7 @@ export function scenarioActions(input) {
       return {
         main: req('help', 'Подобрать решение'),
         second: req('quote', 'Запросить КП'),
-        links: [req('consult', 'Консультация инженера')],
+        links: [req('consult', 'Консультация специалиста')],
       }
     case 'equipment': {
       const main = input.demo
@@ -113,7 +113,7 @@ export function scenarioActions(input) {
       const links = []
       if (input.demo && cart) links.push(req('help', 'Подобрать оборудование'))
       if (input.picks)
-        links.push({ type: 'anchor', href: '#cross-title', label: 'Расходники и ПО к нему' })
+        links.push({ type: 'anchor', href: '#cross-title', label: 'Расходники и программы к нему' })
       return { main, second, links }
     }
     case 'renewal':

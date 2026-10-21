@@ -121,7 +121,8 @@ export const demoSections: DemoSection[] = [
   {
     key: 'machine',
     title: 'Машиностроение',
-    summary: 'Деталь и сборка, 3D-сканеры Artec для реверс-инжиниринга.',
+    summary:
+      'Inventor, Fusion, MechaniCS — детали, сборки, чертежи; сканеры Artec для реверс-инжиниринга.',
     menuGroup: 'software',
     isDirection: true,
     icon: 'cog',

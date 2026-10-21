@@ -50,7 +50,7 @@ test('кнопки: стандартная лицензия с ценой и б�
 
 test('кнопки: корпоративное ПО без корзины, даже с ценой', () => {
   const set = scenarioActions({ scenario: 'corporate', cart: true })
-  assert.deepEqual(labels(set), ['Подобрать решение', 'Запросить КП', 'Консультация инженера'])
+  assert.deepEqual(labels(set), ['Подобрать решение', 'Запросить КП', 'Консультация специалиста'])
   assert.ok(![set.main, set.second, ...set.links].some((a) => a?.type === 'cart'))
 })
 
@@ -60,7 +60,7 @@ test('кнопки: сканер — запись на демонстрацию,
   assert.deepEqual(labels(artec), [
     'Записаться на демонстрацию',
     'Подобрать оборудование',
-    'Расходники и ПО к нему',
+    'Расходники и программы к нему',
   ])
   const plotter = scenarioActions({ scenario: 'equipment', cart: true })
   assert.equal(plotter.main.type, 'cart')
