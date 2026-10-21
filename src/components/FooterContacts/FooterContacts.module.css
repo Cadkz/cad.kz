@@ -1,6 +1,9 @@
-/* Контакты на тёмном листе подвала: светлый текст, значки — полупрозрачные квадраты. */
+/* Контакты на тёмном листе подвала: светлый текст, значки — полупрозрачные квадраты.
+   На телефоне блок во всю ширину колонки: значки растянуты до правого края (решение
+   владельца 21.10.2026 — справа не пусто, подвал не кажется сдвинутым влево). */
 .contacts {
   display: flex;
+  align-self: stretch;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
@@ -47,19 +50,21 @@
   line-height: var(--leading-normal);
 }
 
-/* шесть значков в одну строку и в узкой колонке контактов на 960 px */
+/* телефон: значки поровну на всю ширину, высотой с обычную кнопку — удобно пальцем;
+   от 640 px — квадраты в строку (шесть влезают и в узкую колонку контактов на 960 px) */
 .icons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  align-self: stretch;
+  gap: var(--space-2);
 }
 
 .icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--control-height-sm);
-  height: var(--control-height-sm);
+  height: var(--control-height);
   border-radius: var(--radius-md);
   background: var(--color-on-dark-soft);
   color: var(--color-text-inverse);
@@ -74,5 +79,17 @@
   .numbers {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .icons {
+    display: flex;
+    flex-wrap: wrap;
+    align-self: flex-start;
+    gap: var(--space-1);
+  }
+
+  .icon {
+    width: var(--control-height-sm);
+    height: var(--control-height-sm);
   }
 }

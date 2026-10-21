@@ -84,6 +84,30 @@ export type Option = { value: string; label: string; count: number }
 
 const byLabel = (a: Option, b: Option) => a.label.localeCompare(b.label, 'ru')
 
+/** Ранг, с которого товар считается топом продаж (src/domain/priority.mjs, TOP_BASE). */
+const TOP_SALES_RANK = 10
+
+/**
+ * Порядок производителей в фильтре (замечание владельца 21.10.2026: SCAD внизу, а Chaos, АРС-ПС
+ * и Base вверху). Сначала производители раздела по его порядку («Первыми в разделе»), затем
+ * производители топов продаж — как их товары стоят в каталоге (Autodesk, АВС, SCAD, Fine, Artec,
+ * CSoft, ЛИРА), остальные по алфавиту. Список товаров с сервера уже упорядочен по приоритету.
+ */
+function vendorOrder(items: CatalogItem[], pins: string[]) {
+  const first = new Map<string, number>()
+  items.forEach((item, index) => {
+    if (item.vendor && item.rank >= TOP_SALES_RANK && !first.has(item.vendor))
+      first.set(item.vendor, index)
+  })
+  const place = (option: Option) => {
+    const pin = pins.indexOf(option.value)
+    if (pin !== -1) return pin
+    const top = first.get(option.value)
+    return top == null ? Number.MAX_SAFE_INTEGER : pins.length + top
+  }
+  return (a: Option, b: Option) => place(a) - place(b) || byLabel(a, b)
+}
+
 /** Варианты всех групп фильтра для текущего выбора. Пустые варианты скрыты, выбранные — нет. */
 export function facetOptions(items: CatalogItem[], facets: Facet[], state: FilterState) {
   const scope = (key: Key) => items.filter((item) => matches(item, state, key))
@@ -93,6 +117,8 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
   const typeCounts = countBy(scope('type'), (item) => item.types)
   const vendorCounts = countBy(scope('vendors'), (item) => [item.vendor])
   const taskCounts = countBy(scope('tasks'), (item) => item.tasks)
+  const section = state.type ?? state.direction
+  const pins = facets.find((facet) => facet.slug === section)?.pins ?? []
 
   const fromFacets = (list: Facet[], counts: Map<string, number>, selected: string | null) =>
     list
@@ -102,10 +128,14 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
         count: counts.get(facet.slug) ?? 0,
       }))
       .filter((option) => option.count > 0 || option.value === selected)
-  const fromCounts = (counts: Map<string, number>, selected: string[]) =>
+  const fromCounts = (
+    counts: Map<string, number>,
+    selected: string[],
+    order: (a: Option, b: Option) => number = byLabel,
+  ) =>
     [...new Set([...counts.keys(), ...selected])]
       .map((value) => ({ value, label: value, count: counts.get(value) ?? 0 }))
-      .sort(byLabel)
+      .sort(order)
 
   const typeGroup: CatalogGroup = state.group === 'service' ? 'service' : 'hardware'
   // Задачи показываются, только если сужают выдачу: когда каждая задача оставляет то же самое,
@@ -133,7 +163,10 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
             state.type,
           ),
     // У услуг список производителей не нужен: там один CAD.kz (аудит 21.10.2026, К5).
-    vendors: state.group === 'service' ? [] : fromCounts(vendorCounts, state.vendors),
+    vendors:
+      state.group === 'service'
+        ? []
+        : fromCounts(vendorCounts, state.vendors, vendorOrder(items, pins)),
     // Задачи раскрываются после выбора направления или типа: так фильтр остаётся коротким.
     tasks: (state.direction || state.type) && narrows ? taskList : [],
   }
