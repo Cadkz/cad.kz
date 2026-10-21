@@ -43,7 +43,9 @@ export function BimBand({
             alt=""
             sizes="(min-width: 1200px) 720px, (min-width: 960px) 60vw, 100vw"
             className={styles.image}
-            priority={priority}
+            // Первая картинка экрана: грузится сразу и раньше остальных (замер PageSpeed 21.10.2026).
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
           />
           {bim.eyebrow && !noEyebrow && <Badge tone="onDark">{bim.eyebrow}</Badge>}
           <Heading id="bim-title" className={styles.title}>

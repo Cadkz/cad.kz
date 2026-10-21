@@ -1,6 +1,5 @@
 import { permanentRedirect } from 'next/navigation'
 import { BimBand } from '@/components/BimBand/BimBand'
-import { CatalogFilter } from '@/components/CatalogFilter/CatalogFilter'
 import { CatalogHashRedirect } from '@/components/CatalogHashRedirect/CatalogHashRedirect'
 import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
 import { DirectionCard } from '@/components/DirectionCard/DirectionCard'
@@ -8,12 +7,13 @@ import { Faq } from '@/components/Faq/Faq'
 import { FaqHelp } from '@/components/FaqHelp/FaqHelp'
 import { Col, Grid } from '@/components/Grid/Grid'
 import { HiddenTitle } from '@/components/HiddenTitle/HiddenTitle'
+import { HomeCatalog } from '@/components/HomeCatalog/HomeCatalog'
 import { HomeNews } from '@/components/HomeNews/HomeNews'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { Section } from '@/components/Section/Section'
-import { clientItems, getCatalog, getDirections } from '@/lib/catalog'
-import { emptyFilter, fromParams, toQuery } from '@/lib/catalogFilter'
+import { getDirections } from '@/lib/catalog'
+import { fromParams, toQuery } from '@/lib/catalogFilter'
 import { getHome } from '@/lib/home'
 import { getContacts } from '@/lib/navigation'
 import { CATALOG_PATH, catalogHref } from '@/lib/navigationHrefs'
@@ -28,7 +28,8 @@ export const metadata = { alternates: { canonical: '/' } }
  * Главная — шаблон «Витрина». Первым блоком BIM целиком (решение владельца 16.10 и 21.10.2026,
  * без плашки над заголовком), направления (на телефоне по две плитки в ряд), каталог с фильтром —
  * только от 960 px (решение владельца 21.10.2026: на телефоне он занимал 5 экранов; полный
- * каталог там — в меню и на /catalog), «Новости и акции», «Как мы работаем», вопросы,
+ * каталог там — в меню и на /catalog; в страницу каталог не кладётся, компьютер догружает его
+ * сам — HomeCatalog, пакет 7 «Скорость»), «Новости и акции», «Как мы работаем», вопросы,
  * «Нашли дешевле». «Популярные решения» — в меню «Каталог», не на главной. h1 из админки
  * «Главная» скрыт визуально. Подзаголовков-инструкций у секций нет (аудит 21.10.2026).
  */
@@ -37,12 +38,11 @@ export default async function Home({ searchParams }: Props) {
   const query = toQuery(fromParams(await searchParams))
   if (query) permanentRedirect(`${CATALOG_PATH}?${query}`)
 
-  const [home, directions, news, contacts, catalog, topicCovers] = await Promise.all([
+  const [home, directions, news, contacts, topicCovers] = await Promise.all([
     getHome(),
     getDirections(),
     getPublications({ limit: 3 }),
     getContacts(),
-    getCatalog(),
     getTopicCovers(),
   ])
   return (
@@ -76,12 +76,7 @@ export default async function Home({ searchParams }: Props) {
         action={{ href: catalogHref(), label: 'Открыть каталог' }}
         desktopOnly
       >
-        <CatalogFilter
-          items={clientItems([...catalog.items, ...catalog.extras])}
-          facets={catalog.facets}
-          lines={catalog.lines}
-          initial={emptyFilter}
-        />
+        <HomeCatalog />
       </Section>
       <HomeNews slides={home.slides} news={news.docs} covers={topicCovers} />
       {home.process.length > 0 && (

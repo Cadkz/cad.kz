@@ -33,8 +33,13 @@ export function generateMetadata(): Metadata {
   }
 }
 
-// Один корпоративный шрифт Golos Text: на первом экране нужна кириллица.
-const criticalFonts = ['/fonts/golos-text-cyrillic-wght-normal.woff2']
+// Один корпоративный шрифт Golos Text. На первом экране нужна кириллица и латиница: в латинском
+// файле пробел, цифры и знаки препинания, без него не рисуется ни один абзац. Без предзагрузки браузер
+// узнаёт о нём только из стилей, и первый текст ждал лишний шаг (PageSpeed, 21.10.2026).
+const criticalFonts = [
+  '/fonts/golos-text-cyrillic-wght-normal.woff2',
+  '/fonts/golos-text-latin-wght-normal.woff2',
+]
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   for (const href of criticalFonts) {

@@ -24,7 +24,9 @@ export function ProductGallery({ pictures, title }: Props) {
           width={current.width}
           height={current.height}
           sizes="(min-width: 1200px) 784px, (min-width: 960px) 66vw, 100vw"
-          priority={active === 0}
+          // Первая картинка товара — главная на первом экране: сразу и раньше остальных.
+          loading={active === 0 ? 'eager' : 'lazy'}
+          fetchPriority={active === 0 ? 'high' : 'auto'}
           className={styles.image}
         />
       </div>
