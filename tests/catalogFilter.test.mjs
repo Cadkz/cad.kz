@@ -116,3 +116,41 @@ test('курсы видны только во вкладке «Услуги»', 
   assert.equal(results(list, update(emptyFilter, { group: 'service' })).total, 1)
   assert.equal(results(list, update(emptyFilter, { type: 'training' })).total, 0)
 })
+
+test('производители в фильтре: раздел, затем топы продаж по каталогу, остальные по алфавиту', () => {
+  const ranked = (id, vendor, rank, directions = ['structural']) => ({
+    ...item(id, 'software', directions, [], vendor, []),
+    rank,
+  })
+  // Список с сервера уже упорядочен по приоритету: топы продаж первыми.
+  const list = [
+    ranked(1, 'Autodesk', 109),
+    ranked(2, 'SCAD Soft', 106),
+    ranked(3, 'ЛИРА-FEM', 102),
+    ranked(4, 'Chaos Group', 3),
+    ranked(5, 'АРС-ПС', 1),
+    ranked(6, 'Base', 1),
+  ]
+  const all = facetOptions(list, facets, emptyFilter).vendors.map((o) => o.value)
+  assert.deepEqual(all, ['Autodesk', 'SCAD Soft', 'ЛИРА-FEM', 'АРС-ПС', 'Base', 'Chaos Group'])
+  const pinned = [
+    ...facets,
+    {
+      slug: 'structural',
+      title: 'Расчёт',
+      group: 'software',
+      isDirection: true,
+      pins: ['SCAD Soft', 'ЛИРА-FEM', 'Base'],
+    },
+  ]
+  const state = update(emptyFilter, { direction: 'structural' })
+  const inSection = facetOptions(list, pinned, state).vendors.map((o) => o.value)
+  assert.deepEqual(inSection, [
+    'SCAD Soft',
+    'ЛИРА-FEM',
+    'Base',
+    'Autodesk',
+    'АРС-ПС',
+    'Chaos Group',
+  ])
+})
