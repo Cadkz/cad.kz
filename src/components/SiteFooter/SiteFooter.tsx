@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { organizationLd, websiteLd } from '@/domain/structuredData.mjs'
 import { getContacts } from '@/lib/navigation'
-import { siteUrl } from '@/lib/seo'
+import { isProduction, siteUrl } from '@/lib/seo'
 import { footerColumns } from '@/lib/siteNav'
-import { ContactList } from '../ContactList/ContactList'
 import { Container } from '../Container/Container'
+import { FooterContacts } from '../FooterContacts/FooterContacts'
 import { JsonLd } from '../JsonLd/JsonLd'
 import { Logo } from '../Logo/Logo'
 import styles from './SiteFooter.module.css'
@@ -13,8 +13,9 @@ import styles from './SiteFooter.module.css'
 const LOGO = '/images/brand/cad-kz-logo.png'
 
 /**
- * Общий подвал сайта: на всех страницах одинаковый, многоколоночный. Белая карточка
- * с мягкой тенью на фоне страницы. Здесь же разметка компании и сайта для поисковиков —
+ * Общий подвал сайта: на всех страницах одинаковый. Белая карточка с мягкой тенью на фоне
+ * страницы: описание компании, «Покупателям», «Компания» и контакты (аудит 21.10.2026,
+ * пакет 3). На телефоне описание скрыто, ссылки в две колонки — подвал короче вдвое. Здесь же разметка компании и сайта для поисковиков —
  * из тех же контактов, что в подвале.
  */
 export async function SiteFooter() {
@@ -55,14 +56,14 @@ export async function SiteFooter() {
               )}
             </nav>
           ))}
-          <div className={styles.column}>
+          <div className={styles.contacts}>
             <p className={styles.title}>Контакты</p>
-            <ContactList contacts={contacts} />
+            <FooterContacts contacts={contacts} />
           </div>
         </div>
         <div className={styles.bottom}>
           <span>CAD.kz © {year}. Все права защищены.</span>
-          <span>Демонстрационная версия: заявки и оплата не подключены.</span>
+          {!isProduction() && <span>Тестовая версия сайта</span>}
         </div>
       </Container>
     </footer>

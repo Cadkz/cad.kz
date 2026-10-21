@@ -2,19 +2,25 @@
   padding: var(--section-gap) 0 var(--space-10);
 }
 
+/* телефон: логотип, ссылки в две колонки, контакты; описание компании скрыто */
 .card {
   display: grid;
   grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-  gap: var(--space-8) var(--grid-gap);
-  padding: var(--space-8) var(--space-6);
+  gap: var(--space-6) var(--grid-gap);
+  padding: var(--space-6);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: var(--shadow-float);
 }
 
-.card > * {
+.brand,
+.contacts {
   grid-column: span 12;
+}
+
+.column {
+  grid-column: span 6;
 }
 
 .brand {
@@ -24,27 +30,33 @@
 }
 
 .text {
+  display: none;
   max-width: var(--sidebar);
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
 }
 
-.column {
+.column,
+.contacts {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-3);
 }
 
 .title {
+  margin-bottom: var(--space-2);
   color: var(--color-navy);
   font-family: var(--font-heading);
   font-size: var(--text-body);
   font-weight: var(--weight-bold);
 }
 
+/* ссылка высотой с малую кнопку — удобно попасть пальцем */
 .link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height-sm);
   color: var(--color-text-muted);
   font-size: var(--text-sm);
 }
@@ -66,16 +78,24 @@
 
 @media (min-width: 640px) {
   .card {
+    gap: var(--space-8) var(--grid-gap);
     padding: var(--space-10);
   }
 
-  .card > * {
-    grid-column: span 6;
+  .text {
+    display: block;
+  }
+
+  .column,
+  .contacts {
+    grid-column: span 4;
   }
 }
 
 @media (min-width: 960px) {
-  .card > * {
+  .brand,
+  .column,
+  .contacts {
     grid-column: span 3;
   }
 }

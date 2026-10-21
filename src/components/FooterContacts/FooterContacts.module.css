@@ -1,0 +1,74 @@
+.contacts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+/* телефон: номера по два в строку — подвал короче; от 640 px столбиком */
+.numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-4);
+}
+
+/* строки контактов высотой с малую кнопку — удобно попасть пальцем */
+.phone,
+.mail {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-sm);
+  white-space: nowrap;
+}
+
+.phone {
+  color: var(--color-text);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+}
+
+.mail {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.phone:hover,
+.mail:hover {
+  color: var(--color-blue);
+}
+
+.place {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  border-radius: var(--radius-md);
+  background: var(--color-navy);
+  color: var(--color-text-inverse);
+  transition: background var(--duration-fast) var(--ease);
+}
+
+.icon:hover {
+  background: var(--color-blue);
+}
+
+@media (min-width: 640px) {
+  .numbers {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

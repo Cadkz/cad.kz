@@ -69,23 +69,28 @@ export const aboutColumns = [
   },
 ]
 
+/**
+ * Подвал: две колонки ссылок (аудит 21.10.2026, Г7, Т1). «Покупателям» — то, что ищут
+ * бухгалтерия и вернувшийся клиент; каталог — в шапке, в подвале его не повторяем.
+ */
 export const footerColumns = [
   {
-    title: 'О магазине',
+    title: 'Покупателям',
     links: [
-      { title: 'Новости', href: '/news' },
-      { title: 'Акции', href: '/news?kind=promotion' },
       { title: 'Как купить', href: '/about/howto' },
-      { title: 'О компании', href: '/about' },
-      { title: 'Контакты', href: '/contacts' },
+      { title: 'Продление лицензий', href: '/renew' },
+      { title: 'Доставка', href: '/about/delivery' },
+      { title: 'Гарантии', href: '/about/guaranty' },
+      { title: 'Реквизиты', href: '/about/requisites' },
     ],
   },
   {
-    title: 'Каталог',
+    title: 'Компания',
     links: [
-      { title: 'Программное обеспечение', href: catalogHref({ group: 'software' }) },
-      { title: 'Оборудование', href: catalogHref({ group: 'hardware' }) },
-      { title: 'Услуги и обучение', href: catalogHref({ group: 'service' }) },
+      { title: 'О компании', href: '/about' },
+      { title: 'Контакты', href: '/contacts' },
+      { title: 'Новости', href: '/news' },
+      { title: 'Акции', href: '/news?kind=promotion' },
     ],
   },
 ]

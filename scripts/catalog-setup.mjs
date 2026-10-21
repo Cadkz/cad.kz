@@ -8,6 +8,7 @@
 // дополнения к AutoCAD, Revit, Inventor (Требуется базовое ПО) и AutoCAD LT; политика
 // конфиденциальности со старого сайта; таблицы в описаниях товаров со старого сайта; страница «Внедрение BIM»; иллюстрации тем новостей; готовые виды
 // списков в админке; разделы по аудиту 21.10.2026 (SCAD Office в BIM, курсы SCAD; Revit из расчёта убран);
+// контакты и подвал по аудиту (основной номер, адрес офиса, описание компании);
 // отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
@@ -22,6 +23,7 @@ import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
+import { setupFooterAudit } from '../src/lib/footerSetup.ts'
 import { setupGeo5Catalog } from '../src/lib/geoSetup.ts'
 import {
   setupHomeHero,
@@ -183,6 +185,9 @@ try {
   const revitBack = await setupRevitBack(payload)
   if (!revitBack) console.log('Revit уже убран из «Расчёта конструкций».')
   else for (const line of revitBack) console.log(`Revit без расчёта — ${line}`)
+  const footer = await setupFooterAudit(payload)
+  if (!footer) console.log('Контакты и подвал по аудиту уже настроены.')
+  else for (const line of footer) console.log(`Подвал по аудиту — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)
