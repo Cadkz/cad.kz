@@ -84,7 +84,8 @@
   color: var(--color-sky);
 }
 
-/* Низ: надпись cad.kz слева (Кадди в правом углу её не закрывает), под ней или рядом — ©. */
+/* Низ: надпись cad.kz по центру, под ней © тоже по центру. На телефоне надпись во всю
+   ширину (Кадди там в шапке), шире — по центру сетки, Кадди в правом углу её не задевает. */
 .end {
   display: grid;
   grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
@@ -95,16 +96,18 @@
 }
 
 .word {
-  grid-column: span 8;
+  grid-column: 1 / -1;
 }
 
 .bottom {
   display: flex;
   flex-wrap: wrap;
-  grid-column: span 12;
+  grid-column: 1 / -1;
+  justify-content: center;
   gap: var(--space-1) var(--space-6);
   color: var(--color-text-on-dark);
   font-size: var(--text-xs);
+  text-align: center;
 }
 
 @media (min-width: 640px) {
@@ -130,20 +133,14 @@
     padding-top: var(--space-10);
   }
 
+  /* 8 колонок по центру: 3–10 */
   .word {
-    grid-column: span 6;
-  }
-
-  /* © рядом с надписью, по её нижнему краю */
-  .bottom {
-    flex-direction: column;
-    align-self: end;
-    grid-column: span 6;
+    grid-column: 3 / span 8;
   }
 }
 
 /* от 960 px: 3 + 3 + 2 + 4 — короткой «Компании» хватает двух колонок, контактам нужна
-   ширина, чтобы значки встали в одну строку; надпись — 5 колонок */
+   ширина, чтобы значки встали в одну строку */
 @media (min-width: 960px) {
   .brand,
   .column {
@@ -158,11 +155,8 @@
     grid-column: span 4;
   }
 
+  /* 6 колонок по центру: 4–9 */
   .word {
-    grid-column: span 5;
-  }
-
-  .bottom {
-    grid-column: span 7;
+    grid-column: 4 / span 6;
   }
 }
