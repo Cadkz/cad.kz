@@ -16,15 +16,29 @@ type Props = {
   flush?: boolean
   /** Блок первым на экране (главная с 16.10.2026) — картинка грузится сразу, для LCP. */
   priority?: boolean
+  /**
+   * Без своей тёмной карточки: блок стоит на тёмном фоне во всю ширину экрана (первый экран
+   * главной в пробном редизайне 21.10.2026 — фон и изолинии даёт ToneBand).
+   */
+  bare?: boolean
 }
 
 /** Тёмный блок «Внедрение BIM»: вводный текст, четыре этапа, кнопки и ключевые цифры. */
-export function BimBand({ bim, level = 2, more, flush = false, priority = false }: Props) {
+export function BimBand({
+  bim,
+  level = 2,
+  more,
+  flush = false,
+  priority = false,
+  bare = false,
+}: Props) {
   if (!bim.title) return null
   const Heading = level === 1 ? 'h1' : 'h2'
   return (
     <section
-      className={flush ? `${styles.section} ${styles.flush}` : styles.section}
+      className={[styles.section, flush ? styles.flush : '', bare ? styles.bare : '']
+        .filter(Boolean)
+        .join(' ')}
       aria-labelledby="bim-title"
     >
       <Container>

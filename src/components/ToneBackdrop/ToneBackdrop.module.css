@@ -1,0 +1,31 @@
+/* Подложка на весь экран за содержимым: высота «большого» экрана телефона, чтобы при
+   скрытии адресной строки снизу не мелькала полоса. */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100lvh;
+  z-index: var(--z-below);
+  pointer-events: none;
+  background-color: var(--tone-base);
+  transition: background-color var(--duration-tone) var(--ease);
+}
+
+.backdrop[data-active="mist"] {
+  background-color: var(--tone-mist);
+}
+
+.backdrop[data-active="lilac"] {
+  background-color: var(--tone-lilac);
+}
+
+.backdrop[data-active="sky"] {
+  background-color: var(--tone-sky);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop {
+    transition: none;
+  }
+}

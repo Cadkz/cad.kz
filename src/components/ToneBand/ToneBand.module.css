@@ -1,0 +1,52 @@
+/* Светлые блоки прозрачны: оттенок даёт общая подложка страницы (ToneBackdrop). */
+.band {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Тёмный блок: свой фон во всю ширину экрана. Края растворяются на двойной отступ секции,
+   и тёмное плавно перетекает в оттенок соседнего светлого блока. Текст в зоне растворения
+   не стоит: сверху и снизу добавлен такой же запас. */
+.night {
+  padding-top: var(--section-gap);
+  padding-bottom: calc(var(--section-gap) * 2);
+  color: var(--color-text-inverse);
+}
+
+.night::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background: var(--tone-night);
+  /* Плотность по S-кривой 0 → 15 → 50 → 85 → 100 %: без заметной ступеньки на краях. */
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, black 15%, transparent) calc(var(--section-gap) * 0.5),
+    color-mix(in srgb, black 50%, transparent) var(--section-gap),
+    color-mix(in srgb, black 85%, transparent) calc(var(--section-gap) * 1.5),
+    black calc(var(--section-gap) * 2),
+    black calc(100% - var(--section-gap) * 2),
+    color-mix(in srgb, black 85%, transparent) calc(100% - var(--section-gap) * 1.5),
+    color-mix(in srgb, black 50%, transparent) calc(100% - var(--section-gap)),
+    color-mix(in srgb, black 15%, transparent) calc(100% - var(--section-gap) * 0.5),
+    transparent
+  );
+}
+
+/* Первый на странице: сверху сразу тёмный, под шапкой без светлой полосы. */
+.first {
+  padding-top: 0;
+}
+
+.first::before {
+  mask-image: linear-gradient(
+    to bottom,
+    black calc(100% - var(--section-gap) * 2),
+    color-mix(in srgb, black 85%, transparent) calc(100% - var(--section-gap) * 1.5),
+    color-mix(in srgb, black 50%, transparent) calc(100% - var(--section-gap)),
+    color-mix(in srgb, black 15%, transparent) calc(100% - var(--section-gap) * 0.5),
+    transparent
+  );
+}

@@ -9,8 +9,11 @@ type Props = {
   sub?: string
   action?: { href: string; label: string }
   id?: string
-  /** tint — голубая подложка во всю ширину экрана с фирменным узором. */
-  tone?: 'plain' | 'tint'
+  /**
+   * tint — голубая подложка во всю ширину экрана с фирменным узором.
+   * night — заголовок для тёмного фона (секция внутри тёмного ToneBand).
+   */
+  tone?: 'plain' | 'tint' | 'night'
   children: ReactNode
 }
 

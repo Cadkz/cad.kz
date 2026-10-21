@@ -189,3 +189,42 @@
     max-width: min(var(--measure), calc(100% * 7 / 12));
   }
 }
+
+/* Без карточки (первый экран главной, пробный редизайн 21.10.2026): тёмный фон и изолинии
+   во всю ширину экрана даёт ToneBand, текст стоит на общем левом крае с логотипом. */
+.bare {
+  padding-top: 0;
+}
+
+.bare .band {
+  padding-right: 0;
+  padding-bottom: 0;
+  padding-left: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.bare .band::before,
+.bare .band::after {
+  display: none;
+}
+
+/* Без карточки края картинки ничто не обрезает — растворяем её со всех сторон. */
+.bare .image {
+  width: 100%;
+  margin-right: 0;
+  margin-left: 0;
+  mask-image:
+    linear-gradient(to bottom, transparent, black 15%, black 55%, transparent),
+    linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  mask-composite: intersect;
+}
+
+@media (min-width: 960px) {
+  .bare .image {
+    width: 60%;
+    mask-image:
+      linear-gradient(to right, transparent, black 35%, black 85%, transparent),
+      linear-gradient(to bottom, transparent, black 15%, black 35%, transparent 85%);
+  }
+}

@@ -1,0 +1,29 @@
+/* Холст на весь тёмный блок, под содержимым. Под текстом слева линии приглушены,
+   книзу растворяются вместе с краем блока. Появляется мягко, когда нарисован первый кадр. */
+.canvas {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-reveal) var(--ease);
+  mask-image:
+    linear-gradient(to bottom, black 55%, transparent 90%),
+    linear-gradient(to right, color-mix(in srgb, black 40%, transparent), black 60%);
+  mask-composite: intersect;
+}
+
+.canvas[data-ready] {
+  opacity: 1;
+}
+
+@media (min-width: 960px) {
+  .canvas {
+    mask-image:
+      linear-gradient(to bottom, black 55%, transparent 90%),
+      linear-gradient(to right, color-mix(in srgb, black 25%, transparent) 20%, black 65%);
+  }
+}

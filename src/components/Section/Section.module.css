@@ -55,3 +55,20 @@
 .action:hover {
   color: var(--color-navy);
 }
+
+/* На тёмном фоне (ToneBand night): светлый заголовок, ссылка «Все …» — голубая. */
+.night h2 {
+  color: var(--color-text-inverse);
+}
+
+.night .sub {
+  color: var(--color-text-on-dark);
+}
+
+.night .action {
+  color: var(--color-sky);
+}
+
+.night .action:hover {
+  color: var(--color-text-inverse);
+}
