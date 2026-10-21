@@ -247,7 +247,6 @@ async function loadCatalog(): Promise<{
     const cartId = cartOffer(product, productOffers, context)
     const action = cardAction({
       scenario,
-      kind: product.kind,
       demo: Boolean(mainSection?.demoButton ?? topMain?.demoButton),
       cart: cartId != null,
     })
@@ -269,7 +268,6 @@ async function loadCatalog(): Promise<{
       offersCount,
       // Корзина из карточки — только где сценарий её предлагает (src/domain/buyScenario.mjs).
       cartOfferId: action.cart ? cartId : null,
-      actionLabel: action.label,
       badge: requires.length ? `Плагин для ${requires.join(' / ')}` : null,
       group,
       scenario,
@@ -336,4 +334,26 @@ async function loadCatalog(): Promise<{
       : []
   })
   return { items: listed, extras, variants, facets, lines }
+}
+
+/** Длина описания в карточке: на компьютере видно три строки, этого хватает с запасом. */
+const SUMMARY_LIMIT = 160
+
+function shortText(text: string | null) {
+  if (!text || text.length <= SUMMARY_LIMIT) return text
+  const cut = text.slice(0, SUMMARY_LIMIT)
+  return `${cut.slice(0, cut.lastIndexOf(' ') > 0 ? cut.lastIndexOf(' ') : SUMMARY_LIMIT).trimEnd()}…`
+}
+
+/**
+ * Лёгкий список для фильтра каталога в браузере (аудит 21.10.2026, С1): только то, что нужно
+ * карточке и фильтру. Без других названий для поиска и подписи картинки, описание — коротким.
+ */
+export function clientItems(items: CatalogItem[]): CatalogItem[] {
+  return items.map((item) => ({
+    ...item,
+    aliases: null,
+    summary: shortText(item.summary),
+    picture: item.picture && { ...item.picture, alt: '' },
+  }))
 }

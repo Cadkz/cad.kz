@@ -88,7 +88,12 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
   const groupCounts = countBy(items, (item) => [item.group])
   const directionCounts = countBy(scope('direction'), (item) => item.directions)
   const typeCounts = countBy(scope('type'), (item) => item.types)
-  const vendorCounts = countBy(scope('vendors'), (item) => [item.vendor])
+  // «Производитель» — только у программ и оборудования: CAD.kz с курсами и услугами в одном
+  // списке с Autodesk и Canon выглядит как производитель программ (аудит 21.10.2026, К5).
+  const vendorCounts = countBy(
+    scope('vendors').filter((item) => item.group !== 'service'),
+    (item) => [item.vendor],
+  )
   const taskCounts = countBy(scope('tasks'), (item) => item.tasks)
 
   const fromFacets = (list: Facet[], counts: Map<string, number>, selected: string | null) =>
@@ -129,7 +134,7 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
             typeCounts,
             state.type,
           ),
-    vendors: fromCounts(vendorCounts, state.vendors),
+    vendors: state.group === 'service' ? [] : fromCounts(vendorCounts, state.vendors),
     // Задачи раскрываются после выбора направления или типа: так фильтр остаётся коротким.
     tasks: (state.direction || state.type) && narrows ? taskList : [],
   }
@@ -148,6 +153,22 @@ export function update(state: FilterState, change: Partial<FilterState>): Filter
   // Линейка принадлежит одному производителю: другой выбор производителя её сбрасывает.
   if (('group' in change || 'vendors' in change) && !('line' in change)) next.line = null
   return next
+}
+
+/**
+ * Убирает выбранных производителей, которых нет при новых условиях: был SCAD Soft, нажали
+ * «Архитектура и BIM» без SCAD — производитель снимается, а не получается пустой экран
+ * (аудит 21.10.2026, К3). Линейка снимается вместе со своим производителем.
+ */
+export function pruneVendors(items: CatalogItem[], state: FilterState): FilterState {
+  if (!state.vendors.length) return state
+  const open = { ...state, line: null }
+  const present = new Set(
+    items.filter((item) => matches(item, open, 'vendors')).map((item) => item.vendor ?? ''),
+  )
+  const vendors = state.vendors.filter((vendor) => present.has(vendor))
+  if (vendors.length === state.vendors.length) return state
+  return { ...state, vendors, line: null }
 }
 
 /**

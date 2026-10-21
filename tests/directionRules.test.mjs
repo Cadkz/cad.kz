@@ -14,6 +14,11 @@ test('исключение внутри группы важнее раздело
   assert.deepEqual(sw('Artec 3D', 'Artec Studio 19'), ['scanners', 'machine'])
   assert.deepEqual(sw('SCAD Soft', 'ОТКОС'), ['geotech', 'structural'])
   assert.deepEqual(sw('SCAD Soft', 'ЗАПРОС'), ['geotech', 'structural'])
+  // Аудит 21.10.2026: основной SCAD Office и в BIM, сателлиты — только расчёт.
+  assert.deepEqual(sw('SCAD Soft', 'SCAD Office 25.1 комплект SS'), ['structural', 'arch'])
+  assert.deepEqual(sw('SCAD Soft', 'КРИСТАЛЛ'), ['structural'])
+  assert.deepEqual(sw('Autodesk', 'Revit'), ['arch', 'mep', 'structural'])
+  assert.deepEqual(sw('Autodesk', 'Revit LT'), ['arch', 'mep'])
   assert.deepEqual(sw('НТП Трубопровод', 'ПАССАТ Колонны'), ['pipes', 'machine'])
   assert.deepEqual(sw('НТП Трубопровод', 'СТАРТ-Проф'), ['pipes', 'mep'])
   assert.deepEqual(sw('Autodesk', 'Autodesk Docs'), ['estimate'])

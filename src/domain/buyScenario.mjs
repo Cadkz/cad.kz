@@ -148,18 +148,16 @@ export function scenarioActions(input) {
 }
 
 /**
- * Кнопка карточки в каталоге: корзина — только у стандартной лицензии и оборудования без
- * демонстрации с одной комплектацией; у остальных сценариев своя подпись, ссылка ведёт на страницу
- * товара. label null — подпись по комплектациям («Выбрать комплект» или «Подробнее»).
- * @param {{ scenario: Scenario, kind?: string | null, demo?: boolean, cart: boolean }} input
- * @returns {{ cart: boolean, label: string | null }}
+ * Кнопка карточки в каталоге — одна на карточку (аудит 21.10.2026, Г4): «В корзину» только у
+ * стандартной лицензии и оборудования без демонстрации с одной комплектацией с ценой, у всех
+ * остальных — «Подробнее» со ссылкой на страницу товара. Подписи по сценарию («Подобрать
+ * решение», «Записаться на демо», «Продлить») остаются на странице товара (scenarioActions).
+ * @param {{ scenario: Scenario, demo?: boolean, cart: boolean }} input
+ * @returns {{ cart: boolean }}
  */
-export function cardAction({ scenario, kind, demo, cart }) {
-  if (scenario === 'corporate') return { cart: false, label: 'Подобрать решение' }
-  if (scenario === 'equipment' && demo) return { cart: false, label: 'Записаться на демо' }
-  if (scenario === 'renewal') return { cart: false, label: 'Продлить' }
-  if (scenario === 'service')
-    return { cart: false, label: kind === 'course' ? 'Записаться' : 'Подробнее' }
-  if (cart) return { cart: true, label: null }
-  return { cart: false, label: null }
+export function cardAction({ scenario, demo, cart }) {
+  if (!cart) return { cart: false }
+  if (scenario === 'standard') return { cart: true }
+  if (scenario === 'equipment') return { cart: !demo }
+  return { cart: false }
 }

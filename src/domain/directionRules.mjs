@@ -110,9 +110,10 @@ export const DIRECTION_RULES = [
   },
   {
     key: 'course-structural',
-    label: 'Курсы по расчёту (ЛИРА, Robot, еврокоды, Advance Steel)',
+    // 21.10.2026, аудит К4: курсы SCAD тоже в «Расчёт конструкций».
+    label: 'Курсы по расчёту (ЛИРА, SCAD, Robot, еврокоды, Advance Steel)',
     kind: 'course',
-    title: /lira|лира|robot|еврокод|advance steel/i,
+    title: /lira|лира|scad|скад|robot|еврокод|advance steel/i,
     sections: ['training', 'structural'],
   },
   {
@@ -183,6 +184,8 @@ export const DIRECTION_RULES = [
     label: 'SCAD Office и программы-сателлиты',
     vendor: 'SCAD Soft',
     sections: ['structural'],
+    // 21.10.2026, аудит К1: основной комплекс считает модели из Revit — вторым разделом BIM.
+    exceptions: [{ label: 'SCAD Office', title: /scad office/i, sections: ['structural', 'arch'] }],
   },
   {
     key: 'lira-soil',
@@ -467,7 +470,10 @@ export const DIRECTION_RULES = [
         sections: ['arch', 'estimate'],
       },
       { label: 'ReCap Pro', title: /recap/i, sections: ['arch', 'scanners'] },
-      { label: 'Revit', title: /revit/i, sections: ['arch', 'mep'] },
+      // 21.10.2026, аудит К2: КЖ и КМ моделируют в Revit — он и в «Расчёте конструкций»;
+      // у Revit LT нет инструментов конструкций, он остаётся как был.
+      { label: 'Revit LT', title: /revit lt/i, sections: ['arch', 'mep'] },
+      { label: 'Revit', title: /revit/i, sections: ['arch', 'mep', 'structural'] },
       {
         label: 'AEC Collection',
         title: /architecture engineering|aec/i,

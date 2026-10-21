@@ -12,7 +12,7 @@ import { HomeNews } from '@/components/HomeNews/HomeNews'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { Section } from '@/components/Section/Section'
-import { getCatalog, getDirections } from '@/lib/catalog'
+import { clientItems, getCatalog, getDirections } from '@/lib/catalog'
 import { emptyFilter, fromParams, toQuery } from '@/lib/catalogFilter'
 import { getHome } from '@/lib/home'
 import { getContacts } from '@/lib/navigation'
@@ -77,7 +77,7 @@ export default async function Home({ searchParams }: Props) {
         desktopOnly
       >
         <CatalogFilter
-          items={[...catalog.items, ...catalog.extras]}
+          items={clientItems([...catalog.items, ...catalog.extras])}
           facets={catalog.facets}
           lines={catalog.lines}
           initial={emptyFilter}

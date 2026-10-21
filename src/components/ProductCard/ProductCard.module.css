@@ -1,8 +1,12 @@
+/* Телефон: картинка слева квадратом, справа название, производитель, цена, кнопка (аудит М3).
+   От 640 px — вертикальная карточка с картинкой сверху. */
 .card {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: var(--card-thumb) minmax(0, 1fr);
+  column-gap: var(--space-4);
+  align-content: start;
   height: 100%;
-  padding: var(--space-5);
+  padding: var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg);
@@ -23,13 +27,19 @@
   transform: none;
 }
 
+.card > * {
+  grid-column: 2;
+}
+
 .media {
   display: flex;
+  grid-row: 1 / span 6;
+  grid-column: 1;
+  align-self: start;
   align-items: center;
   justify-content: center;
-  aspect-ratio: var(--ratio-card);
-  margin-bottom: var(--space-4);
-  padding: var(--space-3);
+  aspect-ratio: 1;
+  padding: var(--space-2);
   overflow: hidden;
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -79,7 +89,7 @@
 }
 
 .summary {
-  display: -webkit-box;
+  display: none;
   margin-top: var(--space-2);
   overflow: hidden;
   color: var(--color-gray-700);
@@ -91,7 +101,29 @@
 
 .foot {
   margin-top: auto;
-  padding-top: var(--space-4);
+  padding-top: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .card {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-5);
+  }
+
+  .media {
+    aspect-ratio: var(--ratio-card);
+    margin-bottom: var(--space-4);
+    padding: var(--space-3);
+  }
+
+  .summary {
+    display: -webkit-box;
+  }
+
+  .foot {
+    padding-top: var(--space-4);
+  }
 }
 
 .more {

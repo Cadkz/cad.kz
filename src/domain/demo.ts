@@ -216,7 +216,7 @@ export const demoProducts: DemoProduct[] = [
     title: 'Revit',
     kind: 'software',
     manufacturer: 'Autodesk',
-    sections: ['arch'],
+    sections: ['arch', 'structural'],
     tasks: ['Архитектура и генплан', 'BIM-координация'],
     summary: 'BIM-платформа для проектирования архитектуры и конструкций.',
     description:
@@ -232,7 +232,7 @@ export const demoProducts: DemoProduct[] = [
     title: 'SCAD Office',
     kind: 'software',
     manufacturer: 'SCAD Soft',
-    sections: ['structural'],
+    sections: ['structural', 'arch'],
     tasks: ['Расчёт зданий и сооружений', 'КЖ — железобетон', 'КМ — металлоконструкции'],
     summary: 'Расчёт и конструирование строительных конструкций методом конечных элементов.',
     description:

@@ -9,6 +9,7 @@ import {
   type FilterState,
   facetOptions,
   groupedResults,
+  pruneVendors,
   results,
   toQuery,
   update,
@@ -33,7 +34,8 @@ type Props = { items: CatalogItem[]; facets: Facet[]; lines: CatalogLine[]; init
  * От 960 px фильтр слева, на телефоне — в выдвижной панели.
  */
 export function CatalogFilter({ items, facets, lines, initial }: Props) {
-  const [state, setState] = useState(initial)
+  // Ссылка с производителем, которого нет в направлении, тоже не даёт пустой экран.
+  const [state, setState] = useState(() => pruneVendors(items, initial))
   const [panelOpen, setPanelOpen] = useState(false)
   const top = useRef<HTMLDivElement>(null)
 
@@ -49,7 +51,7 @@ export function CatalogFilter({ items, facets, lines, initial }: Props) {
   const options = useMemo(() => facetOptions(items, facets, view), [items, facets, view])
   const found = useMemo(() => results(items, view, facets), [items, view, facets])
   const groups = useMemo(() => groupedResults(items, view, lines), [items, view, lines])
-  const change = (patch: Partial<FilterState>) => commit(update(state, patch))
+  const change = (patch: Partial<FilterState>) => commit(pruneVendors(items, update(state, patch)))
   const reset = () => commit(emptyFilter)
   const closePanel = useCallback(() => setPanelOpen(false), [])
 

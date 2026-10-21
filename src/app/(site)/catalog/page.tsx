@@ -2,7 +2,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { CatalogFilter } from '@/components/CatalogFilter/CatalogFilter'
 import { Container } from '@/components/Container/Container'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
-import { getCatalog } from '@/lib/catalog'
+import { clientItems, getCatalog } from '@/lib/catalog'
 import { fromParams } from '@/lib/catalogFilter'
 import { CATALOG_PATH } from '@/lib/navigationHrefs'
 import { pageMetadata } from '@/lib/seo'
@@ -31,7 +31,7 @@ export default async function CatalogPage({ searchParams }: Props) {
         />
         <CatalogFilter
           key={JSON.stringify(initial)}
-          items={[...catalog.items, ...catalog.extras]}
+          items={clientItems([...catalog.items, ...catalog.extras])}
           facets={catalog.facets}
           lines={catalog.lines}
           initial={initial}

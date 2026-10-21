@@ -22,16 +22,13 @@ export type ProductCardData = {
   /** Единственная комплектация с ценой — её можно положить в корзину прямо из карточки. */
   cartOfferId: string | null
   badge: string | null
-  /** Подпись кнопки по сценарию покупки («Подобрать решение», «Записаться на демо»); пусто — по комплектациям. */
-  actionLabel?: string | null
 }
 
 /**
- * Карточка товара в каталоге. Одна кнопка внизу по сценарию покупки (src/domain/buyScenario.mjs):
- * «В корзину», если у стандартной лицензии одна комплектация с ценой; «Выбрать комплект», если
- * комплектаций несколько; у корпоративного ПО — «Подобрать решение», у сканеров — «Записаться
- * на демо»; иначе «Подробнее». Название и картинка всегда ведут на страницу товара.
- * Цена — только серверная, из CMS-предложений.
+ * Карточка товара в каталоге. Одна кнопка (аудит 21.10.2026, Г4; правило — cardAction в
+ * src/domain/buyScenario.mjs): «В корзину», если у стандартной лицензии одна комплектация с ценой,
+ * у остальных — «Подробнее». Название и картинка всегда ведут на страницу товара.
+ * На телефоне карточка горизонтальная: картинка слева, без описания (М3). Цена — только серверная.
  */
 export function ProductCard({ product }: { product: ProductCardData }) {
   return (
@@ -48,7 +45,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             alt=""
             width={product.picture.width}
             height={product.picture.height}
-            sizes="(min-width: 1200px) 300px, (min-width: 960px) 25vw, (min-width: 640px) 50vw, 100vw"
+            sizes="(min-width: 1200px) 300px, (min-width: 960px) 25vw, (min-width: 640px) 50vw, 80px"
             className={styles.image}
           />
         ) : (
@@ -77,18 +74,8 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           <AddToCartButton offerId={product.cartOfferId} title={product.title} />
         ) : (
           // Та же ссылка, что у названия: для клавиатуры и экранного диктора достаточно одной.
-          <Link
-            href={
-              product.offersCount > 1 && !product.href.includes('#')
-                ? `${product.href}#config`
-                : product.href
-            }
-            className={styles.more}
-            tabIndex={-1}
-            aria-hidden="true"
-          >
-            {product.actionLabel ??
-              (product.offersCount > 1 && product.priceFrom ? 'Выбрать комплект' : 'Подробнее')}
+          <Link href={product.href} className={styles.more} tabIndex={-1} aria-hidden="true">
+            Подробнее
             <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
           </Link>
         )}

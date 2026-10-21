@@ -4,6 +4,7 @@ import {
   emptyFilter,
   facetOptions,
   fromParams,
+  pruneVendors,
   results,
   toQuery,
   update,
@@ -90,4 +91,21 @@ test('article body markup: headings with anchors, lists, notes', async () => {
   )
   assert.equal(blocks[1].id, 'chto-novogo')
   assert.equal(blocks[4].id, 'chto-novogo-2')
+})
+
+test('смена направления снимает производителя, которого там нет (аудит К3)', () => {
+  const fine = update(emptyFilter, { vendors: ['Fine'] })
+  const next = pruneVendors(items, update(fine, { direction: 'arch' }))
+  assert.deepEqual(next.vendors, [])
+  assert.equal(results(items, next).total, 2)
+  const kept = pruneVendors(items, update(fine, { direction: 'geotech' }))
+  assert.deepEqual(kept.vendors, ['Fine'])
+})
+
+test('CAD.kz с курсами не попадает в список производителей (аудит К5)', () => {
+  const list = [...items, item(6, 'service', [], ['training'], 'CAD.kz', [])]
+  const all = facetOptions(list, facets, emptyFilter).vendors.map((v) => v.value)
+  assert.equal(all.includes('CAD.kz'), false)
+  const service = facetOptions(list, facets, update(emptyFilter, { group: 'service' }))
+  assert.deepEqual(service.vendors, [])
 })

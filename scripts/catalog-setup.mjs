@@ -7,13 +7,15 @@
 // каталог по CRM (САПР и черчение, широкоформат, сценарии покупки, популярные решения);
 // дополнения к AutoCAD, Revit, Inventor (Требуется базовое ПО) и AutoCAD LT; политика
 // конфиденциальности со старого сайта; таблицы в описаниях товаров со старого сайта; страница «Внедрение BIM»; иллюстрации тем новостей; готовые виды
-// списков в админке; отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
+// списков в админке; разделы по аудиту 21.10.2026 (SCAD Office в BIM, Revit в расчёте, курсы SCAD);
+// отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { setupAddons } from '../src/lib/addonsSetup.ts'
+import { setupAuditCatalog } from '../src/lib/auditCatalogSetup.ts'
 import { setupBimPage } from '../src/lib/bimSetup.ts'
 import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
@@ -175,6 +177,9 @@ try {
   const covers = await setupNewsCovers(payload)
   if (!covers) console.log('Иллюстрации тем новостей уже загружены.')
   else for (const line of covers) console.log(`Иллюстрации тем — ${line}`)
+  const audit = await setupAuditCatalog(payload)
+  if (!audit) console.log('Разделы по аудиту 21.10.2026 уже настроены.')
+  else for (const line of audit) console.log(`Разделы по аудиту — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

@@ -85,18 +85,14 @@ test('кнопки: продление, курс, услуга, семейств
   assert.equal(family.second, null)
 })
 
-test('карточка каталога: корзина только у стандартной лицензии', () => {
-  assert.deepEqual(cardAction({ scenario: 'standard', cart: true }), { cart: true, label: null })
-  assert.deepEqual(cardAction({ scenario: 'corporate', cart: true }), {
-    cart: false,
-    label: 'Подобрать решение',
-  })
-  assert.equal(
-    cardAction({ scenario: 'equipment', demo: true, cart: true }).label,
-    'Записаться на демо',
-  )
+test('карточка каталога: одна кнопка, корзина только у стандартной лицензии', () => {
+  assert.deepEqual(cardAction({ scenario: 'standard', cart: true }), { cart: true })
+  assert.deepEqual(cardAction({ scenario: 'standard', cart: false }), { cart: false })
+  assert.deepEqual(cardAction({ scenario: 'corporate', cart: true }), { cart: false })
+  assert.deepEqual(cardAction({ scenario: 'equipment', demo: true, cart: true }), { cart: false })
   assert.equal(cardAction({ scenario: 'equipment', cart: true }).cart, true)
   assert.equal(cardAction({ scenario: 'renewal', cart: true }).cart, false)
+  assert.equal(cardAction({ scenario: 'service', cart: true }).cart, false)
 })
 
 test('подразделы: товары видны в верхнем разделе, старый подраздел в списке остаётся', () => {
