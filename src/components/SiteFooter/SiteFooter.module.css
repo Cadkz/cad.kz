@@ -6,7 +6,10 @@
   isolation: isolate;
   overflow: clip;
   margin-top: var(--section-gap);
-  padding: var(--space-10) 0 var(--space-6);
+  /* Телефон: содержимое на --space-3 глубже рамки (решение владельца 21.10.2026). Тёмный лист
+     во всю ширину экрана, и текст у самого края рамки казался сдвинутым влево — значки шапки
+     видны с 30 px, текст подвала теперь с 32 px. От 640 px — по рамке, как вся страница. */
+  padding: var(--space-10) var(--space-3) var(--space-6);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   background: var(--gradient-deep);
   color: var(--color-text-on-dark);
@@ -113,6 +116,7 @@
 @media (min-width: 640px) {
   .footer {
     padding-top: var(--space-16);
+    padding-inline: 0;
   }
 
   .grid {
