@@ -5,12 +5,16 @@ import { catalogHref } from '@/lib/navigationHrefs'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './DirectionCard.module.css'
 
-/** Карточка направления: открывает каталог, отфильтрованный по этому направлению. */
+/**
+ * Карточка направления: открывает каталог, отфильтрованный по этому направлению. Все карточки
+ * одного тёмно-синего вида (аудит 21.10.2026): цвет из админки («Тёмно-синий / Синий / Графит»)
+ * был только для разнообразия и выглядел случайным.
+ */
 export function DirectionCard({ direction }: { direction: Direction }) {
   return (
     <Link
       href={direction.href ?? catalogHref({ direction: direction.slug })}
-      className={`${styles.card} ${styles[direction.tone]}`}
+      className={styles.card}
     >
       <span className={styles.big} aria-hidden="true">
         <SectionIcon name={direction.icon} size={24} />

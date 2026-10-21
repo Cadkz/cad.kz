@@ -62,6 +62,11 @@
   font-weight: var(--weight-semibold);
 }
 
+/* Тема всегда справа — и когда у новости нет даты (у части перенесённых со старого сайта). */
+.meta > :not(time) {
+  margin-left: auto;
+}
+
 .title {
   font-size: var(--text-h4);
   font-weight: var(--weight-bold);
