@@ -1,5 +1,12 @@
 import type { Payload } from 'payload'
-import { SECTION_PINS, seedLevel, VENDOR_LEVELS } from '../domain/prioritySeed.mjs'
+import {
+  SECTION_PINS,
+  scadBeforeLira,
+  seedLevel,
+  seedTopPlace,
+  TOP_SALES,
+  VENDOR_LEVELS,
+} from '../domain/prioritySeed.mjs'
 import { relId } from './rel'
 
 /** Ключ записи в журнале «Запуски импорта»: настройка выполняется один раз. */
@@ -84,6 +91,85 @@ export async function setupPriorities(payload: Payload): Promise<PriorityReport 
   await payload.create({
     collection: 'import-runs',
     data: { idempotencyKey: PRIORITY_SETUP_KEY, state: 'done', snapshot: report },
+    ...opts,
+  })
+  return report
+}
+
+/** Вторая настройка: топы продаж по местам и SCAD перед ЛИРОЙ в разделах (21.10.2026). */
+export const PRIORITY_V2_KEY = 'catalog-setup:priority-v2'
+
+/**
+ * Решение владельца 21.10.2026: во всём каталоге первыми AutoCAD, АВС, Revit, SCAD Office, GEO5,
+ * Artec, CSoft и только потом ЛИРА. Ставит «Место в топе продаж» товарам, у которых оно пустое
+ * (src/domain/prioritySeed.mjs, TOP_SALES), и в порядке производителей разделов ставит SCAD Soft
+ * перед ЛИРА-FEM. Один раз; дальше всё правится в админке. null — уже сделано.
+ */
+export async function setupPrioritiesV2(payload: Payload): Promise<string[] | null> {
+  const done = await payload.find({
+    collection: 'import-runs',
+    where: { idempotencyKey: { equals: PRIORITY_V2_KEY } },
+    limit: 1,
+    ...opts,
+  })
+  if (done.docs.length) return null
+  const report: string[] = []
+
+  const vendors = await payload.find({ collection: 'manufacturers', pagination: false, ...opts })
+  const titleById = new Map(vendors.docs.map((m) => [m.id, m.title]))
+  const vendorId = (title: string) => vendors.docs.find((m) => m.title === title)?.id
+
+  const products = await payload.find({
+    collection: 'products',
+    pagination: false,
+    ...opts,
+    select: { title: true, manufacturer: true, topOrder: true },
+  })
+  const placed: string[] = []
+  for (const product of products.docs) {
+    if (product.topOrder != null) continue
+    const place = seedTopPlace({
+      title: product.title,
+      vendor: titleById.get(relId(product.manufacturer) ?? -1) ?? null,
+    })
+    if (place == null) continue
+    await payload.update({
+      collection: 'products',
+      id: product.id,
+      data: { topOrder: place },
+      ...opts,
+    })
+    placed.push(`${place}. ${product.title}`)
+  }
+  placed.sort((a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10))
+  report.push(`Топы продаж: ${placed.join('; ') || '—'}`)
+  const missing = TOP_SALES.filter(
+    (rule) => !placed.some((line) => line.startsWith(`${rule.place}.`)),
+  )
+  for (const rule of missing) report.push(`  не найдено место ${rule.place} — ${rule.title.source}`)
+
+  const scad = vendorId('SCAD Soft')
+  const lira = vendorId('ЛИРА-FEM')
+  const sections = await payload.find({ collection: 'sections', pagination: false, ...opts })
+  const moved: string[] = []
+  for (const section of sections.docs) {
+    if (scad == null || lira == null) break
+    const pins = (section.pinnedManufacturers ?? []).map((m) => relId(m) ?? 0).filter(Boolean)
+    const next = scadBeforeLira(pins, scad, lira)
+    if (next.join() === pins.join()) continue
+    await payload.update({
+      collection: 'sections',
+      id: section.id,
+      data: { pinnedManufacturers: next },
+      ...opts,
+    })
+    moved.push(section.title)
+  }
+  report.push(`SCAD перед ЛИРОЙ в разделах: ${moved.join(', ') || '—'}`)
+
+  await payload.create({
+    collection: 'import-runs',
+    data: { idempotencyKey: PRIORITY_V2_KEY, state: 'done', snapshot: { report } },
     ...opts,
   })
   return report

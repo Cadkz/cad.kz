@@ -9,6 +9,7 @@
 // конфиденциальности со старого сайта; таблицы в описаниях товаров со старого сайта; страница «Внедрение BIM»; иллюстрации тем новостей; готовые виды
 // списков в админке; разделы по аудиту 21.10.2026 (SCAD Office в BIM, курсы SCAD; Revit из расчёта убран);
 // контакты и подвал по аудиту (основной номер, адрес офиса, описание компании);
+// топы продаж по местам и SCAD перед ЛИРОЙ, логотипы производителей для карточек (21.10.2026);
 // отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
@@ -18,6 +19,7 @@ import { getPayload } from 'payload'
 import { setupAddons } from '../src/lib/addonsSetup.ts'
 import { setupAuditCatalog, setupRevitBack } from '../src/lib/auditCatalogSetup.ts'
 import { setupBimPage } from '../src/lib/bimSetup.ts'
+import { setupCardLogos } from '../src/lib/cardLogosSetup.ts'
 import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
@@ -36,7 +38,7 @@ import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
 import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
 import { setupPresets, setupQuality } from '../src/lib/presetsSetup.ts'
-import { setupPriorities } from '../src/lib/prioritySetup.ts'
+import { setupPriorities, setupPrioritiesV2 } from '../src/lib/prioritySetup.ts'
 import { setupPrivacyPage } from '../src/lib/privacySetup.ts'
 import { setupProductTables } from '../src/lib/productTablesSetup.ts'
 import { setupFamilyRenew } from '../src/lib/renewSetup.ts'
@@ -188,6 +190,12 @@ try {
   const footer = await setupFooterAudit(payload)
   if (!footer) console.log('Контакты и подвал по аудиту уже настроены.')
   else for (const line of footer) console.log(`Подвал по аудиту — ${line}`)
+  const priorityV2 = await setupPrioritiesV2(payload)
+  if (!priorityV2) console.log('Топы продаж по местам уже расставлены.')
+  else for (const line of priorityV2) console.log(line)
+  const cardLogos = await setupCardLogos(payload)
+  if (!cardLogos) console.log('Логотипы производителей для карточек уже поставлены.')
+  else for (const line of cardLogos) console.log(line)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

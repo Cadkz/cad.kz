@@ -61,6 +61,7 @@ async function buildIndex(): Promise<SuggestIndex> {
         tasks: true,
         manufacturer: true,
         priority: true,
+        topOrder: true,
         pageView: true,
         line: true,
         picker: true,
@@ -121,7 +122,11 @@ async function buildIndex(): Promise<SuggestIndex> {
       tasks: (product.tasks ?? []).map((task) => task.title),
       ...extras.products.get(product.id),
     }
-    const rank = priorityRank(product.priority, vendorId == null ? null : vendorLevel.get(vendorId))
+    const rank = priorityRank(
+      product.priority,
+      vendorId == null ? null : vendorLevel.get(vendorId),
+      product.topOrder,
+    )
     const hidden = product.pageView === 'none'
     return [{ entry, rank, vendor, main: null, title: product.title, hidden }]
   })

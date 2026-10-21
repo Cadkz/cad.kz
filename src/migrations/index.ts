@@ -26,6 +26,7 @@ import * as migration_20261015_110918_quality_presets from './20261015_110918_qu
 import * as migration_20261016_063853_hero_tasks from './20261016_063853_hero_tasks'
 import * as migration_20261016_070220_hero_v2 from './20261016_070220_hero_v2'
 import * as migration_20261020_120747_open_line from './20261020_120747_open_line'
+import * as migration_20261021_131142_catalog_top_logos from './20261021_131142_catalog_top_logos'
 
 export const migrations = [
   {
@@ -167,5 +168,10 @@ export const migrations = [
     up: migration_20261020_120747_open_line.up,
     down: migration_20261020_120747_open_line.down,
     name: '20261020_120747_open_line',
+  },
+  {
+    up: migration_20261021_131142_catalog_top_logos.up,
+    down: migration_20261021_131142_catalog_top_logos.down,
+    name: '20261021_131142_catalog_top_logos',
   },
 ]

@@ -35,9 +35,59 @@ export const PRODUCT_LEVELS = [
   { vendor: 'Artec 3D', title: /^Artec (Leo|Eva)$/i, level: 'flagship' },
 ]
 
+/**
+ * Топы продаж по местам (решение владельца 21.10.2026): AutoCAD, АВС, Revit, SCAD Office, GEO5,
+ * Artec, CSoft и только потом ЛИРА — упор на SCAD (прямая партнёрка, маржа выше). Остальное
+ * (Inventor, Navisworks, коллекции…) — после топов, по «Приоритету показа». У CSoft в топ взят
+ * СПДС; места правятся в админке у товара («Место в топе продаж»).
+ * @type {{ vendor: string, title: RegExp, place: number }[]}
+ */
+export const TOP_SALES = [
+  { vendor: 'Autodesk', title: /^AutoCAD$/i, place: 1 },
+  { vendor: 'АВС', title: /^Программный комплекс АВС/i, place: 2 },
+  { vendor: 'Autodesk', title: /^Revit$/i, place: 3 },
+  { vendor: 'SCAD Soft', title: /^SCAD Office\b/i, place: 4 },
+  { vendor: 'Fine Software', title: /^GEO5$/i, place: 5 },
+  { vendor: 'Artec 3D', title: /^Artec (Leo|Eva)$/i, place: 6 },
+  { vendor: 'Csoft Development', title: /^СПДС\b/i, place: 7 },
+  { vendor: 'ЛИРА-FEM', title: /^ЛИРА\s*-\s*FEM\b/i, place: 8 },
+]
+
+/**
+ * Место товара в топе продаж по правилам или null.
+ * @param {{ title: string, vendor: string | null }} product
+ * @returns {number | null}
+ */
+export function seedTopPlace(product) {
+  const rule = TOP_SALES.find(
+    (item) => item.vendor === product.vendor && item.title.test(product.title.trim()),
+  )
+  return rule?.place ?? null
+}
+
+/**
+ * Порядок производителей раздела с упором на SCAD: если в разделе первыми идёт ЛИРА-FEM, SCAD Soft
+ * ставится прямо перед ней (в «Геотехнике» GEO5, SCAD, ЛИРА; в «Архитектуре и BIM» — SCAD перед
+ * ЛИРОЙ). Без ЛИРЫ порядок не меняется.
+ * @template T
+ * @param {T[]} pins производители раздела по порядку
+ * @param {T} scad
+ * @param {T} lira
+ * @returns {T[]}
+ */
+export function scadBeforeLira(pins, scad, lira) {
+  const at = pins.indexOf(lira)
+  if (at === -1) return pins
+  const scadAt = pins.indexOf(scad)
+  if (scadAt !== -1 && scadAt < at) return pins
+  const rest = pins.filter((item) => item !== scad)
+  rest.splice(rest.indexOf(lira), 0, scad)
+  return rest
+}
+
 /** Производители, которые в разделе идут первыми, по порядку (slug раздела → названия). */
 export const SECTION_PINS = {
-  geotech: ['Fine Software', 'ЛИРА-FEM', 'SCAD Soft'],
+  geotech: ['Fine Software', 'SCAD Soft', 'ЛИРА-FEM'],
   structural: ['SCAD Soft', 'ЛИРА-FEM', 'Base', 'Autodesk'],
   arch: ['Autodesk'],
   mep: ['Autodesk'],

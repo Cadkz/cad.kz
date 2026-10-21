@@ -12,9 +12,13 @@ export type ProductCardData = {
   href: string
   title: string
   manufacturer: string | null
+  /** Коротко о товаре: в карточке не показывается (карточки одной высоты), остаётся в данных. */
   summary: string | null
   icon: string | null
-  /** Своя картинка товара или картинка производителя; нет — подложка со значком раздела. */
+  /**
+   * У программы — логотип, у оборудования — фото (src/domain/cardLogos.mjs); нет — подложка
+   * со значком раздела.
+   */
   picture: Picture | null
   /** Цена самой доступной комплектации, рассчитанная сервером, или null — «по запросу». */
   priceFrom: string | null
@@ -28,7 +32,9 @@ export type ProductCardData = {
  * Карточка товара в каталоге. Одна кнопка (аудит 21.10.2026, Г4; правило — cardAction в
  * src/domain/buyScenario.mjs): «В корзину», если у стандартной лицензии одна комплектация с ценой,
  * у остальных — «Подробнее». Название и картинка всегда ведут на страницу товара.
- * На телефоне карточка горизонтальная: картинка слева, без описания (М3). Цена — только серверная.
+ * На телефоне карточка горизонтальная: картинка слева (М3). Описания в карточке нет ни у кого
+ * (решение владельца 21.10.2026: карточки ровные), логотипы программ — одного размера по центру
+ * рамки, фото оборудования — на всю рамку. Цена — только серверная.
  */
 export function ProductCard({ product }: { product: ProductCardData }) {
   return (
@@ -39,7 +45,17 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         tabIndex={-1}
         aria-hidden="true"
       >
-        {product.picture ? (
+        {product.picture?.fit === 'logo' ? (
+          <Image
+            src={product.picture.url}
+            alt=""
+            width={product.picture.width}
+            height={product.picture.height}
+            sizes="96px"
+            unoptimized={product.picture.local}
+            className={`${styles.image} ${styles.logo}`}
+          />
+        ) : product.picture ? (
           <Image
             src={product.picture.url}
             alt=""
@@ -68,7 +84,6 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           <Badge>{product.badge}</Badge>
         </div>
       )}
-      {product.summary && <p className={styles.summary}>{product.summary}</p>}
       <div className={styles.foot}>
         {product.cartOfferId ? (
           <AddToCartButton offerId={product.cartOfferId} title={product.title} />

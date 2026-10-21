@@ -277,7 +277,7 @@ async function loadCatalog(): Promise<{
         group === 'software' ? productSections.filter((s) => s.isDirection).map((s) => s.slug) : [],
       types: productSections.filter((s) => !s.isDirection).map((s) => s.slug),
       tasks: (product.tasks ?? []).map((task) => task.title),
-      rank: priorityRank(product.priority, vendorLevel.get(vendorId)),
+      rank: priorityRank(product.priority, vendorLevel.get(vendorId), product.topOrder),
       main: topMain?.slug ?? null,
       line: product.line == null ? null : String(relId(product.line)),
       lineOrder: product.lineOrder ?? null,

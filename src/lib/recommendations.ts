@@ -38,6 +38,7 @@ async function loadRecData(payload: Payload): Promise<RecData> {
         suggestSimilar: true,
         suggestCross: true,
         priority: true,
+        topOrder: true,
       },
     }),
     payload.find({
@@ -85,7 +86,11 @@ async function loadRecData(payload: Payload): Promise<RecData> {
       manualCross: relIds(product.recommended),
       suggestSimilar: product.suggestSimilar !== false,
       suggestCross: product.suggestCross !== false,
-      rank: priorityRank(product.priority, vendorLevel.get(relId(product.manufacturer) ?? -1)),
+      rank: priorityRank(
+        product.priority,
+        vendorLevel.get(relId(product.manufacturer) ?? -1),
+        product.topOrder,
+      ),
     })
     cards.set(product.id, {
       slug: product.slug,

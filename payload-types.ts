@@ -183,6 +183,10 @@ export interface Product {
    */
   priority?: ('flagship' | 'top' | 'normal' | 'low') | null;
   /**
+   * Топы продаж идут первыми во всём каталоге и меню, по местам: 1 — самым первым. Одинаковое место — по названию. Пусто — товар не в топе, порядок по «Приоритету показа».
+   */
+  topOrder?: number | null;
+  /**
    * От него кнопки на карточке и странице товара. Пусто — как у основного раздела.
    */
   scenario?: ('standard' | 'corporate' | 'equipment' | 'renewal' | 'service') | null;
@@ -219,6 +223,10 @@ export interface Product {
    */
   description?: string | null;
   gallery?: (number | Media)[] | null;
+  /**
+   * Что показать в карточке каталога вместо картинки по правилам: у программы — её логотип, у оборудования — фото самого устройства. Пусто — логотип программы или производителя, у оборудования — первая картинка галереи.
+   */
+  cardImage?: (number | null) | Media;
   /**
    * 3–4 коротких пункта: показываются в шапке страницы товара.
    */
@@ -339,7 +347,11 @@ export interface Manufacturer {
   priority?: ('flagship' | 'top' | 'normal' | 'low') | null;
   website?: string | null;
   /**
-   * Логотип или коробка программы. Показывается в каталоге и на странице товара, если у товара пустая галерея.
+   * Показывается в карточках программ производителя, у которых нет своего логотипа. Лучше SVG или PNG от 400 px с прозрачным фоном.
+   */
+  logo?: (number | null) | Media;
+  /**
+   * Показывается на странице товара, если у товара пустая галерея. В карточках каталога у программ — «Логотип», у оборудования — фото из галереи.
    */
   image?: (number | null) | Media;
   legacyKey?: string | null;
@@ -1152,6 +1164,7 @@ export interface ProductsSelect<T extends boolean = true> {
   status?: T;
   slug?: T;
   priority?: T;
+  topOrder?: T;
   scenario?: T;
   pageView?: T;
   renewLabel?: T;
@@ -1170,6 +1183,7 @@ export interface ProductsSelect<T extends boolean = true> {
   summary?: T;
   description?: T;
   gallery?: T;
+  cardImage?: T;
   tasks?:
     | T
     | {
@@ -1298,6 +1312,7 @@ export interface ManufacturersSelect<T extends boolean = true> {
   status?: T;
   priority?: T;
   website?: T;
+  logo?: T;
   image?: T;
   legacyKey?: T;
   legacyUrl?: T;

@@ -63,6 +63,7 @@ export async function getMenu(): Promise<MenuTab[]> {
         mainSection: true,
         manufacturer: true,
         priority: true,
+        topOrder: true,
         line: true,
         lineOrder: true,
         pageView: true,
@@ -105,7 +106,11 @@ export async function getMenu(): Promise<MenuTab[]> {
       vendor,
       line: relId(product.line),
       lineOrder: product.lineOrder ?? null,
-      rank: priorityRank(product.priority, vendor == null ? null : vendorLevel.get(vendor)),
+      rank: priorityRank(
+        product.priority,
+        vendor == null ? null : vendorLevel.get(vendor),
+        product.topOrder,
+      ),
       group: itemGroup(product.kind, topMain == null ? null : groupOf.get(topMain)),
     }
   })

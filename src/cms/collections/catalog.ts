@@ -91,14 +91,25 @@ export const manufacturers = contentCollection({
     priorityField(false),
     textField('website', 'Сайт'),
     {
+      name: 'logo',
+      label: 'Логотип',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description:
+          'Показывается в карточках программ производителя, у которых нет своего логотипа. ' +
+          'Лучше SVG или PNG от 400 px с прозрачным фоном.',
+      },
+    },
+    {
       name: 'image',
       label: 'Картинка для товаров без своей',
       type: 'upload',
       relationTo: 'media',
       admin: {
         description:
-          'Логотип или коробка программы. Показывается в каталоге и на странице товара, ' +
-          'если у товара пустая галерея.',
+          'Показывается на странице товара, если у товара пустая галерея. В карточках каталога ' +
+          'у программ — «Логотип», у оборудования — фото из галереи.',
       },
     },
   ],
@@ -355,6 +366,18 @@ const productMainFields: Field[] = [
   },
   relationField('gallery', 'Галерея', 'media', true),
   {
+    name: 'cardImage',
+    label: 'Картинка для карточки',
+    type: 'upload',
+    relationTo: 'media',
+    admin: {
+      description:
+        'Что показать в карточке каталога вместо картинки по правилам: у программы — её логотип, ' +
+        'у оборудования — фото самого устройства. Пусто — логотип программы или производителя, ' +
+        'у оборудования — первая картинка галереи.',
+    },
+  },
+  {
     name: 'tasks',
     label: 'Для каких задач',
     type: 'array',
@@ -581,6 +604,19 @@ export const products: CollectionConfig = {
     { ...statusField, admin: { position: 'sidebar' } },
     { ...slugField(), admin: { position: 'sidebar' } },
     priorityField(true),
+    {
+      name: 'topOrder',
+      label: 'Место в топе продаж',
+      type: 'number',
+      min: 1,
+      max: 99,
+      admin: {
+        position: 'sidebar',
+        description:
+          'Топы продаж идут первыми во всём каталоге и меню, по местам: 1 — самым первым. ' +
+          'Одинаковое место — по названию. Пусто — товар не в топе, порядок по «Приоритету показа».',
+      },
+    },
     scenarioField(true),
     ...pageViewFields,
     ...productSidebarExtras,

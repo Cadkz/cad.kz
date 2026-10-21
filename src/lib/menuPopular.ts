@@ -33,6 +33,8 @@ export const getMenuPopular = cache(async (): Promise<PopularCardData[]> => {
       slug: true,
       legacyUrl: true,
       gallery: true,
+      cardImage: true,
+      kind: true,
       manufacturer: true,
       mainSection: true,
     },
@@ -45,7 +47,7 @@ export const getMenuPopular = cache(async (): Promise<PopularCardData[]> => {
       where: { id: { in: vendorIds } },
       pagination: false,
       depth: 0,
-      select: { title: true, image: true },
+      select: { title: true, image: true, logo: true },
     }),
     payload.find({
       collection: 'sections',

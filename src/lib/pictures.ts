@@ -1,9 +1,23 @@
 import type { Payload } from 'payload'
 import type { Manufacturer, Media, Product } from '../../payload-types'
+import { programLogo, vendorLogo } from '../domain/cardLogos.mjs'
 import { relId } from './rel'
 
-/** Картинка, готовая для next/image: адрес, описание и исходные размеры. */
-export type Picture = { url: string; alt: string; width: number; height: number }
+/** Как вписать картинку в карточку: логотип — небольшим знаком по центру, фото — на всю рамку. */
+export type PictureFit = 'logo' | 'photo'
+
+/**
+ * Картинка, готовая для next/image: адрес, описание и исходные размеры. local — файл сайта
+ * (логотип из public), его не нужно пережимать.
+ */
+export type Picture = {
+  url: string
+  alt: string
+  width: number
+  height: number
+  fit?: PictureFit
+  local?: boolean
+}
 
 /** Запись «Медиа» → картинка. Без адреса или размеров картинку не показываем. */
 export function toPicture(value: number | Media | null | undefined, alt?: string): Picture | null {
@@ -27,38 +41,75 @@ export function productPictures(product: Product): Picture[] {
   return fallback ? [fallback] : []
 }
 
+type CardProduct = Pick<Product, 'id' | 'title' | 'gallery' | 'manufacturer'> &
+  Partial<Pick<Product, 'kind' | 'cardImage'>>
+type CardVendor = Pick<Manufacturer, 'id' | 'title' | 'image'> & Partial<Pick<Manufacturer, 'logo'>>
+
+type StaticLogo = { url: string; width: number; height: number }
+
+/** Что взять в карточку: файл «Медиа» по id или логотип из кода (src/domain/cardLogos.mjs). */
+type Choice = { media: number; fit: PictureFit } | { logo: StaticLogo }
+
 /**
- * Первая картинка для карточек каталога (товары загружены без раскрытия связей):
- * первая из галереи или картинка производителя. Все «Медиа» читаются одним запросом.
+ * Выбор картинки карточки по правилу владельца (21.10.2026, src/domain/cardLogos.mjs):
+ * программа — логотип, оборудование — фото устройства, курс и услуга — как раньше.
+ */
+function chooseCard(product: CardProduct, vendor: CardVendor | undefined): Choice | null {
+  const own = relId(product.cardImage)
+  const kind = product.kind ?? 'software'
+  if (own != null) return { media: own, fit: kind === 'hardware' ? 'photo' : 'logo' }
+  const gallery = relId(product.gallery?.[0])
+  if (kind === 'hardware') return gallery == null ? null : { media: gallery, fit: 'photo' }
+  if (kind === 'software') {
+    const program = programLogo({ title: product.title, vendor: vendor?.title ?? null })
+    if (program) return { logo: program }
+    const adminLogo = relId(vendor?.logo)
+    if (adminLogo != null) return { media: adminLogo, fit: 'logo' }
+    const fromCode = vendorLogo(vendor?.title ?? null)
+    return fromCode ? { logo: fromCode } : null
+  }
+  const fallback = gallery ?? relId(vendor?.image)
+  return fallback == null ? null : { media: fallback, fit: 'photo' }
+}
+
+/**
+ * Картинки для карточек каталога (товары загружены без раскрытия связей). Все «Медиа» читаются
+ * одним запросом. Логотипы из кода — файлы сайта, без «Медиа».
  */
 export async function cardPictures(
   payload: Payload,
-  products: Pick<Product, 'id' | 'title' | 'gallery' | 'manufacturer'>[],
-  manufacturers: Pick<Manufacturer, 'id' | 'title' | 'image'>[],
+  products: CardProduct[],
+  manufacturers: CardVendor[],
 ): Promise<Map<number, Picture>> {
-  const vendorImage = new Map(manufacturers.map((m) => [m.id, relId(m.image)]))
-  const wanted = new Map<number, number>()
+  const vendorById = new Map(manufacturers.map((m) => [m.id, m]))
+  const chosen = new Map<number, Choice>()
   for (const product of products) {
-    const own = relId(product.gallery?.[0])
-    const vendor = vendorImage.get(relId(product.manufacturer) ?? -1)
-    const id = own ?? vendor
-    if (id != null) wanted.set(product.id, id)
+    const choice = chooseCard(product, vendorById.get(relId(product.manufacturer) ?? -1))
+    if (choice) chosen.set(product.id, choice)
   }
-  const ids = [...new Set(wanted.values())]
-  if (!ids.length) return new Map()
-  const { docs } = await payload.find({
-    collection: 'media',
-    where: { id: { in: ids } },
-    limit: ids.length,
-    depth: 0,
-    pagination: false,
-  })
+  const ids = [
+    ...new Set([...chosen.values()].flatMap((choice) => ('media' in choice ? [choice.media] : []))),
+  ]
+  const { docs } = ids.length
+    ? await payload.find({
+        collection: 'media',
+        where: { id: { in: ids } },
+        limit: ids.length,
+        depth: 0,
+        pagination: false,
+      })
+    : { docs: [] }
   const mediaById = new Map(docs.map((media) => [media.id, media]))
   const result = new Map<number, Picture>()
   for (const product of products) {
-    const mediaId = wanted.get(product.id)
-    const picture = mediaId != null ? toPicture(mediaById.get(mediaId), product.title) : null
-    if (picture) result.set(product.id, picture)
+    const choice = chosen.get(product.id)
+    if (!choice) continue
+    const picture =
+      'logo' in choice
+        ? { ...choice.logo, alt: product.title, fit: 'logo' as const, local: true }
+        : toPicture(mediaById.get(choice.media), product.title)
+    if (picture)
+      result.set(product.id, 'media' in choice ? { ...picture, fit: choice.fit } : picture)
   }
   return result
 }

@@ -17,15 +17,30 @@ export const PRIORITY_LEVELS = /** @type {const} */ (['flagship', 'top', 'normal
 const RANK = { flagship: 3, top: 2, normal: 1, low: 0 }
 
 /**
- * Числовой уровень товара: свой, иначе производителя, иначе обычный.
+ * Топы продаж по местам (решение владельца 21.10.2026: AutoCAD, АВС, Revit, SCAD Office, GEO5,
+ * Artec, CSoft, потом ЛИРА) выше любого уровня: место 1 — ранг 109, место 2 — 108 и т. д.
+ * Ниже них — флагманы и остальные по уровню.
+ */
+const TOP_BASE = 10
+const TOP_PLACES = 99
+
+/**
+ * Числовой ранг товара: место в топе продаж, иначе свой уровень, иначе производителя, иначе обычный.
  * @param {string | null | undefined} own
  * @param {string | null | undefined} vendor
+ * @param {number | null | undefined} [topOrder] «Место в топе продаж» у товара (1 — первым)
  * @returns {number}
  */
-export function priorityRank(own, vendor) {
+export function priorityRank(own, vendor, topOrder) {
+  if (topOrder != null && topOrder >= 1 && topOrder <= TOP_PLACES) {
+    return TOP_BASE + TOP_PLACES + 1 - Math.round(topOrder)
+  }
   const level = own || vendor || 'normal'
   return RANK[/** @type {PriorityLevel} */ (level)] ?? RANK.normal
 }
+
+/** Ступень для сравнения в разделе: все топы продаж — одна ступень, там решает порядок раздела. */
+const tier = (/** @type {number} */ rank) => (rank >= TOP_BASE ? TOP_BASE : rank)
 
 /**
  * @typedef {{ rank: number, vendor: string | number | null, main: string | number | null,
@@ -33,8 +48,10 @@ export function priorityRank(own, vendor) {
  */
 
 /**
- * Сравнение двух товаров в разделе: уровень → порядок производителя в разделе → основной раздел
- * совпадает → название.
+ * Сравнение двух товаров в разделе: ступень (топы продаж, флагман, топ…) → порядок производителя
+ * в разделе → место в топе или уровень → основной раздел совпадает → название. Во всём каталоге
+ * производители раздела не заданы, и топы продаж идут строго по местам; в разделе с заданным
+ * порядком производителей (в «Геотехнике» сначала GEO5) порядок раздела важнее мест.
  * @param {string | number | null} section раздел, в котором показываем (null — весь каталог)
  * @param {(string | number)[]} pins производители раздела по порядку
  * @returns {(a: Ranked, b: Ranked) => number}
@@ -45,8 +62,9 @@ export function compareInSection(section = null, pins = []) {
     return index === -1 ? pins.length : index
   }
   return (a, b) =>
-    b.rank - a.rank ||
+    tier(b.rank) - tier(a.rank) ||
     pinIndex(a) - pinIndex(b) ||
+    b.rank - a.rank ||
     (section == null ? 0 : Number(b.main === section) - Number(a.main === section)) ||
     a.title.localeCompare(b.title, 'ru', { numeric: true })
 }
