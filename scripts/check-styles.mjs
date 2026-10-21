@@ -3,8 +3,9 @@
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = new URL('..', import.meta.url).pathname
+const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const SRC = join(ROOT, 'src')
 
 // Файлы, где сырые значения разрешены по определению.
@@ -48,7 +49,7 @@ function checkFile(path, rules, problems) {
   const text = readFileSync(path, 'utf8').replace(/\/\*[\s\S]*?\*\//g, (c) =>
     c.replace(/[^\n]/g, ' '),
   )
-  const file = relative(ROOT, path)
+  const file = relative(ROOT, path).replaceAll('\\', '/')
   for (const rule of rules) {
     for (const match of text.matchAll(rule.pattern)) {
       problems.push(`${file}:${lineOf(text, match.index)}  ${rule.name}: ${match[0].trim()}`)
@@ -67,7 +68,7 @@ function checkFile(path, rules, problems) {
 
 const problems = []
 for (const path of walk(SRC)) {
-  const file = relative(ROOT, path)
+  const file = relative(ROOT, path).replaceAll('\\', '/')
   if (TOKEN_FILES.has(file) || LEGACY_FILES.has(file)) continue
   if (path.endsWith('.css')) checkFile(path, CSS_RULES, problems)
   if (path.endsWith('.tsx')) checkFile(path, TSX_RULES, problems)
