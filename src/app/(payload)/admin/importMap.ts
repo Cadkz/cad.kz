@@ -2,6 +2,8 @@ import { QualityCell as QualityCell_f4234779415bb67fd9a9958587947c9f } from '../
 import { QualityField as QualityField_e6c71f4b09520f8809fe6b389d597c3b } from '../../../components/QualityField/QualityField'
 import { QualityHidden as QualityHidden_e6c71f4b09520f8809fe6b389d597c3b } from '../../../components/QualityField/QualityField'
 import { ProductOffers as ProductOffers_69ef3ae4acb085b684c75091a74eb9de } from '../../../components/ProductOffers/ProductOffers'
+import { ProductsCell as ProductsCell_2af0ab194f5e9060ae641efa92d4e858 } from '../../../components/ProductsLink/ProductsLink'
+import { ProductsField as ProductsField_2af0ab194f5e9060ae641efa92d4e858 } from '../../../components/ProductsLink/ProductsLink'
 import { SlugField as SlugField_be3cdb29464280a3be9c774b7bee1336 } from '../../../components/SlugField/SlugField'
 import { BodyEditor as BodyEditor_86c0a066958e23b9e3a1c929a5761694 } from '../../../components/BodyEditor/BodyEditor'
 import { OrderSnapshotView as OrderSnapshotView_9b9a473c4b75963e2326a4b6719d162f } from '../../../components/OrderSnapshotView/OrderSnapshotView'
@@ -32,6 +34,8 @@ export const importMap = {
   "/components/QualityField/QualityField#QualityField": QualityField_e6c71f4b09520f8809fe6b389d597c3b,
   "/components/QualityField/QualityField#QualityHidden": QualityHidden_e6c71f4b09520f8809fe6b389d597c3b,
   "/components/ProductOffers/ProductOffers#ProductOffers": ProductOffers_69ef3ae4acb085b684c75091a74eb9de,
+  "/components/ProductsLink/ProductsLink#ProductsCell": ProductsCell_2af0ab194f5e9060ae641efa92d4e858,
+  "/components/ProductsLink/ProductsLink#ProductsField": ProductsField_2af0ab194f5e9060ae641efa92d4e858,
   "/components/SlugField/SlugField#SlugField": SlugField_be3cdb29464280a3be9c774b7bee1336,
   "/components/BodyEditor/BodyEditor#BodyEditor": BodyEditor_86c0a066958e23b9e3a1c929a5761694,
   "/components/OrderSnapshotView/OrderSnapshotView#OrderSnapshotView": OrderSnapshotView_9b9a473c4b75963e2326a4b6719d162f,

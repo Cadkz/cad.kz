@@ -14,6 +14,27 @@ import { productSections } from '../hooks/productSections'
 import { offerQualityChange, offerQualityDelete, productQuality } from '../hooks/quality'
 import { pageViewFields, pickerField } from './picker'
 
+const PRODUCTS_LINK = '/components/ProductsLink/ProductsLink'
+
+/**
+ * «Товары (N)»: в списке — колонка, в карточке — ссылка справа. Открывает «Товары» уже
+ * отфильтрованными по этой записи, как папку в Битриксе. В базе ничего не хранит.
+ */
+function productsLinkField(by: 'manufacturer' | 'line' | 'section'): Field {
+  return {
+    name: 'productsLink',
+    label: 'Товары',
+    type: 'ui',
+    admin: {
+      position: 'sidebar',
+      components: {
+        Cell: { path: `${PRODUCTS_LINK}#ProductsCell`, serverProps: { by } },
+        Field: { path: `${PRODUCTS_LINK}#ProductsField`, serverProps: { by } },
+      },
+    },
+  }
+}
+
 /** Иконки разделов: ключ из этого списка сопоставляется с иконкой lucide в компоненте. */
 export const sectionIcons = [
   'building',
@@ -83,11 +104,12 @@ function priorityField(forProduct: boolean): Field {
   }
 }
 
-export const manufacturers = contentCollection({
+const manufacturersBase = contentCollection({
   slug: 'manufacturers',
   singular: 'Производитель',
   plural: 'Производители',
   fields: [
+    productsLinkField('manufacturer'),
     priorityField(false),
     textField('website', 'Сайт'),
     {
@@ -115,6 +137,12 @@ export const manufacturers = contentCollection({
   ],
 })
 
+/** Колонка «Товары» — сразу после названия: открыть товары производителя одним щелчком. */
+export const manufacturers: CollectionConfig = {
+  ...manufacturersBase,
+  admin: { ...manufacturersBase.admin, defaultColumns: ['title', 'productsLink', 'status'] },
+}
+
 /**
  * Линейка производителя: путь в меню и каталоге «раздел → производитель → линейка → товары».
  * Например, у SCAD Soft — «Программный комплекс», «Сателлиты», «Справочники».
@@ -125,6 +153,7 @@ export const productLines: CollectionConfig = {
     singular: 'Линейка',
     plural: 'Линейки производителей',
     fields: [
+      productsLinkField('line'),
       {
         name: 'manufacturer',
         label: 'Производитель',
@@ -204,18 +233,19 @@ export const productLines: CollectionConfig = {
   }),
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'manufacturer', 'order', 'status'],
+    defaultColumns: ['title', 'productsLink', 'manufacturer', 'order', 'status'],
     description:
       'Группы товаров внутри производителя. Товар попадает в линейку полем «Линейка» в карточке ' +
       'товара. Линейка без опубликованных товаров на сайте не показывается.',
   },
 }
 
-export const sections = contentCollection({
+const sectionsBase = contentCollection({
   slug: 'sections',
   singular: 'Раздел',
   plural: 'Разделы',
   fields: [
+    productsLinkField('section'),
     slugField(),
     {
       name: 'parent',
@@ -299,6 +329,11 @@ export const sections = contentCollection({
     },
   ],
 })
+
+export const sections: CollectionConfig = {
+  ...sectionsBase,
+  admin: { ...sectionsBase.admin, defaultColumns: ['title', 'productsLink', 'parent', 'status'] },
+}
 
 /** Основное о товаре: первая вкладка, её видно сразу при открытии. */
 const productMainFields: Field[] = [
