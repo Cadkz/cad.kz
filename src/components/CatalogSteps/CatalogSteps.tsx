@@ -25,13 +25,17 @@ type Path = { back: Back | null; current: string; prompt: string | null }
 
 /** Шаг вверх по разделам оборудования: из подраздела в тип, из типа во всё оборудование. */
 function sectionUp({ facets, state }: Props): Back | null {
+  if (state.direction) return { label: 'Все программы', patch: { group: 'software' } }
   const parent = facets.find((facet) => facet.slug === state.type)?.parent
   if (parent) {
     const title = facets.find((facet) => facet.slug === parent)?.title ?? ''
     return { label: title, patch: { type: parent } }
   }
-  return state.type && state.group === 'hardware'
-    ? { label: 'Всё оборудование', patch: { type: null } }
+  return state.type
+    ? {
+        label: state.group === 'service' ? 'Обучение и услуги' : 'Всё оборудование',
+        patch: { group: state.group === 'service' ? 'service' : 'hardware' },
+      }
     : null
 }
 
@@ -72,10 +76,16 @@ function stepPath(props: Props, section: string): Path {
  */
 export function CatalogSteps(props: Props) {
   const { state, sectionStep, onChange } = props
-  if (sectionStep === 'type') {
+  if (sectionStep === 'type' || sectionStep === 'direction') {
     return (
       <div className={styles.root}>
-        <p className={styles.crumbs}>Оборудование: выберите тип</p>
+        <p className={styles.crumbs}>
+          {sectionStep === 'direction'
+            ? 'Программы: выберите задачу'
+            : state.group === 'service'
+              ? 'Выберите услугу'
+              : 'Оборудование: выберите тип'}
+        </p>
       </div>
     )
   }

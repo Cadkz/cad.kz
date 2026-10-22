@@ -5,6 +5,7 @@
  */
 
 import { featureDefinition, featureLabel, featureValue } from '../domain/catalogFeatureValues.mjs'
+import { type CatalogSort, catalogSort, compareCatalog } from '../domain/catalogSort.mjs'
 import { compareInLine } from '../domain/catalogTree.mjs'
 import equipmentFacets from '../domain/equipmentFacets.json' with { type: 'json' }
 import { compareInSection } from '../domain/priority.mjs'
@@ -21,6 +22,7 @@ export type FilterState = {
   tasks: string[]
   features: Record<string, string[]>
   page: number
+  sort: CatalogSort
 }
 
 type Key = 'group' | 'direction' | 'type' | 'vendors' | 'line' | 'tasks' | `feature:${string}`
@@ -35,6 +37,7 @@ export const emptyFilter: FilterState = {
   tasks: [],
   features: {},
   page: 1,
+  sort: 'recommended',
 }
 
 const groups: CatalogGroup[] = ['software', 'hardware', 'service']
@@ -186,8 +189,10 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
   const scope = (key: Key) => items.filter((item) => matches(item, state, key))
   // Вкладки групп видны всегда: переключение группы и так сбрасывает остальные условия.
   const groupCounts = countBy(items, (item) => [item.group])
-  const directionCounts = countBy(scope('direction'), (item) => item.directions)
-  const typeCounts = countBy(scope('type'), (item) => item.types)
+  // Переход в категорию сбрасывает уточнения: соседние категории остаются доступны.
+  const navigation = items.filter((item) => matches(item, { ...emptyFilter, group: state.group }))
+  const directionCounts = countBy(navigation, (item) => item.directions)
+  const typeCounts = countBy(navigation, (item) => item.types)
   const vendorCounts = countBy(scope('vendors'), (item) => [item.vendor])
   const taskCounts = countBy(scope('tasks'), (item) => item.tasks)
   const section = state.type ?? state.direction
@@ -259,13 +264,17 @@ export function parentType(facets: Facet[], type: string | null) {
 export function update(state: FilterState, change: Partial<FilterState>): FilterState {
   const next = { ...state, ...change, page: change.page ?? 1 }
   if ('group' in change) {
-    next.direction = null
-    next.type = null
+    next.direction = change.direction ?? null
+    next.type = change.type ?? null
     next.vendors = []
     next.tasks = []
   }
   if ('direction' in change || 'type' in change) next.tasks = []
   if ('group' in change || 'direction' in change || 'type' in change) next.features = {}
+  if ('group' in change || 'direction' in change || 'type' in change) {
+    next.sort = 'recommended'
+    next.line = null
+  }
   // Линейка принадлежит одному производителю: другой выбор производителя её сбрасывает.
   if (('group' in change || 'vendors' in change) && !('line' in change)) next.line = null
   return next
@@ -300,6 +309,7 @@ export function results(items: CatalogItem[], state: FilterState, facets: Facet[
   }
   // В линейке основа первой, потом пакеты и модули («Порядок в линейке»).
   if (state.line) list.sort(compareInLine)
+  if (state.sort && state.sort !== 'recommended') list.sort(compareCatalog(state.sort))
   const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE))
   const page = Math.min(state.page, pages)
   return {
@@ -343,7 +353,7 @@ export function groupedResults(
   state: FilterState,
   lines: CatalogLine[],
 ): ResultGroup[] | null {
-  if (!vendorView(state)) return null
+  if (!vendorView(state) || (state.sort && state.sort !== 'recommended')) return null
   const list = items.filter((item) => matches(item, state))
   const own = lines
     .filter((line) => line.vendor === state.vendors[0])
@@ -413,6 +423,7 @@ export function fromParams(params: Record<string, string | string[] | undefined>
     line: one('line'),
     tasks: many('task'),
     features,
+    sort: catalogSort(one('sort')),
     page: Number.isInteger(page) && page > 0 ? page : 1,
   }
 }
@@ -436,6 +447,7 @@ export function toQuery(state: FilterState) {
   for (const [key, values] of Object.entries(state.features ?? {}))
     for (const value of values) query.append(`spec.${key}`, value)
   if (state.page > 1) query.set('page', String(state.page))
+  if (state.sort && state.sort !== 'recommended') query.set('sort', state.sort)
   return query.toString()
 }
 
@@ -457,11 +469,18 @@ export type SectionTile = {
 }
 
 /** Какой шаг «плитками разделов» сейчас: типы оборудования или подразделы типа. */
-export type SectionStep = { kind: 'type' | 'sub'; tiles: SectionTile[] }
+export type SectionStep = { kind: 'type' | 'sub' | 'direction'; tiles: SectionTile[] }
 
 function sectionTile(items: CatalogItem[], facets: Facet[], facet: Facet, base: FilterState) {
   const list = items
-    .filter((item) => matches(item, { ...base, type: facet.slug }))
+    .filter((item) =>
+      matches(
+        item,
+        facet.isDirection
+          ? { ...base, type: null, direction: facet.slug }
+          : { ...base, type: facet.slug },
+      ),
+    )
     .sort(compareInSection(facet.slug, facet.pins ?? []))
   // Родитель широкоформата иллюстрируется устройством, никогда расходником из дочернего раздела.
   const illustrated =
@@ -475,7 +494,9 @@ function sectionTile(items: CatalogItem[], facets: Facet[], facet: Facet, base: 
     children: facets.filter((child) => child.parent === facet.slug).map((child) => child.title),
     vendors: [...new Set(list.flatMap((item) => (item.vendor ? [item.vendor] : [])))],
     count: list.length,
-    picture: (photo ?? illustrated.find((item) => item.picture))?.picture ?? null,
+    picture: facet.isDirection
+      ? null
+      : ((photo ?? illustrated.find((item) => item.picture))?.picture ?? null),
   }
 }
 
@@ -491,6 +512,11 @@ export function sectionStep(
   state: FilterState,
 ): SectionStep | null {
   if (state.vendors.length || state.tasks.length || state.line) return null
+  if (
+    (state.sort && state.sort !== 'recommended') ||
+    Object.values(state.features ?? {}).some((values) => values.length)
+  )
+    return null
   const base: FilterState = { ...state, type: null, page: 1 }
   const make = (kind: SectionStep['kind'], list: Facet[]) => {
     const tiles = list
@@ -503,9 +529,14 @@ export function sectionStep(
       'sub',
       facets.filter((facet) => facet.parent === state.type),
     )
-  if (state.group !== 'hardware' || state.direction) return null
+  if (state.group === 'software' && !state.direction)
+    return make(
+      'direction',
+      facets.filter((facet) => facet.isDirection),
+    )
+  if ((state.group !== 'hardware' && state.group !== 'service') || state.direction) return null
   return make(
     'type',
-    facets.filter((f) => f.group === 'hardware' && !f.isDirection && !f.parent),
+    facets.filter((f) => f.group === state.group && !f.isDirection && !f.parent),
   )
 }

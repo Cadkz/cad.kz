@@ -23,6 +23,7 @@ import { setupAuditCatalog, setupRevitBack } from '../src/lib/auditCatalogSetup.
 import { setupBimPage } from '../src/lib/bimSetup.ts'
 import { setupCardLogos } from '../src/lib/cardLogosSetup.ts'
 import { setupCards } from '../src/lib/cardsSetup.ts'
+import { setupCatalogNavigation } from '../src/lib/catalogNavigationSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
@@ -214,6 +215,8 @@ try {
   const equipment = await setupEquipment(payload)
   if (!equipment) console.log('Оборудование по замечаниям 22.10.2026 уже настроено.')
   else for (const line of equipment) console.log(`Оборудование — ${line}`)
+  const navigation = await setupCatalogNavigation(payload)
+  if (navigation) for (const line of navigation) console.log(`Навигация — ${line}`)
   const research = await setupEquipmentResearch(payload)
   if (!research) console.log('Исследование оборудования уже загружено.')
   else for (const line of research) console.log(`Исследование — ${line}`)

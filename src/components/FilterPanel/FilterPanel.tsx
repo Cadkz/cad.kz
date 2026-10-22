@@ -1,6 +1,5 @@
 'use client'
 
-import type { CatalogGroup } from '@/lib/catalog'
 import type { FilterState, facetOptions } from '@/lib/catalogFilter'
 import { Chip } from '../Chip/Chip'
 import { FilterChecks } from '../FilterChecks/FilterChecks'
@@ -12,12 +11,6 @@ type Props = {
   options: Options
   onChange: (change: Partial<FilterState>) => void
   onReset: () => void
-}
-
-const groupLabels: Record<CatalogGroup, string> = {
-  software: 'Программное обеспечение',
-  hardware: 'Оборудование',
-  service: 'Услуги',
 }
 
 function toggle(list: string[], value: string) {
@@ -38,27 +31,19 @@ const VENDORS_SHOWN = 8
 export function FilterPanel({ state, options, onChange, onReset }: Props) {
   return (
     <div className={styles.panel}>
-      <fieldset className={styles.tabs}>
-        <legend className="visually-hidden">Группа каталога</legend>
-        <Chip selected={state.group === null} onClick={() => onChange({ group: null })}>
-          Все
-        </Chip>
-        {options.groups.map((group) => (
-          <Chip key={group} selected={state.group === group} onClick={() => onChange({ group })}>
-            {groupLabels[group]}
-          </Chip>
-        ))}
-      </fieldset>
       {options.directions.length > 0 && (
         <fieldset className={styles.group}>
-          <legend className={styles.title}>Направление</legend>
+          <legend className={styles.title}>Категория программ</legend>
           {options.directions.map((option) => (
             <Chip
               key={option.value}
               look="option"
               selected={state.direction === option.value}
               onClick={() =>
-                onChange({ direction: state.direction === option.value ? null : option.value })
+                onChange({
+                  group: 'software',
+                  direction: state.direction === option.value ? null : option.value,
+                })
               }
             >
               {option.label}
@@ -77,7 +62,10 @@ export function FilterPanel({ state, options, onChange, onReset }: Props) {
               look="option"
               selected={options.typeSelected === option.value}
               onClick={() =>
-                onChange({ type: options.typeSelected === option.value ? null : option.value })
+                onChange({
+                  group: options.typeGroup,
+                  type: options.typeSelected === option.value ? null : option.value,
+                })
               }
             >
               {option.label}
@@ -85,7 +73,7 @@ export function FilterPanel({ state, options, onChange, onReset }: Props) {
           ))}
         </fieldset>
       )}
-      {(!(state.direction || state.type) || state.vendors.length > 1) && (
+      {(options.vendors.length > 1 || state.vendors.length > 0) && (
         <FilterChecks
           title="Производитель"
           options={options.vendors}
@@ -110,6 +98,7 @@ export function FilterPanel({ state, options, onChange, onReset }: Props) {
           key={group.key}
           title={group.label}
           options={group.options}
+          limit={6}
           selected={state.features[group.key] ?? []}
           onToggle={(value) =>
             onChange({
@@ -122,7 +111,7 @@ export function FilterPanel({ state, options, onChange, onReset }: Props) {
         />
       ))}
       <button type="button" className={styles.reset} onClick={onReset}>
-        Сбросить фильтр
+        Очистить условия
       </button>
     </div>
   )

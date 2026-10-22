@@ -20,6 +20,7 @@ import { vendorStepOn, vendorTiles } from '@/lib/catalogVendors'
 import type { Picture } from '@/lib/pictures'
 import { positions } from '@/lib/plural'
 import { Button } from '../Button/Button'
+import { CatalogControls } from '../CatalogControls/CatalogControls'
 import { CatalogGroups } from '../CatalogGroups/CatalogGroups'
 import { CatalogSelection } from '../CatalogSelection/CatalogSelection'
 import { CatalogSteps } from '../CatalogSteps/CatalogSteps'
@@ -82,7 +83,8 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
   const sections = useMemo(() => sectionStep(items, facets, state), [items, facets, state])
   const vendorStep = !sections && vendorStepOn(view, tiles)
   const change = (patch: Partial<FilterState>) => commit(pruneVendors(items, update(state, patch)))
-  const reset = () => commit(emptyFilter)
+  const reset = () =>
+    commit({ ...emptyFilter, group: state.group, direction: state.direction, type: state.type })
   const closePanel = useCallback(() => setPanelOpen(false), [])
 
   const panel = <FilterPanel state={state} options={options} onChange={change} onReset={reset} />
@@ -93,6 +95,12 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
         {panel}
       </section>
       <div ref={top} className={styles.results}>
+        <CatalogControls
+          state={state}
+          groups={options.groups}
+          onChange={change}
+          showSort={!sections && !vendorStep}
+        />
         <div className={styles.head}>
           <p className={styles.count} aria-live="polite">
             Найдено: {positions(found.total)}
@@ -117,7 +125,12 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
         {sections ? (
           <SectionTiles
             tiles={sections.tiles}
-            onPick={(type) => commit(update(state, { type }), true)}
+            onPick={(slug) =>
+              commit(
+                update(state, sections.kind === 'direction' ? { direction: slug } : { type: slug }),
+                true,
+              )
+            }
           />
         ) : vendorStep ? (
           <VendorTiles
@@ -139,7 +152,7 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
           <div className={styles.empty}>
             <div className={styles.emptyBody}>
               <p>По выбранным условиям товаров нет.</p>
-              <Button onClick={reset}>Сбросить фильтр</Button>
+              <Button onClick={reset}>Очистить условия в этом разделе</Button>
             </div>
             <Mascot pose="search" size="sm" className={styles.mascot} />
           </div>
@@ -156,7 +169,7 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
         {panel}
         <div className={styles.drawerFoot}>
           <Button block onClick={closePanel}>
-            Показать товары
+            Показать: {positions(found.total)}
           </Button>
         </div>
       </Drawer>
