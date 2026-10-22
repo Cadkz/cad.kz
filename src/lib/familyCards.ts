@@ -34,6 +34,8 @@ export function withFamilies(
       offersCount: Math.max(offers, 2),
       cartOfferId: null,
       badge: null,
+      research: null,
+      lifecycle: null,
       directions: [...new Set(list.flatMap((item) => item.directions))],
       types: [...new Set(list.flatMap((item) => item.types))],
       tasks: [],

@@ -72,6 +72,9 @@ export function catalogExtras({
             ? label
             : `${parent.title} ${label}`,
           summary: entry.note || null,
+          // У пакета/модуля могут быть другие лицензии: исследование родительской программы не наследуем.
+          research: null,
+          lifecycle: null,
           priceFrom: priceOf(offers),
           offersCount: offers.length,
           cartOfferId: hasSwitches ? null : cartOf(offers),

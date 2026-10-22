@@ -11,6 +11,7 @@ import { ProductAbout } from '@/components/ProductAbout/ProductAbout'
 import { ProductGallery } from '@/components/ProductGallery/ProductGallery'
 import { ProductHeader } from '@/components/ProductHeader/ProductHeader'
 import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
+import { ProductLifecycle } from '@/components/ProductLifecycle/ProductLifecycle'
 import { ProductPicks } from '@/components/ProductPicks/ProductPicks'
 import { ProductSection } from '@/components/ProductSection/ProductSection'
 import { PropertyList } from '@/components/PropertyList/PropertyList'
@@ -137,6 +138,7 @@ export async function ProductView({
             }
             aside={<PickerSummary />}
           >
+            <ProductLifecycle value={product.lifecycle} />
             <ProductSection
               title={guided ? 'Подберите комплект' : profile.configTitle}
               id="config"

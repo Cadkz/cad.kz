@@ -1,0 +1,219 @@
+[
+  {
+    "category": "plotters",
+    "filters": [
+      {
+        "key": "width",
+        "label": "Ширина печати",
+        "type": "one",
+        "values": ["36\" (A0)", "44\"", "42\""]
+      },
+      {
+        "key": "technology",
+        "label": "Технология печати",
+        "type": "one",
+        "values": ["Струйная пигментная", "CrystalPoint/TonerPearls", "LED/тонер"]
+      },
+      {
+        "key": "color",
+        "label": "Цветность",
+        "type": "one",
+        "values": ["Цветной", "Монохромный"]
+      },
+      {
+        "key": "rolls",
+        "label": "Количество рулонов",
+        "type": "one",
+        "values": ["2", "1+1 опция", "до 6", "до 4", "4 или 6", "4"]
+      },
+      {
+        "key": "scanner",
+        "label": "Сканирование / МФУ",
+        "type": "one",
+        "values": ["Опция МФУ"]
+      },
+      {
+        "key": "purpose",
+        "label": "Назначение",
+        "type": "many",
+        "values": ["САПР/ГИС", "Большие объёмы", "Постеры"]
+      }
+    ]
+  },
+  {
+    "category": "consumables",
+    "filters": [
+      {
+        "key": "type",
+        "label": "Тип расходника",
+        "type": "one",
+        "values": ["Тонер/TonerPearls", "Картридж/расходник"]
+      },
+      {
+        "key": "color",
+        "label": "Цвет",
+        "type": "one",
+        "values": ["Чёрный", "Голубой", "Пурпурный", "Жёлтый"]
+      },
+      {
+        "key": "compatible",
+        "label": "Совместимая модель",
+        "type": "many",
+        "values": [
+          "colorWAVE T60",
+          "colorWAVE T65",
+          "colorWAVE 3500",
+          "colorWAVE 3600",
+          "ColorWave 700",
+          "ColorWave 650"
+        ]
+      },
+      {
+        "key": "generation",
+        "label": "Поколение",
+        "type": "one",
+        "values": ["T-серия", "ColorWave 700", "ColorWave 650"]
+      }
+    ]
+  },
+  {
+    "category": "wide-scanners",
+    "filters": [
+      {
+        "key": "width",
+        "label": "Ширина сканирования",
+        "type": "one",
+        "values": ["60\"", "48\"", "44\"", "36\"", "25\"", "24\"", "12\""]
+      },
+      {
+        "key": "form",
+        "label": "Конструкция",
+        "type": "one",
+        "values": ["Протяжный", "Бесконтактный ART", "Планшетный"]
+      },
+      {
+        "key": "sensor",
+        "label": "Технология сенсора",
+        "type": "one",
+        "values": ["CIS", "CCD"]
+      },
+      {
+        "key": "resolution",
+        "label": "Оптическое разрешение",
+        "type": "one",
+        "values": ["600 dpi", "1200 × 600 dpi", "1200 x 600 dpi"]
+      },
+      {
+        "key": "pc",
+        "label": "Встроенный ПК",
+        "type": "one",
+        "values": ["Встроенный"]
+      },
+      {
+        "key": "printer_pair",
+        "label": "Интеграция с плоттером",
+        "type": "one",
+        "values": ["Без специальной комплектации", "Canon TX"]
+      }
+    ]
+  },
+  {
+    "category": "3d-scanners",
+    "filters": [
+      {
+        "key": "object_size",
+        "label": "Размер объекта",
+        "type": "many",
+        "values": [
+          "XL (>200 см)",
+          "XXL (пространства)",
+          "L (50–200 см)",
+          "M (20–50 см)",
+          "S (5–20 см)",
+          "XS (<5 см)"
+        ]
+      },
+      {
+        "key": "accuracy",
+        "label": "Точность",
+        "type": "one",
+        "values": ["±10 мм", "1,9 мм на 10 м", "0,1 мм", "0,02 мм", "0,05 мм", "0,005 мм"]
+      },
+      {
+        "key": "mode",
+        "label": "Исполнение",
+        "type": "one",
+        "values": ["Мобильный SLAM", "Наземный LiDAR", "Ручной", "Настольный", "Фотограмметрия"]
+      },
+      {
+        "key": "wireless",
+        "label": "Работа без провода",
+        "type": "one",
+        "values": ["Да", "Нет"]
+      },
+      {
+        "key": "technology",
+        "label": "Технология",
+        "type": "one",
+        "values": ["SLAM LiDAR", "LiDAR", "Структурированный свет", "Лазер", "Фотограмметрия"]
+      },
+      {
+        "key": "purpose",
+        "label": "Назначение",
+        "type": "many",
+        "values": [
+          "Архитектура и здания",
+          "Контроль качества",
+          "Реверс-инжиниринг",
+          "Медицина",
+          "Культурное наследие"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "software",
+    "filters": [
+      {
+        "key": "license",
+        "label": "Тип лицензии",
+        "type": "one",
+        "values": ["Подписка", "Бессрочная/по конфигурации"]
+      },
+      {
+        "key": "term",
+        "label": "Срок лицензии",
+        "type": "one",
+        "values": ["1 или 3 года", "Зависит от договора"]
+      },
+      {
+        "key": "deployment",
+        "label": "Размещение",
+        "type": "one",
+        "values": ["Локальная", "Облачная"]
+      },
+      {
+        "key": "edition",
+        "label": "Редакция / комплектация",
+        "type": "one",
+        "values": ["Коллекция", "Полная", "LT", "Пакет/модули", "Облако"]
+      },
+      {
+        "key": "purpose",
+        "label": "Задачи",
+        "type": "many",
+        "values": [
+          "САПР",
+          "BIM",
+          "Обработка 3D-сканов",
+          "3D-моделирование",
+          "Инженерные расчёты",
+          "Геотехника",
+          "Сметы",
+          "Реверс-инжиниринг",
+          "Совместная работа"
+        ]
+      }
+    ]
+  }
+]

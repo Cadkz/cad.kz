@@ -4,6 +4,7 @@
  * при всех остальных выбранных условиях: по нему скрываются пустые варианты.
  */
 import { compareInLine } from '../domain/catalogTree.mjs'
+import equipmentFacets from '../domain/equipmentFacets.json' with { type: 'json' }
 import { compareInSection } from '../domain/priority.mjs'
 import type { CatalogGroup, CatalogItem, CatalogLine, Facet } from './catalog'
 import type { Picture } from './pictures'
@@ -16,10 +17,11 @@ export type FilterState = {
   /** Линейка производителя (id строкой): шаг после выбора одного производителя. */
   line: string | null
   tasks: string[]
+  features: Record<string, string[]>
   page: number
 }
 
-type Key = 'group' | 'direction' | 'type' | 'vendors' | 'line' | 'tasks'
+type Key = 'group' | 'direction' | 'type' | 'vendors' | 'line' | 'tasks' | `feature:${string}`
 
 export const PAGE_SIZE = 9
 export const emptyFilter: FilterState = {
@@ -29,6 +31,7 @@ export const emptyFilter: FilterState = {
   vendors: [],
   line: null,
   tasks: [],
+  features: {},
   page: 1,
 }
 
@@ -42,11 +45,14 @@ function visible(item: CatalogItem, state: FilterState, ignore?: Key) {
   // Для счётчиков задач считаем, будто задача уже выбрана: иначе задачи, которые есть только
   // у отдельных программ GEO5, не попали бы в список.
   const tasksOn = state.tasks.length > 0 || ignore === 'tasks'
+  const featuresOn =
+    Object.values(state.features ?? {}).some((values) => values.length) ||
+    ignore?.startsWith('feature:')
   switch (item.scope) {
     case 'family':
-      return !vendorView(state)
+      return !vendorView(state) && !featuresOn
     case 'detail':
-      return vendorView(state) || tasksOn
+      return vendorView(state) || tasksOn || featuresOn
     case 'task':
       return tasksOn
     default:
@@ -70,7 +76,51 @@ export function matches(item: CatalogItem, state: FilterState, ignore?: Key) {
     return false
   if (ignore !== 'tasks' && state.tasks.length && !item.tasks.some((t) => state.tasks.includes(t)))
     return false
+  const category = featureCategory(state)
+  for (const filter of category?.filters ?? []) {
+    const key = `${category?.category}.${filter.key}`
+    const selected = state.features?.[key] ?? []
+    if (ignore === `feature:${key}` || !selected.length) continue
+    if (
+      item.research?.category !== category?.category ||
+      !selected.some((value) => item.research?.filters[filter.key]?.includes(value))
+    )
+      return false
+  }
   return true
+}
+
+/** 3D-сканеры в CMS называются scanners; родительские плитки не получают фильтров детей. */
+function featureCategory(state: Pick<FilterState, 'type' | 'group' | 'direction'>) {
+  const category =
+    state.type === 'scanners'
+      ? '3d-scanners'
+      : (state.type ??
+        (state.group === 'software' || (state.direction && !state.group) ? 'software' : null))
+  return equipmentFacets.find((entry) => entry.category === category)
+}
+
+/** Внутри группы — ИЛИ, между группами — И; счётчик игнорирует только свою группу. */
+export function featureOptions(items: CatalogItem[], state: FilterState) {
+  const category = featureCategory(state)
+  return (category?.filters ?? [])
+    .map((filter) => {
+      const key = `${category?.category}.${filter.key}`
+      const selected = state.features?.[key] ?? []
+      const scope = items.filter(
+        (item) =>
+          item.research?.category === category?.category && matches(item, state, `feature:${key}`),
+      )
+      const options = filter.values
+        .map((value) => ({
+          value,
+          label: value,
+          count: scope.filter((item) => item.research?.filters[filter.key]?.includes(value)).length,
+        }))
+        .filter((option) => option.count > 0 || selected.includes(option.value))
+      return { key, label: filter.label, options }
+    })
+    .filter((group) => group.options.length)
 }
 
 function countBy(items: CatalogItem[], values: (item: CatalogItem) => (string | null)[]) {
@@ -147,6 +197,7 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
   const shown = items.filter((item) => matches(item, state)).length
   const narrows = state.tasks.length > 0 || taskList.some((option) => option.count !== shown)
   return {
+    features: featureOptions(items, state),
     groups: groups.filter((group) => (groupCounts.get(group) ?? 0) > 0),
     directions:
       state.group === null || state.group === 'software'
@@ -192,6 +243,7 @@ export function update(state: FilterState, change: Partial<FilterState>): Filter
     next.tasks = []
   }
   if ('direction' in change || 'type' in change) next.tasks = []
+  if ('group' in change || 'direction' in change || 'type' in change) next.features = {}
   // Линейка принадлежит одному производителю: другой выбор производителя её сбрасывает.
   if (('group' in change || 'vendors' in change) && !('line' in change)) next.line = null
   return next
@@ -204,7 +256,7 @@ export function update(state: FilterState, change: Partial<FilterState>): Filter
  */
 export function pruneVendors(items: CatalogItem[], state: FilterState): FilterState {
   if (!state.vendors.length) return state
-  const open = { ...state, line: null }
+  const open = { ...state, line: null, features: {} }
   const present = new Set(
     items.filter((item) => matches(item, open, 'vendors')).map((item) => item.vendor ?? ''),
   )
@@ -243,7 +295,9 @@ export function results(items: CatalogItem[], state: FilterState, facets: Facet[
 export function autoVendor(items: CatalogItem[], state: FilterState): FilterState {
   if (!(state.type ?? state.direction) || state.vendors.length) return state
   const vendors = new Set(
-    items.filter((item) => matches(item, state)).map((item) => item.vendor ?? ''),
+    items
+      .filter((item) => matches(item, { ...state, features: {} }))
+      .map((item) => item.vendor ?? ''),
   )
   const [only] = vendors
   return vendors.size === 1 && only ? { ...state, vendors: [only] } : state
@@ -311,6 +365,19 @@ export function fromParams(params: Record<string, string | string[] | undefined>
   }
   const group = one('group')
   const page = Number(one('page'))
+  const features: Record<string, string[]> = {}
+  const category = featureCategory({
+    group: groups.includes(group as CatalogGroup) ? (group as CatalogGroup) : null,
+    type: one('type'),
+    direction: one('direction'),
+  })
+  for (const filter of category?.filters ?? []) {
+    const key = `${category?.category}.${filter.key}`
+    const selected = [...new Set(many(`spec.${key}`))].filter((value) =>
+      filter.values.includes(value),
+    )
+    if (selected.length) features[key] = selected
+  }
   return {
     group: groups.includes(group as CatalogGroup) ? (group as CatalogGroup) : null,
     direction: (() => {
@@ -321,6 +388,7 @@ export function fromParams(params: Record<string, string | string[] | undefined>
     vendors: many('vendor'),
     line: one('line'),
     tasks: many('task'),
+    features,
     page: Number.isInteger(page) && page > 0 ? page : 1,
   }
 }
@@ -341,6 +409,8 @@ export function toQuery(state: FilterState) {
   for (const vendor of state.vendors) query.append('vendor', vendor)
   if (state.line) query.set('line', state.line)
   for (const task of state.tasks) query.append('task', task)
+  for (const [key, values] of Object.entries(state.features ?? {}))
+    for (const value of values) query.append(`spec.${key}`, value)
   if (state.page > 1) query.set('page', String(state.page))
   return query.toString()
 }

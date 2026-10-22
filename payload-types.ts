@@ -294,6 +294,18 @@ export interface Product {
         }[]
       | null;
   };
+  /**
+   * Категория, значения фильтров, статус модели и замена. Не меняет публикацию товара.
+   */
+  researchData?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   properties?:
     | {
         name: string;
@@ -1233,6 +1245,7 @@ export interface ProductsSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  researchData?: T;
   properties?:
     | T
     | {

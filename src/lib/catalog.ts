@@ -7,6 +7,7 @@ import { compareInSection, priorityRank } from '../domain/priority.mjs'
 import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
 import { catalogExtras } from './catalogExtras'
 import { type CatalogVariant, catalogVariants } from './catalogVariants'
+import { lifecycle, type ResearchData, readResearch } from './equipmentResearch'
 import { familyLines } from './families'
 import { withFamilies } from './familyCards'
 import { formatKzt } from './format'
@@ -21,6 +22,7 @@ export type CatalogGroup = 'software' | 'hardware' | 'service'
 
 /** Товар каталога с признаками для каскадного фильтра. */
 export type CatalogItem = ProductCardData & {
+  research?: ResearchData | null
   group: CatalogGroup
   directions: string[]
   types: string[]
@@ -236,6 +238,15 @@ async function loadCatalog(): Promise<{
     offersByProduct.set(productId, [...(offersByProduct.get(productId) ?? []), offer])
   }
 
+  const replacements = new Map(
+    products.docs.map((entry) => [
+      entry.slug,
+      {
+        title: entry.title,
+        href: entry.status === 'published' && entry.pageView !== 'none' ? productPath(entry) : null,
+      },
+    ]),
+  )
   const items = products.docs.map((product): CatalogItem => {
     const ownIds = (product.sections ?? []).map((section) => relId(section) ?? -1)
     const productSections = withTopSections(ownIds, top)
@@ -272,6 +283,8 @@ async function loadCatalog(): Promise<{
       vendor,
       aliases: product.searchAliases ?? null,
       summary: product.summary ?? null,
+      research: readResearch(product.researchData),
+      lifecycle: lifecycle(readResearch(product.researchData), replacements),
       icon: productSections[0]?.icon ?? null,
       picture: pictures.get(product.id) ?? null,
       priceFrom:

@@ -105,6 +105,22 @@ export function FilterPanel({ state, options, onChange, onReset }: Props) {
           />
         </details>
       )}
+      {options.features.map((group) => (
+        <FilterChecks
+          key={group.key}
+          title={group.label}
+          options={group.options}
+          selected={state.features[group.key] ?? []}
+          onToggle={(value) =>
+            onChange({
+              features: {
+                ...state.features,
+                [group.key]: toggle(state.features[group.key] ?? [], value),
+              },
+            })
+          }
+        />
+      ))}
       <button type="button" className={styles.reset} onClick={onReset}>
         Сбросить фильтр
       </button>

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { Product, Section } from '../../payload-types'
 import { resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
 import type { PickerView } from '../domain/picker.mjs'
+import { type Lifecycle, lifecycle, readResearch } from './equipmentResearch'
 import { formatKzt } from './format'
 import { cms } from './payload'
 import { loadPicker } from './picker'
@@ -25,6 +26,7 @@ export type ProductOffer = {
 export type RelatedProduct = { slug: string; href: string; title: string; vendor: string | null }
 
 export type ProductPage = {
+  lifecycle?: Lifecycle | null
   id: number
   slug: string
   /** Адрес страницы: прежний адрес cad.kz, если товар там был. */
@@ -82,6 +84,23 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
   })
   const product = docs[0]
   if (!product) return null
+  const research = readResearch(product.researchData)
+  const replacements = new Map<string, { title: string; href: string | null }>()
+  if (research?.status === 'discontinued' && research.replacedBy) {
+    const { docs } = await payload.find({
+      collection: 'products',
+      where: {
+        and: [{ slug: { equals: research.replacedBy } }, { status: { equals: 'published' } }],
+      },
+      limit: 1,
+      depth: 0,
+    })
+    for (const entry of docs)
+      replacements.set(entry.slug, {
+        title: entry.title,
+        href: entry.pageView !== 'none' ? productPath(entry) : null,
+      })
+  }
   const main = typeof product.mainSection === 'object' ? product.mainSection : null
   // Подраздел без своих настроек берёт сценарий и демонстрацию у родителя.
   const parent = main && typeof main.parent === 'object' ? main.parent : null
@@ -114,6 +133,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     title: product.title,
     kind: product.kind,
     summary: product.summary ?? null,
+    lifecycle: lifecycle(research, replacements),
     description: product.description ?? null,
     vendor:
       product.manufacturer && typeof product.manufacturer !== 'number'

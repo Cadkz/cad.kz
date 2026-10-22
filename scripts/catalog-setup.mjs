@@ -26,6 +26,7 @@ import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
+import { setupEquipmentResearch } from '../src/lib/equipmentResearchSetup.ts'
 import { setupEquipment } from '../src/lib/equipmentSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
 import { setupFooterAudit } from '../src/lib/footerSetup.ts'
@@ -213,6 +214,9 @@ try {
   const equipment = await setupEquipment(payload)
   if (!equipment) console.log('Оборудование по замечаниям 22.10.2026 уже настроено.')
   else for (const line of equipment) console.log(`Оборудование — ${line}`)
+  const research = await setupEquipmentResearch(payload)
+  if (!research) console.log('Исследование оборудования уже загружено.')
+  else for (const line of research) console.log(`Исследование — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

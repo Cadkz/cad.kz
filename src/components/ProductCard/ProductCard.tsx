@@ -1,13 +1,16 @@
 import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import type { Lifecycle } from '@/lib/equipmentResearch'
 import type { Picture } from '@/lib/pictures'
 import { AddToCartButton } from '../AddToCartButton/AddToCartButton'
 import { Badge } from '../Badge/Badge'
+import { ProductLifecycle } from '../ProductLifecycle/ProductLifecycle'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './ProductCard.module.css'
 
 export type ProductCardData = {
+  lifecycle?: Lifecycle | null
   id: number
   href: string
   title: string
@@ -74,6 +77,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         </Link>
       </h3>
       {product.manufacturer && <p className={styles.vendor}>{product.manufacturer}</p>}
+      <ProductLifecycle value={product.lifecycle} />
       <p className={styles.price}>
         {product.priceFrom
           ? `${product.offersCount > 1 ? 'от ' : ''}${product.priceFrom}`

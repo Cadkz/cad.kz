@@ -480,6 +480,15 @@ const productCatalogFields: Field[] = [
 /** Блоки страницы товара ниже шапки и связи с другими товарами. */
 const productPageFields: Field[] = [
   {
+    name: 'researchData',
+    label: 'Данные исследования: фильтры и статус модели',
+    type: 'json',
+    admin: {
+      description:
+        'Категория, значения фильтров, статус модели и замена. Не меняет публикацию товара.',
+    },
+  },
+  {
     name: 'properties',
     label: 'Характеристики',
     type: 'array',
