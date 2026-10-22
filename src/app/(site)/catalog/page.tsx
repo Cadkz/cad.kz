@@ -34,6 +34,7 @@ export default async function CatalogPage({ searchParams }: Props) {
           items={clientItems([...catalog.items, ...catalog.extras])}
           facets={catalog.facets}
           lines={catalog.lines}
+          vendorLogos={catalog.vendorLogos}
           initial={initial}
         />
       </Container>

@@ -12,7 +12,7 @@ import { withFamilies } from './familyCards'
 import { formatKzt } from './format'
 import { cms } from './payload'
 import { pickerView } from './picker'
-import { cardPictures } from './pictures'
+import { cardPictures, type Picture, vendorPictures } from './pictures'
 import { loadPricingContext, type PricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
 import { relId } from './rel'
@@ -179,6 +179,8 @@ async function loadCatalog(): Promise<{
   variants: CatalogVariant[]
   facets: Facet[]
   lines: CatalogLine[]
+  /** Логотипы производителей для плиток шага «производитель», по названию. */
+  vendorLogos: Record<string, Picture>
 }> {
   const payload = await cms()
   const [sections, products, offers, manufacturers, context, productLines] = await Promise.all([
@@ -208,7 +210,10 @@ async function loadCatalog(): Promise<{
     }),
   ])
 
-  const pictures = await cardPictures(payload, products.docs, manufacturers.docs)
+  const [pictures, logos] = await Promise.all([
+    cardPictures(payload, products.docs, manufacturers.docs),
+    vendorPictures(payload, manufacturers.docs),
+  ])
   const sectionById = new Map(sections.docs.map((section) => [section.id, section]))
   // Подразделы (у раздела есть родитель) видны через верхний раздел: src/domain/sectionTree.mjs.
   const top = topSections(sections.docs.map((s) => ({ id: s.id, parent: relId(s.parent) })))
@@ -333,7 +338,7 @@ async function loadCatalog(): Promise<{
         ]
       : []
   })
-  return { items: listed, extras, variants, facets, lines }
+  return { items: listed, extras, variants, facets, lines, vendorLogos: Object.fromEntries(logos) }
 }
 
 /** Длина описания в карточке: на компьютере видно три строки, этого хватает с запасом. */

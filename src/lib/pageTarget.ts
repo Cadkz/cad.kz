@@ -4,14 +4,31 @@ import { productPath } from './productPath'
 import { relId } from './rel'
 
 /**
- * Куда ведёт адрес товара без своей страницы: на страницу его семейства (к его строке),
- * иначе на товар с подбором, где он — вариант (уже выбранным), иначе в каталог производителя.
+ * Куда ведёт адрес товара без своей страницы: на товар из поля «Куда вести со старого адреса»,
+ * иначе на страницу его семейства (к его строке), иначе на товар с подбором, где он — вариант
+ * (уже выбранным), иначе в каталог производителя.
  */
 export async function noPageTarget(
   payload: Payload,
-  product: { id: number; slug: string; lineId: number | null; vendorId: number | null },
+  product: {
+    id: number
+    slug: string
+    lineId: number | null
+    vendorId: number | null
+    redirectId?: number | null
+  },
 ): Promise<string> {
-  const { lineId, vendorId } = product
+  const { lineId, vendorId, redirectId } = product
+  if (redirectId != null && redirectId !== product.id) {
+    const target = await payload.findByID({
+      collection: 'products',
+      id: redirectId,
+      depth: 0,
+      disableErrors: true,
+      select: { slug: true, legacyUrl: true, status: true, pageView: true },
+    })
+    if (target?.status === 'published' && target.pageView !== 'none') return productPath(target)
+  }
   if (lineId != null) {
     const { docs } = await payload.find({
       collection: 'product-lines',

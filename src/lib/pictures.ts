@@ -153,3 +153,39 @@ export async function bodyPictures(
   }
   return result
 }
+
+/**
+ * Логотипы производителей для плиток каталога (шаг «производитель»): «Логотип» из админки,
+ * иначе знак из кода (src/domain/cardLogos.mjs), иначе без картинки. Ключ — название.
+ */
+export async function vendorPictures(
+  payload: Payload,
+  manufacturers: CardVendor[],
+): Promise<Map<string, Picture>> {
+  const ids = manufacturers.flatMap((m) => {
+    const id = relId(m.logo)
+    return id == null ? [] : [id]
+  })
+  const { docs } = ids.length
+    ? await payload.find({
+        collection: 'media',
+        where: { id: { in: ids } },
+        limit: ids.length,
+        depth: 0,
+        pagination: false,
+      })
+    : { docs: [] }
+  const mediaById = new Map(docs.map((media) => [media.id, media]))
+  const result = new Map<string, Picture>()
+  for (const vendor of manufacturers) {
+    const own = toPicture(mediaById.get(relId(vendor.logo) ?? -1), vendor.title)
+    const code = vendorLogo(vendor.title)
+    const picture = own
+      ? { ...own, fit: 'logo' as const }
+      : code
+        ? { ...code, alt: vendor.title, fit: 'logo' as const, local: true }
+        : null
+    if (picture) result.set(vendor.title, picture)
+  }
+  return result
+}

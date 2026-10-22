@@ -257,3 +257,45 @@ test('цена «от» подбора — самый дешёвый собир�
   )
   assert.equal(cheapestTotal({ switches: [], steps: [] }, unit), null)
 })
+
+test('цена «от» не берёт значение «Обновление»: у АВС — цена новой лицензии', async () => {
+  const { cheapestTotal: cheapest } = await import('../src/domain/picker.mjs')
+  const view = {
+    switches: [
+      {
+        key: 'buy',
+        title: 'Покупка',
+        options: [
+          { value: 'Новая лицензия', note: null },
+          { value: 'Обновление', note: null },
+        ],
+      },
+    ],
+    steps: [
+      {
+        key: 's',
+        title: 'Программа',
+        hint: null,
+        mode: 'base',
+        collapsed: false,
+        items: [
+          {
+            key: 'i',
+            productId: 1,
+            label: 'АВС ПИР',
+            note: null,
+            offers: [
+              { id: 'new', configuration: '', variants: ['Новая лицензия'] },
+              { id: 'upd', configuration: '', variants: ['Обновление'] },
+            ],
+            fixedOffers: [],
+            preselect: false,
+            tasks: [],
+          },
+        ],
+      },
+    ],
+  }
+  const unit = (id) => (id === 'new' ? 135720n : 71920n)
+  assert.equal(cheapest(view, unit), 135720n)
+})

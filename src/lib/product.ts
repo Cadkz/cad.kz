@@ -52,6 +52,8 @@ export type ProductPage = {
   /** Линейка и производитель: куда вести адрес товара без своей страницы. */
   lineId: number | null
   vendorId: number | null
+  /** Товар без своей страницы: куда вести с его адреса («Куда вести со старого адреса»). */
+  redirectId: number | null
   /** Своя галерея или картинка производителя; пусто — блока картинок нет. */
   pictures: Picture[]
   seo: Product['seo']
@@ -148,6 +150,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     demo: Boolean(main?.demoButton ?? parent?.demoButton),
     lineId: relId(product.line),
     vendorId: relId(product.manufacturer),
+    redirectId: relId(product.redirectTo),
     pictures: productPictures(product),
     seo: product.seo,
   }

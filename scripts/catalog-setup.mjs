@@ -10,6 +10,7 @@
 // списков в админке; разделы по аудиту 21.10.2026 (SCAD Office в BIM, курсы SCAD; Revit из расчёта убран);
 // контакты и подвал по аудиту (основной номер, адрес офиса, описание компании);
 // топы продаж по местам и SCAD перед ЛИРОЙ, логотипы производителей для карточек (21.10.2026);
+// каталог как в Битриксе: САПР в «Архитектуре и BIM», АВС — лицензия или обновление (22.10.2026);
 // отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
@@ -34,6 +35,7 @@ import {
   setupHomeTrust,
 } from '../src/lib/homeSetup.ts'
 import { setupNewsCovers } from '../src/lib/newsCoversSetup.ts'
+import { setupOwnerCatalog } from '../src/lib/ownerCatalogSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
 import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
@@ -203,6 +205,9 @@ try {
   const cardLogos = await setupCardLogos(payload)
   if (!cardLogos) console.log('Логотипы производителей для карточек уже поставлены.')
   else for (const line of cardLogos) console.log(line)
+  const owner = await setupOwnerCatalog(payload)
+  if (!owner) console.log('Каталог по замечаниям 22.10.2026 уже настроен.')
+  else for (const line of owner) console.log(line)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

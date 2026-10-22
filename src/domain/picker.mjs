@@ -336,7 +336,17 @@ export function offersAsPicker(productId, offers, licenses, title = 'Компл�
 }
 
 /**
+ * Значение переключателя «Обновление» (у АВС: «Новая лицензия / Обновление»): цена обновления
+ * в «от» каталога не входит, иначе карточка показывает цену для тех, у кого программа уже есть.
+ * @param {string} value
+ */
+export function isRenewal(value) {
+  return /^обновлени[ея]/i.test(value.trim())
+}
+
+/**
  * Самый дешёвый комплект, который можно собрать в подборе, — для цены «от» в каталоге.
+ * Значения «Обновление» не перебираются (isRenewal).
  * Для каждого сочетания переключателей: всё из шагов «основа» плюс самый дешёвый вариант
  * каждого шага «один вариант»; отдельно — каждый готовый комплект. Галочки (шаг «несколько»)
  * необязательны и в минимум не входят. Сборка, где хоть одна обязательная строка без цены,
@@ -348,8 +358,11 @@ export function offersAsPicker(productId, offers, licenses, title = 'Компл�
 export function cheapestTotal(view, unitOf) {
   /** @type {Record<string, string>[]} */
   let combos = [{}]
-  for (const sw of view.switches)
-    combos = combos.flatMap((c) => sw.options.map((o) => ({ ...c, [sw.key]: o.value })))
+  for (const sw of view.switches) {
+    const priced = sw.options.filter((o) => !isRenewal(o.value))
+    const options = priced.length ? priced : sw.options
+    combos = combos.flatMap((c) => options.map((o) => ({ ...c, [sw.key]: o.value })))
+  }
   /** @type {bigint | null} */
   let best = null
   const consider = (/** @type {bigint | null} */ sum) => {

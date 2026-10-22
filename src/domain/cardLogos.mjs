@@ -31,7 +31,8 @@ const adsk = (name) =>
  * @type {[RegExp, StaticLogo][]}
  */
 const AUTODESK = [
-  [/revit lt suite/i, adsk('autocad-revit-lt-suite')],
+  // LT комплект (бывш. AutoCAD Revit LT Suite): два знака внахлёст, замечание владельца 22.10.2026.
+  [/revit lt suite|^lt комплект/i, adsk('lt-autocad-revit.svg')],
   [/^architecture engineering|aec collection/i, adsk('aec-collection.svg')],
   [/^product design/i, adsk('product-design-manufacturing-collection')],
   [/^media & entertainment/i, adsk('media-entertainment-collection.svg')],

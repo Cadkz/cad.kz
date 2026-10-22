@@ -283,6 +283,12 @@ export function groupedResults(
   return groups
 }
 
+/**
+ * Влитые направления: старая ссылка открывает новое («САПР и черчение» влито в «САПР,
+ * архитектура и BIM» 22.10.2026).
+ */
+const DIRECTION_ALIASES: Record<string, string> = { cad: 'arch' }
+
 /** Состояние ↔ адрес страницы: ссылку на подборку можно отправить коллеге. */
 export function fromParams(params: Record<string, string | string[] | undefined>): FilterState {
   const one = (key: string) => {
@@ -297,13 +303,24 @@ export function fromParams(params: Record<string, string | string[] | undefined>
   const page = Number(one('page'))
   return {
     group: groups.includes(group as CatalogGroup) ? (group as CatalogGroup) : null,
-    direction: one('direction'),
+    direction: (() => {
+      const direction = one('direction')
+      return direction ? (DIRECTION_ALIASES[direction] ?? direction) : null
+    })(),
     type: one('type'),
     vendors: many('vendor'),
     line: one('line'),
     tasks: many('task'),
     page: Number.isInteger(page) && page > 0 ? page : 1,
   }
+}
+
+/** Выбор из строки адреса в браузере (?direction=…&vendor=…): для «Назад» и «Вперёд». */
+export function fromSearch(search: string): FilterState {
+  const query = new URLSearchParams(search)
+  const params: Record<string, string[]> = {}
+  for (const key of new Set(query.keys())) params[key] = query.getAll(key)
+  return fromParams(params)
 }
 
 export function toQuery(state: FilterState) {

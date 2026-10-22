@@ -195,6 +195,10 @@ export interface Product {
    */
   pageView: 'standard' | 'picker' | 'none';
   /**
+   * Например, «Обновление для АВС ПИР» → «АВС ПИР»: обновление теперь выбирается на его странице. Пусто — подбор или семейство, где есть этот товар, иначе каталог производителя.
+   */
+  redirectTo?: (number | null) | Product;
+  /**
    * Например, «Обновить версию». Пусто — «Продлить лицензию» у стандартной лицензии, у остальных кнопки нет.
    */
   renewLabel?: string | null;
@@ -1167,6 +1171,7 @@ export interface ProductsSelect<T extends boolean = true> {
   topOrder?: T;
   scenario?: T;
   pageView?: T;
+  redirectTo?: T;
   renewLabel?: T;
   seo?:
     | T

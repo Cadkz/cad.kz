@@ -25,6 +25,19 @@ export const pageViewFields: Field[] = [
     },
   },
   {
+    name: 'redirectTo',
+    label: 'Куда вести со старого адреса',
+    type: 'relationship',
+    relationTo: 'products',
+    admin: {
+      position: 'sidebar',
+      condition: (data) => data?.pageView === 'none',
+      description:
+        'Например, «Обновление для АВС ПИР» → «АВС ПИР»: обновление теперь выбирается на его ' +
+        'странице. Пусто — подбор или семейство, где есть этот товар, иначе каталог производителя.',
+    },
+  },
+  {
     name: 'renewLabel',
     label: 'Кнопка продления',
     type: 'text',
@@ -41,7 +54,8 @@ const switchField: Field = {
   name: 'switches',
   label: 'Переключатели',
   type: 'array',
-  maxRows: 2,
+  // Три — у АВС-KZ: покупка (новая или обновление), защита лицензии, база РСНБ.
+  maxRows: 3,
   labels: { singular: 'Переключатель', plural: 'Переключатели' },
   admin: {
     description:

@@ -83,7 +83,8 @@ const sectionHints = {
   predklapan: ntp,
   shtutser_mke: ntp,
   the_scope_of: { group: 'software' },
-  basic_cad: { direction: 'cad', group: 'software' },
+  // «САПР и черчение» влито в «САПР, архитектура и BIM» (22.10.2026).
+  basic_cad: { direction: 'arch', group: 'software' },
   architectural_cad: { direction: 'arch', group: 'software' },
   bim_design: { direction: 'arch', group: 'software' },
   Structural_cad: { direction: 'structural', group: 'software' },

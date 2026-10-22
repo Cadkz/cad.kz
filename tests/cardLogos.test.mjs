@@ -13,7 +13,8 @@ test('у программ Autodesk и GEO5 — свой значок из наб
   assert.equal(logo('Fusion 360 Team', 'Autodesk'), a('fusion-360.png'))
   assert.equal(logo('Fusion 360 with PowerMill', 'Autodesk'), a('powermill.png'))
   assert.equal(logo('Inventor Professional', 'Autodesk'), a('inventor.svg'))
-  assert.equal(logo('AutoCAD Revit LT Suite', 'Autodesk'), a('autocad-revit-lt-suite.png'))
+  assert.equal(logo('AutoCAD Revit LT Suite', 'Autodesk'), a('lt-autocad-revit.svg'))
+  assert.equal(logo('LT комплект: AutoCAD + Revit', 'Autodesk'), a('lt-autocad-revit.svg'))
   assert.equal(
     logo('Architecture Engineering & Construction Collection', 'Autodesk'),
     a('aec-collection.svg'),

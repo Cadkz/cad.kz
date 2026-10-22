@@ -4,11 +4,17 @@ import { useEffect, useState } from 'react'
 import type { CatalogItem, CatalogLine, Facet } from '@/lib/catalog'
 import { emptyFilter } from '@/lib/catalogFilter'
 import { catalogHref } from '@/lib/navigationHrefs'
+import type { Picture } from '@/lib/pictures'
 import { ButtonLink } from '../Button/Button'
 import { CatalogFilter } from '../CatalogFilter/CatalogFilter'
 import styles from './HomeCatalog.module.css'
 
-type Data = { items: CatalogItem[]; facets: Facet[]; lines: CatalogLine[] }
+type Data = {
+  items: CatalogItem[]
+  facets: Facet[]
+  lines: CatalogLine[]
+  vendorLogos: Record<string, Picture>
+}
 type State = Data | 'loading' | 'error'
 
 /** Тот же порог, что у секции «только для компьютера» (Section desktopOnly). */
@@ -74,6 +80,7 @@ export function HomeCatalog() {
       items={state.items}
       facets={state.facets}
       lines={state.lines}
+      vendorLogos={state.vendorLogos}
       initial={emptyFilter}
     />
   )
