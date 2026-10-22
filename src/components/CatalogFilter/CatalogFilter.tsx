@@ -21,6 +21,7 @@ import type { Picture } from '@/lib/pictures'
 import { positions } from '@/lib/plural'
 import { Button } from '../Button/Button'
 import { CatalogGroups } from '../CatalogGroups/CatalogGroups'
+import { CatalogSelection } from '../CatalogSelection/CatalogSelection'
 import { CatalogSteps } from '../CatalogSteps/CatalogSteps'
 import { Drawer } from '../Drawer/Drawer'
 import { FilterPanel } from '../FilterPanel/FilterPanel'
@@ -112,6 +113,7 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
           sectionStep={sections?.kind ?? null}
           onChange={change}
         />
+        <CatalogSelection state={state} groups={options.features} onChange={change} />
         {sections ? (
           <SectionTiles
             tiles={sections.tiles}

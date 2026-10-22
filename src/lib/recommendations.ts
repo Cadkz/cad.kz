@@ -7,6 +7,7 @@ import {
   type SectionInfo,
   similarFor,
 } from '../domain/recommend.mjs'
+import { catalogAvailable } from './equipmentResearch'
 import type { RelatedProduct } from './product'
 import { productPath } from './productPath'
 import { relId, relIds } from './rel'
@@ -25,6 +26,8 @@ async function loadRecData(payload: Payload): Promise<RecData> {
       pagination: false,
       depth: 0,
       select: {
+        status: true,
+        researchData: true,
         title: true,
         slug: true,
         legacyUrl: true,
@@ -72,6 +75,7 @@ async function loadRecData(payload: Payload): Promise<RecData> {
   const items: RecItem[] = []
   const cards = new Map<number, RelatedProduct>()
   for (const product of products.docs) {
+    if (!catalogAvailable(product)) continue
     const vendor = vendors.get(relId(product.manufacturer) ?? -1) ?? null
     const sectionIds = relIds(product.sections)
     items.push({

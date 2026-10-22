@@ -44,6 +44,13 @@
   margin-bottom: var(--space-2);
 }
 
+.logoFallback {
+  color: var(--color-navy);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  overflow-wrap: anywhere;
+}
+
 .logo {
   width: auto;
   max-width: 100%;

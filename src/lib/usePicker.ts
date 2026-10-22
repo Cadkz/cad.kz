@@ -29,7 +29,9 @@ export function usePicker(view: PickerView, pick: PickTarget | null) {
   const lines: PickedLine[] = useMemo(() => pickedLines(view, state), [view, state])
   // Что считать: пусто, по запросу (есть вариант без цены) или тело запроса к серверу.
   const request = !lines.length
-    ? 'empty'
+    ? view.steps.length
+      ? 'empty'
+      : 'request'
     : lines.some((line) => !line.offer?.price)
       ? 'request'
       : JSON.stringify({

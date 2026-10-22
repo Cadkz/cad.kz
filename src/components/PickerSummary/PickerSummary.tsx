@@ -26,7 +26,9 @@ export function PickerSummary() {
         ? 'Считаем…'
         : total.state === 'request'
           ? 'По запросу'
-          : '—'
+          : !view.steps.length
+            ? 'По запросу'
+            : '—'
   return (
     <div className={styles.box} id="summary">
       <p className={styles.label}>Ваш выбор</p>
@@ -46,7 +48,11 @@ export function PickerSummary() {
           ))}
         </ul>
       ) : (
-        <p className={styles.note}>Отметьте, что нужно, — итог посчитается сразу.</p>
+        <p className={styles.note}>
+          {view.steps.length
+            ? 'Отметьте, что нужно, — итог посчитается сразу.'
+            : 'Укажите количество и запросите цену. Менеджер уточнит комплектацию и сроки поставки.'}
+        </p>
       )}
       <div className={styles.row}>
         <span className={styles.label}>{profile.quantity}</span>
@@ -86,7 +92,9 @@ export function PickerSummary() {
         </div>
       )}
       <p className={styles.note}>
-        Учебные цены демоверсии. Точную стоимость и сроки подтвердит менеджер.
+        {view.steps.length
+          ? 'Учебные цены демоверсии. Точную стоимость и сроки подтвердит менеджер.'
+          : 'Запрос не обязывает к покупке.'}
       </p>
     </div>
   )

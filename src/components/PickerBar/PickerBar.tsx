@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { requestNeedsChoice } from '@/domain/pickerRequest.mjs'
 import { pickerActions } from '@/lib/pickerAction'
 import { usePickerCart } from '@/lib/usePickerCart'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
@@ -13,18 +14,19 @@ import styles from './PickerBar.module.css'
  * консультация, демонстрация).
  */
 export function PickerBar() {
-  const { total, lines, openRequest, meta } = usePickerContext()
+  const { total, lines, openRequest, meta, view } = usePickerContext()
   const { cartFirst, canAdd, added, addToCart } = usePickerCart()
   const action = pickerActions(meta, cartFirst).main
   const needsChoice =
     action.type === 'cart' ||
-    (action.type === 'request' && (action.kind === 'quote' || action.kind === 'price'))
+    (action.type === 'request' &&
+      requestNeedsChoice(action.kind, view.steps.length > 0, Boolean(meta.familySlug)))
   const text =
     total.state === 'done'
       ? total.text
       : total.state === 'busy'
         ? 'Считаем…'
-        : total.state === 'request'
+        : total.state === 'request' || !view.steps.length
           ? 'Цена по запросу'
           : 'Выберите комплект'
   return (

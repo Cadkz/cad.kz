@@ -10,6 +10,7 @@ import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './ProductCard.module.css'
 
 export type ProductCardData = {
+  logoFallback?: string | null
   lifecycle?: Lifecycle | null
   id: number
   href: string
@@ -67,6 +68,8 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             sizes="(min-width: 1200px) 300px, (min-width: 960px) 25vw, (min-width: 640px) 50vw, 80px"
             className={styles.image}
           />
+        ) : product.logoFallback ? (
+          <span className={styles.logoFallback}>{product.logoFallback}</span>
         ) : (
           <SectionIcon name={product.icon} size={24} />
         )}

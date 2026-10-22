@@ -77,18 +77,15 @@ test('Все 54 товара, категории и значения фильт�
   }
 })
 
-test('Группы и варианты следуют JSON; пустые варианты скрыты', () => {
+test('Группы следуют исследованию; бесполезные одиночные признаки скрыты', () => {
   const options = featureOptions(items, plotters)
   assert.deepEqual(
     options.map((entry) => entry.label),
-    facets[0].filters.map((entry) => entry.label),
+    ['Ширина печати', 'Технология печати', 'Цветность', 'Рулоны: максимум с опциями', 'Назначение'],
   )
   const narrowed = featureOptions(items, features(plotters, { 'plotters.color': ['Монохромный'] }))
   const technology = narrowed.find((entry) => entry.key === 'plotters.technology')
-  assert.deepEqual(
-    technology.options.map((entry) => entry.value),
-    ['LED/тонер'],
-  )
+  assert.equal(technology, undefined)
   assert.ok(narrowed.every((entry) => entry.options.every((option) => option.count > 0)))
 })
 

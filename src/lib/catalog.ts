@@ -7,7 +7,7 @@ import { compareInSection, priorityRank } from '../domain/priority.mjs'
 import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
 import { catalogExtras } from './catalogExtras'
 import { type CatalogVariant, catalogVariants } from './catalogVariants'
-import { lifecycle, type ResearchData, readResearch } from './equipmentResearch'
+import { catalogAvailable, lifecycle, type ResearchData, readResearch } from './equipmentResearch'
 import { familyLines } from './families'
 import { withFamilies } from './familyCards'
 import { formatKzt } from './format'
@@ -247,7 +247,7 @@ async function loadCatalog(): Promise<{
       },
     ]),
   )
-  const items = products.docs.map((product): CatalogItem => {
+  const items = products.docs.filter(catalogAvailable).map((product): CatalogItem => {
     const ownIds = (product.sections ?? []).map((section) => relId(section) ?? -1)
     const productSections = withTopSections(ownIds, top)
       .map((id) => sectionById.get(id))
@@ -287,6 +287,7 @@ async function loadCatalog(): Promise<{
       lifecycle: lifecycle(readResearch(product.researchData), replacements),
       icon: productSections[0]?.icon ?? null,
       picture: pictures.get(product.id) ?? null,
+      logoFallback: group === 'software' ? vendor : null,
       priceFrom:
         product.pageView === 'picker'
           ? pickerFrom(product, offersByProduct, titleById, context)

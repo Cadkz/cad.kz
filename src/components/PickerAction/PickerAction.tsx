@@ -2,6 +2,7 @@
 
 import { Check, ShoppingCart } from 'lucide-react'
 import type { Action } from '@/domain/buyScenario.mjs'
+import { requestNeedsChoice } from '@/domain/pickerRequest.mjs'
 import { usePickerCart } from '@/lib/usePickerCart'
 import { Button, ButtonLink } from '../Button/Button'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
@@ -17,7 +18,7 @@ type Props = {
  * к блоку страницы.
  */
 export function PickerAction({ action, variant }: Props) {
-  const { lines, openRequest } = usePickerContext()
+  const { lines, openRequest, view, meta } = usePickerContext()
   const { canAdd, added, addToCart } = usePickerCart()
   const size = variant === 'text' ? 'sm' : 'md'
   const block = variant !== 'text'
@@ -38,8 +39,11 @@ export function PickerAction({ action, variant }: Props) {
         {action.label}
       </Button>
     )
-  // Без выбора нельзя просить КП и цену; подбор, консультацию и демонстрацию — можно.
-  const needsChoice = action.kind === 'quote' || action.kind === 'price'
+  const needsChoice = requestNeedsChoice(
+    action.kind,
+    view.steps.length > 0,
+    Boolean(meta.familySlug),
+  )
   return (
     <Button
       block={block}

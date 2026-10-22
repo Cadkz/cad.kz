@@ -3,6 +3,7 @@
 import { createContext, type ReactNode, useContext, useState } from 'react'
 import type { Scenario } from '@/domain/buyScenario.mjs'
 import type { PickerView } from '@/domain/picker.mjs'
+import { requestLines } from '@/domain/pickerRequest.mjs'
 import { type KindProfile, kindProfile } from '@/domain/productKind.mjs'
 import type { RequestKind } from '@/domain/siteRequest.mjs'
 import type { Contacts } from '@/lib/navigation'
@@ -64,12 +65,18 @@ export function PickerProvider({ view, meta, pick, children }: Props) {
           title: sw.title,
           value: api.state.switches[sw.key] ?? '',
         }))}
-        lines={api.lines.map((line) => ({
-          productId: line.item.productId,
-          offerId: line.offer?.id ?? null,
-          label: line.item.label,
-          detail: null,
-        }))}
+        lines={requestLines(
+          api.lines.map((line) => ({
+            productId: line.item.productId,
+            offerId: line.offer?.id ?? null,
+            label: line.item.label,
+            detail: null,
+          })),
+          meta.productId,
+          meta.productTitle,
+          view.steps.length > 0,
+          Boolean(meta.familySlug),
+        )}
         contacts={meta.contacts}
       />
     </Context.Provider>

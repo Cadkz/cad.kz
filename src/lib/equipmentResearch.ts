@@ -29,6 +29,13 @@ export function readResearch(value: unknown): ResearchData | null {
 
 export type Lifecycle = { replacement: { title: string; href: string | null } | null }
 
+/** Отсутствие цены не означает снятие с продажи. Скрываем только явно снятые модели. */
+export function catalogAvailable(product: { status?: string; researchData?: unknown }) {
+  return (
+    product.status === 'published' && readResearch(product.researchData)?.status !== 'discontinued'
+  )
+}
+
 /** Ссылка только на опубликованную модель со своей страницей. Текстовая замена остаётся текстом. */
 export function lifecycle(
   research: ResearchData | null,

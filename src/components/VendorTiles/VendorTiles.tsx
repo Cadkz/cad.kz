@@ -28,7 +28,7 @@ export function VendorTiles({ tiles, logos, onPick }: Props) {
         const body: ReactNode = (
           <>
             <span className={styles.logoBox}>
-              {logo && (
+              {logo ? (
                 <Image
                   src={logo.url}
                   alt=""
@@ -37,6 +37,8 @@ export function VendorTiles({ tiles, logos, onPick }: Props) {
                   className={styles.logo}
                   unoptimized={logo.local}
                 />
+              ) : (
+                <span className={styles.logoFallback}>{tile.title}</span>
               )}
             </span>
             <span className={styles.title}>{tile.title}</span>

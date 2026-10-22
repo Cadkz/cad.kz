@@ -3,6 +3,8 @@
  * Счётчик у значения (на сайте не показывается) — сколько товаров останется, если его выбрать
  * при всех остальных выбранных условиях: по нему скрываются пустые варианты.
  */
+
+import { featureDefinition, featureLabel, featureValue } from '../domain/catalogFeatureValues.mjs'
 import { compareInLine } from '../domain/catalogTree.mjs'
 import equipmentFacets from '../domain/equipmentFacets.json' with { type: 'json' }
 import { compareInSection } from '../domain/priority.mjs'
@@ -36,6 +38,10 @@ export const emptyFilter: FilterState = {
 }
 
 const groups: CatalogGroup[] = ['software', 'hardware', 'service']
+const catalogFeatures = equipmentFacets.map((category) => ({
+  ...category,
+  filters: category.filters.map((filter) => featureDefinition(category.category, filter)),
+}))
 
 /** Выбран ровно один производитель: его товары показываются группами по линейкам. */
 export const vendorView = (state: FilterState) => state.vendors.length === 1
@@ -83,7 +89,11 @@ export function matches(item: CatalogItem, state: FilterState, ignore?: Key) {
     if (ignore === `feature:${key}` || !selected.length) continue
     if (
       item.research?.category !== category?.category ||
-      !selected.some((value) => item.research?.filters[filter.key]?.includes(value))
+      !selected.some((value) =>
+        item.research?.filters[filter.key]?.some(
+          (raw) => featureValue(category?.category, filter.key, raw) === value,
+        ),
+      )
     )
       return false
   }
@@ -97,7 +107,7 @@ function featureCategory(state: Pick<FilterState, 'type' | 'group' | 'direction'
       ? '3d-scanners'
       : (state.type ??
         (state.group === 'software' || (state.direction && !state.group) ? 'software' : null))
-  return equipmentFacets.find((entry) => entry.category === category)
+  return catalogFeatures.find((entry) => entry.category === category)
 }
 
 /** Внутри группы — ИЛИ, между группами — И; счётчик игнорирует только свою группу. */
@@ -114,11 +124,23 @@ export function featureOptions(items: CatalogItem[], state: FilterState) {
       const options = filter.values
         .map((value) => ({
           value,
-          label: value,
-          count: scope.filter((item) => item.research?.filters[filter.key]?.includes(value)).length,
+          label: featureLabel(category?.category, filter.key, value),
+          count: scope.filter((item) =>
+            item.research?.filters[filter.key]?.some(
+              (raw) => featureValue(category?.category, filter.key, raw) === value,
+            ),
+          ).length,
         }))
         .filter((option) => option.count > 0 || selected.includes(option.value))
-      return { key, label: filter.label, options }
+      // Единственный общий признак ничего не уточняет, но выбранную галочку всегда можно снять.
+      return {
+        key,
+        label: filter.label,
+        options:
+          !selected.length && options.length === 1 && options[0]?.count === scope.length
+            ? []
+            : options,
+      }
     })
     .filter((group) => group.options.length)
 }
@@ -373,9 +395,11 @@ export function fromParams(params: Record<string, string | string[] | undefined>
   })
   for (const filter of category?.filters ?? []) {
     const key = `${category?.category}.${filter.key}`
-    const selected = [...new Set(many(`spec.${key}`))].filter((value) =>
-      filter.values.includes(value),
-    )
+    const selected = [
+      ...new Set(
+        many(`spec.${key}`).map((value) => featureValue(category?.category, filter.key, value)),
+      ),
+    ].filter((value) => filter.values.includes(value))
     if (selected.length) features[key] = selected
   }
   return {
@@ -439,7 +463,10 @@ function sectionTile(items: CatalogItem[], facets: Facet[], facet: Facet, base: 
   const list = items
     .filter((item) => matches(item, { ...base, type: facet.slug }))
     .sort(compareInSection(facet.slug, facet.pins ?? []))
-  const photo = list.find((item) => item.picture && item.picture.fit !== 'logo')
+  // Родитель широкоформата иллюстрируется устройством, никогда расходником из дочернего раздела.
+  const illustrated =
+    facet.slug === 'wide-format' ? list.filter((item) => item.types.includes('plotters')) : list
+  const photo = illustrated.find((item) => item.picture && item.picture.fit !== 'logo')
   return {
     slug: facet.slug,
     title: facet.title,
@@ -448,7 +475,7 @@ function sectionTile(items: CatalogItem[], facets: Facet[], facet: Facet, base: 
     children: facets.filter((child) => child.parent === facet.slug).map((child) => child.title),
     vendors: [...new Set(list.flatMap((item) => (item.vendor ? [item.vendor] : [])))],
     count: list.length,
-    picture: (photo ?? list.find((item) => item.picture))?.picture ?? null,
+    picture: (photo ?? illustrated.find((item) => item.picture))?.picture ?? null,
   }
 }
 
