@@ -90,7 +90,7 @@ const items = [
   { title: 'Canon colorWAVE T60', vendor: 'Canon', sections: [P] },
   {
     title: 'WideTEK 36CL Сканер для плоттеров',
-    vendor: 'Image Access',
+    vendor: 'WideTEK',
     sections: ['Широкоформатные сканеры'],
   },
   {

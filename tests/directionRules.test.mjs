@@ -6,7 +6,7 @@ const sw = (vendor, title, kind = 'software') => directionSections({ vendor, tit
 
 test('товар без исключения получает разделы группы', () => {
   assert.deepEqual(sw('Artec 3D', 'Artec Leo', 'hardware'), ['scanners', 'machine'])
-  assert.deepEqual(sw('Image Access', 'WideTEK 36CL', 'hardware'), ['wide-scanners'])
+  assert.deepEqual(sw('WideTEK', 'WideTEK 36CL', 'hardware'), ['wide-scanners'])
   assert.deepEqual(sw('Canon', 'Тонер colorWAVE T60 голубой', 'hardware'), ['consumables'])
 })
 

@@ -73,7 +73,8 @@ const PRODUCT_PROPERTIES = { IP_PROP9: 'Артикул', IP_PROP134: 'Важно
 const MANUFACTURER_ALIASES = [
   [/canon/i, 'Canon'],
   [/artec/i, 'Artec 3D'],
-  [/widetek|image access/i, 'Image Access'],
+  // Image Access — производитель сканеров WideTEK; на сайте он называется по линейке (22.10.2026).
+  [/widetek|image access/i, 'WideTEK'],
   [/^autodesk\b/i, 'Autodesk'],
   [/^курсы|^графические рабочие станции$/i, null],
 ]
@@ -114,7 +115,14 @@ function versionFromTitle(title) {
   return /\d/.test(first) && !/год|лет/i.test(first) ? `Версия ${first}` : ''
 }
 
-function kindOf(group0, group1) {
+/**
+ * Программы, которые в Битриксе лежат среди оборудования: на сайте это ПО в «Машиностроении»
+ * (решение владельца 22.10.2026), повторный импорт не должен делать их снова оборудованием.
+ */
+const SOFTWARE_TITLES = /^artec\s+(studio|cloud)\b/i
+
+function kindOf(group0, group1, title = '') {
+  if (SOFTWARE_TITLES.test(title)) return 'software'
   if (group0.startsWith('Аппаратное')) return 'hardware'
   if (group0.startsWith('Услуги')) return /курс/i.test(group1) ? 'course' : 'service'
   return 'software'
@@ -163,7 +171,7 @@ function toProduct(id, { row, images, related }, priceRow) {
     bitrixId: id,
     title: clean(row.IE_NAME),
     slug: clean(row.IE_CODE),
-    kind: kindOf(groups[0] ?? '', groups[1] ?? ''),
+    kind: kindOf(groups[0] ?? '', groups[1] ?? '', clean(row.IE_NAME)),
     manufacturer: clean(row.IP_PROP10) || clean(priceRow?.Производитель) || groups[1] || null,
     oldSections: groups,
     summary: stripHtml(row.IE_PREVIEW_TEXT) || null,

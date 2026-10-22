@@ -12,6 +12,7 @@ import {
   groupedResults,
   pruneVendors,
   results,
+  sectionStep,
   toQuery,
   update,
 } from '@/lib/catalogFilter'
@@ -27,6 +28,7 @@ import { Mascot } from '../Mascot/Mascot'
 import { Pagination } from '../Pagination/Pagination'
 import { ProductCard } from '../ProductCard/ProductCard'
 import { Reveal } from '../Reveal/Reveal'
+import { SectionTiles } from '../SectionTiles/SectionTiles'
 import { VendorTiles } from '../VendorTiles/VendorTiles'
 import styles from './CatalogFilter.module.css'
 
@@ -74,7 +76,10 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
   const groups = useMemo(() => groupedResults(items, view, lines), [items, view, lines])
   // В направлении сначала производители, как папки в Битриксе (решение владельца 22.10.2026).
   const tiles = useMemo(() => vendorTiles(items, facets, lines, view), [items, facets, lines, view])
-  const vendorStep = vendorStepOn(view, tiles)
+  // Оборудование: сначала типы, в типе с подразделами — подразделы плитками. Считается по выбору
+  // без подставленного производителя: иначе у плоттеров (только Canon) шаг бы пропускался.
+  const sections = useMemo(() => sectionStep(items, facets, state), [items, facets, state])
+  const vendorStep = !sections && vendorStepOn(view, tiles)
   const change = (patch: Partial<FilterState>) => commit(pruneVendors(items, update(state, patch)))
   const reset = () => commit(emptyFilter)
   const closePanel = useCallback(() => setPanelOpen(false), [])
@@ -104,9 +109,15 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
           state={view}
           auto={view !== state}
           vendorStep={vendorStep}
+          sectionStep={sections?.kind ?? null}
           onChange={change}
         />
-        {vendorStep ? (
+        {sections ? (
+          <SectionTiles
+            tiles={sections.tiles}
+            onPick={(type) => commit(update(state, { type }), true)}
+          />
+        ) : vendorStep ? (
           <VendorTiles
             tiles={tiles}
             logos={vendorLogos}
@@ -131,7 +142,7 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
             <Mascot pose="search" size="sm" className={styles.mascot} />
           </div>
         )}
-        {!groups && !vendorStep && (
+        {!sections && !groups && !vendorStep && (
           <Pagination
             page={found.page}
             pages={found.pages}

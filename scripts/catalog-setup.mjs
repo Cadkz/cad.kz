@@ -11,6 +11,7 @@
 // контакты и подвал по аудиту (основной номер, адрес офиса, описание компании);
 // топы продаж по местам и SCAD перед ЛИРОЙ, логотипы производителей для карточек (21.10.2026);
 // каталог как в Битриксе: САПР в «Архитектуре и BIM», АВС — лицензия или обновление (22.10.2026);
+// оборудование как в Битриксе: четыре типа, плоттеры и комплектующие, WideTEK (22.10.2026);
 // отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
@@ -25,6 +26,7 @@ import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
+import { setupEquipment } from '../src/lib/equipmentSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
 import { setupFooterAudit } from '../src/lib/footerSetup.ts'
 import { setupGeo5Catalog } from '../src/lib/geoSetup.ts'
@@ -208,6 +210,9 @@ try {
   const owner = await setupOwnerCatalog(payload)
   if (!owner) console.log('Каталог по замечаниям 22.10.2026 уже настроен.')
   else for (const line of owner) console.log(line)
+  const equipment = await setupEquipment(payload)
+  if (!equipment) console.log('Оборудование по замечаниям 22.10.2026 уже настроено.')
+  else for (const line of equipment) console.log(`Оборудование — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

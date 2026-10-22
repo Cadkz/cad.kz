@@ -128,7 +128,7 @@ test('по модели: тонер только к своему плоттер�
   const t60 = item(31, 'Canon colorWAVE T60', 'Canon', 5, [], hw)
   const tx = item(32, 'imagePROGRAF TX-3200', 'Canon', 5, [], hw)
   const toner = item(33, 'Тонер Canon/6692C004AA/colorWAVE T60 Toner BK', 'Canon', 6, [], hw)
-  const scanner = item(34, 'WideTEK 36CL', 'Image Access', 7, [], hw)
+  const scanner = item(34, 'WideTEK 36CL', 'WideTEK', 7, [], hw)
   const cartridge = item(35, 'картридж Océ ColorWave 650 Black', 'Canon', 6, [], hw)
   const pool = [t60, tx, toner, scanner, cartridge]
   assert.equal(crossFor([t60], pool, sections)[0], toner.id)

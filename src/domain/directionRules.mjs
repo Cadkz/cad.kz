@@ -66,8 +66,8 @@ export const DIRECTION_RULES = [
   },
   {
     key: 'widetek',
-    label: 'Image Access WideTEK — широкоформатные сканеры',
-    vendor: 'Image Access',
+    label: 'WideTEK — широкоформатные сканеры',
+    vendor: 'WideTEK',
     sections: ['wide-scanners'],
   },
   {

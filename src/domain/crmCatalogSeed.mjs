@@ -123,7 +123,7 @@ export const CRM_PINS = {
   pipes: ['Csoft Development', 'НТП Трубопровод'],
   viz: ['Autodesk', 'Chaos Group'],
   scanners: ['Artec 3D', 'Autodesk'],
-  'wide-format': ['Canon', 'Image Access'],
+  'wide-format': ['Canon', 'WideTEK'],
 }
 
 /** «С этим покупают» у новых разделов. */

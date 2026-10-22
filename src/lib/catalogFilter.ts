@@ -6,6 +6,7 @@
 import { compareInLine } from '../domain/catalogTree.mjs'
 import { compareInSection } from '../domain/priority.mjs'
 import type { CatalogGroup, CatalogItem, CatalogLine, Facet } from './catalog'
+import type { Picture } from './pictures'
 
 export type FilterState = {
   group: CatalogGroup | null
@@ -138,6 +139,8 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
       .sort(order)
 
   const typeGroup: CatalogGroup = state.group === 'service' ? 'service' : 'hardware'
+  // Открыт подраздел («Плоттеры») — в списке типов отмечен его родитель.
+  const typeSelected = parentType(facets, state.type)
   // Задачи показываются, только если сужают выдачу: когда каждая задача оставляет то же самое,
   // список галочек ничего не даёт (замечание владельца 12.10.2026 про GEO5).
   const taskList = fromCounts(taskCounts, state.tasks)
@@ -158,10 +161,11 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
       state.group === 'software'
         ? []
         : fromFacets(
-            facets.filter((f) => !f.isDirection && f.group === typeGroup),
+            facets.filter((f) => !f.isDirection && !f.parent && f.group === typeGroup),
             typeCounts,
-            state.type,
+            typeSelected,
           ),
+    typeSelected,
     // У услуг список производителей не нужен: там один CAD.kz (аудит 21.10.2026, К5).
     vendors:
       state.group === 'service'
@@ -170,6 +174,12 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
     // Задачи раскрываются после выбора направления или типа: так фильтр остаётся коротким.
     tasks: (state.direction || state.type) && narrows ? taskList : [],
   }
+}
+
+/** Верхний тип для выбранного раздела: у подраздела — его родитель, иначе он сам. */
+export function parentType(facets: Facet[], type: string | null) {
+  if (!type) return null
+  return facets.find((facet) => facet.slug === type)?.parent ?? type
 }
 
 /** Изменение одного условия. Смена группы или направления сбрасывает то, что стоит ниже по каскаду. */
@@ -333,4 +343,72 @@ export function toQuery(state: FilterState) {
   for (const task of state.tasks) query.append('task', task)
   if (state.page > 1) query.set('page', String(state.page))
   return query.toString()
+}
+
+/** Плитка типа оборудования или подраздела. Подпись собирает компонент (SectionTiles). */
+export type SectionTile = {
+  slug: string
+  title: string
+  /** Описание раздела из админки, если есть. */
+  summary: string | null
+  /** Иконка раздела — вместо фото, если у товаров раздела картинок нет. */
+  icon: string | null
+  /** Названия подразделов («Плоттеры», «Комплектующие») — у типа с подразделами. */
+  children: string[]
+  /** Производители раздела по порядку каталога. */
+  vendors: string[]
+  count: number
+  /** Фото первого по порядку раздела товара. */
+  picture: Picture | null
+}
+
+/** Какой шаг «плитками разделов» сейчас: типы оборудования или подразделы типа. */
+export type SectionStep = { kind: 'type' | 'sub'; tiles: SectionTile[] }
+
+function sectionTile(items: CatalogItem[], facets: Facet[], facet: Facet, base: FilterState) {
+  const list = items
+    .filter((item) => matches(item, { ...base, type: facet.slug }))
+    .sort(compareInSection(facet.slug, facet.pins ?? []))
+  const photo = list.find((item) => item.picture && item.picture.fit !== 'logo')
+  return {
+    slug: facet.slug,
+    title: facet.title,
+    summary: facet.summary ?? null,
+    icon: facet.icon ?? null,
+    children: facets.filter((child) => child.parent === facet.slug).map((child) => child.title),
+    vendors: [...new Set(list.flatMap((item) => (item.vendor ? [item.vendor] : [])))],
+    count: list.length,
+    picture: (photo ?? list.find((item) => item.picture))?.picture ?? null,
+  }
+}
+
+/**
+ * Оборудование как папки в Битриксе (замечание владельца 22.10.2026): во вкладке «Оборудование»
+ * сначала плитки типов (3D-сканеры, плоттеры, широкоформатные сканеры, рабочие станции), в типе
+ * с подразделами — плитки подразделов («Плоттеры», «Комплектующие»). Не нужен, когда выбран
+ * производитель или задачи, и когда плитка вышла бы одна.
+ */
+export function sectionStep(
+  items: CatalogItem[],
+  facets: Facet[],
+  state: FilterState,
+): SectionStep | null {
+  if (state.vendors.length || state.tasks.length || state.line) return null
+  const base: FilterState = { ...state, type: null, page: 1 }
+  const make = (kind: SectionStep['kind'], list: Facet[]) => {
+    const tiles = list
+      .map((facet) => sectionTile(items, facets, facet, base))
+      .filter((tile) => tile.count > 0)
+    return tiles.length > 1 ? { kind, tiles } : null
+  }
+  if (state.type)
+    return make(
+      'sub',
+      facets.filter((facet) => facet.parent === state.type),
+    )
+  if (state.group !== 'hardware' || state.direction) return null
+  return make(
+    'type',
+    facets.filter((f) => f.group === 'hardware' && !f.isDirection && !f.parent),
+  )
 }

@@ -67,7 +67,7 @@ test('регулярные выражения правил переводятс�
 const samples = [
   ['Artec 3D', 'hardware', 'Artec Leo'],
   ['Artec 3D', 'software', 'Artec Studio 19'],
-  ['Image Access', 'hardware', 'WideTEK 36CL'],
+  ['WideTEK', 'hardware', 'WideTEK 36CL'],
   ['Canon', 'hardware', 'Тонер colorWAVE T60 голубой'],
   ['Canon', 'hardware', 'Картридж Océ ColorWave 700'],
   ['Canon', 'hardware', 'imagePROGRAF TX-3200'],

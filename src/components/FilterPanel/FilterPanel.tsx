@@ -75,8 +75,10 @@ export function FilterPanel({ state, options, onChange, onReset }: Props) {
             <Chip
               key={option.value}
               look="option"
-              selected={state.type === option.value}
-              onClick={() => onChange({ type: state.type === option.value ? null : option.value })}
+              selected={options.typeSelected === option.value}
+              onClick={() =>
+                onChange({ type: options.typeSelected === option.value ? null : option.value })
+              }
             >
               {option.label}
             </Chip>

@@ -68,7 +68,7 @@ const sectionHints = {
   novye_versii10: { group: 'software' },
   novye_versii11: { group: 'software' },
   '3d_skanery_artec': { vendor: 'Artec 3D', group: 'hardware' },
-  WideTek: { vendor: 'Image Access', group: 'hardware' },
+  WideTek: { vendor: 'WideTEK', group: 'hardware' },
   ars_ps: { vendor: 'АРС-ПС', group: 'software' },
   chaos_group: { vendor: 'Chaos Group', group: 'software' },
   csoft_development: { vendor: 'Csoft Development', group: 'software' },

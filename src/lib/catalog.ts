@@ -61,6 +61,15 @@ export type Facet = {
   isDirection: boolean
   /** Производители, которые в этом разделе показываются первыми, по порядку. */
   pins?: string[]
+  /**
+   * Родительский раздел (slug): у подраздела («Плоттеры» внутри «Широкоформатных плоттеров»).
+   * В списке типов фильтра подразделов нет, они открываются плитками внутри родителя.
+   */
+  parent?: string
+  /** Короткое описание раздела: подпись плитки типа оборудования. */
+  summary?: string
+  /** Иконка раздела: на плитке типа, если у товаров нет фото. */
+  icon?: string
 }
 
 export type Direction = {
@@ -313,17 +322,23 @@ async function loadCatalog(): Promise<{
   // Без выбранного раздела: топы продаж первыми, дальше по названию.
   listed.sort(compareInSection())
 
-  const facets = sections.docs
-    .filter((section) => relId(section.parent) == null)
-    .map((section) => ({
+  // Подразделы тоже в списке (с родителем): по ним шаг «подраздел» плитками и путь «Назад».
+  const facets = sections.docs.map((section): Facet => {
+    const parent = sectionById.get(relId(section.parent) ?? -1)
+    const topGroup = sectionById.get(top.get(section.id) ?? section.id)?.menuGroup
+    return {
       slug: section.slug,
       title: section.title,
-      group: section.menuGroup,
+      group: topGroup ?? section.menuGroup,
       isDirection: Boolean(section.isDirection),
       pins: (section.pinnedManufacturers ?? [])
         .map((m) => vendorById.get(relId(m) ?? -1))
         .filter((title): title is string => Boolean(title)),
-    }))
+      ...(parent ? { parent: parent.slug } : {}),
+      ...(section.summary ? { summary: section.summary } : {}),
+      ...(section.icon ? { icon: section.icon } : {}),
+    }
+  })
   const lines = productLines.docs.flatMap((line) => {
     const vendor = vendorById.get(relId(line.manufacturer) ?? -1)
     return vendor
