@@ -1,6 +1,7 @@
 import type { Product } from '../../payload-types'
 import { compareInSection, priorityRank } from '../domain/priority.mjs'
 import type { SuggestEntry, SuggestIndex } from '../domain/suggest.mjs'
+import { catalogAvailable } from './equipmentResearch'
 import { familyLines } from './families'
 import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
@@ -65,6 +66,8 @@ async function buildIndex(): Promise<SuggestIndex> {
         pageView: true,
         line: true,
         picker: true,
+        status: true,
+        researchData: true,
       },
     }),
     payload.find({
@@ -100,6 +103,8 @@ async function buildIndex(): Promise<SuggestIndex> {
   }
 
   const ranked = products.docs.flatMap((product) => {
+    // Снятые модели в поиске не предлагаем, как и в каталоге (решение владельца 23.10.2026).
+    if (!catalogAvailable(product)) return []
     const vendorId = relId(product.manufacturer)
     const vendor = vendorId == null ? null : (vendorTitle.get(vendorId) ?? null)
     const lineId = relId(product.line)

@@ -10,6 +10,7 @@ import {
   facetOptions,
   fromSearch,
   groupedResults,
+  POPULAR,
   pruneVendors,
   results,
   sectionStep,
@@ -19,9 +20,10 @@ import {
 import { vendorStepOn, vendorTiles } from '@/lib/catalogVendors'
 import type { Picture } from '@/lib/pictures'
 import { positions } from '@/lib/plural'
+import type { PopularCardData } from '@/lib/popular'
 import { Button } from '../Button/Button'
-import { CatalogControls } from '../CatalogControls/CatalogControls'
 import { CatalogGroups } from '../CatalogGroups/CatalogGroups'
+import { CatalogPopular } from '../CatalogPopular/CatalogPopular'
 import { CatalogSelection } from '../CatalogSelection/CatalogSelection'
 import { CatalogSteps } from '../CatalogSteps/CatalogSteps'
 import { Drawer } from '../Drawer/Drawer'
@@ -41,6 +43,8 @@ type Props = {
   /** Логотипы производителей для плиток шага «производитель». */
   vendorLogos: Record<string, Picture>
   initial: FilterState
+  /** Плитки «Популярных решений» — те же, что в меню «Каталог». */
+  popular?: PopularCardData[]
 }
 
 /**
@@ -48,7 +52,7 @@ type Props = {
  * фильтрация мгновенная в браузере, выбор сохраняется в адресе страницы.
  * От 960 px фильтр слева, на телефоне — в выдвижной панели.
  */
-export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Props) {
+export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popular = [] }: Props) {
   // Ссылка с производителем, которого нет в направлении, тоже не даёт пустой экран.
   const [state, setState] = useState(() => pruneVendors(items, initial))
   const [panelOpen, setPanelOpen] = useState(false)
@@ -87,7 +91,16 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
     commit({ ...emptyFilter, group: state.group, direction: state.direction, type: state.type })
   const closePanel = useCallback(() => setPanelOpen(false), [])
 
-  const panel = <FilterPanel state={state} options={options} onChange={change} onReset={reset} />
+  const popularView = state.group === POPULAR
+  const panel = (
+    <FilterPanel
+      state={state}
+      options={options}
+      onChange={change}
+      onReset={reset}
+      hasPopular={popular.length > 0}
+    />
+  )
 
   return (
     <div className={styles.shell}>
@@ -95,15 +108,9 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
         {panel}
       </section>
       <div ref={top} className={styles.results}>
-        <CatalogControls
-          state={state}
-          groups={options.groups}
-          onChange={change}
-          showSort={!sections && !vendorStep}
-        />
         <div className={styles.head}>
           <p className={styles.count} aria-live="polite">
-            Найдено: {positions(found.total)}
+            {popularView ? 'Чаще всего выбирают' : `Найдено: ${positions(found.total)}`}
           </p>
           <span className={styles.mobileOnly}>
             <Button variant="outline" size="sm" onClick={() => setPanelOpen(true)}>
@@ -122,7 +129,9 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
           onChange={change}
         />
         <CatalogSelection state={state} groups={options.features} onChange={change} />
-        {sections ? (
+        {popularView ? (
+          <CatalogPopular cards={popular} />
+        ) : sections ? (
           <SectionTiles
             tiles={sections.tiles}
             onPick={(slug) =>
@@ -157,7 +166,7 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial }: Pr
             <Mascot pose="search" size="sm" className={styles.mascot} />
           </div>
         )}
-        {!sections && !groups && !vendorStep && (
+        {!popularView && !sections && !groups && !vendorStep && (
           <Pagination
             page={found.page}
             pages={found.pages}

@@ -95,3 +95,44 @@ test('курс с направлением не попадает в раздел
   const titles = column.vendors.flatMap((v) => v.lines.flatMap((l) => l.links.map((x) => x.title)))
   assert.deepEqual(titles, ['Civil 3D'])
 })
+
+test('Раздел с подразделами: сначала подразделы, как плитки в каталоге', () => {
+  const wide = {
+    id: 20,
+    slug: 'wide-format',
+    title: 'Широкоформатные плоттеры',
+    menuGroup: 'hardware',
+    isDirection: false,
+    children: [
+      { id: 21, slug: 'plotters', title: 'Плоттеры', menuGroup: 'hardware', isDirection: false },
+      { id: 22, slug: 'consumables', title: 'Комплектующие', menuGroup: 'hardware' },
+    ],
+  }
+  const item = (id, title, sub) => ({
+    id,
+    title,
+    main: 20,
+    sections: [20, sub],
+    href: `/p/${id}`,
+    vendor: 1,
+    group: 'hardware',
+  })
+  const [column] = menuColumns(
+    [wide],
+    [item(1, 'Плоттер', 21), item(2, 'Тонер', 22)],
+    [],
+    new Map([[1, 'Canon']]),
+    href,
+  )
+  assert.deepEqual(
+    column.vendors.map((v) => [v.title, v.allHref]),
+    [
+      ['Плоттеры', '/catalog?group=hardware&type=plotters'],
+      ['Комплектующие', '/catalog?group=hardware&type=consumables'],
+    ],
+  )
+  assert.deepEqual(
+    column.vendors[1].lines.flatMap((l) => l.links.map((x) => x.title)),
+    ['Тонер'],
+  )
+})

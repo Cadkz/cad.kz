@@ -1,6 +1,7 @@
 'use client'
 
-import type { FilterState, facetOptions } from '@/lib/catalogFilter'
+import { GROUP_LABELS, POPULAR_LABEL } from '@/domain/catalogNavigation.mjs'
+import { type FilterState, type facetOptions, POPULAR } from '@/lib/catalogFilter'
 import { Chip } from '../Chip/Chip'
 import { FilterChecks } from '../FilterChecks/FilterChecks'
 import styles from './FilterPanel.module.css'
@@ -11,6 +12,8 @@ type Props = {
   options: Options
   onChange: (change: Partial<FilterState>) => void
   onReset: () => void
+  /** Есть ли плитки «Популярных решений» (админка «Главная»): тогда и вкладка. */
+  hasPopular: boolean
 }
 
 function toggle(list: string[], value: string) {
@@ -28,12 +31,29 @@ const VENDORS_SHOWN = 8
  * Когда выбрано направление или тип, производителя выбирают карточками над товарами
  * (CatalogSteps), поэтому здесь его списка нет. Задачи свёрнуты: это уточнение, а не основной путь.
  */
-export function FilterPanel({ state, options, onChange, onReset }: Props) {
+export function FilterPanel({ state, options, onChange, onReset, hasPopular }: Props) {
   return (
     <div className={styles.panel}>
+      {/* Вкладки в том же порядке и с теми же названиями, что в меню «Каталог». */}
+      <fieldset className={styles.tabs}>
+        <legend className="visually-hidden">Группа каталога</legend>
+        <Chip selected={state.group === null} onClick={() => onChange({ group: null })}>
+          Все
+        </Chip>
+        {hasPopular && (
+          <Chip selected={state.group === POPULAR} onClick={() => onChange({ group: POPULAR })}>
+            {POPULAR_LABEL}
+          </Chip>
+        )}
+        {options.groups.map((group) => (
+          <Chip key={group} selected={state.group === group} onClick={() => onChange({ group })}>
+            {GROUP_LABELS[group]}
+          </Chip>
+        ))}
+      </fieldset>
       {options.directions.length > 0 && (
         <fieldset className={styles.group}>
-          <legend className={styles.title}>Категория программ</legend>
+          <legend className={styles.title}>Направление</legend>
           {options.directions.map((option) => (
             <Chip
               key={option.value}
@@ -73,15 +93,17 @@ export function FilterPanel({ state, options, onChange, onReset }: Props) {
           ))}
         </fieldset>
       )}
-      {(options.vendors.length > 1 || state.vendors.length > 0) && (
-        <FilterChecks
-          title="Производитель"
-          options={options.vendors}
-          selected={state.vendors}
-          onToggle={(value) => onChange({ vendors: toggle(state.vendors, value) })}
-          limit={VENDORS_SHOWN}
-        />
-      )}
+      {/* В направлении или типе производителя выбирают плитками над товарами (CatalogSteps). */}
+      {(!(state.direction || state.type) || state.vendors.length > 1) &&
+        options.vendors.length > 0 && (
+          <FilterChecks
+            title="Производитель"
+            options={options.vendors}
+            selected={state.vendors}
+            onToggle={(value) => onChange({ vendors: toggle(state.vendors, value) })}
+            limit={VENDORS_SHOWN}
+          />
+        )}
       {options.tasks.length > 0 && (
         <details className={styles.more} open={state.tasks.length > 0}>
           <summary className={styles.summary}>Уточнить по задачам</summary>

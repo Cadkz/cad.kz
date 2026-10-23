@@ -2,6 +2,7 @@
 
 import { MessageCircle } from 'lucide-react'
 import { type PointerEventHandler, useState } from 'react'
+import { POPULAR_LABEL } from '@/domain/catalogNavigation.mjs'
 import type { MenuTab } from '@/lib/navigation'
 import type { PopularCardData } from '@/lib/popular'
 import { MenuPopular } from '../MenuPopular/MenuPopular'
@@ -37,7 +38,7 @@ export function MegaMenu({
   onPointerLeave,
 }: Props) {
   const segments = [
-    ...(popular.length ? [{ key: POPULAR, label: 'Популярные решения' }] : []),
+    ...(popular.length ? [{ key: POPULAR, label: POPULAR_LABEL }] : []),
     ...tabs.map(({ key, label }) => ({ key, label })),
   ]
   const [active, setActive] = useState(segments[0]?.key ?? '')

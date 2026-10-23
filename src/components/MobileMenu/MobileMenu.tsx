@@ -4,6 +4,7 @@ import { ChevronDown, Menu } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
+import { POPULAR_LABEL } from '@/domain/catalogNavigation.mjs'
 import type { MenuTab } from '@/lib/navigation'
 import type { PopularCardData } from '@/lib/popular'
 import { aboutColumns, sectionLinks } from '@/lib/siteNav'
@@ -75,7 +76,7 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
       <Drawer open={open} onClose={close} title="Меню" side="left">
         <nav aria-label="Меню сайта" className={styles.nav}>
           {popular.length > 0 && (
-            <Group title="Популярные решения" name="mobile-menu" open>
+            <Group title={POPULAR_LABEL} name="mobile-menu" open>
               <MenuPopular cards={popular} onNavigate={close} compact />
             </Group>
           )}

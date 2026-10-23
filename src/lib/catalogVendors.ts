@@ -63,7 +63,6 @@ export function vendorTiles(
  * уже выбран, выбраны задачи или производитель в разделе один.
  */
 export function vendorStepOn(state: FilterState, tiles: VendorTile[]) {
-  if (state.sort && state.sort !== 'recommended') return false
   return (
     state.vendors.length === 0 &&
     state.tasks.length === 0 &&

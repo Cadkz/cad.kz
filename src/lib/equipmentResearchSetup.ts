@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 import research from '../domain/equipmentResearch.json' with { type: 'json' }
+import { KEEP_OWN_TEXT } from '../domain/ownerCatalogFixes.mjs'
 import { relId, relIds } from './rel'
 
 export const EQUIPMENT_RESEARCH_KEY = 'catalog-setup:equipment-research-v1'
@@ -35,7 +36,8 @@ export async function setupEquipmentResearch(payload: Payload): Promise<string[]
   for (const seed of research.products) {
     const category = research.categories.find((entry) => entry.order.includes(seed.slug))?.category
     // order нужен только для принадлежности к категории, порядок товаров не переносим.
-    if (!category || /iridium/i.test(seed.slug)) continue
+    // Iridium ждёт данных владельца; у SCAD и AutoCAD владелец оставил свои тексты (23.10.2026).
+    if (!category || /iridium/i.test(seed.slug) || KEEP_OWN_TEXT.includes(seed.slug)) continue
     const product = products.find((entry) => entry.slug === seed.slug)
     if (!product) {
       missing++

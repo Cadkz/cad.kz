@@ -1,7 +1,9 @@
 import type { Section, SiteSetting } from '../../payload-types'
+import { GROUP_LABELS } from '../domain/catalogNavigation.mjs'
 import { menuColumns } from '../domain/menu.mjs'
 import { priorityRank } from '../domain/priority.mjs'
 import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
+import { catalogAvailable } from './equipmentResearch'
 import { familyLines } from './families'
 import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
@@ -26,11 +28,27 @@ export type MenuColumn = {
 }
 export type MenuTab = { key: string; label: string; columns: MenuColumn[]; allHref: string }
 
-const groupLabels: Record<Section['menuGroup'], string> = {
-  software: 'Программное обеспечение',
-  hardware: 'Оборудование',
-  service: 'Услуги',
-}
+/** Те же названия, что у вкладок на странице каталога (src/domain/catalogNavigation.mjs). */
+const groupLabels: Record<Section['menuGroup'], string> = GROUP_LABELS
+
+/** Раздел для меню: только то, что нужно menuColumns. */
+const menuSection = ({
+  id,
+  slug,
+  title,
+  menuGroup,
+  isDirection,
+  pinnedManufacturers,
+  icon,
+}: Section) => ({
+  id,
+  icon: icon ?? null,
+  slug,
+  title,
+  menuGroup,
+  isDirection: Boolean(isDirection),
+  pins: (pinnedManufacturers ?? []).map((m) => relId(m) ?? 0),
+})
 
 const relId = (value: number | { id: number } | null | undefined) =>
   value == null ? null : typeof value === 'number' ? value : value.id
@@ -68,6 +86,8 @@ export async function getMenu(): Promise<MenuTab[]> {
         lineOrder: true,
         pageView: true,
         kind: true,
+        status: true,
+        researchData: true,
       },
     }),
     payload.find({
@@ -90,7 +110,8 @@ export async function getMenu(): Promise<MenuTab[]> {
   const groupOf = new Map(sections.docs.map((s) => [s.id, s.menuGroup]))
   const vendorLevel = new Map(manufacturers.docs.map((m) => [m.id, m.priority]))
   const vendorTitle = new Map(manufacturers.docs.map((m) => [m.id, m.title]))
-  const items = products.docs.map((product) => {
+  // Снятые с производства модели не показываются, как и в каталоге (решение владельца 23.10.2026).
+  const items = products.docs.filter(catalogAvailable).map((product) => {
     const vendor = relId(product.manufacturer)
     const main = relId(product.mainSection)
     const topMain = main == null ? null : (top.get(main) ?? main)
@@ -150,14 +171,12 @@ export async function getMenu(): Promise<MenuTab[]> {
     columns: menuColumns(
       sections.docs
         .filter((section) => section.menuGroup === group && relId(section.parent) == null)
-        .map(({ id, slug, title, menuGroup, isDirection, pinnedManufacturers, icon }) => ({
-          id,
-          icon: icon ?? null,
-          slug,
-          title,
-          menuGroup,
-          isDirection: Boolean(isDirection),
-          pins: (pinnedManufacturers ?? []).map((m) => relId(m) ?? 0),
+        .map((section) => ({
+          ...menuSection(section),
+          // Подразделы («Плоттеры», «Расходные материалы») — шагом в меню, как плитки в каталоге.
+          children: sections.docs
+            .filter((child) => relId(child.parent) === section.id)
+            .map(menuSection),
         })),
       menuItems,
       lineData,

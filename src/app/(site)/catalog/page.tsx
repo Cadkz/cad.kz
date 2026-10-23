@@ -4,6 +4,7 @@ import { Container } from '@/components/Container/Container'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
 import { clientItems, getCatalog } from '@/lib/catalog'
 import { fromParams } from '@/lib/catalogFilter'
+import { getMenuPopular } from '@/lib/menuPopular'
 import { CATALOG_PATH } from '@/lib/navigationHrefs'
 import { pageMetadata } from '@/lib/seo'
 
@@ -19,7 +20,11 @@ export const metadata = pageMetadata({
 
 /** Каталог — шаблон «Каталог»: фильтр слева, карточки справа, на телефоне фильтр в панели. */
 export default async function CatalogPage({ searchParams }: Props) {
-  const [catalog, params] = await Promise.all([getCatalog(), searchParams])
+  const [catalog, popular, params] = await Promise.all([
+    getCatalog(),
+    getMenuPopular(),
+    searchParams,
+  ])
   const initial = fromParams(params)
   return (
     <main>
@@ -27,7 +32,7 @@ export default async function CatalogPage({ searchParams }: Props) {
         <Breadcrumbs items={[{ title: 'Главная', href: '/' }, { title: 'Каталог' }]} />
         <PageIntro
           title="Каталог"
-          lead="Выберите программы, оборудование или услуги, затем категорию. Уточните выбор фильтрами; если знаете название — воспользуйтесь поиском в шапке."
+          lead="Выберите направление, затем производителя. Не знаете, что подойдёт, — спросите Кадди или напишите в WhatsApp."
         />
         <CatalogFilter
           key={JSON.stringify(initial)}
@@ -36,6 +41,7 @@ export default async function CatalogPage({ searchParams }: Props) {
           lines={catalog.lines}
           vendorLogos={catalog.vendorLogos}
           initial={initial}
+          popular={popular}
         />
       </Container>
     </main>

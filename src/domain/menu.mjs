@@ -24,7 +24,7 @@ export function menuTitle(title) {
 
 /**
  * @typedef {{ id: number, slug: string, title: string, menuGroup: string, isDirection: boolean,
- *   pins?: number[], icon?: string | null }} MenuSection
+ *   pins?: number[], icon?: string | null, children?: MenuSection[] }} MenuSection
  * @typedef {{ id: number, title: string, main: number | null, sections: number[], href: string,
  *   rank?: number, vendor?: number | null, line?: number | null, lineOrder?: number | null,
  *   group?: string }} MenuProduct
@@ -77,9 +77,12 @@ export function menuColumns(sections, products, lines, vendorTitles, hrefFor, li
         }))
         // Порядок до линеек: «основной раздел выше» решает между товарами одного уровня.
         .sort(compareInSection(section.id, section.pins ?? []))
-      const vendors = vendorTree(inSection, lines, vendorTitles, section.pins ?? []).map(
-        (vendor) => {
-          const vendorFilter = vendor.key === OTHER ? filter : { ...filter, vendor: vendor.title }
+      const vendorCards = (
+        /** @type {typeof inSection} */ list,
+        /** @type {Record<string, string>} */ base = filter,
+      ) =>
+        vendorTree(list, lines, vendorTitles, section.pins ?? []).map((vendor) => {
+          const vendorFilter = vendor.key === OTHER ? base : { ...base, vendor: vendor.title }
           return {
             key: vendor.key,
             title: vendor.title,
@@ -97,8 +100,42 @@ export function menuColumns(sections, products, lines, vendorTitles, hrefFor, li
               ),
             })),
           }
-        },
+        })
+      // Подразделы («Плоттеры», «Расходные материалы») — первым шагом, как плитки в каталоге
+      // (решение владельца 23.10.2026: меню и каталог устроены одинаково).
+      const children = (section.children ?? []).flatMap((child) => {
+        const inChild = inSection.filter((product) => product.sections.includes(child.id))
+        if (!inChild.length) return []
+        const childFilter = { group: section.menuGroup, type: child.slug }
+        const cards = vendorCards(inChild, childFilter)
+        return [
+          {
+            key: `section:${child.slug}`,
+            title: child.title,
+            allHref: hrefFor(childFilter),
+            // Один производитель — его линейки; несколько — по линейке на производителя.
+            lines:
+              cards.length === 1
+                ? (cards[0]?.lines ?? [])
+                : cards.map((card) => ({
+                    key: card.key,
+                    title: card.title,
+                    links: card.lines.flatMap((line) => line.links).slice(0, limit),
+                    more: card.lines.some((line) => line.more) || card.lines.length > 1,
+                    allHref: card.allHref,
+                  })),
+          },
+        ]
+      })
+      const inChildren = new Set(
+        (section.children ?? []).flatMap((child) =>
+          inSection.filter((p) => p.sections.includes(child.id)).map((p) => p.id),
+        ),
       )
+      const vendors =
+        children.length > 1
+          ? [...children, ...vendorCards(inSection.filter((p) => !inChildren.has(p.id)))]
+          : vendorCards(inSection)
       return {
         title: section.title,
         icon: section.icon ?? null,

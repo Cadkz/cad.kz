@@ -3,10 +3,10 @@ import { registerHooks } from 'node:module'
 import test from 'node:test'
 import facets from '../src/domain/equipmentFacets.json' with { type: 'json' }
 import source from '../src/domain/equipmentResearch.json' with { type: 'json' }
+import { KEEP_OWN_TEXT } from '../src/domain/ownerCatalogFixes.mjs'
 import {
   autoVendor,
   emptyFilter,
-  facetOptions,
   featureOptions,
   fromParams,
   fromSearch,
@@ -34,7 +34,6 @@ const hooks = registerHooks({
 const { setupEquipmentResearch, EQUIPMENT_RESEARCH_KEY, researchDescription } = await import(
   '../src/lib/equipmentResearchSetup.ts'
 )
-const { vendorStepOn } = await import('../src/lib/catalogVendors.ts')
 hooks.deregister()
 
 const items = source.products.map((seed, index) => {
@@ -151,34 +150,16 @@ test('Смена раздела сбрасывает характеристик�
   assert.equal(update(state, { features: {} }).page, 1)
 })
 
-test('scanners использует 3d-scanners; ПО показывает фильтры, Iridium и родитель — нет', () => {
+test('scanners использует 3d-scanners; у ПО, Iridium и родителя фильтров нет', () => {
   assert.equal(
     featureOptions(items, { ...emptyFilter, type: 'scanners' })[0].key,
     '3d-scanners.object_size',
   )
-  assert.equal(
-    featureOptions(items, { ...emptyFilter, group: 'software' })[0].key,
-    'software.license',
-  )
-  assert.equal(
-    featureOptions(items, { ...emptyFilter, direction: 'machine' })[0].key,
-    'software.license',
-  )
+  // Решение владельца 23.10.2026: у программ фильтра по характеристикам нет.
+  assert.deepEqual(featureOptions(items, { ...emptyFilter, group: 'software' }), [])
+  assert.deepEqual(featureOptions(items, { ...emptyFilter, direction: 'machine' }), [])
   for (const type of ['wide-format', 'workstations', null])
     assert.deepEqual(featureOptions(items, { ...emptyFilter, type }), [])
-})
-
-test('Фильтр ПО находит скрытый участник семейства и пропускает шаг производителей', () => {
-  const software = items
-    .filter((item) => item.group === 'software')
-    .map((item) => ({ ...item, scope: 'detail' }))
-  const state = features(
-    { ...emptyFilter, group: 'software' },
-    { 'software.license': ['Подписка'] },
-  )
-  assert.ok(results(software, state).total > 0)
-  assert.equal(vendorStepOn(state, [{}, {}]), false)
-  assert.ok(facetOptions(software, [], { ...emptyFilter, group: 'software' }).features.length > 0)
 })
 
 test('Характеристики не подставляют случайного единственного производителя', () => {
@@ -278,14 +259,15 @@ test('Разовая настройка сохраняет названия, п�
   const f = fixture()
   const before = f.stores.products.map(({ title, lineOrder }) => ({ title, lineOrder }))
   const report = await setupEquipmentResearch(f.payload)
-  assert.equal(f.stores['assistant-knowledge'].length, 54)
+  // SCAD и AutoCAD владелец оставил со своими текстами (23.10.2026).
+  assert.equal(f.stores['assistant-knowledge'].length, 54 - KEEP_OWN_TEXT.length)
   assert.equal(f.stores['import-runs'][0].idempotencyKey, EQUIPMENT_RESEARCH_KEY)
   assert.ok(report.some((line) => line.startsWith('Название не меняли:')))
   assert.deepEqual(
     f.stores.products.map(({ title, lineOrder }) => ({ title, lineOrder })),
     before,
   )
-  for (const product of f.stores.products) {
+  for (const product of f.stores.products.filter((p) => !KEEP_OWN_TEXT.includes(p.slug))) {
     assert.equal(product.mainSection, 4)
     assert.deepEqual(product.extraSections, [5])
     assert.deepEqual(product.properties[0], { name: 'Артикул', value: 'ABC' })
@@ -305,7 +287,7 @@ test('Повтор после сбоя не дублирует сравнени�
   assert.equal(f.stores['import-runs'].length, 0)
   f.fail(null)
   await setupEquipmentResearch(f.payload)
-  assert.equal(f.stores['assistant-knowledge'].length, 54)
+  assert.equal(f.stores['assistant-knowledge'].length, 54 - KEEP_OWN_TEXT.length)
   const missing = fixture()
   missing.stores.products.pop()
   const report = await setupEquipmentResearch(missing.payload)

@@ -5,15 +5,18 @@
  */
 
 import { featureDefinition, featureLabel, featureValue } from '../domain/catalogFeatureValues.mjs'
-import { type CatalogSort, catalogSort, compareCatalog } from '../domain/catalogSort.mjs'
 import { compareInLine } from '../domain/catalogTree.mjs'
 import equipmentFacets from '../domain/equipmentFacets.json' with { type: 'json' }
 import { compareInSection } from '../domain/priority.mjs'
 import type { CatalogGroup, CatalogItem, CatalogLine, Facet } from './catalog'
 import type { Picture } from './pictures'
 
+/** «Популярные решения» — первая вкладка, как в меню «Каталог»: плитки вместо товаров. */
+export const POPULAR = 'popular'
+export type CatalogView = CatalogGroup | typeof POPULAR
+
 export type FilterState = {
-  group: CatalogGroup | null
+  group: CatalogView | null
   direction: string | null
   type: string | null
   vendors: string[]
@@ -22,7 +25,6 @@ export type FilterState = {
   tasks: string[]
   features: Record<string, string[]>
   page: number
-  sort: CatalogSort
 }
 
 type Key = 'group' | 'direction' | 'type' | 'vendors' | 'line' | 'tasks' | `feature:${string}`
@@ -37,10 +39,10 @@ export const emptyFilter: FilterState = {
   tasks: [],
   features: {},
   page: 1,
-  sort: 'recommended',
 }
 
 const groups: CatalogGroup[] = ['software', 'hardware', 'service']
+const views: CatalogView[] = [POPULAR, ...groups]
 const catalogFeatures = equipmentFacets.map((category) => ({
   ...category,
   filters: category.filters.map((filter) => featureDefinition(category.category, filter)),
@@ -103,13 +105,15 @@ export function matches(item: CatalogItem, state: FilterState, ignore?: Key) {
   return true
 }
 
-/** 3D-сканеры в CMS называются scanners; родительские плитки не получают фильтров детей. */
-function featureCategory(state: Pick<FilterState, 'type' | 'group' | 'direction'>) {
-  const category =
-    state.type === 'scanners'
-      ? '3d-scanners'
-      : (state.type ??
-        (state.group === 'software' || (state.direction && !state.group) ? 'software' : null))
+/**
+ * Фильтр по характеристикам — только у оборудования. 3D-сканеры в CMS называются scanners;
+ * родительские плитки не получают фильтров детей. У программ его нет (решение владельца
+ * 23.10.2026): данные исследования есть у 11 программ из сотен, галочка «Локальная» прятала бы
+ * все остальные.
+ */
+function featureCategory(state: Pick<FilterState, 'type'>) {
+  const category = state.type === 'scanners' ? '3d-scanners' : state.type
+  if (!category || category === 'software') return undefined
   return catalogFeatures.find((entry) => entry.category === category)
 }
 
@@ -226,8 +230,10 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
   return {
     features: featureOptions(items, state),
     groups: groups.filter((group) => (groupCounts.get(group) ?? 0) > 0),
+    // Как в меню «Каталог»: направление — раздел программ, тип — оборудования или услуг; открыт
+    // один — другой список не показываем.
     directions:
-      state.group === null || state.group === 'software'
+      (state.group === null || state.group === 'software') && !state.type
         ? fromFacets(
             facets.filter((f) => f.isDirection),
             directionCounts,
@@ -236,7 +242,7 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
         : [],
     typeGroup,
     types:
-      state.group === 'software'
+      state.group === 'software' || state.group === POPULAR || state.direction
         ? []
         : fromFacets(
             facets.filter((f) => !f.isDirection && !f.parent && f.group === typeGroup),
@@ -271,10 +277,7 @@ export function update(state: FilterState, change: Partial<FilterState>): Filter
   }
   if ('direction' in change || 'type' in change) next.tasks = []
   if ('group' in change || 'direction' in change || 'type' in change) next.features = {}
-  if ('group' in change || 'direction' in change || 'type' in change) {
-    next.sort = 'recommended'
-    next.line = null
-  }
+  if ('group' in change || 'direction' in change || 'type' in change) next.line = null
   // Линейка принадлежит одному производителю: другой выбор производителя её сбрасывает.
   if (('group' in change || 'vendors' in change) && !('line' in change)) next.line = null
   return next
@@ -309,7 +312,6 @@ export function results(items: CatalogItem[], state: FilterState, facets: Facet[
   }
   // В линейке основа первой, потом пакеты и модули («Порядок в линейке»).
   if (state.line) list.sort(compareInLine)
-  if (state.sort && state.sort !== 'recommended') list.sort(compareCatalog(state.sort))
   const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE))
   const page = Math.min(state.page, pages)
   return {
@@ -353,7 +355,7 @@ export function groupedResults(
   state: FilterState,
   lines: CatalogLine[],
 ): ResultGroup[] | null {
-  if (!vendorView(state) || (state.sort && state.sort !== 'recommended')) return null
+  if (!vendorView(state)) return null
   const list = items.filter((item) => matches(item, state))
   const own = lines
     .filter((line) => line.vendor === state.vendors[0])
@@ -398,11 +400,7 @@ export function fromParams(params: Record<string, string | string[] | undefined>
   const group = one('group')
   const page = Number(one('page'))
   const features: Record<string, string[]> = {}
-  const category = featureCategory({
-    group: groups.includes(group as CatalogGroup) ? (group as CatalogGroup) : null,
-    type: one('type'),
-    direction: one('direction'),
-  })
+  const category = featureCategory({ type: one('type') })
   for (const filter of category?.filters ?? []) {
     const key = `${category?.category}.${filter.key}`
     const selected = [
@@ -413,7 +411,7 @@ export function fromParams(params: Record<string, string | string[] | undefined>
     if (selected.length) features[key] = selected
   }
   return {
-    group: groups.includes(group as CatalogGroup) ? (group as CatalogGroup) : null,
+    group: views.includes(group as CatalogView) ? (group as CatalogView) : null,
     direction: (() => {
       const direction = one('direction')
       return direction ? (DIRECTION_ALIASES[direction] ?? direction) : null
@@ -423,7 +421,6 @@ export function fromParams(params: Record<string, string | string[] | undefined>
     line: one('line'),
     tasks: many('task'),
     features,
-    sort: catalogSort(one('sort')),
     page: Number.isInteger(page) && page > 0 ? page : 1,
   }
 }
@@ -447,7 +444,6 @@ export function toQuery(state: FilterState) {
   for (const [key, values] of Object.entries(state.features ?? {}))
     for (const value of values) query.append(`spec.${key}`, value)
   if (state.page > 1) query.set('page', String(state.page))
-  if (state.sort && state.sort !== 'recommended') query.set('sort', state.sort)
   return query.toString()
 }
 
@@ -512,11 +508,8 @@ export function sectionStep(
   state: FilterState,
 ): SectionStep | null {
   if (state.vendors.length || state.tasks.length || state.line) return null
-  if (
-    (state.sort && state.sort !== 'recommended') ||
-    Object.values(state.features ?? {}).some((values) => values.length)
-  )
-    return null
+  if (state.group === POPULAR) return null
+  if (Object.values(state.features ?? {}).some((values) => values.length)) return null
   const base: FilterState = { ...state, type: null, page: 1 }
   const make = (kind: SectionStep['kind'], list: Facet[]) => {
     const tiles = list
