@@ -28,6 +28,7 @@
 }
 
 .item {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -47,101 +48,197 @@
     color var(--duration-fast) var(--ease);
 }
 
+/* Без якорей (старые браузеры): у пункта своя линия, прорисовывается слева направо при
+   наведении и стоит под открытым разделом; подложка — как раньше. */
+.item::after {
+  content: "";
+  position: absolute;
+  right: var(--space-3);
+  bottom: 0;
+  left: var(--space-3);
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-liquid);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--duration-draw-line) var(--ease-reveal);
+}
+
+.item:hover::after,
+.item:focus-visible::after,
+.item[aria-current="page"]::after,
+.item[aria-expanded="true"]::after {
+  transform: none;
+  transform-origin: left;
+}
+
 .item:hover,
 .item[aria-expanded="true"] {
   background: var(--color-hover);
   color: var(--color-text);
 }
 
-.chevron {
-  transition: transform var(--duration-base) var(--ease);
-}
-
-.item[aria-expanded="true"] .chevron {
-  transform: rotate(180deg);
-}
-
-.dropWrap {
-  position: relative;
-}
-
-/* Панель всегда в разметке: закрытие тоже плавное, но быстрее открытия. До 1200 px она
-   выровнена по правому краю пункта, иначе выходит за экран и даёт прокрутку вбок. */
-.dropdown {
-  position: absolute;
-  top: calc(100% + var(--space-1));
-  right: 0;
-  display: flex;
-  gap: var(--space-6);
-  padding: var(--space-4);
-  border-radius: var(--radius-panel);
-  background: var(--color-popover);
-  box-shadow: var(--shadow-popover);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(calc(-1 * var(--space-1)));
-  transition:
-    opacity var(--duration-exit) var(--ease),
-    transform var(--duration-exit) var(--ease),
-    visibility 0s linear var(--duration-exit);
-}
-
-@media (min-width: 1200px) {
-  .dropdown {
-    right: auto;
-    left: 0;
-  }
-}
-
-.dropdown[data-open="true"] {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-  transition:
-    opacity var(--duration-enter) var(--ease),
-    transform var(--duration-enter) var(--ease),
-    visibility 0s;
-}
-
-@supports (backdrop-filter: blur(1px)) {
-  .dropdown {
-    backdrop-filter: var(--blur-glass);
-  }
-}
-
-.column {
-  display: flex;
-  flex-direction: column;
-  min-width: max-content;
-}
-
-.columnTitle {
-  margin-bottom: var(--space-1);
-  padding: var(--space-1) var(--space-3);
-  color: var(--color-text-muted);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-}
-
-.dropLink {
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
+.item[aria-current="page"] {
   color: var(--color-text);
-  font-size: var(--text-sm);
-  transition: background-color var(--duration-fast) var(--ease);
 }
 
-.dropLink:hover {
-  background: var(--color-hover);
+.pill,
+.line {
+  display: none;
 }
 
-.contacts {
-  padding-left: var(--space-6);
-  border-left: 1px solid var(--color-hairline);
-}
+/* Жидкая метка (24.10.2026). Линия и подложка — по одному элементу на всю строку, привязаны
+   якорем к выделенному пункту (data-line / data-pill ставит SubNav). Когда пункт меняется,
+   передний край перетекает быстро (--duration-liquid-lead), задний — позже и с отдачей
+   (--duration-liquid-tail): линия на миг тянется, как капля. Направление — в data-line / data-pill
+   у строки: right, left, enter (появиться на месте), leave (исчезнуть), still. */
+@supports (anchor-name: --a) {
+  .nav {
+    position: relative;
+    isolation: isolate;
+  }
 
-.contacts > div {
-  padding: var(--space-1) var(--space-3);
+  .item::after {
+    display: none;
+  }
+
+  .item:hover,
+  .item[aria-expanded="true"] {
+    background: none;
+  }
+
+  .item[data-line="true"] {
+    anchor-name: --subnav-line;
+  }
+
+  .item[data-pill="true"] {
+    anchor-name: --subnav-pill;
+  }
+
+  .item[data-line="true"][data-pill="true"] {
+    anchor-name: --subnav-line, --subnav-pill;
+  }
+
+  .item[data-line="true"],
+  .item[data-pill="true"] {
+    color: var(--color-text);
+  }
+
+  .pill,
+  .line {
+    display: block;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  /* Мягкая подложка под пунктом с указателем. Под текстом: строка — свой слой (isolation). */
+  .pill {
+    z-index: var(--z-below);
+    top: anchor(--subnav-pill top, 0);
+    right: anchor(--subnav-pill right, 100%);
+    bottom: anchor(--subnav-pill bottom, 0);
+    left: anchor(--subnav-pill left, 0);
+    border-radius: var(--radius-sm);
+    background: var(--color-hover);
+    opacity: 0;
+    transform: scale(var(--scale-menu-card));
+  }
+
+  .nav[data-hover="true"] .pill {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Линия под текстом пункта (без внутренних полей пункта), с переливом синего в голубой. */
+  .line {
+    top: calc(anchor(--subnav-line bottom, 0) - 2px);
+    right: calc(anchor(--subnav-line right, 100%) + var(--space-3));
+    left: calc(anchor(--subnav-line left, 0) + var(--space-3));
+    height: 2px;
+    border-radius: var(--radius-pill);
+    background: var(--gradient-liquid);
+    transform: scaleX(0);
+    transform-origin: right;
+  }
+
+  .nav[data-lit="true"] .line {
+    transform: none;
+    transform-origin: left;
+  }
+
+  /* Появиться на месте: края встают сразу, линия прорисовывается слева направо, подложка
+     набухает из середины с отдачей. */
+  .nav[data-line="enter"] .line,
+  .nav[data-line="still"] .line {
+    transition:
+      transform var(--duration-draw-line) var(--ease-reveal),
+      left 0s,
+      right 0s,
+      top 0s;
+  }
+
+  .nav[data-pill="enter"] .pill,
+  .nav[data-pill="still"] .pill {
+    transition:
+      opacity var(--duration-enter) var(--ease),
+      transform var(--duration-liquid-tail) var(--ease-liquid-tail),
+      inset 0s;
+  }
+
+  /* Исчезнуть: линия стирается к правому краю, подложка гаснет; края держатся на месте,
+     пока не исчезнут (задержка), иначе метка прыгнула бы к краю строки. */
+  .nav[data-line="leave"] .line {
+    transition:
+      transform var(--duration-draw-line) var(--ease-reveal),
+      left 0s linear var(--duration-draw-line),
+      right 0s linear var(--duration-draw-line),
+      top 0s linear var(--duration-draw-line);
+  }
+
+  .nav[data-pill="leave"] .pill {
+    transition:
+      opacity var(--duration-exit) var(--ease),
+      transform var(--duration-exit) var(--ease),
+      inset 0s linear var(--duration-exit);
+  }
+
+  /* Перетекание вправо: правый край впереди, левый догоняет. */
+  .nav[data-line="right"] .line {
+    transition:
+      transform var(--duration-draw-line) var(--ease-reveal),
+      right var(--duration-liquid-lead) var(--ease-liquid-lead),
+      left var(--duration-liquid-tail) var(--ease-liquid-tail) var(--delay-liquid-tail),
+      top 0s;
+  }
+
+  .nav[data-pill="right"] .pill {
+    transition:
+      opacity var(--duration-enter) var(--ease),
+      transform var(--duration-enter) var(--ease),
+      top 0s,
+      bottom 0s,
+      right var(--duration-liquid-lead) var(--ease-liquid-lead),
+      left var(--duration-liquid-tail) var(--ease-liquid-tail) var(--delay-liquid-tail);
+  }
+
+  /* Перетекание влево: левый край впереди, правый догоняет. */
+  .nav[data-line="left"] .line {
+    transition:
+      transform var(--duration-draw-line) var(--ease-reveal),
+      left var(--duration-liquid-lead) var(--ease-liquid-lead),
+      right var(--duration-liquid-tail) var(--ease-liquid-tail) var(--delay-liquid-tail),
+      top 0s;
+  }
+
+  .nav[data-pill="left"] .pill {
+    transition:
+      opacity var(--duration-enter) var(--ease),
+      transform var(--duration-enter) var(--ease),
+      top 0s,
+      bottom 0s,
+      left var(--duration-liquid-lead) var(--ease-liquid-lead),
+      right var(--duration-liquid-tail) var(--ease-liquid-tail) var(--delay-liquid-tail);
+  }
 }
 
 .phone {

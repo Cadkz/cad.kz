@@ -46,3 +46,44 @@
 .all:hover {
   color: var(--color-navy);
 }
+
+/* В мегаменю плитки собираются волной, как карточки шагов раздела (MenuDrill). В меню телефона
+   (compact) — без волны: строка и так раскрывается. */
+[data-open="true"] .root .grid > li {
+  --wave: 0;
+  animation: menuCard var(--duration-menu-card) var(--ease-reveal) backwards;
+  animation-delay: calc(var(--delay-menu-card) * var(--wave));
+}
+
+.root .grid > li:nth-child(2) {
+  --wave: 1;
+}
+.root .grid > li:nth-child(3) {
+  --wave: 2;
+}
+.root .grid > li:nth-child(4) {
+  --wave: 3;
+}
+.root .grid > li:nth-child(5) {
+  --wave: 4;
+}
+.root .grid > li:nth-child(6) {
+  --wave: 5;
+}
+.root .grid > li:nth-child(7) {
+  --wave: 6;
+}
+.root .grid > li:nth-child(8) {
+  --wave: 7;
+}
+.root .grid > li:nth-child(n + 9) {
+  --wave: 8;
+}
+
+@keyframes menuCard {
+  from {
+    opacity: 0;
+    filter: blur(var(--blur-menu-card));
+    transform: scale(var(--scale-menu-card));
+  }
+}
