@@ -14,8 +14,10 @@ import { QueryPresetsColumnsCell as QueryPresetsColumnsCell_2b8867833a34864a02dd
 import { QueryPresetsColumnField as QueryPresetsColumnField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsGroupByCell as QueryPresetsGroupByCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsGroupByField as QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
+import { AdminNav as AdminNav_a2a5d49c997f53d7eefb70c0e9b9398d } from '../../../components/AdminNav/AdminNav'
 import { AdminNavTools as AdminNavTools_2fc225efb0c4d89686d274717840deee } from '../../../components/AdminNavTools/AdminNavTools'
 import { AdminHome as AdminHome_d6cd5d3bc8e724441d928f41cd54e087 } from '../../../components/AdminHome/AdminHome'
+import { AdminNavMain as AdminNavMain_78ea0e3db77afc64d43b47d4136ff346 } from '../../../components/AdminNavMain/AdminNavMain'
 import { CatalogTreeView as CatalogTreeView_63578c839f029a4292cdac2f6a88bcc2 } from '../../../components/CatalogTreeView/CatalogTreeView'
 import { BitrixImportView as BitrixImportView_31f0a3e387f2bd8b4181ac01e9918aee } from '../../../components/BitrixImportView/BitrixImportView'
 import { PriceListView as PriceListView_94d00816e844af2d5fa87147e72feb4f } from '../../../components/PriceListView/PriceListView'
@@ -47,8 +49,10 @@ export const importMap = {
   "@payloadcms/next/client#QueryPresetsColumnField": QueryPresetsColumnField_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsGroupByCell": QueryPresetsGroupByCell_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsGroupByField": QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40,
+  "/components/AdminNav/AdminNav#AdminNav": AdminNav_a2a5d49c997f53d7eefb70c0e9b9398d,
   "/components/AdminNavTools/AdminNavTools#AdminNavTools": AdminNavTools_2fc225efb0c4d89686d274717840deee,
   "/components/AdminHome/AdminHome#AdminHome": AdminHome_d6cd5d3bc8e724441d928f41cd54e087,
+  "/components/AdminNavMain/AdminNavMain#AdminNavMain": AdminNavMain_78ea0e3db77afc64d43b47d4136ff346,
   "/components/CatalogTreeView/CatalogTreeView#CatalogTreeView": CatalogTreeView_63578c839f029a4292cdac2f6a88bcc2,
   "/components/BitrixImportView/BitrixImportView#BitrixImportView": BitrixImportView_31f0a3e387f2bd8b4181ac01e9918aee,
   "/components/PriceListView/PriceListView#PriceListView": PriceListView_94d00816e844af2d5fa87147e72feb4f,

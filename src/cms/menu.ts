@@ -20,13 +20,13 @@ import { globalWithHistory, withHistory } from './history'
  */
 const MENU: { group: string; collections: CollectionConfig[]; globals: GlobalConfig[] }[] = [
   {
-    group: 'Каталог',
+    group: 'Каталог списками',
     collections: [products, offers, sections, manufacturers, productLines, sectionRules],
     globals: [],
   },
   { group: 'Цены', collections: [exchangeRates], globals: [pricingSettings] },
   {
-    group: 'Публикации',
+    group: 'Сайт',
     collections: [publications, topics, pages, media],
     globals: [homePage, siteSettings],
   },

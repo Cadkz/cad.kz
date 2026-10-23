@@ -43,7 +43,17 @@ export type TreeProduct = {
   updatedAt: string
 }
 
-export type CatalogTreeData = { vendors: TreeVendor[]; products: TreeProduct[] }
+export type CatalogTreeData = {
+  vendors: TreeVendor[]
+  products: TreeProduct[]
+  /**
+   * Старые демокарточки (до переноса из Битрикса, «демо:» в служебном ключе): скрыты, адрес
+   * «demo-…». В дереве не показываются, чтобы не путать с настоящими товарами того же названия.
+   */
+  demoCount: number
+}
+
+const isDemo = (legacyKey: string | null | undefined) => String(legacyKey ?? '').startsWith('demo:')
 
 /** Всё дерево одним запросом: ~800 товаров по нескольку коротких полей. */
 export async function loadCatalogTree(payload: Payload): Promise<CatalogTreeData> {
@@ -67,6 +77,7 @@ export async function loadCatalogTree(payload: Payload): Promise<CatalogTreeData
         topOrder: true,
         pageView: true,
         researchData: true,
+        legacyKey: true,
         updatedAt: true,
       },
     }),
@@ -82,7 +93,8 @@ export async function loadCatalogTree(payload: Payload): Promise<CatalogTreeData
   const priced = new Set(
     offers.docs.flatMap((offer) => (offer.amount ? [relId(offer.product)] : [])),
   )
-  const rows: TreeProduct[] = products.docs.map((product) => {
+  const real = products.docs.filter((product) => !isDemo(product.legacyKey))
+  const rows: TreeProduct[] = real.map((product) => {
     const shown = availability({
       research: readResearch(product.researchData)?.status ?? null,
       priced: priced.has(product.id),
@@ -121,6 +133,7 @@ export async function loadCatalogTree(payload: Payload): Promise<CatalogTreeData
       counts: counts.get(vendor.id) ?? { software: 0, hardware: 0, service: 0 },
     })),
     products: rows,
+    demoCount: products.docs.length - real.length,
   }
 }
 

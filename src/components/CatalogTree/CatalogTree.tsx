@@ -85,6 +85,16 @@ export function CatalogTree({ data }: { data: CatalogTreeData }) {
 
       {showProducts ? <CatalogTreeProducts tree={tree} /> : <CatalogTreeVendors tree={tree} />}
 
+      {!showProducts && data.demoCount > 0 && (
+        <p className={styles.note}>
+          Старые демокарточки ({data.demoCount}) скрыты из дерева: это копии первых дней демо, на
+          сайте их нет.{' '}
+          <a href="/admin/collections/products?where[legacyKey][like]=demo%3A">
+            Посмотреть списком
+          </a>
+        </p>
+      )}
+
       {!showProducts && tree.empty.length > 0 && (
         <p className={styles.note}>
           Производители без товаров:{' '}

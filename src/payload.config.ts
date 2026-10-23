@@ -39,7 +39,10 @@ export default buildConfig({
       importMapFile: path.resolve(dirname, 'app/(payload)/admin/importMap.ts'),
     },
     components: {
-      // Меню: группы и порядок — src/cms/menu.ts, свои страницы — группа «Инструменты».
+      // Меню (src/domain/adminMenu.mjs): сверху «Главное» с иконками, дальше группы Payload
+      // (src/cms/menu.ts) без повторов, внизу «Инструменты» и свёрнутое «Ещё».
+      Nav: '/components/AdminNav/AdminNav#AdminNav',
+      beforeNavLinks: ['/components/AdminNavMain/AdminNavMain#AdminNavMain'],
       afterNavLinks: ['/components/AdminNavTools/AdminNavTools#AdminNavTools'],
       // Главная админки — очередь работы, ниже все разделы по группам меню.
       beforeDashboard: ['/components/AdminHome/AdminHome#AdminHome'],
