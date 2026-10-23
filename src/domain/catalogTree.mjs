@@ -2,8 +2,9 @@
  * Путь по каталогу «раздел → производитель → линейка → товары» (решение владельца 09.10.2026).
  * Чистые функции без базы: одни и те же для мегаменю, мобильного меню и каталога на главной.
  *
- * Производители раздела: сначала «Первыми в разделе» по порядку, потом по уровню приоритета
- * лучшего товара, потом по названию. Товары без производителя — в конце, группой «Другие».
+ * Производители раздела: сначала «Первыми в разделе» по порядку, потом по «Сорт.» производителя
+ * (меньше — выше, пусто — после заданных), потом по уровню приоритета лучшего товара, потом по
+ * названию. Товары без производителя — в конце, группой «Другие».
  * Линейки — по полю «Порядок», товары без линейки у производителя с линейками — последней группой
  * «Другие программы». Товары внутри линейки: «Порядок в линейке» (основа первой), потом уровень
  * приоритета, потом название.
@@ -21,7 +22,7 @@ export const OTHER_VENDOR_TITLE = 'Другие производители'
  * в браузере).
  * @typedef {number | string} Key
  * @typedef {{ title: string, vendor: Key | null, rank: number, line: Key | null,
- *   lineOrder: number | null }} TreeProduct
+ *   lineOrder: number | null, vendorOrder?: number | null }} TreeProduct
  * @typedef {{ id: Key, title: string, vendor: Key, order: number }} TreeLine
  * @typedef {{ key: string, title: string, items: TreeProduct[] }} LineNode
  * @typedef {{ key: string, title: string, lines: LineNode[] }} VendorNode
@@ -63,12 +64,17 @@ export function vendorTree(products, lines, vendorTitles, pins = []) {
     const index = vendor == null ? -1 : pins.indexOf(vendor)
     return index === -1 ? pins.length : index
   }
+  // «Сорт.» производителя приходит в каждом его товаре: берём первое заданное.
+  const sortOf = (/** @type {Key} */ vendor) =>
+    (byVendor.get(vendor) ?? []).find((item) => item.vendorOrder != null)?.vendorOrder ??
+    Number.MAX_SAFE_INTEGER
   const vendors = [...byVendor.keys()].sort((a, b) => {
     if (a == null || b == null) return Number(a == null) - Number(b == null)
     const itemsA = byVendor.get(a) ?? []
     const itemsB = byVendor.get(b) ?? []
     return (
       pinIndex(a) - pinIndex(b) ||
+      sortOf(a) - sortOf(b) ||
       best(itemsB) - best(itemsA) ||
       (vendorTitles.get(a) ?? '').localeCompare(vendorTitles.get(b) ?? '', 'ru')
     )

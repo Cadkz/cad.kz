@@ -29,6 +29,7 @@ import * as migration_20261020_120747_open_line from './20261020_120747_open_lin
 import * as migration_20261021_131142_catalog_top_logos from './20261021_131142_catalog_top_logos'
 import * as migration_20261022_104851_product_redirect_to from './20261022_104851_product_redirect_to'
 import * as migration_20261022_125849_equipment_research from './20261022_125849_equipment_research'
+import * as migration_20261023_114952_manufacturer_order from './20261023_114952_manufacturer_order'
 
 export const migrations = [
   {
@@ -185,5 +186,10 @@ export const migrations = [
     up: migration_20261022_125849_equipment_research.up,
     down: migration_20261022_125849_equipment_research.down,
     name: '20261022_125849_equipment_research',
+  },
+  {
+    up: migration_20261023_114952_manufacturer_order.up,
+    down: migration_20261023_114952_manufacturer_order.down,
+    name: '20261023_114952_manufacturer_order',
   },
 ]

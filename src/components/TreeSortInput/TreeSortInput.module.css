@@ -1,0 +1,24 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.input {
+  width: calc(var(--base) * 4);
+  padding: calc(var(--base) / 6) calc(var(--base) / 4);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-input-bg);
+  color: var(--theme-elevation-800);
+  font: inherit;
+  text-align: right;
+}
+
+.input:focus {
+  border-color: var(--theme-elevation-400);
+  outline: none;
+}
+
+.input:disabled {
+  opacity: 0.5;
+}
+
+.invalid {
+  outline: 2px solid var(--theme-error-500);
+}

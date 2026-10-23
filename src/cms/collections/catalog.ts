@@ -110,6 +110,19 @@ const manufacturersBase = contentCollection({
   plural: 'Производители',
   fields: [
     productsLinkField('manufacturer'),
+    {
+      name: 'order',
+      label: 'Сорт.',
+      type: 'number',
+      min: 0,
+      admin: {
+        position: 'sidebar',
+        description:
+          'Как «Сорт.» в Битриксе: меньше — выше. Порядок производителей в админке «Каталог» и ' +
+          'плиток производителей на сайте. Где у раздела заданы «Первыми в разделе», сначала они. ' +
+          'Пусто — после производителей с числом, по топам продаж.',
+      },
+    },
     priorityField(false),
     textField('website', 'Сайт'),
     {
@@ -140,7 +153,10 @@ const manufacturersBase = contentCollection({
 /** Колонка «Товары» — сразу после названия: открыть товары производителя одним щелчком. */
 export const manufacturers: CollectionConfig = {
   ...manufacturersBase,
-  admin: { ...manufacturersBase.admin, defaultColumns: ['title', 'productsLink', 'status'] },
+  admin: {
+    ...manufacturersBase.admin,
+    defaultColumns: ['title', 'productsLink', 'order', 'status'],
+  },
 }
 
 /**
@@ -380,11 +396,13 @@ const productMainFields: Field[] = [
       },
       {
         name: 'lineOrder',
-        label: 'Порядок в линейке',
+        label: 'Сорт. (порядок в линейке)',
         type: 'number',
         admin: {
           width: '40%',
-          description: 'Меньше — выше. Основа линейки (SCAD Office) — 1, пакеты — 2, модули — 3.',
+          description:
+            'Как «Сорт.» в Битриксе: меньше — выше у своего производителя. Основа линейки ' +
+            '(SCAD Office) — 1, пакеты — 2, модули — 3. Топы продаж всё равно первыми.',
         },
       },
     ],

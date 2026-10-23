@@ -94,7 +94,7 @@ export async function getMenu(): Promise<MenuTab[]> {
       collection: 'manufacturers',
       pagination: false,
       depth: 0,
-      select: { priority: true, title: true },
+      select: { priority: true, title: true, order: true },
     }),
     payload.find({
       collection: 'product-lines',
@@ -110,6 +110,7 @@ export async function getMenu(): Promise<MenuTab[]> {
   const groupOf = new Map(sections.docs.map((s) => [s.id, s.menuGroup]))
   const vendorLevel = new Map(manufacturers.docs.map((m) => [m.id, m.priority]))
   const vendorTitle = new Map(manufacturers.docs.map((m) => [m.id, m.title]))
+  const vendorOrder = new Map(manufacturers.docs.map((m) => [m.id, m.order ?? null]))
   // Снятые с производства модели не показываются, как и в каталоге (решение владельца 23.10.2026).
   const items = products.docs.filter(catalogAvailable).map((product) => {
     const vendor = relId(product.manufacturer)
@@ -127,6 +128,7 @@ export async function getMenu(): Promise<MenuTab[]> {
       vendor,
       line: relId(product.line),
       lineOrder: product.lineOrder ?? null,
+      vendorOrder: vendor == null ? null : (vendorOrder.get(vendor) ?? null),
       rank: priorityRank(
         product.priority,
         vendor == null ? null : vendorLevel.get(vendor),

@@ -1,0 +1,48 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: calc(var(--base) / 3) calc(var(--base) / 2);
+  border-bottom: 1px solid var(--theme-elevation-100);
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table th {
+  color: var(--theme-elevation-500);
+}
+
+.table tbody tr:hover {
+  background: var(--theme-elevation-50);
+}
+
+/* Длинные названия переносятся, остальные колонки — в одну строку. */
+.name {
+  min-width: calc(var(--base) * 12);
+  white-space: normal;
+}
+
+.name a {
+  color: var(--theme-elevation-800);
+}
+
+.muted {
+  color: var(--theme-elevation-500);
+}
+
+.ok {
+  color: var(--theme-success-750);
+}
+
+.warn {
+  color: var(--theme-error-750);
+}

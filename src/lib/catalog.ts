@@ -39,6 +39,8 @@ export type CatalogItem = ProductCardData & {
   /** Линейка производителя (id строкой) и порядок в ней: путь «производитель → линейка». */
   line: string | null
   lineOrder: number | null
+  /** «Сорт.» производителя: порядок плиток производителей (src/domain/catalogTree.mjs). */
+  vendorOrder?: number
   /**
    * Когда карточка видна (src/lib/catalogFilter.ts): all — всегда; family — карточка семейства,
    * пока не выбран производитель; detail — программа семейства или пакет, когда выбран
@@ -92,6 +94,10 @@ export const kindGroup: Record<Product['kind'], CatalogGroup> = {
 }
 
 const published = { status: { equals: 'published' } } as const
+
+/** «Сорт.» производителя в товар каталога, только если задан. */
+const optionalOrder = (order: number | null | undefined) =>
+  order == null ? {} : { vendorOrder: order }
 
 /** Самая доступная комплектация, цена посчитана сервером. Ошибка курса не роняет каталог. */
 function cheapest(offers: Offer[], context: PricingContext) {
@@ -230,6 +236,7 @@ async function loadCatalog(): Promise<{
   const top = topSections(sections.docs.map((s) => ({ id: s.id, parent: relId(s.parent) })))
   const vendorById = new Map(manufacturers.docs.map((m: Manufacturer) => [m.id, m.title]))
   const vendorLevel = new Map(manufacturers.docs.map((m: Manufacturer) => [m.id, m.priority]))
+  const vendorOrder = new Map(manufacturers.docs.map((m: Manufacturer) => [m.id, m.order]))
   const titleById = new Map(products.docs.map((product) => [product.id, product.title]))
   const offersByProduct = new Map<number, Offer[]>()
   for (const offer of offers.docs) {
@@ -309,6 +316,8 @@ async function loadCatalog(): Promise<{
       main: topMain?.slug ?? null,
       line: product.line == null ? null : String(relId(product.line)),
       lineOrder: product.lineOrder ?? null,
+      // Только заданный: пустой не занимает место в данных каталога, которые уходят в браузер.
+      ...optionalOrder(vendorOrder.get(vendorId)),
       scope: 'all',
     }
   })

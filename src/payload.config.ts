@@ -44,6 +44,11 @@ export default buildConfig({
       // Главная админки — очередь работы, ниже все разделы по группам меню.
       beforeDashboard: ['/components/AdminHome/AdminHome#AdminHome'],
       views: {
+        catalogTree: {
+          Component: '/components/CatalogTreeView/CatalogTreeView#CatalogTreeView',
+          path: '/catalog',
+          meta: { title: 'Каталог' },
+        },
         bitrixImport: {
           Component: '/components/BitrixImportView/BitrixImportView#BitrixImportView',
           path: '/import-bitrix',

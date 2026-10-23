@@ -16,6 +16,20 @@ const dateTime = new Intl.DateTimeFormat('ru-RU', {
   minute: '2-digit',
 })
 
+const shortDateTime = new Intl.DateTimeFormat('ru-RU', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'Etc/GMT-5',
+})
+
+/** Дата и время по Казахстану коротко, как в списках админки: «23.10.2026 16:49». */
+export function formatStamp(value: string) {
+  return shortDateTime.format(new Date(value)).replace(',', '')
+}
+
 /** Целая сумма в тенге из строки сервера: «1 850 000 ₸». */
 export function formatKzt(value: string) {
   return `${money.format(BigInt(value))} ₸`

@@ -16,6 +16,7 @@ import { QueryPresetsGroupByCell as QueryPresetsGroupByCell_2b8867833a34864a02dd
 import { QueryPresetsGroupByField as QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { AdminNavTools as AdminNavTools_2fc225efb0c4d89686d274717840deee } from '../../../components/AdminNavTools/AdminNavTools'
 import { AdminHome as AdminHome_d6cd5d3bc8e724441d928f41cd54e087 } from '../../../components/AdminHome/AdminHome'
+import { CatalogTreeView as CatalogTreeView_63578c839f029a4292cdac2f6a88bcc2 } from '../../../components/CatalogTreeView/CatalogTreeView'
 import { BitrixImportView as BitrixImportView_31f0a3e387f2bd8b4181ac01e9918aee } from '../../../components/BitrixImportView/BitrixImportView'
 import { PriceListView as PriceListView_94d00816e844af2d5fa87147e72feb4f } from '../../../components/PriceListView/PriceListView'
 import { PricesView as PricesView_3e5ca9332e94e0d0ce775e4810e4ba16 } from '../../../components/PricesView/PricesView'
@@ -48,6 +49,7 @@ export const importMap = {
   "@payloadcms/next/client#QueryPresetsGroupByField": QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40,
   "/components/AdminNavTools/AdminNavTools#AdminNavTools": AdminNavTools_2fc225efb0c4d89686d274717840deee,
   "/components/AdminHome/AdminHome#AdminHome": AdminHome_d6cd5d3bc8e724441d928f41cd54e087,
+  "/components/CatalogTreeView/CatalogTreeView#CatalogTreeView": CatalogTreeView_63578c839f029a4292cdac2f6a88bcc2,
   "/components/BitrixImportView/BitrixImportView#BitrixImportView": BitrixImportView_31f0a3e387f2bd8b4181ac01e9918aee,
   "/components/PriceListView/PriceListView#PriceListView": PriceListView_94d00816e844af2d5fa87147e72feb4f,
   "/components/PricesView/PricesView#PricesView": PricesView_3e5ca9332e94e0d0ce775e4810e4ba16,

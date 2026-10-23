@@ -218,7 +218,7 @@ export interface Product {
    */
   line?: (number | null) | ProductLine;
   /**
-   * Меньше — выше. Основа линейки (SCAD Office) — 1, пакеты — 2, модули — 3.
+   * Как «Сорт.» в Битриксе: меньше — выше у своего производителя. Основа линейки (SCAD Office) — 1, пакеты — 2, модули — 3. Топы продаж всё равно первыми.
    */
   lineOrder?: number | null;
   summary?: string | null;
@@ -357,6 +357,10 @@ export interface Manufacturer {
   id: number;
   title: string;
   status: 'draft' | 'published';
+  /**
+   * Как «Сорт.» в Битриксе: меньше — выше. Порядок производителей в админке «Каталог» и плиток производителей на сайте. Где у раздела заданы «Первыми в разделе», сначала они. Пусто — после производителей с числом, по топам продаж.
+   */
+  order?: number | null;
   /**
    * Уровень для всех товаров производителя, если у товара свой не выбран. Топы продаж показываются первыми в меню, каталоге и подборках.
    */
@@ -1328,6 +1332,7 @@ export interface SectionsSelect<T extends boolean = true> {
 export interface ManufacturersSelect<T extends boolean = true> {
   title?: T;
   status?: T;
+  order?: T;
   priority?: T;
   website?: T;
   logo?: T;
