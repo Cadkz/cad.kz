@@ -4,11 +4,15 @@
 // Файлы лежат в public/models, сжатые (gltf-transform): геометрия meshopt, текстуры WebP.
 
 /**
- * slug товара → адрес модели в public/models. Первая — Artec Leo (artec_leo), файл ждём от
- * владельца: сервис отдаёт модель только по ссылке, из облачной среды её не скачать.
+ * slug товара → адрес модели в public/models. Artec Leo — Tripo H3.1 по фото с artec3d.com
+ * (23.10.2026): 44 МБ → 1,9 МБ (gltf-transform optimize: упрощение до 6 %, quantize без декодера, текстуры
+ * WebP 1024). artec-leo — slug в демоданных, artec_leo — на сайте.
  * @type {Record<string, string>}
  */
-const MODELS = {}
+const MODELS = {
+  artec_leo: '/models/artec-leo.glb',
+  'artec-leo': '/models/artec-leo.glb',
+}
 
 /** @param {string} slug @returns {string | null} */
 export function productModel(slug) {
