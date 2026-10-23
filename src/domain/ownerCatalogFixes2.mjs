@@ -110,3 +110,40 @@ export const NEW_PLOTTERS = [
   properties: txSpecs(model),
   knowledge: `${entry.title}. ${NEW_GENERATION} Замена для ${model.predecessor}, который ещё есть в продаже. Ширина ${model.width}, 5 пигментных цветов, два рулона, A1 около 17 с, Wi-Fi и Ethernet, вариант МФУ ${model.mfp}. Цена и срок поставки — у менеджера.`,
 }))
+
+/**
+ * Прежний текст со старого cad.kz для программ, у которых история версий уже не хранит
+ * сохранение до исследования (в истории товара 20 последних сохранений).
+ * @type {Record<string, { summary: string, description: string }>}
+ */
+export const OLD_SITE_TEXT = {
+  'architecture_engineering_construction_collection-1107088405': {
+    summary:
+      'Единый набор инструментов BIM Autodesk для проектирования зданий, объектов инфраструктуры и строительства.',
+    description: [
+      'Коллекция для проектирования и строительства промышленных и гражданских объектов — это единый набор всех необходимых инструментов BIM для проектирования зданий, объектов инфраструктуры и строительства.',
+      '## Что входит в коллекцию',
+      [
+        '- Revit',
+        '- Civil 3D',
+        '- InfraWorks',
+        '- AutoCAD (Windows и Mac), AutoCAD Architecture, Electrical, Map 3D, Mechanical, MEP, Plant 3D, Raster Design, мобильное и веб-приложение AutoCAD',
+        '- Navisworks Manage',
+        '- 3ds Max',
+        '- ReCap Pro',
+        '- Advance Steel',
+        '- Fabrication CADmep',
+        '- Insight',
+        '- Revit Live',
+        '- Structural Bridge Design',
+        '- Dynamo Studio',
+        '- FormIt Pro',
+        '- Robot Structural Analysis Professional',
+        '- Vehicle Tracking',
+        '- Autodesk Rendering',
+        '- Autodesk Drive',
+        '- Autodesk Docs',
+      ].join('\n'),
+    ].join('\n\n'),
+  },
+}

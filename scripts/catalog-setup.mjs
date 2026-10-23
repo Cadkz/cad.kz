@@ -40,7 +40,7 @@ import {
 } from '../src/lib/homeSetup.ts'
 import { setupNewsCovers } from '../src/lib/newsCoversSetup.ts'
 import { setupOwnerCatalogFixes } from '../src/lib/ownerCatalogFixes.ts'
-import { setupOwnerCatalogFixes2 } from '../src/lib/ownerCatalogFixes2.ts'
+import { setupOwnerCatalogFixes2, setupOwnerCatalogFixes3 } from '../src/lib/ownerCatalogFixes2.ts'
 import { setupOwnerCatalog } from '../src/lib/ownerCatalogSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
@@ -226,6 +226,9 @@ try {
   const fixes2 = await setupOwnerCatalogFixes2(payload)
   if (!fixes2) console.log('Решения владельца, часть 2 (23.10.2026), уже применены.')
   else for (const line of fixes2) console.log(`Решения владельца 2 — ${line}`)
+  const fixes3 = await setupOwnerCatalogFixes3(payload)
+  if (!fixes3) console.log('Тексты со старого cad.kz уже возвращены.')
+  else for (const line of fixes3) console.log(`Решения владельца 3 — ${line}`)
   const filtersV2 = await setupEquipmentFiltersV2(payload)
   if (!filtersV2) console.log('Фильтры плоттеров и сканеров (23.10.2026) уже обновлены.')
   else for (const line of filtersV2) console.log(`Фильтры оборудования — ${line}`)

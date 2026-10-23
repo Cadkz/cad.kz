@@ -1,5 +1,10 @@
 import type { Payload } from 'payload'
-import { NEW_PLOTTERS, RENAMES_V2, RESTORE_TEXT_V2 } from '../domain/ownerCatalogFixes2.mjs'
+import {
+  NEW_PLOTTERS,
+  OLD_SITE_TEXT,
+  RENAMES_V2,
+  RESTORE_TEXT_V2,
+} from '../domain/ownerCatalogFixes2.mjs'
 import { knowledge, restoreText } from './ownerCatalogFixes'
 import { relId, relIds } from './rel'
 
@@ -129,6 +134,46 @@ export async function setupOwnerCatalogFixes2(payload: Payload): Promise<string[
   await payload.create({
     collection: 'import-runs',
     data: { idempotencyKey: OWNER_FIXES_2_KEY, state: 'done', snapshot: { report } },
+    ...opts,
+  })
+  return report
+}
+
+/**
+ * Догон к части 2: у AEC Collection в истории не осталось сохранения до исследования, текст
+ * берём со старого cad.kz. Пишем, только если описание всё ещё из исследования (в товаре есть
+ * researchData, а правил его не человек).
+ */
+export const OWNER_FIXES_3_KEY = 'catalog-setup:owner-fixes-3-2026-10-23'
+
+export async function setupOwnerCatalogFixes3(payload: Payload): Promise<string[] | null> {
+  const done = await payload.find({
+    collection: 'import-runs',
+    where: { idempotencyKey: { equals: OWNER_FIXES_3_KEY } },
+    limit: 1,
+    ...opts,
+  })
+  if (done.docs.length) return null
+  const report: string[] = []
+  for (const product of await bySlug(payload, Object.keys(OLD_SITE_TEXT))) {
+    const text = OLD_SITE_TEXT[product.slug]
+    if (!text || !product.researchData || product.updatedBy) continue
+    await payload.update({
+      collection: 'products',
+      id: product.id,
+      data: {
+        summary: text.summary,
+        description: text.description,
+        mainSection: relId(product.mainSection),
+        extraSections: relIds(product.extraSections),
+      },
+      ...opts,
+    })
+    report.push(`${product.title}: текст со старого cad.kz`)
+  }
+  await payload.create({
+    collection: 'import-runs',
+    data: { idempotencyKey: OWNER_FIXES_3_KEY, state: 'done', snapshot: { report } },
     ...opts,
   })
   return report
