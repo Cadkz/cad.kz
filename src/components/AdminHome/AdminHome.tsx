@@ -1,9 +1,8 @@
 import type { Payload, ServerProps } from 'payload'
 import { AdminActions } from '@/components/AdminActions/AdminActions'
 import { AdminCardGrid } from '@/components/AdminCardGrid/AdminCardGrid'
-import { loadGapCards } from '@/lib/adminGaps'
 import { loadCrmCard, loadPromosCard, loadRequestsCard, type QueueCard } from '@/lib/adminQueue'
-import { loadActivityCard, loadDraftsCard, loadRatesCard } from '@/lib/adminRecent'
+import { loadActivityCard, loadRatesCard } from '@/lib/adminRecent'
 import styles from './AdminHome.module.css'
 
 type Section = { key: string; title: string; cards: QueueCard[] }
@@ -20,30 +19,26 @@ async function safe(load: () => Promise<QueueCard>, title: string): Promise<Queu
 
 async function loadSections(payload: Payload, admin: boolean): Promise<Section[]> {
   const now = new Date()
-  const [requests, crm, promos, drafts, gaps, rates, activity] = await Promise.all([
+  // Черновики и неполные карточки владелец убрал с главной (23.10.2026): списки остаются
+  // в «Каталог → Товары» и на странице «Заполненность».
+  const [requests, crm, promos, rates, activity] = await Promise.all([
     admin ? safe(() => loadRequestsCard(payload, now), 'Заявки') : null,
     admin ? safe(() => loadCrmCard(payload), 'Ошибки CRM') : null,
     safe(() => loadPromosCard(payload, now), 'Акции'),
-    safe(() => loadDraftsCard(payload, now), 'Черновики'),
-    loadGapCards(payload).catch((error: unknown) => {
-      console.error('Главная админки: неполные карточки не загрузились', error)
-      return []
-    }),
     safe(() => loadRatesCard(payload), 'Курсы и НДС'),
     safe(() => loadActivityCard(payload), 'Журнал'),
   ])
   // Ошибки CRM — первыми: заявку, не дошедшую до менеджеров, надо увидеть сразу.
-  const work = [crm, requests, promos, drafts].filter((card): card is QueueCard => card !== null)
+  const work = [crm, requests, promos].filter((card): card is QueueCard => card !== null)
   return [
     { key: 'work', title: 'Требует внимания', cards: work },
-    { key: 'gaps', title: 'Неполные карточки товаров', cards: gaps },
     { key: 'prices', title: 'Цены и журнал', cards: [rates, activity] },
   ]
 }
 
 /**
  * Главная админки — очередь работы: быстрые кнопки, затем что требует внимания (ошибки CRM,
- * заявки, заканчивающиеся акции, черновики), неполные карточки товаров, курсы и журнал.
+ * заявки, заканчивающиеся акции), курсы и журнал.
  * Ниже Payload показывает все разделы админки по группам меню.
  */
 export async function AdminHome({ payload, user }: ServerProps) {

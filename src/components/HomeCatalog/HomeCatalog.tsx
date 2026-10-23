@@ -5,6 +5,7 @@ import type { CatalogItem, CatalogLine, Facet } from '@/lib/catalog'
 import { emptyFilter } from '@/lib/catalogFilter'
 import { catalogHref } from '@/lib/navigationHrefs'
 import type { Picture } from '@/lib/pictures'
+import type { PopularCardData } from '@/lib/popular'
 import { ButtonLink } from '../Button/Button'
 import { CatalogFilter } from '../CatalogFilter/CatalogFilter'
 import styles from './HomeCatalog.module.css'
@@ -14,6 +15,7 @@ type Data = {
   facets: Facet[]
   lines: CatalogLine[]
   vendorLogos: Record<string, Picture>
+  popular: PopularCardData[]
 }
 type State = Data | 'loading' | 'error'
 
@@ -82,6 +84,7 @@ export function HomeCatalog() {
       lines={state.lines}
       vendorLogos={state.vendorLogos}
       initial={emptyFilter}
+      popular={state.popular}
     />
   )
 }
