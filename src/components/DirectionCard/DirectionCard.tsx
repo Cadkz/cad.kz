@@ -8,7 +8,8 @@ import styles from './DirectionCard.module.css'
 /**
  * Карточка направления: открывает каталог, отфильтрованный по этому направлению. Все карточки
  * одного тёмно-синего вида (аудит 21.10.2026): цвет из админки («Тёмно-синий / Синий / Графит»)
- * был только для разнообразия и выглядел случайным.
+ * был только для разнообразия и выглядел случайным. При наведении карточка не прыгает: подпись
+ * «В каталог» выезжает из-под маски, проступает тонкая рамка, крупный значок медленно смещается.
  */
 export function DirectionCard({ direction }: { direction: Direction }) {
   return (
@@ -24,7 +25,12 @@ export function DirectionCard({ direction }: { direction: Direction }) {
       </span>
       <span className={styles.title}>{direction.title}</span>
       {direction.summary && <span className={styles.summary}>{direction.summary}</span>}
-      <ArrowRight size={20} strokeWidth={1.75} aria-hidden="true" className={styles.arrow} />
+      <span className={styles.cta} aria-hidden="true">
+        <span className={styles.ctaInner}>
+          В каталог
+          <ArrowRight size={16} strokeWidth={1.75} />
+        </span>
+      </span>
     </Link>
   )
 }

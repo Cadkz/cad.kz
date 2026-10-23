@@ -81,9 +81,7 @@ export default async function Home({ searchParams }: Props) {
       <HomeNews slides={home.slides} news={news.docs} covers={topicCovers} />
       {home.process.length > 0 && (
         <Section id="process" tone="tint" title="Как мы работаем">
-          <Reveal>
-            <ProcessSteps steps={home.process} cards={home.sideCards} />
-          </Reveal>
+          <ProcessSteps steps={home.process} cards={home.sideCards} />
         </Section>
       )}
       {home.faq.length > 0 && (

@@ -8,8 +8,8 @@
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   transition:
-    border-color var(--duration-fast) var(--ease),
-    box-shadow var(--duration-fast) var(--ease);
+    border-color var(--duration-slow) var(--ease-reveal),
+    box-shadow var(--duration-slow) var(--ease-reveal);
 }
 
 .card:hover {
@@ -41,6 +41,18 @@
 
 .image {
   object-fit: cover;
+}
+
+/* Обложка «оседает» при появлении блока: начинает чуть крупнее и за --duration-settle приходит
+   к своему размеру внутри рамки (рамка не меняется). Только вместе с Reveal вокруг карточки. */
+@media (prefers-reduced-motion: no-preference) {
+  :global([data-reveal="wait"]) .image {
+    transform: scale(var(--scale-settle));
+  }
+
+  :global([data-reveal="in"]) .image {
+    transition: transform var(--duration-settle) var(--ease-reveal);
+  }
 }
 
 .body {
@@ -81,7 +93,18 @@
   content: "";
 }
 
-.link:hover {
+/* Под заголовком при наведении на карточку прорисовывается тонкая линия слева направо
+   (по строкам, если заголовок в две-три строки). */
+.link {
+  background: linear-gradient(currentcolor, currentcolor) 0 100% / 0 1px no-repeat;
+  transition:
+    color var(--duration-slow) var(--ease-reveal),
+    background-size var(--duration-slow) var(--ease-reveal);
+}
+
+.card:hover .link,
+.link:focus-visible {
+  background-size: 100% 1px;
   color: var(--color-blue);
 }
 

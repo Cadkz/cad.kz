@@ -18,7 +18,9 @@ type Props = {
 
 /**
  * Секция страницы: заголовок h2, подзаголовок, ссылка «Все …» и содержимое в рамке сайта.
- * Штриха над заголовком нет (решение владельца 13.10.2026: лишний декор).
+ * Штриха над заголовком нет (решение владельца 13.10.2026: лишний декор). Заголовок, когда
+ * вошёл в экран, поднимается из-под невидимой маски, ссылка справа проявляется чуть позже
+ * (RevealObserver; пробная ветка redesign/home-motion-2).
  */
 export function Section({
   title,
@@ -34,9 +36,11 @@ export function Section({
   return (
     <section id={id} className={classes.filter(Boolean).join(' ')} aria-labelledby={headingId}>
       <Container>
-        <div className={styles.head}>
+        <div className={styles.head} data-reveal="">
           <div className={styles.text}>
-            <h2 id={headingId}>{title}</h2>
+            <h2 id={headingId} className={styles.title}>
+              <span className={styles.titleLine}>{title}</span>
+            </h2>
             {sub && <p className={styles.sub}>{sub}</p>}
           </div>
           {action && (

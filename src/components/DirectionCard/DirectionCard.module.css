@@ -16,9 +16,18 @@
   background: var(--gradient-deep);
   color: var(--color-text-inverse);
   isolation: isolate;
-  transition:
-    box-shadow var(--duration-base) var(--ease),
-    transform var(--duration-base) var(--ease);
+}
+
+/* Тонкая светлая рамка — проступает при наведении (поверх затемнения, клики не ловит). */
+.card::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--shadow-inset-on-dark);
+  opacity: 0;
+  pointer-events: none;
+  content: "";
+  transition: opacity var(--duration-slow) var(--ease-reveal);
 }
 
 .card::before {
@@ -29,15 +38,6 @@
   content: "";
 }
 
-.card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(calc(-1 * var(--space-1)));
-}
-
-.card:active {
-  transform: none;
-}
-
 /* Крупная полупрозрачная иконка в углу — фирменный декор карточек направлений. */
 .big {
   position: absolute;
@@ -46,19 +46,14 @@
   z-index: var(--z-below);
   opacity: 0.1;
   transition:
-    opacity var(--duration-base) var(--ease),
-    transform var(--duration-base) var(--ease);
+    opacity var(--duration-slow) var(--ease-reveal),
+    transform var(--duration-slow) var(--ease-reveal);
 }
 
 .big svg {
   width: calc(var(--icon-box) * 2);
   height: calc(var(--icon-box) * 2);
   stroke-width: 1;
-}
-
-.card:hover .big {
-  opacity: 0.22;
-  transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1)));
 }
 
 .icon {
@@ -84,10 +79,11 @@
   color: var(--color-text-on-dark);
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
+  transition: color var(--duration-slow) var(--ease-reveal);
 }
 
-/* Стрелка появляется при наведении: карточка — переход в каталог. */
-.arrow {
+/* Подпись «В каталог» — только от 640 px и только с мышью (на телефоне строки без подписи). */
+.cta {
   display: none;
 }
 
@@ -122,22 +118,53 @@
     -webkit-line-clamp: 3;
   }
 
-  .arrow {
+  /* Подпись выезжает снизу из-под маски в правом верхнем углу: окошко .cta обрезает её. */
+  .cta {
     position: absolute;
     top: var(--space-5);
     right: var(--space-5);
     display: inline-flex;
-    color: var(--color-text-on-dark);
-    opacity: 0;
-    transform: translateX(calc(-1 * var(--space-1)));
-    transition:
-      opacity var(--duration-base) var(--ease),
-      transform var(--duration-base) var(--ease);
+    overflow: clip;
+    color: var(--color-text-inverse);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
   }
 
-  .card:hover .arrow,
-  .card:focus-visible .arrow {
-    opacity: 1;
-    transform: none;
+  .ctaInner {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    opacity: 0;
+    transform: translateY(100%);
+    transition:
+      opacity var(--duration-slow) var(--ease-reveal),
+      transform var(--duration-slow) var(--ease-reveal);
   }
+}
+
+/* Наведение мышью и фокус с клавиатуры: подпись, тонкая рамка, значок и описание светлеют.
+   Карточка на месте — без подъёма и тени (пожелание владельца 23.10.2026: без «прыжков»). */
+@media (hover: hover) {
+  .card:hover::after {
+    opacity: 1;
+  }
+
+  .card:hover .big {
+    opacity: 0.24;
+    transform: translate(calc(-1 * var(--space-2)), calc(-1 * var(--space-2)));
+  }
+
+  .card:hover .summary {
+    color: var(--color-text-inverse);
+  }
+}
+
+.card:hover .ctaInner,
+.card:focus-visible .ctaInner {
+  opacity: 1;
+  transform: none;
+}
+
+.card:focus-visible::after {
+  opacity: 1;
 }

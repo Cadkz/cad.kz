@@ -60,3 +60,25 @@
     transform: translateY(calc(-1 * var(--space-1)));
   }
 }
+
+/* Ответ раскрывается плавно по высоте — блоки ниже съезжают мягко, а не прыжком (Chrome, Edge,
+   свежий Safari; где не умеют — как раньше, сразу). Только при обычной настройке движения. */
+@supports (interpolate-size: allow-keywords) {
+  @media (prefers-reduced-motion: no-preference) {
+    .item {
+      interpolate-size: allow-keywords;
+    }
+
+    .item::details-content {
+      height: 0;
+      overflow: clip;
+      transition:
+        height var(--duration-slow) var(--ease-reveal),
+        content-visibility var(--duration-slow) allow-discrete;
+    }
+
+    .item[open]::details-content {
+      height: auto;
+    }
+  }
+}

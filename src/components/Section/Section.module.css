@@ -22,6 +22,33 @@
   mask-image: radial-gradient(ellipse at 50% 0%, black, transparent 70%);
 }
 
+/* Глубина: сетка-узор на подложке прокручивается медленнее карточек. Слой выше и ниже секции
+   на половину сдвига, секция обрезает его краями. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .tint {
+      overflow: clip;
+    }
+
+    .tint::before {
+      inset: calc(var(--parallax-shift) / -2) 0;
+      animation: lag linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+  }
+}
+
+@keyframes lag {
+  from {
+    transform: translateY(calc(var(--parallax-shift) / -2));
+  }
+
+  to {
+    transform: translateY(calc(var(--parallax-shift) / 2));
+  }
+}
+
 .head {
   display: flex;
   flex-wrap: wrap;
@@ -36,6 +63,36 @@
   flex-direction: column;
   gap: var(--space-2);
   max-width: var(--measure);
+}
+
+/* Заголовок поднимается из-под маски, когда вошёл в экран (как строки у Floema): строка
+   обрезается краем заголовка (с запасом на хвосты букв «у», «д»), сдвиг — на свою высоту.
+   Без JavaScript и при «меньше движения» заголовок виден сразу. */
+.titleLine {
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .title {
+    overflow: clip;
+    overflow-clip-margin: var(--space-1);
+  }
+
+  .head[data-reveal="wait"] .titleLine {
+    transform: translateY(calc(100% + var(--space-2)));
+  }
+
+  .head[data-reveal="wait"] .action {
+    opacity: 0;
+  }
+
+  .head[data-reveal="in"] .titleLine {
+    transition: transform var(--duration-reveal) var(--ease-reveal);
+  }
+
+  .head[data-reveal="in"] .action {
+    transition: opacity var(--duration-reveal) var(--ease-reveal) var(--duration-base);
+  }
 }
 
 .sub {

@@ -87,8 +87,30 @@
     margin-left: auto;
   }
 
+  /* Глубина: чертёж двух КП проплывает медленнее текста — за время, пока баннер проходит
+     экран, смещается снизу вверх на --parallax-shift (половина вниз, половина вверх). */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .art {
+        animation: float linear both;
+        animation-timeline: view();
+        animation-range: cover;
+      }
+    }
+  }
+
   .kaddi {
     order: 0;
     margin-left: 0;
+  }
+}
+
+@keyframes float {
+  from {
+    transform: translateY(calc(var(--parallax-shift) / 2));
+  }
+
+  to {
+    transform: translateY(calc(var(--parallax-shift) / -2));
   }
 }

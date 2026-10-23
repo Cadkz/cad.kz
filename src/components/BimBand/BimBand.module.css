@@ -183,9 +183,62 @@
     mask-composite: intersect;
   }
 
+  /* Глубина при прокрутке (как у 1820 Productions): BIM-модель уходит вверх медленнее
+     текста — отстаёт на --parallax-shift, пока блок уезжает с экрана. Только CSS, считает
+     браузер без JavaScript; где прокрутку так не умеют (Firefox) — картинка просто на месте. */
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .image {
+        animation: lag linear both;
+        /* Отсчёт — от верха страницы: при загрузке картинка ровно на своём месте. */
+        animation-timeline: scroll(root block);
+        animation-range: 0 100vh;
+      }
+    }
+  }
+
   /* Заголовок и вводный текст — в левых 7 колонках, на тёмной половине. */
   .title,
   .lead {
     max-width: min(var(--measure), calc(100% * 7 / 12));
+  }
+}
+
+@keyframes lag {
+  to {
+    transform: translateY(var(--parallax-shift));
+  }
+}
+
+/* Этапы и нижняя строка (кнопки, цифры) при загрузке проступают по очереди за заголовком.
+   Заголовок и вводный текст не анимируются — от них зависит скорость первого экрана (LCP).
+   Только при загрузке, один раз; при «меньше движения» всё видно сразу. */
+@media (prefers-reduced-motion: no-preference) {
+  .stage,
+  .bottom {
+    animation: rise var(--duration-reveal) var(--ease-reveal) var(--duration-base) backwards;
+  }
+
+  .stage:nth-child(2) {
+    animation-delay: calc(var(--duration-base) + var(--delay-reveal-step));
+  }
+
+  .stage:nth-child(3) {
+    animation-delay: calc(var(--duration-base) + var(--delay-reveal-step) * 2);
+  }
+
+  .stage:nth-child(4) {
+    animation-delay: calc(var(--duration-base) + var(--delay-reveal-step) * 3);
+  }
+
+  .bottom {
+    animation-delay: calc(var(--duration-base) + var(--delay-reveal-step) * 4);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-4));
   }
 }

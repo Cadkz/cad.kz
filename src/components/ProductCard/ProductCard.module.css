@@ -11,9 +11,8 @@
   border-radius: var(--radius-lg);
   background: var(--color-bg);
   transition:
-    border-color var(--duration-base) var(--ease),
-    box-shadow var(--duration-base) var(--ease),
-    transform var(--duration-base) var(--ease);
+    border-color var(--duration-slow) var(--ease-reveal),
+    box-shadow var(--duration-slow) var(--ease-reveal);
 }
 
 .logoFallback {
@@ -24,15 +23,11 @@
   overflow-wrap: anywhere;
 }
 
-/* Наведение как у карточек направлений на главной: подъём на 4 px, тень, голубая рамка. */
+/* Наведение спокойное (пробная ветка redesign/home-motion-2): карточка на месте, без
+   подъёма и увеличения картинки — голубая рамка и мягкая тень проступают медленно. */
 .card:hover {
   border-color: var(--color-blue-mid);
-  box-shadow: var(--shadow-md);
-  transform: translateY(calc(-1 * var(--space-1)));
-}
-
-.card:active {
-  transform: none;
+  box-shadow: var(--shadow-sm);
 }
 
 .card > * {
@@ -62,11 +57,6 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transition: transform var(--duration-base) var(--ease);
-}
-
-.card:hover .image {
-  transform: scale(1.03);
 }
 
 /* Логотип программы: на телефоне — на всю миниатюру, от 640 px — знак --card-logo по центру
@@ -166,13 +156,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .card,
-  .image,
   .more svg {
     transition: none;
   }
 
-  .card:hover,
-  .card:hover .image,
   .card:hover .more svg {
     transform: none;
   }
