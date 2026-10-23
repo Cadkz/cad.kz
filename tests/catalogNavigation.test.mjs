@@ -22,7 +22,8 @@ import {
 const hooks = registerHooks({
   resolve(specifier, context, next) {
     return next(
-      specifier === './rel' && context.parentURL?.includes('/src/lib/')
+      ['./rel', './ownerCatalogFixes'].includes(specifier) &&
+        context.parentURL?.includes('/src/lib/')
         ? new URL(`${specifier}.ts`, context.parentURL).href
         : specifier,
       context,
@@ -30,6 +31,7 @@ const hooks = registerHooks({
   },
 })
 const { setupOwnerCatalogFixes } = await import('../src/lib/ownerCatalogFixes.ts')
+const { setupOwnerCatalogFixes2 } = await import('../src/lib/ownerCatalogFixes2.ts')
 hooks.deregister()
 
 const item = (id, title, direction, extra = {}) => ({
@@ -196,4 +198,71 @@ test('Решения владельца: названия и тексты из �
   const count = writes.length
   assert.equal(await setupOwnerCatalogFixes(payload), null)
   assert.equal(writes.length, count)
+})
+
+test('Решения владельца, часть 2: тексты 9 программ, названия, TX-3300/4300 — один раз', async () => {
+  const runs = new Map()
+  const writes = []
+  const created = []
+  const products = [
+    { id: 1, slug: 'geo5', title: 'GEO5', researchData: { category: 'software' } },
+    { id: 2, slug: 'plotwave_t30_35', title: 'plotWAVE T30/35' },
+    {
+      id: 3,
+      slug: 'imageprograf_tx_3200',
+      title: 'imagePROGRAF TX-3200',
+      kind: 'hardware',
+      pageView: 'standard',
+      manufacturer: 5,
+      mainSection: 6,
+      extraSections: [],
+      cardImage: 8,
+      gallery: [8],
+    },
+    { id: 4, slug: 'imageprograf_tx_4200', title: 'imagePROGRAF TX-4200', kind: 'hardware' },
+  ]
+  const payload = {
+    find: async ({ collection, where }) => {
+      if (collection === 'import-runs') {
+        const run = runs.get(where.idempotencyKey.equals)
+        return { docs: run ? [run] : [] }
+      }
+      if (collection === 'products')
+        return { docs: products.filter((p) => where.slug.in.includes(p.slug)) }
+      if (collection === 'assistant-knowledge') return { docs: [{ id: 9, active: true }] }
+      return { docs: [] }
+    },
+    findVersions: async () => ({
+      docs: [
+        { version: { researchData: { a: 1 }, description: 'Исследование' } },
+        { version: { researchData: null, summary: 'Своё', description: 'Своё описание' } },
+      ],
+    }),
+    update: async (call) => {
+      writes.push(call)
+    },
+    create: async ({ collection, data }) => {
+      if (collection === 'import-runs') runs.set(data.idempotencyKey, data)
+      else created.push({ collection, data })
+    },
+  }
+  const report = await setupOwnerCatalogFixes2(payload)
+  assert.ok(report.length > 0)
+  const geo = writes.find((x) => x.collection === 'products' && x.id === 1)
+  assert.equal(geo.data.description, 'Своё описание')
+  assert.ok(writes.some((x) => x.collection === 'assistant-knowledge' && x.data.active === false))
+  const plot = writes.find((x) => x.collection === 'products' && x.id === 2)
+  assert.equal(plot.data.title, 'plotWAVE T30/T35')
+  const tx = created.filter((x) => x.collection === 'products').map((x) => x.data)
+  assert.deepEqual(
+    tx.map((x) => x.slug),
+    ['imageprograf_tx_3300', 'imageprograf_tx_4300'],
+  )
+  assert.equal(tx[0].manufacturer, 5)
+  assert.equal(tx[0].cardImage, 8)
+  assert.equal(tx[0].researchData.filters.format, 'A0 (36″, 914 мм)')
+  assert.equal(created.filter((x) => x.collection === 'assistant-knowledge').length, 2)
+  const count = writes.length + created.length
+  assert.equal(await setupOwnerCatalogFixes2(payload), null)
+  assert.equal(writes.length + created.length, count)
 })

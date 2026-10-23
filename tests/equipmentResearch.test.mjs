@@ -5,6 +5,8 @@ import facets from '../src/domain/equipmentFacets.json' with { type: 'json' }
 import { EQUIPMENT_FILTERS_V2, mergeFilters } from '../src/domain/equipmentFiltersV2.mjs'
 import source from '../src/domain/equipmentResearch.json' with { type: 'json' }
 import { KEEP_OWN_TEXT } from '../src/domain/ownerCatalogFixes.mjs'
+import { RESTORE_TEXT_V2 } from '../src/domain/ownerCatalogFixes2.mjs'
+
 import {
   autoVendor,
   emptyFilter,
@@ -36,6 +38,9 @@ const { setupEquipmentResearch, EQUIPMENT_RESEARCH_KEY, researchDescription } = 
   '../src/lib/equipmentResearchSetup.ts'
 )
 hooks.deregister()
+
+/** Программы, у которых владелец оставил свои тексты (23.10.2026): исследование их не трогает. */
+const OWN_TEXT = [...KEEP_OWN_TEXT, ...RESTORE_TEXT_V2]
 
 /** Фильтры товара на сайте: исследование плюс замена групп плоттеров и сканеров (23.10.2026). */
 function siteFilters(category, seed) {
@@ -288,15 +293,15 @@ test('Разовая настройка сохраняет названия, п�
   const f = fixture()
   const before = f.stores.products.map(({ title, lineOrder }) => ({ title, lineOrder }))
   const report = await setupEquipmentResearch(f.payload)
-  // SCAD и AutoCAD владелец оставил со своими текстами (23.10.2026).
-  assert.equal(f.stores['assistant-knowledge'].length, 54 - KEEP_OWN_TEXT.length)
+  // Все программы владелец оставил со своими текстами (23.10.2026).
+  assert.equal(f.stores['assistant-knowledge'].length, 54 - OWN_TEXT.length)
   assert.equal(f.stores['import-runs'][0].idempotencyKey, EQUIPMENT_RESEARCH_KEY)
   assert.ok(report.some((line) => line.startsWith('Название не меняли:')))
   assert.deepEqual(
     f.stores.products.map(({ title, lineOrder }) => ({ title, lineOrder })),
     before,
   )
-  for (const product of f.stores.products.filter((p) => !KEEP_OWN_TEXT.includes(p.slug))) {
+  for (const product of f.stores.products.filter((p) => !OWN_TEXT.includes(p.slug))) {
     assert.equal(product.mainSection, 4)
     assert.deepEqual(product.extraSections, [5])
     assert.deepEqual(product.properties[0], { name: 'Артикул', value: 'ABC' })
@@ -316,9 +321,12 @@ test('Повтор после сбоя не дублирует сравнени�
   assert.equal(f.stores['import-runs'].length, 0)
   f.fail(null)
   await setupEquipmentResearch(f.payload)
-  assert.equal(f.stores['assistant-knowledge'].length, 54 - KEEP_OWN_TEXT.length)
+  assert.equal(f.stores['assistant-knowledge'].length, 54 - OWN_TEXT.length)
   const missing = fixture()
-  missing.stores.products.pop()
+  // Убираем товар, который исследование обновляет (программы оно теперь не трогает).
+  missing.stores.products = missing.stores.products.filter(
+    (p) => p.slug !== 'imageprograf_tz_32000',
+  )
   const report = await setupEquipmentResearch(missing.payload)
   assert.ok(report.some((line) => line.startsWith('Не найден товар:')))
   assert.equal(missing.stores['import-runs'].length, 0)

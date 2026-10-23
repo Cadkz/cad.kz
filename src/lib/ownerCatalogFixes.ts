@@ -70,7 +70,7 @@ async function restoreSections(payload: Payload, report: string[]) {
 }
 
 /** Последняя версия товара до загрузки исследования: у неё ещё нет researchData. */
-async function restoreText(payload: Payload, product: Product, report: string[]) {
+export async function restoreText(payload: Payload, product: Product, report: string[]) {
   const versions = await payload.findVersions({
     collection: 'products',
     where: { parent: { equals: product.id } },
@@ -96,7 +96,7 @@ async function restoreText(payload: Payload, product: Product, report: string[])
   report.push(`${product.title}: вернули прежнее описание и характеристики`)
 }
 
-async function knowledge(payload: Payload, slug: string) {
+export async function knowledge(payload: Payload, slug: string) {
   const { docs } = await payload.find({
     collection: 'assistant-knowledge',
     where: { product: { equals: `Каталог: ${slug}` } },
