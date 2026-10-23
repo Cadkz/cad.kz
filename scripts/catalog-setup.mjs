@@ -49,6 +49,7 @@ import { setupPresets, setupQuality } from '../src/lib/presetsSetup.ts'
 import { setupPriorities, setupPrioritiesV2, setupPrioritiesV3 } from '../src/lib/prioritySetup.ts'
 import { setupPrivacyPage } from '../src/lib/privacySetup.ts'
 import { setupProductTables } from '../src/lib/productTablesSetup.ts'
+import { setupProgramTexts } from '../src/lib/programTextsSetup.ts'
 import { setupFamilyRenew } from '../src/lib/renewSetup.ts'
 import { setupSearchAliases } from '../src/lib/searchSetup.ts'
 import { setupMepTasks } from '../src/lib/tasksSetup.ts'
@@ -229,6 +230,9 @@ try {
   const fixes3 = await setupOwnerCatalogFixes3(payload)
   if (!fixes3) console.log('Тексты со старого cad.kz уже возвращены.')
   else for (const line of fixes3) console.log(`Решения владельца 3 — ${line}`)
+  const programTexts = await setupProgramTexts(payload)
+  if (!programTexts) console.log('Тексты 6 программ от владельца уже загружены.')
+  else for (const line of programTexts) console.log(`Тексты программ — ${line}`)
   const filtersV2 = await setupEquipmentFiltersV2(payload)
   if (!filtersV2) console.log('Фильтры плоттеров и сканеров (23.10.2026) уже обновлены.')
   else for (const line of filtersV2) console.log(`Фильтры оборудования — ${line}`)
