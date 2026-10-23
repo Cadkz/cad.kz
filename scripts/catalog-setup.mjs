@@ -28,6 +28,7 @@ import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
 import { setupDemoCleanup } from '../src/lib/demoCleanupSetup.ts'
 import { setupEquipmentFiltersV2 } from '../src/lib/equipmentFiltersSetup.ts'
+import { setupEquipmentPhotos } from '../src/lib/equipmentPhotosSetup.ts'
 import { setupEquipmentResearch } from '../src/lib/equipmentResearchSetup.ts'
 import { setupEquipment } from '../src/lib/equipmentSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
@@ -234,6 +235,9 @@ try {
   const programTexts = await setupProgramTexts(payload)
   if (!programTexts) console.log('Тексты 6 программ от владельца уже загружены.')
   else for (const line of programTexts) console.log(`Тексты программ — ${line}`)
+  const photos = await setupEquipmentPhotos(payload)
+  if (!photos) console.log('Фото плоттеров Canon уже загружены.')
+  else for (const line of photos) console.log(`Фото оборудования — ${line}`)
   const demoCleanup = await setupDemoCleanup(payload)
   if (!demoCleanup) console.log('Старые демокарточки уже удалены.')
   else for (const line of demoCleanup) console.log(`Демокарточки — ${line}`)
