@@ -59,3 +59,108 @@
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
+
+/* Сцена первого экрана (оборудование с фото, пробная ветка redesign/product-stage):
+   светлая подложка с чертёжной сеткой, фото крупно, белый фон снимка растворяется в подложке
+   (multiply), главные факты — подписью рядом. Фото при загрузке «оседает» с --scale-settle,
+   прозрачность не трогаем: от картинки зависит скорость первого экрана (LCP). */
+.stage {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: var(--space-6);
+  aspect-ratio: auto;
+  padding: var(--space-6);
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--color-surface), var(--color-blue-soft));
+}
+
+.stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--blueprint-light);
+  background-size: var(--blueprint-size);
+  mask-image: var(--blueprint-fade);
+}
+
+.stage .image {
+  aspect-ratio: var(--ratio-stage);
+  height: auto;
+  mix-blend-mode: multiply;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stage .image {
+    animation: settle var(--duration-settle) var(--ease-reveal);
+  }
+}
+
+@keyframes settle {
+  from {
+    transform: scale(var(--scale-settle));
+  }
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-strong);
+}
+
+.fact dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-overline);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-overline);
+  text-transform: uppercase;
+}
+
+.fact dd {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+/* От 960 px: факты колонкой слева внизу (3 из 8 колонок), фото справа (5 из 8). */
+@media (min-width: 960px) {
+  .stage {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: end;
+    aspect-ratio: var(--ratio-media);
+    padding: var(--space-8);
+  }
+
+  .stage .image {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: stretch;
+    min-height: 0;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+
+  .stage:not(:has(.facts)) .image {
+    grid-column: 1 / -1;
+  }
+
+  .facts {
+    grid-column: 1;
+    grid-row: 1;
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

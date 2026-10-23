@@ -22,7 +22,7 @@ import { getCatalog } from '@/lib/catalog'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
-import type { PickTarget, ProductPage, RelatedProduct } from '@/lib/product'
+import { keyFacts, type PickTarget, type ProductPage, type RelatedProduct } from '@/lib/product'
 import { getRecommendations } from '@/lib/recommendations'
 import { parseBody } from '@/lib/richText'
 import { shortDescription, siteUrl } from '@/lib/seo'
@@ -77,6 +77,8 @@ export async function ProductView({
   const direction = product.sections.find((s) => s.isDirection)
   const guided = product.pageView === 'picker'
   const profile = kindProfile(product.kind)
+  // Оборудование со своими фото: крупная сцена в первом экране вместо галереи ниже подбора.
+  const stage = product.kind === 'hardware' && product.ownPictures && product.pictures.length > 0
   // Цена для поисковиков — та же «от», что в каталоге и в итоге подбора на этой странице.
   const listed = byHref.get(product.path)
   const structured = productLd({
@@ -134,6 +136,16 @@ export async function ProductView({
                 icon={product.pictures.length ? null : (product.sections[0]?.icon ?? 'building')}
                 tasks={product.tasks}
                 requires={product.requires.map((r) => r.title)}
+                media={
+                  stage ? (
+                    <ProductGallery
+                      pictures={product.pictures}
+                      title={product.title}
+                      facts={keyFacts(product.properties)}
+                      stage
+                    />
+                  ) : undefined
+                }
               />
             }
             aside={<PickerSummary />}
@@ -147,7 +159,7 @@ export async function ProductView({
               <PickerSteps />
               <PickerHelp />
             </ProductSection>
-            {product.pictures.length > 0 && (
+            {!stage && product.pictures.length > 0 && (
               <ProductGallery pictures={product.pictures} title={product.title} />
             )}
             {product.description && (

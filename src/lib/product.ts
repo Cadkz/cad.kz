@@ -58,6 +58,8 @@ export type ProductPage = {
   redirectId: number | null
   /** Своя галерея или картинка производителя; пусто — блока картинок нет. */
   pictures: Picture[]
+  /** Есть своя галерея (фото товара), а не картинка производителя. */
+  ownPictures: boolean
   seo: Product['seo']
 }
 
@@ -172,6 +174,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     vendorId: relId(product.manufacturer),
     redirectId: relId(product.redirectTo),
     pictures: productPictures(product),
+    ownPictures: (product.gallery ?? []).length > 0,
     seo: product.seo,
   }
 }
@@ -202,4 +205,17 @@ export function pickParam(params: Params): PickTarget | null {
   if (item && /^[\w-]{1,64}$/.test(item)) return item
   const id = Number(first(params.pick))
   return Number.isSafeInteger(id) && id > 0 ? id : null
+}
+
+/** Короткое значение, которое читается подписью у фото: не длиннее этого числа знаков. */
+const FACT_MAX_LENGTH = 32
+
+/**
+ * Главные факты для сцены первого экрана оборудования: первые три характеристики с коротким
+ * значением (формат, технология, разрешение — порядок задаёт админка).
+ */
+export function keyFacts(properties: { name: string; value: string }[], limit = 3) {
+  return properties
+    .filter(({ name, value }) => name.trim() && value.trim() && value.length <= FACT_MAX_LENGTH)
+    .slice(0, limit)
 }

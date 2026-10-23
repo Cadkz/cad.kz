@@ -1,6 +1,12 @@
 .header {
   display: flex;
   flex-direction: column;
+  gap: var(--space-6);
+}
+
+.top {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
 }
 
@@ -69,7 +75,7 @@
 }
 
 @media (min-width: 640px) {
-  .header {
+  .top {
     flex-direction: row;
     gap: var(--space-6);
   }
