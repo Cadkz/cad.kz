@@ -13,10 +13,13 @@ import { ProductHeader } from '@/components/ProductHeader/ProductHeader'
 import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
 import { ProductLifecycle } from '@/components/ProductLifecycle/ProductLifecycle'
 import { ProductPicks } from '@/components/ProductPicks/ProductPicks'
+import { ProductScans } from '@/components/ProductScans/ProductScans'
 import { ProductSection } from '@/components/ProductSection/ProductSection'
 import { ProductStage } from '@/components/ProductStage/ProductStage'
+import { ProductTabs } from '@/components/ProductTabs/ProductTabs'
 import { PropertyList } from '@/components/PropertyList/PropertyList'
 import { Reveal } from '@/components/Reveal/Reveal'
+import { productScans } from '@/domain/artecScans.mjs'
 import { kindProfile } from '@/domain/productKind.mjs'
 import { productModel } from '@/domain/productModels.mjs'
 import { productLd } from '@/domain/structuredData.mjs'
@@ -83,6 +86,14 @@ export async function ProductView({
   // в галерее ниже.
   const model = product.kind === 'hardware' ? productModel(product.slug) : null
   const stage = Boolean(product.stagePicture || model)
+  // Оборудование (24.10.2026): описание и характеристики — вкладками «Обзор / Характеристики»,
+  // у сканеров Artec ниже — примеры сканов.
+  const hardware = product.kind === 'hardware'
+  const scans = hardware ? productScans(product.slug) : []
+  const about = product.description ? (
+    <ProductAbout blocks={parseBody(product.description)} />
+  ) : null
+  const specs = product.properties.length > 0 ? <PropertyList items={product.properties} /> : null
   // Цена для поисковиков — та же «от», что в каталоге и в итоге подбора на этой странице.
   const listed = byHref.get(product.path)
   const structured = productLd({
@@ -166,18 +177,37 @@ export async function ProductView({
             {product.pictures.length > 0 && (
               <ProductGallery pictures={product.pictures} title={product.title} priority={!stage} />
             )}
-            {product.description && (
+            {hardware && (about || specs) ? (
               <Reveal>
-                <ProductSection title={profile.about} id="about">
-                  <ProductAbout blocks={parseBody(product.description)} />
-                </ProductSection>
+                <ProductTabs
+                  label={`О товаре ${product.title}`}
+                  tabs={[
+                    ...(about ? [{ id: 'overview', title: 'Обзор', content: about }] : []),
+                    ...(specs ? [{ id: 'specs', title: 'Характеристики', content: specs }] : []),
+                  ]}
+                />
               </Reveal>
+            ) : (
+              <>
+                {about && (
+                  <Reveal>
+                    <ProductSection title={profile.about} id="about">
+                      {about}
+                    </ProductSection>
+                  </Reveal>
+                )}
+                {specs && (
+                  <Reveal>
+                    <ProductSection title={profile.specs} id="specs">
+                      {specs}
+                    </ProductSection>
+                  </Reveal>
+                )}
+              </>
             )}
-            {product.properties.length > 0 && (
+            {scans.length > 0 && (
               <Reveal>
-                <ProductSection title={profile.specs} id="specs">
-                  <PropertyList items={product.properties} />
-                </ProductSection>
+                <ProductScans title={product.title} scans={scans} />
               </Reveal>
             )}
             {product.faq.length > 0 && (

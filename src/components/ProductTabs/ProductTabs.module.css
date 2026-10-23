@@ -1,0 +1,60 @@
+/* Вкладки как сегментный переключатель «Новости / Статьи»: серая подложка, выбранная — белая. */
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
+}
+
+.tabs {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: var(--radius-control);
+  background: var(--color-hover);
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  height: var(--touch-target);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
+}
+
+.tab:hover {
+  color: var(--color-text);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.tab[aria-selected="true"] {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-popover);
+  color: var(--color-text);
+}
+
+.panel {
+  color: var(--color-gray-700);
+  line-height: var(--leading-relaxed);
+}
+
+@media (min-width: 960px) {
+  .tab {
+    height: var(--space-10);
+  }
+}

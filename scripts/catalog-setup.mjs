@@ -19,6 +19,7 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { setupAddons } from '../src/lib/addonsSetup.ts'
+import { setupArtecTexts } from '../src/lib/artecTextsSetup.ts'
 import { setupAuditCatalog, setupRevitBack } from '../src/lib/auditCatalogSetup.ts'
 import { setupBimPage } from '../src/lib/bimSetup.ts'
 import { setupCardLogos } from '../src/lib/cardLogosSetup.ts'
@@ -244,6 +245,9 @@ try {
   const filtersV2 = await setupEquipmentFiltersV2(payload)
   if (!filtersV2) console.log('Фильтры плоттеров и сканеров (23.10.2026) уже обновлены.')
   else for (const line of filtersV2) console.log(`Фильтры оборудования — ${line}`)
+  const artecTexts = await setupArtecTexts(payload)
+  if (!artecTexts) console.log('Тексты сканеров Artec (24.10.2026) уже загружены.')
+  else for (const line of artecTexts) console.log(`Тексты Artec — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)
