@@ -79,6 +79,9 @@ export function tableHtml(head, rows) {
   return `<table>${thead}<tbody>${rows.map((cells) => row(cells, 'td')).join('')}</tbody></table>`
 }
 
+/** Перенос строки внутри абзаца разметки: в HTML — помеченный <br>. */
+const LINE_BREAK_HTML = '<br data-line="1">'
+
 /**
  * Разметка поля «Текст» → HTML для редактора. Каждый блок — с новой строки (так удобнее
  * в режиме HTML).
@@ -108,7 +111,9 @@ export function markupToHtml(markup) {
         return `<ol>${lines.map((line) => `<li>${inlineHtml(line.replace(STEP_LINE, ''))}</li>`).join('')}</ol>`
       if (chunk.startsWith('> '))
         return `<blockquote>${inlineHtml(lines.map((l) => l.replace(/^> ?/, '')).join(' '))}</blockquote>`
-      return `<p>${lines.map(inlineHtml).join('<br>')}</p>`
+      // Перенос строки внутри абзаца помечен: при сохранении он остаётся переносом, а не новым
+      // абзацем (вставленный из Word или набранный Shift+Enter <br> — по-прежнему новый абзац).
+      return `<p>${lines.map(inlineHtml).join(LINE_BREAK_HTML)}</p>`
     })
     .filter(Boolean)
     .join('\n')
@@ -267,8 +272,10 @@ function mediaBlock(node) {
 
 /** Абзац, случайно начавшийся как разметка, не должен ею стать. */
 function plainParagraph(text) {
+  // Номер «1. » в начале одного абзаца не трогаем: на сайте это обычный абзац с номером
+  // (шагами становятся только строки подряд), а снять его — потерять текст.
   return text
-    .replace(/^(#+|>|-|\d{1,2}[.)])\s+/, '')
+    .replace(/^(#+|>|-)\s+/, '')
     .replace(/^!\[/, '[')
     .replace(/^\|(.*)\|$/, '$1')
 }
@@ -351,7 +358,10 @@ export function htmlToMarkup(html) {
   /** @type {string[]} картинки, встреченные внутри абзаца */
   let pending = []
   const flush = () => {
-    const text = squash(line.join('')).trim()
+    const text = squash(line.join(''))
+      .trim()
+      .replace(/ ?\uE000 ?/g, '\n')
+      .replace(/^\n+|\n+$/g, '')
     if (text) blocks.push(plainParagraph(text))
     blocks.push(...pending)
     line = []
@@ -424,6 +434,11 @@ export function htmlToMarkup(html) {
       const text = squash(inlineText(node, media)).trim()
       if (text) blocks.push(`> ${text}`)
       blocks.push(...media)
+      return
+    }
+    if (tag === 'br' && attr(node.attrs, 'data-line') != null) {
+      // Метка переноса внутри абзаца (см. markupToHtml): пробелом её не схлопнуть.
+      line.push('\uE000')
       return
     }
     if (tag === 'br' || tag === 'hr') return flush()

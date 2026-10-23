@@ -1,7 +1,8 @@
 import type { CollectionConfig } from 'payload'
+import { altFromFilename } from '../../domain/mediaAlt.mjs'
 import { UPLOAD_MIME_TYPES } from '../../domain/mediaTypes.mjs'
 import { everyone, isAdmin, isEditor } from '../access'
-import { contentCollection, legacyFields, seoField, slugField, textField } from '../fields'
+import { contentCollection, legacyFields, seoField, slugField } from '../fields'
 import { publicationDefaults } from '../hooks/publicationDefaults'
 
 const KINDS = ['article', 'news', 'promotion'] as const
@@ -189,5 +190,26 @@ export const media: CollectionConfig = {
     mimeTypes: UPLOAD_MIME_TYPES,
   },
   access: { read: everyone, create: isEditor, update: isEditor, delete: isAdmin },
-  fields: [textField('alt', 'Описание изображения', true), ...legacyFields],
+  // Картинки перетаскивают пачкой: описание можно не вписывать, оно берётся из имени файла.
+  hooks: {
+    beforeChange: [
+      ({ data, req }) => {
+        if (typeof data.alt !== 'string' || !data.alt.trim())
+          data.alt = altFromFilename(data.filename ?? req.file?.name)
+        return data
+      },
+    ],
+  },
+  fields: [
+    {
+      name: 'alt',
+      label: 'Описание изображения',
+      type: 'text',
+      // В базе пустым не бывает (заполняет хук выше), но вписывать при загрузке не обязательно.
+      required: true,
+      validate: () => true as const,
+      admin: { description: 'Можно не заполнять: возьмём из имени файла.' },
+    },
+    ...legacyFields,
+  ],
 }

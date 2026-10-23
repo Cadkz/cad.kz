@@ -15,6 +15,8 @@ import { offerQualityChange, offerQualityDelete, productQuality } from '../hooks
 import { pageViewFields, pickerField } from './picker'
 
 const PRODUCTS_LINK = '/components/ProductsLink/ProductsLink'
+/** Визуальный редактор с режимом HTML и таблицами — тот же, что у новостей и страниц. */
+const BODY_EDITOR = '/components/BodyEditor/BodyEditor#BodyEditor'
 
 /**
  * «Товары (N)»: в списке — колонка, в карточке — ссылка справа. Открывает «Товары» уже
@@ -351,8 +353,8 @@ export const sections: CollectionConfig = {
   admin: { ...sectionsBase.admin, defaultColumns: ['title', 'productsLink', 'parent', 'status'] },
 }
 
-/** Основное о товаре: первая вкладка, её видно сразу при открытии. */
-const productMainFields: Field[] = [
+/** «Основное», как в Битриксе: тип, производитель, линейка и «Сорт.». Разделы и поиск — ниже. */
+const productBasicFields: Field[] = [
   {
     type: 'row',
     fields: [
@@ -407,17 +409,16 @@ const productMainFields: Field[] = [
       },
     ],
   },
-  { name: 'summary', label: 'Коротко для карточки (1–2 предложения)', type: 'textarea' },
+]
+
+/** «Анонс», как в Битриксе: что видно в карточке каталога и в шапке страницы товара. */
+const productAnnounceFields: Field[] = [
   {
-    name: 'description',
-    label: 'Описание',
+    name: 'summary',
+    label: 'Коротко для карточки (1–2 предложения)',
     type: 'textarea',
-    admin: {
-      description:
-        'Пустая строка — новый абзац, «## » в начале — подзаголовок, «- » — пункт списка.',
-    },
+    admin: { description: 'Показывается в карточке каталога и под названием на странице товара.' },
   },
-  relationField('gallery', 'Галерея', 'media', true),
   {
     name: 'cardImage',
     label: 'Картинка для карточки',
@@ -425,9 +426,9 @@ const productMainFields: Field[] = [
     relationTo: 'media',
     admin: {
       description:
-        'Что показать в карточке каталога вместо картинки по правилам: у программы — её логотип, ' +
-        'у оборудования — фото самого устройства. Пусто — логотип программы или производителя, ' +
-        'у оборудования — первая картинка галереи.',
+        'Можно перетащить файл прямо сюда. У программы — её логотип, у оборудования — фото ' +
+        'самого устройства. Пусто — логотип программы или производителя, у оборудования — ' +
+        'первая картинка галереи.',
     },
   },
   {
@@ -439,6 +440,35 @@ const productMainFields: Field[] = [
       description: '3–4 коротких пункта: показываются в шапке страницы товара.',
     },
     fields: [textField('title', 'Задача', true)],
+  },
+]
+
+/**
+ * «Подробно», как в Битриксе: описание в визуальном редакторе с режимом HTML (тот же, что у
+ * новостей). Хранится разметкой сайта: старые тексты не меняются, пока их не правили.
+ */
+const productDetailFields: Field[] = [
+  {
+    name: 'description',
+    label: 'Описание',
+    type: 'textarea',
+    admin: { components: { Field: BODY_EDITOR } },
+  },
+]
+
+/** «Картинки»: галерея страницы товара, файлы перетаскиваются прямо в поле. */
+const productImageFields: Field[] = [
+  {
+    name: 'gallery',
+    label: 'Галерея',
+    type: 'upload',
+    relationTo: 'media',
+    hasMany: true,
+    admin: {
+      description:
+        'Перетащите сюда картинки с компьютера — можно несколько сразу — или выберите из уже ' +
+        'загруженных. Порядок меняется перетаскиванием, первая — главная на странице товара.',
+    },
   },
 ]
 
@@ -495,17 +525,8 @@ const productCatalogFields: Field[] = [
   },
 ]
 
-/** Блоки страницы товара ниже шапки и связи с другими товарами. */
+/** «Характеристики и связи»: блоки страницы товара ниже описания и связи с другими товарами. */
 const productPageFields: Field[] = [
-  {
-    name: 'researchData',
-    label: 'Данные исследования: фильтры и статус модели',
-    type: 'json',
-    admin: {
-      description:
-        'Категория, значения фильтров, статус модели и замена. Не меняет публикацию товара.',
-    },
-  },
   {
     name: 'properties',
     label: 'Характеристики',
@@ -565,19 +586,42 @@ const productPageFields: Field[] = [
       },
     ],
   },
+  {
+    type: 'collapsible',
+    label: 'Служебное: данные для фильтров оборудования',
+    admin: {
+      initCollapsed: true,
+      description: 'Заполняется автоматически. Обычно менять не нужно.',
+    },
+    fields: [
+      {
+        name: 'researchData',
+        label: 'Данные исследования: фильтры и статус модели',
+        type: 'json',
+        admin: {
+          description:
+            'Категория, значения фильтров, статус модели и замена. Не меняет публикацию товара.',
+        },
+      },
+    ],
+  },
 ]
 
 /**
- * Карточка товара в админке: название сверху, дальше вкладки — главное, комплектации, подбор,
- * страница, каталог. Справа — публикация, адрес, показ, а SEO и служебное свёрнуты.
- * Вкладки и свёрнутые блоки без имени: данные в базе лежат как раньше, миграция не нужна.
+ * Карточка товара в админке по вкладкам, как в Битриксе (решение владельца 23.10.2026):
+ * «Основное», «Анонс», «Подробно», «Картинки», «Цены», «Характеристики и связи», «SEO».
+ * Справа — активность, адрес, показ. Вкладки и свёрнутые блоки без имени: данные в базе лежат
+ * как раньше, миграция не нужна.
  */
 const productTabs: Field = {
   type: 'tabs',
   tabs: [
-    { label: 'Главное', fields: productMainFields },
+    { label: 'Основное', fields: [...productBasicFields, ...productCatalogFields] },
+    { label: 'Анонс', fields: productAnnounceFields },
+    { label: 'Подробно', fields: productDetailFields },
+    { label: 'Картинки', fields: productImageFields },
     {
-      label: 'Комплектации и цены',
+      label: 'Цены',
       fields: [
         {
           name: 'offersTable',
@@ -591,30 +635,36 @@ const productTabs: Field = {
       admin: { condition: (data) => data?.pageView === 'picker' },
       fields: [pickerField],
     },
-    { label: 'Страница товара', fields: productPageFields },
-    { label: 'Каталог и поиск', fields: productCatalogFields },
+    { label: 'Характеристики и связи', fields: productPageFields },
+    {
+      label: 'SEO',
+      fields: [
+        seoField,
+        {
+          type: 'collapsible',
+          label: 'Служебное: перенос со старого сайта',
+          admin: {
+            initCollapsed: true,
+            description: 'Заполняется при переносе со старого сайта. Обычно менять не нужно.',
+          },
+          fields: legacyFields,
+        },
+      ],
+    },
   ],
 }
 
-/** Справа, свёрнуто: для поисковиков и служебное (поля переноса со старого сайта). */
-const productSidebarExtras: Field[] = [
-  {
-    type: 'collapsible',
-    label: 'Для поисковиков (SEO)',
-    admin: { position: 'sidebar', initCollapsed: true },
-    fields: [seoField],
-  },
-  {
-    type: 'collapsible',
-    label: 'Служебное',
-    admin: {
-      position: 'sidebar',
-      initCollapsed: true,
-      description: 'Заполняется при переносе со старого сайта. Обычно менять не нужно.',
-    },
-    fields: legacyFields,
-  },
-]
+/** «Активность», как в Битриксе: значения в базе прежние (черновик / опубликовано). */
+const activityField: Field = {
+  ...statusField,
+  label: 'Активность',
+  options: [
+    // Порядок значений как в statusField: от него зависит тип в базе.
+    { label: 'Нет — скрыт с сайта (черновик)', value: 'draft' },
+    { label: 'Да — показывать на сайте', value: 'published' },
+  ],
+  admin: { position: 'sidebar' },
+}
 
 const productCollection = contentCollection({
   slug: 'products',
@@ -663,7 +713,7 @@ export const products: CollectionConfig = {
   fields: [
     textField('title', 'Название', true),
     ...qualityFields,
-    { ...statusField, admin: { position: 'sidebar' } },
+    activityField,
     { ...slugField(), admin: { position: 'sidebar' } },
     priorityField(true),
     {
@@ -681,7 +731,6 @@ export const products: CollectionConfig = {
     },
     scenarioField(true),
     ...pageViewFields,
-    ...productSidebarExtras,
     productTabs,
   ],
   enableQueryPresets: true,
