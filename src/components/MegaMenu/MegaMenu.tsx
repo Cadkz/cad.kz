@@ -11,6 +11,8 @@ import styles from './MegaMenu.module.css'
 
 type Props = {
   id: string
+  /** Закрытое меню остаётся в разметке (невидимо и недоступно), чтобы закрываться плавно. */
+  open: boolean
   tabs: MenuTab[]
   popular: PopularCardData[]
   onNavigate: () => void
@@ -26,10 +28,12 @@ const POPULAR = 'popular'
  * Мегаменю каталога. Слева на тёмной чертёжной сетке — «Популярные решения» и группы
  * (программы, оборудование, услуги), внизу предложение подбора; справа — плитки популярных
  * решений или разделы группы и товары раздела под курсором. Показывается одна вкладка за раз,
- * поэтому меню всегда помещается в экран.
+ * поэтому меню всегда помещается в экран. Открывается шторкой вниз, группы слева проступают
+ * по очереди, содержимое вкладки сменяется мягким проявлением, без сдвигов вбок (23.10.2026).
  */
 export function MegaMenu({
   id,
+  open,
   tabs,
   popular,
   onNavigate,
@@ -41,7 +45,14 @@ export function MegaMenu({
     ...(popular.length ? [{ key: POPULAR, label: POPULAR_LABEL }] : []),
     ...tabs.map(({ key, label }) => ({ key, label })),
   ]
-  const [active, setActive] = useState(segments[0]?.key ?? '')
+  const first = segments[0]?.key ?? ''
+  const [active, setActive] = useState(first)
+  // Каждое открытие — снова с первой вкладки, как раньше, когда меню собиралось заново.
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) setActive(first)
+  }
   const current = segments.find((item) => item.key === active) ?? segments[0]
   if (!current) return null
   const tab = tabs.find((item) => item.key === current.key)
@@ -49,6 +60,8 @@ export function MegaMenu({
     <div
       id={id}
       className={styles.menu}
+      data-open={open}
+      inert={!open}
       onPointerEnter={onPointerEnter}
       onPointerLeave={onPointerLeave}
     >

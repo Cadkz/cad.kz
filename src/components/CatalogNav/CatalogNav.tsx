@@ -23,6 +23,10 @@ type Props = { menu: MenuTab[]; popular: PopularCardData[]; whatsappHref: string
  */
 export function CatalogNav({ menu, popular, whatsappHref }: Props) {
   const [open, setOpen] = useState(false)
+  // Меню в разметке с первого открытия: так оно и закрывается плавно. До первого открытия его
+  // нет вовсе — картинки популярных решений не грузятся на каждой странице зря.
+  const [opened, setOpened] = useState(false)
+  if (open && !opened) setOpened(true)
   const root = useRef<HTMLDivElement>(null)
   const button = useRef<HTMLButtonElement>(null)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -83,9 +87,10 @@ export function CatalogNav({ menu, popular, whatsappHref }: Props) {
         <ChevronDown size={16} strokeWidth={1.75} className={styles.chevron} aria-hidden="true" />
       </button>
       {/* Мегаменю без обёртки: оно позиционировано по строке шапки и не встаёт в её ряд. */}
-      {open && (
+      {opened && (
         <MegaMenu
           id="nav-catalog"
+          open={open}
           tabs={menu}
           popular={popular}
           onNavigate={close}

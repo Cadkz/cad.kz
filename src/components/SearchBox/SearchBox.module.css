@@ -144,22 +144,24 @@
   border-radius: var(--radius-panel);
   background: var(--color-popover);
   box-shadow: var(--shadow-popover);
+  /* Как меню «Каталог» (23.10.2026): раскрывается шторкой сверху вниз, гаснет быстро. Край
+     обрезки открытой панели — за тенью, чтобы её не резать. */
+  clip-path: inset(0 0 100% 0);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(calc(-1 * var(--space-1)));
   transition:
     opacity var(--duration-exit) var(--ease),
-    transform var(--duration-exit) var(--ease),
+    clip-path 0s linear var(--duration-exit),
     visibility 0s linear var(--duration-exit);
 }
 
 .inline .dropdown[data-open="true"] {
+  clip-path: inset(calc(-1 * var(--space-12)));
   opacity: 1;
   visibility: visible;
-  transform: none;
   transition:
     opacity var(--duration-enter) var(--ease),
-    transform var(--duration-enter) var(--ease),
+    clip-path var(--duration-unfold) var(--ease-reveal),
     visibility 0s;
 }
 

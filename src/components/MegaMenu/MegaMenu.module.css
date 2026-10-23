@@ -11,7 +11,34 @@
   border-radius: var(--radius-panel);
   background: var(--color-surface);
   box-shadow: var(--shadow-popover);
-  animation: open var(--duration-enter) var(--ease);
+  /* Закрыто: невидимо, свёрнуто к верхнему краю, клики не ловит (inert в разметке). Гаснет
+     быстро, свёрнутым становится уже невидимым. */
+  clip-path: inset(0 0 100% 0);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--duration-exit) var(--ease),
+    clip-path 0s linear var(--duration-exit),
+    visibility 0s linear var(--duration-exit);
+}
+
+/* Открыто: раскрывается шторкой сверху вниз (край обрезки уходит за тень, чтобы её не резать).
+   Только clip-path и прозрачность — размеры и раскладка не меняются, прокрутки вбок нет. */
+.menu[data-open="true"] {
+  clip-path: inset(calc(-1 * var(--space-12)));
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--duration-enter) var(--ease),
+    clip-path var(--duration-unfold) var(--ease-reveal),
+    visibility 0s;
+}
+
+@starting-style {
+  .menu[data-open="true"] {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+  }
 }
 
 /* Левая колонка: тёмная чертёжная сетка, группы сверху, предложение подбора внизу. */
@@ -60,6 +87,34 @@
     color var(--duration-fast) var(--ease);
 }
 
+/* Группы слева проступают по очереди при открытии (прозрачность, сдвиг на 4 px внутри меню). */
+.menu[data-open="true"] .segment {
+  animation: segment var(--duration-enter) var(--ease) backwards;
+}
+
+.menu[data-open="true"] .segment:nth-child(2) {
+  animation-delay: var(--delay-menu-step);
+}
+
+.menu[data-open="true"] .segment:nth-child(3) {
+  animation-delay: calc(var(--delay-menu-step) * 2);
+}
+
+.menu[data-open="true"] .segment:nth-child(4) {
+  animation-delay: calc(var(--delay-menu-step) * 3);
+}
+
+.menu[data-open="true"] .segment:nth-child(n + 5) {
+  animation-delay: calc(var(--delay-menu-step) * 4);
+}
+
+@keyframes segment {
+  from {
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--space-1)));
+  }
+}
+
 .segment:hover {
   color: var(--color-text-inverse);
 }
@@ -69,8 +124,9 @@
   color: var(--color-text-inverse);
 }
 
-/* Метка выбранной группы — тонкая линия sky слева, как выделенный слой в CAD. */
-.segment[aria-selected="true"]::before {
+/* Метка выбранной группы — тонкая линия sky слева, как выделенный слой в CAD. Вырастает от
+   середины, когда группу выбрали, и сходится обратно у прежней. */
+.segment::before {
   content: "";
   position: absolute;
   top: var(--space-3);
@@ -79,6 +135,12 @@
   width: 2px;
   border-radius: var(--radius-pill);
   background: var(--color-sky);
+  transform: scaleY(0);
+  transition: transform var(--duration-base) var(--ease-reveal);
+}
+
+.segment[aria-selected="true"]::before {
+  transform: none;
 }
 
 .offer {
@@ -124,10 +186,14 @@
   overscroll-behavior: contain;
 }
 
-/* Только прозрачность и сдвиг вниз на 4 px: ширина страницы не меняется, прокрутки вбок нет. */
-@keyframes open {
+/* Смена вкладки: новая панель мягко проявляется на месте, без сдвига (панель собирается
+   заново по key). При открытии меню — чуть позже групп слева. */
+.menu[data-open="true"] .panel {
+  animation: fade var(--duration-enter) var(--ease) var(--delay-menu-step) backwards;
+}
+
+@keyframes fade {
   from {
     opacity: 0;
-    transform: translateY(calc(-1 * var(--space-1)));
   }
 }
