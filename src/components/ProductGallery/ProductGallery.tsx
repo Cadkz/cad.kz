@@ -5,17 +5,9 @@ import { useState } from 'react'
 import type { Picture } from '@/lib/pictures'
 import styles from './ProductGallery.module.css'
 
-type Fact = { name: string; value: string }
-
 type Props = {
   pictures: Picture[]
   title: string
-  /**
-   * Сцена первого экрана (оборудование с фото, пробная ветка 23.10.2026): крупное фото на
-   * светлой чертёжной подложке, белый фон снимка растворяется в ней, рядом — главные факты.
-   */
-  stage?: boolean
-  facts?: Fact[]
   /** Первая картинка — главная на первом экране (нет сцены выше): грузится заранее. */
   priority?: boolean
 }
@@ -23,46 +15,25 @@ type Props = {
 /**
  * Картинки на странице товара: главная на 8 колонок, под ней миниатюры, если картинок несколько.
  * Переключение без перезагрузки; первая картинка — первая на экране, грузится с приоритетом.
- * В виде сцены (stage) фото крупнее и с фактами вокруг, как у Longbow.
  */
-export function ProductGallery({
-  pictures,
-  title,
-  stage = false,
-  facts = [],
-  priority = true,
-}: Props) {
+export function ProductGallery({ pictures, title, priority = true }: Props) {
   const [active, setActive] = useState(0)
   const current = pictures[active] ?? pictures[0]
   if (!current) return null
   return (
-    <div className={stage ? `${styles.gallery} ${styles.isStage}` : styles.gallery}>
-      <div className={stage ? `${styles.main} ${styles.stage}` : styles.main}>
+    <div className={styles.gallery}>
+      <div className={styles.main}>
         <Image
           src={current.url}
           alt={current.alt || title}
           width={current.width}
           height={current.height}
-          sizes={
-            stage
-              ? '(min-width: 1200px) 560px, (min-width: 960px) 46vw, 100vw'
-              : '(min-width: 1200px) 784px, (min-width: 960px) 66vw, 100vw'
-          }
+          sizes="(min-width: 1200px) 784px, (min-width: 960px) 66vw, 100vw"
           // Первая картинка товара — главная на первом экране: заранее и с высоким приоритетом.
           preload={priority && active === 0}
           fetchPriority={priority && active === 0 ? 'high' : undefined}
           className={styles.image}
         />
-        {stage && facts.length > 0 && (
-          <dl className={styles.facts}>
-            {facts.map((fact) => (
-              <div key={fact.name} className={styles.fact}>
-                <dt>{fact.name}</dt>
-                <dd>{fact.value}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
       </div>
       {pictures.length > 1 && (
         <ul className={styles.thumbs} aria-label="Картинки товара">

@@ -14,9 +14,11 @@ import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
 import { ProductLifecycle } from '@/components/ProductLifecycle/ProductLifecycle'
 import { ProductPicks } from '@/components/ProductPicks/ProductPicks'
 import { ProductSection } from '@/components/ProductSection/ProductSection'
+import { ProductStage } from '@/components/ProductStage/ProductStage'
 import { PropertyList } from '@/components/PropertyList/PropertyList'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { kindProfile } from '@/domain/productKind.mjs'
+import { productModel } from '@/domain/productModels.mjs'
 import { productLd } from '@/domain/structuredData.mjs'
 import { getCatalog } from '@/lib/catalog'
 import { getContacts } from '@/lib/navigation'
@@ -77,8 +79,10 @@ export async function ProductView({
   const direction = product.sections.find((s) => s.isDirection)
   const guided = product.pageView === 'picker'
   const profile = kindProfile(product.kind)
-  // Оборудование с вырезанным фото: крупная сцена в первом экране, обычные фото — в галерее ниже.
-  const stage = product.stagePicture
+  // Оборудование с вырезанным фото или 3D-моделью: крупная сцена в первом экране, обычные фото —
+  // в галерее ниже.
+  const model = product.kind === 'hardware' ? productModel(product.slug) : null
+  const stage = Boolean(product.stagePicture || model)
   // Цена для поисковиков — та же «от», что в каталоге и в итоге подбора на этой странице.
   const listed = byHref.get(product.path)
   const structured = productLd({
@@ -138,11 +142,11 @@ export async function ProductView({
                 requires={product.requires.map((r) => r.title)}
                 media={
                   stage ? (
-                    <ProductGallery
-                      pictures={[stage]}
+                    <ProductStage
                       title={product.title}
+                      picture={product.stagePicture}
+                      model={model}
                       facts={product.facts}
-                      stage
                     />
                   ) : undefined
                 }
