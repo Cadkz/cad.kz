@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 import type { Product, Section } from '../../payload-types'
 import { resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
+import { keyFacts } from '../domain/keyFacts.mjs'
 import type { PickerView } from '../domain/picker.mjs'
+import { cleanSpecs } from '../domain/specs.mjs'
 import { type Lifecycle, lifecycle, readResearch } from './equipmentResearch'
 import { formatKzt } from './format'
 import { cms } from './payload'
 import { loadPicker } from './picker'
-import { type Picture, productPictures } from './pictures'
+import { type Picture, productPictures, toPicture } from './pictures'
 import { loadPricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
 import { relId } from './rel'
@@ -23,6 +25,9 @@ export type ProductOffer = {
   price: string | null
 }
 
+export type Spec = ReturnType<typeof cleanSpecs>[number]
+export type Fact = ReturnType<typeof keyFacts>[number]
+
 export type RelatedProduct = { slug: string; href: string; title: string; vendor: string | null }
 
 export type ProductPage = {
@@ -38,7 +43,10 @@ export type ProductPage = {
   vendor: string | null
   sections: { slug: string; title: string; isDirection: boolean; icon: string | null }[]
   tasks: string[]
-  properties: { name: string; value: string }[]
+  /** Характеристики для показа: по-русски, без повторов, группа отдельно (src/domain/specs.mjs). */
+  properties: Spec[]
+  /** Главные факты категории для сцены первого экрана (src/domain/keyFacts.mjs). */
+  facts: Fact[]
   faq: { question: string; answer: string }[]
   requires: RelatedProduct[]
   offers: ProductOffer[]
@@ -58,8 +66,11 @@ export type ProductPage = {
   redirectId: number | null
   /** Своя галерея или картинка производителя; пусто — блока картинок нет. */
   pictures: Picture[]
-  /** Есть своя галерея (фото товара), а не картинка производителя. */
-  ownPictures: boolean
+  /**
+   * Фото для сцены первого экрана: «Картинка для карточки» в PNG или WebP — вырезанное фото на
+   * прозрачном или белом фоне (фото владельца, 23.10.2026). JPEG с серым фоном в сцену не берём.
+   */
+  stagePicture: Picture | null
   seo: Product['seo']
 }
 
@@ -87,6 +98,11 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
   const product = docs[0]
   if (!product) return null
   const research = readResearch(product.researchData)
+  const specs = cleanSpecs(
+    (product.properties ?? []).filter(
+      ({ name }) => !HIDDEN_PROPERTIES.has(name.trim().toLowerCase()),
+    ),
+  )
   const replacements = new Map<string, { title: string; href: string | null }>()
   if (research?.status === 'discontinued' && research.replacedBy) {
     const { docs } = await payload.find({
@@ -150,9 +166,8 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
         icon: section.icon ?? null,
       })),
     tasks: (product.tasks ?? []).map((task) => task.title),
-    properties: (product.properties ?? [])
-      .filter(({ name }) => !HIDDEN_PROPERTIES.has(name.trim().toLowerCase()))
-      .map(({ name, value }) => ({ name, value })),
+    properties: specs,
+    facts: keyFacts(research, specs),
     faq: (product.faq ?? []).map(({ question, answer }) => ({ question, answer })),
     requires: related(product.requiresProducts),
     offers: priced.map(({ offer, unit }) => ({
@@ -174,7 +189,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     vendorId: relId(product.manufacturer),
     redirectId: relId(product.redirectTo),
     pictures: productPictures(product),
-    ownPictures: (product.gallery ?? []).length > 0,
+    stagePicture: stagePicture(product),
     seo: product.seo,
   }
 }
@@ -207,15 +222,12 @@ export function pickParam(params: Params): PickTarget | null {
   return Number.isSafeInteger(id) && id > 0 ? id : null
 }
 
-/** Короткое значение, которое читается подписью у фото: не длиннее этого числа знаков. */
-const FACT_MAX_LENGTH = 32
+/** Прозрачный фон бывает только у PNG и WebP: из них фото в сцене смотрится вырезанным. */
+const CUTOUT_TYPES = new Set(['image/png', 'image/webp'])
 
-/**
- * Главные факты для сцены первого экрана оборудования: первые три характеристики с коротким
- * значением (формат, технология, разрешение — порядок задаёт админка).
- */
-export function keyFacts(properties: { name: string; value: string }[], limit = 3) {
-  return properties
-    .filter(({ name, value }) => name.trim() && value.trim() && value.length <= FACT_MAX_LENGTH)
-    .slice(0, limit)
+function stagePicture(product: Product): Picture | null {
+  if (product.kind !== 'hardware') return null
+  const media = product.cardImage
+  if (!media || typeof media === 'number' || !CUTOUT_TYPES.has(media.mimeType ?? '')) return null
+  return toPicture(media, product.title)
 }

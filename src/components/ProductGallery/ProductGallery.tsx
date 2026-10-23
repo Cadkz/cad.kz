@@ -16,6 +16,8 @@ type Props = {
    */
   stage?: boolean
   facts?: Fact[]
+  /** Первая картинка — главная на первом экране (нет сцены выше): грузится заранее. */
+  priority?: boolean
 }
 
 /**
@@ -23,7 +25,13 @@ type Props = {
  * Переключение без перезагрузки; первая картинка — первая на экране, грузится с приоритетом.
  * В виде сцены (stage) фото крупнее и с фактами вокруг, как у Longbow.
  */
-export function ProductGallery({ pictures, title, stage = false, facts = [] }: Props) {
+export function ProductGallery({
+  pictures,
+  title,
+  stage = false,
+  facts = [],
+  priority = true,
+}: Props) {
   const [active, setActive] = useState(0)
   const current = pictures[active] ?? pictures[0]
   if (!current) return null
@@ -41,8 +49,8 @@ export function ProductGallery({ pictures, title, stage = false, facts = [] }: P
               : '(min-width: 1200px) 784px, (min-width: 960px) 66vw, 100vw'
           }
           // Первая картинка товара — главная на первом экране: заранее и с высоким приоритетом.
-          preload={active === 0}
-          fetchPriority={active === 0 ? 'high' : undefined}
+          preload={priority && active === 0}
+          fetchPriority={priority && active === 0 ? 'high' : undefined}
           className={styles.image}
         />
         {stage && facts.length > 0 && (
