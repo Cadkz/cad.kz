@@ -62,7 +62,7 @@ export function HomeCatalog() {
 
   if (state === 'loading') {
     return (
-      <div className={styles.reserve} role="status">
+      <div key="loading" className={styles.reserve} role="status">
         <p className={styles.note}>Загружаем каталог…</p>
       </div>
     )
@@ -77,14 +77,21 @@ export function HomeCatalog() {
       </div>
     )
   }
+  // Каталог целиком (панель с фильтром) проступает из размытия: если догрузился, пока его
+  // видно, — сразу; если ниже экрана — когда до него докрутили (data-reveal, RevealObserver).
+  // Карточки внутри появляются следом своим порядком. Разные key у заглушки и каталога —
+  // чтобы это был новый блок в странице (иначе React переиспользует div заглушки, и наблюдатель
+  // появления его не замечает).
   return (
-    <CatalogFilter
-      items={state.items}
-      facets={state.facets}
-      lines={state.lines}
-      vendorLogos={state.vendorLogos}
-      initial={emptyFilter}
-      popular={state.popular}
-    />
+    <div key="ready" className={styles.appear} data-reveal="">
+      <CatalogFilter
+        items={state.items}
+        facets={state.facets}
+        lines={state.lines}
+        vendorLogos={state.vendorLogos}
+        initial={emptyFilter}
+        popular={state.popular}
+      />
+    </div>
   )
 }

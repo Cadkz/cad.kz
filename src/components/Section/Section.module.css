@@ -79,6 +79,7 @@
   }
 
   .head[data-reveal="wait"] .titleLine {
+    filter: blur(var(--blur-reveal));
     transform: translateY(calc(100% + var(--space-2)));
   }
 
@@ -87,7 +88,9 @@
   }
 
   .head[data-reveal="in"] .titleLine {
-    transition: transform var(--duration-reveal) var(--ease-reveal);
+    transition:
+      transform var(--duration-reveal) var(--ease-reveal),
+      filter var(--duration-reveal) var(--ease-focus) var(--delay-reveal-step);
   }
 
   .head[data-reveal="in"] .action {

@@ -14,3 +14,29 @@
   align-items: flex-start;
   gap: var(--space-4);
 }
+
+/* Готовый каталог: на месте надписи «Загружаем каталог…» проступает из размытия (анимация
+   при появлении), а если он ниже экрана — ждёт и проступает, когда до него докрутили. */
+@media (prefers-reduced-motion: no-preference) {
+  .appear {
+    animation: appear var(--duration-reveal) var(--ease-reveal);
+  }
+
+  .appear[data-reveal="wait"] {
+    opacity: 0;
+    filter: blur(var(--blur-reveal));
+  }
+
+  .appear[data-reveal="in"] {
+    transition:
+      opacity var(--duration-reveal) var(--ease-reveal),
+      filter var(--duration-reveal) var(--ease-focus);
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    filter: blur(var(--blur-reveal));
+  }
+}

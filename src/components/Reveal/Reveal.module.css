@@ -1,15 +1,19 @@
-/* Появление при прокрутке. RevealObserver ставит data-reveal: wait — блок ниже экрана, ждёт;
+/* Появление при прокрутке: прозрачность, размытие и подъём на 16 px. RevealObserver ставит data-reveal: wait — блок ниже экрана, ждёт;
    in — вошёл в экран, проявляется и поднимается по времени, плавно до конца. Уже видимое
    при загрузке не трогается. Без JavaScript атрибут пустой — блок виден сразу. */
 @media (prefers-reduced-motion: no-preference) {
   .reveal[data-reveal="wait"] {
     opacity: 0;
-    transform: translateY(var(--space-6));
+    filter: blur(var(--blur-reveal));
+    transform: translateY(var(--space-4));
   }
 
+  /* Из размытия в чёткость (пробная ветка, 23.10.2026): резкость приходит чуть позже
+     прозрачности, поэтому блок «собирается», а не просто выезжает. */
   .reveal[data-reveal="in"] {
     transition:
       opacity var(--duration-reveal) var(--ease-reveal),
+      filter var(--duration-reveal) var(--ease-focus) var(--delay-reveal-step),
       transform var(--duration-reveal) var(--ease-reveal);
   }
 

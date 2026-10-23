@@ -58,6 +58,19 @@
   mask-image: linear-gradient(to bottom, black 55%, transparent);
 }
 
+/* На телефоне и планшете модель сверху плашки тоже отстаёт от текста, но вдвое меньше:
+   ниже неё заголовок, наезжать на него нельзя. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .image {
+      --lag: calc(var(--parallax-shift) / 2);
+      animation: lag linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 100vh;
+    }
+  }
+}
+
 .title {
   max-width: var(--measure);
   color: var(--color-text-inverse);
@@ -184,11 +197,12 @@
   }
 
   /* Глубина при прокрутке (как у 1820 Productions): BIM-модель уходит вверх медленнее
-     текста — отстаёт на --parallax-shift, пока блок уезжает с экрана. Только CSS, считает
+     текста — отстаёт на --parallax-shift-lg, пока блок уезжает с экрана. Только CSS, считает
      браузер без JavaScript; где прокрутку так не умеют (Firefox) — картинка просто на месте. */
   @supports (animation-timeline: scroll()) {
     @media (prefers-reduced-motion: no-preference) {
       .image {
+        --lag: var(--parallax-shift-lg);
         animation: lag linear both;
         /* Отсчёт — от верха страницы: при загрузке картинка ровно на своём месте. */
         animation-timeline: scroll(root block);
@@ -206,7 +220,7 @@
 
 @keyframes lag {
   to {
-    transform: translateY(var(--parallax-shift));
+    transform: translateY(var(--lag));
   }
 }
 
@@ -239,6 +253,7 @@
 @keyframes rise {
   from {
     opacity: 0;
+    filter: blur(var(--blur-reveal));
     transform: translateY(var(--space-4));
   }
 }

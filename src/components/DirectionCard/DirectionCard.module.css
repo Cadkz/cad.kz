@@ -168,3 +168,25 @@
 .card:focus-visible::after {
   opacity: 1;
 }
+
+/* Глубина: крупный значок в углу плывёт медленнее карточки, пока она проходит экран
+   (наведение двигает обёртку .big, прокрутка — сам значок, друг другу не мешают). */
+@keyframes drift {
+  from {
+    transform: translateY(calc(var(--parallax-shift) / 3));
+  }
+
+  to {
+    transform: translateY(calc(var(--parallax-shift) / -3));
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .big svg {
+      animation: drift linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+  }
+}
