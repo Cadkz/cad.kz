@@ -130,3 +130,63 @@
     display: block;
   }
 }
+
+/* Сборка при прокрутке (владелец 23.10.2026): шаги и карточки съезжаются к своим местам —
+   первый слева, средний снизу, последний справа, — строго вместе с прокруткой, без размытия
+   и без доигрывания по времени. Полностью на месте, когда блок поднялся почти до середины
+   экрана. Сдвиг на телефоне вдвое меньше. Голубая подложка Section обрезает края, прокрутки
+   вбок нет. Где браузер так не умеет (Firefox) и при «меньше движения» — всё сразу на месте. */
+.fromStart {
+  --from-x: calc(var(--parallax-shift) / -2);
+  --from-y: 0px;
+}
+
+.fromEnd {
+  --from-x: calc(var(--parallax-shift) / 2);
+  --from-y: 0px;
+}
+
+.fromBelow {
+  --from-x: 0px;
+  --from-y: calc(var(--parallax-shift) / 2);
+}
+
+@media (min-width: 960px) {
+  .fromStart {
+    --from-x: calc(-1 * var(--parallax-shift));
+  }
+
+  .fromEnd {
+    --from-x: var(--parallax-shift);
+  }
+
+  .fromBelow {
+    --from-y: var(--parallax-shift);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .assemble {
+      animation: assemble var(--ease) both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 45%;
+    }
+  }
+}
+
+@keyframes assemble {
+  from {
+    opacity: 0;
+    transform: translate(var(--from-x), var(--from-y));
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

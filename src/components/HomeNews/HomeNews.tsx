@@ -3,7 +3,6 @@ import { type TopicCovers, toCard } from '@/lib/publications'
 import type { Publication } from '../../../payload-types'
 import { HeroSlider } from '../HeroSlider/HeroSlider'
 import { NewsCard } from '../NewsCard/NewsCard'
-import { Reveal } from '../Reveal/Reveal'
 import { Section } from '../Section/Section'
 import styles from './HomeNews.module.css'
 
@@ -21,22 +20,27 @@ export function HomeNews({ slides, news, covers }: Props) {
   const side = (feature ? news.slice(1) : news).slice(0, 3)
   if (!slides.length && !feature) return null
   return (
-    <Section id="news" title="Новости и акции" action={{ href: '/news', label: 'Все новости' }}>
+    <Section
+      id="news"
+      title="Новости и акции"
+      action={{ href: '/news', label: 'Все новости' }}
+      still
+    >
       <ul className={styles.grid}>
-        <Reveal as="li" className={styles.main}>
+        <li className={styles.main}>
           {feature ? (
             <NewsCard news={toCard(feature, covers)} size="large" withExcerpt />
           ) : (
             <HeroSlider slides={slides} />
           )}
-        </Reveal>
+        </li>
         {side.length > 0 && (
           <li className={styles.side}>
             <ul className={styles.list}>
-              {side.map((item, i) => (
-                <Reveal as="li" key={item.id} step={i + 1} className={styles.item}>
+              {side.map((item) => (
+                <li key={item.id} className={styles.item}>
                   <NewsCard news={toCard(item, covers)} size="text" />
-                </Reveal>
+                </li>
               ))}
             </ul>
           </li>

@@ -2,7 +2,6 @@ import { BookOpen, FileText, MessageSquare } from 'lucide-react'
 import type { Home } from '@/lib/home'
 import { ButtonLink } from '../Button/Button'
 import { Grid } from '../Grid/Grid'
-import { Reveal } from '../Reveal/Reveal'
 import styles from './ProcessSteps.module.css'
 
 const icons = [MessageSquare, FileText, BookOpen]
@@ -12,9 +11,18 @@ type Props = { steps: Home['process']; cards: Home['sideCards'] }
 /**
  * «Как мы работаем»: три компактных шага (номер, заголовок, описание в одной карточке) и под
  * ними карточки с действием из админки — «Подберём комплект под ваше ТЗ», «Работаем по
- * госзакупкам» (перенесены из «Акций», замечание владельца 13.10.2026). Шаги и карточки
- * появляются по очереди, слева направо, когда вошли в экран.
+ * госзакупкам» (перенесены из «Акций», замечание владельца 13.10.2026). При прокрутке шаги
+ * и карточки съезжаются к своим местам с краёв и снизу, привязанно к прокрутке — блок собирается
+ * воедино (владелец 23.10.2026: без размытия, попиксельно).
  */
+const stepFrom = [styles.fromStart, styles.fromBelow, styles.fromEnd]
+
+/** Две карточки — слева и справа, одна — снизу. */
+function cardFrom(i: number, count: number) {
+  if (count < 2) return styles.fromBelow
+  return i % 2 === 0 ? styles.fromStart : styles.fromEnd
+}
+
 export function ProcessSteps({ steps, cards }: Props) {
   return (
     <div className={styles.stack}>
@@ -22,25 +30,30 @@ export function ProcessSteps({ steps, cards }: Props) {
         {steps.map((step, i) => {
           const Icon = icons[i % icons.length] ?? MessageSquare
           return (
-            <Reveal as="li" key={step.title} step={i} className={styles.step}>
+            <li key={step.title} className={`${styles.step} ${styles.assemble} ${stepFrom[i % 3]}`}>
               <span className={styles.num}>{i + 1}</span>
               <div className={styles.body}>
                 <h3 className={styles.title}>{step.title}</h3>
                 {step.text && <p className={styles.text}>{step.text}</p>}
               </div>
               <Icon size={20} strokeWidth={1.75} aria-hidden="true" className={styles.icon} />
-            </Reveal>
+            </li>
           )
         })}
       </Grid>
       {cards.length > 0 && (
         <Grid as="ul" span={{ base: 12, md: cards.length > 1 ? 6 : 12 }}>
           {cards.map((card, i) => (
-            <Reveal
-              as="li"
+            <li
               key={card.title}
-              step={i}
-              className={card.dark ? `${styles.card} ${styles.dark}` : styles.card}
+              className={[
+                styles.card,
+                card.dark ? styles.dark : '',
+                styles.assemble,
+                cardFrom(i, cards.length),
+              ]
+                .filter(Boolean)
+                .join(' ')}
             >
               <div className={styles.cardBody}>
                 <h3 className={styles.cardTitle}>{card.title}</h3>
@@ -56,7 +69,7 @@ export function ProcessSteps({ steps, cards }: Props) {
                   {card.link.label}
                 </ButtonLink>
               )}
-            </Reveal>
+            </li>
           ))}
         </Grid>
       )}

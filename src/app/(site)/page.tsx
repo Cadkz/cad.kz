@@ -85,7 +85,7 @@ export default async function Home({ searchParams }: Props) {
         </Section>
       )}
       {home.faq.length > 0 && (
-        <Section id="faq" title="Частые вопросы">
+        <Section id="faq" title="Частые вопросы" still>
           <Grid>
             <Col span={{ base: 12, md: 8 }}>
               <Faq items={home.faq} />

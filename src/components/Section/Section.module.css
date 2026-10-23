@@ -67,7 +67,9 @@
 
 /* Заголовок поднимается из-под маски, когда вошёл в экран (как строки у Floema): строка
    обрезается краем заголовка (с запасом на хвосты букв «у», «д»), сдвиг — на свою высоту.
-   Без JavaScript и при «меньше движения» заголовок виден сразу. */
+   Без размытия (размытие — только у карточек и баннеров, владелец 23.10.2026). Секции с still
+   (новости, частые вопросы) не анимируются. Без JavaScript и при «меньше движения» заголовок
+   виден сразу. */
 .titleLine {
   display: inline-block;
 }
@@ -79,7 +81,6 @@
   }
 
   .head[data-reveal="wait"] .titleLine {
-    filter: blur(var(--blur-reveal));
     transform: translateY(calc(100% + var(--space-2)));
   }
 
@@ -88,9 +89,7 @@
   }
 
   .head[data-reveal="in"] .titleLine {
-    transition:
-      transform var(--duration-reveal) var(--ease-reveal),
-      filter var(--duration-reveal) var(--ease-focus) var(--delay-reveal-step);
+    transition: transform var(--duration-reveal) var(--ease-reveal);
   }
 
   .head[data-reveal="in"] .action {

@@ -13,6 +13,8 @@ type Props = {
   tone?: 'plain' | 'tint'
   /** Только от 960 px: на телефоне и планшете секции нет (каталог на главной, решение владельца 21.10.2026). */
   desktopOnly?: boolean
+  /** Без появления при прокрутке: заголовок и ссылка стоят на месте («Новости и акции», «Частые вопросы» — решение владельца 23.10.2026). */
+  still?: boolean
   children: ReactNode
 }
 
@@ -20,7 +22,7 @@ type Props = {
  * Секция страницы: заголовок h2, подзаголовок, ссылка «Все …» и содержимое в рамке сайта.
  * Штриха над заголовком нет (решение владельца 13.10.2026: лишний декор). Заголовок, когда
  * вошёл в экран, поднимается из-под невидимой маски, ссылка справа проявляется чуть позже
- * (RevealObserver; пробная ветка redesign/home-motion-2).
+ * (RevealObserver, 23.10.2026); у секций still — без движения.
  */
 export function Section({
   title,
@@ -29,6 +31,7 @@ export function Section({
   id,
   tone = 'plain',
   desktopOnly = false,
+  still = false,
   children,
 }: Props) {
   const headingId = id ? `${id}-title` : undefined
@@ -36,7 +39,7 @@ export function Section({
   return (
     <section id={id} className={classes.filter(Boolean).join(' ')} aria-labelledby={headingId}>
       <Container>
-        <div className={styles.head} data-reveal="">
+        <div className={styles.head} data-reveal={still ? undefined : ''}>
           <div className={styles.text}>
             <h2 id={headingId} className={styles.title}>
               <span className={styles.titleLine}>{title}</span>
