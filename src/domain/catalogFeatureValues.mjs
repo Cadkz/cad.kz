@@ -23,9 +23,16 @@ export function featureDefinition(category, filter) {
     ...new Set(filter.values.map((value) => featureValue(category, filter.key, value))),
   ]
   if (['width', 'rolls', 'accuracy', 'resolution'].includes(filter.key)) {
-    const number = (value) =>
-      Number(value.match(/\d+(?:[.,]\d+)?/)?.[0]?.replace(',', '.') ?? Infinity)
-    values.sort((a, b) => number(a) - number(b))
+    // По всем числам по очереди: «600 × 600» раньше «600 × 1200».
+    const numbers = (value) =>
+      (value.match(/\d+(?:[.,]\d+)?/g) ?? []).map((n) => Number(n.replace(',', '.')))
+    values.sort((a, b) => {
+      const [x, y] = [numbers(a), numbers(b)]
+      for (let i = 0; i < Math.max(x.length, y.length); i++)
+        if ((x[i] ?? Infinity) !== (y[i] ?? Infinity))
+          return (x[i] ?? Infinity) - (y[i] ?? Infinity)
+      return 0
+    })
   }
   if (filter.key === 'object_size') {
     const order = ['XS', 'S', 'M', 'L', 'XL', 'XXL']

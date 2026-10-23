@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { registerHooks } from 'node:module'
 import test from 'node:test'
 import facets from '../src/domain/equipmentFacets.json' with { type: 'json' }
+import { EQUIPMENT_FILTERS_V2, mergeFilters } from '../src/domain/equipmentFiltersV2.mjs'
 import source from '../src/domain/equipmentResearch.json' with { type: 'json' }
 import { KEEP_OWN_TEXT } from '../src/domain/ownerCatalogFixes.mjs'
 import {
@@ -36,6 +37,12 @@ const { setupEquipmentResearch, EQUIPMENT_RESEARCH_KEY, researchDescription } = 
 )
 hooks.deregister()
 
+/** Фильтры товара на сайте: исследование плюс замена групп плоттеров и сканеров (23.10.2026). */
+function siteFilters(category, seed) {
+  const next = EQUIPMENT_FILTERS_V2[category]?.[seed.slug]
+  return next ? mergeFilters(category, seed.filters, next) : seed.filters
+}
+
 const items = source.products.map((seed, index) => {
   const category = source.categories.find((entry) => entry.order.includes(seed.slug)).category
   return {
@@ -52,25 +59,39 @@ const items = source.products.map((seed, index) => {
     main: category,
     line: null,
     lineOrder: index,
-    research: readResearch({ category, ...seed }),
+    research: readResearch({ category, ...seed, filters: siteFilters(category, seed) }),
   }
 })
 const plotters = { ...emptyFilter, group: 'hardware', type: 'plotters' }
 const features = (state, values) => update(state, { features: values })
 
-test('Все 54 товара, категории и значения фильтров перенесены без изменения данных', () => {
+test('Все 54 товара перенесены; у каждого значения фильтра есть группа и вариант', () => {
   assert.equal(items.length, 54)
   assert.equal(new Set(items.map((item) => item.slug)).size, 54)
+  // Группы плоттеров и сканеров заменены по образцу владельца, остальные — из исследования.
+  const replaced = Object.keys(EQUIPMENT_FILTERS_V2)
   assert.deepEqual(
-    facets,
-    source.categories.map(({ category, filters }) => ({ category, filters })),
+    facets.filter((entry) => !replaced.includes(entry.category)),
+    source.categories
+      .filter((entry) => !replaced.includes(entry.category))
+      .map(({ category, filters }) => ({ category, filters })),
   )
+  for (const category of replaced) {
+    const order = source.categories.find((entry) => entry.category === category).order
+    assert.deepEqual(Object.keys(EQUIPMENT_FILTERS_V2[category]).sort(), [...order].sort())
+  }
   for (const category of facets) {
     for (const item of items.filter((item) => item.research.category === category.category)) {
       for (const filter of category.filters) {
         for (const value of item.research.filters[filter.key] ?? []) {
           assert.ok(filter.values.includes(value), `${item.slug}: ${filter.key}=${value}`)
         }
+      }
+      for (const key of Object.keys(item.research.filters)) {
+        assert.ok(
+          category.filters.some((filter) => filter.key === key),
+          `${item.slug}: группа ${key}`,
+        )
       }
     }
   }
@@ -80,9 +101,17 @@ test('Группы следуют исследованию; бесполезны
   const options = featureOptions(items, plotters)
   assert.deepEqual(
     options.map((entry) => entry.label),
-    ['Ширина печати', 'Технология печати', 'Цветность', 'Рулоны: максимум с опциями', 'Назначение'],
+    [
+      'Максимальный формат печати',
+      'Технология печати',
+      'Цвет печати',
+      'Разрешение печати, dpi',
+      'Скорость печати, макс.',
+      'Рулоны: максимум с опциями',
+      'Назначение',
+    ],
   )
-  const narrowed = featureOptions(items, features(plotters, { 'plotters.color': ['Монохромный'] }))
+  const narrowed = featureOptions(items, features(plotters, { 'plotters.color': ['Монохромная'] }))
   const technology = narrowed.find((entry) => entry.key === 'plotters.technology')
   assert.equal(technology, undefined)
   assert.ok(narrowed.every((entry) => entry.options.every((option) => option.count > 0)))
@@ -90,7 +119,7 @@ test('Группы следуют исследованию; бесполезны
 
 test('Галочки: ИЛИ внутри группы, И между группами, массивы значений поддерживаются', () => {
   const state = features(plotters, {
-    'plotters.color': ['Цветной', 'Монохромный'],
+    'plotters.color': ['Цветная', 'Монохромная'],
     'plotters.purpose': ['Постеры'],
   })
   const found = items.filter((item) => matches(item, state))
@@ -99,7 +128,7 @@ test('Галочки: ИЛИ внутри группы, И между групп
   assert.equal(results(items, plotters).total, 11)
   assert.equal(
     items.filter((item) =>
-      matches(item, features(plotters, { 'plotters.color': ['Цветной', 'Монохромный'] })),
+      matches(item, features(plotters, { 'plotters.color': ['Цветная', 'Монохромная'] })),
     ).length,
     11,
   )
@@ -109,19 +138,19 @@ test('Нулевой выбранный вариант остаётся дост
   const state = features(
     { ...plotters, vendors: ['Производитель'] },
     {
-      'plotters.color': ['Монохромный'],
+      'plotters.color': ['Монохромная'],
       'plotters.technology': ['Струйная пигментная'],
     },
   )
   assert.equal(results(items, state).total, 0)
   const color = featureOptions(items, state).find((entry) => entry.key === 'plotters.color')
-  assert.equal(color.options.find((entry) => entry.value === 'Монохромный').count, 0)
+  assert.equal(color.options.find((entry) => entry.value === 'Монохромная').count, 0)
   assert.deepEqual(pruneVendors(items, state).vendors, state.vendors)
 })
 
 test('Каждый шаг восстанавливается из URL; кавычки, кириллица и несколько значений не теряются', () => {
   const states = [plotters]
-  states.push(features(states.at(-1), { 'plotters.width': ['36" (A0)', '44"'] }))
+  states.push(features(states.at(-1), { 'plotters.format': ['A0 (36″, 914 мм)', 'A0+ (42–44″)'] }))
   states.push(
     features(states.at(-1), {
       ...states.at(-1).features,
@@ -133,7 +162,7 @@ test('Каждый шаг восстанавливается из URL; кавы�
   assert.deepEqual(
     fromParams({
       type: 'plotters',
-      'spec.plotters.width': 'неизвестно',
+      'spec.plotters.format': 'неизвестно',
       'spec.software.license': 'Подписка',
     }).features,
     {},
@@ -141,7 +170,7 @@ test('Каждый шаг восстанавливается из URL; кавы�
 })
 
 test('Смена раздела сбрасывает характеристики и страницу; производитель сохраняет выбор', () => {
-  const state = { ...features(plotters, { 'plotters.width': ['44"'] }), page: 3 }
+  const state = { ...features(plotters, { 'plotters.format': ['A0+ (42–44″)'] }), page: 3 }
   for (const change of [{ type: 'scanners' }, { group: 'software' }, { direction: 'machine' }]) {
     assert.deepEqual(update(state, change).features, {})
     assert.equal(update(state, change).page, 1)
@@ -302,5 +331,26 @@ test('Описание сохраняет абзацы, подзаголовки
       sections: [{ title: 'Блок', text: 'Текст', bullets: ['Один', 'Два'] }],
     }),
     'Первый\n\nВторой\n\n## Блок\n\nТекст\n\n- Один\n- Два',
+  )
+})
+
+test('Сканеры: формат, разрешение, скорость и цветность ровными значениями; старые группы стёрты', () => {
+  const scanners = { ...emptyFilter, group: 'hardware', type: 'wide-scanners' }
+  const labels = featureOptions(items, scanners).map((entry) => entry.label)
+  for (const label of [
+    'Максимальный формат сканирования',
+    'Разрешение сканирования, dpi',
+    'Скорость сканирования',
+    'Цветность сканирования, бит',
+  ])
+    assert.ok(labels.includes(label), label)
+  assert.ok(!labels.includes('Ширина сканирования'))
+  const wide = items.filter((item) =>
+    matches(item, features(scanners, { 'wide-scanners.format': ['A0+ (44–48″)'] })),
+  )
+  assert.equal(wide.length, 3)
+  assert.deepEqual(
+    mergeFilters('plotters', { width: '44"', rolls: '2', color: 'Цветной' }, { color: 'Цветная' }),
+    { rolls: '2', color: 'Цветная' },
   )
 })

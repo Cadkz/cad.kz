@@ -20,6 +20,44 @@
   text-transform: uppercase;
 }
 
+.legend {
+  width: 100%;
+  margin-bottom: var(--space-1);
+  padding: 0;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  min-height: var(--touch-target);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-overline);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-overline);
+  text-align: left;
+  text-transform: uppercase;
+}
+
+@media (min-width: 960px) {
+  .heading {
+    min-height: 0;
+    padding: var(--space-1) 0;
+  }
+}
+
+.heading:hover {
+  color: var(--color-navy);
+}
+
+.headingIconClosed {
+  transform: rotate(-90deg);
+}
+
 .check {
   display: flex;
   align-items: center;

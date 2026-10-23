@@ -26,6 +26,7 @@ import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
+import { setupEquipmentFiltersV2 } from '../src/lib/equipmentFiltersSetup.ts'
 import { setupEquipmentResearch } from '../src/lib/equipmentResearchSetup.ts'
 import { setupEquipment } from '../src/lib/equipmentSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
@@ -221,6 +222,9 @@ try {
   const fixes = await setupOwnerCatalogFixes(payload)
   if (!fixes) console.log('Решения владельца по исследованию (23.10.2026) уже применены.')
   else for (const line of fixes) console.log(`Решения владельца — ${line}`)
+  const filtersV2 = await setupEquipmentFiltersV2(payload)
+  if (!filtersV2) console.log('Фильтры плоттеров и сканеров (23.10.2026) уже обновлены.')
+  else for (const line of filtersV2) console.log(`Фильтры оборудования — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

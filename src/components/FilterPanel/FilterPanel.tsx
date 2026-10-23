@@ -26,6 +26,9 @@ function toggle(list: string[], value: string) {
  */
 const VENDORS_SHOWN = 8
 
+/** Сколько групп характеристик открыто сразу: формат, технология, цвет, разрешение. */
+const FEATURES_OPEN = 4
+
 /**
  * Панель условий фильтра: группа, направление или тип, производитель, задачи.
  * Когда выбрано направление или тип, производителя выбирают карточками над товарами
@@ -115,12 +118,15 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular }: P
           />
         </details>
       )}
-      {options.features.map((group) => (
+      {/* Характеристики: первые группы открыты, остальные свёрнуты (образец владельца 23.10.2026). */}
+      {options.features.map((group, index) => (
         <FilterChecks
           key={group.key}
           title={group.label}
           options={group.options}
           limit={6}
+          collapsible
+          defaultOpen={index < FEATURES_OPEN}
           selected={state.features[group.key] ?? []}
           onToggle={(value) =>
             onChange({
