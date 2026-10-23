@@ -1,9 +1,9 @@
-import { Coins, FileSpreadsheet, type LucideIcon, Plus, Table } from 'lucide-react'
+import { Coins, FileSpreadsheet, FolderTree, type LucideIcon, Plus, Table } from 'lucide-react'
 import styles from './AdminActions.module.css'
 
 type Action = { label: string; href: string; icon: LucideIcon; main?: boolean }
 
-/** Самое частое — одной кнопкой: новый товар, новость, акция, цены, прайс, курсы. */
+/** Самое частое — одной кнопкой: новый товар, новость, акция, каталог, цены, прайс, курсы. */
 const ACTIONS: Action[] = [
   { label: 'Товар', href: '/admin/collections/products/create', icon: Plus, main: true },
   {
@@ -18,6 +18,7 @@ const ACTIONS: Action[] = [
     icon: Plus,
     main: true,
   },
+  { label: 'Каталог деревом', href: '/admin/catalog', icon: FolderTree },
   { label: 'Цены таблицей', href: '/admin/prices', icon: Table },
   { label: 'Загрузить прайс', href: '/admin/price-list', icon: FileSpreadsheet },
   { label: 'Курсы валют', href: '/admin/rates', icon: Coins },

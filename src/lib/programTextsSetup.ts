@@ -25,15 +25,19 @@ export async function setupProgramTexts(payload: Payload): Promise<string[] | nu
     ...opts,
   })
   const report: string[] = []
+  let missing = 0
   for (const text of PROGRAM_TEXTS) {
     // Первый найденный адрес из списка — карточка программы.
     const product = text.slugs
       .map((slug) => docs.find((entry) => entry.slug === slug))
       .find((entry) => entry !== undefined)
     if (!product) {
-      report.push(`${text.slugs.join(' / ')}: товара нет — пропустили`)
+      missing++
+      report.push(`${text.slugs.join(' / ')}: товара нет — повторим при следующей сборке`)
       continue
     }
+    // Повторный запуск (не все товары нашлись в прошлый раз): уже загруженное не трогаем.
+    if (product.summary === text.summary && product.description === text.description) continue
     await payload.update({
       collection: 'products',
       id: product.id,
@@ -48,6 +52,7 @@ export async function setupProgramTexts(payload: Payload): Promise<string[] | nu
     })
     report.push(`${product.title}: новый текст и характеристики`)
   }
+  if (missing) return report
   await payload.create({
     collection: 'import-runs',
     data: { idempotencyKey: PROGRAM_TEXTS_KEY, state: 'done', snapshot: { report } },

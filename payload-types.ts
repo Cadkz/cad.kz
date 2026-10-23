@@ -629,10 +629,13 @@ export interface Publication {
   id: number;
   title: string;
   status: 'draft' | 'published';
-  slug: string;
   kind: 'article' | 'news' | 'promotion';
   /**
-   * Дата публикации на сайте. Будущая дата — публикация появится сама в это время (статус при этом «Опубликовано»).
+   * Выберите из списка. Новая тема добавляется в «Темы новостей и статей».
+   */
+  theme?: (number | null) | Topic;
+  /**
+   * Дата публикации на сайте. Будущая дата — публикация появится сама в это время (активность при этом «Да»).
    */
   publishedAt?: string | null;
   /**
@@ -643,19 +646,19 @@ export interface Publication {
    * После этой даты акция пропадает с главной и уходит в «Архивные» (на сайте остаётся). Пусто — действует полгода от начала показа.
    */
   endsAt?: string | null;
-  /**
-   * Выберите из списка. Новая тема добавляется в «Темы новостей и статей».
-   */
-  theme?: (number | null) | Topic;
+  slug: string;
   topic?: string | null;
   /**
    * Одно-два предложения: видны в карточке в списке новостей и на главной.
    */
   excerpt?: string | null;
   /**
-   * Картинка 16 : 9, например 1920 × 1080, без мелкого текста. Нет — в карточке будет обложка темы.
+   * Перетащите картинку с компьютера прямо сюда или выберите из загруженных. Лучше 16 : 9 (например 1920 × 1080), без мелкого текста. Нет — в карточке будет обложка темы.
    */
   cover?: (number | null) | Media;
+  /**
+   * Таблица — кнопкой на панели редактора, картинку можно перетащить в текст или вставить из буфера.
+   */
   body?: string | null;
   /**
    * Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.
@@ -703,8 +706,17 @@ export interface Page {
   id: number;
   title: string;
   status: 'draft' | 'published';
+  /**
+   * По нему сайт находит страницу. Менять не нужно — страница пропадёт.
+   */
   slug: string;
+  /**
+   * Крупный абзац под заголовком. Можно не заполнять.
+   */
   lead?: string | null;
+  /**
+   * Таблица — кнопкой на панели редактора, картинку можно перетащить в текст или вставить из буфера.
+   */
   body?: string | null;
   /**
    * Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.
@@ -1409,12 +1421,12 @@ export interface ExchangeRatesSelect<T extends boolean = true> {
 export interface PublicationsSelect<T extends boolean = true> {
   title?: T;
   status?: T;
-  slug?: T;
   kind?: T;
+  theme?: T;
   publishedAt?: T;
   hideAfter?: T;
   endsAt?: T;
-  theme?: T;
+  slug?: T;
   topic?: T;
   excerpt?: T;
   cover?: T;
