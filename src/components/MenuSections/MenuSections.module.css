@@ -69,3 +69,40 @@
 .everything:hover {
   color: var(--color-navy);
 }
+
+/* Разделы группы проступают сверху вниз той же волной, что карточки справа (24.10.2026):
+   из размытия в чёткость, без сдвига. В мегаменю — при открытии и смене группы. */
+[data-open="true"] .sections > li {
+  --wave: 0;
+  animation: menuSection var(--duration-menu-card) var(--ease-reveal) backwards;
+  animation-delay: calc(var(--delay-menu-card) * var(--wave));
+}
+
+.sections > li:nth-child(2) {
+  --wave: 1;
+}
+.sections > li:nth-child(3) {
+  --wave: 2;
+}
+.sections > li:nth-child(4) {
+  --wave: 3;
+}
+.sections > li:nth-child(5) {
+  --wave: 4;
+}
+.sections > li:nth-child(6) {
+  --wave: 5;
+}
+.sections > li:nth-child(7) {
+  --wave: 6;
+}
+.sections > li:nth-child(n + 8) {
+  --wave: 7;
+}
+
+@keyframes menuSection {
+  from {
+    opacity: 0;
+    filter: blur(var(--blur-menu-card));
+  }
+}

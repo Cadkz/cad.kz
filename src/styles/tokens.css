@@ -55,6 +55,11 @@
   --gradient-navy: linear-gradient(135deg, var(--color-navy), var(--color-blue));
   --gradient-deep: linear-gradient(120deg, var(--color-navy-deep), var(--color-navy));
   --gradient-graphite: linear-gradient(135deg, var(--color-gray-700), var(--color-gray-500));
+  --gradient-liquid: linear-gradient(
+    90deg,
+    var(--color-blue),
+    var(--color-sky)
+  ); /* жидкая линия второй строки шапки: синий перетекает в голубой (24.10.2026) */
   --gradient-soft: linear-gradient(135deg, var(--color-blue-soft), var(--color-blue-mid));
   --gradient-card-shade: linear-gradient(165deg, rgba(10, 16, 48, 0.35), rgba(8, 13, 38, 0.88));
 
@@ -243,6 +248,20 @@
   --duration-exit: 140ms; /* исчезновение — быстрее появления */
   --duration-unfold: 320ms; /* мегаменю каталога раскрывается шторкой сверху вниз (23.10.2026) */
   --delay-menu-step: 40ms; /* группы слева в мегаменю проступают по очереди */
+  /* Плитки и карточки мегаменю собираются волной (24.10.2026): из лёгкого размытия и уменьшения
+     в чёткость, по очереди. Только прозрачность, масштаб и размытие — раскладка не двигается. */
+  --duration-menu-card: 560ms;
+  --delay-menu-card: 36ms; /* шаг волны между соседними карточками */
+  --scale-menu-card: 0.94;
+  --blur-menu-card: 6px;
+  /* Жидкая метка второй строки шапки (24.10.2026): передний край догоняет курсор быстро,
+     задний подтягивается позже и с лёгкой отдачей — линия тянется, как капля. */
+  --duration-liquid-lead: 260ms;
+  --duration-liquid-tail: 560ms;
+  --delay-liquid-tail: 50ms;
+  --ease-liquid-lead: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-liquid-tail: cubic-bezier(0.34, 1.32, 0.5, 1); /* лёгкий перелёт и возврат, как у капли */
+  --duration-draw-line: 320ms; /* линия под пунктом прорисовывается слева направо */
   --duration-blink: 140ms; /* моргание Кадди: глаза закрыты 100–160 мс (руководство персонажа) */
   --delay-blink: 1200ms; /* первое моргание Кадди после появления */
   --period-blink: 11000ms; /* круг моргания Кадди: два моргания с промежутками 4,4 и 6,6 с */

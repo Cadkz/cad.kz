@@ -130,29 +130,44 @@
   color: var(--color-navy);
 }
 
-/* Карточки шага проступают по очереди: каждый шаг и раздел — новый список, анимация при появлении. */
-.cards > li {
-  animation: cardIn var(--duration-enter) var(--ease) backwards;
+/* Карточки шага собираются волной (24.10.2026): каждая проступает из лёгкого размытия и
+   уменьшения в чёткость, соседняя — чуть позже. Каждый шаг и раздел — новый список, анимация при
+   появлении и при каждом открытии меню (атрибут data-open у мегаменю). Масштаб меньше единицы не выходит за свою ячейку — прокрутки и сдвигов нет. */
+[data-open="true"] .cards > li {
+  --wave: 0;
+  animation: menuCard var(--duration-menu-card) var(--ease-reveal) backwards;
+  animation-delay: calc(var(--delay-menu-card) * var(--wave));
 }
 
 .cards > li:nth-child(2) {
-  animation-delay: calc(var(--delay-menu-step) / 2);
+  --wave: 1;
 }
-
 .cards > li:nth-child(3) {
-  animation-delay: var(--delay-menu-step);
+  --wave: 2;
 }
-
 .cards > li:nth-child(4) {
-  animation-delay: calc(var(--delay-menu-step) * 3 / 2);
+  --wave: 3;
+}
+.cards > li:nth-child(5) {
+  --wave: 4;
+}
+.cards > li:nth-child(6) {
+  --wave: 5;
+}
+.cards > li:nth-child(7) {
+  --wave: 6;
+}
+.cards > li:nth-child(8) {
+  --wave: 7;
+}
+.cards > li:nth-child(n + 9) {
+  --wave: 8;
 }
 
-.cards > li:nth-child(n + 5) {
-  animation-delay: calc(var(--delay-menu-step) * 2);
-}
-
-@keyframes cardIn {
+@keyframes menuCard {
   from {
     opacity: 0;
+    filter: blur(var(--blur-menu-card));
+    transform: scale(var(--scale-menu-card));
   }
 }
