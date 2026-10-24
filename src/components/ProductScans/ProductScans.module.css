@@ -3,8 +3,3 @@
   color: var(--color-text-muted);
   font-size: var(--text-sm);
 }
-
-/* Сканы во всю ширину рамки, между двумя частями страницы товара (решение владельца 24.10.2026). */
-.wide {
-  margin-block: var(--section-gap);
-}

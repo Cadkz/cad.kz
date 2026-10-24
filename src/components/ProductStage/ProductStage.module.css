@@ -1,4 +1,4 @@
-/* Сцена первого экрана оборудования: светлая подложка
+/* Сцена первого экрана любого товара (оборудование и программы): светлая подложка
    с чертёжной сеткой, фото крупно, белый фон снимка растворяется в подложке (multiply), главные
    факты — подписью рядом. Фото при загрузке «оседает» с --scale-settle, прозрачность не трогаем:
    от картинки зависит скорость первого экрана (LCP). */
@@ -34,8 +34,33 @@
 }
 
 .float {
+  position: relative;
   width: 100%;
   height: 100%;
+}
+
+/* Вся картинка — кнопка «открыть крупно»; слайды лежат стопкой друг на друге. */
+.open {
+  position: absolute;
+  inset: 0;
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  cursor: zoom-in;
+  touch-action: pan-y;
+}
+
+.open:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: block;
 }
 
 .image {
@@ -43,6 +68,114 @@
   height: 100%;
   object-fit: contain;
   mix-blend-mode: multiply;
+  user-select: none;
+}
+
+/* Листание (24.10.2026, просьба владельца «красиво листались»): уходящая картинка сдвигается
+   вбок, уменьшается и тает в размытии, новая выплывает с другой стороны в чёткость. */
+.slide[data-state="before"],
+.slide[data-state="after"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .slide {
+    transition:
+      opacity var(--duration-slow) var(--ease-reveal),
+      transform var(--duration-slow) var(--ease-reveal),
+      filter var(--duration-slow) var(--ease-focus);
+  }
+
+  .slide[data-state="before"] {
+    filter: blur(var(--blur-fade));
+    transform: translateX(calc(var(--parallax-shift) * -1)) scale(var(--scale-menu-card));
+  }
+
+  .slide[data-state="after"] {
+    filter: blur(var(--blur-fade));
+    transform: translateX(var(--parallax-shift)) scale(var(--scale-menu-card));
+  }
+}
+
+.zoom {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  border-radius: var(--radius-round);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-navy);
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease);
+}
+
+.open:hover .zoom,
+.open:focus-visible .zoom {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .zoom {
+    opacity: 1;
+  }
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--color-navy);
+}
+
+/* Стрелки и номер картинки — под фото справа, на листе. */
+.nav {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-raised);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.counter {
+  min-width: var(--space-10);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-round);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-navy);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease);
+}
+
+.arrow:hover {
+  border-color: var(--color-navy);
+}
+
+.arrow:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 /* Глубина при прокрутке (просьба владельца 24.10.2026, «параллакса не хватает»): пока первый
@@ -78,7 +211,7 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .image {
+  .slide:first-child .image {
     animation: settle var(--duration-settle) var(--ease-reveal);
   }
 }
@@ -147,4 +280,20 @@
     grid-row: 1;
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+.media:has(.nav) {
+  padding-bottom: calc(var(--control-height-sm) + var(--space-3));
+}
+
+/* Пока у товара нет картинки — значок раздела в круге посреди листа. */
+.placeholder > * {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--placeholder-size);
+  height: var(--placeholder-size);
+  border-radius: var(--radius-round);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
 }

@@ -1,0 +1,26 @@
+/* Карточка покупки липнет под шапкой от 960 px. --fade (0…1) и --fade-dir (−1 вверх, 1 снизу)
+   ставит AsideFade по прокрутке: прозрачность, размытие и сдвиг с отставанием — параллакс. */
+@media (min-width: 960px) {
+  .sticky {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-4));
+  }
+
+  .card {
+    opacity: calc(1 - var(--fade, 0));
+    will-change: opacity;
+  }
+
+  .card[data-hidden] {
+    pointer-events: none;
+  }
+}
+
+@media (min-width: 960px) and (prefers-reduced-motion: no-preference) {
+  .card {
+    filter: blur(calc(var(--fade, 0) * var(--blur-fade)));
+    transform: translateY(calc(var(--fade, 0) * var(--fade-dir, -1) * var(--parallax-shift)))
+      scale(calc(1 - var(--fade, 0) * (1 - var(--scale-parallax))));
+    will-change: opacity, filter, transform;
+  }
+}

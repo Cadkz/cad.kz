@@ -1,0 +1,172 @@
+/* Окно на весь экран без своей рамки: нажатие мимо рамки закрывает. Рамка — светлый лист
+   с чертёжной сеткой, как сцена товара; белый фон снимка растворяется в листе (multiply). */
+.dialog {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: var(--space-4);
+  border: 0;
+  background: transparent;
+}
+
+.dialog[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog::backdrop {
+  background: var(--color-overlay);
+  backdrop-filter: var(--blur-glass);
+}
+
+:root:has(.dialog[open]) {
+  overflow: hidden;
+}
+
+.frame {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: var(--container);
+  height: 100%;
+  max-height: var(--scan-viewer-height);
+  padding: calc(var(--control-height) + var(--space-8)) var(--space-4);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--color-surface), var(--color-blue-soft));
+  box-shadow: var(--shadow-lg);
+}
+
+.frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--blueprint-light);
+  background-size: var(--blueprint-size);
+  mask-image: var(--blueprint-fade);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dialog[open] .frame {
+    animation: open var(--duration-unfold) var(--ease-reveal);
+  }
+
+  .image {
+    animation: focus var(--duration-slow) var(--ease-reveal);
+  }
+}
+
+@keyframes open {
+  from {
+    opacity: 0;
+    scale: var(--scale-menu-card);
+  }
+}
+
+@keyframes focus {
+  from {
+    opacity: 0;
+    filter: blur(var(--blur-reveal));
+  }
+}
+
+.top {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  left: var(--space-4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  pointer-events: none;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--color-navy);
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.counter {
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}
+
+.control {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-round);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-navy);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: border-color var(--duration-fast) var(--ease);
+}
+
+.control:hover {
+  border-color: var(--color-navy);
+}
+
+.control:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.prev,
+.next {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.prev {
+  left: var(--space-4);
+}
+
+.next {
+  right: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .dialog {
+    padding: var(--space-8);
+  }
+
+  .frame {
+    padding: var(--space-16) calc(var(--control-height) + var(--space-8));
+  }
+
+  .top {
+    top: var(--space-6);
+    right: var(--space-6);
+    left: var(--space-6);
+  }
+}

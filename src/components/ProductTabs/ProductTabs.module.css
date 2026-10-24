@@ -1,5 +1,6 @@
 /* Вкладки «Обзор / Характеристики» (24.10.2026, правки владельца): крупный переключатель на
-   всю ширину колонки, липкий, пока читают обзор; белая подложка перетекает к выбранной. */
+   всю ширину колонки, стоит на месте (владелец 24.10.2026: липкий наезжал на текст); белая
+   подложка перетекает к выбранной. */
 .wrap {
   display: flex;
   flex-direction: column;
@@ -7,11 +8,8 @@
   scroll-margin-top: calc(var(--header-height) + var(--space-4));
 }
 
-/* Липнет под шапкой. На телефоне шапка уезжает при прокрутке вниз — строка встаёт к верху. */
 .bar {
-  position: sticky;
-  top: var(--space-2);
-  z-index: var(--z-raised);
+  position: relative;
 }
 
 .tabs {
@@ -122,11 +120,5 @@
 @media (min-width: 640px) {
   .tab {
     font-size: var(--text-lead);
-  }
-}
-
-@media (min-width: 960px) {
-  .bar {
-    top: calc(var(--header-height) + var(--space-2));
   }
 }

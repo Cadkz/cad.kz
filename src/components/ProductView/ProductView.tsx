@@ -8,7 +8,6 @@ import { PickerProvider } from '@/components/PickerProvider/PickerProvider'
 import { PickerSteps } from '@/components/PickerSteps/PickerSteps'
 import { PickerSummary } from '@/components/PickerSummary/PickerSummary'
 import { ProductAbout } from '@/components/ProductAbout/ProductAbout'
-import { ProductGallery } from '@/components/ProductGallery/ProductGallery'
 import { ProductHeader } from '@/components/ProductHeader/ProductHeader'
 import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
 import { ProductLifecycle } from '@/components/ProductLifecycle/ProductLifecycle'
@@ -19,6 +18,7 @@ import { ProductStage } from '@/components/ProductStage/ProductStage'
 import { ProductTabs } from '@/components/ProductTabs/ProductTabs'
 import { PropertyList } from '@/components/PropertyList/PropertyList'
 import { Reveal } from '@/components/Reveal/Reveal'
+import { SectionIcon } from '@/components/SectionIcon/SectionIcon'
 import { kindProfile } from '@/domain/productKind.mjs'
 import { productLd } from '@/domain/structuredData.mjs'
 import { getCatalog } from '@/lib/catalog'
@@ -80,10 +80,6 @@ export async function ProductView({
   const direction = product.sections.find((s) => s.isDirection)
   const guided = product.pageView === 'picker'
   const profile = kindProfile(product.kind)
-  // Оборудование с вырезанным фото: крупная сцена в первом экране, обычные фото — в галерее ниже.
-  const stage = product.stagePicture
-  // Оборудование: описание и характеристики вкладками «Обзор / Характеристики».
-  const hardware = product.kind === 'hardware'
   const about = product.description ? (
     <ProductAbout blocks={parseBody(product.description)} />
   ) : null
@@ -122,61 +118,57 @@ export async function ProductView({
       title={product.title}
       vendor={product.vendor}
       summary={product.summary}
-      icon={product.pictures.length || stage ? null : (product.sections[0]?.icon ?? 'building')}
+      icon={null}
       tasks={product.tasks}
       requires={product.requires.map((r) => r.title)}
       media={
-        stage ? (
-          <ProductStage title={product.title} picture={stage} facts={product.facts} />
-        ) : undefined
+        <ProductStage
+          title={product.title}
+          pictures={product.stagePictures}
+          facts={product.facts}
+          placeholder={
+            <span>
+              <SectionIcon name={product.sections[0]?.icon ?? 'building'} size={24} />
+            </span>
+          }
+        />
       }
     />
   )
-  // Порядок для всех товаров (решение владельца 24.10.2026): заголовок и коротко, фото, обзор
-  // и характеристики, у сканеров — примеры сканов во всю ширину, ниже комплектация и вопросы.
-  // Итог справа едет до сканов, а у комплектации появляется снова — сумма видна при выборе.
+  // Порядок для всех товаров (решение владельца 24.10.2026): заголовок и коротко, лист с
+  // картинками и тремя фактами, вкладки «Обзор / Характеристики», у сканеров — примеры сканов
+  // во всю ширину, ниже комплектация и вопросы. Карточка покупки одна: уходит под сканы
+  // в размытие и выныривает под ними (ProductLayout, AsideFade).
+  const tabs = [
+    ...(about ? [{ id: 'overview' as const, title: 'Обзор', content: about }] : []),
+    ...(specs
+      ? [
+          {
+            id: 'specs' as const,
+            title: 'Характеристики',
+            count: product.properties.length,
+            content: specs,
+          },
+        ]
+      : []),
+  ]
   const overview = (
     <>
       <ProductLifecycle value={product.lifecycle} />
-      {product.pictures.length > 0 && (
-        <ProductGallery pictures={product.pictures} title={product.title} priority={!stage} />
-      )}
-      {hardware && (about || specs) ? (
+      {tabs.length > 1 && (
         <Reveal>
-          <ProductTabs
-            label={`О товаре ${product.title}`}
-            tabs={[
-              ...(about ? [{ id: 'overview' as const, title: 'Обзор', content: about }] : []),
-              ...(specs
-                ? [
-                    {
-                      id: 'specs' as const,
-                      title: 'Характеристики',
-                      count: product.properties.length,
-                      content: specs,
-                    },
-                  ]
-                : []),
-            ]}
-          />
+          <ProductTabs label={`О товаре ${product.title}`} tabs={tabs} />
         </Reveal>
-      ) : (
-        <>
-          {about && (
-            <Reveal>
-              <ProductSection title={profile.about} id="about">
-                {about}
-              </ProductSection>
-            </Reveal>
-          )}
-          {specs && (
-            <Reveal>
-              <ProductSection title={profile.specs} id="specs">
-                {specs}
-              </ProductSection>
-            </Reveal>
-          )}
-        </>
+      )}
+      {tabs.length === 1 && (
+        <Reveal>
+          <ProductSection
+            title={about ? profile.about : profile.specs}
+            id={about ? 'about' : 'specs'}
+          >
+            {about ?? specs}
+          </ProductSection>
+        </Reveal>
       )}
     </>
   )
@@ -199,7 +191,8 @@ export async function ProductView({
       )}
     </>
   )
-  const scans = product.scans.length > 0
+  const scans =
+    product.scans.length > 0 ? <ProductScans title={product.title} scans={product.scans} /> : null
 
   return (
     <main>
@@ -219,24 +212,16 @@ export async function ProductView({
           ]}
         />
         <PickerProvider key={String(pick)} view={product.picker} meta={meta} pick={pick}>
-          {scans ? (
-            <>
-              <ProductLayout asideLast asideDesktopOnly header={header} aside={<PickerSummary />}>
-                {overview}
-              </ProductLayout>
-              <Reveal>
-                <ProductScans title={product.title} scans={product.scans} />
-              </Reveal>
-              <ProductLayout asideLast aside={<PickerSummary anchor={false} />}>
-                {choice}
-              </ProductLayout>
-            </>
-          ) : (
-            <ProductLayout asideLast header={header} aside={<PickerSummary />}>
-              {overview}
-              {choice}
-            </ProductLayout>
-          )}
+          <ProductLayout
+            asideLast
+            header={header}
+            aside={<PickerSummary />}
+            wide={scans}
+            tail={scans ? choice : undefined}
+          >
+            {overview}
+            {scans ? null : choice}
+          </ProductLayout>
           <PickerBar />
         </PickerProvider>
         <ProductPicks

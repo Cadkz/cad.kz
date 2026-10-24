@@ -287,6 +287,23 @@ export function imageSources(blocks: Block[]) {
   )
 }
 
+/**
+ * Где закончить начало абзаца: после последней точки (!, ?) перед заглавной буквой в пределах
+ * budget, но не раньше трети. Внутри ссылки или выделения не режем. Нет такого места — null.
+ */
+function sentenceCut(text: string, budget: number): number | null {
+  let best: number | null = null
+  for (const match of text.matchAll(/[.!?]\s+(?=[A-ZА-ЯЁ«"])/g)) {
+    const end = (match.index ?? 0) + 1
+    if (end > budget) break
+    const head = text.slice(0, end)
+    const open = (head.match(/\[/g) ?? []).length - (head.match(/\]/g) ?? []).length
+    const stars = (head.match(/\*\*/g) ?? []).length
+    if (end >= budget / 3 && open === 0 && stars % 2 === 0) best = end
+  }
+  return best
+}
+
 /** Длина блока в знаках: для решения, сколько текста показать сразу. */
 function blockLength(block: Block) {
   if (block.type === 'list' || block.type === 'steps') return block.items.join(' ').length
@@ -302,6 +319,17 @@ function blockLength(block: Block) {
  * остаётся на странице для поисковиков, но не заставляет листать.
  */
 export function splitPreview(blocks: Block[], budget = 420): { lead: Block[]; rest: Block[] } {
+  // Длинный первый абзац (у программ со старого сайта бывает на полэкрана) режем по концу
+  // предложения в пределах budget: обзор не длиннее, чем у Artec Leo (владелец 24.10.2026).
+  const [first, ...others] = blocks
+  if (first?.type === 'paragraph' && first.text.length > budget * 1.2) {
+    const cut = sentenceCut(first.text, budget)
+    if (cut)
+      return {
+        lead: [{ type: 'paragraph', text: first.text.slice(0, cut).trim() }],
+        rest: [{ type: 'paragraph', text: first.text.slice(cut).trim() }, ...others],
+      }
+  }
   const lead: Block[] = []
   let used = 0
   for (const block of blocks) {

@@ -1,68 +1,83 @@
+/* Телефон: заголовок, блок покупки, содержимое — или покупка в конце (data-aside-last). */
 .layout {
   display: grid;
-  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-  grid-template-areas:
-    "header header header header header header header header header header header header"
-    "aside aside aside aside aside aside aside aside aside aside aside aside"
-    "body body body body body body body body body body body body";
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-8) var(--grid-gap);
 }
 
-.layout[data-aside-last="true"] {
-  grid-template-areas:
-    "header header header header header header header header header header header header"
-    "body body body body body body body body body body body body"
-    "aside aside aside aside aside aside aside aside aside aside aside aside";
-}
-
-.layout[data-headless="true"] {
-  grid-template-areas:
-    "body body body body body body body body body body body body"
-    "aside aside aside aside aside aside aside aside aside aside aside aside";
-}
-
-.layout[data-aside-desktop="true"] .aside {
-  display: none;
+.header,
+.aside,
+.body,
+.wide {
+  min-width: 0;
 }
 
 .header {
-  grid-area: header;
-  min-width: 0;
+  order: 1;
 }
 
 .aside {
-  grid-area: aside;
-  min-width: 0;
+  order: 2;
 }
 
 .body {
-  grid-area: body;
   display: flex;
   flex-direction: column;
+  order: 3;
   gap: var(--section-gap);
-  min-width: 0;
 }
 
+.wide {
+  order: 4;
+}
+
+.tail {
+  order: 5;
+}
+
+.layout[data-aside-last="true"] .aside {
+  order: 6;
+}
+
+/* От 960 px: текст на 8 колонок, покупка на 4 по всей высоте страницы, липкая. Широкий блок —
+   во всю рамку и выше колонки покупки по слою; фон страницы под ним закрывает карточку. */
 @media (min-width: 960px) {
-  .layout,
-  .layout[data-aside-last="true"] {
-    grid-template-areas:
-      "header header header header header header header header aside aside aside aside"
-      "body body body body body body body body aside aside aside aside";
+  .layout {
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
     grid-template-rows: auto 1fr;
   }
 
-  .layout[data-headless="true"] {
-    grid-template-areas: "body body body body body body body body aside aside aside aside";
-    grid-template-rows: auto;
+  .layout[data-wide="true"] {
+    grid-template-rows: auto auto auto 1fr;
   }
 
-  .layout[data-aside-desktop="true"] .aside {
-    display: block;
+  .header {
+    grid-column: 1 / span 8;
+    grid-row: 1;
   }
 
-  .sticky {
-    position: sticky;
-    top: calc(var(--header-height) + var(--space-4));
+  .body {
+    grid-column: 1 / span 8;
+    grid-row: 2;
+  }
+
+  .wide {
+    position: relative;
+    z-index: var(--z-raised);
+    grid-column: 1 / -1;
+    grid-row: 3;
+    background: var(--color-bg);
+  }
+
+  /* Запас под карточку покупки, чтобы она вынырнула из-под сканов целиком (AsideFade). */
+  .tail {
+    grid-row: 4;
+    min-height: var(--aside-room, auto);
+  }
+
+  .aside,
+  .layout[data-aside-last="true"] .aside {
+    grid-column: 9 / -1;
+    grid-row: 1 / -1;
   }
 }

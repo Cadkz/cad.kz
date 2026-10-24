@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { Product, Section } from '../../payload-types'
 import { type Scan, scanById } from '../domain/artecScans.mjs'
 import { resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
-import { keyFacts } from '../domain/keyFacts.mjs'
+import { FACT_MAX_LENGTH, keyFacts } from '../domain/keyFacts.mjs'
 import type { PickerView } from '../domain/picker.mjs'
 import { cleanSpecs } from '../domain/specs.mjs'
 import { type Lifecycle, lifecycle, readResearch } from './equipmentResearch'
@@ -68,10 +68,11 @@ export type ProductPage = {
   /** Своя галерея или картинка производителя; пусто — блока картинок нет. */
   pictures: Picture[]
   /**
-   * Фото для сцены первого экрана: «Картинка для карточки» в PNG или WebP — вырезанное фото на
-   * прозрачном или белом фоне (фото владельца, 23.10.2026). JPEG с серым фоном в сцену не берём.
+   * Картинки сцены первого экрана (лист с разметкой) у любого товара: сначала «Картинка для
+   * карточки» в PNG или WebP — вырезанное фото, затем галерея (решение владельца 24.10.2026:
+   * второго блока картинок на странице нет, всё листается в сцене).
    */
-  stagePicture: Picture | null
+  stagePictures: Picture[]
   /** Примеры сканов (админка: товар → «Примеры сканов»), только у оборудования. */
   scans: Scan[]
   seo: Product['seo']
@@ -170,7 +171,13 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
       })),
     tasks: (product.tasks ?? []).map((task) => task.title),
     properties: specs,
-    facts: keyFacts(research, specs),
+    facts: fillFacts(keyFacts(research, specs), {
+      vendor: product.manufacturer,
+      license: priced[0]?.offer.license ?? null,
+      direction: product.sections,
+      tasks: product.tasks,
+      kind: product.kind,
+    }),
     faq: (product.faq ?? []).map(({ question, answer }) => ({ question, answer })),
     requires: related(product.requiresProducts),
     offers: priced.map(({ offer, unit }) => ({
@@ -192,7 +199,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     vendorId: relId(product.manufacturer),
     redirectId: relId(product.redirectTo),
     pictures: productPictures(product),
-    stagePicture: stagePicture(product),
+    stagePictures: stagePictures(product),
     scans: product.kind === 'hardware' ? productScans(product) : [],
     seo: product.seo,
   }
@@ -229,11 +236,54 @@ export function pickParam(params: Params): PickTarget | null {
 /** Прозрачный фон бывает только у PNG и WebP: из них фото в сцене смотрится вырезанным. */
 const CUTOUT_TYPES = new Set(['image/png', 'image/webp'])
 
-function stagePicture(product: Product): Picture | null {
-  if (product.kind !== 'hardware') return null
+function stagePictures(product: Product): Picture[] {
   const media = product.cardImage
-  if (!media || typeof media === 'number' || !CUTOUT_TYPES.has(media.mimeType ?? '')) return null
-  return toPicture(media, product.title)
+  const cutout =
+    media && typeof media !== 'number' && CUTOUT_TYPES.has(media.mimeType ?? '')
+      ? toPicture(media, product.title)
+      : null
+  const all = [cutout, ...productPictures(product)].filter((p): p is Picture => Boolean(p))
+  return all.filter((picture, index) => all.findIndex((p) => p.url === picture.url) === index)
+}
+
+/** Сколько фактов в сцене: три строки слева от фото (решение владельца 24.10.2026). */
+const FACTS = 3
+
+type FactSource = {
+  vendor: Product['manufacturer']
+  license: string | null
+  direction: Product['sections']
+  tasks: Product['tasks']
+  kind: Product['kind']
+}
+
+/**
+ * У программ характеристик обычно нет — три строки сцены добираем из того, что есть у товара:
+ * производитель, лицензия самой дешёвой комплектации, направление, первая задача.
+ */
+function fillFacts(facts: Fact[], source: FactSource): Fact[] {
+  const vendor = source.vendor && typeof source.vendor !== 'number' ? source.vendor.title : null
+  const direction = (source.direction ?? []).find(
+    (section) => typeof section !== 'number' && section.isDirection,
+  )
+  const extra: (Fact | null)[] = [
+    vendor
+      ? { name: source.kind === 'software' ? 'Разработчик' : 'Производитель', value: vendor }
+      : null,
+    source.license ? { name: 'Лицензия', value: source.license } : null,
+    direction && typeof direction !== 'number'
+      ? { name: 'Направление', value: direction.title }
+      : null,
+    source.tasks?.[0] ? { name: 'Задача', value: source.tasks[0].title } : null,
+  ]
+  const result = [...facts]
+  for (const fact of extra) {
+    if (result.length >= FACTS) break
+    if (!fact || fact.value.length > FACT_MAX_LENGTH) continue
+    if (result.some((entry) => entry.name === fact.name)) continue
+    result.push(fact)
+  }
+  return result
 }
 
 /** Сканы из админки по порядку; своя подпись заменяет подпись из библиотеки. */
