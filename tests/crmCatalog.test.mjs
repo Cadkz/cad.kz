@@ -54,13 +54,13 @@ test('кнопки: корпоративное ПО без корзины, да�
   assert.ok(![set.main, set.second, ...set.links].some((a) => a?.type === 'cart'))
 })
 
-test('кнопки: сканер — запись на демонстрацию, плоттер с ценой — корзина', () => {
-  const artec = scenarioActions({ scenario: 'equipment', cart: false, demo: true, picks: true })
-  assert.equal(artec.main.type === 'request' && artec.main.kind, 'demo')
+test('кнопки: сканер — запросить цену и демонстрация, плоттер с ценой — корзина', () => {
+  const artec = scenarioActions({ scenario: 'equipment', cart: true, demo: true, picks: true })
+  assert.equal(artec.main.type === 'request' && artec.main.kind, 'price')
   assert.deepEqual(labels(artec), [
+    'Запросить цену',
     'Записаться на демонстрацию',
-    'Подобрать оборудование',
-    'Расходники и программы к нему',
+    'Расходники и ПО к нему',
   ])
   const plotter = scenarioActions({ scenario: 'equipment', cart: true })
   assert.equal(plotter.main.type, 'cart')

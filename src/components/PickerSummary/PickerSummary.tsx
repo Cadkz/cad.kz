@@ -12,9 +12,10 @@ import styles from './PickerSummary.module.css'
  * Итог подбора в боковой колонке: что выбрано, количество, сумма с сервера. Кнопки — по сценарию
  * покупки (src/domain/buyScenario.mjs): у стандартной лицензии с ценой «В корзину» и «Получить КП
  * на организацию», без цены — «Получить КП»; у корпоративного ПО — «Подобрать решение»,
- * у сканеров — «Записаться на демонстрацию». Продление и помощь — ссылками ниже.
+ * у сканеров — «Запросить цену» и «Записаться на демонстрацию». Продление и помощь — ссылками ниже.
+ * На странице со сканами итог стоит дважды (до сканов и у комплектации) — якорь только у первого.
  */
-export function PickerSummary() {
+export function PickerSummary({ anchor = true }: { anchor?: boolean }) {
   const picker = usePickerContext()
   const { lines, total, quantity, setQuantity, meta, view, state, profile } = picker
   const { cartFirst } = usePickerCart()
@@ -30,7 +31,7 @@ export function PickerSummary() {
             ? 'По запросу'
             : '—'
   return (
-    <div className={styles.box} id="summary">
+    <div className={styles.box} id={anchor ? 'summary' : undefined}>
       <p className={styles.label}>Ваш выбор</p>
       {lines.length ? (
         <ul className={styles.lines}>

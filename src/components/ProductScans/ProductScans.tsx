@@ -11,13 +11,15 @@ import styles from './ProductScans.module.css'
  */
 export function ProductScans({ title, scans }: { title: string; scans: Scan[] }) {
   return (
-    <ProductSection
-      title="Примеры сканов"
-      id="scans"
-      sub={`Модели, снятые сканером ${title}. Нажмите, чтобы открыть крупно и покрутить.`}
-    >
-      <ScanGallery scans={scans} />
-      <p className={styles.credit}>{SCANS_CREDIT}</p>
-    </ProductSection>
+    <div className={styles.wide}>
+      <ProductSection
+        title="Примеры сканов"
+        id="scans"
+        sub={`Модели, снятые сканером ${title}. Нажмите, чтобы открыть крупно и покрутить.`}
+      >
+        <ScanGallery scans={scans} />
+        <p className={styles.credit}>{SCANS_CREDIT}</p>
+      </ProductSection>
+    </div>
   )
 }

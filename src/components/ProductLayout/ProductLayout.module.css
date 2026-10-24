@@ -15,6 +15,16 @@
     "aside aside aside aside aside aside aside aside aside aside aside aside";
 }
 
+.layout[data-headless="true"] {
+  grid-template-areas:
+    "body body body body body body body body body body body body"
+    "aside aside aside aside aside aside aside aside aside aside aside aside";
+}
+
+.layout[data-aside-desktop="true"] .aside {
+  display: none;
+}
+
 .header {
   grid-area: header;
   min-width: 0;
@@ -40,6 +50,15 @@
       "header header header header header header header header aside aside aside aside"
       "body body body body body body body body aside aside aside aside";
     grid-template-rows: auto 1fr;
+  }
+
+  .layout[data-headless="true"] {
+    grid-template-areas: "body body body body body body body body aside aside aside aside";
+    grid-template-rows: auto;
+  }
+
+  .layout[data-aside-desktop="true"] .aside {
+    display: block;
   }
 
   .sticky {

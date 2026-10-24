@@ -103,18 +103,28 @@ export function scenarioActions(input) {
         links: [req('consult', 'Консультация специалиста')],
       }
     case 'equipment': {
-      const main = input.demo
-        ? req('demo', 'Записаться на демонстрацию')
-        : cart
-          ? toCart
-          : req('price', 'Запросить цену')
-      const second = input.demo && cart ? toCart : req('help', 'Подобрать оборудование')
+      // Сканеры с демонстрацией (решение владельца 24.10.2026): главная — «Запросить цену»,
+      // ниже «Записаться на демонстрацию» и ссылка на расходники и ПО, без «Подобрать оборудование».
+      if (input.demo) {
+        /** @type {Action[]} */
+        const links = input.picks
+          ? [{ type: 'anchor', href: '#cross-title', label: 'Расходники и ПО к нему' }]
+          : []
+        return {
+          main: req('price', 'Запросить цену'),
+          second: req('demo', 'Записаться на демонстрацию'),
+          links,
+        }
+      }
       /** @type {Action[]} */
-      const links = []
-      if (input.demo && cart) links.push(req('help', 'Подобрать оборудование'))
-      if (input.picks)
-        links.push({ type: 'anchor', href: '#cross-title', label: 'Расходники и программы к нему' })
-      return { main, second, links }
+      const links = input.picks
+        ? [{ type: 'anchor', href: '#cross-title', label: 'Расходники и программы к нему' }]
+        : []
+      return {
+        main: cart ? toCart : req('price', 'Запросить цену'),
+        second: req('help', 'Подобрать оборудование'),
+        links,
+      }
     }
     case 'renewal':
       return {

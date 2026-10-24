@@ -60,9 +60,9 @@ function toPicks(items: RelatedProduct[], byHref: Map<string, PickItem>): PickIt
 
 /**
  * Страница товара — шаблон «Товар», один для всех товаров; подписи блоков и главное действие
- * зависят от типа (src/domain/productKind.mjs). Первый экран: название, коротко,
- * задачи; справа итог выбора с тремя действиями. Ниже подбор по шагам (у обычной страницы —
- * один шаг из комплектаций), описание (начало сразу, остальное свёрнуто), характеристики, вопросы.
+ * зависят от типа (src/domain/productKind.mjs). Первый экран: название, коротко, задачи;
+ * справа итог выбора с действиями. Ниже фото, описание и характеристики, у сканеров — примеры
+ * сканов во всю ширину, затем подбор по шагам (у обычной страницы — один шаг) и вопросы.
  */
 export async function ProductView({
   product,
@@ -82,8 +82,7 @@ export async function ProductView({
   const profile = kindProfile(product.kind)
   // Оборудование с вырезанным фото: крупная сцена в первом экране, обычные фото — в галерее ниже.
   const stage = product.stagePicture
-  // Оборудование (24.10.2026): название, коротко, фото; ниже комплектация рядом с итогом,
-  // описание и характеристики вкладками «Обзор / Характеристики», у сканеров — примеры сканов.
+  // Оборудование: описание и характеристики вкладками «Обзор / Характеристики».
   const hardware = product.kind === 'hardware'
   const about = product.description ? (
     <ProductAbout blocks={parseBody(product.description)} />
@@ -118,6 +117,90 @@ export async function ProductView({
     },
   }
 
+  const header = (
+    <ProductHeader
+      title={product.title}
+      vendor={product.vendor}
+      summary={product.summary}
+      icon={product.pictures.length || stage ? null : (product.sections[0]?.icon ?? 'building')}
+      tasks={product.tasks}
+      requires={product.requires.map((r) => r.title)}
+      media={
+        stage ? (
+          <ProductStage title={product.title} picture={stage} facts={product.facts} />
+        ) : undefined
+      }
+    />
+  )
+  // Порядок для всех товаров (решение владельца 24.10.2026): заголовок и коротко, фото, обзор
+  // и характеристики, у сканеров — примеры сканов во всю ширину, ниже комплектация и вопросы.
+  // Итог справа едет до сканов, а у комплектации появляется снова — сумма видна при выборе.
+  const overview = (
+    <>
+      <ProductLifecycle value={product.lifecycle} />
+      {product.pictures.length > 0 && (
+        <ProductGallery pictures={product.pictures} title={product.title} priority={!stage} />
+      )}
+      {hardware && (about || specs) ? (
+        <Reveal>
+          <ProductTabs
+            label={`О товаре ${product.title}`}
+            tabs={[
+              ...(about ? [{ id: 'overview' as const, title: 'Обзор', content: about }] : []),
+              ...(specs
+                ? [
+                    {
+                      id: 'specs' as const,
+                      title: 'Характеристики',
+                      count: product.properties.length,
+                      content: specs,
+                    },
+                  ]
+                : []),
+            ]}
+          />
+        </Reveal>
+      ) : (
+        <>
+          {about && (
+            <Reveal>
+              <ProductSection title={profile.about} id="about">
+                {about}
+              </ProductSection>
+            </Reveal>
+          )}
+          {specs && (
+            <Reveal>
+              <ProductSection title={profile.specs} id="specs">
+                {specs}
+              </ProductSection>
+            </Reveal>
+          )}
+        </>
+      )}
+    </>
+  )
+  const choice = (
+    <>
+      <ProductSection
+        title={guided ? 'Подберите комплект' : profile.configTitle}
+        id="config"
+        sub={guided ? 'Отметьте нужное — итог пересчитается сразу.' : undefined}
+      >
+        <PickerSteps />
+        <PickerHelp />
+      </ProductSection>
+      {product.faq.length > 0 && (
+        <Reveal>
+          <ProductSection title="Частые вопросы" id="faq">
+            <Faq items={product.faq} />
+          </ProductSection>
+        </Reveal>
+      )}
+    </>
+  )
+  const scans = product.scans.length > 0
+
   return (
     <main>
       <JsonLd data={structured} />
@@ -136,91 +219,24 @@ export async function ProductView({
           ]}
         />
         <PickerProvider key={String(pick)} view={product.picker} meta={meta} pick={pick}>
-          <ProductLayout
-            asideLast
-            header={
-              <ProductHeader
-                title={product.title}
-                vendor={product.vendor}
-                summary={product.summary}
-                icon={
-                  product.pictures.length || stage
-                    ? null
-                    : (product.sections[0]?.icon ?? 'building')
-                }
-                tasks={product.tasks}
-                requires={product.requires.map((r) => r.title)}
-                media={
-                  stage ? (
-                    <ProductStage title={product.title} picture={stage} facts={product.facts} />
-                  ) : undefined
-                }
-              />
-            }
-            aside={<PickerSummary />}
-          >
-            <ProductLifecycle value={product.lifecycle} />
-            <ProductSection
-              title={guided ? 'Подберите комплект' : profile.configTitle}
-              id="config"
-              sub={guided ? 'Отметьте нужное — итог пересчитается сразу.' : undefined}
-            >
-              <PickerSteps />
-              <PickerHelp />
-            </ProductSection>
-            {product.pictures.length > 0 && (
-              <ProductGallery pictures={product.pictures} title={product.title} priority={!stage} />
-            )}
-            {hardware && (about || specs) ? (
-              <Reveal>
-                <ProductTabs
-                  label={`О товаре ${product.title}`}
-                  tabs={[
-                    ...(about ? [{ id: 'overview' as const, title: 'Обзор', content: about }] : []),
-                    ...(specs
-                      ? [
-                          {
-                            id: 'specs' as const,
-                            title: 'Характеристики',
-                            count: product.properties.length,
-                            content: specs,
-                          },
-                        ]
-                      : []),
-                  ]}
-                />
-              </Reveal>
-            ) : (
-              <>
-                {about && (
-                  <Reveal>
-                    <ProductSection title={profile.about} id="about">
-                      {about}
-                    </ProductSection>
-                  </Reveal>
-                )}
-                {specs && (
-                  <Reveal>
-                    <ProductSection title={profile.specs} id="specs">
-                      {specs}
-                    </ProductSection>
-                  </Reveal>
-                )}
-              </>
-            )}
-            {product.scans.length > 0 && (
+          {scans ? (
+            <>
+              <ProductLayout asideLast asideDesktopOnly header={header} aside={<PickerSummary />}>
+                {overview}
+              </ProductLayout>
               <Reveal>
                 <ProductScans title={product.title} scans={product.scans} />
               </Reveal>
-            )}
-            {product.faq.length > 0 && (
-              <Reveal>
-                <ProductSection title="Частые вопросы" id="faq">
-                  <Faq items={product.faq} />
-                </ProductSection>
-              </Reveal>
-            )}
-          </ProductLayout>
+              <ProductLayout asideLast aside={<PickerSummary anchor={false} />}>
+                {choice}
+              </ProductLayout>
+            </>
+          ) : (
+            <ProductLayout asideLast header={header} aside={<PickerSummary />}>
+              {overview}
+              {choice}
+            </ProductLayout>
+          )}
           <PickerBar />
         </PickerProvider>
         <ProductPicks
