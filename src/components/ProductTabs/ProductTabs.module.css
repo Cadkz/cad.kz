@@ -1,4 +1,5 @@
-/* Вкладки как сегментный переключатель «Новости / Статьи»: серая подложка, выбранная — белая. */
+/* Вкладки «Обзор / Характеристики» (24.10.2026, правки владельца): крупный переключатель на
+   всю ширину колонки, липкий, пока читают обзор; белая подложка перетекает к выбранной. */
 .wrap {
   display: flex;
   flex-direction: column;
@@ -6,19 +7,38 @@
   scroll-margin-top: calc(var(--header-height) + var(--space-4));
 }
 
+/* Липнет под шапкой. На телефоне шапка уезжает при прокрутке вниз — строка встаёт к верху. */
+.bar {
+  position: sticky;
+  top: var(--space-2);
+  z-index: var(--z-raised);
+}
+
 .tabs {
-  display: inline-flex;
-  align-self: flex-start;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-1);
   padding: var(--space-1);
-  border-radius: var(--radius-control);
-  background: var(--color-hover);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  background: var(--color-header-glass);
+  box-shadow: var(--shadow-sm);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .tabs {
+    backdrop-filter: var(--blur-glass);
+  }
 }
 
 .tab {
   display: inline-flex;
   align-items: center;
-  height: var(--touch-target);
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--space-12);
   padding: 0 var(--space-4);
   border: 0;
   border-radius: var(--radius-sm);
@@ -26,15 +46,15 @@
   color: var(--color-text-muted);
   font: inherit;
   font-size: var(--text-body);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
   cursor: pointer;
-  transition:
-    background-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
+  transition: color var(--duration-fast) var(--ease);
 }
 
-.tab:hover {
-  color: var(--color-text);
+.tab:hover,
+.tab[aria-selected="true"] {
+  color: var(--color-navy);
 }
 
 .tab:focus-visible {
@@ -42,10 +62,56 @@
   outline-offset: 2px;
 }
 
-.tab[aria-selected="true"] {
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--space-6);
+  height: var(--space-5);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-blue-soft);
+  color: var(--color-navy);
+  font-size: var(--text-overline);
+  font-weight: var(--weight-semibold);
+}
+
+/* Подложка выбранной вкладки. Пока скрипт не измерил вкладки — у самой вкладки белый фон. */
+.pill {
+  position: absolute;
+  z-index: var(--z-below);
+  top: var(--space-1);
+  right: var(--pill-right, 50%);
+  bottom: var(--space-1);
+  left: var(--pill-left, var(--space-1));
+  border-radius: var(--radius-sm);
   background: var(--color-surface);
   box-shadow: var(--shadow-popover);
-  color: var(--color-text);
+  opacity: 0;
+}
+
+.tabs:not([data-ready="true"]) .tab[aria-selected="true"] {
+  background: var(--color-surface);
+}
+
+.tabs[data-ready="true"] .pill {
+  opacity: 1;
+}
+
+/* Жидкая метка, как во второй строке шапки: край со стороны движения догоняет быстро, второй —
+   позже и с отдачей, подложка на миг тянется каплей. */
+@media (prefers-reduced-motion: no-preference) {
+  .tabs[data-dir="right"] .pill {
+    transition:
+      right var(--duration-liquid-lead) var(--ease-liquid-lead),
+      left var(--duration-liquid-tail) var(--ease-liquid-tail) var(--delay-liquid-tail);
+  }
+
+  .tabs[data-dir="left"] .pill {
+    transition:
+      left var(--duration-liquid-lead) var(--ease-liquid-lead),
+      right var(--duration-liquid-tail) var(--ease-liquid-tail) var(--delay-liquid-tail);
+  }
 }
 
 .panel {
@@ -53,8 +119,14 @@
   line-height: var(--leading-relaxed);
 }
 
-@media (min-width: 960px) {
+@media (min-width: 640px) {
   .tab {
-    height: var(--space-10);
+    font-size: var(--text-lead);
+  }
+}
+
+@media (min-width: 960px) {
+  .bar {
+    top: calc(var(--header-height) + var(--space-2));
   }
 }

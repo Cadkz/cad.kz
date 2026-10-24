@@ -1,4 +1,5 @@
 import type { CollectionConfig, Field } from 'payload'
+import { SCAN_OPTIONS } from '../../domain/artecScans.mjs'
 import { SCENARIO_LABELS, SCENARIOS } from '../../domain/buyScenario.mjs'
 import { CHECK_LABELS, CHECKS } from '../../domain/quality.mjs'
 import {
@@ -472,6 +473,47 @@ const productImageFields: Field[] = [
   },
 ]
 
+/**
+ * «Примеры сканов» у 3D-сканеров (24.10.2026): какие готовые 3D-модели показать на странице
+ * и в каком порядке. Сами модели — библиотека сайта (src/domain/artecScans.mjs): тяжёлые
+ * исходники сканов сначала уменьшают, поэтому выбор — из списка, а не загрузкой файла.
+ */
+const productScanFields: Field[] = [
+  {
+    name: 'scans',
+    label: 'Примеры сканов',
+    type: 'array',
+    labels: { singular: 'Скан', plural: 'Сканы' },
+    admin: {
+      description:
+        'Показываются на странице товара галереей: превью листаются, по нажатию модель ' +
+        'открывается крупно, её можно крутить и приближать. Порядок — перетаскиванием, первый ' +
+        'скан идёт первым. Пусто — блока нет. Новый скан в список добавляет разработчик.',
+    },
+    fields: [
+      {
+        type: 'row',
+        fields: [
+          {
+            name: 'scan',
+            label: 'Скан',
+            type: 'select',
+            required: true,
+            options: SCAN_OPTIONS,
+            admin: { width: '60%' },
+          },
+          {
+            name: 'title',
+            label: 'Своя подпись',
+            type: 'text',
+            admin: { width: '40%', description: 'Пусто — подпись из списка.' },
+          },
+        ],
+      },
+    ],
+  },
+]
+
 /** Где товар виден в каталоге и как его находит поиск. */
 const productCatalogFields: Field[] = [
   {
@@ -620,6 +662,11 @@ const productTabs: Field = {
     { label: 'Анонс', fields: productAnnounceFields },
     { label: 'Подробно', fields: productDetailFields },
     { label: 'Картинки', fields: productImageFields },
+    {
+      label: 'Примеры сканов',
+      admin: { condition: (data) => data?.kind === 'hardware' },
+      fields: productScanFields,
+    },
     {
       label: 'Цены',
       fields: [

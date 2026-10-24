@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import type { Product, Section } from '../../payload-types'
+import { type Scan, scanById } from '../domain/artecScans.mjs'
 import { resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
 import { keyFacts } from '../domain/keyFacts.mjs'
 import type { PickerView } from '../domain/picker.mjs'
@@ -71,6 +72,8 @@ export type ProductPage = {
    * прозрачном или белом фоне (фото владельца, 23.10.2026). JPEG с серым фоном в сцену не берём.
    */
   stagePicture: Picture | null
+  /** Примеры сканов (админка: товар → «Примеры сканов»), только у оборудования. */
+  scans: Scan[]
   seo: Product['seo']
 }
 
@@ -190,6 +193,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     redirectId: relId(product.redirectTo),
     pictures: productPictures(product),
     stagePicture: stagePicture(product),
+    scans: product.kind === 'hardware' ? productScans(product) : [],
     seo: product.seo,
   }
 }
@@ -230,4 +234,12 @@ function stagePicture(product: Product): Picture | null {
   const media = product.cardImage
   if (!media || typeof media === 'number' || !CUTOUT_TYPES.has(media.mimeType ?? '')) return null
   return toPicture(media, product.title)
+}
+
+/** Сканы из админки по порядку; своя подпись заменяет подпись из библиотеки. */
+function productScans(product: Product): Scan[] {
+  return (product.scans ?? []).flatMap((entry) => {
+    const scan = scanById(entry.scan)
+    return scan ? [{ ...scan, title: entry.title?.trim() || scan.title }] : []
+  })
 }

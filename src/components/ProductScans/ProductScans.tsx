@@ -1,28 +1,22 @@
+import type { Scan } from '@/domain/artecScans.mjs'
 import { SCANS_CREDIT } from '@/domain/artecScans.mjs'
 import { ProductSection } from '../ProductSection/ProductSection'
-import { ScanCard } from '../ScanCard/ScanCard'
+import { ScanGallery } from '../ScanGallery/ScanGallery'
 import styles from './ProductScans.module.css'
 
-type Props = { title: string; scans: { title: string; src: string }[] }
-
 /**
- * «Примеры сканов» на странице сканера Artec (24.10.2026): настоящие модели, снятые этим
- * сканером, их можно покрутить. Модель грузится только по нажатию — страница не тяжелеет.
+ * «Примеры сканов» на странице 3D-сканера: настоящие модели, снятые этим сканером, лентой
+ * превью. Модель грузится только в окне просмотра — страница не тяжелеет. Список и порядок —
+ * в админке (товар → «Примеры сканов»).
  */
-export function ProductScans({ title, scans }: Props) {
+export function ProductScans({ title, scans }: { title: string; scans: Scan[] }) {
   return (
     <ProductSection
       title="Примеры сканов"
       id="scans"
-      sub={`Модели, снятые сканером ${title}. Нажмите, чтобы покрутить.`}
+      sub={`Модели, снятые сканером ${title}. Нажмите, чтобы открыть крупно и покрутить.`}
     >
-      <ul className={styles.list}>
-        {scans.map((scan) => (
-          <li key={scan.src}>
-            <ScanCard title={scan.title} src={scan.src} />
-          </li>
-        ))}
-      </ul>
+      <ScanGallery scans={scans} />
       <p className={styles.credit}>{SCANS_CREDIT}</p>
     </ProductSection>
   )

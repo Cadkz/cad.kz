@@ -311,10 +311,10 @@ const ARTEC_EXTRAS = /** @type {Step2} */ ({
   title: 'Программы и аксессуары',
   mode: 'many',
   hint: 'Что входит в поставку сканера, уточнит менеджер.',
+  // Метрологический набор не предлагаем (владелец 24.10.2026): только Studio и Cloud.
   items: [
     { slug: 'artec_studio_19', label: 'Artec Studio 19', note: 'Обработка сканов' },
     { slug: 'artec_cloud', label: 'Artec Cloud', note: 'Облачная обработка и хранение' },
-    { slug: 'metrologicheskiy_nabor_artec', label: 'Метрологический набор Artec' },
   ],
 })
 

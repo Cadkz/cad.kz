@@ -1,4 +1,4 @@
-/* Сцена первого экрана (оборудование, пробная ветка redesign/product-stage): светлая подложка
+/* Сцена первого экрана оборудования: светлая подложка
    с чертёжной сеткой, фото крупно, белый фон снимка растворяется в подложке (multiply), главные
    факты — подписью рядом. Фото при загрузке «оседает» с --scale-settle, прозрачность не трогаем:
    от картинки зависит скорость первого экрана (LCP). */
@@ -33,11 +33,48 @@
   aspect-ratio: var(--ratio-stage);
 }
 
+.float {
+  width: 100%;
+  height: 100%;
+}
+
 .image {
   width: 100%;
   height: 100%;
   object-fit: contain;
   mix-blend-mode: multiply;
+}
+
+/* Глубина при прокрутке (просьба владельца 24.10.2026, «параллакса не хватает»): пока первый
+   экран уходит вверх, фото отстаёт и чуть уменьшается, а сетка подложки, наоборот, уезжает
+   быстрее — фото будто висит над листом. Отсчёт от верха страницы: при загрузке всё на месте.
+   Только CSS; где так не умеют (Firefox) и при «меньше движения» — без движения. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .float {
+      animation: float linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 100vh;
+    }
+
+    .stage::before {
+      animation: sheet linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 100vh;
+    }
+  }
+}
+
+@keyframes float {
+  to {
+    transform: translateY(calc(var(--parallax-shift) / 3)) scale(var(--scale-parallax));
+  }
+}
+
+@keyframes sheet {
+  to {
+    background-position: 0 calc(var(--parallax-shift) / -2);
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -84,7 +121,7 @@
   line-height: var(--leading-snug);
 }
 
-/* От 960 px: факты колонкой слева внизу (3 из 8 колонок), фото или модель справа (5 из 8). */
+/* От 960 px: факты колонкой слева внизу (3 из 8 колонок), фото справа (5 из 8). */
 @media (min-width: 960px) {
   .stage {
     grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);

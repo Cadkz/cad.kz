@@ -252,6 +252,40 @@ export interface Product {
    */
   gallery?: (number | Media)[] | null;
   /**
+   * Показываются на странице товара галереей: превью листаются, по нажатию модель открывается крупно, её можно крутить и приближать. Порядок — перетаскиванием, первый скан идёт первым. Пусто — блока нет. Новый скан в список добавляет разработчик.
+   */
+  scans?:
+    | {
+        scan:
+          | 'leo-car-engine'
+          | 'leo-bmw-manifold'
+          | 'leo-pipework'
+          | 'leo-axle-shaft'
+          | 'eva-cylinder-head'
+          | 'eva-moto-wheel'
+          | 'eva-side-table'
+          | 'eva-metal-table'
+          | 'spider-water-pump'
+          | 'spider-water-pump-2'
+          | 'spider-gamepad'
+          | 'spider-metal-part'
+          | 'micro-industrial-part'
+          | 'micro-screw'
+          | 'micro-copper-key'
+          | 'micro-teeth'
+          | 'point-engine'
+          | 'point-cam-gear'
+          | 'point-car-rim'
+          | 'ray-church-facade'
+          | 'ray-pipes';
+        /**
+         * Пусто — подпись из списка.
+         */
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Например, SCAD Office: переключатель «Редакция», шаги «Основа», «Что будете проверять», «Дополнительные функции», «Готовые комплекты». Цена считается сервером.
    */
   picker?: {
@@ -1226,6 +1260,13 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   description?: T;
   gallery?: T;
+  scans?:
+    | T
+    | {
+        scan?: T;
+        title?: T;
+        id?: T;
+      };
   picker?:
     | T
     | {

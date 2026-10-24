@@ -19,6 +19,7 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { setupAddons } from '../src/lib/addonsSetup.ts'
+import { setupArtecScanners } from '../src/lib/artecScannersSetup.ts'
 import { setupArtecTexts } from '../src/lib/artecTextsSetup.ts'
 import { setupAuditCatalog, setupRevitBack } from '../src/lib/auditCatalogSetup.ts'
 import { setupBimPage } from '../src/lib/bimSetup.ts'
@@ -248,6 +249,9 @@ try {
   const artecTexts = await setupArtecTexts(payload)
   if (!artecTexts) console.log('Тексты сканеров Artec (24.10.2026) уже загружены.')
   else for (const line of artecTexts) console.log(`Тексты Artec — ${line}`)
+  const artecScanners = await setupArtecScanners(payload)
+  if (!artecScanners) console.log('Сканеры Artec (24.10.2026, Point II, Neo, сканы) уже настроены.')
+  else for (const line of artecScanners) console.log(`Сканеры Artec — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

@@ -1,32 +1,24 @@
-'use client'
-
 import Image from 'next/image'
-import { useState } from 'react'
 import type { Picture } from '@/lib/pictures'
 import type { Fact } from '@/lib/product'
-import { ProductModel } from '../ProductModel/ProductModel'
 import styles from './ProductStage.module.css'
 
 type Props = {
   title: string
-  picture: Picture | null
-  /** Адрес 3D-модели (src/domain/productModels.mjs) или null. */
-  model: string | null
+  picture: Picture
   facts: Fact[]
 }
 
 /**
- * Сцена первого экрана оборудования (пробная ветка, по референсу Longbow): крупное вырезанное
- * фото на светлой подложке и три главных факта рядом. Если есть 3D-модель — кнопка «Покрутить
- * в 3D» поверх фото, а без фото модель стоит сразу на его месте.
+ * Сцена первого экрана оборудования (по референсу Longbow): крупное вырезанное фото на светлой
+ * подложке с сеткой и три главных факта рядом. Фото статичное (решение владельца 24.10.2026:
+ * 3D-модель вместо фото убрана), при прокрутке оно отстаёт от сетки — глубина без JavaScript.
  */
-export function ProductStage({ title, picture, model, facts }: Props) {
-  const [show3d, setShow3d] = useState(false)
-  const modelOnly = !picture
+export function ProductStage({ title, picture, facts }: Props) {
   return (
     <div className={styles.stage}>
       <div className={styles.media}>
-        {picture && !show3d && (
+        <div className={styles.float}>
           <Image
             src={picture.url}
             alt={picture.alt || title}
@@ -38,10 +30,7 @@ export function ProductStage({ title, picture, model, facts }: Props) {
             fetchPriority="high"
             className={styles.image}
           />
-        )}
-        {model && (
-          <ProductModel src={model} title={title} auto={modelOnly} onOpen={() => setShow3d(true)} />
-        )}
+        </div>
       </div>
       {facts.length > 0 && (
         <dl className={styles.facts}>

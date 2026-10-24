@@ -1,0 +1,145 @@
+/* Окно на весь экран без своей рамки: само окно — прозрачная область, нажатие по ней мимо
+   рамки закрывает. Рамка — тёмно-синий лист с чертёжной сеткой, как подвал. */
+.dialog {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: var(--space-4);
+  border: 0;
+  background: transparent;
+}
+
+.dialog[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog::backdrop {
+  background: var(--color-overlay);
+  backdrop-filter: var(--blur-glass);
+}
+
+/* Страница под открытым окном не прокручивается. */
+:root:has(.dialog[open]) {
+  overflow: hidden;
+}
+
+.frame {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: var(--container);
+  height: 100%;
+  max-height: var(--scan-viewer-height);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--gradient-deep);
+  box-shadow: var(--shadow-lg);
+}
+
+.frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--blueprint-dark);
+  background-size: var(--blueprint-size);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dialog[open] .frame {
+    animation: open var(--duration-unfold) var(--ease-reveal);
+  }
+}
+
+@keyframes open {
+  from {
+    opacity: 0;
+    scale: var(--scale-menu-card);
+  }
+}
+
+.top {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  left: var(--space-4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  pointer-events: none;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--color-text-inverse);
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.counter {
+  color: var(--color-text-on-dark);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}
+
+.control {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  border: 1px solid var(--color-on-dark-line);
+  border-radius: var(--radius-round);
+  background: var(--color-on-dark-soft);
+  color: var(--color-text-inverse);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.control:hover {
+  background: var(--color-on-dark-hover);
+}
+
+.control:focus-visible {
+  outline: 2px solid var(--color-sky);
+  outline-offset: 2px;
+}
+
+.prev,
+.next {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.prev {
+  left: var(--space-4);
+}
+
+.next {
+  right: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .dialog {
+    padding: var(--space-8);
+  }
+
+  .top {
+    top: var(--space-6);
+    right: var(--space-6);
+    left: var(--space-6);
+  }
+}
