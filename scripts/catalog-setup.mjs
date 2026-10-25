@@ -12,7 +12,7 @@
 // топы продаж по местам и SCAD перед ЛИРОЙ, логотипы производителей для карточек (21.10.2026);
 // каталог как в Битриксе: САПР в «Архитектуре и BIM», АВС — лицензия или обновление (22.10.2026);
 // оборудование как в Битриксе: четыре типа, плоттеры и комплектующие, WideTEK (22.10.2026);
-// отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
+// тексты сканеров WideTEK (26.10.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -60,6 +60,7 @@ import { setupMepTasks } from '../src/lib/tasksSetup.ts'
 import { setupTextsAudit } from '../src/lib/textsSetup.ts'
 import { setupVendors } from '../src/lib/vendorsSetup.ts'
 import { setupVersions } from '../src/lib/versionsSetup.ts'
+import { setupWidetekTexts } from '../src/lib/widetekTextsSetup.ts'
 
 const payload = await getPayload({ config })
 try {
@@ -252,6 +253,9 @@ try {
   const artecScanners = await setupArtecScanners(payload)
   if (!artecScanners) console.log('Сканеры Artec (24.10.2026, Point II, Neo, сканы) уже настроены.')
   else for (const line of artecScanners) console.log(`Сканеры Artec — ${line}`)
+  const widetekTexts = await setupWidetekTexts(payload)
+  if (!widetekTexts) console.log('Тексты сканеров WideTEK (26.10.2026) уже загружены.')
+  else for (const line of widetekTexts) console.log(`Тексты WideTEK — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

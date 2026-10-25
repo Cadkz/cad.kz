@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 import type { Manufacturer, Media, Product } from '../../payload-types'
 import { programLogo, vendorLogo } from '../domain/cardLogos.mjs'
+import { type SitePhoto, sitePhotos } from '../domain/sitePhotos.mjs'
 import { relId } from './rel'
 
 /** Как вписать картинку в карточку: логотип — небольшим знаком по центру, фото — на всю рамку. */
@@ -26,14 +27,22 @@ export function toPicture(value: number | Media | null | undefined, alt?: string
   return { url: value.url, alt: value.alt || alt || '', width: value.width, height: value.height }
 }
 
+/** Фото файлом сайта (src/domain/sitePhotos.mjs) → картинка; пережимает next/image. */
+function sitePicture(photo: SitePhoto, alt: string): Picture {
+  return { ...photo, alt }
+}
+
 /**
- * Картинки страницы товара: своя галерея, а если она пуста — картинка производителя.
- * Товар нужен с раскрытыми связями (depth 2).
+ * Картинки страницы товара: фото файлами сайта, затем своя галерея; если пусто —
+ * картинка производителя. Товар нужен с раскрытыми связями (depth 2).
  */
 export function productPictures(product: Product): Picture[] {
-  const own = (product.gallery ?? [])
-    .map((item) => toPicture(item, product.title))
-    .filter((picture): picture is Picture => Boolean(picture))
+  const own = [
+    ...sitePhotos(product.slug).map((photo) => sitePicture(photo, product.title)),
+    ...(product.gallery ?? [])
+      .map((item) => toPicture(item, product.title))
+      .filter((picture): picture is Picture => Boolean(picture)),
+  ]
   if (own.length) return own
   const vendor = product.manufacturer
   const fallback =
@@ -42,13 +51,16 @@ export function productPictures(product: Product): Picture[] {
 }
 
 type CardProduct = Pick<Product, 'id' | 'title' | 'gallery' | 'manufacturer'> &
-  Partial<Pick<Product, 'kind' | 'cardImage'>>
+  Partial<Pick<Product, 'kind' | 'cardImage' | 'slug'>>
 type CardVendor = Pick<Manufacturer, 'id' | 'title' | 'image'> & Partial<Pick<Manufacturer, 'logo'>>
 
 type StaticLogo = { url: string; width: number; height: number }
 
-/** Что взять в карточку: файл «Медиа» по id или логотип из кода (src/domain/cardLogos.mjs). */
-type Choice = { media: number; fit: PictureFit } | { logo: StaticLogo }
+/**
+ * Что взять в карточку: файл «Медиа» по id, логотип из кода (src/domain/cardLogos.mjs) или
+ * фото файлом сайта (src/domain/sitePhotos.mjs).
+ */
+type Choice = { media: number; fit: PictureFit } | { logo: StaticLogo } | { photo: SitePhoto }
 
 /**
  * Выбор картинки карточки по правилу владельца (21.10.2026, src/domain/cardLogos.mjs):
@@ -58,6 +70,8 @@ function chooseCard(product: CardProduct, vendor: CardVendor | undefined): Choic
   const own = relId(product.cardImage)
   const kind = product.kind ?? 'software'
   if (own != null) return { media: own, fit: kind === 'hardware' ? 'photo' : 'logo' }
+  const site = product.slug ? sitePhotos(product.slug)[0] : undefined
+  if (site) return { photo: site }
   // Логотип программы по названию — при любом типе товара: Artec Studio и Artec Cloud бывают
   // отмечены как оборудование, но это программы.
   const program = programLogo({ title: product.title, vendor: vendor?.title ?? null })
@@ -109,7 +123,9 @@ export async function cardPictures(
     const picture =
       'logo' in choice
         ? { ...choice.logo, alt: product.title, fit: 'logo' as const, local: true }
-        : toPicture(mediaById.get(choice.media), product.title)
+        : 'photo' in choice
+          ? { ...sitePicture(choice.photo, product.title), fit: 'photo' as const }
+          : toPicture(mediaById.get(choice.media), product.title)
     if (picture)
       result.set(product.id, 'media' in choice ? { ...picture, fit: choice.fit } : picture)
   }

@@ -3,6 +3,7 @@ import type { Payload, PayloadRequest, Where } from 'payload'
 import type { Product } from '../../payload-types'
 import { resolveScenario } from '../domain/buyScenario.mjs'
 import { type Check, productQuality } from '../domain/quality.mjs'
+import { sitePhotos } from '../domain/sitePhotos.mjs'
 import { loadPricingContext, type PricingContext, quoteOffer } from './pricing'
 import { relId, relIds } from './rel'
 
@@ -21,7 +22,14 @@ export type ProductQuality = { gaps: Check[]; score: number }
 type QualitySource = Partial<
   Pick<
     Product,
-    'kind' | 'scenario' | 'mainSection' | 'extraSections' | 'gallery' | 'description' | 'summary'
+    | 'kind'
+    | 'scenario'
+    | 'mainSection'
+    | 'extraSections'
+    | 'gallery'
+    | 'description'
+    | 'summary'
+    | 'slug'
   >
 >
 
@@ -31,6 +39,7 @@ export const QUALITY_SELECT = {
   mainSection: true,
   extraSections: true,
   gallery: true,
+  slug: true,
   description: true,
   summary: true,
 } as const
@@ -108,7 +117,7 @@ export function qualityOf(
   return productQuality({
     offers: counts?.all ?? 0,
     priced: counts?.priced ?? 0,
-    hasImage: relIds(product.gallery).length > 0,
+    hasImage: relIds(product.gallery).length > 0 || sitePhotos(product.slug ?? '').length > 0,
     hasDescription: Boolean(product.description?.trim()),
     hasSummary: Boolean(product.summary?.trim()),
     hasSection: main != null || relIds(product.extraSections).length > 0,
