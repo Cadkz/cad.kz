@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 import research from '../domain/equipmentResearch.json' with { type: 'json' }
+import { sitePhotos } from '../domain/sitePhotos.mjs'
 import texts from '../domain/widetekTexts.json' with { type: 'json' }
 import { researchDescription } from './equipmentResearchSetup'
 import { relId, relIds } from './rel'
@@ -75,6 +76,56 @@ export async function setupWidetekTexts(payload: Payload): Promise<string[] | nu
   await payload.create({
     collection: 'import-runs',
     data: { idempotencyKey: WIDETEK_TEXTS_KEY, state: 'done', snapshot: { report } },
+    ...opts,
+  })
+  return report
+}
+
+/**
+ * Решение владельца 26.10.2026: у сканеров WideTEK старые картинки Битрикса из галереи убрать —
+ * на странице остаются только новые фото (src/domain/sitePhotos.mjs). Файлы в «Медиа» не
+ * удаляются, вернуть можно в админке: товар → «Галерея». Товары без новых фото не трогаем.
+ */
+export const WIDETEK_GALLERY_KEY = 'catalog-setup:widetek-gallery-clear-2026-10-26'
+
+export async function clearWidetekGallery(payload: Payload): Promise<string[] | null> {
+  const done = await payload.find({
+    collection: 'import-runs',
+    where: { idempotencyKey: { equals: WIDETEK_GALLERY_KEY } },
+    limit: 1,
+    ...opts,
+  })
+  if (done.docs.length) return null
+  const slugs = texts.map((entry) => entry.slug).filter((slug) => sitePhotos(slug).length > 0)
+  const { docs } = await payload.find({
+    collection: 'products',
+    where: { slug: { in: slugs } },
+    pagination: false,
+    ...opts,
+  })
+  const report: string[] = []
+  for (const product of docs) {
+    const count = relIds(product.gallery).length
+    if (!count) continue
+    await payload.update({
+      collection: 'products',
+      id: product.id,
+      data: {
+        gallery: [],
+        mainSection: relId(product.mainSection),
+        extraSections: relIds(product.extraSections),
+      },
+      ...opts,
+    })
+    report.push(`${product.title}: убрано старых картинок — ${count}`)
+  }
+  if (docs.length < slugs.length) {
+    report.push(`Не найдено товаров: ${slugs.length - docs.length}. Повторим при следующей сборке.`)
+    return report
+  }
+  await payload.create({
+    collection: 'import-runs',
+    data: { idempotencyKey: WIDETEK_GALLERY_KEY, state: 'done', snapshot: { report } },
     ...opts,
   })
   return report

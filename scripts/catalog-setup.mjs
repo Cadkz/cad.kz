@@ -60,7 +60,7 @@ import { setupMepTasks } from '../src/lib/tasksSetup.ts'
 import { setupTextsAudit } from '../src/lib/textsSetup.ts'
 import { setupVendors } from '../src/lib/vendorsSetup.ts'
 import { setupVersions } from '../src/lib/versionsSetup.ts'
-import { setupWidetekTexts } from '../src/lib/widetekTextsSetup.ts'
+import { clearWidetekGallery, setupWidetekTexts } from '../src/lib/widetekTextsSetup.ts'
 
 const payload = await getPayload({ config })
 try {
@@ -256,6 +256,9 @@ try {
   const widetekTexts = await setupWidetekTexts(payload)
   if (!widetekTexts) console.log('Тексты сканеров WideTEK (26.10.2026) уже загружены.')
   else for (const line of widetekTexts) console.log(`Тексты WideTEK — ${line}`)
+  const widetekGallery = await clearWidetekGallery(payload)
+  if (!widetekGallery) console.log('Старые картинки WideTEK уже убраны.')
+  else for (const line of widetekGallery) console.log(`Галерея WideTEK — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)
