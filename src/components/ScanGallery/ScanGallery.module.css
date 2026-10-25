@@ -1,8 +1,12 @@
-/* Лента сканов: прокрутка вбок с привязкой к карточке, следующая карточка выглядывает —
-   видно, что листается. Подложка превью — тёмно-синяя с чертёжной сеткой, как подвал:
+/* Лента сканов: прокрутка вбок с привязкой к карточке. В ряд всегда целое число карточек
+   (телефон 1, от 640 — 2, от 960 — 3; замечание владельца 26.10.2026: обрезанная четвёртая
+   выглядела неряшливо), листается стрелками по ряду. Подложка превью — тёмно-синяя с чертёжной сеткой, как подвал:
    бело-серые сканы на ней читаются лучше, чем на светлом. */
 .gallery {
+  --per-view: 1;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .track {
@@ -27,7 +31,7 @@
 
 .item {
   flex: none;
-  width: 78%;
+  width: calc((100% - (var(--per-view) - 1) * var(--grid-gap)) / var(--per-view));
   scroll-snap-align: start;
 }
 
@@ -111,113 +115,65 @@
   line-height: var(--leading-snug);
 }
 
+.track {
+  order: 1;
+}
+
+/* Телефон: стрелки под лентой справа; от 960 px — над лентой, на одной строке с подзаголовком. */
 .arrows {
-  display: none;
+  order: 2;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 
-/* Анимация по прокрутке ленты: карточка у края входит из уменьшения и полупрозрачности,
-   превью внутри плывёт навстречу движению — глубина, как за стеклом. Где браузер так не умеет
-   (Firefox) и при «меньше движения» — лента просто листается. */
-@supports (animation-timeline: view(inline)) {
-  @media (prefers-reduced-motion: no-preference) {
-    .item {
-      animation: edge linear both;
-      animation-timeline: view(inline);
-    }
-
-    .poster {
-      animation: drift linear both;
-      animation-timeline: view(inline);
-    }
-  }
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-round);
+  background: var(--color-surface);
+  color: var(--color-navy);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
 }
 
-@keyframes edge {
-  entry 0% {
-    opacity: 0.4;
-    scale: var(--scale-menu-card);
-    filter: blur(var(--blur-reveal));
-  }
-
-  entry 100% {
-    opacity: 1;
-    scale: 1;
-    filter: blur(0);
-  }
-
-  exit 0% {
-    opacity: 1;
-    scale: 1;
-    filter: blur(0);
-  }
-
-  exit 100% {
-    opacity: 0.4;
-    scale: var(--scale-menu-card);
-    filter: blur(var(--blur-reveal));
-  }
+.arrow:hover {
+  border-color: var(--color-blue);
+  color: var(--color-blue);
 }
 
-@keyframes drift {
-  from {
-    translate: calc(var(--parallax-shift) / 3) 0;
-  }
+.arrow:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
 
-  to {
-    translate: calc(var(--parallax-shift) / -3) 0;
-  }
+.arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 @media (min-width: 640px) {
-  .item {
-    width: calc((100% - var(--grid-gap)) / 2.3);
+  .gallery {
+    --per-view: 2;
   }
 }
 
-/* От 960 px: в ряд видно две с половиной карточки (лента во всю ширину рамки), стрелки по бокам ленты. */
 @media (min-width: 960px) {
-  .item {
-    width: calc((100% - 2 * var(--grid-gap)) / 2.6);
+  .gallery {
+    --per-view: 3;
   }
 
   .arrows {
     position: absolute;
     top: calc(-1 * (var(--control-height-sm) + var(--space-4)));
     right: 0;
-    display: flex;
-    gap: var(--space-2);
-  }
-
-  .arrow {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--control-height-sm);
-    height: var(--control-height-sm);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-round);
-    background: var(--color-surface);
-    color: var(--color-navy);
-    cursor: pointer;
-    transition:
-      border-color var(--duration-fast) var(--ease),
-      color var(--duration-fast) var(--ease);
-  }
-
-  .arrow:hover {
-    border-color: var(--color-blue);
-    color: var(--color-blue);
-  }
-
-  .arrow:focus-visible {
-    outline: 2px solid var(--color-focus);
-    outline-offset: 2px;
-  }
-}
-
-/* От 1200 px лента во всю ширину рамки: в ряд три с половиной карточки. */
-@media (min-width: 1200px) {
-  .item {
-    width: calc((100% - 3 * var(--grid-gap)) / 3.6);
+    margin-top: 0;
   }
 }

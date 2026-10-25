@@ -1,4 +1,5 @@
-/* Телефон: заголовок, блок покупки, содержимое — или покупка в конце (data-aside-last). */
+/* Телефон: заголовок, блок покупки, содержимое — или покупка после содержимого
+   (data-aside-last); широкий блок (сканы) последним. */
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -27,28 +28,20 @@
   gap: var(--section-gap);
 }
 
-.wide {
+.layout[data-aside-last="true"] .aside {
   order: 4;
 }
 
-.tail {
+.wide {
   order: 5;
 }
 
-.layout[data-aside-last="true"] .aside {
-  order: 6;
-}
-
-/* От 960 px: текст на 8 колонок, покупка на 4 по всей высоте страницы, липкая. Широкий блок —
-   во всю рамку и выше колонки покупки по слою; фон страницы под ним закрывает карточку. */
+/* От 960 px: текст на 8 колонок, покупка на 4 рядом с заголовком и содержимым, липкая.
+   Широкий блок — под ними во всю рамку. */
 @media (min-width: 960px) {
   .layout {
     grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-    grid-template-rows: auto 1fr;
-  }
-
-  .layout[data-wide="true"] {
-    grid-template-rows: auto auto auto 1fr;
+    grid-template-rows: auto 1fr auto;
   }
 
   .header {
@@ -61,23 +54,19 @@
     grid-row: 2;
   }
 
-  .wide {
-    position: relative;
-    z-index: var(--z-raised);
-    grid-column: 1 / -1;
-    grid-row: 3;
-    background: var(--color-bg);
-  }
-
-  /* Запас под карточку покупки, чтобы она вынырнула из-под сканов целиком (AsideFade). */
-  .tail {
-    grid-row: 4;
-    min-height: var(--aside-room, auto);
-  }
-
   .aside,
   .layout[data-aside-last="true"] .aside {
     grid-column: 9 / -1;
-    grid-row: 1 / -1;
+    grid-row: 1 / span 2;
+  }
+
+  .sticky {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-4));
+  }
+
+  .wide {
+    grid-column: 1 / -1;
+    grid-row: 3;
   }
 }

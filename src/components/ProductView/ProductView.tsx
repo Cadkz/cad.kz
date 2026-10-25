@@ -135,10 +135,10 @@ export async function ProductView({
       }
     />
   )
-  // Порядок для всех товаров (решение владельца 24.10.2026): заголовок и коротко, лист с
-  // картинками и тремя фактами, вкладки «Обзор / Характеристики», у сканеров — примеры сканов
-  // во всю ширину, ниже комплектация и вопросы. Карточка покупки одна: уходит под сканы
-  // в размытие и выныривает под ними (ProductLayout, AsideFade).
+  // Порядок для всех товаров (решение владельца 26.10.2026): заголовок и коротко, лист с
+  // картинками и тремя фактами, комплектация, вкладки «Обзор / Характеристики», вопросы;
+  // у сканеров примеры сканов — в самом низу во всю ширину, карточка покупки липнет рядом с
+  // содержимым и останавливается над сканами (без ухода в размытие).
   const tabs = [
     ...(about ? [{ id: 'overview' as const, title: 'Обзор', content: about }] : []),
     ...(specs
@@ -172,25 +172,24 @@ export async function ProductView({
       )}
     </>
   )
-  const choice = (
-    <>
-      <ProductSection
-        title={guided ? 'Подберите комплект' : profile.configTitle}
-        id="config"
-        sub={guided ? 'Отметьте нужное — итог пересчитается сразу.' : undefined}
-      >
-        <PickerSteps />
-        <PickerHelp />
-      </ProductSection>
-      {product.faq.length > 0 && (
-        <Reveal>
-          <ProductSection title="Частые вопросы" id="faq">
-            <Faq items={product.faq} />
-          </ProductSection>
-        </Reveal>
-      )}
-    </>
+  const config = (
+    <ProductSection
+      title={guided ? 'Подберите комплект' : profile.configTitle}
+      id="config"
+      sub={guided ? 'Отметьте нужное — итог пересчитается сразу.' : undefined}
+    >
+      <PickerSteps />
+      <PickerHelp />
+    </ProductSection>
   )
+  const faq =
+    product.faq.length > 0 ? (
+      <Reveal>
+        <ProductSection title="Частые вопросы" id="faq">
+          <Faq items={product.faq} />
+        </ProductSection>
+      </Reveal>
+    ) : null
   const scans =
     product.scans.length > 0 ? <ProductScans title={product.title} scans={product.scans} /> : null
 
@@ -212,15 +211,10 @@ export async function ProductView({
           ]}
         />
         <PickerProvider key={String(pick)} view={product.picker} meta={meta} pick={pick}>
-          <ProductLayout
-            asideLast
-            header={header}
-            aside={<PickerSummary />}
-            wide={scans}
-            tail={scans ? choice : undefined}
-          >
+          <ProductLayout asideLast header={header} aside={<PickerSummary />} wide={scans}>
+            {config}
             {overview}
-            {scans ? null : choice}
+            {faq}
           </ProductLayout>
           <PickerBar />
         </PickerProvider>
