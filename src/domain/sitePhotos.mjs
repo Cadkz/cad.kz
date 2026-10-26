@@ -3,6 +3,9 @@
 // Vercel Blob почти на лимите (решение 25.10.2026). Пачка WideTEK от владельца (ChatGPT,
 // 26.10.2026): официальные рендеры Image Access, источники — manifest.csv пачки. У WideTEK 44 —
 // рендеры WideTEK 48: корпус общий, 44 обновляется до 48 ключом.
+// Пачка Artec (ChatGPT, 26.10.2026): официальные фото и рендеры artec3d.com, источники —
+// manifest.csv пачки; у Eva убран почти повтор первого кадра, у Leo — обрезок экрана. Скриншоты
+// Artec Studio и Artec Cloud — в public/images/software; карточка программы остаётся с логотипом.
 // Порядок: первая — главная (вырезанная, для карточки и сцены), остальные — галерея.
 // «Картинка для карточки» и галерея из админки показываются раньше и вместе с этими фото.
 
@@ -83,6 +86,67 @@ export const SITE_PHOTOS = {
       { url: '/images/equipment/widetek-12-2.webp', width: 869, height: 1600 },
       { url: '/images/equipment/widetek-12-3.webp', width: 1596, height: 1600 },
     ],
+  // artec-leo
+  artec_leo: [
+    { url: '/images/equipment/artec-leo-1.webp', width: 1600, height: 1485 },
+    { url: '/images/equipment/artec-leo-2.webp', width: 1600, height: 1067 },
+    { url: '/images/equipment/artec-leo-3.webp', width: 1340, height: 1340 },
+  ],
+  // artec-eva
+  artec_eva: [
+    { url: '/images/equipment/artec-eva-1.webp', width: 915, height: 1600 },
+    { url: '/images/equipment/artec-eva-3.webp', width: 1288, height: 1289 },
+    { url: '/images/equipment/artec-eva-4.webp', width: 1288, height: 1289 },
+  ],
+  // artec-spider-ii
+  artec_spider_ii: [
+    { url: '/images/equipment/artec-spider-ii-1.webp', width: 959, height: 1167 },
+    { url: '/images/equipment/artec-spider-ii-2.webp', width: 1600, height: 1068 },
+    { url: '/images/equipment/artec-spider-ii-3.webp', width: 712, height: 849 },
+  ],
+  // artec-micro-ii
+  artec_micro_ii: [
+    { url: '/images/equipment/artec-micro-ii-1.webp', width: 1600, height: 1402 },
+    { url: '/images/equipment/artec-micro-ii-2.webp', width: 1600, height: 1600 },
+    { url: '/images/equipment/artec-micro-ii-3.webp', width: 1600, height: 1600 },
+    { url: '/images/equipment/artec-micro-ii-4.webp', width: 1600, height: 1600 },
+  ],
+  // artec-ray-ii
+  artec_ray_ii: [
+    { url: '/images/equipment/artec-ray-ii-1.webp', width: 1554, height: 1600 },
+    { url: '/images/equipment/artec-ray-ii-2.webp', width: 1600, height: 998 },
+    { url: '/images/equipment/artec-ray-ii-3.webp', width: 1600, height: 1600 },
+  ],
+  // artec-jet
+  artec_jet: [
+    { url: '/images/equipment/artec-jet-1.webp', width: 1083, height: 1024 },
+    { url: '/images/equipment/artec-jet-2.webp', width: 1600, height: 901 },
+    { url: '/images/equipment/artec-jet-3.webp', width: 1600, height: 686 },
+  ],
+  // artec-point-ii
+  artec_point_ii: [
+    { url: '/images/equipment/artec-point-ii-1.webp', width: 418, height: 1012 },
+    { url: '/images/equipment/artec-point-ii-2.webp', width: 448, height: 1005 },
+    { url: '/images/equipment/artec-point-ii-3.webp', width: 287, height: 1006 },
+  ],
+  // artec-neo
+  artec_neo: [
+    { url: '/images/equipment/artec-neo-1.webp', width: 882, height: 1074 },
+    { url: '/images/equipment/artec-neo-2.webp', width: 1600, height: 1001 },
+    { url: '/images/equipment/artec-neo-3.webp', width: 757, height: 889 },
+    { url: '/images/equipment/artec-neo-4.webp', width: 997, height: 970 },
+  ],
+  // artec-studio
+  artec_studio_19: [
+    { url: '/images/software/artec-studio-1.webp', width: 1600, height: 900 },
+    { url: '/images/software/artec-studio-2.webp', width: 1030, height: 754 },
+  ],
+  // artec-cloud
+  artec_cloud: [
+    { url: '/images/software/artec-cloud-1.webp', width: 1600, height: 900 },
+    { url: '/images/software/artec-cloud-2.webp', width: 1600, height: 900 },
+    { url: '/images/software/artec-cloud-3.webp', width: 1288, height: 1289 },
+  ],
 }
 
 /** @param {string} slug @returns {SitePhoto[]} */

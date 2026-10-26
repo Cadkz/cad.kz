@@ -70,12 +70,13 @@ function chooseCard(product: CardProduct, vendor: CardVendor | undefined): Choic
   const own = relId(product.cardImage)
   const kind = product.kind ?? 'software'
   if (own != null) return { media: own, fit: kind === 'hardware' ? 'photo' : 'logo' }
-  const site = product.slug ? sitePhotos(product.slug)[0] : undefined
-  if (site) return { photo: site }
   // Логотип программы по названию — при любом типе товара: Artec Studio и Artec Cloud бывают
-  // отмечены как оборудование, но это программы.
+  // отмечены как оборудование, но это программы. Раньше фото файлом сайта: скриншоты программ
+  // (Artec Studio, Artec Cloud) — для страницы товара, карточка остаётся с логотипом.
   const program = programLogo({ title: product.title, vendor: vendor?.title ?? null })
   if (program) return { logo: program }
+  const site = product.slug ? sitePhotos(product.slug)[0] : undefined
+  if (site) return { photo: site }
   const gallery = relId(product.gallery?.[0])
   if (kind === 'hardware') return gallery == null ? null : { media: gallery, fit: 'photo' }
   if (kind === 'software') {

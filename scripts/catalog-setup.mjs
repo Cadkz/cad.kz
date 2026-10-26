@@ -20,6 +20,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { setupAddons } from '../src/lib/addonsSetup.ts'
 import { setupArtecScanners } from '../src/lib/artecScannersSetup.ts'
+import { setupArtecSoftwareTexts } from '../src/lib/artecSoftwareTextsSetup.ts'
 import { setupArtecTexts } from '../src/lib/artecTextsSetup.ts'
 import { setupAuditCatalog, setupRevitBack } from '../src/lib/auditCatalogSetup.ts'
 import { setupBimPage } from '../src/lib/bimSetup.ts'
@@ -259,6 +260,9 @@ try {
   const widetekGallery = await clearWidetekGallery(payload)
   if (!widetekGallery) console.log('Старые картинки WideTEK уже убраны.')
   else for (const line of widetekGallery) console.log(`Галерея WideTEK — ${line}`)
+  const artecSoftware = await setupArtecSoftwareTexts(payload)
+  if (!artecSoftware) console.log('Тексты Artec Studio и Artec Cloud (26.10.2026) уже загружены.')
+  else for (const line of artecSoftware) console.log(`Тексты программ Artec — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)
