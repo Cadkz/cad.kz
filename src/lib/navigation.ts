@@ -128,6 +128,7 @@ export async function getMenu(): Promise<MenuTab[]> {
       { url: picture.url, width: picture.width, height: picture.height, local: picture.local },
     ]),
   )
+  const trainingId = sections.docs.find((s) => s.slug === 'training')?.id
   const directionSlug = new Map(
     sections.docs.filter((s) => s.isDirection).map((s) => [s.id, s.slug]),
   )
@@ -162,7 +163,8 @@ export async function getMenu(): Promise<MenuTab[]> {
       ),
       group: itemGroup(product.kind, topMain == null ? null : groupOf.get(topMain)),
       // Категория курса — как в каталоге (src/domain/courseTopics.mjs).
-      ...(product.kind === 'course'
+      ...(product.kind === 'course' ||
+      (product.sections ?? []).some((section) => relId(section) === trainingId)
         ? {
             topic: courseTopic(
               product.title,

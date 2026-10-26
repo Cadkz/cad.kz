@@ -279,8 +279,9 @@ async function loadCatalog(): Promise<{
       product.pageView === 'picker' ? Math.max(productOffers.length, 2) : productOffers.length
     const cartId = cartOffer(product, productOffers, context)
     // У курсов нет картинок (замечание владельца 27.10.2026): значок категории курса.
+    // «Корпоративное обучение» заведено услугой, но стоит в «Обучении» — тоже по категории.
     const topic =
-      product.kind === 'course'
+      product.kind === 'course' || productSections.some((s) => s.slug === 'training')
         ? courseTopic(
             product.title,
             productSections.filter((s) => s.isDirection).map((s) => s.slug),
