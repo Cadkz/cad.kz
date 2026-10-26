@@ -1,9 +1,11 @@
+import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import { brandOf } from '@/domain/brands.mjs'
 import type { CatalogItem } from './catalog'
 import type { Home } from './home'
 import type { Picture } from './pictures'
 
 export type PopularCardData = {
+  product?: ProductCardData
   key: string
   title: string
   href: string

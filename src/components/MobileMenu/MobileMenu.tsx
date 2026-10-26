@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronDown, Menu } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
@@ -12,8 +12,8 @@ import { Drawer } from '../Drawer/Drawer'
 import { HeaderAction } from '../HeaderAction/HeaderAction'
 import { WhatsappIcon } from '../icons/icons'
 import { MenuPopular } from '../MenuPopular/MenuPopular'
+import { MobileMenuGroup } from '../MobileMenuGroup/MobileMenuGroup'
 import { MobileVendors } from '../MobileVendors/MobileVendors'
-import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './MobileMenu.module.css'
 
 type Props = {
@@ -23,36 +23,13 @@ type Props = {
   whatsappHref: string | null
 }
 
-/** Группы каталога, которые в меню телефона видны сразу. Обучение и внедрение — ссылками ниже. */
-const PRODUCT_GROUPS = ['software', 'hardware']
-
-/** Раскрывающаяся строка. Одно имя у соседних — открыта только одна, экран не тонет в списках. */
-function Group({
-  title,
-  name,
-  open,
-  children,
-}: {
-  title: string
-  name: string
-  open?: boolean
-  children: ReactNode
-}) {
-  return (
-    <details className={styles.group} name={name} open={open}>
-      <summary className={styles.summary}>
-        {title}
-        <ChevronDown size={20} strokeWidth={1.75} className={styles.chevron} aria-hidden="true" />
-      </summary>
-      <div className={styles.groupBody}>{children}</div>
-    </details>
-  )
-}
+/** Те же группы и порядок, что в каталоге и мегаменю. */
+const PRODUCT_GROUPS = ['software', 'hardware', 'service']
 
 /**
  * Меню для экранов уже 960 px: кнопка слева от логотипа, панель выезжает слева.
  * Сверху «Популярные решения» (раскрыты сразу), затем «Программное обеспечение» и «Оборудование»
- * (разделы → производители → товары),
+ * (товары сразу, направление и производитель — фильтры),
  * ниже разделы сайта, «О компании», контакты и WhatsApp.
  */
 export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
@@ -76,37 +53,24 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
       <Drawer open={open} onClose={close} title="Меню" side="left">
         <nav aria-label="Меню сайта" className={styles.nav}>
           {popular.length > 0 && (
-            <Group title={POPULAR_LABEL} name="mobile-menu" open>
+            <MobileMenuGroup title={POPULAR_LABEL} name="mobile-menu" open>
               <MenuPopular cards={popular} onNavigate={close} compact />
-            </Group>
+            </MobileMenuGroup>
           )}
           {groups.map((tab) => (
-            <Group key={tab.key} title={tab.label} name="mobile-menu">
-              {tab.columns.map((column) => (
-                <details key={column.title} className={styles.section} name={`menu-${tab.key}`}>
-                  <summary className={styles.sectionSummary}>
-                    <SectionIcon name={column.icon} size={16} className={styles.sectionIcon} />
-                    <span className={styles.sectionTitle}>{column.title}</span>
-                  </summary>
-                  <div className={styles.sectionBody}>
-                    <MobileVendors column={column} onNavigate={close} />
-                    <Link href={column.allHref} className={styles.all} onClick={close}>
-                      Все товары раздела
-                    </Link>
-                  </div>
-                </details>
-              ))}
+            <MobileMenuGroup key={tab.key} title={tab.label} name="mobile-menu">
+              <MobileVendors tab={tab} onNavigate={close} />
               <Link href={tab.allHref} className={styles.all} onClick={close}>
                 Смотреть все
               </Link>
-            </Group>
+            </MobileMenuGroup>
           ))}
           {sectionLinks.map((item) => (
             <Link key={item.href} href={item.href} className={styles.topLink} onClick={close}>
               {item.title}
             </Link>
           ))}
-          <Group title="О компании" name="mobile-menu">
+          <MobileMenuGroup title="О компании" name="mobile-menu">
             {aboutColumns.map((column) => (
               <div key={column.title} className={styles.aboutColumn}>
                 <p className={styles.caption}>{column.title}</p>
@@ -117,7 +81,7 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
                 ))}
               </div>
             ))}
-          </Group>
+          </MobileMenuGroup>
         </nav>
         <div className={styles.contacts}>
           <p className={styles.caption}>Контакты</p>

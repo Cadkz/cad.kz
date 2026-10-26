@@ -1,4 +1,5 @@
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
+import { CollectionContents } from '@/components/CollectionContents/CollectionContents'
 import { Container } from '@/components/Container/Container'
 import { Faq } from '@/components/Faq/Faq'
 import { JsonLd } from '@/components/JsonLd/JsonLd'
@@ -160,6 +161,7 @@ export async function ProductView({
   ]
   const overview = (
     <>
+      <CollectionContents product={product} />
       <ProductLifecycle value={product.lifecycle} />
       {tabs.length > 1 && (
         <Reveal>

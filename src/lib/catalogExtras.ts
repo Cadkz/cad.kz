@@ -83,6 +83,8 @@ export function catalogExtras({
           // Сразу после своего товара, в порядке шага.
           rank: parent.rank - n / 1000,
           scope: 'detail',
+          entryType: 'Модуль',
+          collectionNote: null,
         })
       }
     }

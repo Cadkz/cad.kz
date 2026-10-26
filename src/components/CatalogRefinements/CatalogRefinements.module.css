@@ -1,0 +1,22 @@
+.root {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.root label {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  min-width: 0;
+  max-width: 100%;
+}
+.root select {
+  max-width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  font: inherit;
+}

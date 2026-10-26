@@ -11,6 +11,8 @@ import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './ProductCard.module.css'
 
 export type ProductCardData = {
+  entryType?: string
+  collectionNote?: string | null
   logoFallback?: string | null
   /** Раздел услуги: без картинки в карточке — его чертёж (DirectionArt), а не значок. */
   art?: string | null

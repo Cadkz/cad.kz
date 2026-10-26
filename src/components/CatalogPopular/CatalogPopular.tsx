@@ -1,5 +1,5 @@
 import type { PopularCardData } from '@/lib/popular'
-import { PopularCard } from '../PopularCard/PopularCard'
+import { CatalogEntry } from '../CatalogEntry/CatalogEntry'
 import styles from './CatalogPopular.module.css'
 
 /**
@@ -10,9 +10,7 @@ export function CatalogPopular({ cards }: { cards: PopularCardData[] }) {
   return (
     <ul className={styles.grid} aria-label="Популярные решения">
       {cards.map((card) => (
-        <li key={card.key}>
-          <PopularCard card={card} />
-        </li>
+        <li key={card.key}>{card.product && <CatalogEntry product={card.product} />}</li>
       ))}
     </ul>
   )
