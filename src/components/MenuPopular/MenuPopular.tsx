@@ -2,7 +2,7 @@ import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { catalogHref } from '@/lib/navigationHrefs'
 import type { PopularCardData } from '@/lib/popular'
-import { PopularCard } from '../PopularCard/PopularCard'
+import { CatalogEntry } from '../CatalogEntry/CatalogEntry'
 import styles from './MenuPopular.module.css'
 
 type Props = {
@@ -23,7 +23,7 @@ export function MenuPopular({ cards, onNavigate, compact = false }: Props) {
       <ul className={styles.grid}>
         {cards.map((card) => (
           <li key={card.key}>
-            <PopularCard card={card} onNavigate={onNavigate} />
+            {card.product && <CatalogEntry product={card.product} onNavigate={onNavigate} />}
           </li>
         ))}
       </ul>

@@ -2,6 +2,7 @@ import { cache } from 'react'
 import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
 import { cardAction, resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
+import { collectionInfo, entryType } from '../domain/catalogPresentation.mjs'
 import { courseTopic } from '../domain/courseTopics.mjs'
 import { cheapestTotal } from '../domain/picker.mjs'
 import { compareInSection, priorityRank } from '../domain/priority.mjs'
@@ -213,7 +214,7 @@ async function loadCatalog(): Promise<{
       collection: 'products',
       where: published,
       sort: 'title',
-      limit: 1000,
+      pagination: false,
       depth: 0,
     }),
     payload.find({ collection: 'offers', where: published, limit: 5000, depth: 0 }),
@@ -299,7 +300,10 @@ async function loadCatalog(): Promise<{
       manufacturer: vendor,
       vendor,
       aliases: product.searchAliases ?? null,
-      summary: product.summary ?? null,
+      entryType: entryType(product),
+      collectionNote: collectionInfo({ ...product, manufacturer: vendor })?.note ?? null,
+      summary:
+        collectionInfo({ ...product, manufacturer: vendor })?.summary ?? product.summary ?? null,
       research: readResearch(product.researchData),
       lifecycle: lifecycle(readResearch(product.researchData), replacements),
       icon: topic?.icon ?? productSections[0]?.icon ?? null,
@@ -322,7 +326,9 @@ async function loadCatalog(): Promise<{
       // нужно только подборкам «С этим покупают».
       directions:
         group === 'software' ? productSections.filter((s) => s.isDirection).map((s) => s.slug) : [],
-      types: productSections.filter((s) => !s.isDirection).map((s) => s.slug),
+      types: productSections
+        .filter((s) => !s.isDirection || group === 'service')
+        .map((s) => s.slug),
       tasks: (product.tasks ?? []).map((task) => task.title),
       rank: priorityRank(product.priority, vendorLevel.get(vendorId), product.topOrder),
       main: topMain?.slug ?? null,

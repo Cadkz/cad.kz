@@ -9,6 +9,7 @@ import { compareInLine } from '../domain/catalogTree.mjs'
 import { COURSE_TOPICS, OTHER_TOPIC, topicOrder } from '../domain/courseTopics.mjs'
 import { MERGED_DIRECTIONS } from '../domain/directionsNine.mjs'
 import equipmentFacets from '../domain/equipmentFacets.json' with { type: 'json' }
+import { familyTaskHref } from '../domain/familyGroups.mjs'
 import { compareInSection } from '../domain/priority.mjs'
 import type { CatalogGroup, CatalogItem, CatalogLine, Facet } from './catalog'
 import type { Picture } from './pictures'
@@ -63,9 +64,9 @@ function visible(item: CatalogItem, state: FilterState, ignore?: Key) {
     ignore?.startsWith('feature:')
   switch (item.scope) {
     case 'family':
-      return !vendorView(state) && !featuresOn
+      return !vendorView(state) && !state.line && !featuresOn
     case 'detail':
-      return vendorView(state) || tasksOn || featuresOn
+      return vendorView(state) || Boolean(state.line) || tasksOn || featuresOn
     case 'task':
       return tasksOn
     default:
@@ -237,7 +238,7 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
     directions:
       (state.group === null || state.group === 'software') && !state.type
         ? fromFacets(
-            facets.filter((f) => f.isDirection),
+            facets.filter((f) => f.isDirection && !f.parent && f.group === 'software'),
             directionCounts,
             state.direction,
           )
@@ -247,7 +248,10 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
       state.group === 'software' || state.group === POPULAR || state.direction
         ? []
         : fromFacets(
-            facets.filter((f) => !f.isDirection && !f.parent && f.group === typeGroup),
+            facets.filter(
+              (f) =>
+                (!f.isDirection || f.group === 'service') && !f.parent && f.group === typeGroup,
+            ),
             typeCounts,
             typeSelected,
           ),
@@ -320,7 +324,11 @@ export function results(items: CatalogItem[], state: FilterState, facets: Facet[
     total: list.length,
     pages,
     page,
-    items: list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    items: list
+      .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+      .map((item) =>
+        item.href ? { ...item, href: familyTaskHref(item.href, state.direction) } : item,
+      ),
   }
 }
 
@@ -564,4 +572,17 @@ export function sectionStep(
     'type',
     facets.filter((f) => f.group === state.group && !f.isDirection && !f.parent),
   )
+}
+
+/** Старые адреса без group получают правильную вкладку, пустой каталог — популярные. */
+export function browseState(state: FilterState, facets: Facet[], hasPopular: boolean): FilterState {
+  if (state.group) return state
+  const section = facets.find((facet) => facet.slug === (state.type ?? state.direction))
+  if (section)
+    return section.group !== 'software' && state.direction
+      ? { ...state, group: section.group, direction: null, type: state.type ?? section.slug }
+      : { ...state, group: section.group }
+  if (state.direction) return { ...state, group: 'software' }
+  if (state.type || state.vendors.length || state.line || state.tasks.length) return state
+  return { ...state, group: hasPopular ? POPULAR : 'software' }
 }

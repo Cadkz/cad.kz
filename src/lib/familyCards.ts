@@ -42,6 +42,8 @@ export function withFamilies(
       rank: Math.max(...list.map((item) => item.rank)),
       lineOrder: 0,
       scope: 'family',
+      entryType: 'Линейка',
+      collectionNote: null,
     })
   }
   return [...items.filter((item) => !hidden.has(item.id)), ...cards]

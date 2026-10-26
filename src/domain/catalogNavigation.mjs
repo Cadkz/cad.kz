@@ -6,7 +6,7 @@
 export const POPULAR_LABEL = 'Популярные решения'
 
 export const GROUP_LABELS = {
-  software: 'Программное обеспечение',
+  software: 'Программы',
   hardware: 'Оборудование',
-  service: 'Услуги',
+  service: 'Обучение и внедрение',
 }
