@@ -44,6 +44,7 @@ import {
   setupHomeTrust,
 } from '../src/lib/homeSetup.ts'
 import { setupNewsCovers } from '../src/lib/newsCoversSetup.ts'
+import { clearOldPictures } from '../src/lib/oldPicturesSetup.ts'
 import { setupOwnerCatalogFixes } from '../src/lib/ownerCatalogFixes.ts'
 import { setupOwnerCatalogFixes2, setupOwnerCatalogFixes3 } from '../src/lib/ownerCatalogFixes2.ts'
 import { setupOwnerCatalog } from '../src/lib/ownerCatalogSetup.ts'
@@ -268,6 +269,10 @@ try {
   if (!software)
     console.log('Тексты 7 программ из пачки batch-software (26.10.2026) уже загружены.')
   else for (const line of software) console.log(`Тексты программ — ${line}`)
+  const oldPictures = await clearOldPictures(payload)
+  if (!oldPictures)
+    console.log('Старые картинки Битрикса у программ и не-PNG у товаров уже убраны.')
+  else for (const line of oldPictures) console.log(`Старые картинки — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

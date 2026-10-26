@@ -1,6 +1,7 @@
 'use client'
 
 import { SlidersHorizontal } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CatalogItem, CatalogLine, Facet } from '@/lib/catalog'
 import {
@@ -53,8 +54,14 @@ type Props = {
  * От 960 px фильтр слева, на телефоне — в выдвижной панели.
  */
 export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popular = [] }: Props) {
+  // Условия берутся из адреса, а не только с сервера: при «Назад» из товара Next.js показывает
+  // сохранённую страницу каталога со старым стартом (пустым), а в адресе — нужный шаг
+  // (замечание владельца 26.10.2026: «назад» из Artec вёл в пустой каталог).
+  const search = useSearchParams()
   // Ссылка с производителем, которого нет в направлении, тоже не даёт пустой экран.
-  const [state, setState] = useState(() => pruneVendors(items, initial))
+  const [state, setState] = useState(() =>
+    pruneVendors(items, search.size ? fromSearch(search.toString()) : initial),
+  )
   const [panelOpen, setPanelOpen] = useState(false)
   const top = useRef<HTMLDivElement>(null)
 
