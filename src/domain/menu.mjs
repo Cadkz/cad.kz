@@ -5,10 +5,20 @@
  * «Смотреть все» в каталог, иначе меню на каждой странице весило бы сотни килобайт.
  */
 import { OTHER, vendorTree } from './catalogTree.mjs'
+import { COURSE_TOPICS, OTHER_TOPIC, topicOrder } from './courseTopics.mjs'
 import { compareInSection } from './priority.mjs'
 
 /** Товаров линейки в меню, дальше — «Смотреть все» в каталоге. */
 export const MENU_LINKS = 12
+
+/**
+ * «Популярное в разделе» под плитками производителей: первые товары раздела по приоритету
+ * (замечание владельца 27.10.2026: в «Сметах» две плитки и пустая половина меню).
+ */
+export const MENU_POPULAR = 6
+
+/** Раздел «Обучение»: курсы в меню — по категориям, как в каталоге (src/domain/courseTopics.mjs). */
+export const TRAINING = 'training'
 
 /**
  * Короткое название для меню: без канцелярского «Право на использование программного
@@ -27,11 +37,14 @@ export function menuTitle(title) {
  *   pins?: number[], icon?: string | null, children?: MenuSection[] }} MenuSection
  * @typedef {{ id: number, title: string, main: number | null, sections: number[], href: string,
  *   rank?: number, vendor?: number | null, line?: number | null, lineOrder?: number | null,
- *   group?: string }} MenuProduct
+ *   group?: string, topic?: string }} MenuProduct
+ * @typedef {{ url: string, width: number, height: number, local?: boolean }} MenuLogo
  * @typedef {{ title: string, href: string }} MenuLinkData
  * @typedef {{ key: string, title: string, links: MenuLinkData[], more: boolean, allHref: string }} MenuLineData
- * @typedef {{ key: string, title: string, allHref: string, lines: MenuLineData[] }} MenuVendorData
- * @typedef {{ title: string, icon: string | null, allHref: string, vendors: MenuVendorData[] }} MenuColumnData
+ * @typedef {{ key: string, title: string, allHref: string, lines: MenuLineData[],
+ *   logo: MenuLogo | null, icon: string | null }} MenuVendorData
+ * @typedef {{ title: string, icon: string | null, allHref: string, vendors: MenuVendorData[],
+ *   popular: MenuLinkData[] }} MenuColumnData
  */
 
 /**
@@ -54,9 +67,19 @@ export function sectionFilter(section) {
  * @param {Map<number, string>} vendorTitles
  * @param {(filter: Record<string, string>) => string} hrefFor адрес каталога по фильтру
  * @param {number} [limit]
+ * @param {Map<string, MenuLogo>} [logos] логотипы производителей по названию — те же, что
+ *   у плиток производителей в каталоге (меню и каталог выглядят одинаково)
  * @returns {MenuColumnData[]}
  */
-export function menuColumns(sections, products, lines, vendorTitles, hrefFor, limit = MENU_LINKS) {
+export function menuColumns(
+  sections,
+  products,
+  lines,
+  vendorTitles,
+  hrefFor,
+  limit = MENU_LINKS,
+  logos = new Map(),
+) {
   return sections
     .map((section) => {
       const filter = sectionFilter(section)
@@ -86,6 +109,8 @@ export function menuColumns(sections, products, lines, vendorTitles, hrefFor, li
           return {
             key: vendor.key,
             title: vendor.title,
+            logo: vendor.key === OTHER ? null : (logos.get(vendor.title) ?? null),
+            icon: null,
             allHref: hrefFor(vendorFilter),
             lines: vendor.lines.map((line) => ({
               key: line.key,
@@ -112,6 +137,8 @@ export function menuColumns(sections, products, lines, vendorTitles, hrefFor, li
           {
             key: `section:${child.slug}`,
             title: child.title,
+            logo: null,
+            icon: child.icon ?? null,
             allHref: hrefFor(childFilter),
             // Один производитель — его линейки; несколько — по линейке на производителя.
             lines:
@@ -133,15 +160,71 @@ export function menuColumns(sections, products, lines, vendorTitles, hrefFor, li
         ),
       )
       const vendors =
-        children.length > 1
-          ? [...children, ...vendorCards(inSection.filter((p) => !inChildren.has(p.id)))]
-          : vendorCards(inSection)
+        section.slug === TRAINING
+          ? topicCards(inSection, filter, hrefFor, limit)
+          : children.length > 1
+            ? [...children, ...vendorCards(inSection.filter((p) => !inChildren.has(p.id)))]
+            : vendorCards(inSection)
       return {
         title: section.title,
         icon: section.icon ?? null,
         allHref: hrefFor(filter),
         vendors,
+        // Курсы и так видны категориями; у разделов с подразделами — свои плитки; один
+        // производитель — меню сразу показывает его товары.
+        popular:
+          section.slug === TRAINING || children.length || vendors.length < 2
+            ? []
+            : inSection.slice(0, MENU_POPULAR).map((product) => ({
+                title: menuTitle(product.title),
+                href: product.href,
+              })),
       }
     })
     .filter((column) => column.vendors.length > 0)
+}
+
+/**
+ * Курсы раздела «Обучение» карточками категорий: значок и название категории, внутри — курсы.
+ * @param {MenuProduct[]} courses
+ * @param {Record<string, string>} filter
+ * @param {(filter: Record<string, string>) => string} hrefFor
+ * @param {number} limit
+ * @returns {MenuVendorData[]}
+ */
+function topicCards(courses, filter, hrefFor, limit) {
+  /** @type {Map<string, MenuProduct[]>} */
+  const byTopic = new Map()
+  for (const course of courses) {
+    const key = course.topic ?? OTHER_TOPIC.key
+    byTopic.set(key, [...(byTopic.get(key) ?? []), course])
+  }
+  const all = [...COURSE_TOPICS, OTHER_TOPIC]
+  return [...byTopic]
+    .sort(([a], [b]) => topicOrder(a) - topicOrder(b))
+    .map(([key, list]) => {
+      const topic = all.find((item) => item.key === key) ?? OTHER_TOPIC
+      const sorted = [...list].sort((a, b) =>
+        a.title.localeCompare(b.title, 'ru', { numeric: true }),
+      )
+      return {
+        key: `topic:${key}`,
+        title: topic.title,
+        logo: null,
+        icon: topic.icon,
+        allHref: hrefFor(filter),
+        lines: [
+          {
+            key,
+            title: topic.title,
+            links: sorted.slice(0, limit).map((course) => ({
+              title: menuTitle(course.title),
+              href: course.href,
+            })),
+            more: sorted.length > limit,
+            allHref: hrefFor(filter),
+          },
+        ],
+      }
+    })
 }

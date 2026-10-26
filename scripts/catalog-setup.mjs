@@ -12,7 +12,7 @@
 // топы продаж по местам и SCAD перед ЛИРОЙ, логотипы производителей для карточек (21.10.2026);
 // каталог как в Битриксе: САПР в «Архитектуре и BIM», АВС — лицензия или обновление (22.10.2026);
 // оборудование как в Битриксе: четыре типа, плоттеры и комплектующие, WideTEK (22.10.2026);
-// тексты сканеров WideTEK (26.10.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
+// тексты сканеров WideTEK (26.10.2026); девять направлений — визуализация и трубопроводы влиты (27.10.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -30,6 +30,7 @@ import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
 import { setupDemoCleanup } from '../src/lib/demoCleanupSetup.ts'
+import { setupDirectionsNine } from '../src/lib/directionsSetup.ts'
 import { setupEquipmentFiltersV2 } from '../src/lib/equipmentFiltersSetup.ts'
 import { setupEquipmentPhotos } from '../src/lib/equipmentPhotosSetup.ts'
 import { setupEquipmentResearch } from '../src/lib/equipmentResearchSetup.ts'
@@ -273,6 +274,9 @@ try {
   if (!oldPictures)
     console.log('Старые картинки Битрикса у программ и не-PNG у товаров уже убраны.')
   else for (const line of oldPictures) console.log(`Старые картинки — ${line}`)
+  const directions = await setupDirectionsNine(payload)
+  if (!directions) console.log('Девять направлений (27.10.2026) уже настроены.')
+  else for (const line of directions) console.log(`Направления — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

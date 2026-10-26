@@ -1,6 +1,6 @@
 import { OTHER, vendorTree } from '../domain/catalogTree.mjs'
 import type { CatalogItem, CatalogLine, Facet } from './catalog'
-import { type FilterState, matches } from './catalogFilter'
+import { type FilterState, matches, topicView } from './catalogFilter'
 import { positions } from './plural'
 
 /** Плитка производителя в направлении: название, что у него есть, куда ведёт щелчок. */
@@ -25,7 +25,8 @@ export function vendorTiles(
   state: FilterState,
 ): VendorTile[] {
   const section = state.type ?? state.direction
-  if (!section) return []
+  // Курсы делятся по категориям, а не по производителям (topicView).
+  if (!section || topicView(state)) return []
   const listState = { ...state, vendors: [], line: null }
   const scope = items.filter((item) => matches(item, listState))
   const titles = new Map(scope.flatMap((item) => (item.vendor ? [[item.vendor, item.vendor]] : [])))

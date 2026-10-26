@@ -33,6 +33,18 @@
   animation-name: slide-left;
 }
 
+/* Попап по центру (окно заявки, 27.10.2026): высота по содержимому, не выше экрана. */
+.root[data-side="center"] .panel {
+  inset: 0;
+  width: min(var(--dialog-width), calc(100% - var(--gutter) * 2));
+  height: fit-content;
+  max-height: calc(100dvh - var(--space-6) * 2);
+  margin: auto;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  animation-name: pop;
+}
+
 .head {
   display: flex;
   flex-shrink: 0;
@@ -71,6 +83,11 @@
   padding: var(--space-5) var(--gutter) var(--space-8);
 }
 
+.root[data-side="center"] .body {
+  min-height: 0;
+  padding-bottom: var(--space-6);
+}
+
 @keyframes fade {
   from {
     opacity: 0;
@@ -86,5 +103,12 @@
 @keyframes slide-left {
   from {
     transform: translateX(-100%);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(var(--scale-menu-card));
   }
 }

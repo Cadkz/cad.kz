@@ -90,9 +90,9 @@ const sectionHints = {
   Structural_cad: { direction: 'structural', group: 'software' },
   engineering_cad: { direction: 'mep', group: 'software' },
   infrastructure_cad: { direction: 'infra', group: 'software' },
-  design_and_visualization: { direction: 'viz', group: 'software' },
+  design_and_visualization: { direction: 'arch', group: 'software' },
   mechanical_engineering: { direction: 'machine', group: 'software' },
-  process_design_and_calculations: { direction: 'pipes', group: 'software' },
+  process_design_and_calculations: { direction: 'mep', group: 'software' },
 }
 
 /** Подсказка для старого раздела (производитель, направление, группа каталога) или пустая. */

@@ -60,14 +60,6 @@ const places = [
   { value: 'с выездом к нам', label: 'С выездом к нам' },
 ]
 
-type Way = 'callback' | 'call' | 'whatsapp'
-/** WhatsApp первым: так быстрее всего, состав уже набран в сообщении. Звонок — запасной путь. */
-const ways = [
-  { value: 'whatsapp', label: 'Напишу в WhatsApp' },
-  { value: 'callback', label: 'Перезвоните мне' },
-  { value: 'call', label: 'Позвоню сам' },
-]
-
 /** Текст для WhatsApp и для разговора: страница и выбранное. */
 function messageText(
   kind: RequestKind,
@@ -83,18 +75,18 @@ function messageText(
 }
 
 /**
- * Окно «Как связаться»: сразу кнопка WhatsApp с уже набранным составом, по выбору — перезвонить
- * (заявка сохраняется на сервере) или позвонить самому (номера и часы работы).
+ * Окно заявки — попап по центру (решение владельца 27.10.2026): сразу форма «имя, телефон,
+ * почта по желанию», у запроса цены — галочка «Запросить скидку». Ниже, за чертой, — кто хочет
+ * быстрее: WhatsApp с уже набранным составом и телефоны с часами работы.
  */
 export function RequestDialog(props: Props) {
-  const { kind, onClose, pageTitle, lines, choices, quantity, contacts } = props
-  const [way, setWay] = useState<Way>(contacts.whatsappHref ? 'whatsapp' : 'callback')
+  const { kind, onClose, pageTitle, lines, choices, quantity, contacts, button } = props
   const [place, setPlace] = useState(places[0]?.value ?? '')
   if (!kind) return null
   const note = kind === 'demo' ? `Демонстрация: ${place}` : ''
   const text = `${messageText(kind, pageTitle, lines, choices, quantity)}${note ? `\n${note}` : ''}`
   return (
-    <Drawer open onClose={onClose} title={titles[kind]}>
+    <Drawer open onClose={onClose} title={button || titles[kind]} side="center">
       <div className={styles.body}>
         <p className={styles.intro}>{intro[kind]}</p>
         {lines.length > 0 && (
@@ -125,38 +117,33 @@ export function RequestDialog(props: Props) {
             onChange={setPlace}
           />
         )}
-        <RadioChips
-          legend="Как удобнее связаться"
-          name="contact-way"
-          value={way}
-          options={contacts.whatsappHref ? ways : ways.filter((w) => w.value !== 'whatsapp')}
-          onChange={(value) => setWay(value as Way)}
+        <CallbackForm
+          {...props}
+          kind={kind}
+          note={note}
+          discount={kind === 'price' || kind === 'quote'}
         />
-        {way === 'callback' && <CallbackForm {...props} kind={kind} note={note} />}
-        {way === 'call' && (
-          <div className={styles.call}>
-            {contacts.phones.map((phone) => (
-              <a key={phone.tel} href={`tel:${phone.tel}`} className={styles.phone}>
-                <Phone size={20} strokeWidth={1.75} aria-hidden="true" />
-                {phone.label}
-              </a>
-            ))}
-            {contacts.hours && <p className={styles.detail}>{contacts.hours}</p>}
-            <p className={styles.detail}>
-              Назовите менеджеру программу и что нужно: {titles[kind].toLowerCase()}.
-            </p>
-          </div>
-        )}
-        {way === 'whatsapp' && contacts.whatsappHref && (
-          <ButtonLink
-            href={`${contacts.whatsappHref}?text=${encodeURIComponent(text)}`}
-            external
-            block
-          >
-            <WhatsappIcon size={20} />
-            Открыть WhatsApp
-          </ButtonLink>
-        )}
+        <div className={styles.direct}>
+          <p className={styles.directTitle}>Или свяжитесь сами</p>
+          {contacts.whatsappHref && (
+            <ButtonLink
+              href={`${contacts.whatsappHref}?text=${encodeURIComponent(text)}`}
+              external
+              variant="outline"
+              block
+            >
+              <WhatsappIcon size={20} />
+              Написать в WhatsApp
+            </ButtonLink>
+          )}
+          {contacts.phones.map((phone) => (
+            <a key={phone.tel} href={`tel:${phone.tel}`} className={styles.phone}>
+              <Phone size={16} strokeWidth={1.75} aria-hidden="true" />
+              {phone.label}
+            </a>
+          ))}
+          {contacts.hours && <p className={styles.detail}>{contacts.hours}</p>}
+        </div>
       </div>
     </Drawer>
   )

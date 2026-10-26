@@ -10,7 +10,8 @@ type Props = {
   onClose: () => void
   title: string
   children: ReactNode
-  side?: 'left' | 'right'
+  /** center — попап по центру (окно заявки), left/right — выдвижная панель. */
+  side?: 'left' | 'right' | 'center'
 }
 
 const focusable =

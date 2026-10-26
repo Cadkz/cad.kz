@@ -1,11 +1,13 @@
 'use client'
 
+import Link from 'next/link'
 import { type FormEvent, useRef, useState } from 'react'
-import { CONSENT_TEXT, type RequestKind, validateContact } from '@/domain/siteRequest.mjs'
+import { isEmail } from '@/domain/order.mjs'
+import { type RequestKind, validateContact } from '@/domain/siteRequest.mjs'
 import { type CrmState, crmDoneText } from '@/lib/crmNotice'
 import { Button } from '../Button/Button'
 import { CheckboxField } from '../CheckboxField/CheckboxField'
-import { TextAreaField, TextField } from '../Field/Field'
+import { TextField } from '../Field/Field'
 import type { RequestLine } from '../RequestDialog/RequestDialog'
 import styles from './CallbackForm.module.css'
 
@@ -20,13 +22,21 @@ type Props = {
   button?: string
   /** Строка перед комментарием клиента, например «Демонстрация: в офисе CAD.kz». */
   note?: string
+  /** Галочка «Запросить скидку» — у запроса цены и КП. */
+  discount?: boolean
 }
 
 type Sent = { number: string; crm: CrmState }
 
+/** Адрес политики конфиденциальности (перенесена со старого сайта). */
+const PRIVACY_HREF = '/about/privacy-policy'
+
 /**
- * «Перезвоните мне»: имя, телефон, комментарий и согласие. Заявку сохраняет сервер
- * (/api/request) вместе с выбором клиента; в демо честно говорим, что менеджерам она не уходит.
+ * Заявка со страницы товара (решение владельца 27.10.2026): имя и телефон обязательны, почта —
+ * по желанию; у запроса цены — галочка «Запросить скидку». Согласие на обработку данных — строкой
+ * под кнопкой: нажимая «Отправить», человек соглашается. Почта и просьба о скидке уходят менеджеру
+ * строками комментария. Заявку сохраняет сервер (/api/request); в демо честно говорим, что
+ * менеджерам она не уходит.
  */
 export function CallbackForm(props: Props) {
   const { kind, pageProductId, familySlug, quantity, choices, lines, button, note } = props
@@ -39,16 +49,26 @@ export function CallbackForm(props: Props) {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
+    const email = String(data.get('email') ?? '').trim()
+    const discount = data.get('discount') === 'on'
     const contact = {
       name: String(data.get('name') ?? ''),
       phone: String(data.get('phone') ?? ''),
-      comment: String(data.get('comment') ?? ''),
-      consent: data.get('consent') === 'on',
+      comment: [
+        note,
+        email ? `Почта: ${email}` : '',
+        discount ? 'Просит скидку: предложить лучшую цену' : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      consent: true,
     }
     const checked = validateContact(contact)
-    setErrors(checked.ok ? {} : checked.errors)
+    const found = checked.ok ? {} : { ...checked.errors }
+    if (email && !isEmail(email)) found.email = 'Проверьте почту, например name@company.kz'
+    setErrors(found)
     setFormError('')
-    if (!checked.ok) return
+    if (Object.keys(found).length) return
     key.current ??= crypto.randomUUID()
     setSending(true)
     try {
@@ -57,10 +77,9 @@ export function CallbackForm(props: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...contact,
-          comment: [note, contact.comment].filter(Boolean).join('\n'),
           idempotencyKey: key.current,
           kind,
-          button,
+          button: discount ? 'Запросить скидку' : button,
           pageProductId,
           familySlug,
           quantity,
@@ -94,6 +113,7 @@ export function CallbackForm(props: Props) {
         name="name"
         id="callback-name"
         autoComplete="name"
+        required
         error={errors.name}
       />
       <TextField
@@ -103,30 +123,37 @@ export function CallbackForm(props: Props) {
         type="tel"
         autoComplete="tel"
         placeholder="+7 701 123-45-67"
+        required
         error={errors.phone}
       />
-      <TextAreaField
-        label="Комментарий"
-        name="comment"
-        id="callback-comment"
-        hint="Необязательно. Например, когда удобно говорить."
-        rows={3}
-        error={errors.comment}
+      <TextField
+        label="Почта"
+        name="email"
+        id="callback-email"
+        type="email"
+        autoComplete="email"
+        hint="Пришлём расчёт и счёт на почту"
+        error={errors.email}
       />
-      <CheckboxField
-        name="consent"
-        id="callback-consent"
-        label={CONSENT_TEXT}
-        error={errors.consent}
-      />
-      {(formError || errors.items) && (
+      {props.discount && (
+        <CheckboxField
+          name="discount"
+          id="callback-discount"
+          label="Запросить скидку — менеджер проверит акции и предложит лучшую цену"
+        />
+      )}
+      {(formError || errors.items || errors.comment) && (
         <p className={styles.error} role="alert">
-          {formError || errors.items}
+          {formError || errors.items || errors.comment}
         </p>
       )}
       <Button type="submit" block disabled={sending}>
         {sending ? 'Отправляем…' : 'Отправить заявку'}
       </Button>
+      <p className={styles.consent}>
+        Нажимая «Отправить заявку», вы соглашаетесь на обработку персональных данных по{' '}
+        <Link href={PRIVACY_HREF}>политике конфиденциальности</Link>.
+      </p>
     </form>
   )
 }

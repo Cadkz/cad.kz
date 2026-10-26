@@ -85,30 +85,37 @@ const req = (/** @type {RequestKind} */ kind, /** @type {string} */ label) =>
   /** @type {Action} */ ({ type: 'request', kind, label })
 
 /**
- * Кнопки итога на странице товара — одно правило на весь сайт (замечание владельца 26.10.2026:
- * «кнопок слишком много и на каждой странице свои»): одна кнопка и одна ссылка под ней.
- * - Кнопка: «В корзину», если есть цена и корзина возможна; иначе «Запросить цену».
- *   Корзины нет у корпоративного ПО, у сканеров с демонстрацией и на странице семейства.
- *   Курс — «Записаться на курс», услуга — «Обсудить проект», продление — «Продлить».
- * - Ссылка: «Помочь с выбором»; у сканеров с демонстрацией — «Записаться на демонстрацию».
- * Счёт на организацию оформляется в корзине (галочка), отдельная кнопка КП не нужна.
+ * Кнопки итога на странице товара — одно правило на весь сайт (решение владельца 27.10.2026,
+ * по образцу прежней карточки): сверху одна синяя кнопка — заявка, рядом маленькая квадратная
+ * с корзиной, ниже «Задать вопрос» (открывает чат с Кадди, в PickerSummary — не здесь).
+ * - main: всегда заявка. «Запросить цену»; если цена известна и корзина возможна — «Запросить
+ *   цену и счёт». Курс — «Записаться на курс», услуга — «Обсудить проект», продление — «Продлить».
+ * - second: «В корзину» значком, если есть цена и корзина возможна. Корзины нет у корпоративного
+ *   ПО, у сканеров с демонстрацией и на странице семейства.
+ * - links: только «Записаться на демонстрацию» у сканеров с демонстрацией.
  * @param {ActionInput} input
  * @returns {ActionSet}
  */
 export function scenarioActions(input) {
-  const help = req('help', 'Помочь с выбором')
-  const one = (/** @type {Action} */ main, /** @type {Action} */ link = help) =>
-    /** @type {ActionSet} */ ({ main, second: null, links: [link] })
   if (input.scenario === 'service')
-    return input.kind === 'course'
-      ? one(req('signup', 'Записаться на курс'))
-      : one(req('consult', 'Обсудить проект'))
-  if (input.scenario === 'renewal') return one(req('renew', input.renewLabel || 'Продлить'))
+    return {
+      main:
+        input.kind === 'course'
+          ? req('signup', 'Записаться на курс')
+          : req('consult', 'Обсудить проект'),
+      second: null,
+      links: [],
+    }
+  if (input.scenario === 'renewal')
+    return { main: req('renew', input.renewLabel || 'Продлить'), second: null, links: [] }
   const demo = input.scenario === 'equipment' && Boolean(input.demo)
   const cart = input.cart && !input.family && input.scenario !== 'corporate' && !demo
-  const ask = req(input.scenario === 'equipment' ? 'price' : 'quote', 'Запросить цену')
-  const main = cart ? /** @type {Action} */ ({ type: 'cart', label: 'В корзину' }) : ask
-  return one(main, demo ? req('demo', 'Записаться на демонстрацию') : help)
+  const kind = input.scenario === 'equipment' ? 'price' : 'quote'
+  return {
+    main: req(kind, cart ? 'Запросить цену и счёт' : 'Запросить цену'),
+    second: cart ? /** @type {Action} */ ({ type: 'cart', label: 'В корзину' }) : null,
+    links: demo ? [req('demo', 'Записаться на демонстрацию')] : [],
+  }
 }
 
 /**

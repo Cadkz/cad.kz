@@ -1,5 +1,6 @@
 import type { Section, SiteSetting } from '../../payload-types'
 import { GROUP_LABELS } from '../domain/catalogNavigation.mjs'
+import { courseTopic } from '../domain/courseTopics.mjs'
 import { menuColumns } from '../domain/menu.mjs'
 import { priorityRank } from '../domain/priority.mjs'
 import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
@@ -7,6 +8,7 @@ import { catalogAvailable } from './equipmentResearch'
 import { familyLines } from './families'
 import { catalogHref } from './navigationHrefs'
 import { cms } from './payload'
+import { vendorPictures } from './pictures'
 import { productPath } from './productPath'
 
 export type MenuLink = { title: string; href: string }
@@ -18,13 +20,28 @@ export type MenuLine = {
   more: boolean
   allHref: string
 }
-export type MenuVendor = { key: string; title: string; allHref: string; lines: MenuLine[] }
+/** Логотип производителя в меню — тот же, что у плитки производителя в каталоге. */
+export type MenuLogo = { url: string; width: number; height: number; local?: boolean }
+/**
+ * Карточка первого шага раздела: производитель (логотип и название), подраздел оборудования
+ * или категория курсов (значок и название). Без перечисления того, что внутри (27.10.2026).
+ */
+export type MenuVendor = {
+  key: string
+  title: string
+  allHref: string
+  lines: MenuLine[]
+  logo: MenuLogo | null
+  icon: string | null
+}
 /** Раздел в мегаменю: производители раздела по порядку и адрес каталога с этим разделом. */
 export type MenuColumn = {
   title: string
   icon: string | null
   allHref: string
   vendors: MenuVendor[]
+  /** Первые товары раздела по приоритету: строкой под карточками производителей. */
+  popular: MenuLink[]
 }
 export type MenuTab = { key: string; label: string; columns: MenuColumn[]; allHref: string }
 
@@ -94,7 +111,7 @@ export async function getMenu(): Promise<MenuTab[]> {
       collection: 'manufacturers',
       pagination: false,
       depth: 0,
-      select: { priority: true, title: true, order: true },
+      select: { priority: true, title: true, order: true, logo: true, image: true },
     }),
     payload.find({
       collection: 'product-lines',
@@ -105,6 +122,15 @@ export async function getMenu(): Promise<MenuTab[]> {
     }),
   ])
 
+  const logos = new Map(
+    [...(await vendorPictures(payload, manufacturers.docs))].map(([title, picture]) => [
+      title,
+      { url: picture.url, width: picture.width, height: picture.height, local: picture.local },
+    ]),
+  )
+  const directionSlug = new Map(
+    sections.docs.filter((s) => s.isDirection).map((s) => [s.id, s.slug]),
+  )
   // Подразделы видны через верхний раздел (src/domain/sectionTree.mjs).
   const top = topSections(sections.docs.map((s) => ({ id: s.id, parent: relId(s.parent) })))
   const groupOf = new Map(sections.docs.map((s) => [s.id, s.menuGroup]))
@@ -135,6 +161,18 @@ export async function getMenu(): Promise<MenuTab[]> {
         product.topOrder,
       ),
       group: itemGroup(product.kind, topMain == null ? null : groupOf.get(topMain)),
+      // Категория курса — как в каталоге (src/domain/courseTopics.mjs).
+      ...(product.kind === 'course'
+        ? {
+            topic: courseTopic(
+              product.title,
+              (product.sections ?? []).flatMap((section) => {
+                const slug = directionSlug.get(relId(section) ?? 0)
+                return slug ? [slug] : []
+              }),
+            ).key,
+          }
+        : {}),
     }
   })
 
@@ -184,6 +222,8 @@ export async function getMenu(): Promise<MenuTab[]> {
       lineData,
       vendorTitle,
       catalogHref,
+      undefined,
+      logos,
     ),
   }))
 

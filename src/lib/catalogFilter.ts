@@ -6,6 +6,8 @@
 
 import { featureDefinition, featureLabel, featureValue } from '../domain/catalogFeatureValues.mjs'
 import { compareInLine } from '../domain/catalogTree.mjs'
+import { COURSE_TOPICS, OTHER_TOPIC, topicOrder } from '../domain/courseTopics.mjs'
+import { MERGED_DIRECTIONS } from '../domain/directionsNine.mjs'
 import equipmentFacets from '../domain/equipmentFacets.json' with { type: 'json' }
 import { compareInSection } from '../domain/priority.mjs'
 import type { CatalogGroup, CatalogItem, CatalogLine, Facet } from './catalog'
@@ -327,7 +329,7 @@ export function results(items: CatalogItem[], state: FilterState, facets: Facet[
  * показывает его товары группами. Возвращает выбор для показа, адрес страницы не меняется.
  */
 export function autoVendor(items: CatalogItem[], state: FilterState): FilterState {
-  if (!(state.type ?? state.direction) || state.vendors.length) return state
+  if (!(state.type ?? state.direction) || state.vendors.length || topicView(state)) return state
   const vendors = new Set(
     items
       .filter((item) => matches(item, { ...state, features: {} }))
@@ -335,6 +337,35 @@ export function autoVendor(items: CatalogItem[], state: FilterState): FilterStat
   )
   const [only] = vendors
   return vendors.size === 1 && only ? { ...state, vendors: [only] } : state
+}
+
+/** Тип «Обучение»: курсы группами по категориям, без шага производителя (27.10.2026). */
+export const TRAINING = 'training'
+
+/** «Обучение» без выбранных производителя и задач — курсы группами по категориям. */
+export function topicView(state: FilterState) {
+  return state.type === TRAINING && !state.vendors.length && !state.tasks.length
+}
+
+/** Курсы по категориям (src/domain/courseTopics.mjs) в порядке категорий, внутри — по названию. */
+function topicGroups(list: CatalogItem[]): ResultGroup[] {
+  const byKey = new Map<string, CatalogItem[]>()
+  for (const item of list) {
+    const key = item.topic ?? OTHER_TOPIC.key
+    byKey.set(key, [...(byKey.get(key) ?? []), item])
+  }
+  const titles = new Map<string, string>([
+    ...COURSE_TOPICS.map((topic): [string, string] => [topic.key, topic.title]),
+    [OTHER_TOPIC.key, OTHER_TOPIC.title],
+  ])
+  return [...byKey]
+    .sort(([a], [b]) => topicOrder(a) - topicOrder(b))
+    .map(([key, group]) => ({
+      key,
+      title: titles.get(key) ?? OTHER_TOPIC.title,
+      href: null,
+      items: group.sort((a, b) => a.title.localeCompare(b.title, 'ru', { numeric: true })),
+    }))
 }
 
 export type ResultGroup = {
@@ -355,6 +386,7 @@ export function groupedResults(
   state: FilterState,
   lines: CatalogLine[],
 ): ResultGroup[] | null {
+  if (topicView(state)) return topicGroups(items.filter((item) => matches(item, state)))
   if (!vendorView(state)) return null
   const list = items.filter((item) => matches(item, state))
   const own = lines
@@ -383,9 +415,9 @@ export function groupedResults(
 
 /**
  * Влитые направления: старая ссылка открывает новое («САПР и черчение» влито в «САПР,
- * архитектура и BIM» 22.10.2026).
+ * архитектура и BIM» 22.10.2026; визуализация и трубопроводы — 27.10.2026, directionsNine.mjs).
  */
-const DIRECTION_ALIASES: Record<string, string> = { cad: 'arch' }
+const DIRECTION_ALIASES: Record<string, string> = { cad: 'arch', ...MERGED_DIRECTIONS }
 
 /** Состояние ↔ адрес страницы: ссылку на подборку можно отправить коллеге. */
 export function fromParams(params: Record<string, string | string[] | undefined>): FilterState {

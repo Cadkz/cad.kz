@@ -8,6 +8,7 @@ import { PickerProvider } from '@/components/PickerProvider/PickerProvider'
 import { PickerSteps } from '@/components/PickerSteps/PickerSteps'
 import { PickerSummary } from '@/components/PickerSummary/PickerSummary'
 import { ProductAbout } from '@/components/ProductAbout/ProductAbout'
+import { ProductFacts } from '@/components/ProductFacts/ProductFacts'
 import { ProductHeader } from '@/components/ProductHeader/ProductHeader'
 import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
 import { ProductLifecycle } from '@/components/ProductLifecycle/ProductLifecycle'
@@ -122,16 +123,21 @@ export async function ProductView({
       tasks={product.tasks}
       requires={product.requires.map((r) => r.title)}
       media={
-        <ProductStage
-          title={product.title}
-          pictures={product.stagePictures}
-          facts={product.facts}
-          placeholder={
-            <span>
-              <SectionIcon name={product.sections[0]?.icon ?? 'building'} size={24} />
-            </span>
-          }
-        />
+        // У курсов картинок нет (замечание владельца 27.10.2026): вместо сцены — факты строкой.
+        product.kind === 'course' ? (
+          <ProductFacts facts={product.facts} />
+        ) : (
+          <ProductStage
+            title={product.title}
+            pictures={product.stagePictures}
+            facts={product.facts}
+            placeholder={
+              <span>
+                <SectionIcon name={product.sections[0]?.icon ?? 'building'} size={24} />
+              </span>
+            }
+          />
+        )
       }
     />
   )

@@ -75,7 +75,9 @@ function chooseCard(product: CardProduct, vendor: CardVendor | undefined): Choic
   // (Artec Studio, Artec Cloud) — для страницы товара, карточка остаётся с логотипом.
   const program = programLogo({ title: product.title, vendor: vendor?.title ?? null })
   if (program) return { logo: program }
-  const site = product.slug ? sitePhotos(product.slug)[0] : undefined
+  // Фото файлами сайта у программ — скриншоты интерфейса: они для страницы товара, в карточке
+  // каталога у программы только логотип (замечание владельца 27.10.2026: SCAD, ЛИРА, АВС-KZ).
+  const site = product.slug && kind !== 'software' ? sitePhotos(product.slug)[0] : undefined
   if (site) return { photo: site }
   const gallery = relId(product.gallery?.[0])
   if (kind === 'hardware') return gallery == null ? null : { media: gallery, fit: 'photo' }

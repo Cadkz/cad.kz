@@ -53,6 +53,36 @@
   background: var(--color-blue-soft);
 }
 
+/* Курс (27.10.2026): картинок у курсов нет — тёмно-синий лист с чертёжной сеткой, как у плиток
+   направлений, и значок категории курса в светлом круге. */
+.course {
+  position: relative;
+  isolation: isolate;
+  background: var(--gradient-deep);
+  color: var(--color-text-inverse);
+}
+
+.course::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--blueprint-dark);
+  background-size: var(--blueprint-size);
+  mask-image: var(--blueprint-fade);
+}
+
+.courseIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-box);
+  height: var(--icon-box);
+  border: 1px solid var(--color-on-dark-line);
+  border-radius: var(--radius-md);
+  background: var(--color-on-dark-soft);
+}
+
 .image {
   width: 100%;
   height: 100%;

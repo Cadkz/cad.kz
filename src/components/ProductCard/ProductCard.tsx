@@ -30,6 +30,11 @@ export type ProductCardData = {
   /** Единственная комплектация с ценой — её можно положить в корзину прямо из карточки. */
   cartOfferId: string | null
   badge: string | null
+  /**
+   * Категория курса (src/domain/courseTopics.mjs): у курсов картинок нет — тёмный лист со
+   * значком направления курса (замечание владельца 27.10.2026). Группы «Обучения» в каталоге.
+   */
+  topic?: string
 }
 
 /**
@@ -45,7 +50,11 @@ export function ProductCard({ product }: { product: ProductCardData }) {
     <article className={styles.card}>
       <Link
         href={product.href}
-        className={product.picture ? styles.media : `${styles.media} ${styles.placeholder}`}
+        className={
+          product.picture
+            ? styles.media
+            : `${styles.media} ${product.topic ? styles.course : styles.placeholder}`
+        }
         tabIndex={-1}
         aria-hidden="true"
       >
@@ -68,6 +77,10 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             sizes="(min-width: 1200px) 300px, (min-width: 960px) 25vw, (min-width: 640px) 50vw, 80px"
             className={styles.image}
           />
+        ) : product.topic ? (
+          <span className={styles.courseIcon}>
+            <SectionIcon name={product.icon} size={24} />
+          </span>
         ) : product.logoFallback ? (
           <span className={styles.logoFallback}>{product.logoFallback}</span>
         ) : (

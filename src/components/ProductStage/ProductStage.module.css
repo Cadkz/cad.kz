@@ -254,31 +254,19 @@
   line-height: var(--leading-snug);
 }
 
-/* От 960 px: факты колонкой слева внизу (3 из 8 колонок), фото справа (5 из 8). */
+/* От 960 px (замечание владельца 27.10.2026: факты слева внизу оставляли над собой пустое
+   поле): картинка на всю ширину листа 16 : 9, факты — строкой под ней, до трёх в ряд. */
 @media (min-width: 960px) {
   .stage {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);
-    grid-template-rows: minmax(0, 1fr);
-    align-items: end;
-    aspect-ratio: var(--ratio-media);
     padding: var(--space-8);
   }
 
   .media {
-    grid-column: 2;
-    grid-row: 1;
-    align-self: stretch;
-    aspect-ratio: auto;
-  }
-
-  .stage:not(:has(.facts)) .media {
-    grid-column: 1 / -1;
+    aspect-ratio: var(--ratio-media);
   }
 
   .facts {
-    grid-column: 1;
-    grid-row: 1;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

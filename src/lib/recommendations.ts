@@ -7,7 +7,10 @@ import {
   type SectionInfo,
   similarFor,
 } from '../domain/recommend.mjs'
+import { AEC_TITLE, linePickFor, PICKS_LIMIT, pinPicks } from '../domain/vendorPicks.mjs'
 import { catalogAvailable } from './equipmentResearch'
+import { catalogHref } from './navigationHrefs'
+import { plural } from './plural'
 import type { RelatedProduct } from './product'
 import { productPath } from './productPath'
 import { relId, relIds } from './rel'
@@ -109,12 +112,59 @@ async function loadRecData(payload: Payload): Promise<RecData> {
 const toCards = (ids: number[], cards: Map<number, RelatedProduct>) =>
   ids.map((id) => cards.get(id)).filter((card): card is RelatedProduct => Boolean(card))
 
-/** Подборки для страницы товара: «С этим покупают» и «Похожие» без повторов между ними. */
+/** Линейка производителя строкой подборки: ведёт в каталог на эту линейку. */
+async function lineCard(payload: Payload, title: string): Promise<RelatedProduct | null> {
+  const { docs } = await payload.find({
+    collection: 'product-lines',
+    where: { and: [{ title: { equals: title } }, { status: { equals: 'published' } }] },
+    limit: 1,
+    depth: 1,
+  })
+  const line = docs[0]
+  const vendor = typeof line?.manufacturer === 'object' ? line.manufacturer : null
+  if (!line || !vendor) return null
+  const count = await payload.count({
+    collection: 'products',
+    where: { and: [{ line: { equals: line.id } }, { status: { equals: 'published' } }] },
+  })
+  if (!count.totalDocs) return null
+  return {
+    slug: `line-${line.id}`,
+    href: catalogHref({ group: 'software', vendor: vendor.title, line: String(line.id) }),
+    title: line.title,
+    vendor: vendor.title,
+    note: `${count.totalDocs} ${plural(count.totalDocs, 'программа', 'программы', 'программ')}`,
+  }
+}
+
+/**
+ * Подборки для страницы товара: «С этим покупают» и «Похожие» без повторов между ними, по две
+ * строки (решение владельца 27.10.2026). У программ Autodesk второй в «С этим покупают» — AEC
+ * Collection, к AutoCAD и Revit первой — линейка MagiCAD (src/domain/vendorPicks.mjs).
+ */
 export async function getRecommendations(payload: Payload, productId: number) {
   const { items, info, cards } = await loadRecData(payload)
   const target = items.find((item) => item.id === productId)
   if (!target) return { cross: [], similar: [] }
-  const cross = crossFor([target], items, info)
-  const similar = similarFor(target, items, { exclude: cross })
-  return { cross: toCards(cross, cards), similar: toCards(similar, cards) }
+  const found = crossFor([target], items, info, { limit: PICKS_LIMIT + 2 })
+  const autodesk = target.vendor === 'Autodesk' && target.kind === 'software'
+  const aec = autodesk
+    ? items.find((item) => item.vendor === 'Autodesk' && AEC_TITLE.test(item.title))
+    : undefined
+  const lineTitle = autodesk ? linePickFor(target.title) : null
+  const line = lineTitle ? await lineCard(payload, lineTitle) : null
+  const cross = pinPicks(
+    toCards(found, cards),
+    {
+      first: line,
+      second: aec && aec.id !== target.id ? (cards.get(aec.id) ?? null) : null,
+    },
+    (card) => card.href,
+  )
+  const shown = new Set(cross.map((card) => card.href))
+  const similar = similarFor(target, items, {
+    limit: PICKS_LIMIT,
+    exclude: items.filter((item) => shown.has(cards.get(item.id)?.href ?? '')).map((i) => i.id),
+  })
+  return { cross, similar: toCards(similar, cards) }
 }

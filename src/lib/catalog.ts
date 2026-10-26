@@ -2,6 +2,7 @@ import { cache } from 'react'
 import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
 import { cardAction, resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
+import { courseTopic } from '../domain/courseTopics.mjs'
 import { cheapestTotal } from '../domain/picker.mjs'
 import { compareInSection, priorityRank } from '../domain/priority.mjs'
 import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
@@ -277,6 +278,14 @@ async function loadCatalog(): Promise<{
     const offersCount =
       product.pageView === 'picker' ? Math.max(productOffers.length, 2) : productOffers.length
     const cartId = cartOffer(product, productOffers, context)
+    // У курсов нет картинок (замечание владельца 27.10.2026): значок категории курса.
+    const topic =
+      product.kind === 'course'
+        ? courseTopic(
+            product.title,
+            productSections.filter((s) => s.isDirection).map((s) => s.slug),
+          )
+        : null
     const action = cardAction({
       scenario,
       demo: Boolean(mainSection?.demoButton ?? topMain?.demoButton),
@@ -292,8 +301,8 @@ async function loadCatalog(): Promise<{
       summary: product.summary ?? null,
       research: readResearch(product.researchData),
       lifecycle: lifecycle(readResearch(product.researchData), replacements),
-      icon: productSections[0]?.icon ?? null,
-      picture: pictures.get(product.id) ?? null,
+      icon: topic?.icon ?? productSections[0]?.icon ?? null,
+      picture: topic ? null : (pictures.get(product.id) ?? null),
       logoFallback: group === 'software' ? vendor : null,
       priceFrom:
         product.pageView === 'picker'
@@ -319,6 +328,7 @@ async function loadCatalog(): Promise<{
       // Только заданный: пустой не занимает место в данных каталога, которые уходят в браузер.
       ...optionalOrder(vendorOrder.get(vendorId)),
       scope: 'all',
+      ...(topic ? { topic: topic.key } : {}),
     }
   })
   const hidden = new Set(products.docs.filter((p) => p.pageView === 'none').map((p) => p.id))

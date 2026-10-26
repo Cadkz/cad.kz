@@ -13,6 +13,8 @@ export type PickItem = {
   priceFrom: string | null
   offersCount: number
   cartOfferId: string | null
+  /** Подпись вместо цены: у линейки «6 программ». */
+  note?: string
 }
 
 const initials = (title: string) =>
@@ -30,9 +32,11 @@ const initials = (title: string) =>
  * «В корзину» значком, если комплектация одна, иначе стрелка на страницу товара.
  */
 export function PickRow({ item }: { item: PickItem }) {
-  const price = item.priceFrom
-    ? `${item.offersCount > 1 ? 'от ' : ''}${item.priceFrom}`
-    : 'Цена по запросу'
+  const price = item.note
+    ? item.note
+    : item.priceFrom
+      ? `${item.offersCount > 1 ? 'от ' : ''}${item.priceFrom}`
+      : 'Цена по запросу'
   return (
     <div className={styles.row}>
       <span className={styles.thumb} aria-hidden="true">

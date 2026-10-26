@@ -17,6 +17,16 @@ export const BUYER_TYPES = /** @type {const} */ (['individual', 'company'])
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
+/**
+ * Почта похожа на настоящую (та же проверка, что у заказа): для необязательного поля «Почта»
+ * в заявке со страницы товара.
+ * @param {string} value
+ */
+export function isEmail(value) {
+  const email = value.trim()
+  return email.length <= 254 && EMAIL.test(email)
+}
+
 /** Приводит телефон к виду +77011234567 или возвращает null, если номер не похож на телефон. */
 export function normalizePhone(value) {
   if (typeof value !== 'string') return null

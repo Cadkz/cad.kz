@@ -40,10 +40,20 @@
   font-size: var(--text-xs);
 }
 
-.call {
+.direct {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.directTitle {
+  color: var(--color-text-muted);
+  font-size: var(--text-overline);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-overline);
+  text-transform: uppercase;
 }
 
 .phone {
@@ -51,7 +61,10 @@
   align-items: center;
   gap: var(--space-2);
   color: var(--color-navy);
-  font-family: var(--font-heading);
-  font-size: var(--text-h3);
-  font-weight: var(--weight-heavy);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.phone:hover {
+  color: var(--color-blue);
 }

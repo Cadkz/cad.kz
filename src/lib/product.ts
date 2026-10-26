@@ -29,7 +29,14 @@ export type ProductOffer = {
 export type Spec = ReturnType<typeof cleanSpecs>[number]
 export type Fact = ReturnType<typeof keyFacts>[number]
 
-export type RelatedProduct = { slug: string; href: string; title: string; vendor: string | null }
+export type RelatedProduct = {
+  slug: string
+  href: string
+  title: string
+  vendor: string | null
+  /** Вместо цены — подпись строки (у линейки «6 программ»). */
+  note?: string
+}
 
 export type ProductPage = {
   lifecycle?: Lifecycle | null

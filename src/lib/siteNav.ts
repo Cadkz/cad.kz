@@ -19,14 +19,15 @@ export const sectionLinks = [
 
 /**
  * Плитки после направлений на главной: оборудование и услуги — тоже входы в каталог.
- * С ними 10 направлений по CRM заполняют сетку без пустого места (12 плиток: 4 ряда по 3).
+ * С ними семь направлений программ дают ровно 9 плиток — сетка 3 × 3 (решение владельца
+ * 27.10.2026, src/domain/directionsNine.mjs). Описания — для каких задач, без списка товаров.
  */
 export const directionExtras = [
   {
     slug: 'hardware',
     href: catalogHref({ group: 'hardware' }),
     title: 'Оборудование',
-    summary: '3D-сканеры Artec, плоттеры и сканеры чертежей, рабочие станции.',
+    summary: '3D-сканирование, печать и сканирование чертежей, станции для тяжёлых проектов.',
     icon: 'scan',
     tone: 'graphite' as const,
   },
@@ -34,7 +35,7 @@ export const directionExtras = [
     slug: 'service',
     href: catalogHref({ group: 'service' }),
     title: 'Обучение и внедрение',
-    summary: 'Курсы учебного центра, внедрение BIM и консалтинг.',
+    summary: 'Курсы по программам и внедрение BIM в работу проектной организации.',
     icon: 'graduation',
     tone: 'blue' as const,
   },
