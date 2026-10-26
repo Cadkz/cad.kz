@@ -57,6 +57,7 @@ import { setupProductTables } from '../src/lib/productTablesSetup.ts'
 import { setupProgramTexts } from '../src/lib/programTextsSetup.ts'
 import { setupFamilyRenew } from '../src/lib/renewSetup.ts'
 import { setupSearchAliases } from '../src/lib/searchSetup.ts'
+import { setupSoftwareTexts } from '../src/lib/softwareTextsSetup.ts'
 import { setupMepTasks } from '../src/lib/tasksSetup.ts'
 import { setupTextsAudit } from '../src/lib/textsSetup.ts'
 import { setupVendors } from '../src/lib/vendorsSetup.ts'
@@ -263,6 +264,10 @@ try {
   const artecSoftware = await setupArtecSoftwareTexts(payload)
   if (!artecSoftware) console.log('Тексты Artec Studio и Artec Cloud (26.10.2026) уже загружены.')
   else for (const line of artecSoftware) console.log(`Тексты программ Artec — ${line}`)
+  const software = await setupSoftwareTexts(payload)
+  if (!software)
+    console.log('Тексты 7 программ из пачки batch-software (26.10.2026) уже загружены.')
+  else for (const line of software) console.log(`Тексты программ — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

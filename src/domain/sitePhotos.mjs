@@ -6,6 +6,12 @@
 // Пачка Artec (ChatGPT, 26.10.2026): официальные фото и рендеры artec3d.com, источники —
 // manifest.csv пачки; у Eva убран почти повтор первого кадра, у Leo — обрезок экрана. Скриншоты
 // Artec Studio и Artec Cloud — в public/images/software; карточка программы остаётся с логотипом.
+// Пачка программ (ChatGPT, 26.10.2026): кадры официальных демонстраций и справки производителей,
+// источники — manifest.csv пачки. Убраны учебные кадры с нарисованными стрелками и номерами
+// (Revit-2, 3ds Max-2) и кадр Fusion с крупным курсором; у Fusion срезаны белые поля с тенью.
+// У AEC Collection — те же файлы Revit, Civil 3D и Navisworks (своего интерфейса у коллекции нет).
+// Платформы nanoCAD на сайте нет отдельным товаром, СПДС GraphiCS открывается страницей семейства
+// «СПДС» (фото товаров на ней не показываются) — их скриншоты не взяты.
 // Порядок: первая — главная (вырезанная, для карточки и сцены), остальные — галерея.
 // «Картинка для карточки» и галерея из админки показываются раньше и вместе с этими фото.
 
@@ -146,6 +152,58 @@ export const SITE_PHOTOS = {
     { url: '/images/software/artec-cloud-1.webp', width: 1600, height: 900 },
     { url: '/images/software/artec-cloud-2.webp', width: 1600, height: 900 },
     { url: '/images/software/artec-cloud-3.webp', width: 1288, height: 1289 },
+  ],
+  // autocad
+  autocad: [
+    { url: '/images/software/autocad-1.webp', width: 1600, height: 900 },
+    { url: '/images/software/autocad-2.webp', width: 1600, height: 900 },
+  ],
+  // revit
+  'autodesk-revit': [{ url: '/images/software/revit-1.webp', width: 1600, height: 900 }],
+  // civil-3d
+  civil_3d: [
+    { url: '/images/software/civil-3d-1.webp', width: 1600, height: 900 },
+    { url: '/images/software/civil-3d-2.webp', width: 1600, height: 900 },
+  ],
+  // inventor
+  inventor_professional: [
+    { url: '/images/software/inventor-1.webp', width: 1600, height: 900 },
+    { url: '/images/software/inventor-2.webp', width: 1600, height: 900 },
+  ],
+  // navisworks
+  navisworks: [
+    { url: '/images/software/navisworks-1.webp', width: 1600, height: 900 },
+    { url: '/images/software/navisworks-2.webp', width: 1600, height: 900 },
+  ],
+  // 3ds-max
+  '3ds_max': [{ url: '/images/software/3ds-max-1.webp', width: 1600, height: 900 }],
+  // aec-collection
+  'architecture_engineering_construction_collection-1107088405': [
+    { url: '/images/software/revit-1.webp', width: 1600, height: 900 },
+    { url: '/images/software/civil-3d-1.webp', width: 1600, height: 900 },
+    { url: '/images/software/navisworks-1.webp', width: 1600, height: 900 },
+  ],
+  // fusion
+  fusion_360_team: [{ url: '/images/software/fusion-1.webp', width: 937, height: 531 }],
+  // abc-kz
+  the_software_package_avs_4: [
+    { url: '/images/software/abc-kz-1.webp', width: 1508, height: 743 },
+    { url: '/images/software/abc-kz-2.webp', width: 1360, height: 747 },
+  ],
+  // scad-office
+  scad_v23: [
+    { url: '/images/software/scad-office-1.webp', width: 1559, height: 879 },
+    { url: '/images/software/scad-office-2.webp', width: 1559, height: 879 },
+  ],
+  // lira-fem
+  lira_sapr: [
+    { url: '/images/software/lira-fem-1.webp', width: 1600, height: 901 },
+    { url: '/images/software/lira-fem-2.webp', width: 1600, height: 900 },
+  ],
+  // geo5
+  geo5: [
+    { url: '/images/software/geo5-1.webp', width: 1386, height: 1043 },
+    { url: '/images/software/geo5-2.webp', width: 1386, height: 1043 },
   ],
 }
 

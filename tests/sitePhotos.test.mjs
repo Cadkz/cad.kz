@@ -4,7 +4,9 @@ import { test } from 'node:test'
 import { NEW_SCANNERS } from '../src/domain/artecNewScanners.mjs'
 import artecSoftware from '../src/domain/artecSoftwareTexts.json' with { type: 'json' }
 import research from '../src/domain/equipmentResearch.json' with { type: 'json' }
+import legacy from '../src/domain/legacyCatalog.json' with { type: 'json' }
 import { SITE_PHOTOS, sitePhotos } from '../src/domain/sitePhotos.mjs'
+import software from '../src/domain/softwareTexts.json' with { type: 'json' }
 import texts from '../src/domain/widetekTexts.json' with { type: 'json' }
 
 /** Размеры WebP из заголовка: VP8X (с прозрачностью) или VP8 (без). */
@@ -19,6 +21,7 @@ function webpSize(file) {
 const slugs = new Set([
   ...research.products.map((entry) => entry.slug),
   ...NEW_SCANNERS.map((entry) => entry.slug),
+  ...Object.keys(legacy.products),
 ])
 
 test('фото файлами сайта: файлы на месте, товары существуют, размеры заданы', () => {
@@ -71,5 +74,44 @@ test('пачка Artec: фото у 8 сканеров и 2 программ, т
     assert.ok(entry.summary.length > 20)
     assert.ok(entry.specs.length >= 10)
     assert.doesNotMatch(entry.description, /не задаётся|требует подтверждения/i)
+  }
+})
+
+test('пачка программ: скриншоты у 12, тексты у 7 без утверждённых', () => {
+  const shots = [
+    'autocad',
+    'autodesk-revit',
+    'civil_3d',
+    'inventor_professional',
+    'navisworks',
+    '3ds_max',
+    'architecture_engineering_construction_collection-1107088405',
+    'fusion_360_team',
+    'the_software_package_avs_4',
+    'scad_v23',
+    'lira_sapr',
+    'geo5',
+  ]
+  for (const slug of shots) {
+    assert.match(sitePhotos(slug)[0]?.url ?? '', /^\/images\/software\//, `нет скриншота у ${slug}`)
+  }
+  // Утверждённые 23.10 тексты не трогаем.
+  const approved = [
+    'autocad',
+    'autodesk-revit',
+    'scad_v23',
+    'lira_sapr',
+    'fusion',
+    'fusion_360_team',
+    'geo5',
+  ]
+  assert.equal(software.length, 7)
+  for (const entry of software) {
+    assert.ok(slugs.has(entry.slug), `нет товара ${entry.slug}`)
+    assert.ok(!approved.includes(entry.slug), `утверждённый текст: ${entry.slug}`)
+    assert.ok(entry.summary.length > 20)
+    assert.ok(entry.description.length > 1500)
+    assert.ok(entry.specs.length >= 4)
+    assert.doesNotMatch(entry.description, /карточк|не подтвержд|официальной странице/i)
   }
 })
