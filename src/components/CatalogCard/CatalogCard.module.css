@@ -1,0 +1,210 @@
+/* Одна карточка для всего каталога. Шапка карточки: значок программы слева, справа тип и
+   производитель над названием. Ниже во всю ширину — зачем (две строки), состав, цена, кнопка.
+   У оборудования от 640 px вместо значка — фото сверху во всю ширину. */
+.card {
+  display: grid;
+  grid-template-columns: var(--card-mark) minmax(0, 1fr);
+  column-gap: var(--space-3);
+  align-content: start;
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  transition:
+    border-color var(--duration-slow) var(--ease-reveal),
+    box-shadow var(--duration-slow) var(--ease-reveal);
+}
+
+.card:hover {
+  border-color: var(--color-blue-mid);
+  box-shadow: var(--shadow-sm);
+}
+
+.card > * {
+  grid-column: 1 / -1;
+}
+
+.mark,
+.photo {
+  display: flex;
+  grid-row: 1 / span 2;
+  grid-column: 1;
+  align-self: start;
+  align-items: center;
+  justify-content: center;
+  width: var(--card-mark);
+  height: var(--card-mark);
+  padding: var(--space-1);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-blue);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.fallback {
+  color: var(--color-navy);
+  font-size: var(--text-overline);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.kind {
+  display: flex;
+  flex-wrap: wrap;
+  grid-row: 1;
+  grid-column: 2;
+  align-self: end;
+  gap: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+  line-height: var(--leading-snug);
+}
+
+.kindLabel {
+  color: var(--color-blue);
+  font-weight: var(--weight-semibold);
+}
+
+.vendor {
+  color: var(--color-text-muted);
+}
+
+.title {
+  grid-row: 2;
+  grid-column: 2;
+  margin-top: var(--space-1);
+  font-size: var(--text-h4);
+  line-height: var(--leading-snug);
+  overflow-wrap: anywhere;
+}
+
+.titleLink {
+  position: relative;
+}
+
+.titleLink:hover {
+  color: var(--color-blue);
+}
+
+/* Зона нажатия пальцем 44 px по высоте без сдвига вёрстки (аудит 21.10.2026, М8). */
+.titleLink::after {
+  position: absolute;
+  top: calc(50% - var(--touch-target) / 2);
+  right: 0;
+  bottom: calc(50% - var(--touch-target) / 2);
+  left: 0;
+  content: "";
+}
+
+.summary {
+  display: -webkit-box;
+  margin-top: var(--space-3);
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.includes {
+  margin-top: var(--space-2);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.badge {
+  margin-top: var(--space-2);
+}
+
+.foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-4);
+}
+
+.price {
+  color: var(--color-navy);
+  font-family: var(--font-heading);
+  font-size: var(--text-body);
+  font-weight: var(--weight-heavy);
+}
+
+.onRequest {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  height: var(--control-height-sm);
+  border-radius: var(--radius-md);
+  background: var(--color-navy);
+  color: var(--color-text-inverse);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  transition: background var(--duration-fast) var(--ease);
+}
+
+.more svg {
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.card:hover .more {
+  background: var(--color-blue);
+}
+
+.card:hover .more svg {
+  transform: translateX(var(--space-1));
+}
+
+@media (min-width: 640px) {
+  .card {
+    padding: var(--space-5);
+  }
+
+  .withPhoto .photo {
+    grid-row: auto;
+    grid-column: 1 / -1;
+    width: auto;
+    height: auto;
+    aspect-ratio: var(--ratio-card);
+    margin-bottom: var(--space-4);
+    padding: var(--space-3);
+    border: 0;
+  }
+
+  .withPhoto .kind,
+  .withPhoto .title {
+    grid-row: auto;
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .more svg {
+    transition: none;
+  }
+
+  .card:hover .more svg {
+    transform: none;
+  }
+}

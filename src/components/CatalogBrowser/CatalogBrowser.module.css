@@ -1,0 +1,46 @@
+.shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: start;
+}
+
+.sidebar {
+  display: none;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
+}
+
+.mobileBar {
+  display: flex;
+}
+
+@media (min-width: 960px) {
+  .shell {
+    grid-template-columns: var(--sidebar) minmax(0, 1fr);
+    padding: var(--space-8);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+
+  /* Дерево разделов остаётся на месте, пока листаются полки. */
+  .sidebar {
+    position: sticky;
+    top: calc(var(--header-height) + var(--subnav-height) + var(--space-4));
+    display: block;
+    max-height: calc(100dvh - var(--header-height) - var(--subnav-height) - var(--space-8));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .mobileBar {
+    display: none;
+  }
+}

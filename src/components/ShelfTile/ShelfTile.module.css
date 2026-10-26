@@ -1,0 +1,87 @@
+/* Плитка раздела: значок, название, примеры внутри, число позиций со стрелкой внизу. */
+.tile {
+  display: grid;
+  grid-template-columns: var(--icon-box) minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr;
+  column-gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    border-color var(--duration-slow) var(--ease-reveal),
+    box-shadow var(--duration-slow) var(--ease-reveal);
+}
+
+.tile:hover {
+  border-color: var(--color-blue-mid);
+  box-shadow: var(--shadow-sm);
+}
+
+.icon {
+  display: flex;
+  grid-row: 1 / span 2;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-box);
+  height: var(--icon-box);
+  border-radius: var(--radius-md);
+  background: var(--color-blue-soft);
+  color: var(--color-blue);
+}
+
+.title {
+  align-self: center;
+  color: var(--color-navy);
+  font-size: var(--text-h4);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.examples {
+  grid-column: 2;
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.foot {
+  display: flex;
+  grid-column: 2;
+  align-items: center;
+  align-self: end;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+  color: var(--color-blue);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.foot svg {
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.tile:hover .foot svg {
+  transform: translateX(var(--space-1));
+}
+
+@media (min-width: 640px) {
+  .tile {
+    padding: var(--space-5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .foot svg {
+    transition: none;
+  }
+
+  .tile:hover .foot svg {
+    transform: none;
+  }
+}

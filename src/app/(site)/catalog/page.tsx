@@ -1,5 +1,5 @@
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
-import { CatalogFilter } from '@/components/CatalogFilter/CatalogFilter'
+import { CatalogBrowser } from '@/components/CatalogBrowser/CatalogBrowser'
 import { Container } from '@/components/Container/Container'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
 import { clientItems, getCatalog } from '@/lib/catalog'
@@ -18,7 +18,11 @@ export const metadata = pageMetadata({
   path: CATALOG_PATH,
 })
 
-/** Каталог — шаблон «Каталог»: фильтр слева, карточки справа, на телефоне фильтр в панели. */
+/**
+ * Каталог — шаблон «Каталог»: разделы слева, карточки справа, на телефоне разделы в панели.
+ * Пробная ветка redesign/catalog-v2: обзор разделов и полки по производителям (CatalogBrowser);
+ * каталог на главной пока прежний (CatalogFilter).
+ */
 export default async function CatalogPage({ searchParams }: Props) {
   const [catalog, popular, params] = await Promise.all([
     getCatalog(),
@@ -32,9 +36,9 @@ export default async function CatalogPage({ searchParams }: Props) {
         <Breadcrumbs items={[{ title: 'Главная', href: '/' }, { title: 'Каталог' }]} />
         <PageIntro
           title="Каталог"
-          lead="Выберите направление, затем производителя. Не знаете, что подойдёт, — спросите Кадди или напишите в WhatsApp."
+          lead="Программы по задачам, оборудование и обучение. Не знаете, что подойдёт, — спросите Кадди или напишите в WhatsApp."
         />
-        <CatalogFilter
+        <CatalogBrowser
           key={JSON.stringify(initial)}
           items={clientItems([...catalog.items, ...catalog.extras])}
           facets={catalog.facets}

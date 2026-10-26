@@ -1,4 +1,5 @@
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
+import { CollectionContents } from '@/components/CollectionContents/CollectionContents'
 import { Container } from '@/components/Container/Container'
 import { Faq } from '@/components/Faq/Faq'
 import { JsonLd } from '@/components/JsonLd/JsonLd'
@@ -22,6 +23,7 @@ import { SectionIcon } from '@/components/SectionIcon/SectionIcon'
 import { kindProfile } from '@/domain/productKind.mjs'
 import { productLd } from '@/domain/structuredData.mjs'
 import { getCatalog } from '@/lib/catalog'
+import { collectionContents } from '@/lib/catalogShelves'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
@@ -190,6 +192,9 @@ export async function ProductView({
         </ProductSection>
       </Reveal>
     ) : null
+  // Коллекции и комплекты: что входит и чем выгоднее (пробная ветка redesign/catalog-v2).
+  const bundle = collectionContents(product.title, catalog.items)
+  const collection = bundle ? <CollectionContents {...bundle} /> : null
   const scans =
     product.scans.length > 0 ? <ProductScans title={product.title} scans={product.scans} /> : null
 
@@ -212,6 +217,7 @@ export async function ProductView({
         />
         <PickerProvider key={String(pick)} view={product.picker} meta={meta} pick={pick}>
           <ProductLayout asideLast header={header} aside={<PickerSummary />} wide={scans}>
+            {collection}
             {config}
             {overview}
             {faq}
