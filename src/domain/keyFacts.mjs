@@ -98,7 +98,10 @@ function wireless(value) {
 export function keyFacts(research, specs) {
   const rule = research ? BY_CATEGORY[research.category] : undefined
   const preferred = rule ? rule(research?.filters ?? {}, specs) : []
-  const general = specs.map((spec) => ({ name: spec.name, value: spec.value }))
+  // Производитель и название уже над заголовком — в фактах не повторяем (владелец 26.10.2026).
+  const general = specs
+    .filter((spec) => !/^(производитель|разработчик|программа|бренд|модель)$/i.test(spec.name))
+    .map((spec) => ({ name: spec.name, value: spec.value }))
   /** @type {Fact[]} */
   const result = []
   for (const item of [...preferred, ...(rule ? [] : general)]) {
@@ -108,4 +111,46 @@ export function keyFacts(research, specs) {
     if (result.length === LIMIT) break
   }
   return result
+}
+
+const SYSTEMS = ['Windows', 'macOS', 'Linux', 'Android', 'iOS', 'Браузер']
+
+/** Длинное описание ОС сокращаем до названий систем: «Windows 10/11 64-bit, …» → «Windows». */
+function shortSystem(/** @type {string} */ value) {
+  if (value.length <= FACT_MAX_LENGTH) return value
+  const found = SYSTEMS.filter((name) => new RegExp(name, 'i').test(value))
+  return found.length ? found.join(', ') : null
+}
+
+/** Тип лицензии простыми словами: навсегда или подписка (по характеристике и комплектациям). */
+export function licenseType(/** @type {(string | null | undefined)[]} */ values) {
+  const text = values.filter(Boolean).join(' ').toLowerCase()
+  const subscription = /подпис|год|мес|аренд/.test(text)
+  const perpetual = /бессроч|навсегда|постоян|perpetual/.test(text)
+  if (subscription && perpetual) return 'Подписка или бессрочная'
+  if (perpetual) return 'Бессрочная'
+  if (subscription) return 'Подписка'
+  return null
+}
+
+/**
+ * Три факта программы (решение владельца 26.10.2026): операционная система, язык интерфейса,
+ * тип лицензии — запустится ли на компьютере, на каком языке, навсегда или подписка.
+ * «Разработчик» не показываем — он уже над названием.
+ * @param {Spec[]} specs
+ * @param {(string | null | undefined)[]} licenses условия лицензий комплектаций товара
+ * @returns {Fact[]}
+ */
+export function softwareFacts(specs, licenses) {
+  const spec = (/** @type {RegExp} */ pattern) => specs.find((item) => pattern.test(item.name))
+  const system = spec(/^(ОС|операционн)/i)
+  const language = spec(/язык/i)
+  const license = licenseType([spec(/лиценз/i)?.value, ...licenses])
+  return [
+    fact('Операционная система', system ? shortSystem(system.value) : null),
+    fact('Язык интерфейса', language?.value),
+    fact('Тип лицензии', license),
+  ].filter(
+    /** @returns {item is Fact} */ (item) => item != null && item.value.length <= FACT_MAX_LENGTH,
+  )
 }

@@ -32,57 +32,35 @@ test('сценарий: свой → раздела, если подходит �
   assert.equal(resolveScenario({ own: 'чужое', kind: 'service' }), 'service')
 })
 
-test('кнопки: стандартная лицензия с ценой и без (AutoCAD по запросу)', () => {
+test('кнопки: везде одна кнопка и одна ссылка (замечание владельца 26.10.2026)', () => {
   assert.deepEqual(labels(scenarioActions({ scenario: 'standard', cart: true })), [
     'В корзину',
-    'Получить КП на организацию',
-    'Продлить лицензию',
+    null,
     'Помочь с выбором',
   ])
-  const autocad = scenarioActions({
-    scenario: 'standard',
-    cart: false,
-    renewLabel: 'Продлить подписку',
-  })
-  assert.deepEqual(labels(autocad), ['Получить КП', null, 'Продлить подписку', 'Помочь с выбором'])
-  assert.deepEqual(autocad.main, { type: 'request', kind: 'quote', label: 'Получить КП' })
-})
-
-test('кнопки: корпоративное ПО без корзины, даже с ценой', () => {
-  const set = scenarioActions({ scenario: 'corporate', cart: true })
-  assert.deepEqual(labels(set), ['Подобрать решение', 'Запросить КП', 'Консультация специалиста'])
-  assert.ok(![set.main, set.second, ...set.links].some((a) => a?.type === 'cart'))
-})
-
-test('кнопки: сканер — запросить цену и демонстрация, плоттер с ценой — корзина', () => {
+  const autocad = scenarioActions({ scenario: 'standard', cart: false, renewLabel: 'Продлить' })
+  assert.deepEqual(labels(autocad), ['Запросить цену', null, 'Помочь с выбором'])
+  assert.deepEqual(autocad.main, { type: 'request', kind: 'quote', label: 'Запросить цену' })
+  const aec = scenarioActions({ scenario: 'corporate', cart: true })
+  assert.deepEqual(labels(aec), ['Запросить цену', null, 'Помочь с выбором'])
   const artec = scenarioActions({ scenario: 'equipment', cart: true, demo: true, picks: true })
   assert.equal(artec.main.type === 'request' && artec.main.kind, 'price')
-  assert.deepEqual(labels(artec), [
-    'Запросить цену',
-    'Записаться на демонстрацию',
-    'Расходники и ПО к нему',
-  ])
-  const plotter = scenarioActions({ scenario: 'equipment', cart: true })
-  assert.equal(plotter.main.type, 'cart')
-  const noPrice = scenarioActions({ scenario: 'equipment', cart: false })
-  assert.equal(noPrice.main.label, 'Запросить цену')
-})
-
-test('кнопки: продление, курс, услуга, семейство', () => {
+  assert.deepEqual(labels(artec), ['Запросить цену', null, 'Записаться на демонстрацию'])
+  assert.equal(scenarioActions({ scenario: 'equipment', cart: true }).main.type, 'cart')
   assert.deepEqual(labels(scenarioActions({ scenario: 'renewal', cart: true })), [
     'Продлить',
-    'В корзину',
-    'Узнать, что входит в обновление',
+    null,
+    'Помочь с выбором',
   ])
   const course = scenarioActions({ scenario: 'service', kind: 'course', cart: true, about: true })
-  assert.deepEqual(labels(course), ['Записаться на курс', null, 'Программа курса'])
-  assert.equal(
-    scenarioActions({ scenario: 'service', kind: 'service', cart: false }).main.label,
-    'Обсудить проект',
-  )
+  assert.equal(course.main.label, 'Записаться на курс')
+  assert.equal(scenarioActions({ scenario: 'service', cart: false }).main.label, 'Обсудить проект')
   const family = scenarioActions({ scenario: 'standard', cart: true, family: true })
-  assert.equal(family.main.label, 'Получить КП')
-  assert.equal(family.second, null)
+  assert.equal(family.main.label, 'Запросить цену')
+  for (const set of [autocad, aec, artec, course, family]) {
+    assert.equal(set.second, null)
+    assert.equal(set.links.length, 1)
+  }
 })
 
 test('карточка каталога: одна кнопка, корзина только у стандартной лицензии', () => {

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { Product, Section } from '../../payload-types'
 import { type Scan, scanById } from '../domain/artecScans.mjs'
 import { resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
-import { FACT_MAX_LENGTH, keyFacts } from '../domain/keyFacts.mjs'
+import { FACT_MAX_LENGTH, keyFacts, softwareFacts } from '../domain/keyFacts.mjs'
 import type { PickerView } from '../domain/picker.mjs'
 import { cleanSpecs } from '../domain/specs.mjs'
 import { type Lifecycle, lifecycle, readResearch } from './equipmentResearch'
@@ -171,13 +171,19 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
       })),
     tasks: (product.tasks ?? []).map((task) => task.title),
     properties: specs,
-    facts: fillFacts(keyFacts(research, specs), {
-      vendor: product.manufacturer,
-      license: priced[0]?.offer.license ?? null,
-      direction: product.sections,
-      tasks: product.tasks,
-      kind: product.kind,
-    }),
+    facts: fillFacts(
+      product.kind === 'software'
+        ? softwareFacts(
+            specs,
+            priced.map(({ offer }) => offer.license),
+          )
+        : keyFacts(research, specs),
+      {
+        direction: product.sections,
+        tasks: product.tasks,
+        kind: product.kind,
+      },
+    ),
     faq: (product.faq ?? []).map(({ question, answer }) => ({ question, answer })),
     requires: related(product.requiresProducts),
     offers: priced.map(({ offer, unit }) => ({
@@ -250,8 +256,6 @@ function stagePictures(product: Product): Picture[] {
 const FACTS = 3
 
 type FactSource = {
-  vendor: Product['manufacturer']
-  license: string | null
   direction: Product['sections']
   tasks: Product['tasks']
   kind: Product['kind']
@@ -259,18 +263,15 @@ type FactSource = {
 
 /**
  * У программ характеристик обычно нет — три строки сцены добираем из того, что есть у товара:
- * производитель, лицензия самой дешёвой комплектации, направление, первая задача.
+ * направление и первая задача.
  */
 function fillFacts(facts: Fact[], source: FactSource): Fact[] {
-  const vendor = source.vendor && typeof source.vendor !== 'number' ? source.vendor.title : null
   const direction = (source.direction ?? []).find(
     (section) => typeof section !== 'number' && section.isDirection,
   )
+  // Производитель уже над названием — не повторяем. Условия лицензии тоже: у программ они в
+  // «Типе лицензии» (softwareFacts), у оборудования в этом поле гарантия (владелец 26.10.2026).
   const extra: (Fact | null)[] = [
-    vendor
-      ? { name: source.kind === 'software' ? 'Разработчик' : 'Производитель', value: vendor }
-      : null,
-    source.license ? { name: 'Лицензия', value: source.license } : null,
     direction && typeof direction !== 'number'
       ? { name: 'Направление', value: direction.title }
       : null,

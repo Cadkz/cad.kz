@@ -85,76 +85,30 @@ const req = (/** @type {RequestKind} */ kind, /** @type {string} */ label) =>
   /** @type {Action} */ ({ type: 'request', kind, label })
 
 /**
- * Кнопки страницы товара по сценарию: главная, вторая и ссылки ниже. Цены нет — у стандартной
- * лицензии главная «Получить КП» (AutoCAD и Revit по запросу, решение владельца 12.10.2026).
+ * Кнопки итога на странице товара — одно правило на весь сайт (замечание владельца 26.10.2026:
+ * «кнопок слишком много и на каждой странице свои»): одна кнопка и одна ссылка под ней.
+ * - Кнопка: «В корзину», если есть цена и корзина возможна; иначе «Запросить цену».
+ *   Корзины нет у корпоративного ПО, у сканеров с демонстрацией и на странице семейства.
+ *   Курс — «Записаться на курс», услуга — «Обсудить проект», продление — «Продлить».
+ * - Ссылка: «Помочь с выбором»; у сканеров с демонстрацией — «Записаться на демонстрацию».
+ * Счёт на организацию оформляется в корзине (галочка), отдельная кнопка КП не нужна.
  * @param {ActionInput} input
  * @returns {ActionSet}
  */
 export function scenarioActions(input) {
-  const cart = input.cart && !input.family
-  /** @type {Action} */
-  const toCart = { type: 'cart', label: 'В корзину' }
   const help = req('help', 'Помочь с выбором')
-  switch (input.scenario) {
-    case 'corporate':
-      return {
-        main: req('help', 'Подобрать решение'),
-        second: req('quote', 'Запросить КП'),
-        links: [req('consult', 'Консультация специалиста')],
-      }
-    case 'equipment': {
-      // Сканеры с демонстрацией (решение владельца 24.10.2026): главная — «Запросить цену»,
-      // ниже «Записаться на демонстрацию» и ссылка на расходники и ПО, без «Подобрать оборудование».
-      if (input.demo) {
-        /** @type {Action[]} */
-        const links = input.picks
-          ? [{ type: 'anchor', href: '#cross-title', label: 'Расходники и ПО к нему' }]
-          : []
-        return {
-          main: req('price', 'Запросить цену'),
-          second: req('demo', 'Записаться на демонстрацию'),
-          links,
-        }
-      }
-      /** @type {Action[]} */
-      const links = input.picks
-        ? [{ type: 'anchor', href: '#cross-title', label: 'Расходники и программы к нему' }]
-        : []
-      return {
-        main: cart ? toCart : req('price', 'Запросить цену'),
-        second: req('help', 'Подобрать оборудование'),
-        links,
-      }
-    }
-    case 'renewal':
-      return {
-        main: req('renew', input.renewLabel || 'Продлить'),
-        second: cart ? toCart : null,
-        links: [req('consult', 'Узнать, что входит в обновление')],
-      }
-    case 'service': {
-      const course = input.kind === 'course'
-      return {
-        main: course ? req('signup', 'Записаться на курс') : req('consult', 'Обсудить проект'),
-        second: null,
-        links: input.about
-          ? [{ type: 'anchor', href: '#about', label: course ? 'Программа курса' : 'Состав работ' }]
-          : [],
-      }
-    }
-    default: {
-      const renew = req('renew', input.renewLabel || 'Продлить лицензию')
-      if (input.family)
-        return {
-          main: req('quote', 'Получить КП'),
-          second: null,
-          links: input.renewLabel ? [renew, help] : [help],
-        }
-      return cart
-        ? { main: toCart, second: req('quote', 'Получить КП на организацию'), links: [renew, help] }
-        : { main: req('quote', 'Получить КП'), second: null, links: [renew, help] }
-    }
-  }
+  const one = (/** @type {Action} */ main, /** @type {Action} */ link = help) =>
+    /** @type {ActionSet} */ ({ main, second: null, links: [link] })
+  if (input.scenario === 'service')
+    return input.kind === 'course'
+      ? one(req('signup', 'Записаться на курс'))
+      : one(req('consult', 'Обсудить проект'))
+  if (input.scenario === 'renewal') return one(req('renew', input.renewLabel || 'Продлить'))
+  const demo = input.scenario === 'equipment' && Boolean(input.demo)
+  const cart = input.cart && !input.family && input.scenario !== 'corporate' && !demo
+  const ask = req(input.scenario === 'equipment' ? 'price' : 'quote', 'Запросить цену')
+  const main = cart ? /** @type {Action} */ ({ type: 'cart', label: 'В корзину' }) : ask
+  return one(main, demo ? req('demo', 'Записаться на демонстрацию') : help)
 }
 
 /**

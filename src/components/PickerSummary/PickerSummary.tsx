@@ -9,10 +9,9 @@ import { usePickerContext } from '../PickerProvider/PickerProvider'
 import styles from './PickerSummary.module.css'
 
 /**
- * Итог подбора в боковой колонке: что выбрано, количество, сумма с сервера. Кнопки — по сценарию
- * покупки (src/domain/buyScenario.mjs): у стандартной лицензии с ценой «В корзину» и «Получить КП
- * на организацию», без цены — «Получить КП»; у корпоративного ПО — «Подобрать решение»,
- * у сканеров — «Запросить цену» и «Записаться на демонстрацию». Продление и помощь — ссылками ниже.
+ * Итог подбора в боковой колонке: что выбрано, количество, сумма с сервера. Кнопки — одно правило
+ * на весь сайт (src/domain/buyScenario.mjs): одна кнопка («В корзину» или «Запросить цену») и одна
+ * ссылка под ней («Помочь с выбором», у сканеров с демонстрацией — запись на демонстрацию).
  * На странице со сканами итог стоит дважды (до сканов и у комплектации) — якорь только у первого.
  */
 export function PickerSummary({ anchor = true }: { anchor?: boolean }) {
@@ -49,11 +48,11 @@ export function PickerSummary({ anchor = true }: { anchor?: boolean }) {
           ))}
         </ul>
       ) : (
-        <p className={styles.note}>
-          {view.steps.length
-            ? 'Отметьте, что нужно, — итог посчитается сразу.'
-            : 'Укажите количество и запросите цену. Менеджер уточнит комплектацию и сроки поставки.'}
-        </p>
+        <ul className={styles.lines}>
+          <li className={styles.line}>
+            <span>{meta.productTitle}</span>
+          </li>
+        </ul>
       )}
       <div className={styles.row}>
         <span className={styles.label}>{profile.quantity}</span>
@@ -84,19 +83,12 @@ export function PickerSummary({ anchor = true }: { anchor?: boolean }) {
         </output>
       </div>
       <PickerAction action={actions.main} variant="primary" />
-      {actions.second && <PickerAction action={actions.second} variant="outline" />}
-      {actions.links.length > 0 && (
-        <div className={styles.links}>
-          {actions.links.map((action) => (
-            <PickerAction key={action.label} action={action} variant="text" />
-          ))}
+      {actions.links.map((action) => (
+        <div key={action.label} className={styles.links}>
+          <PickerAction action={action} variant="text" />
         </div>
-      )}
-      <p className={styles.note}>
-        {view.steps.length
-          ? 'Учебные цены демоверсии. Точную стоимость и сроки подтвердит менеджер.'
-          : 'Запрос не обязывает к покупке.'}
-      </p>
+      ))}
+      <p className={styles.note}>Точную стоимость и сроки подтвердит менеджер.</p>
     </div>
   )
 }
