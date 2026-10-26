@@ -1,6 +1,7 @@
 'use client'
 
-import { ArrowRight, ChevronLeft } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, Package } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import type { MenuColumn } from '@/lib/navigation'
@@ -91,7 +92,27 @@ export function MenuDrill({ column, onNavigate }: Props) {
             {column.popular.map((link) => (
               <li key={link.href}>
                 <Link href={link.href} className={styles.popularLink} onClick={onNavigate}>
-                  {shortTitle(link.title)}
+                  <span className={styles.popularMark} aria-hidden="true">
+                    {link.logo ? (
+                      <Image
+                        src={link.logo.url}
+                        alt=""
+                        width={link.logo.width}
+                        height={link.logo.height}
+                        unoptimized={link.logo.local}
+                        className={styles.popularLogo}
+                      />
+                    ) : (
+                      <Package size={16} strokeWidth={1.75} />
+                    )}
+                  </span>
+                  <span className={styles.popularName}>{shortTitle(link.title)}</span>
+                  <ChevronRight
+                    size={16}
+                    strokeWidth={1.75}
+                    aria-hidden="true"
+                    className={styles.popularArrow}
+                  />
                 </Link>
               </li>
             ))}

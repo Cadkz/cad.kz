@@ -42,6 +42,7 @@
  * @property {StepMode} mode
  * @property {boolean} collapsed
  * @property {PickerItem[]} items
+ * @property {string | null} [icon]  Значок группы (семейство по задачам): вместо номера шага.
  *
  * @typedef {object} PickerSwitch
  * @property {string} key

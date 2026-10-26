@@ -12,7 +12,7 @@ import { ProductLayout } from '@/components/ProductLayout/ProductLayout'
 import { ProductSection } from '@/components/ProductSection/ProductSection'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { aboutEntries } from '@/domain/familyAbout.mjs'
-import { type FamilyPage, splitTitle } from '@/lib/families'
+import { type FamilyPage, familyPickerByTask, splitTitle } from '@/lib/families'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import type { PickTarget } from '@/lib/product'
@@ -26,9 +26,12 @@ import styles from './FamilyView.module.css'
 export async function FamilyView({
   family,
   pick,
+  task = null,
 }: {
   family: FamilyPage
   pick: PickTarget | null
+  /** Направление, из которого пришли (?task=geotech): его группа программ первой. */
+  task?: string | null
 }) {
   const contacts = await getContacts()
   const first = family.members[0]
@@ -65,7 +68,12 @@ export async function FamilyView({
             { title: family.title },
           ]}
         />
-        <PickerProvider key={String(pick)} view={family.picker} meta={meta} pick={pick}>
+        <PickerProvider
+          key={`${String(pick)}-${task}`}
+          view={familyPickerByTask(family, task)}
+          meta={meta}
+          pick={pick}
+        >
           <ProductLayout
             asideLast
             header={

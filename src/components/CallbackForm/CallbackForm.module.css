@@ -4,6 +4,19 @@
   gap: var(--space-4);
 }
 
+/* Имя и телефон — в один ряд от 640 px: окно ниже (замечание владельца 27.10.2026). */
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .error {
   color: var(--color-error);
   font-size: var(--text-sm);

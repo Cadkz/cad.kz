@@ -3,6 +3,7 @@
 import { SlidersHorizontal } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { familyTaskHref } from '@/domain/familyGroups.mjs'
 import type { CatalogItem, CatalogLine, Facet } from '@/lib/catalog'
 import {
   autoVendor,
@@ -53,6 +54,12 @@ type Props = {
  * фильтрация мгновенная в браузере, выбор сохраняется в адресе страницы.
  * От 960 px фильтр слева, на телефоне — в выдвижной панели.
  */
+/** Карточка семейства из направления — со ссылкой ?task= (src/domain/familyGroups.mjs). */
+const withTask = (item: CatalogItem, direction: string | null) => ({
+  ...item,
+  href: familyTaskHref(item.href, direction),
+})
+
 export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popular = [] }: Props) {
   // Условия берутся из адреса, а не только с сервера: при «Назад» из товара Next.js показывает
   // сохранённую страницу каталога со старым стартом (пустым), а в адресе — нужный шаг
@@ -85,10 +92,30 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popu
   // Один производитель в разделе — сразу его товары, без шага выбора производителя.
   const view = useMemo(() => autoVendor(items, state), [items, state])
   const options = useMemo(() => facetOptions(items, facets, view), [items, facets, view])
-  const found = useMemo(() => results(items, view, facets), [items, view, facets])
-  const groups = useMemo(() => groupedResults(items, view, lines), [items, view, lines])
+  // Ссылки на семейства из направления — с ?task=: на странице сателлитов SCAD группа
+  // направления (например, основания и фундаменты) первой (замечание владельца 27.10.2026).
+  const found = useMemo(() => {
+    const result = results(items, view, facets)
+    return { ...result, items: result.items.map((item) => withTask(item, view.direction)) }
+  }, [items, view, facets])
+  const groups = useMemo(
+    () =>
+      groupedResults(items, view, lines)?.map((group) => ({
+        ...group,
+        href: group.href && familyTaskHref(group.href, view.direction),
+        items: group.items.map((item) => withTask(item, view.direction)),
+      })),
+    [items, view, lines],
+  )
   // В направлении сначала производители, как папки в Битриксе (решение владельца 22.10.2026).
-  const tiles = useMemo(() => vendorTiles(items, facets, lines, view), [items, facets, lines, view])
+  const tiles = useMemo(
+    () =>
+      vendorTiles(items, facets, lines, view).map((tile) => ({
+        ...tile,
+        href: tile.href && familyTaskHref(tile.href, view.direction),
+      })),
+    [items, facets, lines, view],
+  )
   // Оборудование: сначала типы, в типе с подразделами — подразделы плитками. Считается по выбору
   // без подставленного производителя: иначе у плоттеров (только Canon) шаг бы пропускался.
   const sections = useMemo(() => sectionStep(items, facets, state), [items, facets, state])
@@ -141,6 +168,7 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popu
         ) : sections ? (
           <SectionTiles
             tiles={sections.tiles}
+            logos={sections.kind === 'direction' ? vendorLogos : undefined}
             onPick={(slug) =>
               commit(
                 update(state, sections.kind === 'direction' ? { direction: slug } : { type: slug }),

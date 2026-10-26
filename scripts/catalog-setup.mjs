@@ -30,7 +30,11 @@ import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
 import { setupDemoCleanup } from '../src/lib/demoCleanupSetup.ts'
-import { setupDirectionsNine, setupDirectionsNineV2 } from '../src/lib/directionsSetup.ts'
+import {
+  setupDirectionsNine,
+  setupDirectionsNineV2,
+  setupDirectionsOrder,
+} from '../src/lib/directionsSetup.ts'
 import { setupEquipmentFiltersV2 } from '../src/lib/equipmentFiltersSetup.ts'
 import { setupEquipmentPhotos } from '../src/lib/equipmentPhotosSetup.ts'
 import { setupEquipmentResearch } from '../src/lib/equipmentResearchSetup.ts'
@@ -280,6 +284,9 @@ try {
   const directionsV2 = await setupDirectionsNineV2(payload)
   if (!directionsV2) console.log('VRED и Alias уже только в машиностроении.')
   else for (const line of directionsV2) console.log(`Направления 2 — ${line}`)
+  const order = await setupDirectionsOrder(payload)
+  if (!order) console.log('Порядок направлений (САПР и BIM первыми) уже настроен.')
+  else for (const line of order) console.log(`Порядок направлений — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

@@ -34,6 +34,19 @@
   font-weight: var(--weight-heavy);
 }
 
+/* Значок группы программ по задаче (семейство сателлитов): квадрат, а не кружок с номером. */
+.groupIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--badge-size);
+  height: var(--badge-size);
+  border-radius: var(--radius-sm);
+  background: var(--color-blue-soft);
+  color: var(--color-blue);
+}
+
 .hint {
   max-width: var(--measure);
   color: var(--color-text-muted);

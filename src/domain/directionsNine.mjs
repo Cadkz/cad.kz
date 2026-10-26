@@ -15,6 +15,22 @@
 export const MERGED_DIRECTIONS = /** @type {const} */ ({ viz: 'arch', pipes: 'mep' })
 
 /**
+ * Порядок направлений программ (решение владельца 27.10.2026: «сметы ни в коем случае не первыми,
+ * приоритет — AutoCAD, потом конструкторское, геотехника, сметы, машиностроение»). Один порядок
+ * на главной, в каталоге, в фильтре и в меню — поле «Порядок вывода» раздела.
+ * @type {Record<string, number>}
+ */
+export const DIRECTION_ORDER = {
+  arch: 10,
+  structural: 20,
+  geotech: 30,
+  estimate: 40,
+  machine: 50,
+  infra: 60,
+  mep: 70,
+}
+
+/**
  * Название и описание карточки у каждого направления программ.
  * @type {Record<string, { title?: string, summary: string }>}
  */

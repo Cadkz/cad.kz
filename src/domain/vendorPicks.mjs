@@ -1,8 +1,10 @@
 // @ts-check
 /**
  * Подборки «С этим покупают» по правилам владельца (27.10.2026): у каждой панели по две строки.
- * - У всех программ Autodesk второй строкой — AEC Collection: в неё входят AutoCAD, Revit,
- *   Civil 3D, Navisworks, 3ds Max и другие, часто выгоднее отдельных подписок.
+ * - У программ Autodesk второй строкой — коллекция: у строительных AEC Collection (AutoCAD, Revit,
+ *   Civil 3D, Navisworks, 3ds Max и другие), у машиностроительных (Inventor, Fusion, Vault…) —
+ *   Product Design & Manufacturing Collection (решение владельца 27.10.2026). Часто выгоднее
+ *   отдельных подписок.
  * - К AutoCAD первой строкой — линейка «MagiCAD для AutoCAD», к Revit — «MagiCAD для Revit»:
  *   инженерные сети внутри своей программы.
  * Чистые функции без базы.
@@ -13,6 +15,23 @@ export const PICKS_LIMIT = 2
 
 /** AEC Collection по названию товара. */
 export const AEC_TITLE = /^architecture engineering & construction collection|aec collection/i
+
+/** Product Design & Manufacturing Collection по названию товара. */
+export const PDMC_TITLE = /^product design (&|and) manufacturing collection|pdm collection/i
+
+/** Машиностроительные программы Autodesk — к ним вторым PDMC, а не AEC. */
+const MANUFACTURING =
+  /inventor|fusion|vault|alias|vred|moldflow|netfabb|power(mill|shape|inspect)|featurecam|nastran|factory design|hsm|product design/i
+
+/**
+ * Какую коллекцию ставить второй к программе Autodesk: строительным — AEC, машиностроительным —
+ * PDMC.
+ * @param {string} title
+ * @returns {RegExp}
+ */
+export function collectionFor(title) {
+  return MANUFACTURING.test(title) ? PDMC_TITLE : AEC_TITLE
+}
 
 /**
  * Линейка, которую предлагать первой к программе: название товара → название линейки.

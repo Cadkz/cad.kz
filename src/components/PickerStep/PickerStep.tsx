@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { includedBy, itemUnavailable, offerFor, type PickerStep as Step } from '@/domain/picker.mjs'
 import { PickerOption } from '../PickerOption/PickerOption'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
+import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './PickerStep.module.css'
 
 const controls = { base: 'base', one: 'radio', many: 'checkbox', bundle: 'radio' } as const
@@ -72,6 +73,11 @@ export function PickerStep({ step, number, titled = false }: Props) {
       {/* Единственный шаг не подписываем заново: заголовок секции уже говорит, что выбирать. */}
       <legend className={showTitle ? styles.head : 'visually-hidden'}>
         {number != null && <span className={styles.number}>{number}</span>}
+        {number == null && step.icon && (
+          <span className={styles.groupIcon}>
+            <SectionIcon name={step.icon} size={20} />
+          </span>
+        )}
         {step.title}
       </legend>
       {step.hint && <p className={styles.hint}>{step.hint}</p>}

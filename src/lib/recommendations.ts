@@ -7,7 +7,7 @@ import {
   type SectionInfo,
   similarFor,
 } from '../domain/recommend.mjs'
-import { AEC_TITLE, linePickFor, PICKS_LIMIT, pinPicks } from '../domain/vendorPicks.mjs'
+import { collectionFor, linePickFor, PICKS_LIMIT, pinPicks } from '../domain/vendorPicks.mjs'
 import { catalogAvailable } from './equipmentResearch'
 import { catalogHref } from './navigationHrefs'
 import { plural } from './plural'
@@ -140,7 +140,7 @@ async function lineCard(payload: Payload, title: string): Promise<RelatedProduct
 /**
  * Подборки для страницы товара: «С этим покупают» и «Похожие» без повторов между ними, по две
  * строки (решение владельца 27.10.2026). У программ Autodesk второй в «С этим покупают» — AEC
- * Collection, к AutoCAD и Revit первой — линейка MagiCAD (src/domain/vendorPicks.mjs).
+ * Collection, у машиностроительных (Inventor, Fusion) — Product Design & Manufacturing Collection, к AutoCAD и Revit первой — линейка MagiCAD (src/domain/vendorPicks.mjs).
  */
 export async function getRecommendations(payload: Payload, productId: number) {
   const { items, info, cards } = await loadRecData(payload)
@@ -148,8 +148,9 @@ export async function getRecommendations(payload: Payload, productId: number) {
   if (!target) return { cross: [], similar: [] }
   const found = crossFor([target], items, info, { limit: PICKS_LIMIT + 2 })
   const autodesk = target.vendor === 'Autodesk' && target.kind === 'software'
+  const collection = collectionFor(target.title)
   const aec = autodesk
-    ? items.find((item) => item.vendor === 'Autodesk' && AEC_TITLE.test(item.title))
+    ? items.find((item) => item.vendor === 'Autodesk' && collection.test(item.title))
     : undefined
   const lineTitle = autodesk ? linePickFor(target.title) : null
   const line = lineTitle ? await lineCard(payload, lineTitle) : null

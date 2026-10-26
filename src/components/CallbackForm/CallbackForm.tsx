@@ -108,24 +108,26 @@ export function CallbackForm(props: Props) {
 
   return (
     <form className={styles.form} onSubmit={submit} noValidate>
-      <TextField
-        label="Имя"
-        name="name"
-        id="callback-name"
-        autoComplete="name"
-        required
-        error={errors.name}
-      />
-      <TextField
-        label="Телефон"
-        name="phone"
-        id="callback-phone"
-        type="tel"
-        autoComplete="tel"
-        placeholder="+7 701 123-45-67"
-        required
-        error={errors.phone}
-      />
+      <div className={styles.pair}>
+        <TextField
+          label="Имя"
+          name="name"
+          id="callback-name"
+          autoComplete="name"
+          required
+          error={errors.name}
+        />
+        <TextField
+          label="Телефон"
+          name="phone"
+          id="callback-phone"
+          type="tel"
+          autoComplete="tel"
+          placeholder="+7 701 123-45-67"
+          required
+          error={errors.phone}
+        />
+      </div>
       <TextField
         label="Почта"
         name="email"

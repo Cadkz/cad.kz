@@ -4,7 +4,6 @@ import { Phone } from 'lucide-react'
 import { useState } from 'react'
 import type { RequestKind } from '@/domain/siteRequest.mjs'
 import type { Contacts } from '@/lib/navigation'
-import { ButtonLink } from '../Button/Button'
 import { CallbackForm } from '../CallbackForm/CallbackForm'
 import { Drawer } from '../Drawer/Drawer'
 import { WhatsappIcon } from '../icons/icons'
@@ -76,8 +75,9 @@ function messageText(
 
 /**
  * Окно заявки — попап по центру (решение владельца 27.10.2026): сразу форма «имя, телефон,
- * почта по желанию», у запроса цены — галочка «Запросить скидку». Ниже, за чертой, — кто хочет
- * быстрее: WhatsApp с уже набранным составом и телефоны с часами работы.
+ * почта по желанию», у запроса цены — галочка «Запросить скидку». Окно широкое и невысокое: имя
+ * и телефон в один ряд. Внизу серой полосой во всю ширину — второстепенное: зелёная кнопка
+ * WhatsApp с уже набранным составом и телефоны в ряд, часы работы под ними.
  */
 export function RequestDialog(props: Props) {
   const { kind, onClose, pageTitle, lines, choices, quantity, contacts, button } = props
@@ -125,23 +125,25 @@ export function RequestDialog(props: Props) {
         />
         <div className={styles.direct}>
           <p className={styles.directTitle}>Или свяжитесь сами</p>
-          {contacts.whatsappHref && (
-            <ButtonLink
-              href={`${contacts.whatsappHref}?text=${encodeURIComponent(text)}`}
-              external
-              variant="outline"
-              block
-            >
-              <WhatsappIcon size={20} />
-              Написать в WhatsApp
-            </ButtonLink>
-          )}
-          {contacts.phones.map((phone) => (
-            <a key={phone.tel} href={`tel:${phone.tel}`} className={styles.phone}>
-              <Phone size={16} strokeWidth={1.75} aria-hidden="true" />
-              {phone.label}
-            </a>
-          ))}
+          <div className={styles.directRow}>
+            {contacts.whatsappHref && (
+              <a
+                href={`${contacts.whatsappHref}?text=${encodeURIComponent(text)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.whatsapp}
+              >
+                <WhatsappIcon size={20} />
+                WhatsApp
+              </a>
+            )}
+            {contacts.phones.map((phone) => (
+              <a key={phone.tel} href={`tel:${phone.tel}`} className={styles.phone}>
+                <Phone size={16} strokeWidth={1.75} aria-hidden="true" />
+                {phone.label}
+              </a>
+            ))}
+          </div>
           {contacts.hours && <p className={styles.detail}>{contacts.hours}</p>}
         </div>
       </div>

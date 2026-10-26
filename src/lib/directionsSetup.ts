@@ -1,6 +1,11 @@
 import type { Payload } from 'payload'
 import { SKIP_APPLY_CONTEXT } from '../cms/collections/sectionRules'
-import { DIRECTION_TEXTS, MERGED_DIRECTIONS, remapSections } from '../domain/directionsNine.mjs'
+import {
+  DIRECTION_ORDER,
+  DIRECTION_TEXTS,
+  MERGED_DIRECTIONS,
+  remapSections,
+} from '../domain/directionsNine.mjs'
 import { relId, relIds } from './rel'
 import { applySectionRules, RULES_CONTEXT } from './sectionRules'
 
@@ -211,6 +216,43 @@ export async function setupDirectionsNineV2(payload: Payload): Promise<string[] 
   await payload.create({
     collection: 'import-runs',
     data: { idempotencyKey: DIRECTIONS_V2_KEY, state: 'done', snapshot: { report } },
+    ...opts,
+  })
+  return report
+}
+
+/**
+ * Порядок направлений (решение владельца 27.10.2026, src/domain/directionsNine.mjs): САПР и BIM
+ * первыми, затем расчёт, геотехника, сметы, машиностроение, генплан, сети. Меняет только поле
+ * «Порядок вывода» у разделов, дальше его можно править в админке.
+ */
+export const DIRECTIONS_ORDER_KEY = 'catalog-setup:directions-order-2026-10-27'
+
+export async function setupDirectionsOrder(payload: Payload): Promise<string[] | null> {
+  const done = await payload.find({
+    collection: 'import-runs',
+    where: { idempotencyKey: { equals: DIRECTIONS_ORDER_KEY } },
+    limit: 1,
+    ...opts,
+  })
+  if (done.docs.length) return null
+  const report: string[] = []
+  const sections = await payload.find({ collection: 'sections', pagination: false, ...opts })
+  for (const section of sections.docs) {
+    const order = DIRECTION_ORDER[section.slug]
+    if (order == null || section.order === order) continue
+    await payload.update({
+      collection: 'sections',
+      id: section.id,
+      data: { order },
+      context: skip,
+      ...opts,
+    })
+    report.push(`«${section.title}»: место ${order / 10}`)
+  }
+  await payload.create({
+    collection: 'import-runs',
+    data: { idempotencyKey: DIRECTIONS_ORDER_KEY, state: 'done', snapshot: { report } },
     ...opts,
   })
   return report

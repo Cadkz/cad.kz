@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { groupByTask } from '@/domain/familyGroups.mjs'
 import { familyIncludes, uniqueLabels } from '@/domain/familyPackages.mjs'
 import { EXTRA_ORDER } from '@/domain/familySeed.mjs'
 import type { PickerView } from '@/domain/picker.mjs'
@@ -185,4 +186,31 @@ export function familyMetadata(family: FamilyPage): Metadata {
     description: family.intro,
     path: `/families/${family.slug}`,
   })
+}
+
+/**
+ * Большое семейство (сателлиты SCAD) — группами по задачам со значком, а не одним списком
+ * (замечание владельца 27.10.2026). Из направления (?task=geotech) его группа первой.
+ */
+export function familyPickerByTask(family: FamilyPage, task: string | null): PickerView {
+  const main = family.picker.steps.find((step) => step.key === 'family')
+  if (!main) return family.picker
+  const titles = new Map(family.members.map((m) => [m.id, `${m.title} ${m.description ?? ''}`]))
+  const groups = groupByTask(main.items, (item) => titles.get(item.productId) ?? item.label, task)
+  if (!groups) return family.picker
+  return {
+    ...family.picker,
+    steps: family.picker.steps.flatMap((step) =>
+      step.key === 'family'
+        ? groups.map((group, index) => ({
+            ...step,
+            key: `family-${group.key}`,
+            title: group.title,
+            hint: index === 0 ? step.hint : null,
+            icon: group.icon,
+            items: group.items,
+          }))
+        : [step],
+    ),
+  }
 }

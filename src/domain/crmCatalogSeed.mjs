@@ -66,17 +66,17 @@ export const CRM_PARENTS = {
   consumables: 'wide-format',
 }
 
-/** Порядок разделов: первые два закрывают больше половины обращений. */
+/** Порядок разделов (владелец 27.10.2026: САПР и BIM первыми, сметы после геотехники). */
 /** @type {Record<string, number>} */
 export const CRM_ORDER = {
-  cad: 10,
-  estimate: 20,
-  arch: 30,
-  structural: 40,
-  geotech: 50,
-  machine: 60,
-  infra: 70,
-  mep: 80,
+  cad: 5,
+  arch: 10,
+  structural: 20,
+  geotech: 30,
+  estimate: 40,
+  machine: 50,
+  infra: 60,
+  mep: 70,
   pipes: 90,
   viz: 100,
   scanners: 110,

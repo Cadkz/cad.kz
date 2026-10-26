@@ -1,4 +1,5 @@
 import {
+  BrickWall,
   Building2,
   Cog,
   Columns3,
@@ -10,9 +11,13 @@ import {
   Layers,
   type LucideIcon,
   Monitor,
+  Mountain,
   Printer,
   Route,
   ScanLine,
+  Shapes,
+  TreePine,
+  Wind,
   Wrench,
 } from 'lucide-react'
 
@@ -31,6 +36,11 @@ const icons: Record<string, LucideIcon> = {
   monitor: Monitor,
   graduation: GraduationCap,
   compass: DraftingCompass,
+  mountain: Mountain,
+  brick: BrickWall,
+  tree: TreePine,
+  wind: Wind,
+  shapes: Shapes,
 }
 
 type Props = { name?: string | null; size?: 16 | 20 | 24; className?: string }

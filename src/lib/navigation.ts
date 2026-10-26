@@ -11,7 +11,7 @@ import { cms } from './payload'
 import { vendorPictures } from './pictures'
 import { productPath } from './productPath'
 
-export type MenuLink = { title: string; href: string }
+export type MenuLink = { title: string; href: string; logo?: MenuLogo | null }
 /** Линейка производителя в меню: первые товары и адрес каталога с этой линейкой. */
 export type MenuLine = {
   key: string

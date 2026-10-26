@@ -31,7 +31,13 @@ export function PickerSteps() {
   const manual = view.steps.filter((step) => step.mode !== 'bundle')
   const numbered = (steps: typeof manual) =>
     steps.map((step, index) => (
-      <PickerStep key={step.key} step={step} number={steps.length > 1 ? index + 1 : null} />
+      <PickerStep
+        key={step.key}
+        step={step}
+        // Группы по задачам (со значком) — не шаги по порядку: без номеров.
+        number={steps.length > 1 && !step.icon ? index + 1 : null}
+        titled={Boolean(step.icon)}
+      />
     ))
 
   if (!bundles || !manual.length)
