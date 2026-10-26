@@ -136,13 +136,43 @@ export function catalogKind(item) {
 export function shortTitle(title) {
   const collection = collectionOf(title)
   if (collection) return collection.short
-  return (title ?? '')
+  const short = (title ?? '')
     .replace(/^программный комплекс\s+/i, '')
     .replace(/^программа\s+/i, '')
     .replace(/^графическая станция\s+/i, '')
+    .replace(/^право на использование программного обеспечения\s+/i, '')
+    .replace(/^(онлайн[- ]|очный\s+)?курс\s+/i, '')
+    .replace(/[«»"]/g, '')
+    .replace(/\.\s*углубл[её]нный курс$/i, '')
     .replace(/\s*\(.*?\)\s*/g, ' ')
     .replace(/\s+v\.\s*[\d.]+$/i, '')
-    .replace(/\s+-\s+/g, '-')
+    .replace(/ЛИРА\s*-\s*FEM/, 'ЛИРА-FEM')
     .replace(/\s+/g, ' ')
+    .replace(/\s+,/g, ',')
     .trim()
+  return clip(short.charAt(0).toUpperCase() + short.slice(1))
+}
+
+/** Длинное название курса — до конца слова в пределах SHORT_LIMIT знаков, с многоточием. */
+const SHORT_LIMIT = 40
+
+function clip(text) {
+  if (text.length <= SHORT_LIMIT) return text
+  const cut = text.slice(0, SHORT_LIMIT)
+  const space = cut.lastIndexOf(' ')
+  // Без висящего предлога в конце: «…V ray с…» → «…V ray…».
+  const head = (space > 0 ? cut.slice(0, space) : cut).replace(/\s+[^\s]{1,2}$/, '')
+  return `${head.replace(/[\s,.:;—-]+$/, '')}…`
+}
+
+/**
+ * Имя программы внутри линейки: без названия линейки и пояснения после тире —
+ * «АРБАТ — экспертиза арматуры» → «АРБАТ», «Гидросистема Гидроудар» → «Гидроудар».
+ */
+export function memberName(title, lineTitle) {
+  const own = (title ?? '').startsWith(lineTitle)
+    ? title.slice(lineTitle.length).replace(/^[\s,.:—–-]+/, '')
+    : (title ?? '')
+  const [head] = (own || title).split(/\s[—–-]\s/)
+  return shortTitle(head || title)
 }

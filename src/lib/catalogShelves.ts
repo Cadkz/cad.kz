@@ -4,7 +4,7 @@
  * Чистые функции без React: проверяются тестами (tests/catalogShelves.test.mjs).
  */
 
-import { catalogKind, collectionOf, shortTitle } from '../domain/catalogKinds.mjs'
+import { catalogKind, collectionOf, memberName, shortTitle } from '../domain/catalogKinds.mjs'
 import { compareInSection } from '../domain/priority.mjs'
 import type { CatalogGroup, CatalogItem, CatalogLine, Facet } from './catalog'
 import {
@@ -148,11 +148,11 @@ export function cardInfo(item: CatalogItem, items: CatalogItem[]): CardInfo {
     const members = items.filter(
       (other) => other.line === item.line && other.scope !== 'family' && other.id !== item.id,
     )
-    const names = [...new Set(members.map((member) => shortTitle(member.title)))]
+    const names = [...new Set(members.map((member) => memberName(member.title, item.title)))]
     return {
       kind,
-      includes: names.length
-        ? { names: names.slice(0, INCLUDES_SHOWN), total: names.length }
+      includes: members.length
+        ? { names: names.slice(0, INCLUDES_SHOWN), total: members.length }
         : null,
     }
   }

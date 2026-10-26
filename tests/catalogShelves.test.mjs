@@ -200,7 +200,7 @@ test('состав линейки и коллекции в карточке', ()
   )
   assert.equal(family.kind, 'Линейка')
   assert.deepEqual(family.includes, {
-    names: ['АРБАТ — подбор арматуры', 'КРИСТАЛЛ — сталь'],
+    names: ['АРБАТ', 'КРИСТАЛЛ'],
     total: 2,
   })
   const aec = cardInfo(
