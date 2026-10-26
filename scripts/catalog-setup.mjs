@@ -30,7 +30,7 @@ import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
 import { setupDemoCleanup } from '../src/lib/demoCleanupSetup.ts'
-import { setupDirectionsNine } from '../src/lib/directionsSetup.ts'
+import { setupDirectionsNine, setupDirectionsNineV2 } from '../src/lib/directionsSetup.ts'
 import { setupEquipmentFiltersV2 } from '../src/lib/equipmentFiltersSetup.ts'
 import { setupEquipmentPhotos } from '../src/lib/equipmentPhotosSetup.ts'
 import { setupEquipmentResearch } from '../src/lib/equipmentResearchSetup.ts'
@@ -277,6 +277,9 @@ try {
   const directions = await setupDirectionsNine(payload)
   if (!directions) console.log('Девять направлений (27.10.2026) уже настроены.')
   else for (const line of directions) console.log(`Направления — ${line}`)
+  const directionsV2 = await setupDirectionsNineV2(payload)
+  if (!directionsV2) console.log('VRED и Alias уже только в машиностроении.')
+  else for (const line of directionsV2) console.log(`Направления 2 — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

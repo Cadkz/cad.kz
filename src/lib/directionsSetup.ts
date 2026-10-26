@@ -161,3 +161,57 @@ export async function setupDirectionsNine(payload: Payload): Promise<string[] | 
   })
   return report
 }
+
+/**
+ * VRED и Alias (промышленный дизайн) после слияния оказались в «САПР, BIM и визуализация» рядом
+ * с машиностроением и вылезли в «Похожих» у AutoCAD. Им место только в «Машиностроении».
+ */
+export const DIRECTIONS_V2_KEY = 'catalog-setup:directions-nine-v2-2026-10-27'
+
+export async function setupDirectionsNineV2(payload: Payload): Promise<string[] | null> {
+  const done = await payload.find({
+    collection: 'import-runs',
+    where: { idempotencyKey: { equals: DIRECTIONS_V2_KEY } },
+    limit: 1,
+    ...opts,
+  })
+  if (done.docs.length) return null
+  const report: string[] = []
+  const sections = await payload.find({ collection: 'sections', pagination: false, ...opts })
+  const arch = sections.docs.find((s) => s.slug === 'arch')?.id
+  const machine = sections.docs.find((s) => s.slug === 'machine')?.id
+  if (arch != null && machine != null) {
+    const { docs } = await payload.find({
+      collection: 'products',
+      where: { or: [{ title: { like: 'VRED' } }, { title: { like: 'Alias' } }] },
+      pagination: false,
+      select: { title: true, mainSection: true, extraSections: true },
+      ...opts,
+    })
+    for (const product of docs) {
+      const main = relId(product.mainSection)
+      const extra = relIds(product.extraSections)
+      if (main !== arch && !extra.includes(arch)) continue
+      const nextMain = main === arch ? machine : main
+      await payload.update({
+        collection: 'products',
+        id: product.id,
+        data: {
+          mainSection: nextMain,
+          extraSections: extra.filter((id) => id !== arch && id !== nextMain),
+          // Ручные разделы: следующий импорт по правилам не вернёт их в BIM.
+          autoSections: false,
+        },
+        context: { [RULES_CONTEXT]: true },
+        ...opts,
+      })
+      report.push(`${product.title}: только «Машиностроение»`)
+    }
+  }
+  await payload.create({
+    collection: 'import-runs',
+    data: { idempotencyKey: DIRECTIONS_V2_KEY, state: 'done', snapshot: { report } },
+    ...opts,
+  })
+  return report
+}
