@@ -1,4 +1,5 @@
-/* Чертёж направления: линии navy и blue, заливки blue-soft и sky, как на миллиметровке. */
+/* Чертёж направления: линии navy и blue, заливки blue-soft и blue-mid, как на миллиметровке.
+   Голубого sky нет (замечание владельца 27.10.2026: на светлом он чужой). */
 .svg {
   display: block;
   width: 100%;
@@ -61,7 +62,7 @@
 }
 
 .hot {
-  fill: var(--color-sky);
+  fill: var(--color-blue-mid);
   stroke: var(--color-navy);
   stroke-width: 1.5;
 }
@@ -85,7 +86,20 @@
   stroke-width: 4;
 }
 
-.pipeHot {
-  stroke: var(--color-sky-strong);
+.pipeBlue {
+  stroke: var(--color-blue);
+  stroke-width: 4;
+}
+
+/* Плита перекрытия, радиатор, отмеченный этап: заливка с тонким контуром. */
+.slab {
+  fill: var(--color-blue-mid);
+  stroke: var(--color-navy);
+  stroke-width: 1;
+}
+
+/* Выделенный элемент: проверяемая балка в расчётной модели. */
+.accentWide {
+  stroke: var(--color-blue);
   stroke-width: 4;
 }

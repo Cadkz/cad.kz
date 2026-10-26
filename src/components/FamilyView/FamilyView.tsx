@@ -44,7 +44,7 @@ export async function FamilyView({
     contacts: {
       phones: contacts.phones,
       whatsappHref: contacts.whatsappHref,
-      hours: contacts.hours,
+      email: contacts.email,
     },
   }
   const about = aboutEntries(

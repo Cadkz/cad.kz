@@ -305,6 +305,8 @@ async function loadCatalog(): Promise<{
       icon: topic?.icon ?? productSections[0]?.icon ?? null,
       picture: topic ? null : (pictures.get(product.id) ?? null),
       logoFallback: group === 'software' ? vendor : null,
+      // Услуги без картинки — тематический чертёж раздела (внедрение, обучение), а не ключ.
+      art: group === 'service' && !topic ? (productSections[0]?.slug ?? null) : null,
       priceFrom:
         product.pageView === 'picker'
           ? pickerFrom(product, offersByProduct, titleById, context)

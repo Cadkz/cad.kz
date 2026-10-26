@@ -110,7 +110,7 @@ export async function ProductView({
     contacts: {
       phones: contacts.phones,
       whatsappHref: contacts.whatsappHref,
-      hours: contacts.hours,
+      email: contacts.email,
     },
   }
 

@@ -26,7 +26,7 @@ export type PickerMeta = {
   /** Под товаром есть «С этим покупают» и описание: ссылки-якоря у оборудования и курсов. */
   picks?: boolean
   about?: boolean
-  contacts: Pick<Contacts, 'phones' | 'whatsappHref' | 'hours'>
+  contacts: Pick<Contacts, 'phones' | 'whatsappHref' | 'email'>
 }
 
 type ContextValue = PickerApi & {

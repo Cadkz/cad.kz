@@ -5,12 +5,15 @@ import type { Lifecycle } from '@/lib/equipmentResearch'
 import type { Picture } from '@/lib/pictures'
 import { AddToCartButton } from '../AddToCartButton/AddToCartButton'
 import { Badge } from '../Badge/Badge'
+import { DirectionArt, hasDirectionArt } from '../DirectionArt/DirectionArt'
 import { ProductLifecycle } from '../ProductLifecycle/ProductLifecycle'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './ProductCard.module.css'
 
 export type ProductCardData = {
   logoFallback?: string | null
+  /** Раздел услуги: без картинки в карточке — его чертёж (DirectionArt), а не значок. */
+  art?: string | null
   lifecycle?: Lifecycle | null
   id: number
   href: string
@@ -53,7 +56,13 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         className={
           product.picture
             ? styles.media
-            : `${styles.media} ${product.topic ? styles.course : styles.placeholder}`
+            : `${styles.media} ${
+                product.topic
+                  ? styles.course
+                  : product.art && hasDirectionArt(product.art)
+                    ? styles.blueprint
+                    : styles.placeholder
+              }`
         }
         tabIndex={-1}
         aria-hidden="true"
@@ -83,6 +92,8 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           </span>
         ) : product.logoFallback ? (
           <span className={styles.logoFallback}>{product.logoFallback}</span>
+        ) : product.art && hasDirectionArt(product.art) ? (
+          <DirectionArt slug={product.art} className={styles.art} />
         ) : (
           <SectionIcon name={product.icon} size={24} />
         )}

@@ -5,7 +5,6 @@ import { ArticleBody } from '@/components/ArticleBody/ArticleBody'
 import { Badge } from '@/components/Badge/Badge'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
-import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
 import { JsonLd } from '@/components/JsonLd/JsonLd'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
 import { PrevNext } from '@/components/PrevNext/PrevNext'
@@ -14,7 +13,6 @@ import { RelatedList } from '@/components/RelatedList/RelatedList'
 import { Toc } from '@/components/Toc/Toc'
 import { articleLd } from '@/domain/structuredData.mjs'
 import { formatDate } from '@/lib/format'
-import { getHome } from '@/lib/home'
 import { newsHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
 import { bodyPictures } from '@/lib/pictures'
@@ -62,13 +60,12 @@ export default async function PublicationPage({ params }: Props) {
   if (!publication) notFound()
   const blocks = parseBody(publication.body, publication.title)
   const theme = themeOf(publication)
-  const [neighbors, sameTopic, latest, home, pictures, topicCovers] = await Promise.all([
+  const [neighbors, sameTopic, latest, pictures, topicCovers] = await Promise.all([
     getNeighbors(publication),
     theme?.slug
       ? getPublications({ kinds: [publication.kind], topic: theme.slug, limit: 6 })
       : null,
     getPublications({ kinds: [publication.kind], limit: 6 }),
-    getHome(),
     cms().then((payload) => bodyPictures(payload, imageSources(blocks))),
     getTopicCovers(),
   ])
@@ -145,7 +142,8 @@ export default async function PublicationPage({ params }: Props) {
           <PrevNext previous={neighbors.previous} next={neighbors.next} />
         </ReadingLayout>
       </Container>
-      <CtaBanner cta={home.cta} />
+      {/* Баннер «Нашли дешевле?» на статьях и новостях убран (владелец 27.10.2026): он про
+          цену, а человек пришёл читать. Остался на главной. */}
     </main>
   )
 }

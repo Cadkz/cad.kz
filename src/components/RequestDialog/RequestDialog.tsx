@@ -1,6 +1,6 @@
 'use client'
 
-import { Phone } from 'lucide-react'
+import { Mail, Phone } from 'lucide-react'
 import { useState } from 'react'
 import type { RequestKind } from '@/domain/siteRequest.mjs'
 import type { Contacts } from '@/lib/navigation'
@@ -8,6 +8,7 @@ import { CallbackForm } from '../CallbackForm/CallbackForm'
 import { Drawer } from '../Drawer/Drawer'
 import { WhatsappIcon } from '../icons/icons'
 import { RadioChips } from '../RadioChips/RadioChips'
+import { RequestChoice } from './RequestChoice'
 import styles from './RequestDialog.module.css'
 
 export type RequestLine = {
@@ -29,7 +30,7 @@ type Props = {
   /** Выбор переключателей: срок, редакция. */
   choices: { title: string; value: string }[]
   lines: RequestLine[]
-  contacts: Pick<Contacts, 'phones' | 'whatsappHref' | 'hours'>
+  contacts: Pick<Contacts, 'phones' | 'whatsappHref' | 'email'>
 }
 
 const titles: Record<RequestKind, string> = {
@@ -77,7 +78,7 @@ function messageText(
  * Окно заявки — попап по центру (решение владельца 27.10.2026): сразу форма «имя, телефон,
  * почта по желанию», у запроса цены — галочка «Запросить скидку». Окно широкое и невысокое: имя
  * и телефон в один ряд. Внизу серой полосой во всю ширину — второстепенное: зелёная кнопка
- * WhatsApp с уже набранным составом и телефоны в ряд, часы работы под ними.
+ * WhatsApp с уже набранным составом, почта и телефоны в ряд.
  */
 export function RequestDialog(props: Props) {
   const { kind, onClose, pageTitle, lines, choices, quantity, contacts, button } = props
@@ -90,23 +91,7 @@ export function RequestDialog(props: Props) {
       <div className={styles.body}>
         <p className={styles.intro}>{intro[kind]}</p>
         {lines.length > 0 && (
-          <div className={styles.choice}>
-            <p className={styles.label}>{pageTitle}</p>
-            <ul className={styles.lines}>
-              {lines.map((line) => (
-                <li key={`${line.productId}-${line.offerId}`}>
-                  {line.label}
-                  {line.detail && <span className={styles.detail}> · {line.detail}</span>}
-                </li>
-              ))}
-            </ul>
-            {choices.map((choice) => (
-              <p key={choice.title} className={styles.detail}>
-                {choice.title}: {choice.value}
-              </p>
-            ))}
-            {quantity > 1 && <p className={styles.detail}>Количество: {quantity}</p>}
-          </div>
+          <RequestChoice title={pageTitle} lines={lines} choices={choices} quantity={quantity} />
         )}
         {kind === 'demo' && (
           <RadioChips
@@ -137,6 +122,12 @@ export function RequestDialog(props: Props) {
                 WhatsApp
               </a>
             )}
+            {contacts.email && (
+              <a href={`mailto:${contacts.email}`} className={styles.phone}>
+                <Mail size={16} strokeWidth={1.75} aria-hidden="true" />
+                {contacts.email}
+              </a>
+            )}
             {contacts.phones.map((phone) => (
               <a key={phone.tel} href={`tel:${phone.tel}`} className={styles.phone}>
                 <Phone size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -144,7 +135,6 @@ export function RequestDialog(props: Props) {
               </a>
             ))}
           </div>
-          {contacts.hours && <p className={styles.detail}>{contacts.hours}</p>}
         </div>
       </div>
     </Drawer>

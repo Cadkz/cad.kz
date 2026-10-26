@@ -1,8 +1,23 @@
 .root {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  height: 100%;
   padding: var(--space-6);
+}
+
+/* Та же светлая чертёжная сетка, что у разделов меню (MenuDrill): вкладки меню одного вида
+   (замечание владельца 27.10.2026). */
+.root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--blueprint-light);
+  background-size: var(--blueprint-size);
+  mask-image: var(--blueprint-fade);
 }
 
 .compact {

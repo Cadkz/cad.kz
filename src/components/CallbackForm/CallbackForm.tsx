@@ -134,6 +134,7 @@ export function CallbackForm(props: Props) {
         id="callback-email"
         type="email"
         autoComplete="email"
+        placeholder="name@company.kz"
         hint="Пришлём расчёт и счёт на почту"
         error={errors.email}
       />

@@ -11,29 +11,45 @@
 
 .choice {
   display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.choiceIcon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-box);
+  height: var(--icon-box);
+  border-radius: var(--radius-sm);
+  background: var(--color-blue-soft);
+  color: var(--color-blue);
+}
+
+.choiceText {
+  display: flex;
+  flex: 1;
   flex-direction: column;
   gap: var(--space-1);
-  padding: var(--space-3) var(--space-4);
-  border-left: 3px solid var(--color-blue);
-  border-radius: var(--radius-md);
-  background: var(--color-bg);
+  min-width: 0;
+}
+
+.qty {
+  flex: none;
+  color: var(--color-navy);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
 }
 
 .label {
   color: var(--color-navy);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
-}
-
-.lines {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin: 0;
-  padding: 0;
-  color: var(--color-gray-700);
-  font-size: var(--text-sm);
-  list-style: none;
 }
 
 .detail {

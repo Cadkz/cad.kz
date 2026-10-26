@@ -168,7 +168,6 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popu
         ) : sections ? (
           <SectionTiles
             tiles={sections.tiles}
-            logos={sections.kind === 'direction' ? vendorLogos : undefined}
             onPick={(slug) =>
               commit(
                 update(state, sections.kind === 'direction' ? { direction: slug } : { type: slug }),
