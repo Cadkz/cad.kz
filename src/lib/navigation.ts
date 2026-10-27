@@ -1,3 +1,4 @@
+import { plainTitle } from '@/domain/productTitle.mjs'
 import type { Section, SiteSetting } from '../../payload-types'
 import { GROUP_LABELS } from '../domain/catalogNavigation.mjs'
 import { courseTopic } from '../domain/courseTopics.mjs'
@@ -145,7 +146,7 @@ export async function getMenu(): Promise<MenuTab[]> {
     const topMain = main == null ? null : (top.get(main) ?? main)
     return {
       id: product.id,
-      title: product.title,
+      title: plainTitle(product.title),
       main: topMain,
       sections: withTopSections(
         (product.sections ?? []).map((section) => relId(section) ?? 0),
@@ -189,7 +190,7 @@ export async function getMenu(): Promise<MenuTab[]> {
       {
         ...first,
         id: -lineId,
-        title: family.title,
+        title: plainTitle(family.title),
         href: family.href,
         sections: [...new Set(members.flatMap((m) => m.sections))],
         lineOrder: 0,
@@ -201,7 +202,7 @@ export async function getMenu(): Promise<MenuTab[]> {
 
   const lineData = lines.docs.map((line) => ({
     id: line.id,
-    title: line.title,
+    title: plainTitle(line.title),
     vendor: relId(line.manufacturer) ?? 0,
     order: line.order ?? 100,
   }))

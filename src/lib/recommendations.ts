@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { plainTitle } from '@/domain/productTitle.mjs'
 import { priorityRank } from '../domain/priority.mjs'
 import {
   crossFor,
@@ -102,7 +103,7 @@ async function loadRecData(payload: Payload): Promise<RecData> {
     cards.set(product.id, {
       slug: product.slug,
       href: productPath(product),
-      title: product.title,
+      title: plainTitle(product.title),
       vendor,
     })
   }
@@ -131,7 +132,7 @@ async function lineCard(payload: Payload, title: string): Promise<RelatedProduct
   return {
     slug: `line-${line.id}`,
     href: catalogHref({ group: 'software', vendor: vendor.title, line: String(line.id) }),
-    title: line.title,
+    title: plainTitle(line.title),
     vendor: vendor.title,
     note: `${count.totalDocs} ${plural(count.totalDocs, 'программа', 'программы', 'программ')}`,
   }

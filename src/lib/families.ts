@@ -3,6 +3,7 @@ import { groupByTask } from '@/domain/familyGroups.mjs'
 import { familyIncludes, uniqueLabels } from '@/domain/familyPackages.mjs'
 import { EXTRA_ORDER } from '@/domain/familySeed.mjs'
 import type { PickerView } from '@/domain/picker.mjs'
+import { plainTitle } from '@/domain/productTitle.mjs'
 import type { ProductLine } from '../../payload-types'
 import { cms } from './payload'
 import { offersOf, pickerOffers } from './picker'
@@ -81,7 +82,7 @@ export async function getFamily(slug: string): Promise<FamilyPage | null> {
   const members = products.docs.map((p) => ({
     id: p.id,
     slug: p.slug,
-    title: p.title,
+    title: plainTitle(p.title),
     description: p.description ?? null,
     extra: (p.lineOrder ?? 0) >= EXTRA_ORDER,
     href: p.pageView === 'none' ? null : productPath(p),
@@ -140,7 +141,7 @@ export async function getFamily(slug: string): Promise<FamilyPage | null> {
   return {
     id: line.id,
     slug: line.slug,
-    title: line.title,
+    title: plainTitle(line.title),
     intro: line.intro ?? line.summary ?? null,
     renewLabel: line.renewLabel || null,
     vendor: vendor?.title ?? null,

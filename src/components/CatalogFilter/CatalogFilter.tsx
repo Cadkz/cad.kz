@@ -164,7 +164,7 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popu
         />
         <CatalogSelection state={state} groups={options.features} onChange={change} />
         {popularView ? (
-          <CatalogPopular cards={popular} />
+          <CatalogPopular cards={popular} items={items} />
         ) : sections ? (
           <SectionTiles
             tiles={sections.tiles}

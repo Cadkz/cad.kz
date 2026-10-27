@@ -35,6 +35,20 @@ export function formatKzt(value: string) {
   return `${money.format(BigInt(value))} ₸`
 }
 
+/**
+ * Итог корзины или заказа: позиции по запросу в сумму не входят — «по запросу» или
+ * «1 200 000 ₸ + по запросу», если есть и те, и другие.
+ */
+export function totalKzt(value: string, withRequests: boolean) {
+  if (!withRequests) return formatKzt(value)
+  return BigInt(value) > 0n ? `${formatKzt(value)} + по запросу` : 'По запросу'
+}
+
+/** Цена строки корзины или заказа: у строки-запроса цены нет — «по запросу». */
+export function lineKzt(value: string) {
+  return value ? formatKzt(value) : 'по запросу'
+}
+
 /** Дата публикации: «23 июля 2026». */
 export function formatDate(value: string) {
   return date.format(new Date(value)).replace(' г.', '')

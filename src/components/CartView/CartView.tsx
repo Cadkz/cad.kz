@@ -3,7 +3,7 @@
 import { Copy, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
-import { formatKzt } from '@/lib/format'
+import { lineKzt, totalKzt } from '@/lib/format'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { useCartQuote } from '@/lib/useCartQuote'
 import { Button, ButtonLink } from '../Button/Button'
@@ -27,14 +27,16 @@ export function CartView({
   const { items, ready, remove, setQuantity } = useCart()
   const { quote, error, busy, retry } = useCartQuote(items, ready)
   const [copied, setCopied] = useState(false)
+  const withRequests = Boolean(quote?.lines.some((line) => line.request))
 
   async function copy() {
     if (!quote) return
-    const rows = quote.lines.map(
-      (l) =>
-        `${l.title} — ${l.configuration}: ${l.quantity} × ${formatKzt(l.unitKzt)} = ${formatKzt(l.totalKzt)}`,
+    const rows = quote.lines.map((l) =>
+      l.request
+        ? `${l.title}: ${l.quantity} шт., ${l.configuration.toLowerCase()}`
+        : `${l.title} — ${l.configuration}: ${l.quantity} × ${lineKzt(l.unitKzt)} = ${lineKzt(l.totalKzt)}`,
     )
-    const text = [...rows, `Итого с НДС: ${formatKzt(quote.totalKzt)}`].join('\n')
+    const text = [...rows, `Итого с НДС: ${totalKzt(quote.totalKzt, withRequests)}`].join('\n')
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
@@ -59,7 +61,9 @@ export function CartView({
                     {line ? <Link href={line.href}>{line.title}</Link> : 'Загружаем…'}
                   </h2>
                   <p className={styles.config}>{line?.configuration}</p>
-                  {line && <p className={styles.unit}>{formatKzt(line.unitKzt)} за единицу</p>}
+                  {line && !line.request && (
+                    <p className={styles.unit}>{lineKzt(line.unitKzt)} за единицу</p>
+                  )}
                 </div>
                 <label className={styles.qty}>
                   <span className="visually-hidden">Количество</span>
@@ -75,7 +79,9 @@ export function CartView({
                     }}
                   />
                 </label>
-                <p className={styles.sum}>{!busy && line ? formatKzt(line.totalKzt) : '—'}</p>
+                <p className={styles.sum}>
+                  {!busy && line ? (line.request ? 'По запросу' : lineKzt(line.totalKzt)) : '—'}
+                </p>
                 <button
                   type="button"
                   className={styles.remove}
@@ -91,8 +97,14 @@ export function CartView({
         <aside className={styles.summary} aria-label="Итог">
           <p className={styles.summaryLabel}>Итого с НДС</p>
           <p className={styles.total} role="status">
-            {busy ? 'Пересчитываем…' : quote ? formatKzt(quote.totalKzt) : '—'}
+            {busy ? 'Пересчитываем…' : quote ? totalKzt(quote.totalKzt, withRequests) : '—'}
           </p>
+          {withRequests && (
+            <p className={styles.note}>
+              Комплектацию и цену позиций по запросу менеджер подберёт и подтвердит после
+              оформления.
+            </p>
+          )}
           {error && (
             <div role="alert" className={styles.error}>
               <p>{error}</p>

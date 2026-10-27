@@ -1,4 +1,8 @@
 // Exact rational arithmetic: no binary floating-point money calculations.
+
+/** Версия правила расчёта: хранится в снимке заказа. */
+export const PRICE_RULE = 'KZT-unit-ceil-v1'
+
 function decimal(value) {
   if (typeof value !== 'string' || !/^\d{1,12}(\.\d{1,6})?$/.test(value))
     throw new Error('Некорректное десятичное значение')
@@ -48,6 +52,6 @@ export function quote({
     targetVat,
     includesVat,
     quantity,
-    rule: 'KZT-unit-ceil-v1',
+    rule: PRICE_RULE,
   }
 }

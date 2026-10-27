@@ -1,4 +1,5 @@
 import { cache } from 'react'
+import { plainTitle } from '@/domain/productTitle.mjs'
 import type { HomePage } from '../../payload-types'
 import { cms } from './payload'
 import { cardPictures } from './pictures'
@@ -64,7 +65,7 @@ export const getMenuPopular = cache(async (): Promise<PopularCardData[]> => {
     products.map((product) => ({
       id: product.id,
       href: productPath(product),
-      title: product.title,
+      title: plainTitle(product.title),
       picture: pictures.get(product.id) ?? null,
       icon: iconById.get(relId(product.mainSection) ?? -1) ?? null,
     })),

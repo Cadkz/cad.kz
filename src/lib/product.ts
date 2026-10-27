@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { plainTitle } from '@/domain/productTitle.mjs'
 import type { Product, Section } from '../../payload-types'
 import { type Scan, scanById } from '../domain/artecScans.mjs'
 import { resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
@@ -159,7 +160,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     id: product.id,
     slug: product.slug,
     path: productPath(product),
-    title: product.title,
+    title: plainTitle(product.title),
     kind: product.kind,
     summary: product.summary ?? null,
     lifecycle: lifecycle(research, replacements),

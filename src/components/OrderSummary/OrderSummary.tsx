@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { formatKzt } from '@/lib/format'
+import { lineKzt, totalKzt } from '@/lib/format'
 import { productHref } from '@/lib/navigationHrefs'
 import type { Quote } from '@/lib/useCartQuote'
 import { Button } from '../Button/Button'
@@ -21,17 +21,26 @@ export function OrderSummary({ quote, busy, error, onRetry }: Props) {
               </Link>
               <p className={styles.config}>{line.configuration}</p>
               <p className={styles.qty}>
-                {line.quantity} × {formatKzt(line.unitKzt)}
+                {line.request
+                  ? `${line.quantity} шт.`
+                  : `${line.quantity} × ${lineKzt(line.unitKzt)}`}
               </p>
             </div>
-            <p className={styles.sum}>{formatKzt(line.totalKzt)}</p>
+            <p className={styles.sum}>{line.request ? 'По запросу' : lineKzt(line.totalKzt)}</p>
           </li>
         ))}
       </ul>
       <div className={styles.totalRow}>
         <p className={styles.totalLabel}>Итого с НДС</p>
         <p className={styles.total} role="status">
-          {busy ? 'Пересчитываем…' : quote ? formatKzt(quote.totalKzt) : '—'}
+          {busy
+            ? 'Пересчитываем…'
+            : quote
+              ? totalKzt(
+                  quote.totalKzt,
+                  quote.lines.some((line) => line.request),
+                )
+              : '—'}
         </p>
       </div>
       {error && (

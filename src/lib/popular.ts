@@ -1,10 +1,13 @@
 import { brandOf } from '@/domain/brands.mjs'
+import { plainTitle } from '@/domain/productTitle.mjs'
 import type { CatalogItem } from './catalog'
 import type { Home } from './home'
 import type { Picture } from './pictures'
 
 export type PopularCardData = {
   key: string
+  /** Товар плитки: в каталоге по нему строится полноценная карточка. */
+  productId: number | null
   title: string
   href: string
   picture: Picture | null
@@ -26,11 +29,12 @@ export function popularCards(
   return items.flatMap((item) => {
     const product = item.productId == null ? undefined : byId.get(item.productId)
     const href = item.href || product?.href
-    const title = item.title || product?.title
+    const title = item.title ? plainTitle(item.title) : product?.title
     if (!href || !title) return []
     return [
       {
         key: String(item.key),
+        productId: product?.id ?? null,
         title,
         href,
         picture: product?.picture ?? null,

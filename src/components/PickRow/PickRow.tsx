@@ -13,6 +13,8 @@ export type PickItem = {
   priceFrom: string | null
   offersCount: number
   cartOfferId: string | null
+  /** Товар запросом в корзину (src/domain/cart.mjs), если одной комплектации с ценой нет. */
+  requestKey?: string | null
   /** Подпись вместо цены: у линейки «6 программ». */
   note?: string
 }
@@ -62,8 +64,13 @@ export function PickRow({ item }: { item: PickItem }) {
           <span className={styles.price}>{price}</span>
         </span>
       </span>
-      {item.cartOfferId ? (
-        <AddToCartButton offerId={item.cartOfferId} title={item.title} look="icon" />
+      {item.cartOfferId || item.requestKey ? (
+        <AddToCartButton
+          offerId={item.cartOfferId ?? item.requestKey ?? ''}
+          title={item.title}
+          look="icon"
+          request={!item.cartOfferId}
+        />
       ) : (
         <span className={styles.arrow} aria-hidden="true">
           <ChevronRight size={20} strokeWidth={1.75} />

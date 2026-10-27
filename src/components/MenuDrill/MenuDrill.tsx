@@ -1,7 +1,6 @@
 'use client'
 
-import { ArrowRight, ChevronLeft, ChevronRight, Package } from 'lucide-react'
-import Image from 'next/image'
+import { ArrowRight, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import type { MenuColumn } from '@/lib/navigation'
@@ -88,32 +87,15 @@ export function MenuDrill({ column, onNavigate }: Props) {
       {!vendor && column.popular.length > 0 && (
         <section className={styles.popular} aria-label="Популярное в разделе">
           <p className={styles.popularTitle}>Популярное в разделе</p>
-          <ul className={styles.popularList}>
+          <ul className={styles.cards}>
             {column.popular.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className={styles.popularLink} onClick={onNavigate}>
-                  <span className={styles.popularMark} aria-hidden="true">
-                    {link.logo ? (
-                      <Image
-                        src={link.logo.url}
-                        alt=""
-                        width={link.logo.width}
-                        height={link.logo.height}
-                        unoptimized={link.logo.local}
-                        className={styles.popularLogo}
-                      />
-                    ) : (
-                      <Package size={16} strokeWidth={1.75} />
-                    )}
-                  </span>
-                  <span className={styles.popularName}>{shortTitle(link.title)}</span>
-                  <ChevronRight
-                    size={16}
-                    strokeWidth={1.75}
-                    aria-hidden="true"
-                    className={styles.popularArrow}
-                  />
-                </Link>
+                <MenuTile
+                  title={shortTitle(link.title)}
+                  logo={link.logo}
+                  href={link.href}
+                  onClick={onNavigate}
+                />
               </li>
             ))}
           </ul>

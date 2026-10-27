@@ -1,3 +1,4 @@
+import { productRequestKey } from '@/domain/cart.mjs'
 import type { Offer, Product } from '../../payload-types'
 import { EXTRA_ORDER } from '../domain/familySeed.mjs'
 import type { CatalogItem } from './catalog'
@@ -78,6 +79,7 @@ export function catalogExtras({
           priceFrom: priceOf(offers),
           offersCount: offers.length,
           cartOfferId: hasSwitches ? null : cartOf(offers),
+          requestKey: productRequestKey(id),
           badge: null,
           tasks: entry.tasks ?? [],
           // Сразу после своего товара, в порядке шага.

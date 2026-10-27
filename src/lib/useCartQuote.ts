@@ -11,8 +11,11 @@ export type QuoteLine = {
   title: string
   configuration: string
   quantity: number
+  /** Пусто у строки-запроса: комплектацию и цену подберёт менеджер. */
   unitKzt: string
   totalKzt: string
+  /** Товар без выбранной комплектации (src/domain/cart.mjs, parseRequestKey). */
+  request: boolean
 }
 export type Quote = {
   totalKzt: string

@@ -71,86 +71,20 @@
 .popular {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--color-border);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-blue-soft);
 }
 
+/* «Популярное в разделе» — отдельный голубой блок (просьба владельца 27.10.2026): сверху выбор
+   производителя, ниже готовые товары; карточки те же MenuTile, что во всём меню. */
 .popularTitle {
-  color: var(--color-text-muted);
+  color: var(--color-navy);
   font-size: var(--text-overline);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-overline);
   text-transform: uppercase;
-}
-
-.popularList {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* Каждый товар — отдельная плашка с логотипом и стрелкой: без языка видно, что это шесть
-   ссылок, а не сплошной текст (замечание владельца 27.10.2026). */
-.popularLink {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--space-10);
-  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--text-sm);
-  transition:
-    border-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
-}
-
-.popularLink:hover {
-  border-color: var(--color-blue-mid);
-  color: var(--color-blue);
-}
-
-.popularMark {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: var(--space-8);
-  height: var(--space-8);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg);
-  color: var(--color-blue);
-}
-
-.popularLogo {
-  width: auto;
-  max-width: var(--space-6);
-  height: auto;
-  max-height: var(--space-6);
-  object-fit: contain;
-}
-
-.popularName {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.popularArrow {
-  flex: none;
-  color: var(--color-text-muted);
-}
-
-.popularLink:hover .popularArrow {
-  color: var(--color-blue);
 }
 
 .allLinks {

@@ -38,6 +38,13 @@ export type ProductCardData = {
   offersCount: number
   /** Единственная комплектация с ценой — квадрат с корзиной рядом с «Подробнее». */
   cartOfferId: string | null
+  /**
+   * Остальные товары и семейства кладутся в корзину запросом (src/domain/cart.mjs, просьба
+   * владельца 27.10.2026): комплектацию и цену подберёт менеджер при оформлении.
+   */
+  requestKey?: string | null
+  /** Плитка-ссылка «Популярных решений» без товара: без цены и корзины. */
+  linkOnly?: boolean
   badge: string | null
   /**
    * Категория курса (src/domain/courseTopics.mjs): у курсов картинок нет — тёмный лист со
@@ -55,6 +62,7 @@ export type ProductCardData = {
  * Цена — только серверная.
  */
 export function ProductCard({ product }: { product: ProductCardData }) {
+  const cartKey = product.linkOnly ? null : (product.cartOfferId ?? product.requestKey ?? null)
   const summary = product.cardText ?? cardText(null, product.summary, product.title)
   const mediaClass = product.picture
     ? styles.media
@@ -105,22 +113,31 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           <Badge>{product.badge}</Badge>
         </div>
       )}
-      <p className={styles.price}>
-        {product.priceFrom
-          ? `${product.offersCount > 1 ? 'от ' : ''}${product.priceFrom}`
-          : 'Цена по запросу'}
-      </p>
-      <div className={styles.foot}>
-        {/* Та же ссылка, что у названия (карточка целиком): для диктора и клавиатуры — одна. */}
-        <span className={styles.more} aria-hidden="true">
-          Подробнее
-          <ArrowRight size={16} strokeWidth={1.75} />
-        </span>
-        {product.cartOfferId && (
-          <span className={styles.cart}>
-            <AddToCartButton offerId={product.cartOfferId} title={product.title} look="icon" />
-          </span>
+      <div className={styles.bottom}>
+        {!product.linkOnly && (
+          <p className={styles.price}>
+            {product.priceFrom
+              ? `${product.offersCount > 1 ? 'от ' : ''}${product.priceFrom}`
+              : 'Цена по запросу'}
+          </p>
         )}
+        <div className={styles.foot}>
+          {/* Та же ссылка, что у названия (карточка целиком): для диктора и клавиатуры — одна. */}
+          <span className={styles.more} aria-hidden="true">
+            Подробнее
+            <ArrowRight size={16} strokeWidth={1.75} />
+          </span>
+          {cartKey && (
+            <span className={styles.cart}>
+              <AddToCartButton
+                offerId={cartKey}
+                title={product.title}
+                look="icon"
+                request={!product.cartOfferId}
+              />
+            </span>
+          )}
+        </div>
       </div>
     </article>
   )

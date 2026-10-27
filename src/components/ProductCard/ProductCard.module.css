@@ -101,9 +101,13 @@
 }
 
 .title {
-  font-size: var(--text-h4);
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--text-body);
   line-height: var(--leading-snug);
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 /* Растянутая ссылка: нажатие в любом месте карточки ведёт на товар. */
@@ -139,8 +143,15 @@
   position: relative;
 }
 
-.price {
+/* Цена и кнопки прижаты к низу: в ряду карточек они на одной линии. */
+.bottom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   margin-top: auto;
+}
+
+.price {
   color: var(--color-navy);
   font-size: var(--text-body);
   font-weight: var(--weight-bold);

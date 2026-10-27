@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { normalizeCart } from '../src/domain/cart.mjs'
+import {
+  lineRequestKey,
+  normalizeCart,
+  parseRequestKey,
+  productRequestKey,
+} from '../src/domain/cart.mjs'
 
 test('different configurations of the same product remain separate', () => {
   assert.equal(
@@ -38,4 +43,15 @@ test('reject invalid cart shape and quantities', () => {
     Array(51).fill({ offerId: 'a', quantity: 1 }),
   ])
     assert.throws(() => normalizeCart(value))
+})
+
+test('строка-запрос: товар или семейство без комплектации', () => {
+  assert.deepEqual(parseRequestKey(productRequestKey(12)), { kind: 'product', id: 12 })
+  assert.deepEqual(parseRequestKey(lineRequestKey(7)), { kind: 'line', id: 7 })
+  assert.equal(parseRequestKey('123'), null)
+  assert.equal(parseRequestKey('p0'), null)
+  assert.equal(parseRequestKey('x12'), null)
+  assert.deepEqual(normalizeCart([{ offerId: 'p12', quantity: 1 }]), [
+    { offerId: 'p12', quantity: 1 },
+  ])
 })

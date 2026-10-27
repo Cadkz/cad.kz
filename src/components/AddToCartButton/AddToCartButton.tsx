@@ -11,13 +11,15 @@ type Props = {
   title: string
   /** block — во всю ширину карточки каталога; icon — квадратная кнопка в строке подборки. */
   look?: 'block' | 'icon'
+  /** Товар без выбранной комплектации (src/domain/cart.mjs): её и цену подберёт менеджер. */
+  request?: boolean
 }
 
 /**
- * «В корзину» для товара с одной комплектацией: кладёт её и сразу превращается в ссылку
+ * «В корзину»: кладёт комплектацию (или товар запросом) и сразу превращается в ссылку
  * «В корзине», чтобы было видно, что нажатие сработало. Цену считает сервер в корзине.
  */
-export function AddToCartButton({ offerId, title, look = 'block' }: Props) {
+export function AddToCartButton({ offerId, title, look = 'block', request = false }: Props) {
   const { items, add, ready } = useCart()
   const [error, setError] = useState(false)
   const inCart = ready && items.some((item) => item.offerId === offerId)
@@ -40,7 +42,13 @@ export function AddToCartButton({ offerId, title, look = 'block' }: Props) {
       className={cls}
       disabled={!ready}
       aria-label={look === 'icon' ? `Добавить в корзину: ${title}` : undefined}
-      title={error ? 'Корзина заполнена — оформите заказ или удалите лишнее' : undefined}
+      title={
+        error
+          ? 'Корзина заполнена — оформите заказ или удалите лишнее'
+          : request
+            ? 'В корзину — комплектацию и цену подберёт менеджер'
+            : undefined
+      }
       onClick={() => {
         try {
           add({ offerId, quantity: 1 })

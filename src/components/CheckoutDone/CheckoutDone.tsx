@@ -32,7 +32,8 @@ export function CheckoutDone({ order }: { order: DoneOrder }) {
         <dt>Номер заказа</dt>
         <dd>{order.number}</dd>
         <dt>Сумма с НДС</dt>
-        <dd>{formatKzt(order.totalKzt)}</dd>
+        {/* Только позиции по запросу: суммы нет, её назовёт менеджер. */}
+        <dd>{BigInt(order.totalKzt) > 0n ? formatKzt(order.totalKzt) : 'Назовёт менеджер'}</dd>
         <dt>Сохранён</dt>
         <dd>{formatDateTime(order.savedAt)}</dd>
       </dl>

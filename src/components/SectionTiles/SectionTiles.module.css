@@ -1,4 +1,4 @@
-/* Плитки типов оборудования: та же сетка, что у карточек каталога (1 / 2 / 3 колонки).
+/* Плитки направлений и типов оборудования: та же сетка, что у карточек каталога (1 / 2 / 3 колонки).
    Телефон — фото слева квадратом, как у карточки товара; от 640 px — фото сверху 16:10. */
 .grid {
   display: grid;
@@ -22,25 +22,19 @@
   padding: var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  background: var(--color-bg);
+  background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition:
-    border-color var(--duration-base) var(--ease),
-    box-shadow var(--duration-base) var(--ease),
-    transform var(--duration-base) var(--ease);
+  transition: border-color var(--duration-base) var(--ease);
 }
 
-.tile:hover {
-  border-color: var(--color-blue-mid);
-  box-shadow: var(--shadow-md);
-  transform: translateY(calc(-1 * var(--space-1)));
-}
-
-.tile:active {
-  transform: none;
+/* Единый вид с карточкой товара (просьба владельца 27.10.2026): белая, при наведении рамка
+   целиком синяя, без подъёма и тени. */
+.tile:hover,
+.tile:focus-visible {
+  border-color: var(--color-blue);
 }
 
 .tile > * {
@@ -57,6 +51,7 @@
   aspect-ratio: 1;
   padding: var(--space-2);
   overflow: hidden;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-blue);
@@ -91,7 +86,8 @@
 
 .title {
   color: var(--color-navy);
-  font-size: var(--text-h4);
+  font-family: var(--font-heading);
+  font-size: var(--text-body);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
 }
@@ -112,15 +108,35 @@
   line-height: var(--leading-snug);
 }
 
+/* «Смотреть» — как «Подробнее» у карточки товара: контурная кнопка во всю ширину внизу. */
 .more {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-1);
-  margin-top: auto;
-  padding-top: var(--space-2);
-  color: var(--color-blue);
+  height: var(--control-height-sm);
+  margin-top: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-navy);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
+  transition:
+    border-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
+}
+
+.more svg {
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.tile:hover .more {
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+.tile:hover .more svg {
+  transform: translateX(var(--space-1));
 }
 
 @media (min-width: 640px) {
@@ -144,7 +160,11 @@
   }
 
   .more {
-    padding-top: var(--space-4);
+    margin-top: auto;
+  }
+
+  .hint {
+    margin-bottom: var(--space-4);
   }
 
   .art {
@@ -165,16 +185,15 @@
 @media (prefers-reduced-motion: reduce) {
   .tile,
   .image,
-  .drawing {
+  .drawing,
+  .more,
+  .more svg {
     transition: none;
   }
 
-  .tile:hover {
-    transform: none;
-  }
-
   .tile:hover .image,
-  .tile:hover .drawing {
+  .tile:hover .drawing,
+  .tile:hover .more svg {
     transform: none;
   }
 }

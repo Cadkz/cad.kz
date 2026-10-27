@@ -14,3 +14,23 @@ export function normalizeCart(input) {
   }
   return Array.from(merged, ([offerId, quantity]) => ({ offerId, quantity }))
 }
+
+/**
+ * Строка-запрос (просьба владельца 27.10.2026): у большинства товаров нет одной комплектации
+ * с ценой, поэтому в корзину кладётся сам товар или семейство, а комплектацию и цену подбирает
+ * менеджер при оформлении. Ключ строки — «p<ID товара>» или «l<ID линейки>»; у предложения
+ * с ценой ключ — просто его числовой ID.
+ * @param {string} key
+ * @returns {{ kind: 'product' | 'line', id: number } | null}
+ */
+export function parseRequestKey(key) {
+  const match = /^([pl])([1-9]\d{0,8})$/.exec(key)
+  if (!match) return null
+  return { kind: match[1] === 'p' ? 'product' : 'line', id: Number(match[2]) }
+}
+
+/** @param {number} productId */
+export const productRequestKey = (productId) => `p${productId}`
+
+/** @param {number} lineId */
+export const lineRequestKey = (lineId) => `l${lineId}`

@@ -1,6 +1,8 @@
 import { cache } from 'react'
 import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import { cardText } from '@/domain/cardTexts.mjs'
+import { productRequestKey } from '@/domain/cart.mjs'
+import { plainTitle, withTitleAlias } from '@/domain/productTitle.mjs'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
 import { cardAction, resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
 import { courseTopic } from '../domain/courseTopics.mjs'
@@ -296,10 +298,10 @@ async function loadCatalog(): Promise<{
     return {
       id: product.id,
       href: productPath(product),
-      title: product.title,
+      title: plainTitle(product.title),
       manufacturer: vendor,
       vendor,
-      aliases: product.searchAliases ?? null,
+      aliases: withTitleAlias(product.searchAliases, product.title),
       summary: product.summary ?? null,
       cardText: cardText(product.slug, product.summary ?? null, product.title),
       research: readResearch(product.researchData),
@@ -317,6 +319,8 @@ async function loadCatalog(): Promise<{
       offersCount,
       // Корзина из карточки — только где сценарий её предлагает (src/domain/buyScenario.mjs).
       cartOfferId: action.cart ? cartId : null,
+      // Без одной комплектации с ценой — в корзину запросом, комплектацию подберёт менеджер.
+      requestKey: productRequestKey(product.id),
       badge: requires.length ? `Плагин для ${requires.join(' / ')}` : null,
       group,
       scenario,
@@ -383,7 +387,7 @@ async function loadCatalog(): Promise<{
       ? [
           {
             id: String(line.id),
-            title: line.title,
+            title: plainTitle(line.title),
             vendor,
             order: line.order ?? 100,
             familyHref: families.get(line.id)?.href ?? null,

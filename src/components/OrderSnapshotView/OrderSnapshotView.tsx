@@ -1,5 +1,5 @@
 import type { UIFieldServerComponent } from 'payload'
-import { formatDateTime, formatDay, formatKzt, formatKztMinor } from '@/lib/format'
+import { formatDateTime, formatDay, formatKzt, formatKztMinor, lineKzt } from '@/lib/format'
 import styles from './OrderSnapshotView.module.css'
 
 type SnapshotLine = {
@@ -26,12 +26,14 @@ function isSnapshot(value: unknown): value is Snapshot {
   return Boolean(value && typeof value === 'object' && 'lines' in value && 'totalKzt' in value)
 }
 
-function sourcePrice({ source }: SnapshotLine) {
+function sourcePrice({ source, unitKzt }: SnapshotLine) {
+  if (!unitKzt) return 'по запросу: комплектацию подбирает менеджер'
   const vat = source.includesVat ? `с НДС ${source.vat}%` : 'без НДС'
   return `${source.amount} ${source.currency}, ${vat}`
 }
 
-function rateText({ source, rate }: SnapshotLine) {
+function rateText({ source, rate, unitKzt }: SnapshotLine) {
+  if (!unitKzt) return '—'
   if (source.currency === 'KZT') return 'тенге, пересчёта нет'
   const date = rate.date ? formatDay(rate.date) : 'дата не указана'
   return `${rate.kztPerUnit} ₸ за 1 ${source.currency}, курс от ${date}`
@@ -79,9 +81,11 @@ export const OrderSnapshotView: UIFieldServerComponent = async ({ id, payload, u
                 </td>
                 <td>{sourcePrice(line)}</td>
                 <td>{rateText(line)}</td>
-                <td className={styles.num}>{formatKzt(line.unitKzt)}</td>
+                <td className={styles.num}>{lineKzt(line.unitKzt)}</td>
                 <td className={styles.num}>{line.quantity}</td>
-                <td className={styles.num}>{formatKzt(line.totalKzt)}</td>
+                <td className={styles.num}>
+                  {line.unitKzt ? lineKzt(line.totalKzt) : 'по запросу'}
+                </td>
               </tr>
             ))}
           </tbody>

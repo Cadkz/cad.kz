@@ -1,4 +1,6 @@
 import { cardText } from '@/domain/cardTexts.mjs'
+import { lineRequestKey } from '@/domain/cart.mjs'
+import { plainTitle } from '@/domain/productTitle.mjs'
 import type { CatalogItem } from './catalog'
 
 type FamilyInfo = { title: string; href: string; summary: string | null }
@@ -29,7 +31,7 @@ export function withFamilies(
       ...first,
       id: -lineId,
       href: family.href,
-      title: family.title,
+      title: plainTitle(family.title),
       summary: family.summary ?? first.summary,
       cardText: cardText(
         `family:${family.href.split('/').filter(Boolean).pop() ?? ''}`,
@@ -39,6 +41,7 @@ export function withFamilies(
       priceFrom,
       offersCount: Math.max(offers, 2),
       cartOfferId: null,
+      requestKey: lineRequestKey(lineId),
       badge: null,
       research: null,
       lifecycle: null,

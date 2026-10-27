@@ -1,3 +1,4 @@
+import { plainTitle, withTitleAlias } from '@/domain/productTitle.mjs'
 import type { Product } from '../../payload-types'
 import { compareInSection, priorityRank } from '../domain/priority.mjs'
 import type { SuggestEntry, SuggestIndex } from '../domain/suggest.mjs'
@@ -117,12 +118,12 @@ async function buildIndex(): Promise<SuggestIndex> {
     }
     const entry: SuggestEntry = {
       type: 'product',
-      title: product.title,
+      title: plainTitle(product.title),
       href,
       label: KIND_LABEL[product.kind],
       note: family && product.pageView === 'none' ? family.title : vendor,
       vendor,
-      aliases: product.searchAliases ?? null,
+      aliases: withTitleAlias(product.searchAliases, product.title),
       summary: product.summary ?? null,
       tasks: (product.tasks ?? []).map((task) => task.title),
       ...extras.products.get(product.id),
@@ -144,7 +145,7 @@ async function buildIndex(): Promise<SuggestIndex> {
   const familyEntries: SuggestEntry[] = [...families].map(([lineId, family]) => ({
     ...extras.families.get(lineId),
     type: 'family',
-    title: family.title,
+    title: plainTitle(family.title),
     href: family.href,
     label: 'Семейство программ',
     note: family.vendor == null ? null : (vendorTitle.get(family.vendor) ?? null),
