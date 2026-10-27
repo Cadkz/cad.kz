@@ -7,13 +7,15 @@ import { usePickerCart } from '@/lib/usePickerCart'
 import { PickerAction } from '../PickerAction/PickerAction'
 import { PickerAsk } from '../PickerAsk/PickerAsk'
 import { PickerCartIcon } from '../PickerCartIcon/PickerCartIcon'
+import { PickerDirect } from '../PickerDirect/PickerDirect'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
 import styles from './PickerSummary.module.css'
 
 /**
  * Итог подбора в боковой колонке: что выбрано, количество, сумма с сервера. Кнопки — одно правило
  * на весь сайт (src/domain/buyScenario.mjs, решение владельца 27.10.2026): синяя заявка, рядом
- * квадрат с корзиной (если корзина возможна), ниже «Задать вопрос» — чат с Кадди; у сканеров
+ * квадрат с корзиной (если корзина возможна), ниже «Задать вопрос» — чат с Кадди, под ним
+ * строкой «WhatsApp» и «Нашли дешевле?» (PickerDirect); у сканеров
  * с демонстрацией — ещё ссылка «Записаться на демонстрацию».
  * На странице со сканами итог стоит дважды (до сканов и у комплектации) — якорь только у первого.
  */
@@ -90,6 +92,7 @@ export function PickerSummary({ anchor = true }: { anchor?: boolean }) {
         {actions.second?.type === 'cart' && <PickerCartIcon title={meta.productTitle} />}
       </div>
       <PickerAsk />
+      <PickerDirect />
       {actions.links.map((action) => (
         <div key={action.label} className={styles.links}>
           <PickerAction action={action} variant="text" />

@@ -24,6 +24,8 @@ type Props = {
   note?: string
   /** Галочка «Запросить скидку» — у запроса цены и КП. */
   discount?: boolean
+  /** Галочка скидки уже отмечена («Нашли дешевле?»). */
+  discountChecked?: boolean
 }
 
 type Sent = { number: string; crm: CrmState }
@@ -79,7 +81,7 @@ export function CallbackForm(props: Props) {
           ...contact,
           idempotencyKey: key.current,
           kind,
-          button: discount ? 'Запросить скидку' : button,
+          button: discount && !props.discountChecked ? 'Запросить скидку' : button,
           pageProductId,
           familySlug,
           quantity,
@@ -142,6 +144,7 @@ export function CallbackForm(props: Props) {
         <CheckboxField
           name="discount"
           id="callback-discount"
+          defaultChecked={props.discountChecked}
           label="Запросить скидку — менеджер проверит акции и предложит лучшую цену"
         />
       )}

@@ -9,7 +9,7 @@ import type { RequestKind } from '@/domain/siteRequest.mjs'
 import type { Contacts } from '@/lib/navigation'
 import type { PickTarget } from '@/lib/product'
 import { type PickerApi, usePicker } from '@/lib/usePicker'
-import { RequestDialog } from '../RequestDialog/RequestDialog'
+import { RequestDialog, type RequestLine } from '../RequestDialog/RequestDialog'
 
 export type PickerMeta = {
   productId: number
@@ -33,8 +33,14 @@ type ContextValue = PickerApi & {
   view: PickerView
   meta: PickerMeta
   profile: KindProfile
-  /** Открыть окно заявки; button — подпись нажатой кнопки, уходит менеджеру в Битрикс24. */
-  openRequest: (kind: RequestKind, button?: string) => void
+  /**
+   * Открыть окно заявки; button — подпись нажатой кнопки, уходит менеджеру в Битрикс24;
+   * cheaper — окно «Нашли дешевле?».
+   */
+  openRequest: (kind: RequestKind, button?: string, cheaper?: boolean) => void
+  /** Выбор для заявки и сообщения в WhatsApp: строки и переключатели (срок, редакция). */
+  requestLines: RequestLine[]
+  requestChoices: { title: string; value: string }[]
 }
 
 const Context = createContext<ContextValue | null>(null)
@@ -47,36 +53,53 @@ type Props = { view: PickerView; meta: PickerMeta; pick: PickTarget | null; chil
  */
 export function PickerProvider({ view, meta, pick, children }: Props) {
   const api = usePicker(view, pick)
-  const [request, setRequest] = useState<{ kind: RequestKind; button: string } | null>(null)
-  const openRequest = (kind: RequestKind, button?: string) =>
-    setRequest({ kind, button: button ?? '' })
+  const [request, setRequest] = useState<{
+    kind: RequestKind
+    button: string
+    cheaper: boolean
+  } | null>(null)
+  const openRequest = (kind: RequestKind, button?: string, cheaper?: boolean) =>
+    setRequest({ kind, button: button ?? '', cheaper: Boolean(cheaper) })
+  const choices = view.switches.map((sw) => ({
+    title: sw.title,
+    value: api.state.switches[sw.key] ?? '',
+  }))
+  const lines = requestLines(
+    api.lines.map((line) => ({
+      productId: line.item.productId,
+      offerId: line.offer?.id ?? null,
+      label: line.item.label,
+      detail: null,
+    })),
+    meta.productId,
+    meta.productTitle,
+    view.steps.length > 0,
+    Boolean(meta.familySlug),
+  )
   return (
-    <Context.Provider value={{ ...api, view, meta, profile: kindProfile(meta.kind), openRequest }}>
+    <Context.Provider
+      value={{
+        ...api,
+        view,
+        meta,
+        profile: kindProfile(meta.kind),
+        openRequest,
+        requestLines: lines,
+        requestChoices: choices,
+      }}
+    >
       {children}
       <RequestDialog
         kind={request?.kind ?? null}
         button={request?.button ?? ''}
+        cheaper={request?.cheaper}
         onClose={() => setRequest(null)}
         pageTitle={meta.productTitle}
         pageProductId={meta.productId}
         familySlug={meta.familySlug ?? null}
         quantity={api.quantity}
-        choices={view.switches.map((sw) => ({
-          title: sw.title,
-          value: api.state.switches[sw.key] ?? '',
-        }))}
-        lines={requestLines(
-          api.lines.map((line) => ({
-            productId: line.item.productId,
-            offerId: line.offer?.id ?? null,
-            label: line.item.label,
-            detail: null,
-          })),
-          meta.productId,
-          meta.productTitle,
-          view.steps.length > 0,
-          Boolean(meta.familySlug),
-        )}
+        choices={choices}
+        lines={lines}
         contacts={meta.contacts}
       />
     </Context.Provider>

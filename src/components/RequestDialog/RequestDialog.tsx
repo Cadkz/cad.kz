@@ -4,6 +4,7 @@ import { Mail, Phone } from 'lucide-react'
 import { useState } from 'react'
 import type { RequestKind } from '@/domain/siteRequest.mjs'
 import type { Contacts } from '@/lib/navigation'
+import { requestMessage } from '@/lib/requestMessage'
 import { CallbackForm } from '../CallbackForm/CallbackForm'
 import { Drawer } from '../Drawer/Drawer'
 import { WhatsappIcon } from '../icons/icons'
@@ -31,6 +32,16 @@ type Props = {
   choices: { title: string; value: string }[]
   lines: RequestLine[]
   contacts: Pick<Contacts, 'phones' | 'whatsappHref' | 'email'>
+  /** «Нашли дешевле?» под кнопками карточки покупки: свой заголовок и текст, скидка отмечена. */
+  cheaper?: boolean
+}
+
+/** «Нашли дешевле?»: КП конкурента удобнее всего прислать файлом в WhatsApp. */
+const CHEAPER = {
+  title: 'Нашли дешевле?',
+  intro:
+    'Пришлите коммерческое предложение конкурента в WhatsApp — подберём условия не хуже или объясним разницу в комплектации. Или оставьте телефон, менеджер перезвонит.',
+  message: 'Нашёл дешевле, пришлю КП конкурента',
 }
 
 const titles: Record<RequestKind, string> = {
@@ -60,20 +71,6 @@ const places = [
   { value: 'с выездом к нам', label: 'С выездом к нам' },
 ]
 
-/** Текст для WhatsApp и для разговора: страница и выбранное. */
-function messageText(
-  kind: RequestKind,
-  page: string,
-  lines: RequestLine[],
-  choices: Props['choices'],
-  quantity: number,
-) {
-  const list = lines.map((l) => `— ${l.label}${l.detail ? ` (${l.detail})` : ''}`).join('\n')
-  const picked = choices.map((c) => `\n${c.title}: ${c.value}`).join('')
-  const count = quantity > 1 ? `\nКоличество: ${quantity}` : ''
-  return `Здравствуйте! ${titles[kind]}: ${page}${list ? `\n${list}` : ''}${picked}${count}`
-}
-
 /**
  * Окно заявки — попап по центру (решение владельца 27.10.2026): сразу форма «имя, телефон,
  * почта по желанию», у запроса цены — галочка «Запросить скидку». Окно широкое и невысокое: имя
@@ -81,17 +78,38 @@ function messageText(
  * WhatsApp с уже набранным составом, почта и телефоны в ряд.
  */
 export function RequestDialog(props: Props) {
-  const { kind, onClose, pageTitle, lines, choices, quantity, contacts, button } = props
+  const { kind, onClose, pageTitle, lines, choices, quantity, contacts, button, cheaper } = props
   const [place, setPlace] = useState(places[0]?.value ?? '')
   if (!kind) return null
   const note = kind === 'demo' ? `Демонстрация: ${place}` : ''
-  const text = `${messageText(kind, pageTitle, lines, choices, quantity)}${note ? `\n${note}` : ''}`
+  const heading = cheaper ? CHEAPER.message : titles[kind]
+  const text = `${requestMessage(heading, pageTitle, lines, choices, quantity)}${note ? `\n${note}` : ''}`
+  const whatsappLink = contacts.whatsappHref
+    ? `${contacts.whatsappHref}?text=${encodeURIComponent(text)}`
+    : null
   return (
-    <Drawer open onClose={onClose} title={button || titles[kind]} side="center">
+    <Drawer
+      open
+      onClose={onClose}
+      title={cheaper ? CHEAPER.title : button || titles[kind]}
+      side="center"
+    >
       <div className={styles.body}>
-        <p className={styles.intro}>{intro[kind]}</p>
+        <p className={styles.intro}>{cheaper ? CHEAPER.intro : intro[kind]}</p>
         {lines.length > 0 && (
           <RequestChoice title={pageTitle} lines={lines} choices={choices} quantity={quantity} />
+        )}
+        {cheaper && whatsappLink && (
+          // КП конкурента — файл: в WhatsApp его прислать проще всего, поэтому кнопка над формой.
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.whatsapp}
+          >
+            <WhatsappIcon size={20} />
+            Отправить КП в WhatsApp
+          </a>
         )}
         {kind === 'demo' && (
           <RadioChips
@@ -107,13 +125,14 @@ export function RequestDialog(props: Props) {
           kind={kind}
           note={note}
           discount={kind === 'price' || kind === 'quote'}
+          discountChecked={cheaper}
         />
         <div className={styles.direct}>
           <p className={styles.directTitle}>Или свяжитесь сами</p>
           <div className={styles.directRow}>
-            {contacts.whatsappHref && (
+            {whatsappLink && !cheaper && (
               <a
-                href={`${contacts.whatsappHref}?text=${encodeURIComponent(text)}`}
+                href={whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.whatsapp}
