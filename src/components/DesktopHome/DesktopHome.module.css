@@ -1,0 +1,225 @@
+.root {
+  color: var(--color-text);
+}
+.bim {
+  background: var(--color-navy-deep);
+  color: var(--color-text-inverse);
+  padding: var(--space-20) 0;
+  background-image: var(--blueprint-dark);
+  background-size: var(--blueprint-size);
+}
+.bimGrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--grid-gap);
+}
+.bimIntro {
+  grid-column: span 6;
+}
+.label {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-overline);
+  margin-bottom: var(--space-6);
+}
+.bim h2 {
+  font-size: var(--text-home-section);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+}
+.bim h2 span {
+  color: var(--color-sky);
+}
+.lead {
+  margin-top: var(--space-6);
+  max-width: var(--measure);
+  padding-right: var(--space-16);
+  font-size: var(--text-lead);
+  color: var(--color-text-on-dark);
+}
+.lightLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-4) 0;
+  margin-top: var(--space-6);
+  border-bottom: 1px solid var(--color-sky);
+  color: var(--color-text-inverse);
+}
+.stages {
+  grid-column: 8 / span 5;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stages li {
+  display: flex;
+  gap: var(--space-6);
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--color-grid-dark-major);
+}
+.number {
+  font-size: var(--text-h3);
+  color: var(--color-sky);
+}
+.stages h3,
+.steps h3 {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-medium);
+  margin-bottom: var(--space-2);
+}
+.stages p {
+  font-size: var(--text-sm);
+  color: var(--color-text-on-dark);
+}
+.process,
+.news {
+  padding: var(--space-20) 0;
+}
+.sectionHead {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--grid-gap);
+  align-items: start;
+  margin-bottom: var(--space-12);
+}
+.sectionHead .label {
+  grid-column: span 3;
+  color: var(--color-text-muted);
+}
+.sectionHead h2 {
+  grid-column: span 6;
+  font-size: var(--text-home-section);
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-medium);
+  color: var(--color-navy);
+}
+.sectionHead > a {
+  grid-column: span 3;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  color: var(--color-blue);
+  font-size: var(--text-sm);
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--grid-gap);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.steps li {
+  border-top: 1px solid var(--color-blue);
+  padding-top: var(--space-6);
+}
+.steps li > span {
+  display: block;
+  color: var(--color-blue);
+  font-size: var(--text-display);
+  margin-bottom: var(--space-8);
+}
+.steps p {
+  font-size: var(--text-body);
+  color: var(--color-text-muted);
+  max-width: var(--measure);
+}
+.news {
+  border-top: 1px solid var(--color-border);
+}
+.newsList a {
+  display: grid;
+  grid-template-columns: var(--space-20) minmax(0, 1fr) var(--space-6);
+  gap: var(--grid-gap);
+  align-items: center;
+  padding: var(--space-8) var(--space-4);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-navy);
+  transition: background var(--duration-base) var(--ease);
+}
+.newsList a:hover {
+  background: var(--color-blue-soft);
+}
+.newsList h3 {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-medium);
+}
+.newsList a > span {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+.faq {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--grid-gap);
+  padding: var(--space-16) 0 var(--space-20);
+}
+.faq h2 {
+  font-size: var(--text-home-section);
+  line-height: var(--leading-tight);
+  color: var(--color-navy);
+  font-weight: var(--weight-medium);
+}
+.contact {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--grid-gap);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-16) 0;
+}
+.contact .label {
+  grid-column: span 12;
+  color: var(--color-text-muted);
+}
+.contact h2 {
+  grid-column: span 8;
+  font-size: var(--text-home-studio);
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-medium);
+  color: var(--color-navy);
+}
+.contact > div {
+  grid-column: span 4;
+  align-self: end;
+}
+.contact p {
+  font-size: var(--text-lead);
+  color: var(--color-text-muted);
+}
+.contact a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-blue);
+  color: var(--color-text-inverse);
+  padding: var(--space-5);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-6);
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .stages li,
+    .steps li,
+    .newsList a {
+      animation: studio-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+@keyframes studio-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-8));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bim h2,
+.stages h3 {
+  color: var(--color-text-inverse);
+}

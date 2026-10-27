@@ -1,0 +1,99 @@
+.section {
+  padding: var(--space-20) 0;
+  scroll-margin-top: var(--header-height);
+}
+.heading {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--grid-gap);
+  align-items: end;
+  margin-bottom: var(--space-10);
+}
+.kicker {
+  grid-column: span 3;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-overline);
+  color: var(--color-text-muted);
+  align-self: start;
+}
+.heading h2 {
+  grid-column: span 6;
+  font-size: var(--text-home-section);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  color: var(--color-navy);
+}
+.heading h2 span {
+  color: var(--color-text-muted);
+}
+.heading a {
+  grid-column: span 3;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-blue);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.card {
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-navy);
+  overflow: hidden;
+  transition:
+    background var(--duration-base) var(--ease),
+    transform var(--duration-base) var(--ease),
+    box-shadow var(--duration-base) var(--ease);
+}
+.card:hover {
+  background: var(--color-blue-soft);
+  transform: translateY(calc(-1 * var(--space-1)));
+  box-shadow: var(--shadow-float);
+}
+.meta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+.art {
+  width: 100%;
+  height: var(--home-art-height);
+  margin: var(--space-3) 0;
+  transition: transform var(--duration-slow) var(--ease);
+}
+.card:hover .art {
+  transform: scale(var(--scale-settle));
+}
+.card h3 {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-medium);
+}
+.card p {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  margin-top: var(--space-3);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .art {
+    transition: none;
+  }
+  .card:hover,
+  .card:hover .art {
+    transform: none;
+  }
+}
+
+.equipment {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
