@@ -1,7 +1,9 @@
+import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Lifecycle } from '@/lib/equipmentResearch'
 import type { Picture } from '@/lib/pictures'
+import { AddToCartButton } from '../AddToCartButton/AddToCartButton'
 import { Badge } from '../Badge/Badge'
 import { DirectionArt, hasDirectionArt } from '../DirectionArt/DirectionArt'
 import { ProductLifecycle } from '../ProductLifecycle/ProductLifecycle'
@@ -28,7 +30,7 @@ export type ProductCardData = {
   /** Цена самой доступной комплектации, рассчитанная сервером, или null — «по запросу». */
   priceFrom: string | null
   offersCount: number
-  /** Единственная комплектация с ценой (в пробной карточке кнопки корзины нет). */
+  /** Единственная комплектация с ценой — квадрат с корзиной рядом с «Подробнее». */
   cartOfferId: string | null
   badge: string | null
   /**
@@ -54,7 +56,8 @@ function cardSummary(summary: string | null, title: string) {
  * из варианта Codex, которые понравились владельцу): вся карточка — ссылка, при наведении
  * рамка целиком синяя. Слева у программы логотип --card-mark, у оборудования фото --card-thumb;
  * справа производитель, название, назначение тонким шрифтом (до трёх строк), внизу цена.
- * Кнопок в карточке нет: корзина и заявка — на странице товара. Цена — только серверная.
+ * Внизу «Подробнее» на всю ширину и, если у товара одна комплектация с ценой, маленький квадрат
+ * с корзиной (решение владельца 27.10.2026). Цена — только серверная.
  */
 export function ProductCard({ product }: { product: ProductCardData }) {
   const mark =
@@ -122,6 +125,18 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             ? `${product.offersCount > 1 ? 'от ' : ''}${product.priceFrom}`
             : 'Цена по запросу'}
         </p>
+      </div>
+      <div className={styles.foot}>
+        {/* Та же ссылка, что у названия (карточка целиком): для диктора и клавиатуры — одна. */}
+        <span className={styles.more} aria-hidden="true">
+          Подробнее
+          <ArrowRight size={16} strokeWidth={1.75} />
+        </span>
+        {product.cartOfferId && (
+          <span className={styles.cart}>
+            <AddToCartButton offerId={product.cartOfferId} title={product.title} look="icon" />
+          </span>
+        )}
       </div>
     </article>
   )

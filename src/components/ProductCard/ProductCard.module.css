@@ -5,6 +5,7 @@
   position: relative;
   display: grid;
   grid-template-columns: var(--card-thumb) minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
   align-items: start;
   column-gap: var(--space-4);
   height: 100%;
@@ -99,7 +100,8 @@
   font-size: var(--text-xs);
   font-weight: var(--weight-bold);
   text-align: center;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 .body {
@@ -161,8 +163,69 @@
   font-weight: var(--weight-bold);
 }
 
+/* Низ карточки: «Подробнее» на всю ширину и квадрат корзины справа — на одной линии у всех. */
+.foot {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+}
+
+.more {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  height: var(--control-height-sm);
+  border-radius: var(--radius-md);
+  background: var(--color-navy);
+  color: var(--color-text-inverse);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  transition: background var(--duration-fast) var(--ease);
+}
+
+.more svg {
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.card:hover .more {
+  background: var(--color-blue);
+}
+
+.card:hover .more svg {
+  transform: translateX(var(--space-1));
+}
+
+/* Корзина над растянутой ссылкой карточки: нажатие кладёт в корзину, а не открывает товар. */
+.cart {
+  position: relative;
+  z-index: var(--z-raised);
+  display: flex;
+}
+
+/* Корзина тихая — контурный квадрат, как рядом с заявкой на странице товара. */
+.cart button {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-navy);
+}
+
+.cart button:hover {
+  border-color: var(--color-blue);
+  background: var(--color-surface);
+  color: var(--color-blue);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .card {
+  .card,
+  .more,
+  .more svg {
     transition: none;
+  }
+
+  .card:hover .more svg {
+    transform: none;
   }
 }
