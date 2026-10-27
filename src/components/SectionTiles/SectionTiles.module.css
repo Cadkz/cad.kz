@@ -1,5 +1,5 @@
-/* Плитки направлений и типов оборудования: та же сетка, что у карточек каталога (1 / 2 / 3 колонки).
-   Телефон — фото слева квадратом, как у карточки товара; от 640 px — фото сверху 16:10. */
+/* Плитки направлений и типов оборудования: та же сетка, что у карточек каталога (1 / 2 / 3
+   колонки), сама плитка — CatalogTile. */
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -13,130 +13,17 @@
   display: flex;
 }
 
-.tile {
-  display: grid;
-  grid-template-columns: var(--card-thumb) minmax(0, 1fr);
-  column-gap: var(--space-4);
-  align-content: start;
-  width: 100%;
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color var(--duration-base) var(--ease);
-}
-
-/* Единый вид с карточкой товара (просьба владельца 27.10.2026): белая, при наведении рамка
-   целиком синяя, без подъёма и тени. */
-.tile:hover,
-.tile:focus-visible {
-  border-color: var(--color-blue);
-}
-
-.tile > * {
-  grid-column: 2;
-}
-
-.media {
-  display: flex;
-  grid-row: 1 / span 3;
-  grid-column: 1;
-  align-self: start;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 1;
-  padding: var(--space-2);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-blue);
-}
-
-.art {
-  position: relative;
-  padding: 0;
-  background-color: var(--color-surface);
-  background-image: var(--blueprint-light);
-  background-size: var(--blueprint-size);
-}
-
 .drawing {
-  transition: transform var(--duration-base) var(--ease);
+  width: 100%;
+  height: 100%;
 }
 
-.tile:hover .drawing {
-  transform: scale(1.03);
-}
-
+/* Фото оборудования — целиком, с полями внутри рамки. */
 .image {
   width: 100%;
   height: 100%;
+  padding: var(--space-2);
   object-fit: contain;
-  transition: transform var(--duration-base) var(--ease);
-}
-
-.tile:hover .image {
-  transform: scale(1.03);
-}
-
-.title {
-  color: var(--color-navy);
-  font-family: var(--font-heading);
-  font-size: var(--text-body);
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-snug);
-}
-
-.tile:hover .title {
-  color: var(--color-blue);
-}
-
-.hint {
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  display: -webkit-box;
-  margin-top: var(--space-1);
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  line-height: var(--leading-snug);
-}
-
-/* «Смотреть» — как «Подробнее» у карточки товара: контурная кнопка во всю ширину внизу. */
-.more {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  height: var(--control-height-sm);
-  margin-top: var(--space-3);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
-  color: var(--color-navy);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  transition:
-    border-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
-}
-
-.more svg {
-  transition: transform var(--duration-base) var(--ease);
-}
-
-.tile:hover .more {
-  border-color: var(--color-blue);
-  color: var(--color-blue);
-}
-
-.tile:hover .more svg {
-  transform: translateX(var(--space-1));
 }
 
 @media (min-width: 640px) {
@@ -146,29 +33,8 @@
     grid-auto-rows: 1fr;
   }
 
-  .tile {
-    display: flex;
-    flex-direction: column;
-    padding: var(--space-5);
-  }
-
-  .media {
-    align-self: stretch;
-    aspect-ratio: var(--ratio-card);
-    margin-bottom: var(--space-4);
+  .image {
     padding: var(--space-3);
-  }
-
-  .more {
-    margin-top: auto;
-  }
-
-  .hint {
-    margin-bottom: var(--space-4);
-  }
-
-  .art {
-    padding: 0;
   }
 }
 
@@ -179,21 +45,5 @@
 
   .grid.four {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tile,
-  .image,
-  .drawing,
-  .more,
-  .more svg {
-    transition: none;
-  }
-
-  .tile:hover .image,
-  .tile:hover .drawing,
-  .tile:hover .more svg {
-    transform: none;
   }
 }

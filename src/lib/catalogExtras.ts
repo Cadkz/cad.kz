@@ -73,6 +73,8 @@ export function catalogExtras({
             ? label
             : `${parent.title} ${label}`,
           summary: entry.note || null,
+          // Своя короткая фраза у родителя — про родителя: у пакета фраза из его названия и описания.
+          cardText: null,
           // У пакета/модуля могут быть другие лицензии: исследование родительской программы не наследуем.
           research: null,
           lifecycle: null,

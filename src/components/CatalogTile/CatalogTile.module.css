@@ -1,0 +1,160 @@
+/* Плитка-папка каталога: телефон — картинка слева квадратом, как значок у карточки товара;
+   от 640 px — картинка сверху 16:10. Типографика и низ — как у ProductCard. */
+.tile {
+  display: grid;
+  grid-template-columns: var(--card-thumb) minmax(0, 1fr);
+  column-gap: var(--space-4);
+  row-gap: var(--space-1);
+  align-content: start;
+  width: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color var(--duration-base) var(--ease);
+}
+
+.tile:hover,
+.tile:focus-visible {
+  border-color: var(--color-blue);
+}
+
+.tile > * {
+  grid-column: 2;
+}
+
+.media {
+  display: flex;
+  grid-row: 1 / span 5;
+  grid-column: 1;
+  align-self: start;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  background-image: var(--blueprint-light);
+  background-size: var(--blueprint-size);
+  color: var(--color-blue);
+}
+
+.media > * {
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.tile:hover .media > * {
+  transform: scale(1.03);
+}
+
+/* Логотип производителя: без сетки, с полями, целиком. */
+.logo {
+  padding: var(--space-3);
+  background-image: none;
+}
+
+.overline {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.title {
+  color: var(--color-navy);
+  font-family: var(--font-heading);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.text {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.meta {
+  margin-top: var(--space-2);
+  color: var(--color-navy);
+  font-size: var(--text-body);
+  font-weight: var(--weight-bold);
+}
+
+/* «Смотреть» — как «Подробнее» у карточки товара: контурная кнопка во всю ширину. */
+.more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  height: var(--control-height-sm);
+  margin-top: var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-navy);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  transition:
+    border-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
+}
+
+.more svg {
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.tile:hover .more {
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+.tile:hover .more svg {
+  transform: translateX(var(--space-1));
+}
+
+@media (min-width: 640px) {
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-5);
+  }
+
+  .media {
+    align-self: stretch;
+    aspect-ratio: var(--ratio-card);
+    margin-bottom: var(--space-3);
+  }
+
+  .logo {
+    padding: var(--space-6);
+  }
+
+  /* Итог и кнопка прижаты к низу: в ряду плиток на одной линии. */
+  .meta {
+    margin-top: auto;
+    padding-top: var(--space-3);
+  }
+
+  .more {
+    margin-top: var(--space-3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .media > *,
+  .more,
+  .more svg {
+    transition: none;
+  }
+
+  .tile:hover .media > *,
+  .tile:hover .more svg {
+    transform: none;
+  }
+}

@@ -346,18 +346,51 @@ export const CARD_TEXTS = {
   'family:scad-satellites': 'Проверка элементов, нагрузки и сечения отдельными программами',
 }
 
+/** Своё короткое описание товара или семейства из списка выше, если есть. */
+/** @param {string | null | undefined} key */
+export function ownCardText(key) {
+  return (key && CARD_TEXTS[key]) || null
+}
+
+/** Предел фразы карточки: две-три строки, дальше — до ближайшей границы части фразы. */
+const PHRASE_LIMIT = 100
+
 /**
- * Текст карточки: свой из списка, иначе описание товара без «Название — » в начале.
- * @param {string | null | undefined} key slug товара или `family:<slug>`
- * @param {string | null} summary
+ * Одна законченная фраза из описания товара: без «Название — », первое предложение; длинное —
+ * до последней запятой, точки с запятой или тире перед пределом. Никогда не обрывает слово
+ * и не ставит «…» (просьба владельца 27.10.2026).
+ * @param {string | null | undefined} summary
  * @param {string} title
  */
-export function cardText(key, summary, title) {
-  const own = key ? CARD_TEXTS[key] : undefined
-  if (own) return own
+export function summaryPhrase(summary, title) {
   if (!summary) return null
-  const dash = summary.indexOf(' — ')
-  const rest = dash > 0 && dash <= title.length + 24 ? summary.slice(dash + 3) : summary
-  const first = rest.split(/(?<=[.!?])\s/)[0] ?? rest
-  return first.charAt(0).toUpperCase() + first.slice(1).replace(/\.$/, '')
+  const text = summary.replace(/\s+/g, ' ').trim()
+  const dash = text.search(/ [—–-] /)
+  return phrase(dash > 0 && dash <= title.length + 24 ? text.slice(dash + 3) : text)
+}
+
+/** @param {string} text */
+function phrase(text) {
+  let result = (text.split(/(?<=[.!?])\s/)[0] ?? text).replace(/[.!?]$/, '')
+  if (result.length > PHRASE_LIMIT) {
+    const head = result.slice(0, PHRASE_LIMIT)
+    const cut = Math.max(head.lastIndexOf(', '), head.lastIndexOf('; '), head.lastIndexOf(' — '))
+    if (cut >= 30) result = result.slice(0, cut)
+  }
+  result = result.trim()
+  return result ? result.charAt(0).toUpperCase() + result.slice(1) : null
+}
+
+/**
+ * Название и фраза карточки по одному правилу для всех карточек каталога (просьба владельца
+ * 27.10.2026: единая система). Название — до тире: «АРБАТ - экспертиза и расчёт…» → «АРБАТ»,
+ * пояснение после тире становится фразой. Фраза: своя из списка → пояснение из названия →
+ * первая фраза описания → запасная (`fallback`). Текст не обрезается.
+ * @param {{ title: string, own?: string | null, summary?: string | null, fallback: string }} input
+ */
+export function cardInfo({ title, own, summary, fallback }) {
+  const match = /^(.{2,40}?)\s+[-–—]\s+(.{3,})$/.exec(title)
+  const name = match?.[1] ?? title
+  const note = match?.[2] ? phrase(match[2]) : null
+  return { title: name, text: own || note || summaryPhrase(summary, name) || fallback }
 }

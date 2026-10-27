@@ -1,14 +1,17 @@
+import { cardInfo } from '@/domain/cardTexts.mjs'
 import { OTHER, vendorTree } from '../domain/catalogTree.mjs'
 import type { CatalogItem, CatalogLine, Facet } from './catalog'
 import { type FilterState, matches, topicView } from './catalogFilter'
-import { positions } from './plural'
+
+/** Название программы без пояснения после тире: «АРБАТ - экспертиза…» → «АРБАТ». */
+const shortName = (item: { title: string }) => cardInfo({ title: item.title, fallback: '' }).title
 
 /** Плитка производителя в направлении: название, что у него есть, куда ведёт щелчок. */
 export type VendorTile = {
   key: string
   title: string
-  /** Линейки через точку, единственная программа или «12 позиций». */
-  hint: string
+  /** Что внутри, одной строкой: до трёх линеек или программ через запятую. */
+  text: string
   count: number
   /** У производителя одна программа в разделе — плитка сразу ведёт на неё. */
   href: string | null
@@ -46,12 +49,11 @@ export function vendorTiles(
       return {
         key: vendor.key,
         title: vendor.title,
-        hint:
-          named.length > 1
-            ? named.map((line) => line.title).join(' · ')
-            : products.length === 1
-              ? (only?.title ?? '')
-              : positions(products.length),
+        // Единое правило для всех плиток (просьба владельца 27.10.2026): фраза — что внутри,
+        // число позиций — отдельной строкой в плитке.
+        text: (named.length > 1 ? named.map((line) => line.title) : products.map(shortName))
+          .slice(0, 3)
+          .join(', '),
         count: products.length,
         href: products.length === 1 && only ? only.href : null,
       }

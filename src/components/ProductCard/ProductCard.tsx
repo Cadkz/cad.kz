@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { cardText } from '@/domain/cardTexts.mjs'
+import { cardInfo } from '@/domain/cardTexts.mjs'
 import type { Lifecycle } from '@/lib/equipmentResearch'
 import type { Picture } from '@/lib/pictures'
 import { AddToCartButton } from '../AddToCartButton/AddToCartButton'
@@ -63,7 +63,12 @@ export type ProductCardData = {
  */
 export function ProductCard({ product }: { product: ProductCardData }) {
   const cartKey = product.linkOnly ? null : (product.cartOfferId ?? product.requestKey ?? null)
-  const summary = product.cardText ?? cardText(null, product.summary, product.title)
+  const info = cardInfo({
+    title: product.title,
+    own: product.cardText,
+    summary: product.summary,
+    fallback: 'Описание и комплектации — на странице товара',
+  })
   const mediaClass = product.picture
     ? styles.media
     : `${styles.media} ${
@@ -101,12 +106,12 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           {product.manufacturer && <p className={styles.vendor}>{product.manufacturer}</p>}
           <h3 className={styles.title}>
             <Link href={product.href} className={styles.titleLink}>
-              {product.title}
+              {info.title}
             </Link>
           </h3>
         </div>
       </div>
-      {summary && <p className={styles.summary}>{summary}</p>}
+      <p className={styles.summary}>{info.text}</p>
       <ProductLifecycle value={product.lifecycle} />
       {product.badge && (
         <div className={styles.badge}>
