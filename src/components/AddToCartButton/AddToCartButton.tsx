@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, ShoppingCart } from 'lucide-react'
+import { Check, ShoppingCart, ShoppingCartPlus } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useCart } from '../CartProvider/CartProvider'
@@ -49,7 +49,12 @@ export function AddToCartButton({ offerId, title, look = 'block' }: Props) {
         }
       }}
     >
-      <ShoppingCart size={16} strokeWidth={1.75} aria-hidden="true" />
+      {/* Квадрат без подписи — корзина с плюсом: видно, что нажатие добавит товар. */}
+      {look === 'icon' ? (
+        <ShoppingCartPlus size={20} strokeWidth={1.75} aria-hidden="true" />
+      ) : (
+        <ShoppingCart size={16} strokeWidth={1.75} aria-hidden="true" />
+      )}
       {look === 'block' && 'В корзину'}
     </button>
   )

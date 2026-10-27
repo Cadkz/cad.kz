@@ -1,5 +1,6 @@
 import { cache } from 'react'
 import type { ProductCardData } from '@/components/ProductCard/ProductCard'
+import { cardText } from '@/domain/cardTexts.mjs'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
 import { cardAction, resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
 import { courseTopic } from '../domain/courseTopics.mjs'
@@ -300,6 +301,7 @@ async function loadCatalog(): Promise<{
       vendor,
       aliases: product.searchAliases ?? null,
       summary: product.summary ?? null,
+      cardText: cardText(product.slug, product.summary ?? null, product.title),
       research: readResearch(product.researchData),
       lifecycle: lifecycle(readResearch(product.researchData), replacements),
       icon: topic?.icon ?? productSections[0]?.icon ?? null,

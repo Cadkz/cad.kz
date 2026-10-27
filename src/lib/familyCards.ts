@@ -1,3 +1,4 @@
+import { cardText } from '@/domain/cardTexts.mjs'
 import type { CatalogItem } from './catalog'
 
 type FamilyInfo = { title: string; href: string; summary: string | null }
@@ -30,6 +31,11 @@ export function withFamilies(
       href: family.href,
       title: family.title,
       summary: family.summary ?? first.summary,
+      cardText: cardText(
+        `family:${family.href.split('/').filter(Boolean).pop() ?? ''}`,
+        family.summary ?? first.summary,
+        family.title,
+      ),
       priceFrom,
       offersCount: Math.max(offers, 2),
       cartOfferId: null,

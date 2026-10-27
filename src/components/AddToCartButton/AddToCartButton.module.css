@@ -30,7 +30,7 @@
 
 .icon {
   flex-shrink: 0;
-  width: var(--badge-size);
+  width: var(--control-height-sm);
 }
 
 /* Уже в корзине: светлая плашка с галочкой, ведёт в корзину. */
