@@ -1,44 +1,32 @@
-/* Телефон: картинка слева квадратом, справа название, производитель, цена, кнопка (аудит М3).
-   От 640 px — вертикальная карточка с картинкой сверху. */
+/* Пробная карточка (redesign/catalog-cards, 27.10.2026): горизонтальная на всех ширинах —
+   картинка слева, текст справа, цена внизу. Вся карточка — ссылка (растянутая ссылка названия),
+   при наведении рамка целиком синяя, без подъёма и тени. */
 .card {
+  position: relative;
   display: grid;
   grid-template-columns: var(--card-thumb) minmax(0, 1fr);
+  align-items: start;
   column-gap: var(--space-4);
-  align-content: start;
   height: 100%;
-  padding: var(--space-4);
+  padding: var(--space-5);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg);
-  transition:
-    border-color var(--duration-slow) var(--ease-reveal),
-    box-shadow var(--duration-slow) var(--ease-reveal);
+  transition: border-color var(--duration-base) var(--ease);
 }
 
-.logoFallback {
-  color: var(--color-navy);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
-  text-align: center;
-  overflow-wrap: anywhere;
+/* У программы — логотип маленьким знаком, как в строке, без подложки. */
+.marked {
+  grid-template-columns: var(--card-mark) minmax(0, 1fr);
 }
 
-/* Наведение спокойное (пробная ветка redesign/home-motion-2): карточка на месте, без
-   подъёма и увеличения картинки — голубая рамка и мягкая тень проступают медленно. */
-.card:hover {
-  border-color: var(--color-blue-mid);
-  box-shadow: var(--shadow-sm);
-}
-
-.card > * {
-  grid-column: 2;
+.card:hover,
+.card:focus-within {
+  border-color: var(--color-blue);
 }
 
 .media {
   display: flex;
-  grid-row: 1 / span 6;
-  grid-column: 1;
-  align-self: start;
   align-items: center;
   justify-content: center;
   aspect-ratio: 1;
@@ -47,6 +35,11 @@
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-blue);
+}
+
+.marked .media {
+  padding: 0;
+  background: none;
 }
 
 .placeholder {
@@ -66,8 +59,7 @@
   height: 100%;
 }
 
-/* Курс (27.10.2026): картинок у курсов нет — тёмно-синий лист с чертёжной сеткой, как у плиток
-   направлений, и значок категории курса в светлом круге. */
+/* Курс: тёмно-синий лист с чертёжной сеткой и значок категории. */
 .course {
   position: relative;
   isolation: isolate;
@@ -102,122 +94,75 @@
   object-fit: contain;
 }
 
-/* Логотип программы: на телефоне — на всю миниатюру, от 640 px — знак --card-logo по центру
-   рамки 16:10, у всех программ одного размера. */
-.logo {
-  max-width: 100%;
-  max-height: 100%;
+.logoFallback {
+  color: var(--color-navy);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+  min-width: 0;
+}
+
+.vendor {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
 }
 
 .title {
   font-size: var(--text-h4);
   line-height: var(--leading-snug);
+  overflow-wrap: anywhere;
 }
 
-.titleLink {
-  position: relative;
+/* Растянутая ссылка: нажатие в любом месте карточки ведёт на товар. */
+.titleLink::after {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  content: "";
 }
 
-.titleLink:hover {
-  color: var(--color-blue);
+.titleLink:focus-visible {
+  outline: none;
 }
 
-.vendor {
-  margin-top: var(--space-1);
+.titleLink:focus-visible::after {
+  outline: 2px solid var(--color-blue);
+  outline-offset: var(--space-1);
+}
+
+.summary {
+  display: -webkit-box;
+  overflow: hidden;
   color: var(--color-text-muted);
-  font-size: var(--text-xs);
-}
-
-.price {
-  margin-top: var(--space-2);
-  color: var(--color-navy);
-  font-family: var(--font-heading);
-  font-size: var(--text-body);
-  font-weight: var(--weight-heavy);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-snug);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .badge {
-  margin-top: var(--space-2);
+  position: relative;
 }
 
-.foot {
+.price {
   margin-top: auto;
-  padding-top: var(--space-3);
-}
-
-@media (min-width: 640px) {
-  .card {
-    display: flex;
-    flex-direction: column;
-    padding: var(--space-5);
-  }
-
-  /* Рамка картинки на всю ширину карточки у всех товаров: раньше она сжималась по ширине
-     картинки, и маленькие картинки (SCAD Office) выходили мелкими. */
-  .media {
-    align-self: stretch;
-    aspect-ratio: var(--ratio-card);
-    margin-bottom: var(--space-4);
-    padding: var(--space-3);
-  }
-
-  .blueprint {
-    padding: 0;
-  }
-
-  .logo {
-    width: var(--card-logo);
-    height: var(--card-logo);
-  }
-
-  .foot {
-    padding-top: var(--space-4);
-  }
-}
-
-.more {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  height: var(--control-height-sm);
-  border-radius: var(--radius-md);
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  padding-top: var(--space-2);
+  color: var(--color-navy);
   font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  transition: background var(--duration-fast) var(--ease);
-}
-
-.more svg {
-  transition: transform var(--duration-base) var(--ease);
-}
-
-.card:hover .more {
-  background: var(--color-blue);
-}
-
-.card:hover .more svg {
-  transform: translateX(var(--space-1));
+  font-weight: var(--weight-bold);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card,
-  .more svg {
+  .card {
     transition: none;
   }
-
-  .card:hover .more svg {
-    transform: none;
-  }
-}
-
-/* Зона нажатия пальцем 44 px по высоте без сдвига вёрстки (аудит 21.10.2026, М8). */
-.titleLink::after {
-  position: absolute;
-  top: calc(50% - var(--touch-target) / 2);
-  right: 0;
-  bottom: calc(50% - var(--touch-target) / 2);
-  left: 0;
-  content: "";
 }

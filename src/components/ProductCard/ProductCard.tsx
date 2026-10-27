@@ -1,9 +1,7 @@
-import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Lifecycle } from '@/lib/equipmentResearch'
 import type { Picture } from '@/lib/pictures'
-import { AddToCartButton } from '../AddToCartButton/AddToCartButton'
 import { Badge } from '../Badge/Badge'
 import { DirectionArt, hasDirectionArt } from '../DirectionArt/DirectionArt'
 import { ProductLifecycle } from '../ProductLifecycle/ProductLifecycle'
@@ -19,7 +17,7 @@ export type ProductCardData = {
   href: string
   title: string
   manufacturer: string | null
-  /** Коротко о товаре: в карточке не показывается (карточки одной высоты), остаётся в данных. */
+  /** Коротко о товаре: в карточке — назначение тонким шрифтом, до трёх строк. */
   summary: string | null
   icon: string | null
   /**
@@ -30,7 +28,7 @@ export type ProductCardData = {
   /** Цена самой доступной комплектации, рассчитанная сервером, или null — «по запросу». */
   priceFrom: string | null
   offersCount: number
-  /** Единственная комплектация с ценой — её можно положить в корзину прямо из карточки. */
+  /** Единственная комплектация с ценой (в пробной карточке кнопки корзины нет). */
   cartOfferId: string | null
   badge: string | null
   /**
@@ -41,41 +39,48 @@ export type ProductCardData = {
 }
 
 /**
- * Карточка товара в каталоге. Одна кнопка (аудит 21.10.2026, Г4; правило — cardAction в
- * src/domain/buyScenario.mjs): «В корзину», если у стандартной лицензии одна комплектация с ценой,
- * у остальных — «Подробнее». Название и картинка всегда ведут на страницу товара.
- * На телефоне карточка горизонтальная: картинка слева (М3). Описания в карточке нет ни у кого
- * (решение владельца 21.10.2026: карточки ровные), логотипы программ — одного размера по центру
- * рамки, фото оборудования — на всю рамку. Цена — только серверная.
+ * Описание в карточке — назначение без повтора названия: «AutoCAD — программа для…» →
+ * «Программа для…». Обрезается CSS до трёх строк.
+ */
+function cardSummary(summary: string | null, title: string) {
+  if (!summary) return null
+  const dash = summary.indexOf(' — ')
+  const rest = dash > 0 && dash <= title.length + 24 ? summary.slice(dash + 3) : summary
+  return rest.charAt(0).toUpperCase() + rest.slice(1)
+}
+
+/**
+ * Карточка товара в каталоге (пробная ветка redesign/catalog-cards, 27.10.2026, по карточкам
+ * из варианта Codex, которые понравились владельцу): вся карточка — ссылка, при наведении
+ * рамка целиком синяя. Слева у программы логотип --card-mark, у оборудования фото --card-thumb;
+ * справа производитель, название, назначение тонким шрифтом (до трёх строк), внизу цена.
+ * Кнопок в карточке нет: корзина и заявка — на странице товара. Цена — только серверная.
  */
 export function ProductCard({ product }: { product: ProductCardData }) {
+  const mark =
+    product.picture?.fit === 'logo' || (!product.picture && !product.topic && !product.art)
+  const summary = cardSummary(product.summary, product.title)
+  const mediaClass = product.picture
+    ? styles.media
+    : `${styles.media} ${
+        product.topic
+          ? styles.course
+          : product.art && hasDirectionArt(product.art)
+            ? styles.blueprint
+            : styles.placeholder
+      }`
   return (
-    <article className={styles.card}>
-      <Link
-        href={product.href}
-        className={
-          product.picture
-            ? styles.media
-            : `${styles.media} ${
-                product.topic
-                  ? styles.course
-                  : product.art && hasDirectionArt(product.art)
-                    ? styles.blueprint
-                    : styles.placeholder
-              }`
-        }
-        tabIndex={-1}
-        aria-hidden="true"
-      >
+    <article className={mark ? `${styles.card} ${styles.marked}` : styles.card}>
+      <span className={mediaClass} aria-hidden="true">
         {product.picture?.fit === 'logo' ? (
           <Image
             src={product.picture.url}
             alt=""
             width={product.picture.width}
             height={product.picture.height}
-            sizes="96px"
+            sizes="48px"
             unoptimized={product.picture.local}
-            className={`${styles.image} ${styles.logo}`}
+            className={styles.image}
           />
         ) : product.picture ? (
           <Image
@@ -83,12 +88,12 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             alt=""
             width={product.picture.width}
             height={product.picture.height}
-            sizes="(min-width: 1200px) 300px, (min-width: 960px) 25vw, (min-width: 640px) 50vw, 80px"
+            sizes="80px"
             className={styles.image}
           />
         ) : product.topic ? (
           <span className={styles.courseIcon}>
-            <SectionIcon name={product.icon} size={24} />
+            <SectionIcon name={product.icon} size={20} />
           </span>
         ) : product.logoFallback ? (
           <span className={styles.logoFallback}>{product.logoFallback}</span>
@@ -97,34 +102,26 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         ) : (
           <SectionIcon name={product.icon} size={24} />
         )}
-      </Link>
-      <h3 className={styles.title}>
-        <Link href={product.href} className={styles.titleLink}>
-          {product.title}
-        </Link>
-      </h3>
-      {product.manufacturer && <p className={styles.vendor}>{product.manufacturer}</p>}
-      <ProductLifecycle value={product.lifecycle} />
-      <p className={styles.price}>
-        {product.priceFrom
-          ? `${product.offersCount > 1 ? 'от ' : ''}${product.priceFrom}`
-          : 'Цена по запросу'}
-      </p>
-      {product.badge && (
-        <div className={styles.badge}>
-          <Badge>{product.badge}</Badge>
-        </div>
-      )}
-      <div className={styles.foot}>
-        {product.cartOfferId ? (
-          <AddToCartButton offerId={product.cartOfferId} title={product.title} />
-        ) : (
-          // Та же ссылка, что у названия: для клавиатуры и экранного диктора достаточно одной.
-          <Link href={product.href} className={styles.more} tabIndex={-1} aria-hidden="true">
-            Подробнее
-            <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
+      </span>
+      <div className={styles.body}>
+        {product.manufacturer && <p className={styles.vendor}>{product.manufacturer}</p>}
+        <h3 className={styles.title}>
+          <Link href={product.href} className={styles.titleLink}>
+            {product.title}
           </Link>
+        </h3>
+        {summary && <p className={styles.summary}>{summary}</p>}
+        <ProductLifecycle value={product.lifecycle} />
+        {product.badge && (
+          <div className={styles.badge}>
+            <Badge>{product.badge}</Badge>
+          </div>
         )}
+        <p className={styles.price}>
+          {product.priceFrom
+            ? `${product.offersCount > 1 ? 'от ' : ''}${product.priceFrom}`
+            : 'Цена по запросу'}
+        </p>
       </div>
     </article>
   )
