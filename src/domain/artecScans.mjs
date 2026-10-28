@@ -35,6 +35,8 @@ const EMBED_PARAMS = new URLSearchParams({
   ui_vr: '0',
   ui_ar: '0',
   ui_annotations: '0',
+  // Свой крестик «остановить» у Sketchfab в углу ложился на наш «Закрыть».
+  ui_stop: '0',
   ui_watermark_link: '0',
   ui_theme: 'dark',
   ui_color: '8ac4ff',
