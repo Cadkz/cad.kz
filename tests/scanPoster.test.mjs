@@ -46,3 +46,20 @@ test('пустая картинка — модели нет', () => {
   const rgba = new Uint8Array(4 * 4 * 4).fill(POSTER_BACKGROUND)
   assert.equal(keyOutBackground(rgba, 4, 4), null)
 })
+
+test('мелкая плашка внизу (логотип Artec) убирается, рамка — только по модели', () => {
+  const width = 20
+  const height = 20
+  const rgba = new Uint8Array(width * height * 4)
+  for (let p = 0; p < width * height; p++) {
+    const x = p % width
+    const y = Math.floor(p / width)
+    const model = x >= 4 && x <= 15 && y >= 2 && y <= 13
+    const label = x === 9 && y === 18
+    const value = model || label ? 80 : POSTER_BACKGROUND
+    rgba.set([value, value, value, 255], p * 4)
+  }
+  const box = keyOutBackground(rgba, width, height)
+  assert.deepEqual(box, { left: 4, top: 2, width: 12, height: 12 })
+  assert.equal(rgba[(18 * width + 9) * 4 + 3], 0)
+})
