@@ -1,0 +1,38 @@
+/* Подпись и тонкая полоска слева внизу окна — на месте подсказки, пока модель грузится. */
+.progress {
+  position: absolute;
+  bottom: var(--space-4);
+  left: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: calc(100% - var(--control-height) - var(--space-12));
+  color: var(--color-text-on-dark);
+  font-size: var(--text-sm);
+  pointer-events: none;
+}
+
+.bar {
+  width: 100%;
+  height: var(--space-1);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-on-dark-soft);
+  appearance: none;
+  overflow: hidden;
+}
+
+.bar::-webkit-progress-bar {
+  background: var(--color-on-dark-soft);
+}
+
+.bar::-webkit-progress-value {
+  border-radius: var(--radius-pill);
+  background: var(--color-sky);
+  transition: width var(--duration-base) var(--ease);
+}
+
+.bar::-moz-progress-bar {
+  border-radius: var(--radius-pill);
+  background: var(--color-sky);
+}

@@ -3,6 +3,7 @@
 import { Minus, Plus, RotateCcw } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { Scan } from '@/domain/artecScans.mjs'
+import { ScanProgress } from '../ScanProgress/ScanProgress'
 import type { ModelViewerElement } from './model-viewer'
 import styles from './ScanModel.module.css'
 
@@ -13,15 +14,21 @@ const ZOOM_STEP = 0.75
  * 3D-модель скана в окне просмотра. Просмотрщик (веб-компонент Google model-viewer, ~290 КБ)
  * грузится только при первом открытии окна. Модель медленно вращается, пока её не тронули:
  * первое касание, колесо или кнопки «+ / −» останавливают вращение (просьба владельца
- * 24.10.2026). Колесо и щипок приближают, «⟲» возвращает исходный ракурс.
+ * 24.10.2026). Колесо и щипок приближают, «⟲» возвращает исходный ракурс. Сканы в полном
+ * качестве (28.10.2026) весят 5–15 МБ — пока модель грузится, поверх картинки идёт полоска.
  */
 export function ScanModel({ scan }: { scan: Scan }) {
   const [ready, setReady] = useState(false)
   const [touched, setTouched] = useState(false)
+  const [progress, setProgress] = useState(0)
   const viewer = useRef<ModelViewerElement>(null)
 
   useEffect(() => {
     let alive = true
+    // Сканы сжаты Draco; декодер (~250 КБ) лежит на нашем сайте, а не на gstatic.com.
+    // model-viewer читает адрес из глобальной настройки один раз, при загрузке модуля.
+    const config = globalThis as { ModelViewerElement?: { dracoDecoderLocation?: string } }
+    config.ModelViewerElement = { ...config.ModelViewerElement, dracoDecoderLocation: '/draco/' }
     import('@google/model-viewer').then(() => alive && setReady(true))
     return () => {
       alive = false
@@ -37,8 +44,19 @@ export function ScanModel({ scan }: { scan: Scan }) {
       node.autoRotate = false
       setTouched(true)
     }
+    const onProgress = (event: Event) => {
+      const total = (event as CustomEvent<{ totalProgress?: number }>).detail?.totalProgress
+      if (typeof total === 'number') setProgress(total)
+    }
+    const onLoad = () => setProgress(1)
     node.addEventListener('camera-change', onChange)
-    return () => node.removeEventListener('camera-change', onChange)
+    node.addEventListener('progress', onProgress)
+    node.addEventListener('load', onLoad)
+    return () => {
+      node.removeEventListener('camera-change', onChange)
+      node.removeEventListener('progress', onProgress)
+      node.removeEventListener('load', onLoad)
+    }
   }, [ready])
 
   const zoom = (factor: number) => {
@@ -83,7 +101,8 @@ export function ScanModel({ scan }: { scan: Scan }) {
           Загружаем 3D-модель…
         </p>
       )}
-      <p className={styles.hint} data-hidden={touched}>
+      {ready && progress < 1 && <ScanProgress value={progress} />}
+      <p className={styles.hint} data-hidden={touched || progress < 1}>
         Крутите мышью или пальцем, колесо или щипок — приблизить
       </p>
       <div className={styles.controls}>

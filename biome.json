@@ -11,6 +11,7 @@
       "**",
       "!Макеты",
       "!payload-types.ts",
+      "!public/draco",
       "!next-env.d.ts",
       "!src/app/(payload)/admin/importMap.ts"
     ]
