@@ -1,14 +1,13 @@
 import assert from 'node:assert/strict'
-import { existsSync } from 'node:fs'
 import { test } from 'node:test'
 import { defaultScanIds, SCAN_OPTIONS, scanById } from '../src/domain/artecScans.mjs'
 
-test('у каждого скана из библиотеки есть плеер Sketchfab и превью', () => {
+test('у каждого скана из библиотеки есть плеер Sketchfab и адрес превью', () => {
   for (const { value } of SCAN_OPTIONS) {
     const scan = scanById(value)
     assert.ok(scan, value)
     assert.match(scan.embed, /^https:\/\/sketchfab\.com\/models\/[0-9a-f]{32}\/embed\?/, scan.embed)
-    assert.ok(existsSync(`public${scan.poster}`), scan.poster)
+    assert.equal(scan.poster, `/scan-posters/${value}.webp`)
   }
 })
 

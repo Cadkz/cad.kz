@@ -33,6 +33,6 @@ export function proxy(request: NextRequest) {
 export const config = {
   // Служебные адреса, админка, API и файлы сайта сюда не попадают.
   matcher: [
-    '/((?!_next/|api/|admin|fonts/|images/|icon\\.png|apple-icon\\.png|robots\\.txt|sitemap\\.xml).*)',
+    '/((?!_next/|api/|admin|fonts/|images/|scan-posters/|icon\\.png|apple-icon\\.png|robots\\.txt|sitemap\\.xml).*)',
   ],
 }

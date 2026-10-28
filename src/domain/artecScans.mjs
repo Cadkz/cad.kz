@@ -4,12 +4,13 @@
 // С 28.10.2026 (просьба владельца: «максимально близко к Artec») окно просмотра показывает
 // те же модели и тем же просмотрщиком, что и artec3d.com, — встроенный плеер Sketchfab
 // с прозрачным фоном: полное разрешение исходника (до 10 млн треугольников), их освещение
-// и затенение. До нажатия на странице только картинка-превью (public/images/scans,
-// WebP 640 × 480 на прозрачном фоне), плеер грузится только в открытом окне.
+// и затенение. До нажатия на странице только картинка-превью: снимок того же плеера с
+// Sketchfab, фон вырезается при сборке сайта (src/app/scan-posters), плеер грузится только
+// в открытом окне.
 //
 // Какие сканы показать у товара, выбирают в админке: товар → вкладка «Примеры сканов». Здесь —
 // библиотека готовых сканов (добавить новый — взять id модели Sketchfab со страницы
-// artec3d.com/3d-models/…, снять превью и дописать строку) и набор по умолчанию, который
+// artec3d.com/3d-models/…, дописать строку; превью соберётся само) и набор по умолчанию, который
 // разовая настройка ставит товарам.
 
 /**
@@ -174,7 +175,7 @@ const toScan = (seed) => ({
   id: seed.id,
   title: seed.title,
   embed: `https://sketchfab.com/models/${seed.sketchfab}/embed?${EMBED_PARAMS}`,
-  poster: `/images/scans/${seed.id}.webp`,
+  poster: `/scan-posters/${seed.id}.webp`,
 })
 
 /** Варианты для списка в админке: «Artec Leo — Двигатель автомобиля». */
@@ -182,6 +183,11 @@ export const SCAN_OPTIONS = LIBRARY.map((seed) => ({
   label: `${seed.scanner} — ${seed.title}`,
   value: seed.id,
 }))
+
+/** id модели Sketchfab — для превью (src/app/scan-posters). @param {string} id */
+export function sketchfabId(id) {
+  return LIBRARY.find((entry) => entry.id === id)?.sketchfab ?? null
+}
 
 /** @param {string} id @returns {Scan | null} */
 export function scanById(id) {
