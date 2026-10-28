@@ -13,7 +13,7 @@ const MARK = 'cadScanViewer'
 
 /**
  * Окно просмотра скана (24.10.2026, просьба владельца): модель крупно на тёмно-синем фоне
- * с сеткой, «+ / −» и колесо приближают, стрелки листают сканы. Закрывается крестиком,
+ * с сеткой (с 28.10.2026 — плеер Sketchfab, как на artec3d.com), стрелки листают сканы. Закрывается крестиком,
  * клавишей Esc, нажатием мимо окна и кнопкой «Назад» — в браузере, на мыши и на телефоне:
  * при открытии в историю добавляется запись с тем же адресом, «назад» её снимает.
  */
@@ -61,8 +61,6 @@ export function ScanViewer({ scans, index, onChange }: Props) {
         if (event.target === event.currentTarget) close()
       }}
       onKeyDown={(event) => {
-        // Стрелки на самой модели крутят её, а не листают сканы.
-        if ((event.target as HTMLElement).tagName === 'MODEL-VIEWER') return
         if (event.key === 'ArrowRight') step(1)
         if (event.key === 'ArrowLeft') step(-1)
       }}
