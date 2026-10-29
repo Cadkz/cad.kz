@@ -12,7 +12,8 @@
 // топы продаж по местам и SCAD перед ЛИРОЙ, логотипы производителей для карточек (21.10.2026);
 // каталог как в Битриксе: САПР в «Архитектуре и BIM», АВС — лицензия или обновление (22.10.2026);
 // оборудование как в Битриксе: четыре типа, плоттеры и комплектующие, WideTEK (22.10.2026);
-// тексты сканеров WideTEK (26.10.2026); девять направлений — визуализация и трубопроводы влиты (27.10.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
+// тексты сканеров WideTEK (26.10.2026); девять направлений — визуализация и трубопроводы влиты (27.10.2026);
+// каталог Autodesk — только коллекции AEC, PDMC, M&E и их программы (29.10.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -23,6 +24,7 @@ import { setupArtecScanners } from '../src/lib/artecScannersSetup.ts'
 import { setupArtecSoftwareTexts } from '../src/lib/artecSoftwareTextsSetup.ts'
 import { setupArtecTexts } from '../src/lib/artecTextsSetup.ts'
 import { setupAuditCatalog, setupRevitBack } from '../src/lib/auditCatalogSetup.ts'
+import { setupAutodeskCatalog } from '../src/lib/autodeskCatalogSetup.ts'
 import { setupBimPage } from '../src/lib/bimSetup.ts'
 import { setupCardLogos } from '../src/lib/cardLogosSetup.ts'
 import { setupCards } from '../src/lib/cardsSetup.ts'
@@ -287,6 +289,9 @@ try {
   const order = await setupDirectionsOrder(payload)
   if (!order) console.log('Порядок направлений (САПР и BIM первыми) уже настроен.')
   else for (const line of order) console.log(`Порядок направлений — ${line}`)
+  const autodesk = await setupAutodeskCatalog(payload)
+  if (!autodesk) console.log('Каталог Autodesk по коллекциям (29.10.2026) уже настроен.')
+  else for (const line of autodesk) console.log(`Каталог Autodesk — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)
