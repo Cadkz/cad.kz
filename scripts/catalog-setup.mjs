@@ -13,7 +13,7 @@
 // каталог как в Битриксе: САПР в «Архитектуре и BIM», АВС — лицензия или обновление (22.10.2026);
 // оборудование как в Битриксе: четыре типа, плоттеры и комплектующие, WideTEK (22.10.2026);
 // тексты сканеров WideTEK (26.10.2026); девять направлений — визуализация и трубопроводы влиты (27.10.2026);
-// каталог Autodesk — только коллекции AEC, PDMC, M&E и их программы (29.10.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
+// каталог Autodesk — только коллекции AEC, PDMC, M&E и их программы, Autodesk Forma и линейки (29.10.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -43,6 +43,7 @@ import { setupEquipmentResearch } from '../src/lib/equipmentResearchSetup.ts'
 import { setupEquipment } from '../src/lib/equipmentSetup.ts'
 import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
 import { setupFooterAudit } from '../src/lib/footerSetup.ts'
+import { setupFormaCatalog } from '../src/lib/formaCatalogSetup.ts'
 import { setupGeo5Catalog } from '../src/lib/geoSetup.ts'
 import {
   setupHomeHero,
@@ -292,6 +293,9 @@ try {
   const autodesk = await setupAutodeskCatalog(payload)
   if (!autodesk) console.log('Каталог Autodesk по коллекциям (29.10.2026) уже настроен.')
   else for (const line of autodesk) console.log(`Каталог Autodesk — ${line}`)
+  const forma = await setupFormaCatalog(payload)
+  if (!forma) console.log('Autodesk Forma и линейки Autodesk (29.10.2026) уже настроены.')
+  else for (const line of forma) console.log(`Autodesk Forma — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)
