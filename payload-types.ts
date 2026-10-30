@@ -221,15 +221,6 @@ export interface Product {
    */
   mainSection?: (number | null) | Section;
   /**
-   * Товар виден и в этих разделах каталога.
-   */
-  extraSections?: (number | Section)[] | null;
-  sections?: (number | Section)[] | null;
-  /**
-   * Через запятую: как товар ещё называют покупатели, например «акад, автокад». Поиск на сайте находит товар и по этим словам. Опечатки и русские буквы вместо латинских поиск понимает сам — их вписывать не нужно.
-   */
-  searchAliases?: string | null;
-  /**
    * Показывается в карточке каталога и под названием на странице товара.
    */
   summary?: string | null;
@@ -251,6 +242,21 @@ export interface Product {
    * Перетащите сюда картинки с компьютера — можно несколько сразу — или выберите из уже загруженных. Порядок меняется перетаскиванием, первая — главная на странице товара.
    */
   gallery?: (number | Media)[] | null;
+  properties?:
+    | {
+        name: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  requiresProducts?: (number | Product)[] | null;
   /**
    * Показываются на странице товара галереей: превью листаются, по нажатию модель открывается крупно, её можно крутить и приближать. Порядок — перетаскиванием, первый скан идёт первым. Пусто — блока нет. Новый скан в список добавляет разработчик.
    */
@@ -285,6 +291,40 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Категория, значения фильтров, статус модели и замена. Не меняет публикацию товара.
+   */
+  researchData?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Товар виден и в этих разделах каталога. Пока стоит галочка «Подбирать разделы по правилам» (вкладка «Основное»), их ставят «Правила разделов».
+   */
+  extraSections?: (number | Section)[] | null;
+  sections?: (number | Section)[] | null;
+  /**
+   * Через запятую: как товар ещё называют покупатели, например «акад, автокад». Поиск на сайте находит товар и по этим словам. Опечатки и русские буквы вместо латинских поиск понимает сам — их вписывать не нужно.
+   */
+  searchAliases?: string | null;
+  suggestSimilar?: boolean | null;
+  suggestCross?: boolean | null;
+  similarProducts?: (number | Product)[] | null;
+  recommended?: (number | Product)[] | null;
+  /**
+   * Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  legacyKey?: string | null;
+  legacyUrl?: string | null;
   /**
    * Например, SCAD Office: переключатель «Редакция», шаги «Основа», «Что будете проверять», «Дополнительные функции», «Готовые комплекты». Цена считается сервером.
    */
@@ -339,46 +379,6 @@ export interface Product {
         }[]
       | null;
   };
-  properties?:
-    | {
-        name: string;
-        value: string;
-        id?: string | null;
-      }[]
-    | null;
-  faq?:
-    | {
-        question: string;
-        answer: string;
-        id?: string | null;
-      }[]
-    | null;
-  requiresProducts?: (number | Product)[] | null;
-  suggestSimilar?: boolean | null;
-  suggestCross?: boolean | null;
-  similarProducts?: (number | Product)[] | null;
-  recommended?: (number | Product)[] | null;
-  /**
-   * Категория, значения фильтров, статус модели и замена. Не меняет публикацию товара.
-   */
-  researchData?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.
-   */
-  seo?: {
-    title?: string | null;
-    description?: string | null;
-  };
-  legacyKey?: string | null;
-  legacyUrl?: string | null;
   /**
    * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
    */
@@ -1247,9 +1247,6 @@ export interface ProductsSelect<T extends boolean = true> {
   lineOrder?: T;
   autoSections?: T;
   mainSection?: T;
-  extraSections?: T;
-  sections?: T;
-  searchAliases?: T;
   summary?: T;
   cardImage?: T;
   tasks?:
@@ -1260,6 +1257,21 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   description?: T;
   gallery?: T;
+  properties?:
+    | T
+    | {
+        name?: T;
+        value?: T;
+        id?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  requiresProducts?: T;
   scans?:
     | T
     | {
@@ -1267,6 +1279,22 @@ export interface ProductsSelect<T extends boolean = true> {
         title?: T;
         id?: T;
       };
+  researchData?: T;
+  extraSections?: T;
+  sections?: T;
+  searchAliases?: T;
+  suggestSimilar?: T;
+  suggestCross?: T;
+  similarProducts?: T;
+  recommended?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  legacyKey?: T;
+  legacyUrl?: T;
   picker?:
     | T
     | {
@@ -1305,34 +1333,6 @@ export interface ProductsSelect<T extends boolean = true> {
               id?: T;
             };
       };
-  properties?:
-    | T
-    | {
-        name?: T;
-        value?: T;
-        id?: T;
-      };
-  faq?:
-    | T
-    | {
-        question?: T;
-        answer?: T;
-        id?: T;
-      };
-  requiresProducts?: T;
-  suggestSimilar?: T;
-  suggestCross?: T;
-  similarProducts?: T;
-  recommended?: T;
-  researchData?: T;
-  seo?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-      };
-  legacyKey?: T;
-  legacyUrl?: T;
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;

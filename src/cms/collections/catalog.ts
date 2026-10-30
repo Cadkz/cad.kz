@@ -412,7 +412,7 @@ const productBasicFields: Field[] = [
   },
 ]
 
-/** «Анонс», как в Битриксе: что видно в карточке каталога и в шапке страницы товара. */
+/** Вкладка «Карточка и описание», начало: что видно в карточке каталога и в шапке товара. */
 const productAnnounceFields: Field[] = [
   {
     name: 'summary',
@@ -445,7 +445,7 @@ const productAnnounceFields: Field[] = [
 ]
 
 /**
- * «Подробно», как в Битриксе: описание в визуальном редакторе с режимом HTML (тот же, что у
+ * Подробное описание (вкладка «Карточка и описание») в визуальном редакторе с режимом HTML (как у
  * новостей). Хранится разметкой сайта: старые тексты не меняются, пока их не правили.
  */
 const productDetailFields: Field[] = [
@@ -457,7 +457,7 @@ const productDetailFields: Field[] = [
   },
 ]
 
-/** «Картинки»: галерея страницы товара, файлы перетаскиваются прямо в поле. */
+/** Галерея страницы товара (вкладка «Карточка и описание»): файлы перетаскиваются в поле. */
 const productImageFields: Field[] = [
   {
     name: 'gallery',
@@ -514,8 +514,8 @@ const productScanFields: Field[] = [
   },
 ]
 
-/** Где товар виден в каталоге и как его находит поиск. */
-const productCatalogFields: Field[] = [
+/** Основной раздел и подбор разделов по правилам — во вкладке «Основное». */
+const productSectionFields: Field[] = [
   {
     name: 'autoSections',
     label: 'Подбирать разделы по правилам',
@@ -538,13 +538,21 @@ const productCatalogFields: Field[] = [
         'Главное направление или тип товара: от него значок, хлебные крошки и «Похожие».',
     },
   },
+]
+
+/** Где ещё товар виден в каталоге и как его находит поиск — во вкладке «Продвижение и поиск». */
+const productFindFields: Field[] = [
   {
     name: 'extraSections',
     label: 'Дополнительные разделы',
     type: 'relationship',
     relationTo: 'sections',
     hasMany: true,
-    admin: { description: 'Товар виден и в этих разделах каталога.' },
+    admin: {
+      description:
+        'Товар виден и в этих разделах каталога. Пока стоит галочка «Подбирать разделы по ' +
+        'правилам» (вкладка «Основное»), их ставят «Правила разделов».',
+    },
   },
   {
     // Основной + дополнительные одним списком, заполняется сам (хук productSections).
@@ -567,8 +575,8 @@ const productCatalogFields: Field[] = [
   },
 ]
 
-/** «Характеристики и связи»: блоки страницы товара ниже описания и связи с другими товарами. */
-const productPageFields: Field[] = [
+/** Блоки страницы товара ниже описания — во вкладке «Характеристики и материалы». */
+const productSpecFields: Field[] = [
   {
     name: 'properties',
     label: 'Характеристики',
@@ -590,85 +598,87 @@ const productPageFields: Field[] = [
     ],
   },
   relationField('requiresProducts', 'Требуется базовое ПО', 'products', true),
-  {
-    type: 'collapsible',
-    label: 'Похожие и «С этим покупают»',
-    admin: {
-      initCollapsed: true,
-      description:
-        'Сайт подбирает товары сам по разделам. Ручные списки показываются первыми, ' +
-        'галочки разрешают или запрещают предлагать этот товар в чужих подборках.',
-    },
-    fields: [
-      {
-        name: 'suggestSimilar',
-        label: 'Сайт может предлагать этот товар в «Похожих»',
-        type: 'checkbox',
-        defaultValue: true,
-      },
-      {
-        name: 'suggestCross',
-        label: 'Сайт может предлагать этот товар в «С этим покупают» (и в корзине)',
-        type: 'checkbox',
-        defaultValue: true,
-      },
-      {
-        name: 'similarProducts',
-        label: 'Похожие — вручную',
-        type: 'relationship',
-        relationTo: 'products',
-        hasMany: true,
-      },
-      {
-        name: 'recommended',
-        label: '«С этим покупают» — вручную',
-        type: 'relationship',
-        relationTo: 'products',
-        hasMany: true,
-      },
-    ],
-  },
-  {
-    type: 'collapsible',
-    label: 'Служебное: данные для фильтров оборудования',
-    admin: {
-      initCollapsed: true,
-      description: 'Заполняется автоматически. Обычно менять не нужно.',
-    },
-    fields: [
-      {
-        name: 'researchData',
-        label: 'Данные исследования: фильтры и статус модели',
-        type: 'json',
-        admin: {
-          description:
-            'Категория, значения фильтров, статус модели и замена. Не меняет публикацию товара.',
-        },
-      },
-    ],
-  },
 ]
 
+/** Подборки с другими товарами — во вкладке «Продвижение и поиск». */
+const productRelatedBlock: Field = {
+  type: 'collapsible',
+  label: 'Похожие и «С этим покупают»',
+  admin: {
+    initCollapsed: true,
+    description:
+      'Сайт подбирает товары сам по разделам. Ручные списки показываются первыми, ' +
+      'галочки разрешают или запрещают предлагать этот товар в чужих подборках.',
+  },
+  fields: [
+    {
+      name: 'suggestSimilar',
+      label: 'Сайт может предлагать этот товар в «Похожих»',
+      type: 'checkbox',
+      defaultValue: true,
+    },
+    {
+      name: 'suggestCross',
+      label: 'Сайт может предлагать этот товар в «С этим покупают» (и в корзине)',
+      type: 'checkbox',
+      defaultValue: true,
+    },
+    {
+      name: 'similarProducts',
+      label: 'Похожие — вручную',
+      type: 'relationship',
+      relationTo: 'products',
+      hasMany: true,
+    },
+    {
+      name: 'recommended',
+      label: '«С этим покупают» — вручную',
+      type: 'relationship',
+      relationTo: 'products',
+      hasMany: true,
+    },
+  ],
+}
+
+/** Служебные данные фильтров оборудования — свёрнуто во вкладке «Характеристики и материалы». */
+const productResearchBlock: Field = {
+  type: 'collapsible',
+  label: 'Служебное: данные для фильтров оборудования',
+  admin: {
+    initCollapsed: true,
+    description: 'Заполняется автоматически. Обычно менять не нужно.',
+  },
+  fields: [
+    {
+      name: 'researchData',
+      label: 'Данные исследования: фильтры и статус модели',
+      type: 'json',
+      admin: {
+        description:
+          'Категория, значения фильтров, статус модели и замена. Не меняет публикацию товара.',
+      },
+    },
+  ],
+}
+
 /**
- * Карточка товара в админке по вкладкам, как в Битриксе (решение владельца 23.10.2026):
- * «Основное», «Анонс», «Подробно», «Картинки», «Цены», «Характеристики и связи», «SEO».
- * Справа — активность, адрес, показ. Вкладки и свёрнутые блоки без имени: данные в базе лежат
- * как раньше, миграция не нужна.
+ * Карточка товара в админке — 4 вкладки по исследованию ChatGPT (решение владельца 30.10.2026,
+ * вместо вкладок как в Битриксе от 23.10): «Основное», «Карточка и описание», «Характеристики
+ * и материалы», «Продвижение и поиск»; комплектации и цены — своей вкладкой как часть товара,
+ * «Подбор комплекта» — только при виде страницы «С подбором». Справа — заполненность,
+ * активность, адрес, приоритет, сценарий. Вкладки и свёрнутые блоки без имени: данные в базе
+ * лежат как раньше, миграция не нужна.
  */
 const productTabs: Field = {
   type: 'tabs',
   tabs: [
-    { label: 'Основное', fields: [...productBasicFields, ...productCatalogFields] },
-    { label: 'Анонс', fields: productAnnounceFields },
-    { label: 'Подробно', fields: productDetailFields },
-    { label: 'Картинки', fields: productImageFields },
+    { label: 'Основное', fields: [...productBasicFields, ...productSectionFields] },
     {
-      label: 'Примеры сканов',
-      admin: { condition: (data) => data?.kind === 'hardware' },
-      fields: productScanFields,
+      label: 'Карточка и описание',
+      fields: [...productAnnounceFields, ...productDetailFields, ...productImageFields],
     },
     {
-      label: 'Цены',
+      label: 'Цены и комплектации',
       fields: [
         {
           name: 'offersTable',
@@ -678,14 +688,24 @@ const productTabs: Field = {
       ],
     },
     {
-      label: 'Подбор комплекта',
-      admin: { condition: (data) => data?.pageView === 'picker' },
-      fields: [pickerField],
-    },
-    { label: 'Характеристики и связи', fields: productPageFields },
-    {
-      label: 'SEO',
+      label: 'Характеристики и материалы',
       fields: [
+        ...productSpecFields,
+        // Сканы — только у оборудования (сканеры Artec). Условие на рамке, а не на самом списке:
+        // иначе Payload снимает обязательность «Скана» в базе и нужна миграция.
+        {
+          type: 'row',
+          admin: { condition: (data) => data?.kind === 'hardware' },
+          fields: productScanFields,
+        },
+        productResearchBlock,
+      ],
+    },
+    {
+      label: 'Продвижение и поиск',
+      fields: [
+        ...productFindFields,
+        productRelatedBlock,
         seoField,
         {
           type: 'collapsible',
@@ -697,6 +717,11 @@ const productTabs: Field = {
           fields: legacyFields,
         },
       ],
+    },
+    {
+      label: 'Подбор комплекта',
+      admin: { condition: (data) => data?.pageView === 'picker' },
+      fields: [pickerField],
     },
   ],
 }
