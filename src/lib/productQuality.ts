@@ -52,7 +52,7 @@ const CONTEXT_KEY = 'qualityPricing'
 async function pricing(payload: Payload, req?: PayloadRequest): Promise<PricingContext> {
   const cached = req?.context[CONTEXT_KEY] as PricingContext | undefined
   if (cached) return cached
-  const context = await loadPricingContext(payload)
+  const context = await loadPricingContext(payload, req)
   if (req) req.context[CONTEXT_KEY] = context
   return context
 }

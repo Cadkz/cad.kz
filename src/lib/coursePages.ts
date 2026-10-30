@@ -10,7 +10,9 @@ import type { CourseMatches } from './courseSchedule'
  * строкой «Длительность» в характеристиках, если её нет.
  */
 const FETCH_MS = 15_000
-const PARALLEL = 3
+/** Позже этого сохранять не начинаем: ответ должен уйти раньше, чем Vercel оборвёт запрос (60 с). */
+const SAVE_UNTIL_MS = 30_000
+const SAVE_MS = 20_000
 const options = { overrideAccess: true, depth: 0 } as const
 
 /** Только страницы самого l-p.kz: адрес берётся из таблицы, на чужие сайты сервер не ходит. */
@@ -65,9 +67,18 @@ export function courseLinks(matches: CourseMatches) {
   return links
 }
 
-async function updateOne(payload: Payload, id: number, url: string) {
-  const page = parseCoursePage(await download(url))
-  if (!page) throw new Error('на странице нет описания курса')
+type CoursePage = NonNullable<ReturnType<typeof parseCoursePage>>
+
+/** Сохранение не дольше SAVE_MS: зависло — ответить браузеру причиной, а не ждать обрыва. */
+function inTime<T>(work: Promise<T>) {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const stop = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('база не ответила за 20 с')), SAVE_MS)
+  })
+  return Promise.race([work, stop]).finally(() => clearTimeout(timer))
+}
+
+async function save(payload: Payload, id: number, page: CoursePage) {
   const product = await payload.findByID({ collection: 'products', id, ...options })
   const properties = product.properties ?? []
   const hasHours = properties.some((row) => /длительн/i.test(row.name))
@@ -86,7 +97,13 @@ async function updateOne(payload: Payload, id: number, url: string) {
   return product.title
 }
 
-/** Описания отмеченных курсов (порция из браузера): страницы параллельно, ошибка одной не мешает остальным. */
+function reason(error: unknown) {
+  if (error instanceof Error && error.name === 'TimeoutError') return 'l-p.kz не ответил вовремя'
+  if (error instanceof TypeError) return 'страница l-p.kz не открылась'
+  return error instanceof Error ? error.message : 'ошибка'
+}
+
+/** Описания отмеченных курсов (порция из браузера): ошибка одного не мешает остальным. */
 export async function updateDescriptions(
   payload: Payload,
   matches: CourseMatches,
@@ -94,32 +111,43 @@ export async function updateDescriptions(
 ): Promise<DescriptionResult> {
   const links = courseLinks(matches)
   const titles = new Map(matches.courses.map((course) => [course.id, course.title]))
+  const deadline = Date.now() + SAVE_UNTIL_MS
   const queue = ids.filter((id) => links.has(id))
   const result: DescriptionResult = { done: [], failed: [], doneIds: [], failedIds: [] }
   for (const id of ids.filter((id) => !links.has(id))) {
     result.failed.push(`${titles.get(id) ?? id} — в таблице УЦ нет ссылки на l-p.kz`)
     result.failedIds.push(id)
   }
-  const worker = async () => {
-    for (let id = queue.shift(); id != null; id = queue.shift()) {
-      const url = links.get(id) ?? ''
+  const fail = (id: number, why: string) => {
+    result.failed.push(`${titles.get(id) ?? id} — ${why}`)
+    result.failedIds.push(id)
+  }
+  // Страницы читаются параллельно, а сохраняются по одной: каждое сохранение — отдельная
+  // транзакция и отдельное соединение с базой, а на Vercel соединений всего три.
+  const pages = await Promise.all(
+    queue.map(async (id) => {
       try {
-        result.done.push(await updateOne(payload, id, url))
-        result.doneIds.push(id)
+        const page = parseCoursePage(await download(links.get(id) ?? ''))
+        if (!page) throw new Error('на странице нет описания курса')
+        return { id, page }
       } catch (error) {
-        const reason =
-          error instanceof Error && error.name === 'TimeoutError'
-            ? 'l-p.kz не ответил вовремя'
-            : error instanceof TypeError
-              ? 'страница l-p.kz не открылась'
-              : error instanceof Error
-                ? error.message
-                : 'ошибка'
-        result.failed.push(`${titles.get(id) ?? id} — ${reason}`)
-        result.failedIds.push(id)
+        fail(id, reason(error))
+        return null
       }
+    }),
+  )
+  for (const item of pages) {
+    if (!item) continue
+    if (Date.now() > deadline) {
+      fail(item.id, 'не успели сохранить — повторите')
+      continue
+    }
+    try {
+      result.done.push(await inTime(save(payload, item.id, item.page)))
+      result.doneIds.push(item.id)
+    } catch (error) {
+      fail(item.id, `не сохранилось: ${reason(error)}`)
     }
   }
-  await Promise.all(Array.from({ length: PARALLEL }, worker))
   return result
 }

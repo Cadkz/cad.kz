@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 import { quote } from '@/domain/pricing.mjs'
 import type { Offer } from '../../payload-types'
 
@@ -8,9 +8,17 @@ import type { Offer } from '../../payload-types'
  */
 export type PricingContext = { vat: string; rates: Map<string, { value: string; date: string }> }
 
-export async function loadPricingContext(payload: Payload): Promise<PricingContext> {
+/**
+ * НДС и курсы валют. req — запрос, внутри которого идёт сохранение (хуки товаров): тогда чтение
+ * идёт тем же соединением, что и сохранение. Без него внутри сохранения нужно второе соединение,
+ * а на Vercel их всего три — три сохранения сразу ждали друг друга бесконечно (31.10.2026).
+ */
+export async function loadPricingContext(
+  payload: Payload,
+  req?: PayloadRequest,
+): Promise<PricingContext> {
   const [settings, rates] = await Promise.all([
-    payload.findGlobal({ slug: 'pricing-settings', overrideAccess: true, depth: 0 }),
+    payload.findGlobal({ slug: 'pricing-settings', overrideAccess: true, depth: 0, req }),
     payload.find({
       collection: 'exchange-rates',
       where: { effectiveAt: { less_than_equal: new Date().toISOString() } },
@@ -18,6 +26,7 @@ export async function loadPricingContext(payload: Payload): Promise<PricingConte
       limit: 200,
       overrideAccess: true,
       depth: 0,
+      req,
     }),
   ])
   const latest = new Map<string, { value: string; date: string }>()
