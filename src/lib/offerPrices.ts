@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { groupOf, type TreeGroup } from '@/domain/adminCatalog.mjs'
 import { AMOUNT, CURRENCIES, priceChange, priceEditSummary } from '@/domain/priceEdit.mjs'
 import type { Offer } from '../../payload-types'
 import { logActivity } from './activity'
@@ -26,6 +27,8 @@ export type PriceGridRow = {
   details: string
   /** Товар и комплектация одной строкой — для поиска. */
   label: string
+  /** Вкладка, как в «Каталоге»: программы, оборудование, услуги и обучение. */
+  group: TreeGroup
   vendor: number | null
   section: number | null
   published: boolean
@@ -65,7 +68,7 @@ export async function loadPriceGrid(payload: Payload): Promise<PriceGridData> {
       collection: 'products',
       pagination: false,
       ...opts,
-      select: { title: true, status: true, manufacturer: true, mainSection: true },
+      select: { title: true, kind: true, status: true, manufacturer: true, mainSection: true },
     }),
     payload.find({
       collection: 'manufacturers',
@@ -96,6 +99,7 @@ export async function loadPriceGrid(payload: Payload): Promise<PriceGridData> {
         product: product.title,
         details,
         label: [product.title, details].filter(Boolean).join(' · '),
+        group: groupOf(product.kind),
         vendor: relId(product.manufacturer),
         section: relId(product.mainSection),
         published: offer.status === 'published' && product.status === 'published',

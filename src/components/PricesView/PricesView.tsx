@@ -6,7 +6,12 @@ import { loadPriceGrid } from '@/lib/offerPrices'
 import styles from './PricesView.module.css'
 
 /** Страница «Цены таблицей» в админке: администратор и маркетолог. */
-export async function PricesView({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export async function PricesView({
+  initPageResult,
+  params,
+  searchParams,
+  viewActions,
+}: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
   const { payload, user, i18n } = req
   const template = {
@@ -18,6 +23,8 @@ export async function PricesView({ initPageResult, params, searchParams }: Admin
     searchParams,
     user: user ?? undefined,
     visibleEntities,
+    // Кнопки в шапке (поиск, тема) — общие для всех страниц админки, см. admin.components.actions.
+    viewActions,
   }
   const allowed = user?.role === 'admin' || user?.role === 'editor'
   const data = allowed ? await loadPriceGrid(payload) : null
@@ -32,9 +39,10 @@ export async function PricesView({ initPageResult, params, searchParams }: Admin
         {data ? (
           <>
             <p className={styles.lead}>
-              Все предложения на одной странице. Найдите нужные фильтрами, впишите новую цену прямо
-              в таблицу — справа сразу видно, какой она станет на сайте. Ничего не меняется, пока вы
-              не проверите сводку и не нажмёте «Применить».
+              Как в «Каталоге»: вкладка → производитель → товары с комплектациями. Поиск и фильтры
+              сразу показывают таблицу по всей вкладке. Впишите новую цену прямо в таблицу — справа
+              видно, какой она станет на сайте. Ничего не меняется, пока вы не проверите сводку и не
+              нажмёте «Применить».
             </p>
             <p className={styles.note}>
               Цена на сайте = цена в валюте × курс + НДС {data.vat} %, вверх до тенге. Курсы:{' '}

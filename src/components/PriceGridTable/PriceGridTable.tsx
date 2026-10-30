@@ -1,6 +1,7 @@
 'use client'
 
 import { Undo2 } from 'lucide-react'
+import { Fragment } from 'react'
 import { formatAmount, formatKzt } from '@/lib/format'
 import type { PriceGridRow } from '@/lib/offerPrices'
 import type { PriceGridState } from '@/lib/usePriceGrid'
@@ -9,7 +10,10 @@ import styles from './PriceGridTable.module.css'
 const CURRENCIES = ['KZT', 'USD', 'EUR', 'RUB'] as const
 const kzt = (value: string | null | undefined) => (value ? formatKzt(value) : '—')
 
-/** Строки таблицы цен: цена и валюта правятся прямо в ячейке, справа — цена на сайте после правки. */
+/**
+ * Таблица цен: товар строкой-заголовком, под ним его комплектации. Цена и валюта правятся прямо
+ * в ячейке, справа — цена на сайте после правки.
+ */
 export function PriceGridTable({ grid }: { grid: PriceGridState }) {
   if (!grid.visible.length)
     return <p className={styles.empty}>Под фильтры не подошло ни одного предложения.</p>
@@ -19,7 +23,7 @@ export function PriceGridTable({ grid }: { grid: PriceGridState }) {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Товар и комплектация</th>
+              <th>Комплектация</th>
               <th>Цена в валюте</th>
               <th>НДС в цене</th>
               <th>На сайте сейчас</th>
@@ -28,8 +32,13 @@ export function PriceGridTable({ grid }: { grid: PriceGridState }) {
             </tr>
           </thead>
           <tbody>
-            {grid.shown.map((row) => (
-              <Row key={row.id} row={row} grid={grid} />
+            {grid.shown.map((row, index) => (
+              <Fragment key={row.id}>
+                {grid.shown[index - 1]?.productId !== row.productId && (
+                  <ProductRow row={row} grid={grid} />
+                )}
+                <Row row={row} grid={grid} />
+              </Fragment>
             ))}
           </tbody>
         </table>
@@ -43,6 +52,21 @@ export function PriceGridTable({ grid }: { grid: PriceGridState }) {
   )
 }
 
+/** Товар над своими комплектациями; вне папки производителя — с названием производителя. */
+function ProductRow({ row, grid }: { row: PriceGridRow; grid: PriceGridState }) {
+  const vendor = grid.filter.vendor === null ? grid.folderTitle(row.vendor ?? 'none') : ''
+  return (
+    <tr className={styles.product}>
+      <td colSpan={6}>
+        <a className={styles.productName} href={`/admin/collections/products/${row.productId}`}>
+          {row.product}
+        </a>
+        {vendor && <span className={styles.vendor}>{vendor}</span>}
+      </td>
+    </tr>
+  )
+}
+
 function Row({ row, grid }: { row: PriceGridRow; grid: PriceGridState }) {
   const draft = grid.draftOf(row)
   const edited = grid.isEdited(row)
@@ -52,13 +76,15 @@ function Row({ row, grid }: { row: PriceGridRow; grid: PriceGridState }) {
   return (
     <tr className={rowClass || undefined}>
       <td>
-        <a className={styles.name} href={`/admin/collections/offers/${row.id}`}>
-          {row.product}
+        <a
+          className={styles.name}
+          href={`/admin/collections/offers/${row.id}`}
+          aria-label={`Комплектация: ${row.label}`}
+        >
+          {row.details || 'Основная'}
         </a>
         <span className={styles.muted}>
-          {[row.details, `ID ${row.id}`, !row.published && 'не на сайте']
-            .filter(Boolean)
-            .join(' · ')}
+          {[`ID ${row.id}`, !row.published && 'не на сайте'].filter(Boolean).join(' · ')}
         </span>
       </td>
       <td>
@@ -91,7 +117,9 @@ function Row({ row, grid }: { row: PriceGridRow; grid: PriceGridState }) {
           </span>
         )}
       </td>
-      <td className={styles.muted}>{row.includesVat ? `с НДС ${row.sourceVat} %` : 'без НДС'}</td>
+      <td className={styles.mutedCell}>
+        {row.includesVat ? `с НДС ${row.sourceVat} %` : 'без НДС'}
+      </td>
       <td>{kzt(row.kzt)}</td>
       <td>
         <NewPrice row={row} grid={grid} />

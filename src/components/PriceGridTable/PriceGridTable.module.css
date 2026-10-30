@@ -25,6 +25,22 @@
   white-space: nowrap;
 }
 
+.product td {
+  padding-top: calc(var(--base) * 0.75);
+  border-bottom-color: var(--theme-elevation-150);
+  background: var(--theme-elevation-50);
+}
+
+.productName {
+  color: var(--theme-elevation-800);
+  font-weight: bold;
+}
+
+.vendor {
+  margin-left: calc(var(--base) / 2);
+  color: var(--theme-elevation-500);
+}
+
 .edited {
   background: var(--theme-success-50);
 }
@@ -40,6 +56,11 @@
 
 .muted {
   display: block;
+  color: var(--theme-elevation-500);
+}
+
+/* Ячейка таблицы: без display: block, иначе она выпадает из строки таблицы. */
+.mutedCell {
   color: var(--theme-elevation-500);
 }
 

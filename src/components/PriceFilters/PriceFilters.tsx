@@ -1,20 +1,22 @@
 'use client'
 
-import type { PriceGridState } from '@/lib/usePriceGrid'
+import { isFiltering, type PriceGridState } from '@/lib/usePriceGrid'
 import styles from './PriceFilters.module.css'
 
 type Option = { id: number; title: string }
-type Props = { grid: PriceGridState; vendors: Option[]; sections: Option[] }
+type Props = { grid: PriceGridState; sections: Option[] }
 
 const CURRENCIES = ['KZT', 'USD', 'EUR', 'RUB']
 const toId = (value: string) => (value ? Number(value) : null)
+const toFolder = (value: string) => (value === 'none' ? 'none' : toId(value))
 
-/** Фильтры таблицы цен: поиск, производитель, раздел, валюта, видимость, без цены, изменённые. */
-export function PriceFilters({ grid, vendors, sections }: Props) {
+/**
+ * Фильтры цен: поиск, производитель (та же папка, что слева в пути), раздел, валюта, видимость,
+ * без цены, изменённые. Вкладка и папка — не фильтры: «Сбросить» их не трогает.
+ */
+export function PriceFilters({ grid, sections }: Props) {
   const { filter, setFilter } = grid
-  const changed = Object.values(filter).some(
-    (value) => value !== '' && value !== null && value !== false && value !== 'all',
-  )
+  const changed = isFiltering(filter)
   return (
     <div className={styles.root}>
       <div className={styles.fields}>
@@ -23,7 +25,7 @@ export function PriceFilters({ grid, vendors, sections }: Props) {
           <input
             className={styles.search}
             type="search"
-            placeholder="Название, комплектация или ID"
+            placeholder="Во вкладке: название, комплектация, ID"
             value={filter.query}
             onChange={(event) => setFilter({ query: event.target.value })}
           />
@@ -32,12 +34,14 @@ export function PriceFilters({ grid, vendors, sections }: Props) {
           <span>Производитель</span>
           <select
             value={filter.vendor ?? ''}
-            onChange={(event) => setFilter({ vendor: toId(event.target.value) })}
+            onChange={(event) =>
+              grid.go({ group: filter.group, vendor: toFolder(event.target.value) })
+            }
           >
             <option value="">Все</option>
-            {vendors.map((vendor) => (
-              <option key={vendor.id} value={vendor.id}>
-                {vendor.title}
+            {grid.folders.map((folder) => (
+              <option key={folder.vendor} value={folder.vendor}>
+                {folder.title}
               </option>
             ))}
           </select>
@@ -97,9 +101,11 @@ export function PriceFilters({ grid, vendors, sections }: Props) {
           />
           Только изменённые мной
         </label>
-        <span className={styles.count}>
-          Показано {grid.visible.length} из {grid.total}
-        </span>
+        {!grid.showFolders && (
+          <span className={styles.count}>
+            Показано {grid.visible.length} из {grid.total}
+          </span>
+        )}
         {changed && (
           <button type="button" className={styles.link} onClick={grid.resetFilter}>
             Сбросить фильтры

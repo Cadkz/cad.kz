@@ -56,11 +56,14 @@ export function priceChange(fromKzt, toKzt) {
 
 /**
  * Строки таблицы цен по фильтрам. Поиск — по всем словам в названии товара и комплектации.
+ * group — вкладка (ПО / оборудование / услуги), vendor — папка производителя: число или «none»
+ * (товары без производителя).
  * @template {{ label: string, vendor: number | null, section: number | null, currency: string,
- *   published: boolean, noPrice: boolean, id: number }} Row
+ *   published: boolean, noPrice: boolean, id: number, group?: string }} Row
  * @param {Row[]} rows
- * @param {{ query?: string, vendor?: number | null, section?: number | null, currency?: string,
- *   status?: 'all' | 'published' | 'draft', noPrice?: boolean, edited?: Set<number> | null }} filter
+ * @param {{ query?: string, group?: string | null, vendor?: number | 'none' | null,
+ *   section?: number | null, currency?: string, status?: 'all' | 'published' | 'draft',
+ *   noPrice?: boolean, edited?: Set<number> | null }} filter
  * @returns {Row[]}
  */
 export function filterPriceRows(rows, filter) {
@@ -68,9 +71,11 @@ export function filterPriceRows(rows, filter) {
     .split(/\s+/)
     .filter(Boolean)
   const status = filter.status ?? 'all'
+  const vendor = filter.vendor ?? null
   /** @type {((row: Row) => boolean)[]} */
   const tests = [
-    (row) => filter.vendor == null || row.vendor === filter.vendor,
+    (row) => !filter.group || row.group === filter.group,
+    (row) => vendor === null || row.vendor === (vendor === 'none' ? null : vendor),
     (row) => filter.section == null || row.section === filter.section,
     (row) => !filter.currency || row.currency === filter.currency,
     (row) => status === 'all' || row.published === (status === 'published'),
@@ -82,6 +87,58 @@ export function filterPriceRows(rows, filter) {
     },
   ]
   return rows.filter((row) => tests.every((test) => test(row)))
+}
+
+/**
+ * Папки производителей во вкладке «Цен», как в «Каталоге» (пожелание владельца 30.10.2026):
+ * сколько товаров и комплектаций, сколько из них без цены. Порядок — по названию производителя,
+ * «Без производителя» — последней.
+ * @param {{ vendor: number | null, productId: number, noPrice: boolean }[]} rows
+ * @param {Map<number, string>} titles — названия производителей
+ * @returns {{ vendor: number | 'none', title: string, products: number, offers: number,
+ *   noPrice: number }[]}
+ */
+export function priceFolders(rows, titles) {
+  /** @type {Map<number | 'none', { products: Set<number>, offers: number, noPrice: number }>} */
+  const byVendor = new Map()
+  for (const row of rows) {
+    const key = row.vendor ?? 'none'
+    const folder = byVendor.get(key) ?? { products: new Set(), offers: 0, noPrice: 0 }
+    folder.products.add(row.productId)
+    folder.offers += 1
+    if (row.noPrice) folder.noPrice += 1
+    byVendor.set(key, folder)
+  }
+  const title = (/** @type {number | 'none'} */ key) =>
+    key === 'none' ? 'Без производителя' : (titles.get(key) ?? `Производитель ${key}`)
+  return [...byVendor]
+    .map(([vendor, folder]) => ({
+      vendor,
+      title: title(vendor),
+      products: folder.products.size,
+      offers: folder.offers,
+      noPrice: folder.noPrice,
+    }))
+    .sort(
+      (a, b) =>
+        Number(a.vendor === 'none') - Number(b.vendor === 'none') ||
+        a.title.localeCompare(b.title, 'ru', { numeric: true }),
+    )
+}
+
+/**
+ * Сколько строк в каждой вкладке — чтобы при поиске подсказать: «ещё нашлось в Оборудовании».
+ * @param {{ group?: string }[]} rows
+ * @returns {Record<string, number>}
+ */
+export function countByGroup(rows) {
+  /** @type {Record<string, number>} */
+  const counts = {}
+  for (const row of rows) {
+    const key = row.group ?? ''
+    counts[key] = (counts[key] ?? 0) + 1
+  }
+  return counts
 }
 
 /** Для поиска: нижний регистр, «ё» как «е». */

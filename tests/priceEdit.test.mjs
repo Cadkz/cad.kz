@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
+  countByGroup,
   filterPriceRows,
   parseAmount,
   priceChange,
   priceEditSummary,
+  priceFolders,
   RATE,
   rateStart,
   todayInAstana,
@@ -88,6 +90,33 @@ test('фильтры таблицы цен', () => {
   assert.deepEqual(ids(filterPriceRows(rows, { status: 'published' })), [1, 2, 4])
   assert.deepEqual(ids(filterPriceRows(rows, { noPrice: true })), [4])
   assert.deepEqual(ids(filterPriceRows(rows, { edited: new Set([2, 4]) })), [2, 4])
+})
+
+test('цены папками: вкладка, папка производителя, «Без производителя», подсказка по вкладкам', () => {
+  const tree = [
+    { id: 1, productId: 10, label: 'AutoCAD', vendor: 1, group: 'software', noPrice: false },
+    { id: 2, productId: 10, label: 'AutoCAD 3 года', vendor: 1, group: 'software', noPrice: true },
+    { id: 3, productId: 11, label: 'ЛИРА', vendor: 2, group: 'software', noPrice: false },
+    { id: 4, productId: 12, label: 'Курс AutoCAD', vendor: null, group: 'service', noPrice: false },
+    { id: 5, productId: 13, label: 'Плоттер', vendor: 1, group: 'hardware', noPrice: false },
+  ].map((row) => ({ section: null, currency: 'KZT', published: true, ...row }))
+  assert.deepEqual(ids(filterPriceRows(tree, { group: 'software' })), [1, 2, 3])
+  assert.deepEqual(ids(filterPriceRows(tree, { group: 'software', vendor: 1 })), [1, 2])
+  assert.deepEqual(ids(filterPriceRows(tree, { vendor: 'none' })), [4])
+  const titles = new Map([
+    [1, 'Autodesk'],
+    [2, 'ЛИРА софт'],
+  ])
+  assert.deepEqual(priceFolders(filterPriceRows(tree, { group: 'software' }), titles), [
+    // Как в русском алфавитном порядке: кириллица раньше латиницы.
+    { vendor: 2, title: 'ЛИРА софт', products: 1, offers: 1, noPrice: 0 },
+    { vendor: 1, title: 'Autodesk', products: 1, offers: 2, noPrice: 1 },
+  ])
+  assert.equal(priceFolders(tree, titles).at(-1)?.title, 'Без производителя')
+  assert.deepEqual(countByGroup(filterPriceRows(tree, { query: 'autocad' })), {
+    software: 2,
+    service: 1,
+  })
 })
 
 test('запись в журнале', () => {

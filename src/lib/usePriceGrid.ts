@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { filterPriceRows, parseAmount } from '@/domain/priceEdit.mjs'
+import type { TreeGroup } from '@/domain/adminCatalog.mjs'
+import { countByGroup, filterPriceRows, parseAmount, priceFolders } from '@/domain/priceEdit.mjs'
 import { adminCall } from './adminCall'
 import { formatAmount } from './format'
 import type { PriceGridRow } from './offerPrices'
+import { type PricePlace, pushPricePlace, readPricePlace } from './priceUrl'
 
 /**
  * «Цены таблицей»: правки живут здесь, в браузере, до нажатия «Применить». Цену в тенге после
@@ -16,9 +18,14 @@ export const PAGE = 100
 
 type Currency = PriceGridRow['currency']
 
+/** Папка во вкладке: производитель, «Без производителя» или список папок (null). */
+export type PriceFolder = number | 'none' | null
+
 export type PriceFilter = {
   query: string
-  vendor: number | null
+  /** Вкладка, как в «Каталоге» (пожелание владельца 30.10.2026): ПО, оборудование, услуги. */
+  group: TreeGroup
+  vendor: PriceFolder
   section: number | null
   currency: string
   status: 'all' | 'published' | 'draft'
@@ -28,6 +35,7 @@ export type PriceFilter = {
 
 const EMPTY: PriceFilter = {
   query: '',
+  group: 'software',
   vendor: null,
   section: null,
   currency: '',
@@ -48,7 +56,23 @@ export type Edit = { row: PriceGridRow; amount: string | null; currency: Currenc
 type Message = { kind: 'ok' | 'error'; text: string }
 
 /** query — начальный поиск, например название товара из ссылки «Цены таблицей» в карточке товара. */
-export function usePriceGrid(initial: PriceGridRow[], query = '') {
+/** Фильтры, кроме вкладки и папки: при любом из них папки не нужны — сразу таблица. */
+export function isFiltering(filter: PriceFilter) {
+  return Boolean(
+    filter.query.trim() ||
+      filter.section != null ||
+      filter.currency ||
+      filter.status !== 'all' ||
+      filter.noPrice ||
+      filter.onlyEdited,
+  )
+}
+
+export function usePriceGrid(
+  initial: PriceGridRow[],
+  vendors: { id: number; title: string }[],
+  query = '',
+) {
   const [rows, setRows] = useState(initial)
   const [filter, setFilterState] = useState<PriceFilter>(() => ({ ...EMPTY, query }))
   const [limit, setLimit] = useState(PAGE)
@@ -96,6 +120,20 @@ export function usePriceGrid(initial: PriceGridRow[], query = '') {
     return () => clearTimeout(timer)
   }, [key])
 
+  // Вкладка и папка — из адреса при открытии и по «Назад» в браузере.
+  useEffect(() => {
+    const read = () => {
+      setFilterState((current) => ({
+        ...current,
+        ...readPricePlace(window.location.search, initial, current.query),
+      }))
+      setLimit(PAGE)
+    }
+    read()
+    window.addEventListener('popstate', read)
+    return () => window.removeEventListener('popstate', read)
+  }, [initial])
+
   // Неприменённые правки не теряются молча при уходе со страницы.
   useEffect(() => {
     if (!drafts.size) return
@@ -104,14 +142,34 @@ export function usePriceGrid(initial: PriceGridRow[], query = '') {
     return () => window.removeEventListener('beforeunload', warn)
   }, [drafts.size])
 
-  const visible = useMemo(
-    () =>
-      filterPriceRows(rows, {
-        ...filter,
-        edited: filter.onlyEdited ? new Set(drafts.keys()) : null,
-      }),
-    [rows, filter, drafts],
+  const edited = useMemo(
+    () => (filter.onlyEdited ? new Set(drafts.keys()) : null),
+    [filter.onlyEdited, drafts],
   )
+  const visible = useMemo(
+    () => filterPriceRows(rows, { ...filter, edited }),
+    [rows, filter, edited],
+  )
+
+  // Папки производителей вкладки — пока не открыта папка и не включён ни один фильтр.
+  const showFolders = filter.vendor === null && !isFiltering(filter)
+  const titles = useMemo(
+    () => new Map(vendors.map((vendor) => [vendor.id, vendor.title])),
+    [vendors],
+  )
+  const folders = useMemo(
+    () => priceFolders(filterPriceRows(rows, { group: filter.group }), titles),
+    [rows, filter.group, titles],
+  )
+  // Что нашлось поиском в других вкладках: «ещё в Оборудовании — 3».
+  const elsewhere = useMemo(() => {
+    if (!filter.query.trim()) return {}
+    const counts = countByGroup(
+      filterPriceRows(rows, { ...filter, group: null, vendor: null, edited }),
+    )
+    delete counts[filter.group]
+    return counts
+  }, [rows, filter, edited])
 
   function setDraft(row: PriceGridRow, draft: Draft) {
     setMessage(null)
@@ -186,7 +244,19 @@ export function usePriceGrid(initial: PriceGridRow[], query = '') {
       setFilterState((current) => ({ ...current, ...patch }))
       setLimit(PAGE)
     },
-    resetFilter: () => setFilterState(EMPTY),
+    resetFilter: () =>
+      setFilterState((current) => ({ ...EMPTY, group: current.group, vendor: current.vendor })),
+    /** Открыть вкладку или папку: новый шаг в истории браузера, поиск и фильтры сохраняются. */
+    go(place: PricePlace) {
+      pushPricePlace(place)
+      setFilterState((current) => ({ ...current, ...place }))
+      setLimit(PAGE)
+    },
+    showFolders,
+    folders,
+    elsewhere,
+    folderTitle: (folder: PriceFolder) =>
+      folder === 'none' ? 'Без производителя' : folder === null ? '' : (titles.get(folder) ?? ''),
     total: rows.length,
     visible,
     shown: visible.slice(0, limit),
