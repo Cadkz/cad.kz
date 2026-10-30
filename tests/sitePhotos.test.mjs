@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { NEW_SCANNERS } from '../src/domain/artecNewScanners.mjs'
 import artecSoftware from '../src/domain/artecSoftwareTexts.json' with { type: 'json' }
+import { NAVISWORKS_SIMULATE } from '../src/domain/autodeskNamesSeed.mjs'
 import research from '../src/domain/equipmentResearch.json' with { type: 'json' }
 import legacy from '../src/domain/legacyCatalog.json' with { type: 'json' }
 import { SITE_PHOTOS, sitePhotos } from '../src/domain/sitePhotos.mjs'
@@ -22,6 +23,8 @@ const slugs = new Set([
   ...research.products.map((entry) => entry.slug),
   ...NEW_SCANNERS.map((entry) => entry.slug),
   ...Object.keys(legacy.products),
+  // Товары, созданные разовыми настройками.
+  NAVISWORKS_SIMULATE.slug,
 ])
 
 test('фото файлами сайта: файлы на месте, товары существуют, размеры заданы', () => {

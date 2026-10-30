@@ -175,6 +175,11 @@ export const SITE_PHOTOS = {
     { url: '/images/software/navisworks-1.webp', width: 1600, height: 900 },
     { url: '/images/software/navisworks-2.webp', width: 1600, height: 900 },
   ],
+  // Navisworks Simulate — тот же интерфейс, что у Manage (без Clash Detective).
+  navisworks_simulate: [
+    { url: '/images/software/navisworks-1.webp', width: 1600, height: 900 },
+    { url: '/images/software/navisworks-2.webp', width: 1600, height: 900 },
+  ],
   // 3ds-max
   '3ds_max': [{ url: '/images/software/3ds-max-1.webp', width: 1600, height: 900 }],
   // aec-collection

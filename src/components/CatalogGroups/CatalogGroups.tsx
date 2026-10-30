@@ -9,8 +9,13 @@ import { ProductCard } from '../ProductCard/ProductCard'
 import { Reveal } from '../Reveal/Reveal'
 import styles from './CatalogGroups.module.css'
 
-/** Сколько карточек группы видно сразу; остальные — по кнопке «Показать все». */
-const FIRST = 6
+/**
+ * Сколько карточек группы видно сразу; остальные — по кнопке «Показать все». Пять рядов по три:
+ * сетка не короче колонки фильтров слева (замечание владельца 29.10.2026, было 6). Остаётся
+ * не больше ряда — показываем сразу всё, без кнопки ради одной-трёх карточек.
+ */
+const FIRST = 15
+const TAIL = 3
 
 /**
  * Товары выбранного производителя группами по линейкам: «Программный комплекс»,
@@ -22,7 +27,7 @@ export function CatalogGroups({ groups }: { groups: ResultGroup[] }) {
   return (
     <div className={styles.root}>
       {groups.map((group) => {
-        const all = open.includes(group.key) || group.items.length <= FIRST + 1
+        const all = open.includes(group.key) || group.items.length <= FIRST + TAIL
         const shown = all ? group.items : group.items.slice(0, FIRST)
         return (
           <section key={group.key} className={styles.group} aria-label={group.title || undefined}>

@@ -31,7 +31,8 @@ export type FilterState = {
 
 type Key = 'group' | 'direction' | 'type' | 'vendors' | 'line' | 'tasks' | `feature:${string}`
 
-export const PAGE_SIZE = 9
+/** Карточек на странице: пять рядов по три, не короче колонки фильтров (владелец 29.10.2026). */
+export const PAGE_SIZE = 15
 export const emptyFilter: FilterState = {
   group: null,
   direction: null,

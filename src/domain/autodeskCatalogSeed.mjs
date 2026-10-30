@@ -68,10 +68,10 @@ export const AUTODESK_NEW = [
   },
   {
     slug: 'fusion_for_design',
-    title: 'Fusion для дизайна',
+    title: 'Fusion for Design',
     copyFrom: 'fusion_360_cloud',
     pageView: 'standard',
-    aliases: 'fusion for design, фьюжн для дизайна, фьюжн',
+    aliases: 'fusion for design, fusion для дизайна, фьюжн для дизайна, фьюжн',
     summary: 'Fusion с расчётами, генеративным дизайном, сложными поверхностями и PLM.',
     description: [
       'Autodesk Fusion for Design — Fusion для конструкторов: к основным возможностям добавлены ' +
@@ -81,10 +81,10 @@ export const AUTODESK_NEW = [
   },
   {
     slug: 'fusion_for_manufacturing',
-    title: 'Fusion для производства',
+    title: 'Fusion for Manufacturing',
     copyFrom: 'fusion_360_cloud',
     pageView: 'standard',
-    aliases: 'fusion for manufacturing, фьюжн для производства, фьюжн',
+    aliases: 'fusion for manufacturing, fusion для производства, фьюжн для производства, фьюжн',
     summary: 'Fusion с расширенным ЧПУ: от 2D до 5-осевой обработки, контроль на станке.',
     description: [
       'Autodesk Fusion for Manufacturing — Fusion для производства: к основным возможностям ' +

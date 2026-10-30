@@ -13,7 +13,7 @@
 // каталог как в Битриксе: САПР в «Архитектуре и BIM», АВС — лицензия или обновление (22.10.2026);
 // оборудование как в Битриксе: четыре типа, плоттеры и комплектующие, WideTEK (22.10.2026);
 // тексты сканеров WideTEK (26.10.2026); девять направлений — визуализация и трубопроводы влиты (27.10.2026);
-// каталог Autodesk — только коллекции AEC, PDMC, M&E и их программы, Autodesk Forma и линейки (29.10.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
+// каталог Autodesk — только коллекции AEC, PDMC, M&E и их программы, Autodesk Forma и линейки, названия Fusion, Navisworks Manage и Simulate, прайс-лист Autodesk для Кадди (29.10.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -25,6 +25,7 @@ import { setupArtecSoftwareTexts } from '../src/lib/artecSoftwareTextsSetup.ts'
 import { setupArtecTexts } from '../src/lib/artecTextsSetup.ts'
 import { setupAuditCatalog, setupRevitBack } from '../src/lib/auditCatalogSetup.ts'
 import { setupAutodeskCatalog } from '../src/lib/autodeskCatalogSetup.ts'
+import { setupAutodeskNames } from '../src/lib/autodeskNamesSetup.ts'
 import { setupBimPage } from '../src/lib/bimSetup.ts'
 import { setupCardLogos } from '../src/lib/cardLogosSetup.ts'
 import { setupCards } from '../src/lib/cardsSetup.ts'
@@ -69,6 +70,7 @@ import { setupSearchAliases } from '../src/lib/searchSetup.ts'
 import { setupSoftwareTexts } from '../src/lib/softwareTextsSetup.ts'
 import { setupMepTasks } from '../src/lib/tasksSetup.ts'
 import { setupTextsAudit } from '../src/lib/textsSetup.ts'
+import { setupVendorList } from '../src/lib/vendorListSetup.ts'
 import { setupVendors } from '../src/lib/vendorsSetup.ts'
 import { setupVersions } from '../src/lib/versionsSetup.ts'
 import { clearWidetekGallery, setupWidetekTexts } from '../src/lib/widetekTextsSetup.ts'
@@ -296,6 +298,13 @@ try {
   const forma = await setupFormaCatalog(payload)
   if (!forma) console.log('Autodesk Forma и линейки Autodesk (29.10.2026) уже настроены.')
   else for (const line of forma) console.log(`Autodesk Forma — ${line}`)
+  const names = await setupAutodeskNames(payload)
+  if (!names)
+    console.log('Названия Fusion и Navisworks Manage/Simulate (29.10.2026) уже настроены.')
+  else for (const line of names) console.log(`Названия Autodesk — ${line}`)
+  const vendorList = await setupVendorList(payload)
+  if (!vendorList) console.log('Прайс-лист Autodesk для Кадди уже загружен.')
+  else for (const line of vendorList) console.log(`Прайс-лист Autodesk для Кадди — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)
