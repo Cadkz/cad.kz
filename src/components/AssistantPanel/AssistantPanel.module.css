@@ -16,15 +16,25 @@
   animation: open var(--duration-kaddi-open) var(--ease-reveal) backwards;
 }
 
-/* Белая подложка выше и ниже окна: пока iOS сдвигает экран под клавиатуру, страница
-   не просвечивает ни сверху, ни снизу. */
-.panel::before {
-  position: absolute;
-  inset: -100vh 0;
-  z-index: var(--z-below);
-  background: var(--color-surface);
-  content: "";
-  pointer-events: none;
+/* Телефон: за окном — матовое стекло ровно на видимую часть экрана (те же --viewport-*, что
+   у окна, но не ниже полного экрана). Всё, что iOS показывает вокруг чата, — полоса над клавиатурой, края при раскрытии, —
+   размыто и осветлено, а не кусками страницы. Намного больше экрана нельзя: размытие пропадает. */
+.backdrop {
+  position: fixed;
+  top: var(--viewport-top, 0);
+  right: 0;
+  left: 0;
+  z-index: var(--z-drawer);
+  height: max(var(--viewport-height, 100lvh), 100lvh);
+  background: var(--color-kaddi-backdrop);
+  -webkit-backdrop-filter: var(--blur-kaddi-backdrop);
+  backdrop-filter: var(--blur-kaddi-backdrop);
+  animation: fadeIn var(--duration-base) var(--ease) backwards;
+}
+
+.backdrop[data-closing="true"] {
+  opacity: 0;
+  transition: opacity var(--duration-kaddi-close) var(--ease);
 }
 
 .panel[data-closing="true"] {
@@ -64,7 +74,7 @@
     animation-delay: var(--duration-fast);
   }
 
-  .panel::before {
+  .backdrop {
     display: none;
   }
 
@@ -163,5 +173,11 @@
     clip-path: circle(var(--space-6) at var(--kaddi-origin));
     opacity: 0;
     transform: scale(0.6);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
 }

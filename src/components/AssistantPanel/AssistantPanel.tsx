@@ -57,6 +57,7 @@ export function AssistantPanel({
 }: Props) {
   const titleId = useId()
   const panel = useRef<HTMLElement>(null)
+  const backdrop = useRef<HTMLDivElement>(null)
   // false — разговор; объект — форма передачи (prefill — данные, которые собрал Кадди).
   const [handoff, setHandoff] = useState<false | { prefill?: HandoffPrefill }>(false)
   const shown = useRef(false)
@@ -103,11 +104,13 @@ export function AssistantPanel({
   // (замечание владельца 30.10.2026). Высота и верх берутся из visualViewport.
   useEffect(() => {
     const viewport = window.visualViewport
-    const node = panel.current
-    if (!viewport || !node) return
+    const nodes = [panel.current, backdrop.current].filter((node) => node !== null)
+    if (!viewport) return
     const fit = () => {
-      node.style.setProperty('--viewport-top', `${Math.round(viewport.offsetTop)}px`)
-      node.style.setProperty('--viewport-height', `${Math.round(viewport.height)}px`)
+      for (const node of nodes) {
+        node.style.setProperty('--viewport-top', `${Math.round(viewport.offsetTop)}px`)
+        node.style.setProperty('--viewport-height', `${Math.round(viewport.height)}px`)
+      }
     }
     fit()
     viewport.addEventListener('resize', fit)
@@ -173,82 +176,85 @@ export function AssistantPanel({
   }, [onClose, closing])
 
   return (
-    <section
-      ref={panel}
-      className={styles.panel}
-      data-closing={closing}
-      inert={closing}
-      role="dialog"
-      aria-labelledby={titleId}
-      tabIndex={-1}
-    >
-      <div className={styles.head}>
-        <AssistantHeader titleId={titleId} />
-        <div className={styles.tools}>
-          {chat.messages.length > 0 && !handoff && (
+    <>
+      <div ref={backdrop} className={styles.backdrop} data-closing={closing} aria-hidden="true" />
+      <section
+        ref={panel}
+        className={styles.panel}
+        data-closing={closing}
+        inert={closing}
+        role="dialog"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+      >
+        <div className={styles.head}>
+          <AssistantHeader titleId={titleId} />
+          <div className={styles.tools}>
+            {chat.messages.length > 0 && !handoff && (
+              <button
+                type="button"
+                className={styles.icon}
+                onClick={chat.restart}
+                aria-label="Начать новый разговор"
+                title="Начать новый разговор"
+              >
+                <RotateCcw size={20} strokeWidth={1.75} aria-hidden="true" />
+              </button>
+            )}
             <button
               type="button"
               className={styles.icon}
-              onClick={chat.restart}
-              aria-label="Начать новый разговор"
-              title="Начать новый разговор"
+              onClick={() => onClose()}
+              aria-label="Закрыть чат"
             >
-              <RotateCcw size={20} strokeWidth={1.75} aria-hidden="true" />
+              <X size={20} strokeWidth={1.75} aria-hidden="true" />
             </button>
-          )}
-          <button
-            type="button"
-            className={styles.icon}
-            onClick={() => onClose()}
-            aria-label="Закрыть чат"
-          >
-            <X size={20} strokeWidth={1.75} aria-hidden="true" />
-          </button>
+          </div>
         </div>
-      </div>
-      {demo && (
-        <p className={styles.note}>
-          <Info size={16} strokeWidth={1.75} aria-hidden="true" />
-          Демоверсия: ИИ не подключён, Кадди ищет по каталогу.
-        </p>
-      )}
-      {chat.live && (
-        <p className={styles.note}>
-          <Info size={16} strokeWidth={1.75} aria-hidden="true" />
-          {chat.manager
-            ? 'Вам отвечает менеджер CAD.kz. Кадди пока молчит.'
-            : 'Разговор видят менеджеры CAD.kz и могут подключиться.'}
-        </p>
-      )}
-      {handoff ? (
-        <AssistantHandoff
-          conversationId={chat.conversationId}
-          prefill={handoff.prefill}
-          whatsappHref={
-            whatsappHref &&
-            `${whatsappHref}?text=${encodeURIComponent(whatsappMessage(chat.messages, handoff.prefill))}`
-          }
-          onBack={() => setHandoff(false)}
-        />
-      ) : (
-        <>
-          <AssistantMessages
-            chat={chat}
-            grumpy={grumpy}
-            onHandoff={(prefill) => setHandoff({ prefill })}
-            whatsapp={
+        {demo && (
+          <p className={styles.note}>
+            <Info size={16} strokeWidth={1.75} aria-hidden="true" />
+            Демоверсия: ИИ не подключён, Кадди ищет по каталогу.
+          </p>
+        )}
+        {chat.live && (
+          <p className={styles.note}>
+            <Info size={16} strokeWidth={1.75} aria-hidden="true" />
+            {chat.manager
+              ? 'Вам отвечает менеджер CAD.kz. Кадди пока молчит.'
+              : 'Разговор видят менеджеры CAD.kz и могут подключиться.'}
+          </p>
+        )}
+        {handoff ? (
+          <AssistantHandoff
+            conversationId={chat.conversationId}
+            prefill={handoff.prefill}
+            whatsappHref={
               whatsappHref &&
-              `${whatsappHref}?text=${encodeURIComponent(whatsappMessage(chat.messages))}`
+              `${whatsappHref}?text=${encodeURIComponent(whatsappMessage(chat.messages, handoff.prefill))}`
             }
+            onBack={() => setHandoff(false)}
           />
-          <AssistantComposer
-            disabled={chat.waiting || !chat.conversationId}
-            manager={chat.manager}
-            onSend={chat.send}
-            onHandoff={() => setHandoff({})}
-          />
-        </>
-      )}
-    </section>
+        ) : (
+          <>
+            <AssistantMessages
+              chat={chat}
+              grumpy={grumpy}
+              onHandoff={(prefill) => setHandoff({ prefill })}
+              whatsapp={
+                whatsappHref &&
+                `${whatsappHref}?text=${encodeURIComponent(whatsappMessage(chat.messages))}`
+              }
+            />
+            <AssistantComposer
+              disabled={chat.waiting || !chat.conversationId}
+              manager={chat.manager}
+              onSend={chat.send}
+              onHandoff={() => setHandoff({})}
+            />
+          </>
+        )}
+      </section>
+    </>
   )
 }
