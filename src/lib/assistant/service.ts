@@ -32,7 +32,7 @@ import {
   type StoredConversation,
   saveConversation,
 } from './conversation'
-import { loadKnowledge, priceSummary } from './priceTable'
+import { loadKnowledge, loadVendorList, priceSummary } from './priceTable'
 import { type AssistantMode, leadsReachManagers, modelSettings } from './provider'
 import { createTools, findCards, toCard } from './tools'
 
@@ -106,7 +106,11 @@ async function modelAnswer(
   onTool?: (call: ToolCall) => void,
 ): Promise<Answer> {
   const tools = createTools(payload)
-  const [knowledge, price] = await Promise.all([loadKnowledge(payload), priceSummary(payload)])
+  const [knowledge, price, vendorList] = await Promise.all([
+    loadKnowledge(payload),
+    priceSummary(payload),
+    loadVendorList(payload),
+  ])
   const { apiKey, model } = modelSettings()
   const runTool = async (name: string, input: unknown) => {
     const result = await tools.run(name, input)
@@ -116,6 +120,7 @@ async function modelAnswer(
   const system = systemPrompt({
     now: new Date(),
     knowledge,
+    vendorList,
     price,
     handoff,
     time: workTime(new Date()),

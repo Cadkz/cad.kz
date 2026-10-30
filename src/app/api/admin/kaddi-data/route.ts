@@ -1,7 +1,13 @@
 import { validateKnowledge, validatePriceRows } from '@/domain/priceTable.mjs'
+import { validateVendorList } from '@/domain/vendorList.mjs'
 import { logActivity } from '@/lib/activity'
 import { adminRequest, reply } from '@/lib/adminApi'
-import { loadPriceTable, replaceKnowledge, savePriceTable } from '@/lib/assistant/priceTable'
+import {
+  loadPriceTable,
+  replaceKnowledge,
+  savePriceTable,
+  saveVendorList,
+} from '@/lib/assistant/priceTable'
 import { priceByCode, searchPrice, siteEntries } from '@/lib/assistant/tools'
 
 /**
@@ -81,6 +87,19 @@ export async function POST(request: Request) {
         summary: `База знаний Кадди заменена из файла: записей ${saved}`,
         userId: user.id,
         link: '/admin/collections/assistant-knowledge',
+      })
+    }
+    if (data.vendor) {
+      const list = validateVendorList(data.vendor)
+      if (typeof list === 'string') return reply({ error: list }, 400)
+      const fileName = short((data.vendor as Record<string, unknown>).fileName, 120) || 'без имени'
+      await saveVendorList(payload, list, fileName)
+      parts.push(`прайс-лист ${list.vendor} — ${list.products.length} продуктов`)
+      await logActivity(payload, {
+        action: 'kaddi',
+        summary: `Прайс-лист ${list.vendor} для Кадди: ${fileName}, продуктов ${list.products.length}`,
+        userId: user.id,
+        link: '/admin/kaddi-data',
       })
     }
     if (!parts.length) return reply({ error: 'Нечего загружать' }, 400)

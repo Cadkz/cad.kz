@@ -5,6 +5,7 @@
 
 import { QUICK_REPLIES_RULE } from './quickReplies.mjs'
 import { RENEW_PROGRAM_OPTIONS } from './siteRequest.mjs'
+import { vendorListText } from './vendorList.mjs'
 
 /** Лимиты: одно сообщение, число вопросов в разговоре, сколько истории уходит модели. */
 export const ASSISTANT_LIMITS = /** @type {const} */ ({
@@ -881,6 +882,7 @@ export function checkHandoff(raw, normalizePhone) {
  * @typedef {object} PromptContext
  * @property {Date} now
  * @property {{ product: string, text: string }[]} knowledge  База знаний (лист FAQ), включённые записи.
+ * @property {import('./vendorList.mjs').VendorList | null} [vendorList]  Прайс-лист производителя: что можно поставить.
  * @property {{ updated: string, vat: 'included' | 'excluded' | 'unknown' } | null} price  Действующий прайс.
  * @property {HandoffState} handoff
  * @property {{ state: 'work' | 'lunch' | 'off', text: string }} time  src/domain/priceTable.mjs workTime.
@@ -1066,7 +1068,7 @@ function handoffText(/** @type {HandoffState} */ handoff) {
  * @param {PromptContext} context
  * @returns {[string, string]}
  */
-export function systemPrompt({ knowledge, price, handoff, time }) {
+export function systemPrompt({ knowledge, vendorList = null, price, handoff, time }) {
   const facts = knowledge.length
     ? knowledge
         .map((entry) => `— [${entry.product}] ${entry.text.replace(/\s*\n\s*/g, ' ')}`)
@@ -1075,7 +1077,7 @@ export function systemPrompt({ knowledge, price, handoff, time }) {
   const stable = `${RULES}
 
 База знаний компании — справка для ответов. При расхождении с правилами выше действуют правила. Цены и сроки поставки отсюда клиенту не называй — только из прайса. Ссылку, которую база просит не отправлять клиенту, не отправляй.
-${facts}`
+${facts}${vendorListText(vendorList)}`
   const priceLine = price
     ? `Прайс загружен, дата прайса ${price.updated ? price.updated.split('-').reverse().join('.') : 'не указана'}.`
     : 'Прайс не загружен: стоимость не называй, передавай вопрос менеджеру.'

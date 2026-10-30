@@ -12,12 +12,14 @@ import {
   type VatMode,
 } from '@/domain/priceTable.mjs'
 import { readSpreadsheet, SpreadsheetError } from '@/domain/spreadsheet.mjs'
+import { parseAutodeskList, type VendorList } from '@/domain/vendorList.mjs'
 import styles from './KaddiData.module.css'
 
 type Parsed = {
   fileName: string
   price: { sheet: string; rows: PriceRow[]; problems: string[]; updated: string } | null
   knowledge: { sheet: string; entries: KnowledgeEntry[] } | null
+  vendor: VendorList | null
 }
 
 const PROBLEMS_SHOWN = 12
@@ -45,15 +47,17 @@ export function KaddiData() {
     setParsed(null)
     try {
       const sheets = await readSpreadsheet(new Uint8Array(await file.arrayBuffer()))
-      const price = parsePriceTable(sheets)
-      const knowledge = parseKnowledge(sheets)
-      if (!price && !knowledge) {
+      const vendor = parseAutodeskList(sheets)
+      const price = vendor ? null : parsePriceTable(sheets)
+      const knowledge = vendor ? null : parseKnowledge(sheets)
+      if (!price && !knowledge && !vendor) {
         setError(
-          'В файле нет листа прайса (заголовки «Код» и «Цена, тенге») и листа FAQ (колонка «Продукт»).',
+          'В файле нет листа прайса (заголовки «Код» и «Цена, тенге»), листа FAQ (колонка «Продукт») ' +
+            'и прайс-листа Autodesk (колонки «SKU код» и «РЦКП»).',
         )
         return
       }
-      setParsed({ fileName: file.name, price, knowledge })
+      setParsed({ fileName: file.name, price, knowledge, vendor })
       setUsePrice(Boolean(price?.rows.length))
       setUseKnowledge(Boolean(knowledge?.entries.length))
     } catch (failure) {
@@ -82,6 +86,7 @@ export function KaddiData() {
               }
             : {}),
           ...(useKnowledge && parsed.knowledge ? { knowledge: parsed.knowledge.entries } : {}),
+          ...(parsed.vendor ? { vendor: { ...parsed.vendor, fileName: parsed.fileName } } : {}),
         }),
       })
       const result = await response.json()
@@ -105,7 +110,8 @@ export function KaddiData() {
     <section className={styles.root}>
       <h2 className={styles.title}>Загрузить файл</h2>
       <FileDrop accept=".xlsx,.ods,.csv" fileName={parsed?.fileName ?? null} onFile={read} />
-      {parsed && (
+      {parsed?.vendor && <VendorFound list={parsed.vendor} />}
+      {parsed && !parsed.vendor && (
         <div className={styles.found}>
           {parsed.price ? (
             <div className={styles.block}>
@@ -168,16 +174,19 @@ export function KaddiData() {
           ) : (
             <p className={styles.hint}>Листа FAQ в файле нет — база знаний останется прежней.</p>
           )}
-          <div className={styles.actions}>
-            <AdminButton
-              onClick={save}
-              disabled={
-                busy || (!(usePrice && parsed.price) && !(useKnowledge && parsed.knowledge))
-              }
-            >
-              {busy ? 'Сохраняем…' : 'Загрузить для Кадди'}
-            </AdminButton>
-          </div>
+        </div>
+      )}
+      {parsed && (
+        <div className={styles.actions}>
+          <AdminButton
+            onClick={save}
+            disabled={
+              busy ||
+              (!parsed.vendor && !(usePrice && parsed.price) && !(useKnowledge && parsed.knowledge))
+            }
+          >
+            {busy ? 'Сохраняем…' : 'Загрузить для Кадди'}
+          </AdminButton>
         </div>
       )}
       {error && (
@@ -191,5 +200,29 @@ export function KaddiData() {
         </p>
       )}
     </section>
+  )
+}
+
+const day = (value: string) => (value ? value.split('-').reverse().join('.') : 'не указано')
+
+/** Что нашлось в прайс-листе производителя. */
+function VendorFound({ list }: { list: VendorList }) {
+  return (
+    <div className={styles.found}>
+      <div className={styles.block}>
+        <strong>
+          Прайс-лист {list.vendor}: {list.products.length} продуктов
+        </strong>
+        <p className={styles.hint}>
+          Действует с {day(list.from)} по {day(list.to)}. Заменит прежний прайс-лист {list.vendor}.
+          Прайс CAD.kz и база знаний не меняются. Например:{' '}
+          {list.products
+            .slice(0, 6)
+            .map((product) => product.name)
+            .join(', ')}
+          …
+        </p>
+      </div>
+    </div>
   )
 }

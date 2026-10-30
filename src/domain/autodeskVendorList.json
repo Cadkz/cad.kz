@@ -1,0 +1,730 @@
+{
+  "fileName": "Прайс-лист Autodesk 07.10.2026 - 06.11.2026.xlsx",
+  "list": {
+    "vendor": "Autodesk",
+    "from": "2026-10-07",
+    "to": "2026-11-06",
+    "products": [
+      {
+        "name": "3ds Max",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Advance Steel",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Alias AutoStudio",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Alias Concept",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Alias Surface",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Architecture Engineering & Construction Collection",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Arnold",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "AutoCAD - including specialized toolsets",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "AutoCAD LT",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "AutoCAD Revit LT Suite",
+        "cloud": false,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "AutoCAD Web",
+        "cloud": true,
+        "options": ["новая подписка: 1 год", "продление"]
+      },
+      {
+        "name": "Autodesk Fusion Operations - Admin",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Autodesk Fusion Operations - Shop Floor",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "BIM 360 Build - Packs",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Business Plan",
+        "cloud": false,
+        "options": ["новая подписка: 1 год", "продление"]
+      },
+      {
+        "name": "CFD - cloud service entitlement",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "CFD - Ultimate",
+        "cloud": false,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Civil 3D",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Fabrication CAMduct",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Flame",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Flame Assist",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Flare",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Flow Production Tracking",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Flow Studio - Enterprise",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Flow Studio - Pro",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Flow Studio - Standard",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Forma Build",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Forma Build Essentials",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Forma Data Management",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Forma Design Collaboration",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Forma for Buildings",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Forma Site Design",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Forma Takeoff",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion - with FeatureCAM",
+        "cloud": true,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Fusion Contributor",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion Design Extension",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion for Design",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion for Manufacturing",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion Manage",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion Manage - Enterprise",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion Manage - for third-party users",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion Manage - Sandbox",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion Manufacturing Extension",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion Simulation Extension",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion with Moldflow Adviser",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Fusion with Moldflow Adviser - Legacy",
+        "cloud": true,
+        "options": ["новая подписка: 1 год", "продление"]
+      },
+      {
+        "name": "Fusion with Netfabb",
+        "cloud": true,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Fusion with PowerInspect",
+        "cloud": true,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Fusion with PowerMill Standard",
+        "cloud": true,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Fusion with PowerMill Ultimate",
+        "cloud": true,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Fusion with PowerShape",
+        "cloud": true,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "InfoAsset Manager",
+        "cloud": false,
+        "options": ["новая подписка: 1 год", "продление"]
+      },
+      {
+        "name": "InfoDrainage",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "InfoWater Pro",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "InfoWorks Cloud Simulation - 500 Hours",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "InfoWorks ICM - Ultimate",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "InfoWorks ICM Flood",
+        "cloud": false,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "InfoWorks ICM Sewer",
+        "cloud": false,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "InfoWorks ICMLive",
+        "cloud": false,
+        "options": ["новая подписка: 1 год", "продление"]
+      },
+      {
+        "name": "InfoWorks IWLive Pro",
+        "cloud": false,
+        "options": ["новая подписка: 1 год", "продление"]
+      },
+      {
+        "name": "InfoWorks WS Pro",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "InfraWorks",
+        "cloud": false,
+        "options": ["новая подписка: 1 год", "продление"]
+      },
+      {
+        "name": "Inventor Professional",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Lustre",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Maya",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Media & Entertainment Collection",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Moldflow - Compute Service",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Moldflow Adviser Premium",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Moldflow Adviser Ultimate",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Moldflow Insight",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Moldflow Insight - Legacy",
+        "cloud": true,
+        "options": ["новая подписка: 1 год", "продление"]
+      },
+      {
+        "name": "Moldflow Insight Premium",
+        "cloud": false,
+        "options": ["новая подписка: 1 год", "продление", "переход со старых лицензий"]
+      },
+      {
+        "name": "Moldflow Insight Standard",
+        "cloud": false,
+        "options": ["новая подписка: 1 год", "продление", "переход со старых лицензий"]
+      },
+      {
+        "name": "Moldflow Insight Ultimate",
+        "cloud": false,
+        "options": ["новая подписка: 1 год", "продление", "переход со старых лицензий"]
+      },
+      {
+        "name": "Moldflow Synergy",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "MotionBuilder",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Mudbox",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Navisworks Manage",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Navisworks Simulate",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "NavPack Core",
+        "cloud": false,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "NavPack Design",
+        "cloud": false,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Netfabb Local Simulation",
+        "cloud": false,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Point Layout",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Product Design & Manufacturing Collection",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "ReCap Pro",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Revit",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Vault Office",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Vault PLM - Enterprise",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Vault PLM - Professional",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "Vault Professional",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "VRED Core",
+        "cloud": false,
+        "options": ["новая подписка: 1 год", "продление", "есть сетевые (multi-user)"]
+      },
+      {
+        "name": "VRED Design",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "VRED Presenter",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "VRED Professional",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год, 3 года",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "VRED Render Node",
+        "cloud": false,
+        "options": [
+          "новая подписка: 1 год",
+          "продление",
+          "переход со старых лицензий",
+          "есть сетевые (multi-user)"
+        ]
+      },
+      {
+        "name": "Workshop XR",
+        "cloud": true,
+        "options": ["новая подписка: 1 год, 3 года", "продление"]
+      },
+      {
+        "name": "XPSWMM - Complete",
+        "cloud": false,
+        "options": ["новая подписка: 1 год", "продление"]
+      },
+      {
+        "name": "XPSWMM - Sewer",
+        "cloud": false,
+        "options": ["новая подписка: 1 год", "продление"]
+      }
+    ]
+  }
+}

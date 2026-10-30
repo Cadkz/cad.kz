@@ -6,6 +6,7 @@ import {
   type PriceRow,
   type VatMode,
 } from '@/domain/priceTable.mjs'
+import { VENDOR_STATE, type VendorList, validateVendorList } from '@/domain/vendorList.mjs'
 
 /**
  * Прайс и база знаний Кадди в базе сайта: загрузка со страницы «Прайс и база Кадди», чтение для
@@ -166,4 +167,48 @@ export async function replaceKnowledge(payload: Payload, entries: KnowledgeEntry
     })
   }
   return entries.length
+}
+
+/**
+ * Прайс-лист производителя (что вообще можно поставить, без цен): один действующий на
+ * производителя, новый заменяет прежний. Хранится в той же коллекции с отдельным состоянием.
+ */
+export async function saveVendorList(payload: Payload, list: VendorList, fileName: string) {
+  await payload.delete({
+    collection: 'price-tables',
+    where: { state: { equals: VENDOR_STATE } },
+    ...options,
+  })
+  await payload.create({
+    collection: 'price-tables',
+    data: {
+      state: VENDOR_STATE,
+      summary: {
+        vendor: list.vendor,
+        from: list.from,
+        to: list.to,
+        products: list.products.length,
+        fileName,
+        uploadedAt: new Date().toISOString(),
+      },
+      snapshot: { version: 1, list },
+    },
+    ...options,
+  })
+}
+
+/** Действующий прайс-лист производителя или null. */
+export async function loadVendorList(payload: Payload): Promise<VendorList | null> {
+  const { docs } = await payload.find({
+    collection: 'price-tables',
+    where: { state: { equals: VENDOR_STATE } },
+    sort: '-createdAt',
+    limit: 1,
+    depth: 0,
+    select: { snapshot: true },
+    ...options,
+  })
+  const snapshot = docs[0]?.snapshot as { list?: unknown } | null | undefined
+  const list = validateVendorList(snapshot?.list)
+  return typeof list === 'string' ? null : list
 }
