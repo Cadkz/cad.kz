@@ -47,3 +47,17 @@ test('пустой и бессмысленный запрос', () => {
   assert.deepEqual(titles('пылесос'), [])
   assert.deepEqual(titles('zz'), [])
 })
+
+test('бессмыслица не находит товары с союзом «и» (ыыы звучит как «и»)', () => {
+  const items = [
+    { title: 'Artec Point II', summary: 'Лазерный сканер для контроля качества и точности' },
+    { title: 'Revit', summary: 'BIM-проектирование и документация' },
+  ]
+  assert.deepEqual(searchItems(items, 'ыыы'), [])
+  assert.deepEqual(searchItems(items, 'ыыы\\'), [])
+  assert.deepEqual(searchItems(items, 'ыыыаа'), [])
+  assert.deepEqual(
+    searchItems(items, 'ревит').map((item) => item.title),
+    ['Revit'],
+  )
+})

@@ -269,6 +269,9 @@ function distance(a, b, limit) {
   return prev[b.length]
 }
 
+/** Короче — сравнение по звучанию не делается: одна-две буквы совпадают с чем угодно. */
+const MIN_SOUND = 3
+
 /** @param {number} length */
 const allowedTypos = (length) => (length >= 7 ? 2 : length >= 4 ? 1 : 0)
 
@@ -366,8 +369,12 @@ function bestScore(query, words, strict = false) {
       wordScore(query.latin, entry, !strict),
     )
     if (!strict) {
-      const heard = wordScore(query.heard, { word: entry.sound, stem: entry.sound, sound: '' })
-      best = Math.max(best, Math.min(2, heard))
+      // По звучанию — только слова от трёх звуков: «ыыы» звучит как «и», и находился любой
+      // товар с союзом «и» в описании (замечание владельца 30.10.2026: 60 позиций на «ыыы»).
+      if (query.heard.length >= MIN_SOUND && entry.sound.length >= MIN_SOUND) {
+        const heard = wordScore(query.heard, { word: entry.sound, stem: entry.sound, sound: '' })
+        best = Math.max(best, Math.min(2, heard))
+      }
       for (const v of [query.swapped, query.swappedLatin]) {
         const score = v === query.text ? 0 : wordScore(v, entry)
         if (score >= 2) best = Math.max(best, score)
