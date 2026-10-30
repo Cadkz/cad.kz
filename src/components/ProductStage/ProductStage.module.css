@@ -246,6 +246,9 @@
 }
 
 .fact dd {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   margin: 0;
   color: var(--color-text);
   font-family: var(--font-heading);
@@ -268,6 +271,15 @@
   .facts {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  /* Плоттеры: четыре-пять фактов одной строкой, как у Canon (владелец 30.10.2026). */
+  .facts[data-count="4"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .facts[data-count="5"] {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
 }
 
 .media:has(.nav) {
@@ -284,4 +296,15 @@
   border-radius: var(--radius-round);
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
+}
+
+/* Значок цветности: палитра — акцентным цветом, полукруг — цветом текста. */
+.iconColor {
+  flex: none;
+  color: var(--color-blue);
+}
+
+.iconMono {
+  flex: none;
+  color: var(--color-text-muted);
 }
