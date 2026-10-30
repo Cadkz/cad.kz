@@ -1,6 +1,7 @@
 import { NavGroup } from '@payloadcms/ui'
 import {
   BookOpen,
+  ChartColumn,
   ClipboardCheck,
   Database,
   FileText,
@@ -40,6 +41,7 @@ const ICONS: Record<string, LucideIcon> = {
   knowledge: BookOpen,
   check: ClipboardCheck,
   data: Database,
+  analytics: ChartColumn,
 }
 
 function Item({ link }: { link: MenuLink }) {

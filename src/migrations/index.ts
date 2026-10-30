@@ -31,6 +31,7 @@ import * as migration_20261022_104851_product_redirect_to from './20261022_10485
 import * as migration_20261022_125849_equipment_research from './20261022_125849_equipment_research'
 import * as migration_20261023_114952_manufacturer_order from './20261023_114952_manufacturer_order'
 import * as migration_20261024_000240_product_scans from './20261024_000240_product_scans'
+import * as migration_20261030_100913_search_queries from './20261030_100913_search_queries'
 
 export const migrations = [
   {
@@ -197,5 +198,10 @@ export const migrations = [
     up: migration_20261024_000240_product_scans.up,
     down: migration_20261024_000240_product_scans.down,
     name: '20261024_000240_product_scans',
+  },
+  {
+    up: migration_20261030_100913_search_queries.up,
+    down: migration_20261030_100913_search_queries.down,
+    name: '20261030_100913_search_queries',
   },
 ]

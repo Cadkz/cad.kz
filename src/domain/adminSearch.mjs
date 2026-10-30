@@ -201,6 +201,11 @@ export const ADMIN_ACTIONS = [
     words: 'прайс загрузить excel файл цены',
   },
   {
+    label: 'Аналитика поиска и Кадди',
+    href: '/admin/analytics',
+    words: 'аналитика статистика запросы поиск ищут вопросы кадди',
+  },
+  {
     label: 'Новый курс валюты',
     href: '/admin/rates',
     words: 'курс доллар евро рубль валюта',

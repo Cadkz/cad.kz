@@ -2,8 +2,17 @@
 
 import { Search, X } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
-import { type KeyboardEvent, useEffect, useId, useMemo, useRef, useState } from 'react'
+import {
+  type KeyboardEvent,
+  type MouseEvent,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { groupSuggestions } from '@/domain/suggest.mjs'
+import { sendSearchEvent } from '@/lib/sendSearchEvent'
 import { useSuggest } from '@/lib/useSuggest'
 import { useTypingHint } from '@/lib/useTypingHint'
 import {
@@ -42,6 +51,8 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
   const [open, setOpen] = useState(variant === 'layer')
   const [active, setActive] = useState(-1)
   const state = useSuggest(value)
+  // Последний запрос с готовыми подсказками — для аналитики: что искали и сколько нашлось.
+  const pending = useRef<{ query: string; found: number } | null>(null)
 
   const { groups, options } = useMemo(() => {
     const result = state.status === 'done' || state.status === 'loading' ? state.result : null
@@ -63,6 +74,42 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
     return { groups, options }
   }, [state, listId])
 
+  useEffect(() => {
+    if (state.status === 'done')
+      pending.current = { query: state.result.query, found: state.result.items.length }
+    else if (state.status === 'idle') pending.current = null
+  }, [state])
+
+  /** Аналитика: запрос и куда ушли (null — посмотрел подсказки и ушёл ни с чем). */
+  function track(click: string | null) {
+    const seen = pending.current
+    pending.current = null
+    if (seen) sendSearchEvent({ ...seen, source: 'suggest', click })
+  }
+
+  // Ушли со страницы, не закрыв подсказки, — запрос тоже считается.
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') track(null)
+    }
+    document.addEventListener('visibilitychange', onHide)
+    return () => document.removeEventListener('visibilitychange', onHide)
+  })
+
+  /** Нажатие в панели подсказок: ссылка, «Спросить Кадди» или WhatsApp. */
+  function onPanelClick(event: MouseEvent<HTMLDivElement>) {
+    if (!(event.target instanceof Element)) return
+    const target = event.target.closest<HTMLElement>('a[href], [data-search-click]')
+    if (!target) return
+    const marked = target.dataset.searchClick
+    if (marked) return track(marked)
+    if (!(target instanceof HTMLAnchorElement)) return
+    if (target.origin !== window.location.origin) return track('whatsapp')
+    // «Все результаты» — запрос посчитает страница поиска.
+    if (target.pathname === '/search') pending.current = null
+    else track(target.pathname)
+  }
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: новый набор подсказок — выбор сначала
   useEffect(() => setActive(-1), [options])
   // biome-ignore lint/correctness/useExhaustiveDependencies: перешли на другую страницу — список закрыт
@@ -78,6 +125,7 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
   const showPanel = open && (variant === 'layer' || focused || value.trim().length > 0)
 
   function close() {
+    track(null)
     setOpen(false)
     setActive(-1)
     onClose?.()
@@ -97,6 +145,8 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
       const option = options[active]
       if (option) {
         event.preventDefault()
+        if (option.suggestion) track(option.href.split(/[?#]/)[0] ?? option.href)
+        else pending.current = null
         router.push(option.href)
         input.current?.blur()
         close()
@@ -119,7 +169,10 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
       onBlur={(event) => {
         if (root.current?.contains(event.relatedTarget as Node | null)) return
         setFocused(false)
-        if (variant === 'inline') setOpen(false)
+        if (variant === 'inline') {
+          track(null)
+          setOpen(false)
+        }
       }}
     >
       <search className={styles.row}>
@@ -130,6 +183,8 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
           onSubmit={(event) => {
             event.preventDefault()
             if (!value.trim()) return
+            // Запрос посчитает страница поиска.
+            pending.current = null
             router.push(searchHref(value))
             input.current?.blur()
             close()
@@ -192,6 +247,7 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
         data-open={showPanel}
         inert={!showPanel}
         onMouseDown={(event) => event.preventDefault()}
+        onClickCapture={onPanelClick}
       >
         <SearchSuggestions
           query={value}

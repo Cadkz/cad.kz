@@ -104,3 +104,8 @@
 .catalog:hover {
   border-color: var(--color-blue-mid);
 }
+
+/* Обёртка кнопки «Спросить Кадди» для аналитики поиска — сама места не занимает. */
+.kaddi {
+  display: contents;
+}

@@ -7,6 +7,7 @@ import { Grid } from '../Grid/Grid'
 import { WhatsappIcon } from '../icons/icons'
 import { Mascot } from '../Mascot/Mascot'
 import { ProductCard } from '../ProductCard/ProductCard'
+import { SearchTracker } from '../SearchTracker/SearchTracker'
 import styles from './SearchResults.module.css'
 
 type Props = {
@@ -46,6 +47,22 @@ export function SearchResults({
   whatsappHref,
 }: Props) {
   if (!query.trim()) return null
+  const found = partial ? 0 : items.length + addons.length
+  return (
+    <SearchTracker query={query} found={found}>
+      <Found
+        query={query}
+        items={items}
+        partial={partial}
+        addons={addons}
+        bases={bases}
+        whatsappHref={whatsappHref}
+      />
+    </SearchTracker>
+  )
+}
+
+function Found({ query, items, partial = false, addons = [], bases = [], whatsappHref }: Props) {
   if (!items.length) {
     const text = `Здравствуйте! Ищу на сайте: ${query}. Подскажите, пожалуйста.`
     return (
@@ -71,7 +88,9 @@ export function SearchResults({
             <Link href={catalogHref()} className={styles.catalog}>
               Перейти в каталог
             </Link>
-            <AskKaddi variant="text" />
+            <span className={styles.kaddi} data-search-click="kaddi">
+              <AskKaddi variant="text" />
+            </span>
           </div>
         </div>
         <Mascot pose="search" className={styles.mascot} />

@@ -27,6 +27,7 @@ import { RatesView as RatesView_40625fd6f05f8f77e54d5fe804a2439f } from '../../.
 import { QualityView as QualityView_b38a01f0afeeafbe57506d409fe1d356 } from '../../../components/QualityView/QualityView'
 import { KaddiDataView as KaddiDataView_e4069d6241b6244bfa3b65ac2def2f14 } from '../../../components/KaddiDataView/KaddiDataView'
 import { AssistantCheckView as AssistantCheckView_ec6e0189c41c4a69611fb303565b66ab } from '../../../components/AssistantCheckView/AssistantCheckView'
+import { AnalyticsView as AnalyticsView_47205d9166363221f956bf1d82c83319 } from '../../../components/AnalyticsView/AnalyticsView'
 import { Bitrix24View as Bitrix24View_d620f679068953f3cd8065dee816312d } from '../../../components/Bitrix24View/Bitrix24View'
 import { LegacyContentView as LegacyContentView_f30aba65b9603ebbdd7a3d9cea213479 } from '../../../components/LegacyContentView/LegacyContentView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -63,6 +64,7 @@ export const importMap = {
   "/components/QualityView/QualityView#QualityView": QualityView_b38a01f0afeeafbe57506d409fe1d356,
   "/components/KaddiDataView/KaddiDataView#KaddiDataView": KaddiDataView_e4069d6241b6244bfa3b65ac2def2f14,
   "/components/AssistantCheckView/AssistantCheckView#AssistantCheckView": AssistantCheckView_ec6e0189c41c4a69611fb303565b66ab,
+  "/components/AnalyticsView/AnalyticsView#AnalyticsView": AnalyticsView_47205d9166363221f956bf1d82c83319,
   "/components/Bitrix24View/Bitrix24View#Bitrix24View": Bitrix24View_d620f679068953f3cd8065dee816312d,
   "/components/LegacyContentView/LegacyContentView#LegacyContentView": LegacyContentView_f30aba65b9603ebbdd7a3d9cea213479,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1,

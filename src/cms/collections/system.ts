@@ -46,3 +46,21 @@ export const redirects: CollectionConfig = {
     ...legacyFields,
   ],
 }
+
+/**
+ * Запросы поиска на сайте (аналитика, src/domain/searchStats.mjs): текст, сколько нашлось,
+ * подсказки или страница поиска, куда кликнули. Без адреса и номера сессии. Пишет только сервер
+ * (/api/search/log), хранится SEARCH_RETENTION_DAYS дней. Смотреть — страница «Аналитика».
+ */
+export const searchQueries: CollectionConfig = {
+  slug: 'search-queries',
+  labels: { singular: 'Запрос поиска', plural: 'Запросы поиска' },
+  admin: { hidden: true },
+  access: { read: isAdmin, create: nobody, update: nobody, delete: nobody },
+  fields: [
+    { name: 'query', type: 'text', required: true, index: true },
+    { name: 'found', type: 'number', required: true },
+    { name: 'source', type: 'text', required: true },
+    { name: 'click', type: 'text' },
+  ],
+}

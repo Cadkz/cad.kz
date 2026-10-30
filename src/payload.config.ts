@@ -92,6 +92,11 @@ export default buildConfig({
           path: '/assistant-check',
           meta: { title: 'Проверка Кадди' },
         },
+        analytics: {
+          Component: '/components/AnalyticsView/AnalyticsView#AnalyticsView',
+          path: '/analytics',
+          meta: { title: 'Аналитика' },
+        },
         bitrix24: {
           Component: '/components/Bitrix24View/Bitrix24View#Bitrix24View',
           path: '/bitrix24',

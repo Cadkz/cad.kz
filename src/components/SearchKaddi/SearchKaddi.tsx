@@ -37,7 +37,7 @@ export function SearchKaddi({ query, empty, onPick }: Props) {
       <div className={styles.empty}>
         <div className={styles.text}>
           <p className={styles.lead}>Опишите задачу своими словами — Кадди поможет подобрать.</p>
-          <button type="button" className={styles.button} onClick={ask}>
+          <button type="button" className={styles.button} onClick={ask} data-search-click="kaddi">
             Спросить Кадди
           </button>
         </div>
@@ -46,7 +46,7 @@ export function SearchKaddi({ query, empty, onPick }: Props) {
     )
 
   return (
-    <button type="button" className={styles.row} onClick={ask}>
+    <button type="button" className={styles.row} onClick={ask} data-search-click="kaddi">
       <Mascot pose="head" size="icon" eager hover={false} />
       <span>
         {question.length >= MIN_QUESTION ? (

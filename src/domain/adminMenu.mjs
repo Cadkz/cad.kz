@@ -108,6 +108,7 @@ export const MENU = [
       },
       { label: 'Проверка Кадди', href: '/admin/assistant-check', icon: 'check', access: 'staff' },
       { label: 'Прайс и база', href: '/admin/kaddi-data', icon: 'data', access: 'staff' },
+      { label: 'Аналитика', href: '/admin/analytics', icon: 'analytics', access: 'staff' },
     ],
   },
   {
