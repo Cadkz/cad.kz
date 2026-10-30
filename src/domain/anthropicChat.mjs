@@ -62,8 +62,15 @@ export async function anthropicReply(options) {
   // иногда заканчивает ход без текста — клиент видел «Модель не ответила». Тогда один раз
   // просим ответить клиенту текстом, уже без инструментов.
   let nudged = false
-  for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-    const last = round === MAX_TOOL_ROUNDS || nudged
+  // Отчёт «Проверки Кадди» 30.10.2026 (второй прогон): модель часто пишет суть ответа в том же
+  // ходе, что и вызов инструмента (передача менеджеру, карточка), а после результата — только
+  // «Карточка ниже». Раньше клиент видел лишь последний кусок; теперь текст всех ходов собирается.
+  /** @type {string[]} */
+  const earlier = []
+  // Ещё один круг сверх лимита — для просьбы ответить текстом, если последний ход вышел пустым
+  // (раньше это давало «Модель не закончила ответ» на вопросе про GEO5).
+  for (let round = 0; round <= MAX_TOOL_ROUNDS + 1; round++) {
+    const last = round >= MAX_TOOL_ROUNDS || nudged
     const body = {
       model,
       max_tokens: maxTokens,
@@ -93,19 +100,19 @@ export async function anthropicReply(options) {
       (block) => block?.type === 'tool_use',
     )
     if (data.stop_reason !== 'tool_use' || !uses.length || last) {
-      const text = content
-        .filter((block) => block?.type === 'text')
-        .map((block) => /** @type {{ text: string }} */ (block).text)
-        .join('\n')
-        .trim()
-      if (!text && !nudged) {
+      const own = textOf(content)
+      if (!own && !nudged && round <= MAX_TOOL_ROUNDS) {
         nudged = true
         askForText(messages, content)
         continue
       }
+      const final = data.stop_reason === 'max_tokens' ? wholeSentences(own) : own
+      const text = joinReply(earlier, final)
       if (!text) throw new ModelError('Модель вернула пустой ответ')
-      return { text: data.stop_reason === 'max_tokens' ? wholeSentences(text) : text, toolCalls }
+      return { text, toolCalls }
     }
+    const said = withoutPreamble(textOf(content))
+    if (said) earlier.push(said)
     messages.push({ role: 'assistant', content })
     /** @type {object[]} */
     const results = []
@@ -127,6 +134,64 @@ export async function anthropicReply(options) {
     messages.push({ role: 'user', content: results })
   }
   throw new ModelError('Модель не закончила ответ')
+}
+
+/** Текст блоков хода модели одной строкой. @param {ContentBlock[]} content */
+function textOf(content) {
+  return content
+    .filter((block) => block?.type === 'text')
+    .map((block) => /** @type {{ text: string }} */ (block).text)
+    .join('\n')
+    .trim()
+}
+
+/** Служебные фразы перед инструментом («Проверю прайс.», «Ищу.») клиенту не нужны. */
+const PREAMBLE =
+  /^(сейчас\s+)?(ищу|поищу|проверю|посмотрю|сверю|найду|уточню\s+(в|по)\s+(прайс|каталог)\S*|минуту|секунду|давайте\s+(проверю|посмотрю|найду))(?![а-яё])/i
+
+/**
+ * Текст хода с инструментом без служебных предложений.
+ * @param {string} text
+ */
+export function withoutPreamble(text) {
+  return text
+    .split('\n')
+    .map((line) =>
+      line
+        .split(/(?<=[.!?…])\s+/)
+        .filter((sentence) => !PREAMBLE.test(sentence.trim()))
+        .join(' ')
+        .trim(),
+    )
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
+/** Сравнение без регистра, пробелов и знаков: повтор того же текста не склеивается. */
+function squashText(/** @type {string} */ text) {
+  return text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '')
+}
+
+/**
+ * Ответ клиенту из текста ходов с инструментами и последнего хода. Кусок, который модель
+ * повторила в последнем ходе, второй раз не добавляется.
+ * @param {string[]} earlier
+ * @param {string} final
+ */
+export function joinReply(earlier, final) {
+  const parts = /** @type {string[]} */ ([])
+  for (const piece of [...earlier, final]) {
+    const key = squashText(piece)
+    if (!key) continue
+    const dup = parts.findIndex((part) => squashText(part).includes(key))
+    if (dup >= 0) continue
+    // Новый кусок целиком содержит прежний — оставляем только новый.
+    const covered = parts.findIndex((part) => key.includes(squashText(part)))
+    if (covered >= 0) parts.splice(covered, 1)
+    parts.push(piece)
+  }
+  return parts.join('\n\n').trim()
 }
 
 const TEXT_NUDGE = 'Ответь клиенту текстом по правилам, инструменты больше не вызывай.'

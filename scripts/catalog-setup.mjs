@@ -52,7 +52,7 @@ import {
   setupHomeTextsAudit,
   setupHomeTrust,
 } from '../src/lib/homeSetup.ts'
-import { setupKaddiFaq } from '../src/lib/kaddiFaqSetup.ts'
+import { setupKaddiFaq, setupKaddiFaq2 } from '../src/lib/kaddiFaqSetup.ts'
 import { setupNewsCovers } from '../src/lib/newsCoversSetup.ts'
 import { clearOldPictures } from '../src/lib/oldPicturesSetup.ts'
 import { setupOwnerCatalogFixes } from '../src/lib/ownerCatalogFixes.ts'
@@ -309,6 +309,9 @@ try {
   const faq = await setupKaddiFaq(payload)
   if (!faq) console.log('Справка Кадди 30.10.2026 уже загружена.')
   else for (const line of faq) console.log(`Справка Кадди — ${line}`)
+  const faq2 = await setupKaddiFaq2(payload)
+  if (!faq2) console.log('Справка Кадди, второй прогон 30.10.2026, уже загружена.')
+  else for (const line of faq2) console.log(`Справка Кадди (2) — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)
