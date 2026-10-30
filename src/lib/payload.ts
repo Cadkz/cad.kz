@@ -10,3 +10,11 @@ export async function cms() {
   await connection()
   return getPayload({ config })
 }
+
+/**
+ * Payload без connection(): только для загрузчиков в общем кэше сайта (src/lib/siteCache.ts) —
+ * внутри кэша connection() запрещён, его вызывает сама обёртка siteCached до кэша.
+ */
+export function cmsData() {
+  return getPayload({ config })
+}

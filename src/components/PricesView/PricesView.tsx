@@ -2,6 +2,7 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
 import { AdminTabs } from '@/components/AdminTabs/AdminTabs'
 import { PriceGrid } from '@/components/PriceGrid/PriceGrid'
+import { requireLogin } from '@/lib/adminGate'
 import { loadPriceGrid } from '@/lib/offerPrices'
 import styles from './PricesView.module.css'
 
@@ -13,6 +14,7 @@ export async function PricesView({
   viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
+  requireLogin(req)
   const { payload, user, i18n } = req
   const template = {
     i18n,

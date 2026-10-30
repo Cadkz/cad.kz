@@ -4,6 +4,7 @@ import { GROUP_LABELS, POPULAR_LABEL } from '@/domain/catalogNavigation.mjs'
 import { type FilterState, type facetOptions, POPULAR } from '@/lib/catalogFilter'
 import { Chip } from '../Chip/Chip'
 import { FilterChecks } from '../FilterChecks/FilterChecks'
+import { TrainingFilters } from '../TrainingFilters/TrainingFilters'
 import styles from './FilterPanel.module.css'
 
 type Options = ReturnType<typeof facetOptions>
@@ -95,6 +96,13 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular }: P
             </Chip>
           ))}
         </fieldset>
+      )}
+      {options.training && (
+        <TrainingFilters
+          state={state.training}
+          options={options.training}
+          onChange={(patch) => onChange({ training: { ...state.training, ...patch } })}
+        />
       )}
       {/* В направлении или типе производителя выбирают плитками над товарами (CatalogSteps). */}
       {(!(state.direction || state.type) || state.vendors.length > 1) &&

@@ -1,6 +1,7 @@
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
 import { LegacyContent } from '@/components/LegacyContent/LegacyContent'
+import { requireLogin } from '@/lib/adminGate'
 import { legacyTotals } from '@/lib/legacyContentRun'
 import styles from '../BitrixImportView/BitrixImportView.module.css'
 
@@ -12,6 +13,7 @@ export async function LegacyContentView({
   viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
+  requireLogin(req)
   const { payload, user, i18n } = req
   const template = {
     i18n,

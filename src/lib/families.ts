@@ -5,7 +5,7 @@ import { EXTRA_ORDER } from '@/domain/familySeed.mjs'
 import type { PickerView } from '@/domain/picker.mjs'
 import { plainTitle } from '@/domain/productTitle.mjs'
 import type { ProductLine } from '../../payload-types'
-import { cms } from './payload'
+import { cms, cmsData } from './payload'
 import { offersOf, pickerOffers } from './picker'
 import { loadPricingContext } from './pricing'
 import { productPath } from './productPath'
@@ -151,9 +151,9 @@ export async function getFamily(slug: string): Promise<FamilyPage | null> {
   }
 }
 
-/** Семейства для каталога и меню: линейка → адрес страницы. */
+/** Семейства для каталога и меню: линейка → адрес страницы. Вызывается и внутри общего кэша сайта. */
 export async function familyLines() {
-  const payload = await cms()
+  const payload = await cmsData()
   const { docs } = await payload.find({
     collection: 'product-lines',
     where: { and: [published, { familyPage: { equals: true } }, { slug: { exists: true } }] },

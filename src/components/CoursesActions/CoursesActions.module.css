@@ -51,3 +51,9 @@
   background: var(--theme-success-100);
   color: var(--theme-success-750);
 }
+
+.read {
+  display: grid;
+  gap: calc(var(--base) * 0.5);
+  justify-items: start;
+}

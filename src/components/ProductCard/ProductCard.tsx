@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, CalendarDays } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { cardInfo } from '@/domain/cardTexts.mjs'
@@ -51,6 +51,8 @@ export type ProductCardData = {
    * значком направления курса (замечание владельца 27.10.2026). Группы «Обучения» в каталоге.
    */
   topic?: string
+  /** Ближайший старт курса по расписанию УЦ: «Старт 1 декабря». */
+  start?: string | null
 }
 
 /**
@@ -112,6 +114,12 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         </div>
       </div>
       <p className={styles.summary}>{info.text}</p>
+      {product.start && (
+        <p className={styles.start}>
+          <CalendarDays size={16} strokeWidth={1.75} aria-hidden="true" />
+          {product.start}
+        </p>
+      )}
       <ProductLifecycle value={product.lifecycle} />
       {product.badge && (
         <div className={styles.badge}>

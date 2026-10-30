@@ -276,14 +276,16 @@ export function titleScore(a, b) {
 export const MATCH_SCORE = 0.85
 
 /**
- * @typedef {{ id: number, title: string, aliases: string[] }} CatalogCourse
+ * @typedef {{ id: number, title: string, aliases: string[], lpId?: string | null }} CatalogCourse
+ *   lpId — номер программы l-p.kz у курса, который сайт завёл по таблице сам (src/domain/courseSync.mjs).
  * @typedef {{ program: CourseProgram, courseId: number | null, score: number }} ProgramMatch
  */
 
 /**
  * Сопоставление: каждому курсу расписания — самый похожий курс каталога (по названию и «Другим
  * названиям»). Совпадение «Другого названия» с названием в таблице — всегда тот курс: так
- * владелец поправляет сопоставление в админке без программиста.
+ * владелец поправляет сопоставление в админке без программиста. Курс, заведённый сайтом по
+ * таблице, узнаётся по номеру программы l-p.kz, даже если его потом переименовали.
  * @param {CourseProgram[]} list
  * @param {CatalogCourse[]} catalog
  * @returns {ProgramMatch[]}
@@ -291,6 +293,9 @@ export const MATCH_SCORE = 0.85
 export function matchPrograms(list, catalog) {
   return list.map((program) => {
     let best = { courseId: /** @type {number | null} */ (null), score: 0 }
+    const id = /[?&]ID=(\d+)/i.exec(program.link)?.[1]
+    const own = id ? catalog.find((course) => course.lpId === id) : undefined
+    if (own) return { program, courseId: own.id, score: 1 }
     for (const course of catalog) {
       for (const title of program.titles) {
         const exact = course.aliases.some(

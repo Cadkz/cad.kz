@@ -11,17 +11,23 @@ import {
   scheduleCsvUrl,
   upcoming,
 } from '../domain/courseSchedule.mjs'
+import { lpIdFromKey } from '../domain/courseSync.mjs'
+import { syncCourses } from './courseSync'
 import { productPath } from './productPath'
+import { refreshSiteData } from './siteCache'
 
 /**
- * Расписание курсов из Google Таблицы УЦ (src/domain/courseSchedule.mjs). Таблица читается не чаще
- * раза в 10 минут на сервер; страница не ждёт таблицу, если есть прежняя копия, — обновление идёт
- * фоном. Последняя удачная копия хранится в базе (integrations, course-schedule): Google не
- * ответил — сайт показывает её, и ближайшие группы не пропадают.
+ * Расписание курсов из Google Таблицы УЦ (src/domain/courseSchedule.mjs). Таблица читается раз
+ * в сутки по расписанию (vercel.json → /api/cron/course-schedule, 02:37 по Астане — не вместе
+ * с архивом аналитики) и кнопкой «Прочитать сейчас» в админке (решение владельца 30.10.2026:
+ * «максимум раз в день»). Прочитанное хранится в базе (integrations, course-schedule); страницы
+ * сайта таблицу не ждут — берут эту копию (одна строка из базы), в памяти сервера — 10 минут. Google не ответил —
+ * остаётся прежняя копия, ближайшие группы не пропадают. После каждого удачного чтения — цены
+ * курсов и новые курсы по таблице (src/lib/courseSync.ts).
  */
 const STATE_KEY = 'course-schedule'
-const FRESH_MS = 10 * 60_000
-const FETCH_MS = 6000
+const MEMORY_MS = 10 * 60_000
+const FETCH_MS = 8000
 const options = { overrideAccess: true, depth: 0 } as const
 
 export type Schedule = {
@@ -56,17 +62,7 @@ async function loadSaved(payload: Payload) {
 async function save(payload: Payload, state: Stored) {
   const saved = await loadSaved(payload).catch(() => null)
   if (saved) {
-    // Не переписывать базу, если таблица не менялась.
-    const same =
-      JSON.stringify(saved.state.groups) === JSON.stringify(state.groups) &&
-      (saved.state.error ?? null) === (state.error ?? null)
-    if (!same)
-      await payload.update({
-        collection: 'integrations',
-        id: saved.id,
-        data: { state },
-        ...options,
-      })
+    await payload.update({ collection: 'integrations', id: saved.id, data: { state }, ...options })
     return
   }
   await payload.create({ collection: 'integrations', data: { key: STATE_KEY, state }, ...options })
@@ -96,52 +92,66 @@ async function download(): Promise<CourseGroup[]> {
   return groups
 }
 
-async function refresh(payload: Payload): Promise<Schedule> {
+/**
+ * Прочитать таблицу сейчас (расписание раз в сутки и кнопка в админке): сохранить копию, обновить
+ * цены и курсы. Не прочиталась — в копии остаются прежние группы и пишется ошибка.
+ */
+export async function readScheduleNow(payload: Payload): Promise<Schedule> {
+  const saved = await loadSaved(payload).catch(() => null)
+  let value: Schedule
   try {
     const groups = await download()
-    const value = { groups, fetchedAt: new Date().toISOString(), error: null }
-    await save(payload, value).catch((error) =>
-      console.error('Расписание курсов: не сохранилось', error instanceof Error ? error.name : ''),
-    )
-    return value
+    value = { groups, fetchedAt: new Date().toISOString(), error: null }
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'ошибка чтения'
-    const saved = await loadSaved(payload).catch(() => null)
-    return {
+    value = {
       groups: saved?.state.groups ?? [],
       fetchedAt: saved?.state.fetchedAt ?? null,
-      error: message,
+      error: error instanceof Error ? error.message : 'ошибка чтения',
     }
   }
+  if (value.fetchedAt)
+    await save(payload, { groups: value.groups, fetchedAt: value.fetchedAt, error: value.error })
+  if (!value.error) await syncCourses(payload, value.groups)
+  memory = { value, at: Date.now() }
+  // Ближайшие старты есть в каталоге: кэш сайта — заново (src/lib/siteCache.ts).
+  refreshSiteData()
+  return value
 }
 
 /**
- * Расписание: из памяти, если ему меньше 10 минут; старое — сразу, с обновлением фоном; при
- * первом обращении — ждём таблицу (до 6 с), иначе сохранённая копия. fresh — для кнопки
- * «Обновить сейчас» в админке.
+ * Сохранённая копия расписания из базы; в памяти сервера — 10 минут. Таблицу не читает.
+ * fresh — мимо памяти (админка: копию могли обновить в другой копии сайта).
  */
 export async function loadSchedule(payload: Payload, { fresh = false } = {}): Promise<Schedule> {
-  const now = Date.now()
-  if (!fresh && memory && now - memory.at < FRESH_MS) return memory.value
-  const start = () => {
-    running ??= refresh(payload)
-      .then((value) => {
-        memory = { value, at: Date.now() }
-        return value
-      })
-      .finally(() => {
-        running = null
-      })
-    return running
-  }
-  if (!fresh && memory) {
-    void start()
-    return memory.value
-  }
-  return start()
+  if (!fresh && memory && Date.now() - memory.at < MEMORY_MS) return memory.value
+  if (fresh) running = null
+  running ??= loadSaved(payload)
+    .catch(() => null)
+    .then((saved) => {
+      const value: Schedule = saved
+        ? {
+            groups: saved.state.groups,
+            fetchedAt: saved.state.fetchedAt,
+            error: saved.state.error ?? null,
+          }
+        : { groups: [], fetchedAt: null, error: null }
+      memory = { value, at: Date.now() }
+      return value
+    })
+    .finally(() => {
+      running = null
+    })
+  return running
 }
 
-export type CourseCard = { id: number; title: string; href: string; aliases: string[] }
+export type CourseCard = {
+  id: number
+  title: string
+  href: string
+  aliases: string[]
+  /** Номер программы l-p.kz, если курс завёл сайт по таблице. */
+  lpId: string | null
+}
 
 /** Опубликованные курсы каталога: название, «Другие названия», адрес. */
 export async function catalogCourses(payload: Payload): Promise<CourseCard[]> {
@@ -150,12 +160,13 @@ export async function catalogCourses(payload: Payload): Promise<CourseCard[]> {
     where: { and: [{ kind: { equals: 'course' } }, { status: { equals: 'published' } }] },
     pagination: false,
     depth: 0,
-    select: { title: true, slug: true, legacyUrl: true, searchAliases: true },
+    select: { title: true, slug: true, legacyUrl: true, searchAliases: true, legacyKey: true },
   })
   return docs.map((doc) => ({
     id: doc.id,
     title: doc.title,
     href: productPath(doc),
+    lpId: lpIdFromKey(doc.legacyKey),
     aliases: (doc.searchAliases ?? '')
       .split(/[,;\n]/)
       .map((alias) => alias.trim())
@@ -180,7 +191,12 @@ export async function courseMatches(
     catalogCourses(payload),
   ])
   const today = astanaToday()
-  const catalog: CatalogCourse[] = courses.map(({ id, title, aliases }) => ({ id, title, aliases }))
+  const catalog: CatalogCourse[] = courses.map(({ id, title, aliases, lpId }) => ({
+    id,
+    title,
+    aliases,
+    lpId,
+  }))
   const matched = matchPrograms(programs(schedule.groups, today), catalog)
   return {
     schedule,

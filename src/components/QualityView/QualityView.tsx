@@ -2,6 +2,7 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
 import { AdminCardGrid } from '@/components/AdminCardGrid/AdminCardGrid'
 import { listHref } from '@/domain/adminLinks.mjs'
+import { requireLogin } from '@/lib/adminGate'
 import { loadQualityReport } from '@/lib/qualityReport'
 import styles from './QualityView.module.css'
 
@@ -18,6 +19,7 @@ export async function QualityView({
   viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
+  requireLogin(req)
   const { payload, user, i18n } = req
   const template = {
     i18n,

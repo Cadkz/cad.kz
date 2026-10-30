@@ -8,9 +8,10 @@ import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.m
 import { catalogAvailable } from './equipmentResearch'
 import { familyLines } from './families'
 import { catalogHref } from './navigationHrefs'
-import { cms } from './payload'
+import { cmsData } from './payload'
 import { vendorPictures } from './pictures'
 import { productPath } from './productPath'
+import { siteCached } from './siteCache'
 
 export type MenuLink = { title: string; href: string; logo?: MenuLogo | null }
 /** Линейка производителя в меню: первые товары и адрес каталога с этой линейкой. */
@@ -75,8 +76,11 @@ const relId = (value: number | { id: number } | null | undefined) =>
  * Мегаменю строится из разделов, производителей, линеек и товаров CMS: новый товар сам появляется
  * в меню. Путь: раздел → производитель → линейка → товары (src/domain/menu.mjs).
  */
-export async function getMenu(): Promise<MenuTab[]> {
-  const payload = await cms()
+/** Меню — в общем кэше сайта (src/lib/siteCache.ts): оно на каждой странице. */
+export const getMenu = siteCached('menu', loadMenu)
+
+async function loadMenu(): Promise<MenuTab[]> {
+  const payload = await cmsData()
   const [sections, products, manufacturers, lines] = await Promise.all([
     payload.find({
       collection: 'sections',
@@ -256,8 +260,11 @@ export function mobilePhone(phones: Contacts['phones']): Contacts['phones'][numb
   return mobile ?? phones[0] ?? null
 }
 
-export async function getContacts(): Promise<Contacts> {
-  const payload = await cms()
+/** Контакты и подвал — в общем кэше сайта: они на каждой странице. */
+export const getContacts = siteCached('contacts', loadContacts)
+
+async function loadContacts(): Promise<Contacts> {
+  const payload = await cmsData()
   const settings: SiteSetting = await payload.findGlobal({ slug: 'site-settings', depth: 0 })
   const digits = settings.whatsapp?.replace(/\D/g, '')
   return {

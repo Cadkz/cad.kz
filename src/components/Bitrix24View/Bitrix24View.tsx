@@ -1,6 +1,7 @@
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
 import { Bitrix24Actions } from '@/components/Bitrix24Actions/Bitrix24Actions'
+import { requireLogin } from '@/lib/adminGate'
 import { type Bitrix24Status, loadBitrix24Status } from '@/lib/bitrix24Run'
 import { formatDateTime } from '@/lib/format'
 import { type OpenLineStatus, openLineStatus } from '@/lib/openLine/store'
@@ -118,6 +119,7 @@ export async function Bitrix24View({
   viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
+  requireLogin(req)
   const { payload, user, i18n } = req
   const template = {
     i18n,

@@ -2,6 +2,7 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
 import { KaddiData } from '@/components/KaddiData/KaddiData'
 import { KaddiPriceSearch } from '@/components/KaddiPriceSearch/KaddiPriceSearch'
+import { requireLogin } from '@/lib/adminGate'
 import { knowledgeCount, loadVendorList, priceSummary } from '@/lib/assistant/priceTable'
 import { formatDateTime, formatDay } from '@/lib/format'
 import styles from './KaddiDataView.module.css'
@@ -16,6 +17,7 @@ export async function KaddiDataView({
   viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
+  requireLogin(req)
   const { payload, user, i18n } = req
   const template = {
     i18n,

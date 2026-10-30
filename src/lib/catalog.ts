@@ -1,3 +1,4 @@
+import type { Payload } from 'payload'
 import { cache } from 'react'
 import type { ProductCardData } from '@/components/ProductCard/ProductCard'
 import { ownCardText } from '@/domain/cardTexts.mjs'
@@ -11,16 +12,18 @@ import { compareInSection, priorityRank } from '../domain/priority.mjs'
 import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
 import { catalogExtras } from './catalogExtras'
 import { type CatalogVariant, catalogVariants } from './catalogVariants'
+import { courseMatches, groupsForCourse } from './courseSchedule'
 import { catalogAvailable, lifecycle, type ResearchData, readResearch } from './equipmentResearch'
 import { familyLines } from './families'
 import { withFamilies } from './familyCards'
 import { formatKzt } from './format'
-import { cms } from './payload'
+import { cms, cmsData } from './payload'
 import { pickerView } from './picker'
 import { cardPictures, type Picture, vendorPictures } from './pictures'
 import { loadPricingContext, type PricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
 import { relId } from './rel'
+import { siteCached } from './siteCache'
 
 export type CatalogGroup = 'software' | 'hardware' | 'service'
 
@@ -51,6 +54,11 @@ export type CatalogItem = ProductCardData & {
    * производитель или задача; task — отдельная программа подбора, только когда выбрана задача.
    */
   scope: 'all' | 'family' | 'detail' | 'task'
+  /**
+   * Старты групп курса с открытым набором из расписания УЦ (ГГГГ-ММ-ДД, по порядку): фильтры
+   * обучения «Месяц старта», «Есть набор», порядок «Ближайший старт» и «Старт 1 декабря» на карточке.
+   */
+  starts?: string[]
 }
 
 /** Линейка производителя для шага каталога. familyHref — страница семейства, если она есть. */
@@ -168,6 +176,24 @@ function singleOffer(offers: Offer[], context: PricingContext) {
   }
 }
 
+/**
+ * Старты групп с открытым набором по курсам каталога (расписание УЦ, src/lib/courseSchedule.ts).
+ * Расписание не прочиталось — курсы просто без стартов, каталог не ломается.
+ */
+async function courseStarts(payload: Payload): Promise<Map<number, string[]>> {
+  try {
+    const matches = await courseMatches(payload)
+    return new Map(
+      matches.courses.flatMap((course) => {
+        const list = [...new Set(groupsForCourse(matches, course.id).map((group) => group.start))]
+        return list.length ? [[course.id, list] as const] : []
+      }),
+    )
+  } catch {
+    return new Map()
+  }
+}
+
 export async function getDirections(): Promise<Direction[]> {
   const payload = await cms()
   const { docs } = await payload.find({
@@ -187,10 +213,11 @@ export async function getDirections(): Promise<Direction[]> {
 }
 
 /**
- * Все опубликованные товары с ценой «от» и признаками фильтра. Один набор запросов на страницу:
- * повторный вызов в том же запросе (каталог, поиск, подборки на странице товара) берёт готовое.
+ * Все опубликованные товары с ценой «от» и признаками фильтра. Хранится в общем кэше сайта
+ * (src/lib/siteCache.ts) до первой правки в админке; в одном запросе повторный вызов (каталог,
+ * поиск, подборки на странице товара) берёт готовое.
  */
-export const getCatalog = cache(loadCatalog)
+export const getCatalog = cache(siteCached('catalog', loadCatalog))
 
 async function loadCatalog(): Promise<{
   items: CatalogItem[]
@@ -203,7 +230,7 @@ async function loadCatalog(): Promise<{
   /** Логотипы производителей для плиток шага «производитель», по названию. */
   vendorLogos: Record<string, Picture>
 }> {
-  const payload = await cms()
+  const payload = await cmsData()
   const [sections, products, offers, manufacturers, context, productLines] = await Promise.all([
     payload.find({
       collection: 'sections',
@@ -231,9 +258,10 @@ async function loadCatalog(): Promise<{
     }),
   ])
 
-  const [pictures, logos] = await Promise.all([
+  const [pictures, logos, starts] = await Promise.all([
     cardPictures(payload, products.docs, manufacturers.docs),
     vendorPictures(payload, manufacturers.docs),
+    courseStarts(payload),
   ])
   const sectionById = new Map(sections.docs.map((section) => [section.id, section]))
   // Подразделы (у раздела есть родитель) видны через верхний раздел: src/domain/sectionTree.mjs.
@@ -338,6 +366,7 @@ async function loadCatalog(): Promise<{
       ...optionalOrder(vendorOrder.get(vendorId)),
       scope: 'all',
       ...(topic ? { topic: topic.key } : {}),
+      ...(starts.has(product.id) ? { starts: starts.get(product.id) } : {}),
     }
   })
   const hidden = new Set(products.docs.filter((p) => p.pageView === 'none').map((p) => p.id))

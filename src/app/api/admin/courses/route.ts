@@ -1,12 +1,17 @@
 import { scheduleReport } from '@/domain/courseSchedule.mjs'
 import { logActivity } from '@/lib/activity'
 import { adminRequest, reply } from '@/lib/adminApi'
-import { courseMatches } from '@/lib/courseSchedule'
+import { updateDescriptions } from '@/lib/coursePages'
+import { courseMatches, readScheduleNow } from '@/lib/courseSchedule'
+
+/** Описания читаются со страниц l-p.kz: до минуты на всё. */
+export const maxDuration = 60
 
 /**
  * Действия страницы «Расписание курсов» (администратор и маркетолог): скрыть курсы, которых нет
- * в расписании УЦ, и взять цены курсов из таблицы. Списки и цены сервер считает сам по свежей
- * сверке: из браузера берутся только отмеченные ID.
+ * в расписании УЦ, и обновить описания курсов со страниц l-p.kz. Цены сайт берёт из таблицы сам
+ * при каждом чтении (src/lib/courseSync.ts). Списки и ссылки сервер считает сам по свежей сверке:
+ * из браузера берутся только отмеченные ID.
  */
 const opts = { overrideAccess: true, depth: 0 } as const
 
@@ -20,9 +25,15 @@ export async function POST(request: Request) {
   const checked = await adminRequest(request, 20_000, ['admin', 'editor'])
   if ('error' in checked) return checked.error
   const { payload, data, user } = checked
+  if (data.action === 'read') {
+    const schedule = await readScheduleNow(payload)
+    return schedule.error
+      ? reply({ error: `Таблица не прочиталась: ${schedule.error}` }, 502)
+      : reply({ message: `Таблица прочитана, запусков: ${schedule.groups.length}.` })
+  }
   const chosen = new Set(ids(data.ids))
   if (!chosen.size) return reply({ error: 'Ничего не отмечено' }, 400)
-  const matches = await courseMatches(payload)
+  const matches = await courseMatches(payload, { fresh: true })
   if (!matches.schedule.fetchedAt)
     return reply({ error: 'Таблица расписания не читается — сначала откройте к ней доступ' }, 409)
   const report = scheduleReport(matches.programs, matches.courses, matches.today)
@@ -45,55 +56,17 @@ export async function POST(request: Request) {
     return reply({ message: `Скрыто курсов: ${hide.length}. Вернуть — «Активность» → «Да».` })
   }
 
-  if (data.action === 'prices') {
-    const rows = report.linked.filter((row) => chosen.has(row.course.id) && row.price)
-    const done: string[] = []
-    const skipped: string[] = []
-    for (const row of rows) {
-      const { docs } = await payload.find({
-        collection: 'offers',
-        where: {
-          and: [{ product: { equals: row.course.id } }, { status: { equals: 'published' } }],
-        },
-        pagination: false,
-        ...opts,
-      })
-      const amount = row.price ?? ''
-      // Цена курса — одна; у курса с несколькими комплектациями решает менеджер в «Ценах».
-      if (docs.length > 1) {
-        skipped.push(row.course.title)
-        continue
-      }
-      const priceData = { amount, currency: 'KZT' as const, includesVat: true, sourceVat: '16' }
-      const offer = docs[0]
-      if (offer)
-        await payload.update({ collection: 'offers', id: offer.id, data: priceData, ...opts })
-      else
-        await payload.create({
-          collection: 'offers',
-          data: {
-            title: `${row.course.title} — Обучение одного слушателя`,
-            status: 'published',
-            product: row.course.id,
-            configuration: 'Обучение одного слушателя',
-            license: 'Онлайн-курс',
-            ...priceData,
-          },
-          ...opts,
-        })
-      done.push(row.course.title)
-    }
+  if (data.action === 'descriptions') {
+    const result = await updateDescriptions(payload, matches, [...chosen])
     await logActivity(payload, {
-      action: 'prices',
-      summary: `Цены курсов из расписания УЦ: ${done.length}`,
+      action: 'import',
+      summary: `Описания курсов с l-p.kz: ${result.done.length}`,
       userId: user.id,
       link: '/admin/courses',
-      details: { done, skipped },
+      details: { ...result },
     })
-    const rest = skipped.length
-      ? ` Не тронуты (несколько комплектаций, правьте в «Ценах»): ${skipped.join('; ')}.`
-      : ''
-    return reply({ message: `Цены обновлены у курсов: ${done.length}.${rest}` })
+    const failed = result.failed.length ? ` Не получилось: ${result.failed.join('; ')}.` : ''
+    return reply({ message: `Описания обновлены у курсов: ${result.done.length}.${failed}` })
   }
 
   return reply({ error: 'Неизвестное действие' }, 400)

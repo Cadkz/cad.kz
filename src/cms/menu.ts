@@ -17,6 +17,7 @@ import { users } from './collections/users'
 import { homePage } from './globals/homePage'
 import { siteSettings } from './globals/siteSettings'
 import { globalWithHistory, withHistory } from './history'
+import { withSiteCache, withSiteCacheGlobal } from './hooks/siteCache'
 
 /**
  * Группы коллекций для Payload и подключение истории (src/cms/history.ts). Само меню и главную
@@ -56,10 +57,12 @@ const MENU: { group: string; collections: CollectionConfig[]; globals: GlobalCon
 
 export const menuCollections: CollectionConfig[] = MENU.flatMap(({ group, collections }) =>
   collections.map((collection) =>
-    withHistory({ ...collection, admin: { ...collection.admin, group } }),
+    withSiteCache(withHistory({ ...collection, admin: { ...collection.admin, group } })),
   ),
 )
 
 export const menuGlobals: GlobalConfig[] = MENU.flatMap(({ group, globals }) =>
-  globals.map((global) => globalWithHistory({ ...global, admin: { ...global.admin, group } })),
+  globals.map((global) =>
+    withSiteCacheGlobal(globalWithHistory({ ...global, admin: { ...global.admin, group } })),
+  ),
 )

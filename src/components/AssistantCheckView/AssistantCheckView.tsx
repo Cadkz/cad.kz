@@ -1,6 +1,7 @@
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
 import { AssistantCheck } from '@/components/AssistantCheck/AssistantCheck'
+import { requireLogin } from '@/lib/adminGate'
 import { assistantStatus } from '@/lib/assistant/check'
 import styles from './AssistantCheckView.module.css'
 
@@ -12,6 +13,7 @@ export function AssistantCheckView({
   viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
+  requireLogin(req)
   const { payload, user, i18n } = req
   const template = {
     i18n,

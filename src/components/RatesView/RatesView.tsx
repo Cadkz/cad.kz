@@ -2,6 +2,7 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
 import { AdminTabs } from '@/components/AdminTabs/AdminTabs'
 import { RatesForm } from '@/components/RatesForm/RatesForm'
+import { requireLogin } from '@/lib/adminGate'
 import { loadRates } from '@/lib/ratesRun'
 import styles from './RatesView.module.css'
 
@@ -13,6 +14,7 @@ export async function RatesView({
   viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
+  requireLogin(req)
   const { payload, user, i18n } = req
   const template = {
     i18n,

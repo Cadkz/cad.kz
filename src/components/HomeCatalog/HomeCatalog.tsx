@@ -23,20 +23,22 @@ type State = Data | 'loading' | 'error'
 const DESKTOP = '(min-width: 960px)'
 
 /** Ждём, пока страница загрузится и браузер освободится: каталог не мешает первому экрану. */
+/**
+ * Показать каталог, когда браузер свободен, но не позже чем через полсекунды. Раньше ждали
+ * полной загрузки страницы (все картинки) — на медленной сети «Загружаем каталог…» висело
+ * секундами (замечание владельца 30.10.2026). Сам запрос уходит сразу.
+ */
 function whenIdle(run: () => void) {
-  // В Safari requestIdleCallback нет — тогда сразу после загрузки.
-  const start = () =>
-    typeof window.requestIdleCallback === 'function'
-      ? window.requestIdleCallback(run)
-      : setTimeout(run, 1)
-  if (document.readyState === 'complete') start()
-  else window.addEventListener('load', start, { once: true })
+  if (typeof window.requestIdleCallback === 'function')
+    window.requestIdleCallback(run, { timeout: 500 })
+  else setTimeout(run, 1)
 }
 
 /**
  * Каталог с фильтром на главной (аудит 21.10.2026, пакет 7 «Скорость»). Весь каталог в страницу
  * не кладётся: на телефоне блок скрыт и ничего не грузит, на компьютере каталог догружается из
- * /api/catalog сразу после загрузки страницы. До этого — место той же высоты, блоки ниже не прыгают.
+ * /api/catalog сразу при открытии страницы (данные в общем кэше сайта — ответ быстрый). До этого —
+ * место той же высоты, блоки ниже не прыгают.
  */
 export function HomeCatalog() {
   const [state, setState] = useState<State>('loading')
@@ -47,12 +49,10 @@ export function HomeCatalog() {
     const load = () => {
       if (started || !media.matches) return
       started = true
-      whenIdle(() => {
-        fetch('/api/catalog')
-          .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
-          .then((data: Data) => setState(data))
-          .catch(() => setState('error'))
-      })
+      fetch('/api/catalog')
+        .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
+        .then((data: Data) => whenIdle(() => setState(data)))
+        .catch(() => setState('error'))
     }
     load()
     // Окно расширили до компьютера — догружаем тогда.

@@ -1,6 +1,7 @@
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
 import { BitrixImport } from '@/components/BitrixImport/BitrixImport'
+import { requireLogin } from '@/lib/adminGate'
 import { formatDateTime } from '@/lib/format'
 import styles from './BitrixImportView.module.css'
 
@@ -18,6 +19,7 @@ export async function BitrixImportView({
   viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
+  requireLogin(req)
   const { payload, user, i18n } = req
   const template = {
     i18n,

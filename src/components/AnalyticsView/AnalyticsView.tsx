@@ -4,6 +4,7 @@ import { AnalyticsArchive } from '@/components/AnalyticsArchive/AnalyticsArchive
 import { AnalyticsKaddi } from '@/components/AnalyticsKaddi/AnalyticsKaddi'
 import { AnalyticsTable } from '@/components/AnalyticsTable/AnalyticsTable'
 import { PERIODS, periodKey, type QueryStat, SEARCH_RETENTION_DAYS } from '@/domain/searchStats.mjs'
+import { requireLogin } from '@/lib/adminGate'
 import { loadAnalytics } from '@/lib/analytics'
 import { archiveStatus } from '@/lib/analyticsArchive'
 import styles from './AnalyticsView.module.css'
@@ -48,6 +49,7 @@ export async function AnalyticsView({
   viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
+  requireLogin(req)
   const { payload, user, i18n } = req
   const template = {
     i18n,

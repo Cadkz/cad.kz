@@ -4,6 +4,7 @@ import { SlidersHorizontal } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { familyTaskHref } from '@/domain/familyGroups.mjs'
+import { startNote } from '@/domain/trainingFilter.mjs'
 import type { CatalogItem, CatalogLine, Facet } from '@/lib/catalog'
 import {
   autoVendor,
@@ -60,6 +61,10 @@ const withTask = (item: CatalogItem, direction: string | null) => ({
   href: familyTaskHref(item.href, direction),
 })
 
+/** У курса с расписанием — «Старт 1 декабря» (в выбранном месяце, если месяц выбран). */
+const withStart = (item: CatalogItem, month: string | null) =>
+  item.starts?.length ? { ...item, start: startNote(item, month) } : item
+
 export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popular = [] }: Props) {
   // Условия берутся из адреса, а не только с сервера: при «Назад» из товара Next.js показывает
   // сохранённую страницу каталога со старым стартом (пустым), а в адресе — нужный шаг
@@ -96,14 +101,21 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popu
   // направления (например, основания и фундаменты) первой (замечание владельца 27.10.2026).
   const found = useMemo(() => {
     const result = results(items, view, facets)
-    return { ...result, items: result.items.map((item) => withTask(item, view.direction)) }
+    return {
+      ...result,
+      items: result.items.map((item) =>
+        withStart(withTask(item, view.direction), view.training.month),
+      ),
+    }
   }, [items, view, facets])
   const groups = useMemo(
     () =>
       groupedResults(items, view, lines)?.map((group) => ({
         ...group,
         href: group.href && familyTaskHref(group.href, view.direction),
-        items: group.items.map((item) => withTask(item, view.direction)),
+        items: group.items.map((item) =>
+          withStart(withTask(item, view.direction), view.training.month),
+        ),
       })),
     [items, view, lines],
   )

@@ -32,11 +32,10 @@ test('сценарий: свой → раздела, если подходит �
   assert.equal(resolveScenario({ own: 'чужое', kind: 'service' }), 'service')
 })
 
-test('кнопки: заявка, корзина значком, демонстрация только у сканеров (27.10.2026)', () => {
-  assert.deepEqual(labels(scenarioActions({ scenario: 'standard', cart: true })), [
-    'Запросить цену и счёт',
-    'В корзину',
-  ])
+test('кнопки: с ценой — «Купить», без — заявка, демонстрация только у сканеров (30.10.2026)', () => {
+  const priced = scenarioActions({ scenario: 'standard', cart: true })
+  assert.deepEqual(labels(priced), ['Купить', null])
+  assert.equal(priced.main.type, 'cart')
   const autocad = scenarioActions({ scenario: 'standard', cart: false, renewLabel: 'Продлить' })
   assert.deepEqual(labels(autocad), ['Запросить цену', null])
   assert.deepEqual(autocad.main, { type: 'request', kind: 'quote', label: 'Запросить цену' })
@@ -45,7 +44,7 @@ test('кнопки: заявка, корзина значком, демонст�
   const artec = scenarioActions({ scenario: 'equipment', cart: true, demo: true, picks: true })
   assert.equal(artec.main.type === 'request' && artec.main.kind, 'price')
   assert.deepEqual(labels(artec), ['Запросить цену', null, 'Записаться на демонстрацию'])
-  assert.equal(scenarioActions({ scenario: 'equipment', cart: true }).second?.type, 'cart')
+  assert.equal(scenarioActions({ scenario: 'equipment', cart: true }).main.type, 'cart')
   assert.deepEqual(labels(scenarioActions({ scenario: 'renewal', cart: true })), ['Продлить', null])
   const course = scenarioActions({ scenario: 'service', kind: 'course', cart: true, about: true })
   assert.equal(course.main.label, 'Записаться на курс')

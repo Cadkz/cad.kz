@@ -3,6 +3,7 @@ import type { AdminViewServerProps } from 'payload'
 import { AdminTabs } from '@/components/AdminTabs/AdminTabs'
 import { CatalogTree } from '@/components/CatalogTree/CatalogTree'
 import { loadCatalogTree } from '@/lib/adminCatalog'
+import { requireLogin } from '@/lib/adminGate'
 import styles from './CatalogTreeView.module.css'
 
 /** Страница «Каталог» в админке, деревом как в Битриксе: администратор и маркетолог. */
@@ -13,6 +14,7 @@ export async function CatalogTreeView({
   viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
+  requireLogin(req)
   const { payload, user, i18n } = req
   const template = {
     i18n,

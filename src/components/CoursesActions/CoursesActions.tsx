@@ -7,9 +7,47 @@ import { adminCall } from '@/lib/adminCall'
 import styles from './CoursesActions.module.css'
 
 type Extra = { id: number; title: string }
-type PriceDiff = { id: number; title: string; site: string; table: string }
-type Props = { extra: Extra[]; prices: PriceDiff[]; ready: boolean }
+type Page = { id: number; title: string; link: string }
+type Props = { extra: Extra[]; pages: Page[]; ready: boolean }
 type Result = { message: string }
+
+/**
+ * «Прочитать сейчас»: таблица УЦ читается сразу, а не ночью по расписанию; вместе с ней сайт
+ * обновляет цены курсов и заводит новые.
+ */
+export function CoursesRead() {
+  const router = useRouter()
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState('')
+  const [failed, setFailed] = useState(false)
+  async function read() {
+    setBusy(true)
+    setMessage('')
+    try {
+      const reply = await adminCall<Result>('/api/admin/courses', { action: 'read' })
+      setFailed(false)
+      setMessage(reply.message)
+      router.refresh()
+    } catch (failure) {
+      setFailed(true)
+      setMessage(failure instanceof Error ? failure.message : 'Не получилось. Повторите.')
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <div className={styles.read}>
+      <AdminButton onClick={read} disabled={busy}>
+        {busy ? 'Читаю таблицу…' : 'Прочитать сейчас'}
+      </AdminButton>
+      {message && (
+        <p className={failed ? styles.error : styles.ok} role={failed ? 'alert' : 'status'}>
+          {message}
+        </p>
+      )}
+    </div>
+  )
+}
 
 /** Отмеченные ID: по умолчанию отмечено всё. */
 function useChecks(ids: number[]) {
@@ -26,18 +64,20 @@ function useChecks(ids: number[]) {
 
 /**
  * Действия сверки курсов: скрыть с сайта курсы, которых нет в расписании (в черновики — вернуть
- * можно «Активностью» в каталоге), и взять цены из таблицы. Всё отмечено — снять лишнее галочкой.
+ * можно «Активностью» в каталоге), и обновить описания со страниц l-p.kz. Всё отмечено — снять
+ * лишнее галочкой.
  */
-export function CoursesActions({ extra, prices, ready }: Props) {
+export function CoursesActions({ extra, pages, ready }: Props) {
   const router = useRouter()
   const hide = useChecks(extra.map((c) => c.id))
-  const price = useChecks(prices.map((c) => c.id))
-  const [busy, setBusy] = useState(false)
+  const page = useChecks(pages.map((c) => c.id))
+  const [running, setRunning] = useState<'hide' | 'descriptions' | null>(null)
+  const busy = running !== null
   const [result, setResult] = useState('')
   const [error, setError] = useState('')
 
-  async function run(action: 'hide' | 'prices', ids: number[]) {
-    setBusy(true)
+  async function run(action: 'hide' | 'descriptions', ids: number[]) {
+    setRunning(action)
     setResult('')
     setError('')
     try {
@@ -47,7 +87,7 @@ export function CoursesActions({ extra, prices, ready }: Props) {
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : 'Не получилось. Повторите.')
     } finally {
-      setBusy(false)
+      setRunning(null)
     }
   }
 
@@ -85,36 +125,39 @@ export function CoursesActions({ extra, prices, ready }: Props) {
           </>
         )}
       </section>
-      <section className={styles.section} aria-labelledby="courses-prices">
-        <h2 id="courses-prices">Цена расходится: {prices.length}</h2>
+      <section className={styles.section} aria-labelledby="courses-pages">
+        <h2 id="courses-pages">Описания с l-p.kz: {pages.length}</h2>
         <p className={styles.note}>
-          Цена на сайте не такая, как в таблице УЦ (на сайте — вниз до тысячи). Отмеченным курсам
-          цена станет как в таблице.
+          Курсы, у которых в таблице есть ссылка «Программа курса». Сайт откроет страницы l-p.kz и
+          заменит описание отмеченных курсов текстом оттуда (с программой по модулям). «Коротко для
+          карточки» заполнится, только если оно пустое. Занимает до минуты.
         </p>
-        {prices.length > 0 && (
+        {pages.length > 0 && (
           <>
             <ul className={styles.list}>
-              {prices.map((course) => (
+              {pages.map((course) => (
                 <li key={course.id}>
                   <label className={styles.check}>
                     <input
                       type="checkbox"
-                      checked={price.isOn(course.id)}
-                      onChange={() => price.toggle(course.id)}
+                      checked={page.isOn(course.id)}
+                      onChange={() => page.toggle(course.id)}
                     />
                     <a href={`/admin/collections/products/${course.id}`}>{course.title}</a>
-                    <span className={styles.muted}>
-                      {course.site} → {course.table}
-                    </span>
+                    <a className={styles.muted} href={course.link} target="_blank" rel="noreferrer">
+                      l-p.kz
+                    </a>
                   </label>
                 </li>
               ))}
             </ul>
             <AdminButton
-              onClick={() => run('prices', price.checked)}
-              disabled={busy || !ready || !price.checked.length}
+              onClick={() => run('descriptions', page.checked)}
+              disabled={busy || !ready || !page.checked.length}
             >
-              Взять цены из таблицы ({price.checked.length})
+              {running === 'descriptions'
+                ? 'Читаю страницы…'
+                : `Обновить описания (${page.checked.length})`}
             </AdminButton>
           </>
         )}

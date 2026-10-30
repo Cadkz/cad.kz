@@ -10,6 +10,16 @@ import { COURSE_TOPICS, OTHER_TOPIC, topicOrder } from '../domain/courseTopics.m
 import { MERGED_DIRECTIONS } from '../domain/directionsNine.mjs'
 import equipmentFacets from '../domain/equipmentFacets.json' with { type: 'json' }
 import { compareInSection } from '../domain/priority.mjs'
+import {
+  byStart,
+  emptyTraining,
+  type TrainingKey,
+  type TrainingState,
+  trainingFromParams,
+  trainingMatch,
+  trainingOptions,
+  trainingToQuery,
+} from '../domain/trainingFilter.mjs'
 import type { CatalogGroup, CatalogItem, CatalogLine, Facet } from './catalog'
 import type { Picture } from './pictures'
 
@@ -26,10 +36,20 @@ export type FilterState = {
   line: string | null
   tasks: string[]
   features: Record<string, string[]>
+  /** Фильтры раздела «Обучение»: направление курса, месяц старта, набор, порядок. */
+  training: TrainingState
   page: number
 }
 
-type Key = 'group' | 'direction' | 'type' | 'vendors' | 'line' | 'tasks' | `feature:${string}`
+type Key =
+  | 'group'
+  | 'direction'
+  | 'type'
+  | 'vendors'
+  | 'line'
+  | 'tasks'
+  | `feature:${string}`
+  | `training:${TrainingKey}`
 
 /** Карточек на странице: пять рядов по три, не короче колонки фильтров (владелец 29.10.2026). */
 export const PAGE_SIZE = 15
@@ -41,6 +61,7 @@ export const emptyFilter: FilterState = {
   line: null,
   tasks: [],
   features: {},
+  training: emptyTraining,
   page: 1,
 }
 
@@ -90,6 +111,15 @@ export function matches(item: CatalogItem, state: FilterState, ignore?: Key) {
     return false
   if (ignore !== 'tasks' && state.tasks.length && !item.tasks.some((t) => state.tasks.includes(t)))
     return false
+  if (
+    state.type === TRAINING &&
+    !trainingMatch(
+      item,
+      state.training,
+      ignore?.startsWith('training:') ? trainingKey(ignore) : undefined,
+    )
+  )
+    return false
   const category = featureCategory(state)
   for (const filter of category?.filters ?? []) {
     const key = `${category?.category}.${filter.key}`
@@ -107,6 +137,8 @@ export function matches(item: CatalogItem, state: FilterState, ignore?: Key) {
   }
   return true
 }
+
+const trainingKey = (key: string) => key.slice('training:'.length) as TrainingKey
 
 /**
  * Фильтр по характеристикам — только у оборудования. 3D-сканеры в CMS называются scanners;
@@ -259,7 +291,12 @@ export function facetOptions(items: CatalogItem[], facets: Facet[], state: Filte
         ? []
         : fromCounts(vendorCounts, state.vendors, vendorOrder(items, pins)),
     // Задачи раскрываются после выбора направления или типа: так фильтр остаётся коротким.
-    tasks: (state.direction || state.type) && narrows ? taskList : [],
+    // У обучения вместо задач — свои фильтры (направление курса, месяц старта, набор).
+    tasks: (state.direction || state.type) && narrows && state.type !== TRAINING ? taskList : [],
+    training:
+      state.type === TRAINING
+        ? trainingOptions((key) => scope(`training:${key}`), state.training)
+        : null,
   }
 }
 
@@ -280,6 +317,8 @@ export function update(state: FilterState, change: Partial<FilterState>): Filter
   }
   if ('direction' in change || 'type' in change) next.tasks = []
   if ('group' in change || 'direction' in change || 'type' in change) next.features = {}
+  if (('group' in change || 'type' in change) && !('training' in change))
+    next.training = emptyTraining
   if ('group' in change || 'direction' in change || 'type' in change) next.line = null
   // Линейка принадлежит одному производителю: другой выбор производителя её сбрасывает.
   if (('group' in change || 'vendors' in change) && !('line' in change)) next.line = null
@@ -315,6 +354,8 @@ export function results(items: CatalogItem[], state: FilterState, facets: Facet[
   }
   // В линейке основа первой, потом пакеты и модули («Порядок в линейке»).
   if (state.line) list.sort(compareInLine)
+  if (state.type === TRAINING && state.training.sort === 'start')
+    list.sort(byStart(state.training.month))
   const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE))
   const page = Math.min(state.page, pages)
   return {
@@ -343,9 +384,17 @@ export function autoVendor(items: CatalogItem[], state: FilterState): FilterStat
 /** Тип «Обучение»: курсы группами по категориям, без шага производителя (27.10.2026). */
 export const TRAINING = 'training'
 
-/** «Обучение» без выбранных производителя и задач — курсы группами по категориям. */
+/**
+ * «Обучение» без выбранных производителя и задач — курсы группами по категориям. Порядок
+ * «Ближайший старт» — одним списком по дате.
+ */
 export function topicView(state: FilterState) {
-  return state.type === TRAINING && !state.vendors.length && !state.tasks.length
+  return (
+    state.type === TRAINING &&
+    !state.vendors.length &&
+    !state.tasks.length &&
+    state.training.sort !== 'start'
+  )
 }
 
 /** Курсы по категориям (src/domain/courseTopics.mjs) в порядке категорий, внутри — по названию. */
@@ -454,6 +503,7 @@ export function fromParams(params: Record<string, string | string[] | undefined>
     line: one('line'),
     tasks: many('task'),
     features,
+    training: one('type') === TRAINING ? trainingFromParams(one) : emptyTraining,
     page: Number.isInteger(page) && page > 0 ? page : 1,
   }
 }
@@ -476,6 +526,7 @@ export function toQuery(state: FilterState) {
   for (const task of state.tasks) query.append('task', task)
   for (const [key, values] of Object.entries(state.features ?? {}))
     for (const value of values) query.append(`spec.${key}`, value)
+  if (state.type === TRAINING && state.training) trainingToQuery(state.training, query)
   if (state.page > 1) query.set('page', String(state.page))
   return query.toString()
 }
