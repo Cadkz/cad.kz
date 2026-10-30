@@ -58,8 +58,12 @@ export async function anthropicReply(options) {
   /** @type {{ role: 'user' | 'assistant', content: string | object[] }[]} */
   const messages = options.messages.map((m) => ({ role: m.role, content: m.content }))
   let toolCalls = 0
+  // Отчёт «Проверки Кадди» 30.10.2026: после инструментов (чаще всего передачи менеджеру) модель
+  // иногда заканчивает ход без текста — клиент видел «Модель не ответила». Тогда один раз
+  // просим ответить клиенту текстом, уже без инструментов.
+  let nudged = false
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-    const last = round === MAX_TOOL_ROUNDS
+    const last = round === MAX_TOOL_ROUNDS || nudged
     const body = {
       model,
       max_tokens: maxTokens,
@@ -94,6 +98,11 @@ export async function anthropicReply(options) {
         .map((block) => /** @type {{ text: string }} */ (block).text)
         .join('\n')
         .trim()
+      if (!text && !nudged) {
+        nudged = true
+        askForText(messages, content)
+        continue
+      }
       if (!text) throw new ModelError('Модель вернула пустой ответ')
       return { text: data.stop_reason === 'max_tokens' ? wholeSentences(text) : text, toolCalls }
     }
@@ -118,6 +127,33 @@ export async function anthropicReply(options) {
     messages.push({ role: 'user', content: results })
   }
   throw new ModelError('Модель не закончила ответ')
+}
+
+const TEXT_NUDGE = 'Ответь клиенту текстом по правилам, инструменты больше не вызывай.'
+
+/**
+ * Пустой ход модели: её блоки (если есть) — в историю, затем просьба ответить текстом. Роли в
+ * истории чередуются, поэтому просьба дописывается к последнему сообщению клиента, если ход
+ * модели пустой.
+ * @param {{ role: 'user' | 'assistant', content: string | object[] }[]} messages
+ * @param {ContentBlock[]} content
+ */
+function askForText(messages, content) {
+  // tool_use без ответа инструмента API не примет — такие блоки не возвращаем.
+  const kept = content.filter((block) => block?.type === 'text')
+  if (kept.length) {
+    messages.push({ role: 'assistant', content: kept })
+    messages.push({ role: 'user', content: TEXT_NUDGE })
+    return
+  }
+  const lastMessage = messages.at(-1)
+  if (!lastMessage || lastMessage.role !== 'user') {
+    messages.push({ role: 'user', content: TEXT_NUDGE })
+    return
+  }
+  lastMessage.content = Array.isArray(lastMessage.content)
+    ? [...lastMessage.content, { type: 'text', text: TEXT_NUDGE }]
+    : `${lastMessage.content}\n\n${TEXT_NUDGE}`
 }
 
 /**

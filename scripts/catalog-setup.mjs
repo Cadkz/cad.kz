@@ -52,6 +52,7 @@ import {
   setupHomeTextsAudit,
   setupHomeTrust,
 } from '../src/lib/homeSetup.ts'
+import { setupKaddiFaq } from '../src/lib/kaddiFaqSetup.ts'
 import { setupNewsCovers } from '../src/lib/newsCoversSetup.ts'
 import { clearOldPictures } from '../src/lib/oldPicturesSetup.ts'
 import { setupOwnerCatalogFixes } from '../src/lib/ownerCatalogFixes.ts'
@@ -305,6 +306,9 @@ try {
   const vendorList = await setupVendorList(payload)
   if (!vendorList) console.log('Прайс-лист Autodesk для Кадди уже загружен.')
   else for (const line of vendorList) console.log(`Прайс-лист Autodesk для Кадди — ${line}`)
+  const faq = await setupKaddiFaq(payload)
+  if (!faq) console.log('Справка Кадди 30.10.2026 уже загружена.')
+  else for (const line of faq) console.log(`Справка Кадди — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

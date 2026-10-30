@@ -14,6 +14,14 @@ export function assistantStatus() {
   return { mode: 'off' as const, label: 'Консультант выключен' }
 }
 
+/** Почему нет ответа — словами для отчёта: таймаут, пустой ответ, обрыв связи. */
+function failureReason(error: unknown) {
+  if (error instanceof Error && error.name === 'TimeoutError')
+    return 'Модель не ответила: не уложилась в 30 секунд'
+  if (error instanceof ModelError) return `Модель не ответила: ${error.message.toLowerCase()}`
+  return 'Модель не ответила: обрыв связи'
+}
+
 export type CheckResult =
   | {
       ok: true
@@ -93,7 +101,9 @@ export async function checkQuestion(
           ? 'Модель отклонила ключ (401): проверьте MODEL_API_KEY в Vercel'
           : status === 429
             ? 'Модель просит подождать (429): лимит запросов или расходов'
-            : `Модель не ответила${status ? ` (код ${status})` : ''}`,
+            : status
+              ? `Модель не ответила (код ${status})`
+              : failureReason(error),
     }
   }
 }

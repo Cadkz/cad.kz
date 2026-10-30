@@ -399,6 +399,43 @@ test('модель вызывает инструмент, сервер отда�
   })
 })
 
+test('отчёт 30.10: после инструмента пустой ход — один повтор с просьбой ответить текстом', async () => {
+  const { fetchImpl, calls } = fakeFetch([
+    {
+      stop_reason: 'tool_use',
+      content: [{ type: 'tool_use', id: 't1', name: 'handoffToManager', input: {} }],
+    },
+    { stop_reason: 'end_turn', content: [] },
+    { stop_reason: 'end_turn', content: [{ type: 'text', text: 'Передам менеджеру.' }] },
+  ])
+  const result = await anthropicReply({
+    ...base,
+    fetchImpl,
+    messages: [{ role: 'user', content: 'Ремонтируете плоттеры?' }],
+    runTool: async () => ({ ok: true }),
+  })
+  assert.equal(result.text, 'Передам менеджеру.')
+  assert.equal(calls.length, 3)
+  assert.deepEqual(calls[2].body.tool_choice, { type: 'none' })
+  const lastMessage = calls[2].body.messages.at(-1)
+  assert.equal(lastMessage.role, 'user')
+  assert.equal(lastMessage.content.at(-1).type, 'text')
+
+  const empty = fakeFetch([
+    { stop_reason: 'end_turn', content: [] },
+    { stop_reason: 'end_turn', content: [] },
+  ])
+  await assert.rejects(
+    anthropicReply({
+      ...base,
+      fetchImpl: empty.fetchImpl,
+      messages: [{ role: 'user', content: 'x' }],
+      runTool: async () => null,
+    }),
+    (error) => error instanceof ModelError && /пустой/.test(error.message),
+  )
+})
+
 test('правила двумя частями: постоянная кешируется, состояние разговора — нет', async () => {
   const { fetchImpl, calls } = fakeFetch([
     { stop_reason: 'end_turn', content: [{ type: 'text', text: 'Готово.' }] },

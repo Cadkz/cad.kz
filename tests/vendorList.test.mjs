@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { systemPrompt } from '../src/domain/assistant.mjs'
 import {
+  MULTI_OLD,
   parseAutodeskList,
   purchaseOptions,
   validateVendorList,
@@ -96,6 +97,13 @@ test('Названия и способы покупки', () => {
   assert.equal(vendorProductName('Fusion CLOUD'), 'Fusion')
   assert.deepEqual(purchaseOptions(['X Commercial New Multi-user Annual Subscription']), [
     'новая подписка: 1 год',
-    'есть сетевые (multi-user)',
+    'новые сетевые (multi-user)',
   ])
+  assert.deepEqual(
+    purchaseOptions([
+      'X Commercial New Single-user ELD Annual Subscription',
+      'X Commercial Multi-user Annual Subscription Renewal',
+    ]),
+    ['новая подписка: 1 год', 'продление', MULTI_OLD],
+  )
 })

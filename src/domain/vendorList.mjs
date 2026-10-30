@@ -52,6 +52,14 @@ export function vendorProductName(heading) {
 }
 
 /**
+ * Новые сетевые (multi-user) лицензии Autodesk не продаёт с 2020 года, в прайс-листе они только
+ * в строках для владельцев старых сетевых. Раньше писалось «есть сетевые (multi-user)», и Кадди
+ * предлагал их клиентам как новую покупку (отчёт «Проверки Кадди» 30.10.2026).
+ */
+export const MULTI_OLD = 'новых сетевых (multi-user) нет, только для владельцев старых сетевых'
+const MULTI_LEGACY = 'есть сетевые (multi-user)'
+
+/**
  * Способы покупки по строкам с SKU одного продукта: новая подписка (сроки), продление, переход.
  * @param {string[]} names
  */
@@ -61,8 +69,10 @@ export function purchaseOptions(names) {
   let renewal = false
   let switched = false
   let multi = false
+  let multiNew = false
   for (const name of names) {
     if (/\bnew\b/i.test(name)) {
+      if (/multi-user/i.test(name)) multiNew = true
       if (/annual/i.test(name)) terms.add('1 год')
       if (/2-year/i.test(name)) terms.add('2 года')
       if (/3-year/i.test(name)) terms.add('3 года')
@@ -80,7 +90,8 @@ export function purchaseOptions(names) {
   else options.push('новых подписок нет, только для действующих клиентов')
   if (renewal) options.push('продление')
   if (switched) options.push('переход со старых лицензий')
-  if (multi) options.push('есть сетевые (multi-user)')
+  if (multiNew) options.push('новые сетевые (multi-user)')
+  else if (multi) options.push(MULTI_OLD)
   return options
 }
 
@@ -174,7 +185,10 @@ export function vendorListText(list) {
   const lines = list.products
     .map(
       (product) =>
-        `— ${product.name}${product.cloud ? ' (облачный)' : ''}: ${product.options.join('; ')}`,
+        `— ${product.name}${product.cloud ? ' (облачный)' : ''}: ${product.options
+          // Прайс-лист, загруженный до 30.10.2026, хранит старую формулировку.
+          .map((option) => (option === MULTI_LEGACY ? MULTI_OLD : option))
+          .join('; ')}`,
     )
     .join('\n')
   return `
