@@ -25,6 +25,7 @@ import { PriceListView as PriceListView_94d00816e844af2d5fa87147e72feb4f } from 
 import { PricesView as PricesView_3e5ca9332e94e0d0ce775e4810e4ba16 } from '../../../components/PricesView/PricesView'
 import { RatesView as RatesView_40625fd6f05f8f77e54d5fe804a2439f } from '../../../components/RatesView/RatesView'
 import { QualityView as QualityView_b38a01f0afeeafbe57506d409fe1d356 } from '../../../components/QualityView/QualityView'
+import { CoursesView as CoursesView_fb77c814ae9cec8eab5a5e9984e5ccac } from '../../../components/CoursesView/CoursesView'
 import { KaddiDataView as KaddiDataView_e4069d6241b6244bfa3b65ac2def2f14 } from '../../../components/KaddiDataView/KaddiDataView'
 import { AssistantCheckView as AssistantCheckView_ec6e0189c41c4a69611fb303565b66ab } from '../../../components/AssistantCheckView/AssistantCheckView'
 import { AnalyticsView as AnalyticsView_47205d9166363221f956bf1d82c83319 } from '../../../components/AnalyticsView/AnalyticsView'
@@ -62,6 +63,7 @@ export const importMap = {
   "/components/PricesView/PricesView#PricesView": PricesView_3e5ca9332e94e0d0ce775e4810e4ba16,
   "/components/RatesView/RatesView#RatesView": RatesView_40625fd6f05f8f77e54d5fe804a2439f,
   "/components/QualityView/QualityView#QualityView": QualityView_b38a01f0afeeafbe57506d409fe1d356,
+  "/components/CoursesView/CoursesView#CoursesView": CoursesView_fb77c814ae9cec8eab5a5e9984e5ccac,
   "/components/KaddiDataView/KaddiDataView#KaddiDataView": KaddiDataView_e4069d6241b6244bfa3b65ac2def2f14,
   "/components/AssistantCheckView/AssistantCheckView#AssistantCheckView": AssistantCheckView_ec6e0189c41c4a69611fb303565b66ab,
   "/components/AnalyticsView/AnalyticsView#AnalyticsView": AnalyticsView_47205d9166363221f956bf1d82c83319,

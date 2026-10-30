@@ -259,6 +259,7 @@ test('правила владельца и характер Кадди: роль
       'getPrice',
       'priceTotal',
       'handoffToManager',
+      'courseSchedule',
       'showSitePage',
     ],
   )

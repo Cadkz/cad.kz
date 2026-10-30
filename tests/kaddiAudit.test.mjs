@@ -69,13 +69,13 @@ test('сумма заказа не складывает позицию «по з
   assert.equal(result.total, null)
   // Суммы — с неразрывным пробелом между разрядами.
   const plain = (/** @type {unknown} */ v) => String(v).replace(/\s/g, ' ')
-  assert.equal(plain(result.totalWithoutExcluded), '627 242 ₸')
+  assert.equal(plain(result.totalWithoutExcluded), '626 000 ₸')
   assert.deepEqual(
     result.excluded.map((e) => [e.code, e.reason]),
     [['A1', SITE_REQUEST_NOTE]],
   )
   // Без сверки с сайтом — как раньше.
-  assert.equal(plain(sumPriceRows(rows, items, 'included').total), '1 716 504 ₸')
+  assert.equal(plain(sumPriceRows(rows, items, 'included').total), '1 715 000 ₸')
 })
 
 test('просьба о связи — сразу форма (Ка3), жалоба и возврат — нет', () => {

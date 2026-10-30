@@ -82,6 +82,11 @@ export default buildConfig({
           path: '/quality',
           meta: { title: 'Контроль качества' },
         },
+        courses: {
+          Component: '/components/CoursesView/CoursesView#CoursesView',
+          path: '/courses',
+          meta: { title: 'Расписание курсов' },
+        },
         kaddiData: {
           Component: '/components/KaddiDataView/KaddiDataView#KaddiDataView',
           path: '/kaddi-data',

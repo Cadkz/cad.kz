@@ -1,5 +1,6 @@
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
+import { CourseGroups } from '@/components/CourseGroups/CourseGroups'
 import { Faq } from '@/components/Faq/Faq'
 import { JsonLd } from '@/components/JsonLd/JsonLd'
 import { PickerBar } from '@/components/PickerBar/PickerBar'
@@ -24,6 +25,7 @@ import { kindProfile } from '@/domain/productKind.mjs'
 import { hasSpecSheet } from '@/domain/specSheet.mjs'
 import { productLd } from '@/domain/structuredData.mjs'
 import { getCatalog } from '@/lib/catalog'
+import { courseMatches, groupsForCourse } from '@/lib/courseSchedule'
 import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
@@ -48,16 +50,23 @@ const groupKeys = {
 
 /** Строки подборки с картинкой, ценой и корзиной — из того же набора, что каталог. */
 function toPicks(items: RelatedProduct[], byHref: Map<string, PickItem>): PickItem[] {
-  return items.map(
-    (item) =>
-      byHref.get(item.href) ?? {
-        ...item,
-        picture: null,
-        priceFrom: null,
-        offersCount: 0,
-        cartOfferId: null,
-      },
-  )
+  return items.map((item) => {
+    const listed = byHref.get(item.href)
+    // Подпись подборки (у курса — «Старт 1 декабря») важнее цены из каталога.
+    if (listed) return item.note ? { ...listed, note: item.note } : listed
+    return { ...item, picture: null, priceFrom: null, offersCount: 0, cartOfferId: null }
+  })
+}
+
+/** Ближайшие группы курса из расписания УЦ; таблица недоступна — блока нет. */
+async function courseGroups(product: ProductPage) {
+  if (product.kind !== 'course') return null
+  try {
+    const matches = await courseMatches(await cms())
+    return { groups: groupsForCourse(matches, product.id), today: matches.today }
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -73,10 +82,11 @@ export async function ProductView({
   product: ProductPage
   pick: PickTarget | null
 }) {
-  const [{ cross, similar }, contacts, catalog] = await Promise.all([
+  const [{ cross, similar, limit }, contacts, catalog, schedule] = await Promise.all([
     cms().then((payload) => getRecommendations(payload, product.id)),
     getContacts(),
     getCatalog(),
+    courseGroups(product),
   ])
   const byHref = new Map<string, PickItem>(catalog.items.map((item) => [item.href, item]))
   const direction = product.sections.find((s) => s.isDirection)
@@ -186,6 +196,14 @@ export async function ProductView({
       )}
     </>
   )
+  const groups =
+    schedule && schedule.groups.length > 0 ? (
+      <Reveal>
+        <ProductSection title="Ближайшие группы" id="groups">
+          <CourseGroups groups={schedule.groups} today={schedule.today} />
+        </ProductSection>
+      </Reveal>
+    ) : null
   const config = (
     <ProductSection
       title={guided ? 'Подберите комплект' : profile.configTitle}
@@ -226,6 +244,7 @@ export async function ProductView({
         />
         <PickerProvider key={String(pick)} view={product.picker} meta={meta} pick={pick}>
           <ProductLayout asideLast header={header} aside={<PickerSummary />} wide={scans}>
+            {groups}
             {config}
             {overview}
             {faq}
@@ -233,6 +252,7 @@ export async function ProductView({
           <PickerBar />
         </PickerProvider>
         <ProductPicks
+          limit={limit}
           panels={[
             {
               id: 'cross',

@@ -1,5 +1,6 @@
 import { validateKnowledge, validatePriceRows } from '@/domain/priceTable.mjs'
 import { validateVendorList } from '@/domain/vendorList.mjs'
+import { validateVendorPrices } from '@/domain/vendorPrices.mjs'
 import { logActivity } from '@/lib/activity'
 import { adminRequest, reply } from '@/lib/adminApi'
 import {
@@ -9,6 +10,7 @@ import {
   saveVendorList,
 } from '@/lib/assistant/priceTable'
 import { priceByCode, searchPrice, siteEntries } from '@/lib/assistant/tools'
+import { applyVendorPrices } from '@/lib/vendorPrices'
 
 /**
  * «Прайс и база Кадди» в админке (администратор и маркетолог): запись прайса и базы знаний из файла,
@@ -89,9 +91,12 @@ export async function POST(request: Request) {
         link: '/admin/collections/assistant-knowledge',
       })
     }
+    let report: string[] = []
     if (data.vendor) {
       const list = validateVendorList(data.vendor)
       if (typeof list === 'string') return reply({ error: list }, 400)
+      const prices = validateVendorPrices((data.vendor as Record<string, unknown>).prices)
+      if (typeof prices === 'string') return reply({ error: prices }, 400)
       const fileName = short((data.vendor as Record<string, unknown>).fileName, 120) || 'без имени'
       await saveVendorList(payload, list, fileName)
       parts.push(`прайс-лист ${list.vendor} — ${list.products.length} продуктов`)
@@ -101,9 +106,16 @@ export async function POST(request: Request) {
         userId: user.id,
         link: '/admin/kaddi-data',
       })
+      if (Object.keys(prices).length) {
+        report = await applyVendorPrices(payload, prices, user.id)
+        parts.push(`цены на сайте: ${report[0]}`)
+      }
     }
     if (!parts.length) return reply({ error: 'Нечего загружать' }, 400)
-    return reply({ message: `Готово: ${parts.join(', ')}. Кадди уже отвечает по новым данным.` })
+    return reply({
+      message: `Готово: ${parts.join(', ')}. Кадди уже отвечает по новым данным.`,
+      report: report.slice(1),
+    })
   } catch (error) {
     console.error(
       'Прайс и база Кадди: ошибка',

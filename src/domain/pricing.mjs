@@ -1,7 +1,10 @@
 // Exact rational arithmetic: no binary floating-point money calculations.
 
 /** Версия правила расчёта: хранится в снимке заказа. */
-export const PRICE_RULE = 'KZT-unit-ceil-v1'
+export const PRICE_RULE = 'KZT-unit-floor1000-v2'
+
+/** Шаг округления цены за единицу, тенге (решение владельца 30.10.2026: 189 990 → 189 000). */
+export const PRICE_STEP = 1000n
 
 function decimal(value) {
   if (typeof value !== 'string' || !/^\d{1,12}(\.\d{1,6})?$/.test(value))
@@ -13,9 +16,30 @@ function decimal(value) {
 function round(n, d) {
   return (n * 2n + d) / (2n * d)
 }
-/** Вверх до целого (решение владельца 08.10.2026, как на старом сайте cad.kz). */
+/** Вверх до целого тенге: для цен меньше шага, чтобы не получить 0. */
 function ceil(n, d) {
   return (n + d - 1n) / d
+}
+/**
+ * Цена за единицу на сайте: вниз до тысячи тенге (решение владельца 30.10.2026, вместо «вверх до
+ * целого» от 08.10.2026). Меньше тысячи — вверх до целого тенге, иначе вышел бы ноль.
+ * @param {bigint} n числитель точной цены, тенге
+ * @param {bigint} d знаменатель
+ */
+function siteUnit(n, d) {
+  const whole = n / d
+  return whole >= PRICE_STEP ? (whole / PRICE_STEP) * PRICE_STEP : ceil(n, d)
+}
+
+/**
+ * То же правило для цены в тиынах (строки прайса, которые называет Кадди).
+ * @param {string} tiyn целое число тиынов строкой
+ * @returns {string}
+ */
+export function siteTiyn(tiyn) {
+  const value = BigInt(tiyn)
+  const step = PRICE_STEP * 100n
+  return (value >= step ? (value / step) * step : ((value + 99n) / 100n) * 100n).toString()
 }
 export function quote({
   amount,
@@ -39,7 +63,7 @@ export function quote({
     n *= 100n * sd
     d *= 100n * sd + s
   }
-  const unit = ceil(n, d),
+  const unit = siteUnit(n, d),
     total = unit * BigInt(quantity)
   const vatMinor = round(total * t * 100n, 100n * td + t)
   return {

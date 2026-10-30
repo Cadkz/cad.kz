@@ -45,7 +45,7 @@ export async function PricesView({
               нажмёте «Применить».
             </p>
             <p className={styles.note}>
-              Цена на сайте = цена в валюте × курс + НДС {data.vat} %, вверх до тенге. Курсы:{' '}
+              Цена на сайте = цена в валюте × курс + НДС {data.vat} %, вниз до тысячи тенге. Курсы:{' '}
               {data.rates.map((rate) => `${rate.currency} ${rate.value} ₸`).join(', ') ||
                 'не заданы'}{' '}
               — <a href="/admin/rates">курсы одной страницей</a>.

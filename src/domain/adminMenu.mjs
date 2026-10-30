@@ -36,6 +36,7 @@ export const MENU = [
       { label: 'Каталог', href: '/admin/catalog', icon: 'catalog', access: 'staff' },
       { label: 'Цены', href: '/admin/prices', icon: 'prices', access: 'staff' },
       { label: 'Контроль качества', href: '/admin/quality', icon: 'quality', access: 'staff' },
+      { label: 'Расписание курсов', href: '/admin/courses', icon: 'courses', access: 'staff' },
     ],
   },
   {

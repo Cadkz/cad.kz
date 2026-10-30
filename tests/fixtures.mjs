@@ -19,7 +19,7 @@ export function formRequest(overrides = {}) {
   return {
     idempotencyKey: KEY,
     items: [{ offerId: '11', quantity: 2 }],
-    expectedTotalKzt: '5846400',
+    expectedTotalKzt: '5846000',
     buyer: { ...buyerIndividual },
     comment: '',
     consent: true,
@@ -29,7 +29,7 @@ export function formRequest(overrides = {}) {
 
 export class DuplicateError extends Error {}
 
-/** GEO5: 4 200 € без НДС × 600 × 1,16 = 2 923 200 ₸ за единицу. Artec: 1 000 ₸ с НДС 16%. */
+/** GEO5: 4 200 € без НДС × 600 × 1,16 = 2 923 000 ₸ (вниз до тысячи) за единицу. Artec: 1 000 ₸ с НДС 16%. */
 export function createWorld({ rate = '600' } = {}) {
   const world = {
     now: NOW,

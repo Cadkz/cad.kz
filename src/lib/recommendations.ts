@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 import { plainTitle } from '@/domain/productTitle.mjs'
+import { dayText, pickCourse } from '../domain/courseSchedule.mjs'
 import { priorityRank } from '../domain/priority.mjs'
 import {
   crossFor,
@@ -9,6 +10,7 @@ import {
   similarFor,
 } from '../domain/recommend.mjs'
 import { collectionFor, linePickFor, PICKS_LIMIT, pinPicks } from '../domain/vendorPicks.mjs'
+import { courseMatches, groupsForCourse } from './courseSchedule'
 import { catalogAvailable } from './equipmentResearch'
 import { catalogHref } from './navigationHrefs'
 import { plural } from './plural'
@@ -139,6 +141,34 @@ async function lineCard(payload: Payload, title: string): Promise<RelatedProduct
 }
 
 /**
+ * Курс к программе с ближайшей группой из расписания УЦ (просьба владельца 30.10.2026): строкой
+ * «С этим покупают» с подписью «Старт 1 декабря». Нет расписания или курса — null, страница не
+ * ждёт ошибку таблицы.
+ */
+async function scheduledCourse(
+  payload: Payload,
+  target: RecItem,
+  items: RecItem[],
+  cards: Map<number, RelatedProduct>,
+): Promise<RelatedProduct | null> {
+  if (target.kind !== 'software') return null
+  try {
+    const matches = await courseMatches(payload)
+    const listed = new Set(items.filter((item) => item.kind === 'course').map((item) => item.id))
+    const candidates = matches.courses.flatMap((course) => {
+      const next = groupsForCourse(matches, course.id)[0]
+      return listed.has(course.id) && next ? [{ ...course, next: next.start }] : []
+    })
+    const course = pickCourse(target.title, candidates)
+    const card = course ? cards.get(course.id) : null
+    return card && course ? { ...card, note: `Старт ${dayText(course.next, matches.today)}` } : null
+  } catch (error) {
+    console.error('Расписание курсов: подборка без курса', error instanceof Error ? error.name : '')
+    return null
+  }
+}
+
+/**
  * Подборки для страницы товара: «С этим покупают» и «Похожие» без повторов между ними, по две
  * строки (решение владельца 27.10.2026). У программ Autodesk второй в «С этим покупают» — AEC
  * Collection, у машиностроительных (Inventor, Fusion) — Product Design & Manufacturing Collection, к AutoCAD и Revit первой — линейка MagiCAD (src/domain/vendorPicks.mjs).
@@ -146,7 +176,7 @@ async function lineCard(payload: Payload, title: string): Promise<RelatedProduct
 export async function getRecommendations(payload: Payload, productId: number) {
   const { items, info, cards } = await loadRecData(payload)
   const target = items.find((item) => item.id === productId)
-  if (!target) return { cross: [], similar: [] }
+  if (!target) return { cross: [], similar: [], limit: PICKS_LIMIT }
   const found = crossFor([target], items, info, { limit: PICKS_LIMIT + 2 })
   const autodesk = target.vendor === 'Autodesk' && target.kind === 'software'
   const collection = collectionFor(target.title)
@@ -163,10 +193,19 @@ export async function getRecommendations(payload: Payload, productId: number) {
     },
     (card) => card.href,
   )
+  // Курс с ближайшей группой — третьей строкой, если он есть в расписании; тогда и в «Похожих»
+  // три строки, чтобы панели были ровными.
+  const course = await scheduledCourse(payload, target, items, cards)
+  if (course) {
+    const at = cross.findIndex((card) => card.href === course.href)
+    if (at >= 0) cross.splice(at, 1)
+    cross.splice(PICKS_LIMIT, cross.length, course)
+  }
+  const limit = course ? PICKS_LIMIT + 1 : PICKS_LIMIT
   const shown = new Set(cross.map((card) => card.href))
   const similar = similarFor(target, items, {
-    limit: PICKS_LIMIT,
+    limit,
     exclude: items.filter((item) => shown.has(cards.get(item.id)?.href ?? '')).map((i) => i.id),
   })
-  return { cross, similar: toCards(similar, cards) }
+  return { cross, similar: toCards(similar, cards), limit }
 }

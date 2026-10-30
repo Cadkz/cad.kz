@@ -1,4 +1,5 @@
 // @ts-check
+import { autodeskPrices } from './vendorPrices.mjs'
 // Прайс-лист производителя для Кадди (просьба владельца 29.10.2026): что вообще можно поставить,
 // даже если товара нет в каталоге сайта. Первый — прайс-лист Autodesk на месяц (.xlsx: колонки
 // «Программное обеспечение», «SKU код», «РЦКП»; строки без SKU — заголовки групп; вверху
@@ -8,6 +9,7 @@
 /**
  * @typedef {{ name: string, cloud: boolean, options: string[] }} VendorProduct
  * @typedef {{ vendor: string, from: string, to: string, products: VendorProduct[] }} VendorList
+ * @typedef {import('./vendorPrices.mjs').VendorPrices} VendorPrices
  */
 
 export const MAX_VENDOR_PRODUCTS = 400
@@ -97,8 +99,10 @@ export function purchaseOptions(names) {
 
 /**
  * Прайс-лист Autodesk из таблицы: лист с колонками «SKU» и «РЦКП». null — это не он.
+ * Цены (РЦКП) — отдельно, в prices: только для товаров сайта (src/domain/vendorPrices.mjs), в
+ * список для Кадди они не попадают.
  * @param {{ name: string, rows: string[][] }[]} sheets
- * @returns {VendorList | null}
+ * @returns {(VendorList & { prices: VendorPrices }) | null}
  */
 export function parseAutodeskList(sheets) {
   for (const sheet of sheets) {
@@ -108,6 +112,7 @@ export function parseAutodeskList(sheets) {
     if (headerRow < 0) continue
     const header = sheet.rows[headerRow] ?? []
     const skuCol = header.findIndex((cell) => /sku/i.test(cell))
+    const priceCol = header.findIndex((cell) => /рцкп/i.test(cell))
     const effective = sheet.rows
       .slice(0, headerRow)
       .flat()
@@ -115,7 +120,11 @@ export function parseAutodeskList(sheets) {
     const [fromText = '', toText = ''] = (effective ?? '').split(/\s+-\s+/)
     const body = sheet.rows
       .slice(headerRow + 1)
-      .map((row) => ({ name: String(row[0] ?? '').trim(), sku: String(row[skuCol] ?? '').trim() }))
+      .map((row) => ({
+        name: String(row[0] ?? '').trim(),
+        sku: String(row[skuCol] ?? '').trim(),
+        price: String(row[priceCol] ?? '').trim(),
+      }))
       .filter((row) => row.name)
     const headings = body.filter((row) => !row.sku).map((row) => row.name)
     // Продукт — заголовок, за которым идёт заголовок, начинающийся с него («Revit 2027» →
@@ -142,7 +151,13 @@ export function parseAutodeskList(sheets) {
       .map(([name, entry]) => ({ name, cloud: entry.cloud, options: purchaseOptions(entry.names) }))
       .sort((a, b) => a.name.localeCompare(b.name, 'en'))
       .slice(0, MAX_VENDOR_PRODUCTS)
-    return { vendor: 'Autodesk', from: englishDay(fromText), to: englishDay(toText), products }
+    return {
+      vendor: 'Autodesk',
+      from: englishDay(fromText),
+      to: englishDay(toText),
+      products,
+      prices: autodeskPrices(body.filter((row) => row.sku)),
+    }
   }
   return null
 }

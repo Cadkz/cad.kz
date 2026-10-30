@@ -6,6 +6,7 @@ import {
   type HandoffDraft,
   sitePageCard,
 } from '@/domain/assistant.mjs'
+import { courseWords, groupBrief, upcoming } from '@/domain/courseSchedule.mjs'
 import { normalizePhone } from '@/domain/order.mjs'
 import {
   canTellPrice,
@@ -20,8 +21,10 @@ import {
   totalItems,
   vatText,
 } from '@/domain/priceTable.mjs'
+import { siteTiyn } from '@/domain/pricing.mjs'
 import { type SiteEntry, siteBlocksPrice } from '@/domain/sitePrice.mjs'
 import { getCatalog } from '../catalog'
+import { courseMatches, groupsForCourse } from '../courseSchedule'
 import { searchCatalog } from '../search'
 import { type LoadedPriceTable, loadPriceTable } from './priceTable'
 
@@ -201,7 +204,7 @@ export function priceByCode(table: LoadedPriceTable, input: unknown, site: SiteE
     delivery: deliveryTerm(row),
     priceDate: table.summary.updated || null,
     ...(allowed.ok && row.tiyn
-      ? { price: formatTiyn(row.tiyn), vat: vatText(table.summary.vat) }
+      ? { price: formatTiyn(siteTiyn(row.tiyn)), vat: vatText(table.summary.vat) }
       : { price: null, note: allowed.ok ? 'Цена недоступна' : allowed.reason }),
   }
 }
@@ -292,7 +295,81 @@ export function createTools(payload: Payload): ToolRunner {
     return { status: 'shown', title: card.title, note: 'Под ответом кнопка на этот раздел.' }
   }
 
+  /**
+   * Расписание курсов УЦ: ближайшие группы (даты, занятия, время, формат). Цена — как на сайте
+   * (карточка курса), не из таблицы. Курс есть на сайте — ссылка под ответом.
+   */
+  async function courseSchedule(input: unknown) {
+    const words = courseWords(text(input, 'query', 80))
+    const [matches, catalog] = await Promise.all([courseMatches(payload), getCatalog()])
+    if (!matches.schedule.fetchedAt)
+      return {
+        courses: [],
+        note: 'Расписание недоступно — даты уточнит менеджер (handoffToManager).',
+      }
+    const byHref = new Map(catalog.items.map((item) => [item.href, item]))
+    const fits = (titles: string[]) =>
+      !words.length ||
+      titles.some((title) => {
+        const own = courseWords(title)
+        return words.every((word) => own.some((w) => w.startsWith(word) || word.startsWith(w)))
+      })
+    const result = matches.programs
+      .map((program) => {
+        const course = matches.courses.find((c) => c.id === program.courseId) ?? null
+        const groups = course
+          ? groupsForCourse(matches, course.id)
+          : upcoming(program.groups, matches.today)
+        return { program, course, groups }
+      })
+      .filter(
+        ({ program, course, groups }) =>
+          groups.length && fits([...program.titles, course?.title ?? '']),
+      )
+      .sort((a, b) => (a.groups[0]?.start ?? '').localeCompare(b.groups[0]?.start ?? ''))
+    // Один курс каталога может собрать несколько программ — показываем его один раз.
+    const seen = new Set<string>()
+    const courses = result
+      .filter(({ program, course }) => {
+        const key = course ? `c${course.id}` : program.key
+        if (seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
+      .slice(0, 8)
+      .map(({ program, course, groups }) => {
+        const listed = course ? byHref.get(course.href) : undefined
+        if (course && listed && !found.some((f) => f.id === listed.id))
+          found.push(
+            toCard({
+              id: listed.id,
+              title: listed.title,
+              href: listed.href,
+              vendor: listed.manufacturer,
+              price: listed.priceFrom ? `от ${listed.priceFrom}` : null,
+            }),
+          )
+        return {
+          title: course?.title ?? program.title,
+          onSite: Boolean(listed),
+          price: listed?.priceFrom ?? null,
+          groups: groups.slice(0, 3).map((group) => groupBrief(group, matches.today)),
+        }
+      })
+    if (!courses.length)
+      return {
+        courses: [],
+        note: 'Ближайших групп по этому запросу нет. Предложи менеджера: он скажет, когда будет набор, или соберёт корпоративную группу.',
+      }
+    return {
+      today: matches.today,
+      courses,
+      note: 'onSite: false — курса нет на сайте, записаться можно через менеджера (handoffToManager). price — цена на сайте; нет — стоимость уточнит менеджер.',
+    }
+  }
+
   const tools: Record<string, (input: unknown) => Promise<unknown>> = {
+    courseSchedule,
     searchProducts,
     searchPriceList: (input) => withTable((loaded, entries) => searchPrice(loaded, input, entries)),
     getPrice: (input) => withTable((loaded, entries) => priceByCode(loaded, input, entries)),

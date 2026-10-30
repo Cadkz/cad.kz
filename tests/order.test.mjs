@@ -147,11 +147,11 @@ test('снимок содержит всё, что нужно для прове�
   const snapshot = buildOrderSnapshot({ lines: priced.lines, quotedAt: priced.quotedAt })
 
   assert.equal(snapshot.version, SNAPSHOT_VERSION)
-  assert.equal(snapshot.rule, 'KZT-unit-ceil-v1')
+  assert.equal(snapshot.rule, 'KZT-unit-floor1000-v2')
   assert.equal(snapshot.currency, 'KZT')
   assert.equal(snapshot.quotedAt, NOW.toISOString())
   assert.equal(snapshot.targetVat, '16')
-  assert.equal(snapshot.totalKzt, '5849400')
+  assert.equal(snapshot.totalKzt, '5849000')
 
   const [geo, leo] = snapshot.lines
   assert.deepEqual(geo, {
@@ -163,8 +163,8 @@ test('снимок содержит всё, что нужно для прове�
     quantity: 2,
     source: { amount: '4200', currency: 'EUR', includesVat: false, vat: '16' },
     rate: { kztPerUnit: '600', date: '2026-10-01T00:00:00.000Z' },
-    unitKzt: '2923200',
-    totalKzt: '5846400',
+    unitKzt: '2923000',
+    totalKzt: '5846000',
     vatMinor: geo.vatMinor,
   })
   assert.deepEqual(leo.rate, { kztPerUnit: '1', date: null })
@@ -193,7 +193,7 @@ test('снимок не зависит от дальнейших правок к
   world.offers.get('11').title = 'Новое название'
   assert.equal(snapshot.lines[0].rate.kztPerUnit, '600')
   assert.equal(snapshot.lines[0].productTitle, 'GEO5 Расчёт устойчивости')
-  assert.equal(snapshot.totalKzt, '2923200')
+  assert.equal(snapshot.totalKzt, '2923000')
 })
 
 test('снимок отказывается собираться из пустых или разнородных строк', async () => {
@@ -237,9 +237,9 @@ test('данные для CRM берутся из сохранённого за�
   assert.equal(lead.items.length, 1)
   assert.equal(lead.items[0].offerId, '11')
   assert.equal(lead.items[0].quantity, 2)
-  assert.equal(lead.items[0].totalKzt, '5846400')
+  assert.equal(lead.items[0].totalKzt, '5846000')
   assert.ok(lead.items[0].title && lead.items[0].unitKzt, 'название и цена за единицу в лиде есть')
-  assert.equal(lead.totalKzt, '5846400')
+  assert.equal(lead.totalKzt, '5846000')
   assert.equal(lead.idempotencyKey, KEY)
   assert.equal(lead.consent.accepted, true)
   assert.deepEqual(toCrmLead({ ...order, buyer: { ...company, type: 'individual' } }).buyer, {

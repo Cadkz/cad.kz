@@ -12,13 +12,13 @@ test('успешное оформление: заказ со снимком и �
   assert.equal(result.status, 'created')
   assert.equal(result.idempotencyKey, KEY, 'по ключу заявку находит очередь CRM')
   assert.match(result.order.number, /^CAD-20261008-[A-Z0-9]{5}$/)
-  assert.equal(result.order.totalKzt, '5846400')
+  assert.equal(result.order.totalKzt, '5846000')
   assert.equal(result.order.mode, 'demo')
   assert.equal(world.orders.length, 1)
   assert.equal(world.outbox.length, 1)
 
   const [saved] = world.orders
-  assert.equal(saved.snapshot.totalKzt, '5846400')
+  assert.equal(saved.snapshot.totalKzt, '5846000')
   assert.equal(saved.snapshot.lines[0].rate.kztPerUnit, '600')
   assert.equal(saved.consent.accepted, true)
   assert.equal(saved.consent.version.startsWith('demo-'), true)
@@ -106,8 +106,8 @@ test('цена изменилась: заказ не сохраняется, с�
 
   const result = await submitCheckout(formRequest(), world.deps, meta)
   assert.equal(result.status, 'price_changed')
-  assert.equal(result.quote.totalKzt, '6820800')
-  assert.equal(result.quote.lines[0].unitKzt, '3410400')
+  assert.equal(result.quote.totalKzt, '6820000')
+  assert.equal(result.quote.lines[0].unitKzt, '3410000')
   assert.equal(world.orders.length, 0)
   assert.equal(world.outbox.length, 0)
 })
@@ -123,7 +123,7 @@ test('после подтверждения новой цены заказ со�
     meta,
   )
   assert.equal(confirmed.status, 'created')
-  assert.equal(confirmed.order.totalKzt, '6820800')
+  assert.equal(confirmed.order.totalKzt, '6820000')
   assert.equal(world.orders[0].snapshot.lines[0].rate.kztPerUnit, '700')
   assert.equal(world.orders[0].snapshot.lines[0].rate.date, '2026-10-09T00:00:00.000Z')
 })
@@ -132,7 +132,7 @@ test('цена, присланная клиентом, ничего не реш�
   const world = createWorld()
   const result = await submitCheckout(formRequest({ expectedTotalKzt: '1' }), world.deps, meta)
   assert.equal(result.status, 'price_changed')
-  assert.equal(result.quote.totalKzt, '5846400')
+  assert.equal(result.quote.totalKzt, '5846000')
   assert.equal(world.orders.length, 0)
 
   const withPrices = await submitCheckout(
@@ -141,7 +141,7 @@ test('цена, присланная клиентом, ничего не реш�
     meta,
   )
   assert.equal(withPrices.status, 'created')
-  assert.equal(world.orders[0].snapshot.totalKzt, '5846400')
+  assert.equal(world.orders[0].snapshot.totalKzt, '5846000')
 })
 
 test('предложение снято с публикации: понятная ошибка, заказа нет', async () => {

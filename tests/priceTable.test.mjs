@@ -369,7 +369,7 @@ test('сумма заказа: несколько товаров, количес
     ],
   )
   assert.deepEqual(both.excluded, [])
-  // Пакет одной штукой складывается точно, с тиынами; продление и «по запросу» — нет.
+  // Пакет одной штукой складывается по цене вниз до тысячи; продление и «по запросу» — нет.
   const mixed = sum([
     { code: '11-8', quantity: 1 },
     { code: '11-4', quantity: 1 },
@@ -378,7 +378,7 @@ test('сумма заказа: несколько товаров, количес
     { code: 'нет-такого', quantity: 1 },
   ])
   assert.equal(mixed.total, null)
-  assert.equal(mixed.totalWithoutExcluded, '1\u00a0645\u00a0337,60\u00a0₸')
+  assert.equal(mixed.totalWithoutExcluded, '1\u00a0645\u00a0000\u00a0₸')
   assert.deepEqual(
     mixed.excluded.map((e) => e.code),
     ['11-3', '11-5', 'нет-такого'],

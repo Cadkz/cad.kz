@@ -25,11 +25,11 @@ function lead(overrides = {}) {
         configuration: 'Personal',
         license: 'Бессрочная',
         quantity: 2,
-        unitKzt: '2923200',
-        totalKzt: '5846400',
+        unitKzt: '2923000',
+        totalKzt: '5846000',
       },
     ],
-    totalKzt: '5846400',
+    totalKzt: '5846000',
     messages: [],
     ...overrides,
   }
@@ -90,7 +90,7 @@ test('лид с товарами: создаётся лид, затем стро
     {
       PRODUCT_ID: 0,
       PRODUCT_NAME: 'GEO5 Сваи, Personal, Бессрочная',
-      PRICE: '2923200',
+      PRICE: '2923000',
       QUANTITY: 2,
       MEASURE_CODE: 796,
       MEASURE_NAME: 'шт',

@@ -13,13 +13,14 @@ import {
 } from '@/domain/priceTable.mjs'
 import { readSpreadsheet, SpreadsheetError } from '@/domain/spreadsheet.mjs'
 import { parseAutodeskList, type VendorList } from '@/domain/vendorList.mjs'
+import type { VendorPrices } from '@/domain/vendorPrices.mjs'
 import styles from './KaddiData.module.css'
 
 type Parsed = {
   fileName: string
   price: { sheet: string; rows: PriceRow[]; problems: string[]; updated: string } | null
   knowledge: { sheet: string; entries: KnowledgeEntry[] } | null
-  vendor: VendorList | null
+  vendor: (VendorList & { prices: VendorPrices }) | null
 }
 
 const PROBLEMS_SHOWN = 12
@@ -40,10 +41,12 @@ export function KaddiData() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [done, setDone] = useState('')
+  const [report, setReport] = useState<string[]>([])
 
   async function read(file: File) {
     setError('')
     setDone('')
+    setReport([])
     setParsed(null)
     try {
       const sheets = await readSpreadsheet(new Uint8Array(await file.arrayBuffer()))
@@ -94,8 +97,10 @@ export function KaddiData() {
       else {
         setDone(result.message)
         setParsed(null)
-        // Обновить состояние вверху страницы.
-        window.setTimeout(() => window.location.reload(), 1500)
+        const lines: string[] = Array.isArray(result.report) ? result.report : []
+        setReport(lines)
+        // Обновить состояние вверху страницы; с отчётом по ценам — оставить его на экране.
+        if (!lines.length) window.setTimeout(() => window.location.reload(), 1500)
       }
     } catch {
       setError('Нет связи с сервером. Повторите.')
@@ -199,6 +204,13 @@ export function KaddiData() {
           {done}
         </p>
       )}
+      {report.length > 0 && (
+        <ul className={styles.report}>
+          {report.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }
@@ -206,7 +218,8 @@ export function KaddiData() {
 const day = (value: string) => (value ? value.split('-').reverse().join('.') : 'не указано')
 
 /** Что нашлось в прайс-листе производителя. */
-function VendorFound({ list }: { list: VendorList }) {
+function VendorFound({ list }: { list: VendorList & { prices: VendorPrices } }) {
+  const priced = Object.keys(list.prices).length
   return (
     <div className={styles.found}>
       <div className={styles.block}>
@@ -222,6 +235,12 @@ function VendorFound({ list }: { list: VendorList }) {
             .join(', ')}
           …
         </p>
+        {priced > 0 && (
+          <p className={styles.hint}>
+            Цены на сайте обновятся у {priced} товаров Autodesk: подписки на 1 и 3 года по РЦКП, на
+            сайте — вниз до тысячи тенге.
+          </p>
+        )}
       </div>
     </div>
   )

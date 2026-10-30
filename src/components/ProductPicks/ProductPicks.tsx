@@ -8,7 +8,8 @@ type Panel = { id: string; title: string; sub: string; items: PickItem[] }
 
 /**
  * Сколько строк в панели: по две и в «С этим покупают», и в «Похожих» на всех страницах
- * (решение владельца 27.10.2026), остальное найдётся в каталоге.
+ * (решение владельца 27.10.2026), остальное найдётся в каталоге. Третья — курс с ближайшей
+ * группой из расписания УЦ (30.10.2026): тогда limit = 3 у обеих панелей.
  */
 const LIMIT = PICKS_LIMIT
 
@@ -16,7 +17,7 @@ const LIMIT = PICKS_LIMIT
  * Подборки под страницей товара: «С этим покупают» и «Похожие» — две панели рядом (от 960 px),
  * в каждой короткий список строк. Одна панель — во всю ширину, её список в две колонки.
  */
-export function ProductPicks({ panels }: { panels: Panel[] }) {
+export function ProductPicks({ panels, limit = LIMIT }: { panels: Panel[]; limit?: number }) {
   const shown = panels.filter((panel) => panel.items.length > 0)
   if (!shown.length) return null
   const single = shown.length === 1
@@ -31,7 +32,7 @@ export function ProductPicks({ panels }: { panels: Panel[] }) {
               </h2>
               <p className={styles.sub}>{panel.sub}</p>
               <ul className={single ? `${styles.list} ${styles.twoCols}` : styles.list}>
-                {panel.items.slice(0, LIMIT).map((item) => (
+                {panel.items.slice(0, limit).map((item) => (
                   <li key={item.href}>
                     <PickRow item={item} />
                   </li>

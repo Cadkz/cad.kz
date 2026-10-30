@@ -1,4 +1,5 @@
 // @ts-check
+import { siteTiyn } from './pricing.mjs'
 // Прайс и база знаний для ИИ-консультанта Кадди: чистые функции без базы и сети.
 // Файл компании «Прайс CAD.kz» (.xlsx) — лист product_price_list (код, артикул, семейство,
 // названия, тип покупки, срок, редакция, тип лицензии, места, цена, статус цены, срок поставки,
@@ -640,13 +641,14 @@ export function sumPriceRows(rows, items, vat, blocked = () => null) {
       })
       continue
     }
-    const sum = BigInt(row.tiyn) * BigInt(quantity)
+    const unitTiyn = siteTiyn(row.tiyn)
+    const sum = BigInt(unitTiyn) * BigInt(quantity)
     total += sum
     lines.push({
       code: row.code,
       name: row.name,
       unit: priceUnit(row),
-      unitPrice: formatTiyn(row.tiyn),
+      unitPrice: formatTiyn(unitTiyn),
       quantity,
       sum: formatTiyn(sum.toString()),
     })

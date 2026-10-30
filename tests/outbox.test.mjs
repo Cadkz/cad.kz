@@ -44,7 +44,7 @@ test('лид Битрикс24 собирается из заявки и соде
   )
   assert.equal(fields.COMPANY_TITLE, 'ТОО Проект-Сервис')
   assert.deepEqual(fields.PHONE, [{ VALUE: '+77011234567', VALUE_TYPE: 'WORK' }])
-  assert.equal(fields.OPPORTUNITY, '5846400')
+  assert.equal(fields.OPPORTUNITY, '5846000')
   assert.equal(fields.CURRENCY_ID, 'KZT')
   assert.equal(fields.ORIGIN_ID, KEY)
   assert.match(fields.COMMENTS, /: 2 шт\. × .*₸ = .*₸/)

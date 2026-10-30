@@ -65,8 +65,13 @@ test('Прайс-лист Autodesk: продукты, способы покуп�
   assert.deepEqual(navis?.options, ['новая подписка: 1 год, 3 года', 'продление'])
   assert.equal(list.products[0]?.cloud, true)
   assert.match(list.products[2]?.options[0] ?? '', /только для действующих/)
-  // Проверка на сервере пропускает то же самое.
-  assert.deepEqual(validateVendorList(list), list)
+  // Проверка на сервере пропускает то же самое, кроме цен: они идут отдельно, в цены сайта.
+  const { prices, ...forKaddi } = list
+  assert.deepEqual(validateVendorList(list), forKaddi)
+  assert.deepEqual(prices, {
+    'Forma Site Design': { '1 год': '300000' },
+    'Navisworks Manage': { '1 год': '1695155', '3 года': '5085466' },
+  })
   assert.equal(typeof validateVendorList({ vendor: 'X', products: [] }), 'string')
 })
 

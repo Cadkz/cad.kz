@@ -1,6 +1,7 @@
 import { NavGroup } from '@payloadcms/ui'
 import {
   BookOpen,
+  CalendarDays,
   ChartColumn,
   ClipboardCheck,
   Database,
@@ -29,6 +30,7 @@ const ICONS: Record<string, LucideIcon> = {
   catalog: FolderTree,
   prices: Tags,
   quality: ListChecks,
+  courses: CalendarDays,
   news: Newspaper,
   pages: FileText,
   home: House,

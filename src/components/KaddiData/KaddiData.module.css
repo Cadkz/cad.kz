@@ -63,3 +63,10 @@
   background: var(--theme-success-100);
   color: var(--theme-success-750);
 }
+
+.report {
+  margin: 0;
+  padding-left: var(--base);
+  display: grid;
+  gap: calc(var(--base) / 4);
+}
