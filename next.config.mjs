@@ -10,7 +10,8 @@ export default withPayload({
   skipTrailingSlashRedirect: true,
   // PDF характеристик (src/lib/specSheetPdf.ts): pdfkit читает свои файлы с диска — не собирать его
   // в бандл, а брать из node_modules; шрифты TTF для PDF кладём в функцию явно.
-  serverExternalPackages: ['pdfkit'],
+  // nodemailer (письма, src/lib/mail.ts) — тоже как есть из node_modules: он рассчитан на Node.
+  serverExternalPackages: ['pdfkit', 'nodemailer'],
   outputFileTracingIncludes: {
     '/products/\\[slug\\]/specs.pdf': [
       './src/assets/fonts/*.ttf',

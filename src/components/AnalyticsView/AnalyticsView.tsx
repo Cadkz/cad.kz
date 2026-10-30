@@ -1,9 +1,11 @@
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
+import { AnalyticsArchive } from '@/components/AnalyticsArchive/AnalyticsArchive'
 import { AnalyticsKaddi } from '@/components/AnalyticsKaddi/AnalyticsKaddi'
 import { AnalyticsTable } from '@/components/AnalyticsTable/AnalyticsTable'
 import { PERIODS, periodKey, type QueryStat, SEARCH_RETENTION_DAYS } from '@/domain/searchStats.mjs'
 import { loadAnalytics } from '@/lib/analytics'
+import { archiveStatus } from '@/lib/analyticsArchive'
 import styles from './AnalyticsView.module.css'
 
 /** Строк в таблице на странице; все — в выгрузке. */
@@ -70,7 +72,11 @@ export async function AnalyticsView({
       </DefaultTemplate>
     )
 
-  const data = await loadAnalytics(payload, period)
+  const admin = user?.role === 'admin'
+  const [data, archive] = await Promise.all([
+    loadAnalytics(payload, period),
+    admin ? archiveStatus(payload) : null,
+  ])
   const { searches } = data
   const csv = (part: string) => `/api/admin/analytics?days=${period}&part=${part}`
   const row = (stat: QueryStat) => [
@@ -133,6 +139,7 @@ export async function AnalyticsView({
             Запросов за период очень много — в отчёте последние {searches.total}.
           </p>
         )}
+        {archive && <AnalyticsArchive status={archive} />}
 
         <AnalyticsTable
           id="analytics-top"
@@ -175,7 +182,7 @@ export async function AnalyticsView({
           cut={data.kaddiCut}
           csv={csv}
           show={SHOW}
-          admin={user?.role === 'admin'}
+          admin={admin}
         />
       </div>
     </DefaultTemplate>
