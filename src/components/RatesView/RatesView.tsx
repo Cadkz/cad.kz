@@ -1,5 +1,6 @@
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
+import { AdminTabs } from '@/components/AdminTabs/AdminTabs'
 import { RatesForm } from '@/components/RatesForm/RatesForm'
 import { loadRates } from '@/lib/ratesRun'
 import styles from './RatesView.module.css'
@@ -25,6 +26,7 @@ export async function RatesView({ initPageResult, params, searchParams }: AdminV
     <DefaultTemplate {...template}>
       <div className={styles.root}>
         <h1 className={styles.title}>Курсы валют</h1>
+        <AdminTabs set="prices" current="/admin/rates" />
         {data ? (
           <>
             <p className={styles.lead}>

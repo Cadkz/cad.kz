@@ -7,6 +7,9 @@ import styles from './AdminCardGrid.module.css'
  * Карточки задач сеткой (главная админки, «Контроль качества»). Задачи без дел сворачиваются
  * в одну строку «В порядке: …», чтобы на виду было только то, что надо сделать.
  */
+/** «Ошибки передачи в CRM» → «ошибки передачи в CRM»: сокращения не портим. */
+const lowerFirst = (text: string) => text.charAt(0).toLowerCase() + text.slice(1)
+
 export function AdminCardGrid({ cards }: { cards: QueueCard[] }) {
   const isDone = (card: QueueCard) => !card.always && card.total === 0 && card.items.length === 0
   const open = cards.filter((card) => !isDone(card))
@@ -23,7 +26,7 @@ export function AdminCardGrid({ cards }: { cards: QueueCard[] }) {
       {done.length > 0 && (
         <p className={styles.done}>
           <CircleCheck size={16} strokeWidth={1.75} aria-hidden />
-          <span>В порядке: {done.map((card) => card.title.toLowerCase()).join(', ')}.</span>
+          <span>В порядке: {done.map((card) => lowerFirst(card.title)).join(', ')}.</span>
         </p>
       )}
     </>

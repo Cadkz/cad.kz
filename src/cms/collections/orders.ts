@@ -153,7 +153,7 @@ export const crmDeliveries: CollectionConfig = {
  */
 export const siteRequests: CollectionConfig = {
   slug: 'site-requests',
-  labels: { singular: 'Заявка без корзины', plural: 'Заявки без корзины' },
+  labels: { singular: 'Заявка', plural: 'Заявки' },
   admin: {
     useAsTitle: 'number',
     defaultColumns: ['number', 'createdAt', 'kind', 'productTitle', 'button', 'contactName'],

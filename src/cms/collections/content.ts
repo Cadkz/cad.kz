@@ -235,7 +235,7 @@ export const publications: CollectionConfig = {
 const pageCollection = contentCollection({
   slug: 'pages',
   singular: 'Страница',
-  plural: 'Страницы',
+  plural: 'Страницы сайта',
   fields: [],
 })
 
@@ -281,7 +281,7 @@ export const pages: CollectionConfig = {
 
 export const media: CollectionConfig = {
   slug: 'media',
-  labels: { singular: 'Изображение', plural: 'Медиа' },
+  labels: { singular: 'Картинка или файл', plural: 'Картинки и файлы' },
   // Служебные поля импорта в списке не нужны: в окне выбора картинки — файл и описание.
   admin: { defaultColumns: ['filename', 'alt', 'updatedAt'] },
   upload: {

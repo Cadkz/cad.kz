@@ -1,5 +1,6 @@
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
+import { AdminTabs } from '@/components/AdminTabs/AdminTabs'
 import { PriceGrid } from '@/components/PriceGrid/PriceGrid'
 import { loadPriceGrid } from '@/lib/offerPrices'
 import styles from './PricesView.module.css'
@@ -26,7 +27,8 @@ export async function PricesView({ initPageResult, params, searchParams }: Admin
   return (
     <DefaultTemplate {...template}>
       <div className={styles.root}>
-        <h1 className={styles.title}>Цены таблицей</h1>
+        <h1 className={styles.title}>Цены</h1>
+        <AdminTabs set="prices" current="/admin/prices" />
         {data ? (
           <>
             <p className={styles.lead}>

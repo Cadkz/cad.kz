@@ -69,23 +69,23 @@ export interface Config {
   collections: {
     products: Product;
     offers: Offer;
+    publications: Publication;
+    pages: Page;
+    topics: Topic;
+    media: Media;
+    'site-requests': SiteRequest;
+    orders: Order;
+    conversations: Conversation;
+    'assistant-knowledge': AssistantKnowledge;
+    'price-tables': PriceTable;
     sections: Section;
     manufacturers: Manufacturer;
     'product-lines': ProductLine;
     'section-rules': SectionRule;
     'exchange-rates': ExchangeRate;
-    publications: Publication;
-    topics: Topic;
-    pages: Page;
-    media: Media;
-    orders: Order;
-    'site-requests': SiteRequest;
-    'crm-deliveries': CrmDelivery;
-    'assistant-knowledge': AssistantKnowledge;
-    conversations: Conversation;
-    'price-tables': PriceTable;
-    'activity-log': ActivityLog;
     redirects: Redirect;
+    'activity-log': ActivityLog;
+    'crm-deliveries': CrmDelivery;
     'import-runs': ImportRun;
     integrations: Integration;
     users: User;
@@ -99,23 +99,23 @@ export interface Config {
   collectionsSelect: {
     products: ProductsSelect<false> | ProductsSelect<true>;
     offers: OffersSelect<false> | OffersSelect<true>;
+    publications: PublicationsSelect<false> | PublicationsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    topics: TopicsSelect<false> | TopicsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    'site-requests': SiteRequestsSelect<false> | SiteRequestsSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
+    conversations: ConversationsSelect<false> | ConversationsSelect<true>;
+    'assistant-knowledge': AssistantKnowledgeSelect<false> | AssistantKnowledgeSelect<true>;
+    'price-tables': PriceTablesSelect<false> | PriceTablesSelect<true>;
     sections: SectionsSelect<false> | SectionsSelect<true>;
     manufacturers: ManufacturersSelect<false> | ManufacturersSelect<true>;
     'product-lines': ProductLinesSelect<false> | ProductLinesSelect<true>;
     'section-rules': SectionRulesSelect<false> | SectionRulesSelect<true>;
     'exchange-rates': ExchangeRatesSelect<false> | ExchangeRatesSelect<true>;
-    publications: PublicationsSelect<false> | PublicationsSelect<true>;
-    topics: TopicsSelect<false> | TopicsSelect<true>;
-    pages: PagesSelect<false> | PagesSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    orders: OrdersSelect<false> | OrdersSelect<true>;
-    'site-requests': SiteRequestsSelect<false> | SiteRequestsSelect<true>;
-    'crm-deliveries': CrmDeliveriesSelect<false> | CrmDeliveriesSelect<true>;
-    'assistant-knowledge': AssistantKnowledgeSelect<false> | AssistantKnowledgeSelect<true>;
-    conversations: ConversationsSelect<false> | ConversationsSelect<true>;
-    'price-tables': PriceTablesSelect<false> | PriceTablesSelect<true>;
-    'activity-log': ActivityLogSelect<false> | ActivityLogSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
+    'activity-log': ActivityLogSelect<false> | ActivityLogSelect<true>;
+    'crm-deliveries': CrmDeliveriesSelect<false> | CrmDeliveriesSelect<true>;
     'import-runs': ImportRunsSelect<false> | ImportRunsSelect<true>;
     integrations: IntegrationsSelect<false> | IntegrationsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -130,14 +130,14 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
-    'pricing-settings': PricingSetting;
     'home-page': HomePage;
     'site-settings': SiteSetting;
+    'pricing-settings': PricingSetting;
   };
   globalsSelect: {
-    'pricing-settings': PricingSettingsSelect<false> | PricingSettingsSelect<true>;
     'home-page': HomePageSelect<false> | HomePageSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'pricing-settings': PricingSettingsSelect<false> | PricingSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -606,56 +606,6 @@ export interface Offer {
   createdAt: string;
 }
 /**
- * Новый товар (из импорта или созданный вручную) получает разделы по первому подходящему правилу. Правила проверяются по порядку — от меньшего числа к большему. Товары, у которых разделы поменяли вручную, правила не трогают.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "section-rules".
- */
-export interface SectionRule {
-  id: number;
-  title: string;
-  /**
-   * Меньше — проверяется раньше. Узкое правило (по словам в названии) ставьте раньше общего правила того же производителя.
-   */
-  order: number;
-  /**
-   * Пусто — любой производитель.
-   */
-  manufacturer?: (number | null) | Manufacturer;
-  /**
-   * Пусто — любой тип.
-   */
-  kind?: ('software' | 'hardware' | 'course' | 'service') | null;
-  /**
-   * Через запятую — подходит любое из слов: «revit, autocad». Плюс — нужны все части: «project studio+фундамент». Можно писать начало слова: «геолог». Пусто — подходит любой товар.
-   */
-  words?: string | null;
-  mainSection?: (number | null) | Section;
-  extraSections?: (number | Section)[] | null;
-  /**
-   * Подходящие товары снимаются с публикации. Старые ссылки на них ведут на товары производителя.
-   */
-  retire?: boolean | null;
-  /**
-   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
-   */
-  updatedBy?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "exchange-rates".
- */
-export interface ExchangeRate {
-  id: number;
-  currency: 'USD' | 'EUR' | 'RUB';
-  kztPerUnit: string;
-  effectiveAt: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "publications".
  */
@@ -770,43 +720,6 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orders".
- */
-export interface Order {
-  id: number;
-  number: string;
-  mode: 'demo' | 'live';
-  buyerType: 'individual' | 'company';
-  contactName: string;
-  contactPhone: string;
-  contactEmail?: string | null;
-  companyName?: string | null;
-  bin?: string | null;
-  comment?: string | null;
-  totalKzt: string;
-  consent?: {
-    accepted?: boolean | null;
-    at?: string | null;
-    version?: string | null;
-    text?: string | null;
-  };
-  snapshot:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  idempotencyKey: string;
-  fingerprint: string;
-  clientHash?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-requests".
  */
 export interface SiteRequest {
@@ -845,19 +758,26 @@ export interface SiteRequest {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "crm-deliveries".
+ * via the `definition` "orders".
  */
-export interface CrmDelivery {
+export interface Order {
   id: number;
-  idempotencyKey: string;
-  order?: (number | null) | Order;
-  request?: (number | null) | SiteRequest;
-  state: 'pending' | 'processing' | 'not-sent-demo' | 'sent' | 'failed' | 'dead';
-  attempts?: number | null;
-  nextAttemptAt?: string | null;
-  ambiguous?: boolean | null;
-  lastError?: string | null;
-  externalId?: string | null;
+  number: string;
+  mode: 'demo' | 'live';
+  buyerType: 'individual' | 'company';
+  contactName: string;
+  contactPhone: string;
+  contactEmail?: string | null;
+  companyName?: string | null;
+  bin?: string | null;
+  comment?: string | null;
+  totalKzt: string;
+  consent?: {
+    accepted?: boolean | null;
+    at?: string | null;
+    version?: string | null;
+    text?: string | null;
+  };
   snapshot:
     | {
         [k: string]: unknown;
@@ -867,6 +787,29 @@ export interface CrmDelivery {
     | number
     | boolean
     | null;
+  idempotencyKey: string;
+  fingerprint: string;
+  clientHash?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conversations".
+ */
+export interface Conversation {
+  id: number;
+  idempotencyKey: string;
+  snapshot:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  state: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -889,26 +832,6 @@ export interface AssistantKnowledge {
    * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
    */
   updatedBy?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "conversations".
- */
-export interface Conversation {
-  id: number;
-  idempotencyKey: string;
-  snapshot:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  state: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -937,6 +860,69 @@ export interface PriceTable {
     | number
     | boolean
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Новый товар (из импорта или созданный вручную) получает разделы по первому подходящему правилу. Правила проверяются по порядку — от меньшего числа к большему. Товары, у которых разделы поменяли вручную, правила не трогают.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "section-rules".
+ */
+export interface SectionRule {
+  id: number;
+  title: string;
+  /**
+   * Меньше — проверяется раньше. Узкое правило (по словам в названии) ставьте раньше общего правила того же производителя.
+   */
+  order: number;
+  /**
+   * Пусто — любой производитель.
+   */
+  manufacturer?: (number | null) | Manufacturer;
+  /**
+   * Пусто — любой тип.
+   */
+  kind?: ('software' | 'hardware' | 'course' | 'service') | null;
+  /**
+   * Через запятую — подходит любое из слов: «revit, autocad». Плюс — нужны все части: «project studio+фундамент». Можно писать начало слова: «геолог». Пусто — подходит любой товар.
+   */
+  words?: string | null;
+  mainSection?: (number | null) | Section;
+  extraSections?: (number | Section)[] | null;
+  /**
+   * Подходящие товары снимаются с публикации. Старые ссылки на них ведут на товары производителя.
+   */
+  retire?: boolean | null;
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exchange-rates".
+ */
+export interface ExchangeRate {
+  id: number;
+  currency: 'USD' | 'EUR' | 'RUB';
+  kztPerUnit: string;
+  effectiveAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects".
+ */
+export interface Redirect {
+  id: number;
+  from: string;
+  to: string;
+  legacyKey?: string | null;
+  legacyUrl?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -972,14 +958,28 @@ export interface ActivityLog {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects".
+ * via the `definition` "crm-deliveries".
  */
-export interface Redirect {
+export interface CrmDelivery {
   id: number;
-  from: string;
-  to: string;
-  legacyKey?: string | null;
-  legacyUrl?: string | null;
+  idempotencyKey: string;
+  order?: (number | null) | Order;
+  request?: (number | null) | SiteRequest;
+  state: 'pending' | 'processing' | 'not-sent-demo' | 'sent' | 'failed' | 'dead';
+  attempts?: number | null;
+  nextAttemptAt?: string | null;
+  ambiguous?: boolean | null;
+  lastError?: string | null;
+  externalId?: string | null;
+  snapshot:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1055,6 +1055,42 @@ export interface PayloadLockedDocument {
         value: number | Offer;
       } | null)
     | ({
+        relationTo: 'publications';
+        value: number | Publication;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'topics';
+        value: number | Topic;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'site-requests';
+        value: number | SiteRequest;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
+      } | null)
+    | ({
+        relationTo: 'conversations';
+        value: number | Conversation;
+      } | null)
+    | ({
+        relationTo: 'assistant-knowledge';
+        value: number | AssistantKnowledge;
+      } | null)
+    | ({
+        relationTo: 'price-tables';
+        value: number | PriceTable;
+      } | null)
+    | ({
         relationTo: 'sections';
         value: number | Section;
       } | null)
@@ -1075,52 +1111,16 @@ export interface PayloadLockedDocument {
         value: number | ExchangeRate;
       } | null)
     | ({
-        relationTo: 'publications';
-        value: number | Publication;
-      } | null)
-    | ({
-        relationTo: 'topics';
-        value: number | Topic;
-      } | null)
-    | ({
-        relationTo: 'pages';
-        value: number | Page;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: number | Media;
-      } | null)
-    | ({
-        relationTo: 'orders';
-        value: number | Order;
-      } | null)
-    | ({
-        relationTo: 'site-requests';
-        value: number | SiteRequest;
-      } | null)
-    | ({
-        relationTo: 'crm-deliveries';
-        value: number | CrmDelivery;
-      } | null)
-    | ({
-        relationTo: 'assistant-knowledge';
-        value: number | AssistantKnowledge;
-      } | null)
-    | ({
-        relationTo: 'conversations';
-        value: number | Conversation;
-      } | null)
-    | ({
-        relationTo: 'price-tables';
-        value: number | PriceTable;
+        relationTo: 'redirects';
+        value: number | Redirect;
       } | null)
     | ({
         relationTo: 'activity-log';
         value: number | ActivityLog;
       } | null)
     | ({
-        relationTo: 'redirects';
-        value: number | Redirect;
+        relationTo: 'crm-deliveries';
+        value: number | CrmDelivery;
       } | null)
     | ({
         relationTo: 'import-runs';
@@ -1361,6 +1361,188 @@ export interface OffersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publications_select".
+ */
+export interface PublicationsSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  kind?: T;
+  theme?: T;
+  publishedAt?: T;
+  hideAfter?: T;
+  endsAt?: T;
+  slug?: T;
+  topic?: T;
+  excerpt?: T;
+  cover?: T;
+  body?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  legacyKey?: T;
+  legacyUrl?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  slug?: T;
+  lead?: T;
+  body?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  legacyKey?: T;
+  legacyUrl?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "topics_select".
+ */
+export interface TopicsSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  slug?: T;
+  order?: T;
+  covers?: T;
+  legacyKey?: T;
+  legacyUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  legacyKey?: T;
+  legacyUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-requests_select".
+ */
+export interface SiteRequestsSelect<T extends boolean = true> {
+  number?: T;
+  kind?: T;
+  button?: T;
+  sectionTitle?: T;
+  scenario?: T;
+  mode?: T;
+  productTitle?: T;
+  page?: T;
+  contactName?: T;
+  contactPhone?: T;
+  comment?: T;
+  items?: T;
+  totalKzt?: T;
+  consent?:
+    | T
+    | {
+        accepted?: T;
+        at?: T;
+        version?: T;
+        text?: T;
+      };
+  idempotencyKey?: T;
+  clientHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  number?: T;
+  mode?: T;
+  buyerType?: T;
+  contactName?: T;
+  contactPhone?: T;
+  contactEmail?: T;
+  companyName?: T;
+  bin?: T;
+  comment?: T;
+  totalKzt?: T;
+  consent?:
+    | T
+    | {
+        accepted?: T;
+        at?: T;
+        version?: T;
+        text?: T;
+      };
+  snapshot?: T;
+  idempotencyKey?: T;
+  fingerprint?: T;
+  clientHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conversations_select".
+ */
+export interface ConversationsSelect<T extends boolean = true> {
+  idempotencyKey?: T;
+  snapshot?: T;
+  state?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "assistant-knowledge_select".
+ */
+export interface AssistantKnowledgeSelect<T extends boolean = true> {
+  text?: T;
+  product?: T;
+  active?: T;
+  position?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "price-tables_select".
+ */
+export interface PriceTablesSelect<T extends boolean = true> {
+  state?: T;
+  summary?: T;
+  snapshot?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sections_select".
  */
 export interface SectionsSelect<T extends boolean = true> {
@@ -1457,201 +1639,13 @@ export interface ExchangeRatesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "publications_select".
+ * via the `definition` "redirects_select".
  */
-export interface PublicationsSelect<T extends boolean = true> {
-  title?: T;
-  status?: T;
-  kind?: T;
-  theme?: T;
-  publishedAt?: T;
-  hideAfter?: T;
-  endsAt?: T;
-  slug?: T;
-  topic?: T;
-  excerpt?: T;
-  cover?: T;
-  body?: T;
-  seo?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-      };
+export interface RedirectsSelect<T extends boolean = true> {
+  from?: T;
+  to?: T;
   legacyKey?: T;
   legacyUrl?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "topics_select".
- */
-export interface TopicsSelect<T extends boolean = true> {
-  title?: T;
-  status?: T;
-  slug?: T;
-  order?: T;
-  covers?: T;
-  legacyKey?: T;
-  legacyUrl?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_select".
- */
-export interface PagesSelect<T extends boolean = true> {
-  title?: T;
-  status?: T;
-  slug?: T;
-  lead?: T;
-  body?: T;
-  seo?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-      };
-  legacyKey?: T;
-  legacyUrl?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  legacyKey?: T;
-  legacyUrl?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orders_select".
- */
-export interface OrdersSelect<T extends boolean = true> {
-  number?: T;
-  mode?: T;
-  buyerType?: T;
-  contactName?: T;
-  contactPhone?: T;
-  contactEmail?: T;
-  companyName?: T;
-  bin?: T;
-  comment?: T;
-  totalKzt?: T;
-  consent?:
-    | T
-    | {
-        accepted?: T;
-        at?: T;
-        version?: T;
-        text?: T;
-      };
-  snapshot?: T;
-  idempotencyKey?: T;
-  fingerprint?: T;
-  clientHash?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "site-requests_select".
- */
-export interface SiteRequestsSelect<T extends boolean = true> {
-  number?: T;
-  kind?: T;
-  button?: T;
-  sectionTitle?: T;
-  scenario?: T;
-  mode?: T;
-  productTitle?: T;
-  page?: T;
-  contactName?: T;
-  contactPhone?: T;
-  comment?: T;
-  items?: T;
-  totalKzt?: T;
-  consent?:
-    | T
-    | {
-        accepted?: T;
-        at?: T;
-        version?: T;
-        text?: T;
-      };
-  idempotencyKey?: T;
-  clientHash?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "crm-deliveries_select".
- */
-export interface CrmDeliveriesSelect<T extends boolean = true> {
-  idempotencyKey?: T;
-  order?: T;
-  request?: T;
-  state?: T;
-  attempts?: T;
-  nextAttemptAt?: T;
-  ambiguous?: T;
-  lastError?: T;
-  externalId?: T;
-  snapshot?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "assistant-knowledge_select".
- */
-export interface AssistantKnowledgeSelect<T extends boolean = true> {
-  text?: T;
-  product?: T;
-  active?: T;
-  position?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "conversations_select".
- */
-export interface ConversationsSelect<T extends boolean = true> {
-  idempotencyKey?: T;
-  snapshot?: T;
-  state?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "price-tables_select".
- */
-export interface PriceTablesSelect<T extends boolean = true> {
-  state?: T;
-  summary?: T;
-  snapshot?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1670,13 +1664,19 @@ export interface ActivityLogSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects_select".
+ * via the `definition` "crm-deliveries_select".
  */
-export interface RedirectsSelect<T extends boolean = true> {
-  from?: T;
-  to?: T;
-  legacyKey?: T;
-  legacyUrl?: T;
+export interface CrmDeliveriesSelect<T extends boolean = true> {
+  idempotencyKey?: T;
+  order?: T;
+  request?: T;
+  state?: T;
+  attempts?: T;
+  nextAttemptAt?: T;
+  ambiguous?: T;
+  lastError?: T;
+  externalId?: T;
+  snapshot?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1801,20 +1801,6 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
   isTemp?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pricing-settings".
- */
-export interface PricingSetting {
-  id: number;
-  vat: string;
-  /**
-   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
-   */
-  updatedBy?: (number | null) | User;
-  updatedAt?: string | null;
-  createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1995,14 +1981,17 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pricing-settings_select".
+ * via the `definition` "pricing-settings".
  */
-export interface PricingSettingsSelect<T extends boolean = true> {
-  vat?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
+export interface PricingSetting {
+  id: number;
+  vat: string;
+  /**
+   * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
+   */
+  updatedBy?: (number | null) | User;
+  updatedAt?: string | null;
+  createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2155,6 +2144,17 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         id?: T;
       };
   footerText?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pricing-settings_select".
+ */
+export interface PricingSettingsSelect<T extends boolean = true> {
+  vat?: T;
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;

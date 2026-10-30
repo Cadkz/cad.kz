@@ -1,5 +1,6 @@
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
+import { AdminTabs } from '@/components/AdminTabs/AdminTabs'
 import { CatalogTree } from '@/components/CatalogTree/CatalogTree'
 import { loadCatalogTree } from '@/lib/adminCatalog'
 import styles from './CatalogTreeView.module.css'
@@ -29,6 +30,7 @@ export async function CatalogTreeView({
     <DefaultTemplate {...template}>
       <div className={styles.root}>
         <h1 className={styles.title}>Каталог</h1>
+        <AdminTabs set="catalog" current="/admin/catalog" />
         {data ? (
           <>
             <p className={styles.lead}>

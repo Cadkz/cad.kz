@@ -13,29 +13,37 @@ import { siteSettings } from './globals/siteSettings'
 import { globalWithHistory, withHistory } from './history'
 
 /**
- * Меню админки: группы и порядок пунктов. Payload показывает группы в порядке первого пункта,
- * поэтому порядок здесь — это порядок в меню и на главной админки. Свои страницы (загрузка
- * прайса, проверка Кадди, импорт) — в группе «Инструменты» (`AdminNavTools`). История и журнал
- * удалений подключаются здесь же (src/cms/history.ts).
+ * Группы коллекций для Payload и подключение истории (src/cms/history.ts). Само меню и главную
+ * админки Payload из этих групп не строит: меню по задачам — src/domain/adminMenu.mjs. Группы
+ * названы так же, чтобы в местах, где Payload их всё же показывает, не было старых названий.
  */
 const MENU: { group: string; collections: CollectionConfig[]; globals: GlobalConfig[] }[] = [
+  // Порядок коллекций влияет на схему базы (список коллекций у готовых видов списков):
+  // товары, предложения, публикации — как было, иначе понадобится миграция.
+  { group: 'Каталог', collections: [products, offers], globals: [] },
   {
-    group: 'Каталог списками',
-    collections: [products, offers, sections, manufacturers, productLines, sectionRules],
-    globals: [],
-  },
-  { group: 'Цены', collections: [exchangeRates], globals: [pricingSettings] },
-  {
-    group: 'Сайт',
-    collections: [publications, topics, pages, media],
+    group: 'Контент',
+    collections: [publications, pages, topics, media],
     globals: [homePage, siteSettings],
   },
-  { group: 'Продажи', collections: [orders, siteRequests, crmDeliveries], globals: [] },
-  { group: 'Кадди', collections: [assistantKnowledge, conversations, priceTables], globals: [] },
+  { group: 'Продажи', collections: [siteRequests, orders], globals: [] },
+  { group: 'Кадди', collections: [conversations, assistantKnowledge, priceTables], globals: [] },
   {
-    group: 'Служебное',
-    collections: [activityLog, redirects, importRuns, integrations, users],
-    globals: [],
+    group: 'Настройки',
+    collections: [
+      sections,
+      manufacturers,
+      productLines,
+      sectionRules,
+      exchangeRates,
+      redirects,
+      activityLog,
+      crmDeliveries,
+      importRuns,
+      integrations,
+      users,
+    ],
+    globals: [pricingSettings],
   },
 ]
 

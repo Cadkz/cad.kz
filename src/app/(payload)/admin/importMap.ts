@@ -3,10 +3,10 @@ import { QualityField as QualityField_e6c71f4b09520f8809fe6b389d597c3b } from '.
 import { QualityHidden as QualityHidden_e6c71f4b09520f8809fe6b389d597c3b } from '../../../components/QualityField/QualityField'
 import { BodyEditor as BodyEditor_86c0a066958e23b9e3a1c929a5761694 } from '../../../components/BodyEditor/BodyEditor'
 import { ProductOffers as ProductOffers_69ef3ae4acb085b684c75091a74eb9de } from '../../../components/ProductOffers/ProductOffers'
-import { ProductsCell as ProductsCell_2af0ab194f5e9060ae641efa92d4e858 } from '../../../components/ProductsLink/ProductsLink'
-import { ProductsField as ProductsField_2af0ab194f5e9060ae641efa92d4e858 } from '../../../components/ProductsLink/ProductsLink'
 import { SlugField as SlugField_be3cdb29464280a3be9c774b7bee1336 } from '../../../components/SlugField/SlugField'
 import { OrderSnapshotView as OrderSnapshotView_9b9a473c4b75963e2326a4b6719d162f } from '../../../components/OrderSnapshotView/OrderSnapshotView'
+import { ProductsCell as ProductsCell_2af0ab194f5e9060ae641efa92d4e858 } from '../../../components/ProductsLink/ProductsLink'
+import { ProductsField as ProductsField_2af0ab194f5e9060ae641efa92d4e858 } from '../../../components/ProductsLink/ProductsLink'
 import { QueryPresetsAccessCell as QueryPresetsAccessCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsWhereCell as QueryPresetsWhereCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsWhereField as QueryPresetsWhereField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
@@ -15,10 +15,9 @@ import { QueryPresetsColumnField as QueryPresetsColumnField_2b8867833a34864a02dd
 import { QueryPresetsGroupByCell as QueryPresetsGroupByCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsGroupByField as QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { AdminNav as AdminNav_a2a5d49c997f53d7eefb70c0e9b9398d } from '../../../components/AdminNav/AdminNav'
-import { AdminNavTools as AdminNavTools_2fc225efb0c4d89686d274717840deee } from '../../../components/AdminNavTools/AdminNavTools'
-import { AdminHome as AdminHome_d6cd5d3bc8e724441d928f41cd54e087 } from '../../../components/AdminHome/AdminHome'
 import { AdminSearch as AdminSearch_e5d8b999dd5184cc5b04e363dfe7ca54 } from '../../../components/AdminSearch/AdminSearch'
 import { AdminNavMain as AdminNavMain_78ea0e3db77afc64d43b47d4136ff346 } from '../../../components/AdminNavMain/AdminNavMain'
+import { AdminDashboard as AdminDashboard_398f6e88b9fb4af226a8c9c6a8089413 } from '../../../components/AdminDashboard/AdminDashboard'
 import { CatalogTreeView as CatalogTreeView_63578c839f029a4292cdac2f6a88bcc2 } from '../../../components/CatalogTreeView/CatalogTreeView'
 import { BitrixImportView as BitrixImportView_31f0a3e387f2bd8b4181ac01e9918aee } from '../../../components/BitrixImportView/BitrixImportView'
 import { PriceListView as PriceListView_94d00816e844af2d5fa87147e72feb4f } from '../../../components/PriceListView/PriceListView'
@@ -39,10 +38,10 @@ export const importMap = {
   "/components/QualityField/QualityField#QualityHidden": QualityHidden_e6c71f4b09520f8809fe6b389d597c3b,
   "/components/BodyEditor/BodyEditor#BodyEditor": BodyEditor_86c0a066958e23b9e3a1c929a5761694,
   "/components/ProductOffers/ProductOffers#ProductOffers": ProductOffers_69ef3ae4acb085b684c75091a74eb9de,
-  "/components/ProductsLink/ProductsLink#ProductsCell": ProductsCell_2af0ab194f5e9060ae641efa92d4e858,
-  "/components/ProductsLink/ProductsLink#ProductsField": ProductsField_2af0ab194f5e9060ae641efa92d4e858,
   "/components/SlugField/SlugField#SlugField": SlugField_be3cdb29464280a3be9c774b7bee1336,
   "/components/OrderSnapshotView/OrderSnapshotView#OrderSnapshotView": OrderSnapshotView_9b9a473c4b75963e2326a4b6719d162f,
+  "/components/ProductsLink/ProductsLink#ProductsCell": ProductsCell_2af0ab194f5e9060ae641efa92d4e858,
+  "/components/ProductsLink/ProductsLink#ProductsField": ProductsField_2af0ab194f5e9060ae641efa92d4e858,
   "@payloadcms/next/client#QueryPresetsAccessCell": QueryPresetsAccessCell_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsWhereCell": QueryPresetsWhereCell_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsWhereField": QueryPresetsWhereField_2b8867833a34864a02ddf429b0728a40,
@@ -51,10 +50,9 @@ export const importMap = {
   "@payloadcms/next/client#QueryPresetsGroupByCell": QueryPresetsGroupByCell_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsGroupByField": QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40,
   "/components/AdminNav/AdminNav#AdminNav": AdminNav_a2a5d49c997f53d7eefb70c0e9b9398d,
-  "/components/AdminNavTools/AdminNavTools#AdminNavTools": AdminNavTools_2fc225efb0c4d89686d274717840deee,
-  "/components/AdminHome/AdminHome#AdminHome": AdminHome_d6cd5d3bc8e724441d928f41cd54e087,
   "/components/AdminSearch/AdminSearch#AdminSearch": AdminSearch_e5d8b999dd5184cc5b04e363dfe7ca54,
   "/components/AdminNavMain/AdminNavMain#AdminNavMain": AdminNavMain_78ea0e3db77afc64d43b47d4136ff346,
+  "/components/AdminDashboard/AdminDashboard#AdminDashboard": AdminDashboard_398f6e88b9fb4af226a8c9c6a8089413,
   "/components/CatalogTreeView/CatalogTreeView#CatalogTreeView": CatalogTreeView_63578c839f029a4292cdac2f6a88bcc2,
   "/components/BitrixImportView/BitrixImportView#BitrixImportView": BitrixImportView_31f0a3e387f2bd8b4181ac01e9918aee,
   "/components/PriceListView/PriceListView#PriceListView": PriceListView_94d00816e844af2d5fa87147e72feb4f,

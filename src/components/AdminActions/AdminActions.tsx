@@ -1,9 +1,12 @@
-import { Coins, FileSpreadsheet, FolderTree, type LucideIcon, Plus, Table } from 'lucide-react'
+import { FileSpreadsheet, Inbox, ListChecks, type LucideIcon, Plus } from 'lucide-react'
 import styles from './AdminActions.module.css'
 
-type Action = { label: string; href: string; icon: LucideIcon; main?: boolean }
+type Action = { label: string; href: string; icon: LucideIcon; main?: boolean; admin?: boolean }
 
-/** Самое частое — одной кнопкой: новый товар, новость, акция, каталог, цены, прайс, курсы. */
+/**
+ * Самое частое — одной кнопкой (исследование ChatGPT, 30.10.2026): новый товар, новость, акция,
+ * загрузка прайса, заявки, проверка каталога. Каталог, цены и курсы — в меню и в «Системе».
+ */
 const ACTIONS: Action[] = [
   { label: 'Товар', href: '/admin/collections/products/create', icon: Plus, main: true },
   {
@@ -18,22 +21,23 @@ const ACTIONS: Action[] = [
     icon: Plus,
     main: true,
   },
-  { label: 'Каталог деревом', href: '/admin/catalog', icon: FolderTree },
-  { label: 'Цены таблицей', href: '/admin/prices', icon: Table },
   { label: 'Загрузить прайс', href: '/admin/price-list', icon: FileSpreadsheet },
-  { label: 'Курсы валют', href: '/admin/rates', icon: Coins },
+  { label: 'Заявки', href: '/admin/collections/site-requests', icon: Inbox, admin: true },
+  { label: 'Контроль качества', href: '/admin/quality', icon: ListChecks },
 ]
 
-/** Быстрые кнопки над очередью работы на главной админки. */
-export function AdminActions() {
+/** Быстрые кнопки над очередью работы на главной админки. Заявки видит только администратор. */
+export function AdminActions({ admin }: { admin: boolean }) {
   return (
     <nav className={styles.row} aria-label="Быстрые действия">
-      {ACTIONS.map(({ label, href, icon: Icon, main }) => (
-        <a key={href} className={`${styles.button} ${main ? styles.main : ''}`} href={href}>
-          <Icon size={16} strokeWidth={1.75} aria-hidden />
-          {label}
-        </a>
-      ))}
+      {ACTIONS.filter((action) => admin || !action.admin).map(
+        ({ label, href, icon: Icon, main }) => (
+          <a key={href} className={`${styles.button} ${main ? styles.main : ''}`} href={href}>
+            <Icon size={16} strokeWidth={1.75} aria-hidden />
+            {label}
+          </a>
+        ),
+      )}
     </nav>
   )
 }

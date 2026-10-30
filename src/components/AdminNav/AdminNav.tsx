@@ -1,13 +1,13 @@
 import { DefaultNav } from '@payloadcms/next/rsc'
 import type { ComponentProps } from 'react'
-import { groupEntities } from '@/domain/adminMenu.mjs'
+
+/** Свои группы Payload не выводит: всё меню рисует `AdminNavMain` (src/domain/adminMenu.mjs). */
+const NOTHING = { collections: [], globals: [] }
 
 /**
- * Меню админки: обычное меню Payload, но без пунктов, которые стоят в «Главном» (сверху, с
- * иконками — `AdminNavMain`) и в свёрнутом «Ещё» (снизу — `AdminNavTools`). Так каждый пункт
- * встречается в меню один раз (src/domain/adminMenu.mjs).
+ * Меню админки: оболочка Payload (сворачивание, выход), но без его групп коллекций — иначе
+ * каждый пункт встречался бы дважды. Пункты по задачам — в `AdminNavMain` (beforeNavLinks).
  */
 export function AdminNav(props: ComponentProps<typeof DefaultNav>) {
-  const visible = props.visibleEntities ?? { collections: [], globals: [] }
-  return <DefaultNav {...props} visibleEntities={groupEntities(visible)} />
+  return <DefaultNav {...props} visibleEntities={NOTHING} />
 }

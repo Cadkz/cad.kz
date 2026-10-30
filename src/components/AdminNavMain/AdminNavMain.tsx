@@ -1,56 +1,80 @@
 import { NavGroup } from '@payloadcms/ui'
 import {
+  BookOpen,
+  ClipboardCheck,
+  Database,
+  FileText,
   FolderTree,
-  Home,
+  House,
   Image,
   Inbox,
+  LayoutDashboard,
+  ListChecks,
   type LucideIcon,
+  MessagesSquare,
   Newspaper,
+  PanelBottom,
   ShoppingCart,
+  Tag,
   Tags,
 } from 'lucide-react'
 import type { ServerProps } from 'payload'
-import { MAIN_LINKS } from '@/domain/adminMenu.mjs'
+import { AdminNavLink } from '@/components/AdminNavLink/AdminNavLink'
+import { HOME_LINK, type MenuLink, visibleMenu } from '@/domain/adminMenu.mjs'
 import styles from './AdminNavMain.module.css'
 
 const ICONS: Record<string, LucideIcon> = {
+  dashboard: LayoutDashboard,
   catalog: FolderTree,
   prices: Tags,
-  home: Home,
+  quality: ListChecks,
   news: Newspaper,
-  orders: ShoppingCart,
-  requests: Inbox,
+  pages: FileText,
+  home: House,
+  footer: PanelBottom,
+  topics: Tag,
   media: Image,
+  requests: Inbox,
+  orders: ShoppingCart,
+  dialogs: MessagesSquare,
+  knowledge: BookOpen,
+  check: ClipboardCheck,
+  data: Database,
+}
+
+function Item({ link }: { link: MenuLink }) {
+  const Icon = link.icon ? ICONS[link.icon] : undefined
+  return (
+    <AdminNavLink href={link.href}>
+      {Icon && <Icon size={20} strokeWidth={1.75} aria-hidden="true" className={styles.icon} />}
+      {link.label}
+    </AdminNavLink>
+  )
 }
 
 /**
- * «Главное» вверху меню админки: каждодневное крупно и с иконками (src/domain/adminMenu.mjs).
- * Пункт виден, если у человека есть доступ: к коллекции или настройке — право чтения, к своим
- * страницам («Каталог», «Цены») — администратор и маркетолог.
+ * Всё меню админки по задачам (src/domain/adminMenu.mjs): Главная, Каталог, Контент, Продажи,
+ * Кадди и свёрнутые Настройки. Человек видит только то, к чему у него есть доступ.
  */
 export function AdminNavMain({ user, permissions }: ServerProps) {
-  const staff = user?.role === 'admin' || user?.role === 'editor'
-  const links = MAIN_LINKS.filter((link) => {
-    if (link.collection)
-      return Boolean(
-        permissions?.collections?.[link.collection as keyof typeof permissions.collections]?.read,
-      )
-    if (link.global)
-      return Boolean(permissions?.globals?.[link.global as keyof typeof permissions.globals]?.read)
-    return staff
+  const collections: Record<string, { read?: boolean } | undefined> = permissions?.collections ?? {}
+  const globals: Record<string, { read?: boolean } | undefined> = permissions?.globals ?? {}
+  const groups = visibleMenu({
+    role: typeof user?.role === 'string' ? user.role : undefined,
+    canRead: (kind, slug) => Boolean((kind === 'collection' ? collections : globals)[slug]?.read),
   })
-  if (!links.length) return null
   return (
-    <NavGroup label="Главное">
-      {links.map((link) => {
-        const Icon = ICONS[link.icon] ?? FolderTree
-        return (
-          <a key={link.href} className={styles.link} href={link.href}>
-            <Icon size={20} strokeWidth={1.75} aria-hidden="true" className={styles.icon} />
-            {link.label}
-          </a>
-        )
-      })}
-    </NavGroup>
+    <>
+      <div className={styles.home}>
+        <Item link={HOME_LINK} />
+      </div>
+      {groups.map((group) => (
+        <NavGroup key={group.label} label={group.label} isOpen={!group.collapsed}>
+          {group.links.map((link) => (
+            <Item key={link.href} link={link} />
+          ))}
+        </NavGroup>
+      ))}
+    </>
   )
 }

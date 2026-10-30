@@ -1,4 +1,4 @@
-import type { Payload, ServerProps } from 'payload'
+import type { Payload, TypedUser } from 'payload'
 import { AdminActions } from '@/components/AdminActions/AdminActions'
 import { AdminCardGrid } from '@/components/AdminCardGrid/AdminCardGrid'
 import { loadCrmCard, loadPromosCard, loadRequestsCard, type QueueCard } from '@/lib/adminQueue'
@@ -32,21 +32,24 @@ async function loadSections(payload: Payload, admin: boolean): Promise<Section[]
   const work = [crm, requests, promos].filter((card): card is QueueCard => card !== null)
   return [
     { key: 'work', title: 'Требует внимания', cards: work },
-    { key: 'prices', title: 'Цены и журнал', cards: [rates, activity] },
+    { key: 'system', title: 'Система', cards: [rates, activity] },
   ]
 }
 
+type Props = { payload: Payload; user?: TypedUser }
+
 /**
- * Главная админки — очередь работы: быстрые кнопки, затем что требует внимания (ошибки CRM,
- * заявки, заканчивающиеся акции), курсы и журнал.
- * Ниже Payload показывает все разделы админки по группам меню.
+ * Главная админки — очередь работы: быстрые кнопки, что требует внимания (ошибки CRM, заявки,
+ * заканчивающиеся акции) и «Система» (курсы, НДС, последние действия). Карточек всех разделов,
+ * как у Payload, нет: разделы — в меню слева (AdminDashboard).
  */
-export async function AdminHome({ payload, user }: ServerProps) {
+export async function AdminHome({ payload, user }: Props) {
   if (user?.role !== 'admin' && user?.role !== 'editor') return null
-  const sections = await loadSections(payload, user.role === 'admin')
+  const admin = user.role === 'admin'
+  const sections = await loadSections(payload, admin)
   return (
     <div className={styles.root}>
-      <AdminActions />
+      <AdminActions admin={admin} />
       {sections.map((section) => (
         <section
           key={section.key}

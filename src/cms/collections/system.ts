@@ -16,7 +16,7 @@ function journal(slug: CollectionSlug, plural: string): CollectionConfig {
   }
 }
 
-export const conversations = journal('conversations', 'Диалоги консультанта')
+export const conversations = journal('conversations', 'Диалоги Кадди')
 export const importRuns = journal('import-runs', 'Запуски импорта')
 
 /**

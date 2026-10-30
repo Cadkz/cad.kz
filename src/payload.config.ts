@@ -39,17 +39,16 @@ export default buildConfig({
       importMapFile: path.resolve(dirname, 'app/(payload)/admin/importMap.ts'),
     },
     components: {
-      // Меню (src/domain/adminMenu.mjs): сверху «Главное» с иконками, дальше группы Payload
-      // (src/cms/menu.ts) без повторов, внизу «Инструменты» и свёрнутое «Ещё».
+      // Меню по задачам (src/domain/adminMenu.mjs): поиск, Главная, Каталог, Контент, Продажи,
+      // Кадди, свёрнутые Настройки. Группы коллекций Payload не выводятся — каждый пункт один раз.
       Nav: '/components/AdminNav/AdminNav#AdminNav',
       beforeNavLinks: [
         '/components/AdminSearch/AdminSearch#AdminSearch',
         '/components/AdminNavMain/AdminNavMain#AdminNavMain',
       ],
-      afterNavLinks: ['/components/AdminNavTools/AdminNavTools#AdminNavTools'],
-      // Главная админки — очередь работы, ниже все разделы по группам меню.
-      beforeDashboard: ['/components/AdminHome/AdminHome#AdminHome'],
       views: {
+        // Главная админки — своя: очередь работы без карточек всех коллекций.
+        dashboard: { Component: '/components/AdminDashboard/AdminDashboard#AdminDashboard' },
         catalogTree: {
           Component: '/components/CatalogTreeView/CatalogTreeView#CatalogTreeView',
           path: '/catalog',
@@ -68,7 +67,7 @@ export default buildConfig({
         prices: {
           Component: '/components/PricesView/PricesView#PricesView',
           path: '/prices',
-          meta: { title: 'Цены таблицей' },
+          meta: { title: 'Цены' },
         },
         rates: {
           Component: '/components/RatesView/RatesView#RatesView',

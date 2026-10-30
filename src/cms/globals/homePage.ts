@@ -10,7 +10,7 @@ const link = [textField('linkLabel', 'Текст кнопки'), textField('link
  */
 export const homePage: GlobalConfig = {
   slug: 'home-page',
-  label: 'Главная страница',
+  label: 'Главная сайта',
   access: { read: everyone, update: isEditor },
   fields: [
     textField('eyebrow', 'Первый экран: плашка над заголовком'),

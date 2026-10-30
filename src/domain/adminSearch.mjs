@@ -1,4 +1,6 @@
 // @ts-check
+import { listHref } from './adminLinks.mjs'
+
 /**
  * Поиск по админке (просьба владельца 30.10.2026: «там что-то найти очень сложно»). Ищет сразу
  * в страницах админки (по названию и словам-подсказкам) и в записях: товары, разделы,
@@ -17,11 +19,11 @@ export const SEARCH_LIMIT = 6
  */
 export const ADMIN_PAGES = [
   {
-    label: 'Каталог деревом',
+    label: 'Каталог',
     href: '/admin/catalog',
-    words: 'товары разделы производители сорт активность',
+    words: 'деревом товары разделы производители сорт активность',
   },
-  { label: 'Цены таблицей', href: '/admin/prices', words: 'предложения стоимость тенге' },
+  { label: 'Цены', href: '/admin/prices', words: 'таблицей предложения стоимость тенге' },
   { label: 'Загрузить прайс', href: '/admin/price-list', words: 'excel 1с файл цены' },
   { label: 'Курсы валют', href: '/admin/rates', words: 'доллар евро рубль курс' },
   {
@@ -48,14 +50,15 @@ export const ADMIN_PAGES = [
     label: 'Диалоги Кадди',
     href: '/admin/collections/conversations',
     words: 'кадди переписка чат разговоры консультант',
+    adminOnly: true,
   },
   {
-    label: 'Главная страница сайта',
+    label: 'Главная сайта',
     href: '/admin/globals/home-page',
     words: 'баннер первый экран вопросы faq',
   },
   {
-    label: 'Настройки сайта',
+    label: 'Контакты и подвал',
     href: '/admin/globals/site-settings',
     words: 'телефон почта адрес соцсети подвал шапка',
   },
@@ -65,7 +68,7 @@ export const ADMIN_PAGES = [
     words: 'публикации блог',
   },
   {
-    label: 'Страницы',
+    label: 'Страницы сайта',
     href: '/admin/collections/pages',
     words: 'о компании доставка оплата гарантия',
   },
@@ -74,11 +77,51 @@ export const ADMIN_PAGES = [
     href: '/admin/collections/media',
     words: 'фото изображения медиа загрузка',
   },
-  { label: 'Заказы', href: '/admin/collections/orders', words: 'корзина покупки оформление' },
+  {
+    label: 'Заказы',
+    href: '/admin/collections/orders',
+    words: 'корзина покупки оформление',
+    adminOnly: true,
+  },
   {
     label: 'Заявки',
     href: '/admin/collections/site-requests',
     words: 'запрос цены продление формы лиды',
+    adminOnly: true,
+  },
+  {
+    label: 'НДС и настройки цены',
+    href: '/admin/globals/pricing-settings',
+    words: 'ндс налог цены настройки',
+  },
+  {
+    label: 'Разделы каталога',
+    href: '/admin/collections/sections',
+    words: 'категории структура каталога',
+  },
+  { label: 'Производители', href: '/admin/collections/manufacturers', words: 'вендоры бренды' },
+  {
+    label: 'Линейки производителей',
+    href: '/admin/collections/product-lines',
+    words: 'папки серии',
+  },
+  { label: 'Товары списком', href: '/admin/collections/products', words: 'все товары таблица' },
+  {
+    label: 'Журнал действий',
+    href: '/admin/collections/activity-log',
+    words: 'история кто изменил удаления',
+  },
+  {
+    label: 'Перенос со старого сайта',
+    href: '/admin/legacy-content',
+    words: 'старый cad.kz тексты публикации миграция',
+    adminOnly: true,
+  },
+  {
+    label: 'Запуски импорта',
+    href: '/admin/collections/import-runs',
+    words: 'отчёты отчет настройки импорт',
+    adminOnly: true,
   },
   { label: 'Битрикс24', href: '/admin/bitrix24', words: 'crm лиды вебхук', adminOnly: true },
   {
@@ -97,6 +140,63 @@ export const ADMIN_PAGES = [
     label: 'Пользователи',
     href: '/admin/collections/users',
     words: 'доступ роли пароль',
+    adminOnly: true,
+  },
+]
+
+/** Товары на сайте (для готовых подборок в командах). */
+const PUBLISHED = { status: { equals: 'published' } }
+
+/**
+ * Команды словами (исследование ChatGPT, 30.10.2026): «новость» — создать новость, «прайс» —
+ * загрузить прайс, «без цены» — список товаров без цены. Показываются группой «Действия» первыми.
+ * @type {{ label: string, href: string, words: string, adminOnly?: boolean }[]}
+ */
+export const ADMIN_ACTIONS = [
+  {
+    label: '+ Новость',
+    href: '/admin/collections/publications/create?kind=news',
+    words: 'новость создать добавить написать',
+  },
+  {
+    label: '+ Акция',
+    href: '/admin/collections/publications/create?kind=promotion',
+    words: 'акция скидка создать добавить',
+  },
+  {
+    label: '+ Статья',
+    href: '/admin/collections/publications/create?kind=article',
+    words: 'статья создать добавить написать',
+  },
+  {
+    label: '+ Товар',
+    href: '/admin/collections/products/create',
+    words: 'товар создать добавить новый',
+  },
+  {
+    label: 'Загрузить прайс',
+    href: '/admin/price-list',
+    words: 'прайс загрузить excel файл цены',
+  },
+  {
+    label: 'Новый курс валюты',
+    href: '/admin/rates',
+    words: 'курс доллар евро рубль валюта',
+  },
+  {
+    label: 'Товары на сайте без цены',
+    href: listHref('products', [PUBLISHED, { qualityGaps: { in: ['price'] } }]),
+    words: 'без цены нет цены',
+  },
+  {
+    label: 'Товары на сайте без картинки',
+    href: listHref('products', [PUBLISHED, { qualityGaps: { in: ['image'] } }]),
+    words: 'без картинки нет картинки фото',
+  },
+  {
+    label: 'Новые заявки',
+    href: '/admin/collections/site-requests?sort=-createdAt',
+    words: 'заявки новые сегодня лиды',
     adminOnly: true,
   },
 ]
@@ -157,13 +257,15 @@ export function searchQuery(/** @type {unknown} */ value) {
 const norm = (/** @type {string} */ text) => text.toLowerCase().replaceAll('ё', 'е')
 
 /**
- * Страницы админки под запрос: все слова запроса есть в названии или подсказках.
+ * Страницы админки (или команды) под запрос: все слова запроса есть в названии или подсказках.
  * @param {string} query
  * @param {boolean} isAdmin
+ * @param {{ label: string, href: string, words: string, adminOnly?: boolean }[]} [list]
  */
-export function matchPages(query, isAdmin) {
+export function matchPages(query, isAdmin, list = ADMIN_PAGES) {
   const words = norm(query).split(' ').filter(Boolean)
-  return ADMIN_PAGES.filter((page) => isAdmin || !page.adminOnly)
+  return list
+    .filter((page) => isAdmin || !page.adminOnly)
     .filter((page) => {
       const hay = norm(`${page.label} ${page.words}`)
       return words.every((word) => hay.includes(word))

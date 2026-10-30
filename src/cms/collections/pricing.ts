@@ -28,7 +28,7 @@ export const exchangeRates: CollectionConfig = {
 
 export const pricingSettings: GlobalConfig = {
   slug: 'pricing-settings',
-  label: 'Настройки цены',
+  label: 'НДС и настройки цены',
   access: { read: isAdmin, update: isAdmin },
   hooks: { afterChange: [logVatChange] },
   fields: [{ name: 'vat', label: 'НДС, %', type: 'text', defaultValue: '16', required: true }],

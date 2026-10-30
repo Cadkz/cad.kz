@@ -1,5 +1,6 @@
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
+import { AdminTabs } from '@/components/AdminTabs/AdminTabs'
 import { PriceUpload } from '@/components/PriceUpload/PriceUpload'
 import { formatDateTime } from '@/lib/format'
 import { priceListVendors } from '@/lib/priceListRun'
@@ -44,6 +45,7 @@ export async function PriceListView({
     <DefaultTemplate {...template}>
       <div className={styles.root}>
         <h1 className={styles.title}>Загрузить прайс</h1>
+        <AdminTabs set="prices" current="/admin/price-list" />
         {allowed ? (
           <>
             <p className={styles.lead}>

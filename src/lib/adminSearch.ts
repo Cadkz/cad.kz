@@ -1,5 +1,11 @@
 import type { CollectionSlug, Payload, Where } from 'payload'
-import { matchPages, SEARCH_COLLECTIONS, SEARCH_LIMIT, shortLabel } from '@/domain/adminSearch.mjs'
+import {
+  ADMIN_ACTIONS,
+  matchPages,
+  SEARCH_COLLECTIONS,
+  SEARCH_LIMIT,
+  shortLabel,
+} from '@/domain/adminSearch.mjs'
 
 export type SearchHit = { label: string; note?: string; href: string }
 export type SearchGroup = { label: string; hits: SearchHit[] }
@@ -16,7 +22,10 @@ export async function searchAdmin(
   query: string,
 ): Promise<SearchGroup[]> {
   const groups: SearchGroup[] = []
-  const pages = matchPages(query, user.role === 'admin')
+  const admin = user.role === 'admin'
+  const actions = matchPages(query, admin, ADMIN_ACTIONS)
+  if (actions.length) groups.push({ label: 'Действия', hits: actions })
+  const pages = matchPages(query, admin)
   if (pages.length) groups.push({ label: 'Разделы админки', hits: pages })
   const found = await Promise.all(
     SEARCH_COLLECTIONS.map(async (source) => {

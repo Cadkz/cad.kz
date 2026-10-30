@@ -11,8 +11,9 @@ import styles from './AdminSearch.module.css'
 const DELAY_MS = 250
 
 /**
- * Поиск в меню админки (просьба владельца 30.10.2026): разделы админки и записи — товары,
- * разделы, публикации, база Кадди, заказы и заявки. Результаты ссылками прямо под полем.
+ * Поиск в меню админки (просьба владельца 30.10.2026): команды («новость», «прайс», «без цены»),
+ * разделы админки и записи — товары, разделы, публикации, база Кадди, заказы и заявки.
+ * Результаты ссылками прямо под полем. Ctrl+K — сразу в поиск.
  */
 export function AdminSearch() {
   const [query, setQuery] = useState('')
@@ -20,7 +21,25 @@ export function AdminSearch() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const latest = useRef(0)
+  const input = useRef<HTMLInputElement>(null)
   const listId = useId()
+
+  // Ctrl+K (на Mac — Cmd+K) из любого места админки ставит курсор в поиск.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'k') return
+      // В редакторе текста Ctrl+K — ссылка: в тексте и описаниях не перехватываем.
+      const target = event.target
+      if (target instanceof HTMLElement && target !== input.current) {
+        if (target.isContentEditable || target.closest('textarea')) return
+      }
+      event.preventDefault()
+      input.current?.focus()
+      input.current?.select()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   useEffect(() => {
     const text = query.trim()
@@ -56,10 +75,11 @@ export function AdminSearch() {
         <Search size={16} strokeWidth={1.75} aria-hidden="true" className={styles.icon} />
         <span className={styles.hidden}>Поиск по админке</span>
         <input
+          ref={input}
           className={styles.input}
           type="search"
           value={query}
-          placeholder="Поиск: товар, раздел, заказ…"
+          placeholder="Поиск или команда · Ctrl+K"
           aria-controls={listId}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
