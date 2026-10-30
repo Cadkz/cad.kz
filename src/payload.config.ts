@@ -42,6 +42,9 @@ export default buildConfig({
       // Меню по задачам (src/domain/adminMenu.mjs): поиск, Главная, Каталог, Контент, Продажи,
       // Кадди, свёрнутые Настройки. Группы коллекций Payload не выводятся — каждый пункт один раз.
       Nav: '/components/AdminNav/AdminNav#AdminNav',
+      // Справа в шапке: лупа (поиск, клавиша «/») и солнце / луна (тема). Свои страницы админки
+      // передают их в DefaultTemplate через viewActions.
+      actions: ['/components/AdminHeaderTools/AdminHeaderTools#AdminHeaderTools'],
       beforeNavLinks: [
         '/components/AdminSearch/AdminSearch#AdminSearch',
         '/components/AdminNavMain/AdminNavMain#AdminNavMain',

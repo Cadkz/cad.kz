@@ -15,6 +15,7 @@ import { QueryPresetsColumnField as QueryPresetsColumnField_2b8867833a34864a02dd
 import { QueryPresetsGroupByCell as QueryPresetsGroupByCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsGroupByField as QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { AdminNav as AdminNav_a2a5d49c997f53d7eefb70c0e9b9398d } from '../../../components/AdminNav/AdminNav'
+import { AdminHeaderTools as AdminHeaderTools_d85f40760f0a2a03cdfc0cf8e3aca5e4 } from '../../../components/AdminHeaderTools/AdminHeaderTools'
 import { AdminSearch as AdminSearch_e5d8b999dd5184cc5b04e363dfe7ca54 } from '../../../components/AdminSearch/AdminSearch'
 import { AdminNavMain as AdminNavMain_78ea0e3db77afc64d43b47d4136ff346 } from '../../../components/AdminNavMain/AdminNavMain'
 import { AdminDashboard as AdminDashboard_398f6e88b9fb4af226a8c9c6a8089413 } from '../../../components/AdminDashboard/AdminDashboard'
@@ -50,6 +51,7 @@ export const importMap = {
   "@payloadcms/next/client#QueryPresetsGroupByCell": QueryPresetsGroupByCell_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsGroupByField": QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40,
   "/components/AdminNav/AdminNav#AdminNav": AdminNav_a2a5d49c997f53d7eefb70c0e9b9398d,
+  "/components/AdminHeaderTools/AdminHeaderTools#AdminHeaderTools": AdminHeaderTools_d85f40760f0a2a03cdfc0cf8e3aca5e4,
   "/components/AdminSearch/AdminSearch#AdminSearch": AdminSearch_e5d8b999dd5184cc5b04e363dfe7ca54,
   "/components/AdminNavMain/AdminNavMain#AdminNavMain": AdminNavMain_78ea0e3db77afc64d43b47d4136ff346,
   "/components/AdminDashboard/AdminDashboard#AdminDashboard": AdminDashboard_398f6e88b9fb4af226a8c9c6a8089413,

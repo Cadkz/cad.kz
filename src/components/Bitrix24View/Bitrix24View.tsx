@@ -111,7 +111,12 @@ function OpenLine({ line }: { line: OpenLineStatus }) {
 }
 
 /** Страница «Битрикс24» в админке: подключение, проверка связи, тестовый лид, очередь передачи. */
-export async function Bitrix24View({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export async function Bitrix24View({
+  initPageResult,
+  params,
+  searchParams,
+  viewActions,
+}: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
   const { payload, user, i18n } = req
   const template = {
@@ -123,6 +128,8 @@ export async function Bitrix24View({ initPageResult, params, searchParams }: Adm
     searchParams,
     user: user ?? undefined,
     visibleEntities,
+    // Кнопки в шапке (поиск, тема) — общие для всех страниц админки, см. admin.components.actions.
+    viewActions,
   }
   const admin = user?.role === 'admin'
   const [status, line] = admin

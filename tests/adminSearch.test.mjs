@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { HOME_LINK, isActive, MENU, PAGE_TABS, visibleMenu } from '../src/domain/adminMenu.mjs'
-import { ADMIN_ACTIONS, matchPages, searchQuery, shortLabel } from '../src/domain/adminSearch.mjs'
+import {
+  ADMIN_ACTIONS,
+  isSearchHotkey,
+  matchPages,
+  searchQuery,
+  shortLabel,
+} from '../src/domain/adminSearch.mjs'
 
 test('строка поиска: пробелы схлопываются, короткая и не строка — null', () => {
   assert.equal(searchQuery('  autocad   lt '), 'autocad lt')
@@ -87,4 +93,28 @@ test('команды словами: новость, прайс, без цены
   assert.ok(noPrice[0].href.includes('qualityGaps'))
   assert.equal(matchPages('заявки', false, ADMIN_ACTIONS).length, 0)
   assert.equal(matchPages('заявки', true, ADMIN_ACTIONS).length, 1)
+})
+
+test('клавиша поиска: «/» вне полей, Ctrl+K кроме текста описаний, в русской раскладке тоже', () => {
+  const key = (k, extra = {}) => ({
+    key: k,
+    ctrlKey: false,
+    metaKey: false,
+    altKey: false,
+    ...extra,
+  })
+  const free = { typing: false, richText: false }
+  const typing = { typing: true, richText: false }
+  const rich = { typing: true, richText: true }
+  assert.equal(isSearchHotkey(key('/'), free), true)
+  assert.equal(isSearchHotkey(key('/'), typing), false)
+  // Русская раскладка: та же кнопка даёт «.»
+  assert.equal(isSearchHotkey(key('.', { code: 'Slash' }), free), true)
+  assert.equal(isSearchHotkey(key(',', { code: 'Slash', shiftKey: true }), free), false)
+  assert.equal(isSearchHotkey(key('k', { ctrlKey: true }), typing), true)
+  assert.equal(isSearchHotkey(key('л', { ctrlKey: true, code: 'KeyK' }), free), true)
+  assert.equal(isSearchHotkey(key('K', { metaKey: true }), free), true)
+  assert.equal(isSearchHotkey(key('k', { ctrlKey: true }), rich), false)
+  assert.equal(isSearchHotkey(key('k'), free), false)
+  assert.equal(isSearchHotkey(key('/', { ctrlKey: true }), free), false)
 })

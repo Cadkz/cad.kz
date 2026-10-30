@@ -9,6 +9,7 @@ export async function LegacyContentView({
   initPageResult,
   params,
   searchParams,
+  viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
   const { payload, user, i18n } = req
@@ -21,6 +22,8 @@ export async function LegacyContentView({
     searchParams,
     user: user ?? undefined,
     visibleEntities,
+    // Кнопки в шапке (поиск, тема) — общие для всех страниц админки, см. admin.components.actions.
+    viewActions,
   }
   return (
     <DefaultTemplate {...template}>

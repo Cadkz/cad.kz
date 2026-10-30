@@ -13,6 +13,28 @@ export const SEARCH_MIN = 2
 /** Записей в одной группе результатов. */
 export const SEARCH_LIMIT = 6
 
+/** Событие окна: кнопка-лупа в шапке просит открыть поиск в меню. */
+export const OPEN_ADMIN_SEARCH = 'cad:open-admin-search'
+
+/**
+ * Клавиша поиска (пожелание владельца 30.10.2026): «/», как на GitHub и YouTube, — когда курсор
+ * не в поле ввода; запасная Ctrl+K (Cmd+K) — кроме текста описаний, где это ссылка.
+ * Клавиши узнаём и по месту на клавиатуре (code): в русской раскладке та же кнопка даёт «л»
+ * вместо «k» и «.» вместо «/», и без этого Ctrl+K уходил браузеру — в поиск Google.
+ * @param {{ key: string, code?: string, ctrlKey: boolean, metaKey: boolean, altKey: boolean,
+ *   shiftKey?: boolean }} event
+ * @param {{ typing: boolean, richText: boolean }} place — курсор в поле ввода; в тексте описания
+ * @returns {boolean}
+ */
+export function isSearchHotkey(event, place) {
+  const modifier = event.ctrlKey || event.metaKey
+  const slash = event.key === '/' || (event.code === 'Slash' && !event.shiftKey)
+  if (slash && !modifier && !event.altKey) return !place.typing
+  const k = event.key.toLowerCase() === 'k' || event.code === 'KeyK'
+  if (modifier && k && !event.altKey) return !place.richText
+  return false
+}
+
 /**
  * Свои страницы и частые списки. words — как их могут искать другими словами.
  * @type {{ label: string, href: string, words: string, adminOnly?: boolean }[]}

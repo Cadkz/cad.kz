@@ -5,7 +5,12 @@ import { assistantStatus } from '@/lib/assistant/check'
 import styles from './AssistantCheckView.module.css'
 
 /** Страница «Проверка Кадди» в админке: администратор и маркетолог. */
-export function AssistantCheckView({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export function AssistantCheckView({
+  initPageResult,
+  params,
+  searchParams,
+  viewActions,
+}: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
   const { payload, user, i18n } = req
   const template = {
@@ -17,6 +22,8 @@ export function AssistantCheckView({ initPageResult, params, searchParams }: Adm
     searchParams,
     user: user ?? undefined,
     visibleEntities,
+    // Кнопки в шапке (поиск, тема) — общие для всех страниц админки, см. admin.components.actions.
+    viewActions,
   }
   const allowed = user?.role === 'admin' || user?.role === 'editor'
   const status = assistantStatus()

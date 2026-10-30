@@ -1,19 +1,22 @@
 'use client'
 
+import { useNav } from '@payloadcms/ui'
 import { Search } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
-import { SEARCH_MIN } from '@/domain/adminSearch.mjs'
+import { isSearchHotkey, OPEN_ADMIN_SEARCH, SEARCH_MIN } from '@/domain/adminSearch.mjs'
 import { adminCall } from '@/lib/adminCall'
 import type { SearchGroup } from '@/lib/adminSearch'
 import styles from './AdminSearch.module.css'
 
 /** Пауза после ввода перед запросом — чтобы не искать на каждую букву. */
 const DELAY_MS = 250
+/** Меню на телефоне выезжает с анимацией: курсор ставим, когда поле уже видно. */
+const NAV_OPEN_MS = 300
 
 /**
  * Поиск в меню админки (просьба владельца 30.10.2026): команды («новость», «прайс», «без цены»),
  * разделы админки и записи — товары, разделы, публикации, база Кадди, заказы и заявки.
- * Результаты ссылками прямо под полем. Ctrl+K — сразу в поиск.
+ * Результаты ссылками прямо под полем. «/», Ctrl+K и лупа в шапке — сразу в поиск.
  */
 export function AdminSearch() {
   const [query, setQuery] = useState('')
@@ -23,23 +26,42 @@ export function AdminSearch() {
   const latest = useRef(0)
   const input = useRef<HTMLInputElement>(null)
   const listId = useId()
+  const nav = useNav()
+  const { setNavOpen } = nav
+  // Открыто ли меню — в ref, чтобы не переподписывать клавиши при каждом открытии меню.
+  const navOpen = useRef(nav.navOpen)
+  navOpen.current = nav.navOpen
 
-  // Ctrl+K (на Mac — Cmd+K) из любого места админки ставит курсор в поиск.
+  // «/» или Ctrl+K (на Mac — Cmd+K) из любого места админки и лупа в шапке ставят курсор в поиск.
+  // На телефоне меню закрыто — сначала открываем его, потом ставим курсор.
   useEffect(() => {
+    const open = () => {
+      const wasOpen = navOpen.current
+      if (!wasOpen) setNavOpen(true)
+      window.setTimeout(
+        () => {
+          input.current?.focus()
+          input.current?.select()
+        },
+        wasOpen ? 0 : NAV_OPEN_MS,
+      )
+    }
     const onKey = (event: KeyboardEvent) => {
-      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'k') return
-      // В редакторе текста Ctrl+K — ссылка: в тексте и описаниях не перехватываем.
-      const target = event.target
-      if (target instanceof HTMLElement && target !== input.current) {
-        if (target.isContentEditable || target.closest('textarea')) return
-      }
+      const target = event.target instanceof HTMLElement ? event.target : null
+      const richText = Boolean(target?.isContentEditable || target?.closest('textarea'))
+      const typing =
+        richText || Boolean(target?.closest('input, select, [role="combobox"], [role="textbox"]'))
+      if (!isSearchHotkey(event, { typing, richText: richText && target !== input.current })) return
       event.preventDefault()
-      input.current?.focus()
-      input.current?.select()
+      open()
     }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [])
+    window.addEventListener(OPEN_ADMIN_SEARCH, open)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener(OPEN_ADMIN_SEARCH, open)
+    }
+  }, [setNavOpen])
 
   useEffect(() => {
     const text = query.trim()
@@ -79,7 +101,7 @@ export function AdminSearch() {
           className={styles.input}
           type="search"
           value={query}
-          placeholder="Поиск или команда · Ctrl+K"
+          placeholder="Поиск или команда · нажмите /"
           aria-controls={listId}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {

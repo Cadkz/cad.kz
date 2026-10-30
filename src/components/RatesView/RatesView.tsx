@@ -6,7 +6,12 @@ import { loadRates } from '@/lib/ratesRun'
 import styles from './RatesView.module.css'
 
 /** Страница «Курсы валют» в админке: все курсы и НДС на одном экране. */
-export async function RatesView({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export async function RatesView({
+  initPageResult,
+  params,
+  searchParams,
+  viewActions,
+}: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
   const { payload, user, i18n } = req
   const template = {
@@ -18,6 +23,8 @@ export async function RatesView({ initPageResult, params, searchParams }: AdminV
     searchParams,
     user: user ?? undefined,
     visibleEntities,
+    // Кнопки в шапке (поиск, тема) — общие для всех страниц админки, см. admin.components.actions.
+    viewActions,
   }
   const allowed = user?.role === 'admin' || user?.role === 'editor'
   const data = allowed ? await loadRates(payload) : null

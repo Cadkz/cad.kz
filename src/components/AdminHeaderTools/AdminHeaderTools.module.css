@@ -1,0 +1,27 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.root {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--base) / 4);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--base) * 1.6);
+  height: calc(var(--base) * 1.6);
+  padding: 0;
+  border: 0;
+  border-radius: var(--style-radius-s);
+  background: none;
+  color: var(--theme-elevation-800);
+  cursor: pointer;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: var(--theme-elevation-100);
+  color: var(--theme-text);
+  outline: none;
+}

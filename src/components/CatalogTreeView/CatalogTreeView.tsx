@@ -10,6 +10,7 @@ export async function CatalogTreeView({
   initPageResult,
   params,
   searchParams,
+  viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
   const { payload, user, i18n } = req
@@ -22,6 +23,8 @@ export async function CatalogTreeView({
     searchParams,
     user: user ?? undefined,
     visibleEntities,
+    // Кнопки в шапке (поиск, тема) — общие для всех страниц админки, см. admin.components.actions.
+    viewActions,
   }
   const allowed = user?.role === 'admin' || user?.role === 'editor'
   const data = allowed ? await loadCatalogTree(payload) : null

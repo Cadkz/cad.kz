@@ -15,6 +15,7 @@ export async function BitrixImportView({
   initPageResult,
   params,
   searchParams,
+  viewActions,
 }: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
   const { payload, user, i18n } = req
@@ -27,6 +28,8 @@ export async function BitrixImportView({
     searchParams,
     user: user ?? undefined,
     visibleEntities,
+    // Кнопки в шапке (поиск, тема) — общие для всех страниц админки, см. admin.components.actions.
+    viewActions,
   }
 
   if (user?.role !== 'admin')

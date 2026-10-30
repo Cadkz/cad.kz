@@ -11,7 +11,12 @@ const notFull = listHref('products', [
 ])
 
 /** «Контроль качества» в админке: что не заполнено на сайте, по разделам. */
-export async function QualityView({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export async function QualityView({
+  initPageResult,
+  params,
+  searchParams,
+  viewActions,
+}: AdminViewServerProps) {
   const { req, visibleEntities, permissions, locale } = initPageResult
   const { payload, user, i18n } = req
   const template = {
@@ -23,6 +28,8 @@ export async function QualityView({ initPageResult, params, searchParams }: Admi
     searchParams,
     user: user ?? undefined,
     visibleEntities,
+    // Кнопки в шапке (поиск, тема) — общие для всех страниц админки, см. admin.components.actions.
+    viewActions,
   }
   const allowed = user?.role === 'admin' || user?.role === 'editor'
   const report = allowed ? await loadQualityReport(payload) : null
