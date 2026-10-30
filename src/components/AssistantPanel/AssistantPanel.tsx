@@ -30,9 +30,15 @@ type Props = {
   /** Чат часто открывали и закрывали — Кадди встречает недовольным. */
   grumpy: boolean
   whatsappHref: string | null
+  /** Окно закрыто и доигрывает сворачивание в Кадди; потом onClosed убирает его из разметки. */
+  closing: boolean
   /** returnFocus: false — закрыли кликом мимо окна, фокус остаётся там, куда кликнули. */
   onClose: (returnFocus?: boolean) => void
+  onClosed: () => void
 }
+
+/** Запас на случай, если конец анимации не пришёл (вкладка в фоне): окно всё равно уберётся. */
+const CLOSE_FALLBACK_MS = 600
 
 /**
  * Окно чата с Кадди. От 640 px — окно в правом нижнем углу, на месте Кадди: страницу можно листать,
@@ -40,7 +46,15 @@ type Props = {
  * Escape и клик мимо окна (от 640 px) закрывают его, на телефоне — ещё и переход по ссылке
  * на страницу сайта; форма передачи менеджеру открывается вместо поля ввода.
  */
-export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Props) {
+export function AssistantPanel({
+  chat,
+  demo,
+  grumpy,
+  whatsappHref,
+  closing,
+  onClose,
+  onClosed,
+}: Props) {
   const titleId = useId()
   const panel = useRef<HTMLElement>(null)
   // false — разговор; объект — форма передачи (prefill — данные, которые собрал Кадди).
@@ -68,7 +82,44 @@ export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Pr
     panel.current?.querySelector<HTMLElement>(selector)?.focus()
   }, [handoff])
 
+  // Закрыли — окно сворачивается в Кадди и убирается, когда анимация кончилась.
   useEffect(() => {
+    if (!closing) return
+    const node = panel.current
+    const done = (event?: AnimationEvent) => {
+      if (event && event.target !== node) return
+      onClosed()
+    }
+    const timer = setTimeout(done, CLOSE_FALLBACK_MS)
+    node?.addEventListener('animationend', done)
+    return () => {
+      clearTimeout(timer)
+      node?.removeEventListener('animationend', done)
+    }
+  }, [closing, onClosed])
+
+  // Телефон: окно — ровно видимая часть экрана. Открылась клавиатура — iOS сдвигает видимую
+  // область, а окно с inset: 0 оставалось на месте, и под ним просвечивала страница
+  // (замечание владельца 30.10.2026). Высота и верх берутся из visualViewport.
+  useEffect(() => {
+    const viewport = window.visualViewport
+    const node = panel.current
+    if (!viewport || !node) return
+    const fit = () => {
+      node.style.setProperty('--viewport-top', `${Math.round(viewport.offsetTop)}px`)
+      node.style.setProperty('--viewport-height', `${Math.round(viewport.height)}px`)
+    }
+    fit()
+    viewport.addEventListener('resize', fit)
+    viewport.addEventListener('scroll', fit)
+    return () => {
+      viewport.removeEventListener('resize', fit)
+      viewport.removeEventListener('scroll', fit)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (closing) return
     const root = document.documentElement
     const phone = window.matchMedia('(max-width: 639.98px)')
     const lock = () => {
@@ -119,12 +170,14 @@ export function AssistantPanel({ chat, demo, grumpy, whatsappHref, onClose }: Pr
       node?.removeEventListener('click', onLinkClick)
       delete root.dataset.scrollLocked
     }
-  }, [onClose])
+  }, [onClose, closing])
 
   return (
     <section
       ref={panel}
       className={styles.panel}
+      data-closing={closing}
+      inert={closing}
       role="dialog"
       aria-labelledby={titleId}
       tabIndex={-1}

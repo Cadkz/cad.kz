@@ -3,7 +3,19 @@
 .mascot {
   display: inline-block;
   flex-shrink: 0;
-  animation: appear var(--duration-base) var(--ease) backwards;
+  transform-origin: 50% 100%;
+  animation: appear var(--duration-kaddi-hop) var(--ease-spring) backwards;
+}
+
+/* Чат на сайте работает — Кадди страницы можно нажать: подпрыгивает и открывает чат
+   (KaddiStage). Кнопки «Спросить Кадди» рядом остаются: картинка — только быстрый путь мышью. */
+:global(html[data-assistant="on"]) .mascot[data-kaddi="stage"] {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mascot[data-kaddi-boop="true"] .pose {
+  animation: boop var(--duration-kaddi-hop) var(--ease) both;
 }
 
 /* На экране один Кадди (KaddiStage, решение владельца 16.10.2026): пока виден другой Кадди —
@@ -12,16 +24,17 @@
    появляется этот — кажется, что Кадди перебежал. */
 .mascot[data-kaddi-shown="false"] {
   opacity: 0;
-  transform: translateY(var(--space-2));
+  transform: translateY(var(--space-4)) scale(0.9, 0.8);
   transition:
-    opacity var(--duration-exit) var(--ease),
-    transform var(--duration-exit) var(--ease);
+    opacity var(--duration-base) var(--ease) var(--duration-fast),
+    transform var(--duration-kaddi-close) var(--ease-back-in);
 }
 
+/* Возвращается прыжком с перелётом — уже после того, как другой Кадди ушёл. */
 .mascot[data-kaddi-shown="true"] {
   transition:
     opacity var(--duration-base) var(--ease) var(--duration-base),
-    transform var(--duration-base) var(--ease) var(--duration-base);
+    transform var(--duration-kaddi-open) var(--ease-spring) var(--duration-base);
 }
 
 /* Слой фигуры и глаз. При наведении фигура стоит на месте (решение владельца 13.10:
@@ -104,10 +117,38 @@
   }
 }
 
+/* Появление прыжком: снизу, вытянувшись, с лёгким приседанием на месте. */
 @keyframes appear {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(var(--space-2));
+    transform: translateY(var(--space-4)) scale(0.9, 1.08);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(calc(var(--kaddi-hop) / 4)) scale(1.03, 0.97);
+  }
+  75% {
+    transform: scale(0.99, 1.01);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* Нажали: присел, подпрыгнул, приземлился. */
+@keyframes boop {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: scale(1.06, 0.9);
+  }
+  50% {
+    transform: translateY(var(--kaddi-hop)) scale(0.96, 1.05);
+  }
+  80% {
+    transform: scale(1.03, 0.97);
   }
 }
 

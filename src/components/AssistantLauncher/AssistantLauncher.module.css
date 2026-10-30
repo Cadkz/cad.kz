@@ -39,15 +39,23 @@
   }
 }
 
-/* Окно чата открыто — Кадди уходит вниз, окно стоит на его месте. */
+/* Окно чата открыто — Кадди приседает, подпрыгивает и растворяется в окне, которое вырастает
+   на его месте. */
 .launcher[data-open="true"] {
   visibility: hidden;
   opacity: 0;
-  transform: translateY(var(--space-4));
   transition:
-    opacity var(--duration-exit) var(--ease),
-    transform var(--duration-exit) var(--ease),
-    visibility 0s linear var(--duration-exit);
+    opacity var(--duration-base) var(--ease) var(--duration-base),
+    visibility 0s linear var(--duration-kaddi-hop);
+}
+
+.launcher[data-open="true"] .cat {
+  animation: jump var(--duration-kaddi-hop) var(--ease) both;
+}
+
+/* Окно закрыли — Кадди падает на место и пружинит. */
+.launcher[data-landing="true"] .cat {
+  animation: land var(--duration-kaddi-hop) var(--ease-spring) both;
 }
 
 /* На экране один Кадди (KaddiStage, решение владельца 16.10.2026): пока в экране Кадди страницы
@@ -64,10 +72,21 @@
   visibility: hidden;
   opacity: 0;
   transform: translateY(calc(100% + var(--space-6)));
+  /* Уходит с замахом: чуть привстаёт и ныряет вниз. */
   transition:
-    opacity var(--duration-base) var(--ease),
-    transform var(--duration-base) var(--ease),
-    visibility 0s linear var(--duration-base);
+    opacity var(--duration-base) var(--ease) var(--duration-fast),
+    transform var(--duration-kaddi-close) var(--ease-back-in),
+    visibility 0s linear var(--duration-kaddi-close);
+}
+
+/* Возвращается из-за края с перелётом, как пружина. */
+@media (min-width: 640px) {
+  :global(html[data-kaddi-stage]:not([data-kaddi-page])) .launcher:not([data-open="true"]) {
+    transition:
+      opacity var(--duration-fast) var(--ease),
+      transform var(--duration-kaddi-open) var(--ease-spring),
+      visibility 0s linear;
+  }
 }
 
 /* Фигура: место занято Кадди с чертежами; «недовольный» кладётся поверх.
@@ -147,6 +166,41 @@
 /* Фокус — рамка вокруг кота, а не вокруг невидимой реплики. */
 .launcher:focus-visible {
   outline-offset: var(--space-1);
+}
+
+/* Присел, прыгнул вверх, вытянулся в прыжке и растворился. */
+@keyframes jump {
+  0% {
+    transform: none;
+  }
+  20% {
+    transform: scale(1.08, 0.86);
+  }
+  55% {
+    transform: translateY(var(--kaddi-hop)) scale(0.94, 1.08);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(var(--kaddi-hop)) scale(0.6);
+  }
+}
+
+/* Упал сверху, сплющился от удара и выпрямился. */
+@keyframes land {
+  0% {
+    opacity: 0;
+    transform: translateY(var(--kaddi-hop)) scale(0.9, 1.1);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.1, 0.88);
+  }
+  70% {
+    transform: translateY(calc(var(--kaddi-hop) / 4)) scale(0.97, 1.03);
+  }
+  100% {
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

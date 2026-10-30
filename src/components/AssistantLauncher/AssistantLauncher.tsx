@@ -1,6 +1,6 @@
 'use client'
 
-import { type MouseEvent, useEffect, useState } from 'react'
+import { type MouseEvent, useEffect, useRef, useState } from 'react'
 import { Mascot } from '../Mascot/Mascot'
 import styles from './AssistantLauncher.module.css'
 
@@ -8,6 +8,8 @@ import styles from './AssistantLauncher.module.css'
 const HINT_KEY = 'kaddi-hint-shown'
 const HINT_DELAY_MS = 6000
 const HINT_SHOW_MS = 7000
+/** Сколько длится приземление после закрытия окна (как --duration-kaddi-hop с запасом). */
+const LAND_MS = 900
 
 function hintAlreadyShown() {
   try {
@@ -37,12 +39,25 @@ type Props = {
  * Кадди — голова в шапке). Сидит в каске и моргает; при наведении моргает сразу и показывает
  * «Спросить Кадди», не двигаясь; при нажатии пружинит. Раз за посещение сам моргает и
  * спрашивает «Помочь с выбором?». Если чат дёргают (grumpy) — сидит недовольный.
- * Пока окно чата открыто, Кадди прячется: окно стоит на его месте.
+ * Нажали — Кадди приседает и подпрыгивает, окно вырастает из него; пока окно открыто, Кадди
+ * прячется (окно стоит на его месте), закрыли — приземляется обратно с отскоком.
  * Пока в экране Кадди страницы (KaddiStage — на экране один Кадди), съезжает вниз за край экрана.
  * Со строкой подбора внизу (до 960 px) поднимается над ней.
  */
 export function AssistantLauncher({ open, grumpy, onClick }: Props) {
   const [hint, setHint] = useState(false)
+  // Окно только что закрыли — Кадди возвращается в угол прыжком с отскоком.
+  const [landing, setLanding] = useState(false)
+  const wasOpen = useRef(open)
+
+  useEffect(() => {
+    const before = wasOpen.current
+    wasOpen.current = open
+    if (!before || open) return
+    setLanding(true)
+    const timer = setTimeout(() => setLanding(false), LAND_MS)
+    return () => clearTimeout(timer)
+  }, [open])
 
   useEffect(() => {
     if (open || hintAlreadyShown()) return
@@ -69,6 +84,7 @@ export function AssistantLauncher({ open, grumpy, onClick }: Props) {
       type="button"
       className={styles.launcher}
       data-open={open}
+      data-landing={landing}
       data-hint={hint && !open && !grumpy}
       data-grumpy={grumpy}
       aria-label="Спросить Кадди — ИИ-консультант CAD.kz"

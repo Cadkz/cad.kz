@@ -35,6 +35,8 @@ type Props = {
  */
 export function Assistant({ demo, whatsappHref }: Props) {
   const [open, setOpen] = useState(false)
+  // Окно в разметке: после закрытия ещё доигрывает сворачивание, потом убирается.
+  const [present, setPresent] = useState(false)
   const [grumpy, setGrumpy] = useState(false)
   // Буханка и окно выносятся в body: внутри шапки (backdrop-filter) fixed считался бы от неё.
   const [mounted, setMounted] = useState(false)
@@ -57,6 +59,7 @@ export function Assistant({ demo, whatsappHref }: Props) {
       calm.current = setTimeout(() => setGrumpy(false), GRUMPY_MS)
     }
     setOpen(true)
+    setPresent(true)
   }, [])
 
   const close = useCallback((returnFocus = true) => {
@@ -107,6 +110,8 @@ export function Assistant({ demo, whatsappHref }: Props) {
     if (window.matchMedia('(min-width: 640px)').matches) show(null)
   }, [managers, open, show])
 
+  const hide = useCallback(() => setPresent(false), [])
+
   const toggle = (from: HTMLElement) => (open ? close() : show(from))
 
   return (
@@ -127,13 +132,15 @@ export function Assistant({ demo, whatsappHref }: Props) {
               grumpy={grumpy}
               onClick={(event) => toggle(event.currentTarget)}
             />
-            {open && (
+            {present && (
               <AssistantPanel
                 chat={chat}
                 demo={demo}
                 grumpy={grumpy}
                 whatsappHref={whatsappHref}
+                closing={!open}
                 onClose={close}
+                onClosed={hide}
               />
             )}
           </>,

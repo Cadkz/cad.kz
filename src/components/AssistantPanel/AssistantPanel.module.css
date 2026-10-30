@@ -1,13 +1,34 @@
-/* Телефон: окно на весь экран поверх страницы и шапки. Появляется проявлением и сдвигом
-   на 8 px (--duration-enter), как панели шапки. */
+/* Телефон: окно на всю видимую часть экрана поверх страницы и шапки. Верх и высота — из
+   visualViewport (AssistantPanel): с открытой клавиатурой поле ввода стоит прямо над ней.
+   Раскрывается кругом от головы Кадди в шапке (справа вверху) и сворачивается туда же. */
 .panel {
+  --kaddi-origin: calc(100% - var(--space-8)) var(--space-6);
+
   position: fixed;
-  inset: 0;
+  top: var(--viewport-top, 0);
+  right: 0;
+  left: 0;
   z-index: var(--z-drawer);
   display: flex;
   flex-direction: column;
+  height: var(--viewport-height, 100dvh);
   background: var(--color-surface);
-  animation: open var(--duration-enter) var(--ease);
+  animation: open var(--duration-kaddi-open) var(--ease-reveal) backwards;
+}
+
+/* Белая подложка выше и ниже окна: пока iOS сдвигает экран под клавиатуру, страница
+   не просвечивает ни сверху, ни снизу. */
+.panel::before {
+  position: absolute;
+  inset: -100vh 0;
+  z-index: var(--z-below);
+  background: var(--color-surface);
+  content: "";
+  pointer-events: none;
+}
+
+.panel[data-closing="true"] {
+  animation: close var(--duration-kaddi-close) var(--ease-back-in) forwards;
 }
 
 .panel:focus {
@@ -16,10 +37,16 @@
 
 /* От 640 px: окно в правом нижнем углу экрана, на месте Кадди (AssistantLauncher), не выше
    экрана под закреплённой шапкой. Страница остаётся доступной: можно листать каталог,
-   не закрывая разговор. */
+   не закрывая разговор. Окно вырастает из Кадди кругом с лёгким перелётом и сворачивается
+   обратно в угол. */
 @media (min-width: 640px) {
   .panel {
-    inset: auto var(--space-6) var(--space-6) auto;
+    --kaddi-origin: calc(100% - var(--space-10)) calc(100% - var(--space-10));
+
+    top: auto;
+    right: var(--space-6);
+    bottom: var(--space-6);
+    left: auto;
     z-index: var(--z-dropdown);
     width: var(--assistant-width);
     height: min(
@@ -31,6 +58,20 @@
     border-radius: var(--radius-panel);
     box-shadow: var(--shadow-lg);
     transform-origin: 100% 100%;
+    animation-name: grow;
+    animation-timing-function: var(--ease-spring);
+    /* Сначала Кадди приседает перед прыжком, потом из него вырастает окно. */
+    animation-delay: var(--duration-fast);
+  }
+
+  .panel::before {
+    display: none;
+  }
+
+  .panel[data-closing="true"] {
+    animation-name: shrink;
+    animation-timing-function: var(--ease-back-in);
+    animation-delay: 0ms;
   }
 }
 
@@ -78,9 +119,49 @@
   font-size: var(--text-sm);
 }
 
+/* Телефон: круг от головы Кадди в шапке. */
 @keyframes open {
   from {
+    clip-path: circle(0 at var(--kaddi-origin));
+  }
+  to {
+    clip-path: circle(150% at var(--kaddi-origin));
+  }
+}
+
+@keyframes close {
+  from {
+    clip-path: circle(150% at var(--kaddi-origin));
+  }
+  to {
+    clip-path: circle(0 at var(--kaddi-origin));
+  }
+}
+
+/* От 640 px: круг из Кадди в углу, окно чуть меньше и «доезжает» с перелётом. */
+@keyframes grow {
+  from {
+    clip-path: circle(var(--space-6) at var(--kaddi-origin));
     opacity: 0;
-    transform: translateY(var(--space-2));
+    transform: scale(0.6);
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    clip-path: circle(150% at var(--kaddi-origin));
+    transform: none;
+  }
+}
+
+@keyframes shrink {
+  from {
+    clip-path: circle(150% at var(--kaddi-origin));
+    transform: none;
+  }
+  to {
+    clip-path: circle(var(--space-6) at var(--kaddi-origin));
+    opacity: 0;
+    transform: scale(0.6);
   }
 }

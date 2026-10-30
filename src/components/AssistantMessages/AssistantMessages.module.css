@@ -31,6 +31,37 @@
   gap: var(--space-2);
 }
 
+/* Окно открылось: приветствие и кнопки проступают по очереди, пока окно ещё раскрывается
+   (--delay-kaddi-step). Кадди с ноутбуком появляется своим прыжком (Mascot). */
+.introText > .bot,
+.actions > * {
+  animation: rise var(--duration-reveal) var(--ease-reveal) backwards;
+}
+
+.introText > .bot {
+  animation-delay: calc(var(--delay-kaddi-step) * 3);
+}
+
+.actions > :nth-child(1) {
+  animation-delay: calc(var(--delay-kaddi-step) * 4);
+}
+
+.actions > :nth-child(2) {
+  animation-delay: calc(var(--delay-kaddi-step) * 5);
+}
+
+.actions > :nth-child(3) {
+  animation-delay: calc(var(--delay-kaddi-step) * 6);
+}
+
+.actions > :nth-child(4) {
+  animation-delay: calc(var(--delay-kaddi-step) * 7);
+}
+
+.actions > :nth-child(5) {
+  animation-delay: calc(var(--delay-kaddi-step) * 8);
+}
+
 .botRow,
 .userRow {
   display: flex;
@@ -164,5 +195,12 @@
 @keyframes pulse {
   50% {
     opacity: 0.3;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-3));
   }
 }

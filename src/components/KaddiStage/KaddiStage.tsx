@@ -5,7 +5,9 @@ import { pickStageKaddi } from '@/domain/kaddiStage.mjs'
 import {
   ASSISTANT_STATE_EVENT,
   type AssistantStateDetail,
+  assistantOn,
   assistantOpen,
+  openAssistant,
 } from '@/lib/openAssistant'
 
 const SELECTOR = '[data-kaddi="stage"]'
@@ -16,6 +18,11 @@ const SELECTOR = '[data-kaddi="stage"]'
  */
 const ROOT_MARGIN = '0px 0px 20% 0px'
 
+/** Кадди страницы подпрыгивает, и только потом открывается чат — видно, что откликнулся он. */
+const BOOP_MS = 220
+/** Когда снять отметку прыжка (дольше --duration-kaddi-hop). */
+const BOOP_END_MS = 800
+
 /**
  * Правило «на экране один Кадди» (решение владельца 16.10.2026, вечер; логика выбора —
  * `pickStageKaddi` в `src/domain/kaddiStage.mjs`). Следит за всеми Кадди страниц (Mascot со stage):
@@ -25,6 +32,7 @@ const ROOT_MARGIN = '0px 0px 20% 0px'
  * - <html data-kaddi-stage="ready"> — первый расчёт сделан: до него угловой Кадди не показывается,
  *   чтобы на 404 или в пустой корзине он не выскакивал и тут же не убегал.
  * Новые Кадди после перехода по ссылке подхватываются сами (MutationObserver), ушедшие — забываются.
+ * Нажатие на Кадди страницы (пожелание владельца 30.10.2026) — он подпрыгивает и открывает чат.
  */
 export function KaddiStage() {
   useEffect(() => {
@@ -110,7 +118,28 @@ export function KaddiStage() {
     }
     window.addEventListener(ASSISTANT_STATE_EVENT, onChat)
 
+    let boop: ReturnType<typeof setTimeout> | undefined
+    let boopEnd: ReturnType<typeof setTimeout> | undefined
+    const onClick = (event: MouseEvent) => {
+      if (!(event.target instanceof Element) || !assistantOn()) return
+      const kaddi = event.target.closest<HTMLElement>(SELECTOR)
+      if (!kaddi || kaddi.dataset.kaddiShown === 'false') return
+      // Кадди внутри ссылки или кнопки — действует она, а не чат.
+      if (kaddi.closest('a, button')) return
+      kaddi.dataset.kaddiBoop = 'false'
+      void kaddi.offsetWidth // перезапуск прыжка при повторном нажатии
+      kaddi.dataset.kaddiBoop = 'true'
+      clearTimeout(boop)
+      clearTimeout(boopEnd)
+      boop = setTimeout(() => openAssistant(), BOOP_MS)
+      boopEnd = setTimeout(() => delete kaddi.dataset.kaddiBoop, BOOP_END_MS)
+    }
+    document.addEventListener('click', onClick)
+
     return () => {
+      document.removeEventListener('click', onClick)
+      clearTimeout(boop)
+      clearTimeout(boopEnd)
       window.removeEventListener(ASSISTANT_STATE_EVENT, onChat)
       mo.disconnect()
       io.disconnect()
