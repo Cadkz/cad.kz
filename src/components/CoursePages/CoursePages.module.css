@@ -1,0 +1,62 @@
+/* Живёт в админке Payload: переменные самой админки, размеры шрифта — её. */
+.section {
+  display: grid;
+  gap: calc(var(--base) * 0.5);
+  justify-items: start;
+}
+
+.section h2 {
+  margin: 0;
+}
+
+.note {
+  max-width: calc(var(--base) * 48);
+  margin: 0;
+  color: var(--theme-elevation-500);
+}
+
+.list {
+  display: grid;
+  gap: calc(var(--base) * 0.25);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--base) * 0.5);
+}
+
+.muted {
+  color: var(--theme-elevation-500);
+}
+
+.error,
+.ok {
+  max-width: calc(var(--base) * 48);
+  margin: 0;
+  padding: var(--base);
+  border-radius: var(--style-radius-m);
+}
+
+.error {
+  background: var(--theme-error-100);
+  color: var(--theme-error-750);
+}
+
+.error p,
+.error ul {
+  margin: 0;
+}
+
+.error ul {
+  padding-left: var(--base);
+}
+
+.ok {
+  background: var(--theme-success-100);
+  color: var(--theme-success-750);
+}

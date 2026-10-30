@@ -7,6 +7,12 @@ export async function adminCall<T>(url: string, body: Record<string, unknown>): 
     body: JSON.stringify(body),
   })
   const data = (await response.json().catch(() => ({}))) as T & { error?: string }
-  if (!response.ok) throw new Error(data.error ?? 'Сервер не ответил. Повторите.')
+  if (!response.ok)
+    throw new Error(
+      data.error ??
+        (response.status === 504
+          ? 'Сервер не дождался ответа (больше минуты). Повторите.'
+          : `Сервер не ответил (${response.status}). Повторите.`),
+    )
   return data
 }

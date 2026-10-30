@@ -4,8 +4,13 @@ import { adminRequest, reply } from '@/lib/adminApi'
 import { updateDescriptions } from '@/lib/coursePages'
 import { courseMatches, readScheduleNow } from '@/lib/courseSchedule'
 
-/** Описания читаются со страниц l-p.kz: до минуты на всё. */
+/**
+ * Описания читаются со страниц l-p.kz порциями: браузер шлёт по DESCRIPTION_BATCH курсов, одна
+ * порция — секунды, а не минута (36 курсов одним запросом не укладывались в лимит Vercel,
+ * замечание владельца 31.10.2026).
+ */
 export const maxDuration = 60
+const DESCRIPTION_BATCH = 3
 
 /**
  * Действия страницы «Расписание курсов» (администратор и маркетолог): скрыть курсы, которых нет
@@ -57,16 +62,17 @@ export async function POST(request: Request) {
   }
 
   if (data.action === 'descriptions') {
-    const result = await updateDescriptions(payload, matches, [...chosen])
-    await logActivity(payload, {
-      action: 'import',
-      summary: `Описания курсов с l-p.kz: ${result.done.length}`,
-      userId: user.id,
-      link: '/admin/courses',
-      details: { ...result },
-    })
-    const failed = result.failed.length ? ` Не получилось: ${result.failed.join('; ')}.` : ''
-    return reply({ message: `Описания обновлены у курсов: ${result.done.length}.${failed}` })
+    const batch = [...chosen].slice(0, DESCRIPTION_BATCH)
+    const result = await updateDescriptions(payload, matches, batch)
+    if (result.done.length)
+      await logActivity(payload, {
+        action: 'import',
+        summary: `Описания курсов с l-p.kz: ${result.done.join('; ')}`,
+        userId: user.id,
+        link: '/admin/courses',
+        details: { ...result },
+      })
+    return reply({ message: '', ...result })
   }
 
   return reply({ error: 'Неизвестное действие' }, 400)

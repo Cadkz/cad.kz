@@ -30,10 +30,6 @@
   gap: calc(var(--base) * 0.5);
 }
 
-.muted {
-  color: var(--theme-elevation-500);
-}
-
 .error,
 .ok {
   max-width: calc(var(--base) * 48);

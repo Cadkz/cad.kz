@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { AdminButton } from '@/components/AdminButton/AdminButton'
+import { CoursePages } from '@/components/CoursePages/CoursePages'
 import { adminCall } from '@/lib/adminCall'
 import styles from './CoursesActions.module.css'
 
@@ -64,19 +65,18 @@ function useChecks(ids: number[]) {
 
 /**
  * Действия сверки курсов: скрыть с сайта курсы, которых нет в расписании (в черновики — вернуть
- * можно «Активностью» в каталоге), и обновить описания со страниц l-p.kz. Всё отмечено — снять
- * лишнее галочкой.
+ * можно «Активностью» в каталоге), и обновить описания со страниц l-p.kz (CoursePages). Всё
+ * отмечено — снять лишнее галочкой.
  */
 export function CoursesActions({ extra, pages, ready }: Props) {
   const router = useRouter()
   const hide = useChecks(extra.map((c) => c.id))
-  const page = useChecks(pages.map((c) => c.id))
-  const [running, setRunning] = useState<'hide' | 'descriptions' | null>(null)
+  const [running, setRunning] = useState<'hide' | null>(null)
   const busy = running !== null
   const [result, setResult] = useState('')
   const [error, setError] = useState('')
 
-  async function run(action: 'hide' | 'descriptions', ids: number[]) {
+  async function run(action: 'hide', ids: number[]) {
     setRunning(action)
     setResult('')
     setError('')
@@ -125,43 +125,7 @@ export function CoursesActions({ extra, pages, ready }: Props) {
           </>
         )}
       </section>
-      <section className={styles.section} aria-labelledby="courses-pages">
-        <h2 id="courses-pages">Описания с l-p.kz: {pages.length}</h2>
-        <p className={styles.note}>
-          Курсы, у которых в таблице есть ссылка «Программа курса». Сайт откроет страницы l-p.kz и
-          заменит описание отмеченных курсов текстом оттуда (с программой по модулям). «Коротко для
-          карточки» заполнится, только если оно пустое. Занимает до минуты.
-        </p>
-        {pages.length > 0 && (
-          <>
-            <ul className={styles.list}>
-              {pages.map((course) => (
-                <li key={course.id}>
-                  <label className={styles.check}>
-                    <input
-                      type="checkbox"
-                      checked={page.isOn(course.id)}
-                      onChange={() => page.toggle(course.id)}
-                    />
-                    <a href={`/admin/collections/products/${course.id}`}>{course.title}</a>
-                    <a className={styles.muted} href={course.link} target="_blank" rel="noreferrer">
-                      l-p.kz
-                    </a>
-                  </label>
-                </li>
-              ))}
-            </ul>
-            <AdminButton
-              onClick={() => run('descriptions', page.checked)}
-              disabled={busy || !ready || !page.checked.length}
-            >
-              {running === 'descriptions'
-                ? 'Читаю страницы…'
-                : `Обновить описания (${page.checked.length})`}
-            </AdminButton>
-          </>
-        )}
-      </section>
+      <CoursePages pages={pages} ready={ready} />
       {error && (
         <p className={styles.error} role="alert">
           {error}

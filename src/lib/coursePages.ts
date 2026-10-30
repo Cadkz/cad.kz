@@ -9,8 +9,8 @@ import type { CourseMatches } from './courseSchedule'
  * «Коротко для карточки» заполняется, только если пусто (его правят руками), длительность —
  * строкой «Длительность» в характеристиках, если её нет.
  */
-const FETCH_MS = 10_000
-const PARALLEL = 4
+const FETCH_MS = 15_000
+const PARALLEL = 3
 const options = { overrideAccess: true, depth: 0 } as const
 
 /** Только страницы самого l-p.kz: адрес берётся из таблицы, на чужие сайты сервер не ходит. */
@@ -46,7 +46,13 @@ async function download(url: string) {
   }
 }
 
-export type DescriptionResult = { done: string[]; failed: string[] }
+/** done — названия обновлённых курсов, failed — «название — причина», doneIds / failedIds — их ID. */
+export type DescriptionResult = {
+  done: string[]
+  failed: string[]
+  doneIds: number[]
+  failedIds: number[]
+}
 
 /** Ссылка на программу курса l-p.kz для курса сайта: первая из сопоставленных строк таблицы. */
 export function courseLinks(matches: CourseMatches) {
@@ -80,7 +86,7 @@ async function updateOne(payload: Payload, id: number, url: string) {
   return product.title
 }
 
-/** Описания отмеченных курсов: по 4 страницы сразу, ошибка одной не мешает остальным. */
+/** Описания отмеченных курсов (порция из браузера): страницы параллельно, ошибка одной не мешает остальным. */
 export async function updateDescriptions(
   payload: Payload,
   matches: CourseMatches,
@@ -89,12 +95,17 @@ export async function updateDescriptions(
   const links = courseLinks(matches)
   const titles = new Map(matches.courses.map((course) => [course.id, course.title]))
   const queue = ids.filter((id) => links.has(id))
-  const result: DescriptionResult = { done: [], failed: [] }
+  const result: DescriptionResult = { done: [], failed: [], doneIds: [], failedIds: [] }
+  for (const id of ids.filter((id) => !links.has(id))) {
+    result.failed.push(`${titles.get(id) ?? id} — в таблице УЦ нет ссылки на l-p.kz`)
+    result.failedIds.push(id)
+  }
   const worker = async () => {
     for (let id = queue.shift(); id != null; id = queue.shift()) {
       const url = links.get(id) ?? ''
       try {
         result.done.push(await updateOne(payload, id, url))
+        result.doneIds.push(id)
       } catch (error) {
         const reason =
           error instanceof Error && error.name === 'TimeoutError'
@@ -105,6 +116,7 @@ export async function updateDescriptions(
                 ? error.message
                 : 'ошибка'
         result.failed.push(`${titles.get(id) ?? id} — ${reason}`)
+        result.failedIds.push(id)
       }
     }
   }
