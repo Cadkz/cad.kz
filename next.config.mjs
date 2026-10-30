@@ -8,6 +8,15 @@ export default withPayload({
   poweredByHeader: false,
   // Слеш в конце адреса обрабатывает src/proxy.ts: старые адреса товаров cad.kz сохраняются со слешем.
   skipTrailingSlashRedirect: true,
+  // PDF характеристик (src/lib/specSheetPdf.ts): pdfkit читает свои файлы с диска — не собирать его
+  // в бандл, а брать из node_modules; шрифты TTF для PDF кладём в функцию явно.
+  serverExternalPackages: ['pdfkit'],
+  outputFileTracingIncludes: {
+    '/products/\\[slug\\]/specs.pdf': [
+      './src/assets/fonts/*.ttf',
+      './node_modules/pdfkit/js/data/**/*',
+    ],
+  },
   images: {
     // Картинки CMS при хранении в Vercel Blob.
     remotePatterns: [{ protocol: 'https', hostname: '*.public.blob.vercel-storage.com' }],

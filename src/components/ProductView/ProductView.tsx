@@ -15,12 +15,13 @@ import { ProductLifecycle } from '@/components/ProductLifecycle/ProductLifecycle
 import { ProductPicks } from '@/components/ProductPicks/ProductPicks'
 import { ProductScans } from '@/components/ProductScans/ProductScans'
 import { ProductSection } from '@/components/ProductSection/ProductSection'
+import { ProductSpecs } from '@/components/ProductSpecs/ProductSpecs'
 import { ProductStage } from '@/components/ProductStage/ProductStage'
 import { ProductTabs } from '@/components/ProductTabs/ProductTabs'
-import { PropertyList } from '@/components/PropertyList/PropertyList'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { SectionIcon } from '@/components/SectionIcon/SectionIcon'
 import { kindProfile } from '@/domain/productKind.mjs'
+import { hasSpecSheet } from '@/domain/specSheet.mjs'
 import { productLd } from '@/domain/structuredData.mjs'
 import { getCatalog } from '@/lib/catalog'
 import { getContacts } from '@/lib/navigation'
@@ -84,7 +85,14 @@ export async function ProductView({
   const about = product.description ? (
     <ProductAbout blocks={parseBody(product.description)} />
   ) : null
-  const specs = product.properties.length > 0 ? <PropertyList items={product.properties} /> : null
+  // У оборудования под характеристиками — PDF для закупок и тендеров (пожелание 30.10.2026).
+  const specs =
+    product.properties.length > 0 ? (
+      <ProductSpecs
+        items={product.properties}
+        pdfSlug={hasSpecSheet(product) ? product.slug : null}
+      />
+    ) : null
   // Цена для поисковиков — та же «от», что в каталоге и в итоге подбора на этой странице.
   const listed = byHref.get(product.path)
   const structured = productLd({
