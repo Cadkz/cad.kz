@@ -1,0 +1,78 @@
+/* Переменные админки Payload: токены сайта в админке не подключены. */
+.root {
+  display: grid;
+  gap: calc(var(--base) / 2);
+  margin-bottom: var(--base);
+}
+
+.field {
+  position: relative;
+  display: block;
+}
+
+.icon {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--base) / 2);
+  transform: translateY(-50%);
+  color: var(--theme-elevation-500);
+  pointer-events: none;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.input {
+  width: 100%;
+  padding: calc(var(--base) / 3) calc(var(--base) / 2) calc(var(--base) / 3) calc(var(--base) * 1.5);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-elevation-0);
+  color: var(--theme-text);
+  font: inherit;
+}
+
+.input:focus-visible {
+  border-color: var(--theme-elevation-400);
+  outline: none;
+}
+
+.status {
+  margin: 0;
+  color: var(--theme-elevation-500);
+}
+
+.group {
+  display: grid;
+  gap: calc(var(--base) / 8);
+  margin-bottom: calc(var(--base) / 2);
+}
+
+.groupTitle {
+  margin: 0;
+  color: var(--theme-elevation-500);
+}
+
+.hit {
+  display: grid;
+  margin: 0 calc(var(--base) / -4);
+  padding: calc(var(--base) / 4);
+  border-radius: var(--style-radius-s);
+  color: var(--theme-text);
+  text-decoration: none;
+}
+
+.hit:hover,
+.hit:focus-visible {
+  background: var(--theme-elevation-100);
+}
+
+.note {
+  color: var(--theme-elevation-500);
+}

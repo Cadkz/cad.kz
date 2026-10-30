@@ -1,6 +1,6 @@
 import { NavGroup } from '@payloadcms/ui'
 import type { ServerProps } from 'payload'
-import { MORE_COLLECTIONS, MORE_GLOBALS } from '@/domain/adminMenu.mjs'
+import { KADDI_LINKS, MORE_COLLECTIONS, MORE_GLOBALS } from '@/domain/adminMenu.mjs'
 import styles from './AdminNavTools.module.css'
 
 type Tool = { label: string; href: string; adminOnly?: boolean }
@@ -13,8 +13,6 @@ const TOOLS: Tool[] = [
   { label: 'Загрузить прайс', href: '/admin/price-list' },
   { label: 'Курсы валют', href: '/admin/rates' },
   { label: 'Контроль качества', href: '/admin/quality' },
-  { label: 'Прайс и база Кадди', href: '/admin/kaddi-data' },
-  { label: 'Проверка Кадди', href: '/admin/assistant-check' },
   { label: 'Битрикс24', href: '/admin/bitrix24', adminOnly: true },
   { label: 'Импорт из Битрикса', href: '/admin/import-bitrix', adminOnly: true },
   { label: 'Перенос со старого сайта', href: '/admin/legacy-content', adminOnly: true },
@@ -23,13 +21,18 @@ const TOOLS: Tool[] = [
 const label = (value: unknown, fallback: string) => (typeof value === 'string' ? value : fallback)
 
 /**
- * Низ меню: «Инструменты» (загрузка прайса, курсы, Кадди — администратору и маркетологу,
+ * Низ меню: «Кадди» (проверка, база знаний, прайс и диалоги вместе), «Инструменты» (загрузка прайса, курсы, Кадди — администратору и маркетологу,
  * Битрикс24, импорт и перенос — только администратору) и свёрнутое «Ещё» — редкие и
  * технические списки (src/domain/adminMenu.mjs), которые раньше занимали полменю.
  */
 export function AdminNavTools({ user, payload, permissions }: ServerProps) {
   if (user?.role !== 'admin' && user?.role !== 'editor') return null
   const tools = TOOLS.filter((tool) => !tool.adminOnly || user.role === 'admin')
+  const kaddi = KADDI_LINKS.filter(
+    (link) =>
+      !link.collection ||
+      permissions?.collections?.[link.collection as keyof typeof permissions.collections]?.read,
+  )
   const more = [
     ...MORE_COLLECTIONS.flatMap((slug) => {
       const collection = payload.collections[slug as keyof typeof payload.collections]
@@ -47,6 +50,13 @@ export function AdminNavTools({ user, payload, permissions }: ServerProps) {
   ]
   return (
     <>
+      <NavGroup label="Кадди">
+        {kaddi.map((link) => (
+          <a key={link.href} className={styles.link} href={link.href}>
+            {link.label}
+          </a>
+        ))}
+      </NavGroup>
       <NavGroup label="Инструменты">
         {tools.map((tool) => (
           <a key={tool.href} className={styles.link} href={tool.href}>

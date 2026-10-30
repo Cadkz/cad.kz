@@ -17,6 +17,7 @@ import { QueryPresetsGroupByField as QueryPresetsGroupByField_2b8867833a34864a02
 import { AdminNav as AdminNav_a2a5d49c997f53d7eefb70c0e9b9398d } from '../../../components/AdminNav/AdminNav'
 import { AdminNavTools as AdminNavTools_2fc225efb0c4d89686d274717840deee } from '../../../components/AdminNavTools/AdminNavTools'
 import { AdminHome as AdminHome_d6cd5d3bc8e724441d928f41cd54e087 } from '../../../components/AdminHome/AdminHome'
+import { AdminSearch as AdminSearch_e5d8b999dd5184cc5b04e363dfe7ca54 } from '../../../components/AdminSearch/AdminSearch'
 import { AdminNavMain as AdminNavMain_78ea0e3db77afc64d43b47d4136ff346 } from '../../../components/AdminNavMain/AdminNavMain'
 import { CatalogTreeView as CatalogTreeView_63578c839f029a4292cdac2f6a88bcc2 } from '../../../components/CatalogTreeView/CatalogTreeView'
 import { BitrixImportView as BitrixImportView_31f0a3e387f2bd8b4181ac01e9918aee } from '../../../components/BitrixImportView/BitrixImportView'
@@ -52,6 +53,7 @@ export const importMap = {
   "/components/AdminNav/AdminNav#AdminNav": AdminNav_a2a5d49c997f53d7eefb70c0e9b9398d,
   "/components/AdminNavTools/AdminNavTools#AdminNavTools": AdminNavTools_2fc225efb0c4d89686d274717840deee,
   "/components/AdminHome/AdminHome#AdminHome": AdminHome_d6cd5d3bc8e724441d928f41cd54e087,
+  "/components/AdminSearch/AdminSearch#AdminSearch": AdminSearch_e5d8b999dd5184cc5b04e363dfe7ca54,
   "/components/AdminNavMain/AdminNavMain#AdminNavMain": AdminNavMain_78ea0e3db77afc64d43b47d4136ff346,
   "/components/CatalogTreeView/CatalogTreeView#CatalogTreeView": CatalogTreeView_63578c839f029a4292cdac2f6a88bcc2,
   "/components/BitrixImportView/BitrixImportView#BitrixImportView": BitrixImportView_31f0a3e387f2bd8b4181ac01e9918aee,
