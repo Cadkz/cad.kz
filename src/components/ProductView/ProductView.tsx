@@ -257,14 +257,7 @@ export async function ProductView({
       : product.kind === 'hardware'
         ? allTerms.hardware
         : []
-  const terms =
-    termsList.length > 0 ? (
-      <Reveal>
-        <ProductSection title="Условия покупки" id="terms">
-          <PurchaseTerms terms={termsList} />
-        </ProductSection>
-      </Reveal>
-    ) : null
+  const terms = termsList.length > 0 ? <PurchaseTerms terms={termsList} /> : null
   const scans =
     product.scans.length > 0 ? <ProductScans title={product.title} scans={product.scans} /> : null
 
@@ -284,11 +277,20 @@ export async function ProductView({
           ]}
         />
         <PickerProvider key={String(pick)} view={product.picker} meta={meta} pick={pick}>
-          <ProductLayout asideLast header={header} aside={<PickerSummary />} wide={scans}>
+          <ProductLayout
+            asideLast
+            header={header}
+            aside={
+              <>
+                <PickerSummary />
+                {terms}
+              </>
+            }
+            wide={scans}
+          >
             {groups}
             {config}
             {overview}
-            {terms}
             {faq}
           </ProductLayout>
           <PickerBar />
