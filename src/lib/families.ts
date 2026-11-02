@@ -4,6 +4,7 @@ import { familyIncludes, uniqueLabels } from '@/domain/familyPackages.mjs'
 import { EXTRA_ORDER } from '@/domain/familySeed.mjs'
 import type { PickerView } from '@/domain/picker.mjs'
 import { plainTitle } from '@/domain/productTitle.mjs'
+import { titleDash } from '@/domain/titleDash.mjs'
 import type { ProductLine } from '../../payload-types'
 import { cms, cmsData } from './payload'
 import { offersOf, pickerOffers } from './picker'
@@ -16,10 +17,9 @@ const published = { status: { equals: 'published' } } as const
 
 /** Название вида «АРБАТ - экспертиза …» → коротко «АРБАТ» и пояснение «Экспертиза …». */
 export function splitTitle(title: string): { label: string; note: string | null } {
-  const match = /^(.{2,40}?)\s+[-–—]\s+(.+)$/.exec(title)
+  const match = titleDash(title)
   if (!match) return { label: title, note: null }
-  const [, label = title, rest = ''] = match
-  return { label, note: rest.charAt(0).toUpperCase() + rest.slice(1) }
+  return { label: match.name, note: match.rest.charAt(0).toUpperCase() + match.rest.slice(1) }
 }
 
 export type FamilyMember = {

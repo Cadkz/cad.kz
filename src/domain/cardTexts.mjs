@@ -1,4 +1,5 @@
 // @ts-check
+import { titleDash } from './titleDash.mjs'
 // Короткие описания для карточек каталога (просьба владельца 27.10.2026): одна мысль — для чего
 // товар, без повтора названия и без обрыва на полуслове, до ~70 знаков (две строки в карточке).
 // Ключ — slug товара, у семейств — `family:<slug линейки>`. Пробная ветка redesign/catalog-cards:
@@ -392,8 +393,8 @@ function phrase(text) {
  * @param {{ title: string, own?: string | null, summary?: string | null, fallback: string }} input
  */
 export function cardInfo({ title, own, summary, fallback }) {
-  const match = /^(.{2,40}?)\s+[-–—]\s+(.{3,})$/.exec(title)
-  const name = match?.[1] ?? title
-  const note = match?.[2] ? phrase(match[2]) : null
+  const match = titleDash(title)
+  const name = match?.name ?? title
+  const note = match ? phrase(match.rest) : null
   return { title: name, text: own || note || summaryPhrase(summary, name) || fallback }
 }

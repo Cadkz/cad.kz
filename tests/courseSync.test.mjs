@@ -10,7 +10,13 @@ import {
   planCourseSync,
   tablePrice,
 } from '../src/domain/courseSync.mjs'
-import { courseSummary, parseCoursePage, tidyProgram } from '../src/domain/lpCoursePage.mjs'
+import {
+  academicHours,
+  courseSummary,
+  isModuleSummary,
+  parseCoursePage,
+  tidyProgram,
+} from '../src/domain/lpCoursePage.mjs'
 
 const CSV = [
   '№,Наименование курса,Код запуска,Дата начала,Дата завершения,Дни проведения,Время,Место / формат,Преподаватель,Ответственный за курс,Мин. мест,Макс. мест,"Цена по прайсу, ₸","Стоимость за группу, ₸",Программа курса,Статус',
@@ -128,6 +134,37 @@ test('страница l-p.kz Revit: модули строкой и пункто
   assert.equal(course.description.match(/^## Программа курса$/gm)?.length, 1)
 })
 
+test('страница l-p.kz ЛИРА Essentials: «Тема N.» — модули, без «Тема 1.» в карточке', () => {
+  const course = parseCoursePage(page('lira-essentials'))
+  assert.ok(course)
+  assert.equal(course.hours, '24 ак. часа')
+  assert.equal(course.summary, '')
+  const blocks = course.description.split('\n\n')
+  assert.equal(blocks[0], '## Программа курса')
+  assert.equal(blocks[1], '### 1. Знакомство с программным комплексом LIRA-FEM')
+  const heads = blocks.filter((b) => b.startsWith('### '))
+  assert.equal(heads.length, 5)
+  assert.equal(heads[4]?.slice(0, 20), '### 5. Проектировани')
+  assert.ok(isModuleSummary('Тема 1.'))
+  assert.ok(!isModuleSummary('Курс для инженеров.'))
+})
+
+test('академические часы по-русски', () => {
+  assert.deepEqual([1, 2, 4, 5, 11, 12, 20, 21, 24, 40, 112].map(academicHours), [
+    '1 ак. час',
+    '2 ак. часа',
+    '4 ак. часа',
+    '5 ак. часов',
+    '11 ак. часов',
+    '12 ак. часов',
+    '20 ак. часов',
+    '21 ак. час',
+    '24 ак. часа',
+    '40 ак. часов',
+    '112 ак. часов',
+  ])
+})
+
 test('не страница курса — null; разметка и «коротко» без страницы', () => {
   assert.equal(parseCoursePage('<html><body><h1>Нет</h1></body></html>'), null)
   assert.equal(
@@ -135,4 +172,14 @@ test('не страница курса — null; разметка и «коро�
     'Текст\n\n## Программа курса\n\n### 3. Модуль\n\n- пункт',
   )
   assert.equal(courseSummary('## Раздел\n\nДля кого: инженерам. Второе.'), 'Инженерам. Второе.')
+})
+
+test('тире в кавычках не делит название карточки', async () => {
+  const { titleDash } = await import('../src/domain/titleDash.mjs')
+  assert.equal(titleDash('Онлайн курс «AutoCAD. 3D - моделирование и визуализация»'), null)
+  assert.deepEqual(titleDash('АРБАТ - экспертиза и расчёт'), {
+    name: 'АРБАТ',
+    rest: 'экспертиза и расчёт',
+  })
+  assert.deepEqual(titleDash('«Монолит» — плиты'), { name: '«Монолит»', rest: 'плиты' })
 })

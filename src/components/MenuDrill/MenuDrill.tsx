@@ -3,6 +3,7 @@
 import { ArrowRight, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
+import { titleDash } from '@/domain/titleDash.mjs'
 import type { MenuColumn } from '@/lib/navigation'
 import { MenuTile } from '../MenuTile/MenuTile'
 import styles from './MenuDrill.module.css'
@@ -10,7 +11,7 @@ import styles from './MenuDrill.module.css'
 type Props = { column: MenuColumn; onNavigate: () => void }
 
 /** «КРИСТАЛЛ - экспертиза элементов…» → только название: в карточке меню без пояснений. */
-const shortTitle = (title: string) => title.match(/^(.+?)\s+[-–—]\s+.+$/)?.[1] ?? title
+const shortTitle = (title: string) => titleDash(title, Number.POSITIVE_INFINITY)?.name ?? title
 
 /**
  * Раздел меню по шагам: производители карточками → линейки производителя → товары линейки.

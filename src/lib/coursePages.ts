@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import { parseCoursePage } from '../domain/lpCoursePage.mjs'
+import { isModuleSummary, parseCoursePage } from '../domain/lpCoursePage.mjs'
 import type { CourseMatches } from './courseSchedule'
 
 /**
@@ -81,15 +81,24 @@ function inTime<T>(work: Promise<T>) {
 async function save(payload: Payload, id: number, page: CoursePage) {
   const product = await payload.findByID({ collection: 'products', id, ...options })
   const properties = product.properties ?? []
-  const hasHours = properties.some((row) => /длительн/i.test(row.name))
+  const hours = properties.find((row) => /длительн/i.test(row.name))
+  // Своя строка «Длительность» не трогается; поставленная прошлым разбором («24 ак. часов») —
+  // заменяется на верную форму слова.
+  const ownHours = hours && !/^\d{1,3} ак\. час(а|ов)?$/.test(hours.value ?? '')
+  const keepSummary = product.summary?.trim() && !isModuleSummary(product.summary)
   await payload.update({
     collection: 'products',
     id,
     data: {
       description: page.description,
-      ...(product.summary?.trim() || !page.summary ? {} : { summary: page.summary }),
-      ...(page.hours && !hasHours
-        ? { properties: [{ name: 'Длительность', value: page.hours }, ...properties] }
+      ...(keepSummary ? {} : { summary: page.summary || null }),
+      ...(page.hours && !ownHours && hours?.value !== page.hours
+        ? {
+            properties: [
+              { name: 'Длительность', value: page.hours },
+              ...properties.filter((row) => row !== hours),
+            ],
+          }
         : {}),
     },
     ...options,

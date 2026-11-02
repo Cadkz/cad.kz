@@ -37,6 +37,12 @@ const plain = (/** @type {string} */ html) =>
 
 /** Строка «2. Моделирование объектов здания» — номер модуля программы. */
 const MODULE = /^(\d{1,2})\.\s*(\S.{1,140})$/
+/**
+ * Строка «Тема 1. Знакомство с LIRA-FEM» (у курсов ЛИРА; «Модуль 2: …», «День 3 — …» — так же):
+ * номер берётся из слова, само слово не нужно — на сайте у модуля и так стоит номер.
+ */
+const NAMED_MODULE =
+  /^(?:тема|модуль|раздел|занятие|урок|день|блок|часть)\s*(\d{1,2})\s*[.:)–—-]?\s+(\S.{1,140})$/i
 
 /**
  * Разметка описания в один вид: модули программы — «### N. Название», перед первым модулем —
@@ -51,7 +57,7 @@ export function tidyProgram(markup) {
   /** @type {string[]} */
   const out = []
   blocks.forEach((block, index) => {
-    const module = MODULE.exec(block)
+    const module = MODULE.exec(block) ?? NAMED_MODULE.exec(block)
     if (module && !block.includes('\n') && !/[;:]$/.test(block)) {
       out.push(`### ${module[1]}. ${module[2]?.trim()}`)
       return
@@ -73,15 +79,20 @@ export function tidyProgram(markup) {
 }
 
 /**
- * Коротко для карточки: первый абзац описания, одной-двумя фразами до 240 знаков. Подпись
- * в начале («Для кого курс: …») убирается.
+ * Коротко для карточки: первый абзац описания до программы, одной-двумя фразами до 240 знаков.
+ * Подпись в начале («Для кого курс: …») убирается. Описание сразу с программы («Тема 1. …»
+ * у ЛИРА Essentials) — пусто: карточка возьмёт запасную фразу, а не «Тема 1.».
  * @param {string} markup
  */
 export function courseSummary(markup) {
-  const first = markup
-    .split(/\n\s*\n/)
-    .map((block) => block.trim())
-    .find((block) => block && !/^(#|- |\d+\.|\||>|!\[)/.test(block))
+  const blocks = markup.split(/\n\s*\n/).map((block) => block.trim())
+  const program = blocks.findIndex((block) => block.startsWith('### '))
+  const first = (program < 0 ? blocks : blocks.slice(0, program)).find(
+    (block) =>
+      block &&
+      !/^(#|- |\d+\.|\||>|!\[)/.test(block) &&
+      !NAMED_MODULE.test(block.split('\n')[0] ?? ''),
+  )
   if (!first) return ''
   const text = first.replace(/^[А-ЯЁA-Z][^.:!?]{0,30}:\s+/, '').replace(/\s+/g, ' ')
   const sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) ?? [text]
@@ -93,6 +104,29 @@ export function courseSummary(markup) {
   summary = summary.trim()
   if (summary.length > 240) summary = `${summary.slice(0, summary.lastIndexOf(' ', 236))}…`
   return summary.charAt(0).toUpperCase() + summary.slice(1)
+}
+
+/** 21 ак. час, 24 ак. часа, 20 ак. часов. */
+export function academicHours(/** @type {number} */ count) {
+  const ten = count % 10
+  const hundred = count % 100
+  const word =
+    ten === 1 && hundred !== 11
+      ? 'час'
+      : ten >= 2 && ten <= 4 && (hundred < 12 || hundred > 14)
+        ? 'часа'
+        : 'часов'
+  return `${count} ак. ${word}`
+}
+
+/**
+ * Неудачная «Коротко для карточки» от прошлого разбора («Тема 1.»): её можно заменить.
+ * @param {string | null | undefined} summary
+ */
+export function isModuleSummary(summary) {
+  return /^(?:тема|модуль|раздел|занятие|урок|день|блок|часть)\s*\d{1,2}\.?$/i.test(
+    (summary ?? '').trim(),
+  )
 }
 
 /**
@@ -116,7 +150,7 @@ export function parseCoursePage(html) {
   const hours = /(\d{1,3})\s*ак\.?\s*час/i.exec(plain(table))?.[1]
   return {
     title,
-    hours: hours ? `${hours} ак. часов` : null,
+    hours: hours ? academicHours(Number(hours)) : null,
     description,
     summary: courseSummary(description),
   }
