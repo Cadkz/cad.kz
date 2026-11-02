@@ -8,34 +8,76 @@
   }
 }
 
-/* Единственная залитая кнопка шапки: главное действие — открыть каталог. */
+/* Единственная залитая кнопка шапки. Внешне одна, внутри две зоны (02.11.2026): название ведёт
+   в каталог, стрелка открывает меню. Тонкий разделитель между ними виден только под мышью. */
 .trigger {
   display: inline-flex;
   flex-shrink: 0;
-  align-items: center;
-  gap: var(--space-2);
+  align-items: stretch;
   height: var(--control-height);
-  padding: 0 var(--space-3) 0 var(--space-4);
-  border: 0;
   border-radius: var(--radius-control);
   background: var(--color-blue);
   color: var(--color-text-inverse);
-  font: inherit;
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   white-space: nowrap;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.trigger:has([aria-expanded="true"]) {
+  background: var(--color-blue-hover);
+}
+
+.main,
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
   transition:
     background-color var(--duration-fast) var(--ease),
     transform var(--duration-fast) var(--ease);
 }
 
-.trigger:hover,
-.trigger[aria-expanded="true"] {
+.main {
+  gap: var(--space-2);
+  padding: 0 var(--space-2) 0 var(--space-4);
+  border-radius: var(--radius-control) 0 0 var(--radius-control);
+}
+
+.toggle {
+  position: relative;
+  padding: 0 var(--space-3) 0 var(--space-2);
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+}
+
+.toggle::before {
+  content: "";
+  position: absolute;
+  top: var(--space-3);
+  bottom: var(--space-3);
+  left: 0;
+  width: 1px;
+  background: var(--color-on-dark-line);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease);
+}
+
+.trigger:hover .toggle::before,
+.toggle:focus-visible::before {
+  opacity: 1;
+}
+
+.main:hover,
+.toggle:hover {
   background: var(--color-blue-hover);
 }
 
-.trigger:active {
+.main:active,
+.toggle:active {
   transform: scale(0.98);
 }
 
@@ -44,6 +86,6 @@
   transition: transform var(--duration-base) var(--ease);
 }
 
-.trigger[aria-expanded="true"] .chevron {
+.toggle[aria-expanded="true"] .chevron {
   transform: rotate(180deg);
 }

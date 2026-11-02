@@ -3,6 +3,7 @@
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
+import { groupAllLabel, sectionAllLabel } from '@/domain/catalogNavigation.mjs'
 import type { MenuTab } from '@/lib/navigation'
 import { MenuDrill } from '../MenuDrill/MenuDrill'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
@@ -56,12 +57,17 @@ export function MenuSections({ tab, onNavigate }: Props) {
         ))}
         <li>
           <Link href={tab.allHref} className={styles.everything} onClick={onNavigate}>
-            Весь раздел «{tab.label}»
+            {groupAllLabel(tab.key)}
             <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
           </Link>
         </li>
       </ul>
-      <MenuDrill key={column.title} column={column} onNavigate={onNavigate} />
+      <MenuDrill
+        key={column.title}
+        column={column}
+        allLabel={sectionAllLabel(tab.key, column.title)}
+        onNavigate={onNavigate}
+      />
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { MessageCircle } from 'lucide-react'
-import { type PointerEventHandler, useState } from 'react'
+import { type PointerEventHandler, useEffect, useRef, useState } from 'react'
 import { POPULAR_LABEL } from '@/domain/catalogNavigation.mjs'
 import type { MenuTab } from '@/lib/navigation'
 import type { PopularCardData } from '@/lib/popular'
@@ -20,6 +20,15 @@ type Props = {
   onPointerEnter: PointerEventHandler
   onPointerLeave: PointerEventHandler
 }
+
+/** Задержка смены группы при наведении: мышь, идущая к правой части меню, не переключает группу. */
+const HOVER_DELAY = 90
+
+/**
+ * Через сколько после открытия волна карточек закончилась: дальше смена группы или раздела —
+ * быстрое проявление (правка 02.11.2026: без долгой анимации на каждое наведение).
+ */
+const SETTLE_MS = 700
 
 /** Ключ вкладки «Популярные решения»: она первая и открыта сразу (решение владельца 16.10.2026). */
 const POPULAR = 'popular'
@@ -53,6 +62,22 @@ export function MegaMenu({
     setWasOpen(open)
     if (open) setActive(first)
   }
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const [settled, setSettled] = useState(false)
+  useEffect(() => {
+    if (!open) {
+      setSettled(false)
+      return
+    }
+    const id = setTimeout(() => setSettled(true), SETTLE_MS)
+    return () => clearTimeout(id)
+  }, [open])
+  useEffect(() => () => clearTimeout(timer.current), [])
+  const pick = (key: string, delay = 0) => {
+    clearTimeout(timer.current)
+    if (delay) timer.current = setTimeout(() => setActive(key), delay)
+    else setActive(key)
+  }
   const current = segments.find((item) => item.key === active) ?? segments[0]
   if (!current) return null
   const tab = tabs.find((item) => item.key === current.key)
@@ -61,6 +86,7 @@ export function MegaMenu({
       id={id}
       className={styles.menu}
       data-open={open}
+      data-settled={settled}
       inert={!open}
       onPointerEnter={onPointerEnter}
       onPointerLeave={onPointerLeave}
@@ -76,8 +102,11 @@ export function MegaMenu({
               aria-selected={item.key === current.key}
               aria-controls={`${id}-panel`}
               className={styles.segment}
-              onClick={() => setActive(item.key)}
-              onPointerEnter={(event) => event.pointerType === 'mouse' && setActive(item.key)}
+              onClick={() => pick(item.key)}
+              onPointerEnter={(event) =>
+                event.pointerType === 'mouse' && pick(item.key, HOVER_DELAY)
+              }
+              onPointerLeave={() => clearTimeout(timer.current)}
             >
               {item.label}
             </button>
@@ -85,9 +114,6 @@ export function MegaMenu({
         </div>
         <div className={styles.offer}>
           <p className={styles.offerTitle}>Не знаете, что выбрать?</p>
-          <p className={styles.offerText}>
-            Опишите задачи — поможем с выбором программ или оборудования.
-          </p>
           {whatsappHref && (
             <a href={whatsappHref} className={styles.offerLink} target="_blank" rel="noreferrer">
               <MessageCircle size={16} strokeWidth={1.75} aria-hidden="true" />

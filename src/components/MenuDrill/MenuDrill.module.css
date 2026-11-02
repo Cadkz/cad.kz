@@ -68,25 +68,6 @@
   list-style: none;
 }
 
-.popular {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-blue-soft);
-}
-
-/* «Популярное в разделе» — отдельный голубой блок (просьба владельца 27.10.2026): сверху выбор
-   производителя, ниже готовые товары; карточки те же MenuTile, что во всём меню. */
-.popularTitle {
-  color: var(--color-navy);
-  font-size: var(--text-overline);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-overline);
-  text-transform: uppercase;
-}
-
 .allLinks {
   display: flex;
   flex-wrap: wrap;
@@ -146,5 +127,16 @@
     opacity: 0;
     filter: blur(var(--blur-menu-card));
     transform: scale(var(--scale-menu-card));
+  }
+}
+
+/* Меню уже открыто (волна прошла): смена группы или раздела — короткое проявление без волны. */
+[data-settled="true"] .cards > li {
+  animation: menuSwitch var(--duration-menu-switch) var(--ease) backwards;
+}
+
+@keyframes menuSwitch {
+  from {
+    opacity: 0;
   }
 }

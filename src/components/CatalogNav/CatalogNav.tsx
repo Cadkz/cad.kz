@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronDown, LayoutGrid } from 'lucide-react'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   type PointerEvent as ReactPointerEvent,
@@ -10,16 +11,22 @@ import {
   useState,
 } from 'react'
 import type { MenuTab } from '@/lib/navigation'
+import { catalogHref } from '@/lib/navigationHrefs'
 import type { PopularCardData } from '@/lib/popular'
 import { MegaMenu } from '../MegaMenu/MegaMenu'
 import styles from './CatalogNav.module.css'
 
 type Props = { menu: MenuTab[]; popular: PopularCardData[]; whatsappHref: string | null }
 
+/** Задержка закрытия после ухода мыши: путь от кнопки к меню и случайный выход за край не закрывают его. */
+const CLOSE_DELAY = 250
+
 /**
- * Кнопка «Каталог» в первой строке шапки (от 960 px) и мегаменю под ней.
- * Открывается наведением мыши или нажатием, закрывается уходом мыши (с задержкой), щелчком
- * мимо и Escape — фокус возвращается на кнопку.
+ * Кнопка «Каталог» в первой строке шапки (от 960 px) и мегаменю под ней. Внешне одна кнопка,
+ * внутри два независимых элемента (правка владельца 02.11.2026): название — ссылка на страницу
+ * каталога, стрелка — открыть или закрыть меню без перехода. Наведение мыши на любую часть
+ * открывает меню, уход — закрывает с задержкой; щелчок мимо и Escape закрывают, после Escape
+ * фокус возвращается на стрелку.
  */
 export function CatalogNav({ menu, popular, whatsappHref }: Props) {
   const [open, setOpen] = useState(false)
@@ -28,7 +35,7 @@ export function CatalogNav({ menu, popular, whatsappHref }: Props) {
   const [opened, setOpened] = useState(false)
   if (open && !opened) setOpened(true)
   const root = useRef<HTMLDivElement>(null)
-  const button = useRef<HTMLButtonElement>(null)
+  const toggle = useRef<HTMLButtonElement>(null)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
   // Меню только что открылось наведением — щелчок по той же кнопке не должен его закрыть.
   const hoveredAt = useRef(0)
@@ -45,7 +52,7 @@ export function CatalogNav({ menu, popular, whatsappHref }: Props) {
     }
     function onKey(event: KeyboardEvent) {
       if (event.key !== 'Escape') return
-      button.current?.focus()
+      toggle.current?.focus()
       setOpen(false)
     }
     document.addEventListener('pointerdown', onPointer)
@@ -63,29 +70,33 @@ export function CatalogNav({ menu, popular, whatsappHref }: Props) {
       if (next) {
         if (!open) hoveredAt.current = Date.now()
         setOpen(true)
-      } else timer.current = setTimeout(() => setOpen(false), 200)
+      } else timer.current = setTimeout(() => setOpen(false), CLOSE_DELAY)
     }
   }
 
   return (
     <div ref={root} className={styles.root}>
-      <button
-        ref={button}
-        type="button"
-        className={styles.trigger}
-        aria-expanded={open}
-        aria-controls="nav-catalog"
-        onPointerEnter={hover(true)}
-        onPointerLeave={hover(false)}
-        onClick={() => {
-          if (open && Date.now() - hoveredAt.current < 600) return
-          setOpen(!open)
-        }}
-      >
-        <LayoutGrid size={16} strokeWidth={1.75} aria-hidden="true" />
-        Каталог
-        <ChevronDown size={16} strokeWidth={1.75} className={styles.chevron} aria-hidden="true" />
-      </button>
+      <div className={styles.trigger} onPointerEnter={hover(true)} onPointerLeave={hover(false)}>
+        <Link href={catalogHref()} className={styles.main} onClick={close}>
+          <LayoutGrid size={16} strokeWidth={1.75} aria-hidden="true" />
+          Каталог
+        </Link>
+        <button
+          ref={toggle}
+          type="button"
+          className={styles.toggle}
+          aria-expanded={open}
+          aria-controls="nav-catalog"
+          aria-label={open ? 'Закрыть меню каталога' : 'Открыть меню каталога'}
+          onClick={() => {
+            // Меню только что открылось наведением — щелчок по стрелке его не закрывает.
+            if (open && Date.now() - hoveredAt.current < 600) return
+            setOpen(!open)
+          }}
+        >
+          <ChevronDown size={16} strokeWidth={1.75} className={styles.chevron} aria-hidden="true" />
+        </button>
+      </div>
       {/* Мегаменю без обёртки: оно позиционировано по строке шапки и не встаёт в её ряд. */}
       {opened && (
         <MegaMenu

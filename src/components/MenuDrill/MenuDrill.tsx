@@ -8,7 +8,12 @@ import type { MenuColumn } from '@/lib/navigation'
 import { MenuTile } from '../MenuTile/MenuTile'
 import styles from './MenuDrill.module.css'
 
-type Props = { column: MenuColumn; onNavigate: () => void }
+type Props = {
+  column: MenuColumn
+  /** Подпись ссылки на весь раздел: «Все программы направления», «Все 3D-сканеры». */
+  allLabel: string
+  onNavigate: () => void
+}
 
 /** «КРИСТАЛЛ - экспертиза элементов…» → только название: в карточке меню без пояснений. */
 const shortTitle = (title: string) => titleDash(title, Number.POSITIVE_INFINITY)?.name ?? title
@@ -18,7 +23,7 @@ const shortTitle = (title: string) => titleDash(title, Number.POSITIVE_INFINITY)
  * Шаг с единственным вариантом пропускается (у раздела один производитель, у производителя одна
  * линейка). Назад — по хлебным крошкам сверху.
  */
-export function MenuDrill({ column, onNavigate }: Props) {
+export function MenuDrill({ column, allLabel, onNavigate }: Props) {
   const [vendorKey, setVendorKey] = useState<string | null>(null)
   const [lineKey, setLineKey] = useState<string | null>(null)
   const singleVendor = column.vendors.length === 1
@@ -41,16 +46,13 @@ export function MenuDrill({ column, onNavigate }: Props) {
     ...(line && !singleLine ? [{ title: line.title, back: null }] : []),
   ]
 
-  // Ссылки «все товары» на каждом шаге: текущий уровень и, глубже, весь раздел — чтобы
-  // из любого места меню одним нажатием попасть ко всем товарам направления.
+  // Ссылки «все товары» на каждом шаге: текущий уровень и, глубже, всё направление — чтобы
+  // из любого места меню одним нажатием попасть ко всем товарам. Коротко, без повторов
+  // названий (правка 02.11.2026): название шага и так стоит сверху в крошках.
   const all = [
-    ...(line && !singleLine
-      ? [{ href: line.allHref, label: `Все товары линейки ${line.title}` }]
-      : []),
-    ...(vendor && !singleVendor
-      ? [{ href: vendor.allHref, label: `Все товары ${vendor.title} в разделе` }]
-      : []),
-    { href: column.allHref, label: `Все товары раздела «${column.title}»` },
+    ...(line && !singleLine ? [{ href: line.allHref, label: 'Вся линейка' }] : []),
+    ...(vendor && !singleVendor ? [{ href: vendor.allHref, label: `Всё от ${vendor.title}` }] : []),
+    { href: column.allHref, label: allLabel },
   ]
 
   return (
@@ -85,24 +87,6 @@ export function MenuDrill({ column, onNavigate }: Props) {
         </ul>
       )}
 
-      {!vendor && column.popular.length > 0 && (
-        <section className={styles.popular} aria-label="Популярное в разделе">
-          <p className={styles.popularTitle}>Популярное в разделе</p>
-          <ul className={styles.cards}>
-            {column.popular.map((link) => (
-              <li key={link.href}>
-                <MenuTile
-                  title={shortTitle(link.title)}
-                  logo={link.logo}
-                  href={link.href}
-                  onClick={onNavigate}
-                />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       {vendor && !line && (
         <ul className={styles.cards}>
           {vendor.lines.map((item) => (
@@ -124,7 +108,7 @@ export function MenuDrill({ column, onNavigate }: Props) {
             <li key={link.href}>
               <MenuTile
                 title={shortTitle(link.title)}
-                logo={vendor?.logo}
+                logo={link.logo ?? vendor?.logo}
                 icon={vendor?.icon}
                 href={link.href}
                 onClick={onNavigate}

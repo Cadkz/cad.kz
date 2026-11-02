@@ -1,11 +1,12 @@
 'use client'
 
-import { ChevronDown, Menu } from 'lucide-react'
+import { ArrowRight, ChevronDown, LayoutGrid, Menu } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
-import { POPULAR_LABEL } from '@/domain/catalogNavigation.mjs'
+import { groupAllLabel, POPULAR_LABEL } from '@/domain/catalogNavigation.mjs'
 import type { MenuTab } from '@/lib/navigation'
+import { catalogHref } from '@/lib/navigationHrefs'
 import type { PopularCardData } from '@/lib/popular'
 import { aboutColumns, sectionLinks } from '@/lib/siteNav'
 import { Drawer } from '../Drawer/Drawer'
@@ -75,6 +76,11 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
       />
       <Drawer open={open} onClose={close} title="Меню" side="left">
         <nav aria-label="Меню сайта" className={styles.nav}>
+          <Link href={catalogHref()} className={styles.catalog} onClick={close}>
+            <LayoutGrid size={20} strokeWidth={1.75} aria-hidden="true" />
+            Весь каталог
+            <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" className={styles.arrow} />
+          </Link>
           {popular.length > 0 && (
             <Group title={POPULAR_LABEL} name="mobile-menu" open>
               <MenuPopular cards={popular} onNavigate={close} compact />
@@ -97,7 +103,7 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
                 </details>
               ))}
               <Link href={tab.allHref} className={styles.all} onClick={close}>
-                Смотреть все
+                {groupAllLabel(tab.key)}
               </Link>
             </Group>
           ))}

@@ -9,7 +9,7 @@ import { catalogAvailable } from './equipmentResearch'
 import { familyLines } from './families'
 import { catalogHref } from './navigationHrefs'
 import { cmsData } from './payload'
-import { vendorPictures } from './pictures'
+import { cardPictures, type Picture, vendorPictures } from './pictures'
 import { productPath } from './productPath'
 import { siteCached } from './siteCache'
 
@@ -42,13 +42,17 @@ export type MenuColumn = {
   icon: string | null
   allHref: string
   vendors: MenuVendor[]
-  /** Первые товары раздела по приоритету: строкой под карточками производителей. */
-  popular: MenuLink[]
 }
 export type MenuTab = { key: string; label: string; columns: MenuColumn[]; allHref: string }
 
 /** Те же названия, что у вкладок на странице каталога (src/domain/catalogNavigation.mjs). */
 const groupLabels: Record<Section['menuGroup'], string> = GROUP_LABELS
+
+/** Картинка карточки каталога в размер знака меню. */
+const menuLogo = (picture: Picture | undefined): MenuLogo | null =>
+  picture
+    ? { url: picture.url, width: picture.width, height: picture.height, local: picture.local }
+    : null
 
 /** Раздел для меню: только то, что нужно menuColumns. */
 const menuSection = ({
@@ -110,6 +114,8 @@ async function loadMenu(): Promise<MenuTab[]> {
         kind: true,
         status: true,
         researchData: true,
+        gallery: true,
+        cardImage: true,
       },
     }),
     payload.find({
@@ -133,6 +139,9 @@ async function loadMenu(): Promise<MenuTab[]> {
       { url: picture.url, width: picture.width, height: picture.height, local: picture.local },
     ]),
   )
+  // Своя миниатюра у товара в меню (правка 02.11.2026): у программы — её логотип, у оборудования —
+  // фото устройства, как в карточке каталога; нет — знак производителя.
+  const pictures = await cardPictures(payload, products.docs, manufacturers.docs)
   const trainingId = sections.docs.find((s) => s.slug === 'training')?.id
   const directionSlug = new Map(
     sections.docs.filter((s) => s.isDirection).map((s) => [s.id, s.slug]),
@@ -160,6 +169,7 @@ async function loadMenu(): Promise<MenuTab[]> {
       vendor,
       line: relId(product.line),
       lineOrder: product.lineOrder ?? null,
+      picture: menuLogo(pictures.get(product.id)),
       vendorOrder: vendor == null ? null : (vendorOrder.get(vendor) ?? null),
       rank: priorityRank(
         product.priority,

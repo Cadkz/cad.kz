@@ -21,6 +21,7 @@ import {
   update,
 } from '@/lib/catalogFilter'
 import { vendorStepOn, vendorTiles } from '@/lib/catalogVendors'
+import { CATALOG_PATH } from '@/lib/navigationHrefs'
 import type { Picture } from '@/lib/pictures'
 import { positions } from '@/lib/plural'
 import type { PopularCardData } from '@/lib/popular'
@@ -28,7 +29,9 @@ import { Button } from '../Button/Button'
 import { CatalogGroups } from '../CatalogGroups/CatalogGroups'
 import { CatalogPopular } from '../CatalogPopular/CatalogPopular'
 import { CatalogSelection } from '../CatalogSelection/CatalogSelection'
+import { CatalogShowcaseMore } from '../CatalogShowcaseMore/CatalogShowcaseMore'
 import { CatalogSteps } from '../CatalogSteps/CatalogSteps'
+import { CatalogTabs } from '../CatalogTabs/CatalogTabs'
 import { Drawer } from '../Drawer/Drawer'
 import { FilterPanel } from '../FilterPanel/FilterPanel'
 import { Mascot } from '../Mascot/Mascot'
@@ -48,7 +51,16 @@ type Props = {
   initial: FilterState
   /** Плитки «Популярных решений» — те же, что в меню «Каталог». */
   popular?: PopularCardData[]
+  /**
+   * Витрина на главной (правка владельца 02.11.2026): вкладки над карточками, остальные условия —
+   * по кнопке «Фильтры», не больше SHOWCASE карточек, вместо номеров страниц — кнопка в полный
+   * каталог с теми же условиями. Адрес главной не меняется.
+   */
+  compact?: boolean
 }
+
+/** Сколько карточек в витрине на главной: три ряда по три. */
+const SHOWCASE = 9
 
 /**
  * Каскадный фильтр каталога по данным CMS. Все товары приходят с сервера одним списком,
@@ -65,7 +77,15 @@ const withTask = (item: CatalogItem, direction: string | null) => ({
 const withStart = (item: CatalogItem, month: string | null) =>
   item.starts?.length ? { ...item, start: startNote(item, month) } : item
 
-export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popular = [] }: Props) {
+export function CatalogFilter({
+  items,
+  facets,
+  lines,
+  vendorLogos,
+  initial,
+  popular = [],
+  compact = false,
+}: Props) {
   // Условия берутся из адреса, а не только с сервера: при «Назад» из товара Next.js показывает
   // сохранённую страницу каталога со старым стартом (пустым), а в адресе — нужный шаг
   // (замечание владельца 26.10.2026: «назад» из Artec вёл в пустой каталог).
@@ -79,20 +99,26 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popu
 
   // Каждый шаг — запись в истории браузера: «Назад» (кнопка мыши, жест) возвращает на шаг
   // назад в каталоге, а не уводит со страницы (замечание владельца 22.10.2026).
-  const commit = useCallback((next: FilterState, scroll = false) => {
-    setState(next)
-    const query = toQuery(next)
-    const url = `${window.location.pathname}${query ? `?${query}` : ''}`
-    if (url !== `${window.location.pathname}${window.location.search}`)
-      window.history.pushState(null, '', url)
-    if (scroll) top.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }, [])
+  const commit = useCallback(
+    (next: FilterState, scroll = false) => {
+      setState(next)
+      // На главной шаги в адрес не пишутся: «Назад» уводит со страницы, а не по витрине.
+      if (compact) return
+      const query = toQuery(next)
+      const url = `${window.location.pathname}${query ? `?${query}` : ''}`
+      if (url !== `${window.location.pathname}${window.location.search}`)
+        window.history.pushState(null, '', url)
+      if (scroll) top.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    },
+    [compact],
+  )
 
   useEffect(() => {
+    if (compact) return
     const restore = () => setState(pruneVendors(items, fromSearch(window.location.search)))
     window.addEventListener('popstate', restore)
     return () => window.removeEventListener('popstate', restore)
-  }, [items])
+  }, [items, compact])
 
   // Один производитель в разделе — сразу его товары, без шага выбора производителя.
   const view = useMemo(() => autoVendor(items, state), [items, state])
@@ -145,20 +171,35 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popu
       onChange={change}
       onReset={reset}
       hasPopular={popular.length > 0}
+      tabs={!compact}
     />
   )
+  const shownItems = compact ? found.items.slice(0, SHOWCASE) : found.items
+  const paged = !popularView && !sections && !groups && !vendorStep
 
   return (
-    <div className={styles.shell}>
-      <section className={styles.sidebar} aria-label="Фильтр каталога">
-        {panel}
-      </section>
+    <div className={compact ? `${styles.shell} ${styles.compact}` : styles.shell}>
+      {!compact && (
+        <section className={styles.sidebar} aria-label="Фильтр каталога">
+          {panel}
+        </section>
+      )}
       <div ref={top} className={styles.results}>
         <div className={styles.head}>
-          <p className={styles.count} aria-live="polite">
-            {popularView ? 'Чаще всего выбирают' : `Найдено: ${positions(found.total)}`}
-          </p>
-          <span className={styles.mobileOnly}>
+          {compact ? (
+            <CatalogTabs
+              selected={state.group}
+              groups={options.groups}
+              hasPopular={popular.length > 0}
+              onChange={change}
+              row
+            />
+          ) : (
+            <p className={styles.count} aria-live="polite">
+              {popularView ? 'Чаще всего выбирают' : `Найдено: ${positions(found.total)}`}
+            </p>
+          )}
+          <span className={compact ? undefined : styles.mobileOnly}>
             <Button variant="outline" size="sm" onClick={() => setPanelOpen(true)}>
               <SlidersHorizontal size={16} strokeWidth={1.75} aria-hidden="true" />
               Фильтры
@@ -195,10 +236,14 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popu
             onPick={(vendor) => commit(update(state, { vendors: [vendor] }), true)}
           />
         ) : groups?.length ? (
-          <CatalogGroups key={toQuery(view)} groups={groups} />
+          <CatalogGroups
+            key={toQuery(view)}
+            groups={groups}
+            limit={compact ? SHOWCASE : undefined}
+          />
         ) : found.items.length ? (
           <ul className={styles.grid}>
-            {found.items.map((item, index) => (
+            {shownItems.map((item, index) => (
               <Reveal as="li" key={item.id} step={index % 3}>
                 <ProductCard product={item} morph />
               </Reveal>
@@ -213,12 +258,20 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popu
             <Mascot pose="search" size="sm" className={styles.mascot} />
           </div>
         )}
-        {!popularView && !sections && !groups && !vendorStep && (
-          <Pagination
-            page={found.page}
-            pages={found.pages}
-            onPage={(page) => commit({ ...state, page }, true)}
+        {compact ? (
+          <CatalogShowcaseMore
+            href={`${CATALOG_PATH}${toQuery(state) ? `?${toQuery(state)}` : ''}`}
+            total={paged || groups ? found.total : null}
+            shown={paged ? shownItems.length : Math.min(found.total, SHOWCASE)}
           />
+        ) : (
+          paged && (
+            <Pagination
+              page={found.page}
+              pages={found.pages}
+              onPage={(page) => commit({ ...state, page }, true)}
+            />
+          )
         )}
       </div>
       <Drawer open={panelOpen} onClose={closePanel} title="Фильтр каталога" side="left">

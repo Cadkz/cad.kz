@@ -106,3 +106,14 @@
     filter: blur(var(--blur-menu-card));
   }
 }
+
+/* Меню уже открыто (волна прошла): смена группы или раздела — короткое проявление без волны. */
+[data-settled="true"] .sections > li {
+  animation: menuSwitch var(--duration-menu-switch) var(--ease) backwards;
+}
+
+@keyframes menuSwitch {
+  from {
+    opacity: 0;
+  }
+}

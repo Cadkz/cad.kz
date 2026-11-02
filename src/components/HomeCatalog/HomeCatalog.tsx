@@ -91,6 +91,7 @@ export function HomeCatalog() {
         vendorLogos={state.vendorLogos}
         initial={emptyFilter}
         popular={state.popular}
+        compact
       />
     </div>
   )

@@ -48,8 +48,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: var(--space-8);
-  padding: var(--space-6) var(--space-4);
+  gap: var(--space-6);
+  padding: var(--space-4);
   background: var(--gradient-deep);
   color: var(--color-text-inverse);
 }
@@ -146,8 +146,8 @@
 .offer {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-4);
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-on-dark-line);
   border-radius: var(--radius-md);
   background: var(--color-navy-deep);
@@ -159,18 +159,11 @@
   font-weight: var(--weight-semibold);
 }
 
-.offerText {
-  color: var(--color-text-on-dark);
-  font-size: var(--text-sm);
-  line-height: var(--leading-snug);
-}
-
 .offerLink {
   display: inline-flex;
   align-items: center;
   align-self: flex-start;
   gap: var(--space-2);
-  margin-top: var(--space-1);
   color: var(--color-sky);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
@@ -190,6 +183,12 @@
    заново по key). При открытии меню — чуть позже групп слева. */
 .menu[data-open="true"] .panel {
   animation: fade var(--duration-enter) var(--ease) var(--delay-menu-step) backwards;
+}
+
+/* Смена группы в открытом меню — короче, чем при открытии. */
+.menu[data-settled="true"] .panel {
+  animation-duration: var(--duration-menu-switch);
+  animation-delay: 0s;
 }
 
 @keyframes fade {

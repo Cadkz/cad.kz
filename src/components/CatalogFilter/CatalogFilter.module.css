@@ -110,3 +110,19 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Витрина на главной (02.11.2026): без колонки фильтра — вкладки и «Фильтры» над карточками,
+   три карточки в ряд уже от 960 px. */
+@media (min-width: 960px) {
+  .compact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .compact .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .compact .head {
+    flex-wrap: nowrap;
+  }
+}

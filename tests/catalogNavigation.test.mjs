@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import { registerHooks } from 'node:module'
 import test from 'node:test'
-import { GROUP_LABELS, POPULAR_LABEL } from '../src/domain/catalogNavigation.mjs'
+import {
+  GROUP_LABELS,
+  groupAllLabel,
+  POPULAR_LABEL,
+  sectionAllLabel,
+} from '../src/domain/catalogNavigation.mjs'
 import {
   IN_STOCK_SLUGS,
   KEEP_OWN_TEXT,
@@ -265,4 +270,17 @@ test('Решения владельца, часть 2: тексты 9 прогр
   const count = writes.length + created.length
   assert.equal(await setupOwnerCatalogFixes2(payload), null)
   assert.equal(writes.length + created.length, count)
+})
+
+test('короткие ссылки «все» в меню', () => {
+  assert.equal(groupAllLabel('software'), 'Все программы')
+  assert.equal(groupAllLabel('other'), 'Смотреть все')
+  assert.equal(sectionAllLabel('software', 'САПР, BIM'), 'Все программы направления')
+  assert.equal(sectionAllLabel('hardware', '3D-сканеры'), 'Все 3D-сканеры')
+  assert.equal(
+    sectionAllLabel('hardware', 'Широкоформатные плоттеры'),
+    'Все широкоформатные плоттеры',
+  )
+  assert.equal(sectionAllLabel('service', 'Обучение'), 'Все курсы')
+  assert.equal(sectionAllLabel('hardware', 'ПК и рабочие станции'), 'Все ПК и рабочие станции')
 })

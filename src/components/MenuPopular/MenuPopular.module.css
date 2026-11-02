@@ -115,3 +115,14 @@
     transform: scale(var(--scale-menu-card));
   }
 }
+
+/* Меню уже открыто (волна прошла): возврат на вкладку — короткое проявление без волны. */
+[data-settled="true"] .root .tiles > li {
+  animation: popularSwitch var(--duration-menu-switch) var(--ease) backwards;
+}
+
+@keyframes popularSwitch {
+  from {
+    opacity: 0;
+  }
+}

@@ -1,7 +1,7 @@
 'use client'
 
-import { GROUP_LABELS, POPULAR_LABEL } from '@/domain/catalogNavigation.mjs'
-import { type FilterState, type facetOptions, POPULAR } from '@/lib/catalogFilter'
+import type { FilterState, facetOptions } from '@/lib/catalogFilter'
+import { CatalogTabs } from '../CatalogTabs/CatalogTabs'
 import { Chip } from '../Chip/Chip'
 import { FilterChecks } from '../FilterChecks/FilterChecks'
 import { TrainingFilters } from '../TrainingFilters/TrainingFilters'
@@ -15,6 +15,8 @@ type Props = {
   onReset: () => void
   /** Есть ли плитки «Популярных решений» (админка «Главная»): тогда и вкладка. */
   hasPopular: boolean
+  /** Вкладки групп в панели; на главной они стоят над карточками, в панели не повторяются. */
+  tabs?: boolean
 }
 
 function toggle(list: string[], value: string) {
@@ -35,26 +37,17 @@ const FEATURES_OPEN = 4
  * Когда выбрано направление или тип, производителя выбирают карточками над товарами
  * (CatalogSteps), поэтому здесь его списка нет. Задачи свёрнуты: это уточнение, а не основной путь.
  */
-export function FilterPanel({ state, options, onChange, onReset, hasPopular }: Props) {
+export function FilterPanel({ state, options, onChange, onReset, hasPopular, tabs = true }: Props) {
   return (
     <div className={styles.panel}>
-      {/* Вкладки в том же порядке и с теми же названиями, что в меню «Каталог». */}
-      <fieldset className={styles.tabs}>
-        <legend className="visually-hidden">Группа каталога</legend>
-        <Chip selected={state.group === null} onClick={() => onChange({ group: null })}>
-          Все
-        </Chip>
-        {hasPopular && (
-          <Chip selected={state.group === POPULAR} onClick={() => onChange({ group: POPULAR })}>
-            {POPULAR_LABEL}
-          </Chip>
-        )}
-        {options.groups.map((group) => (
-          <Chip key={group} selected={state.group === group} onClick={() => onChange({ group })}>
-            {GROUP_LABELS[group]}
-          </Chip>
-        ))}
-      </fieldset>
+      {tabs && (
+        <CatalogTabs
+          selected={state.group}
+          groups={options.groups}
+          hasPopular={hasPopular}
+          onChange={onChange}
+        />
+      )}
       {options.directions.length > 0 && (
         <fieldset className={styles.group}>
           <legend className={styles.title}>Направление</legend>

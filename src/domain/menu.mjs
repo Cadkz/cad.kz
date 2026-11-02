@@ -5,7 +5,6 @@
  * «Смотреть все» в каталог, иначе меню на каждой странице весило бы сотни килобайт.
  */
 
-import { programLogo } from './cardLogos.mjs'
 import { OTHER, vendorTree } from './catalogTree.mjs'
 import { COURSE_TOPICS, OTHER_TOPIC, topicOrder } from './courseTopics.mjs'
 import { familyTaskHref } from './familyGroups.mjs'
@@ -13,12 +12,6 @@ import { compareInSection } from './priority.mjs'
 
 /** Товаров линейки в меню, дальше — «Смотреть все» в каталоге. */
 export const MENU_LINKS = 12
-
-/**
- * «Популярное в разделе» под плитками производителей: первые товары раздела по приоритету
- * (замечание владельца 27.10.2026: в «Сметах» две плитки и пустая половина меню).
- */
-export const MENU_POPULAR = 6
 
 /** Раздел «Обучение»: курсы в меню — по категориям, как в каталоге (src/domain/courseTopics.mjs). */
 export const TRAINING = 'training'
@@ -40,14 +33,13 @@ export function menuTitle(title) {
  *   pins?: number[], icon?: string | null, children?: MenuSection[] }} MenuSection
  * @typedef {{ id: number, title: string, main: number | null, sections: number[], href: string,
  *   rank?: number, vendor?: number | null, line?: number | null, lineOrder?: number | null,
- *   group?: string, topic?: string }} MenuProduct
+ *   group?: string, topic?: string, picture?: MenuLogo | null }} MenuProduct
  * @typedef {{ url: string, width: number, height: number, local?: boolean }} MenuLogo
  * @typedef {{ title: string, href: string, logo?: MenuLogo | null }} MenuLinkData
  * @typedef {{ key: string, title: string, links: MenuLinkData[], more: boolean, allHref: string }} MenuLineData
  * @typedef {{ key: string, title: string, allHref: string, lines: MenuLineData[],
  *   logo: MenuLogo | null, icon: string | null }} MenuVendorData
- * @typedef {{ title: string, icon: string | null, allHref: string, vendors: MenuVendorData[],
- *   popular: MenuLinkData[] }} MenuColumnData
+ * @typedef {{ title: string, icon: string | null, allHref: string, vendors: MenuVendorData[] }} MenuColumnData
  */
 
 /**
@@ -121,6 +113,7 @@ export function menuColumns(
               links: line.items.slice(0, limit).map((product) => ({
                 title: menuTitle(product.title),
                 href: familyTaskHref(product.href, filter.direction),
+                logo: product.picture ?? null,
               })),
               more: line.items.length > limit,
               allHref: hrefFor(
@@ -173,24 +166,6 @@ export function menuColumns(
         icon: section.icon ?? null,
         allHref: hrefFor(filter),
         vendors,
-        // Курсы и так видны категориями; у разделов с подразделами — свои плитки; один
-        // производитель — меню сразу показывает его товары.
-        popular:
-          section.slug === TRAINING || children.length || vendors.length < 2
-            ? []
-            : inSection.slice(0, MENU_POPULAR).map((product) => {
-                // Логотип у каждой строки — программы (AutoCAD, Revit), иначе производителя: даже
-                // без языка видно, что это отдельные товары и чьи они (замечание владельца 27.10.2026).
-                const vendor =
-                  product.vendor == null ? null : (vendorTitles.get(product.vendor) ?? null)
-                return {
-                  title: menuTitle(product.title),
-                  href: familyTaskHref(product.href, filter.direction),
-                  logo:
-                    programLogo({ title: product.title, vendor }) ??
-                    (vendor ? (logos.get(vendor) ?? null) : null),
-                }
-              }),
       }
     })
     .filter((column) => column.vendors.length > 0)
