@@ -1,7 +1,7 @@
 import { Newspaper } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { Badge } from '../Badge/Badge'
+import { NewsCardLink } from '../NewsCardLink/NewsCardLink'
 import styles from './NewsCard.module.css'
 
 export type NewsCardData = {
@@ -38,7 +38,15 @@ export function NewsCard({
 }: Props) {
   const Heading = level === 2 ? 'h2' : 'h3'
   return (
-    <article className={size === 'default' ? styles.card : `${styles.card} ${styles[size]}`}>
+    <article
+      className={[
+        styles.card,
+        size !== 'default' && styles[size],
+        withExcerpt && size !== 'large' && styles.divided,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       {size !== 'text' && size !== 'plain' && (
         <div className={`${styles.thumb} ${styles[tone]}`}>
           {news.cover ? (
@@ -64,9 +72,9 @@ export function NewsCard({
           {news.topic && <Badge>{news.topic}</Badge>}
         </div>
         <Heading className={styles.title}>
-          <Link href={news.href} className={styles.link}>
+          <NewsCardLink href={news.href} className={styles.link}>
             {news.title}
-          </Link>
+          </NewsCardLink>
         </Heading>
         {withExcerpt && news.excerpt && <p className={styles.excerpt}>{news.excerpt}</p>}
       </div>

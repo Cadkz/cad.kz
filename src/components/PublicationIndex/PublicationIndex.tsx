@@ -97,7 +97,7 @@ export async function PublicationIndex({ path, title, lead, kind, params }: Prop
           />
         </div>
         {result.docs.length ? (
-          <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
+          <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }} className={styles.cards}>
             {result.docs.map((doc, i) => (
               <li key={doc.id}>
                 <NewsCard
