@@ -78,6 +78,18 @@
   object-fit: contain;
 }
 
+/* Этап 3 анимаций (02.11.2026): фото оборудования под мышью чуть приближается в своей рамке —
+   как витрина; логотипы программ не двигаются. Только мышь, на телефоне без эффекта. */
+@media (hover: hover) and (pointer: fine) {
+  .photo {
+    transition: transform var(--duration-slow) var(--ease-ios);
+  }
+
+  .card:hover .photo {
+    transform: scale(var(--scale-settle));
+  }
+}
+
 .logoFallback {
   padding: var(--space-1);
   color: var(--color-navy);

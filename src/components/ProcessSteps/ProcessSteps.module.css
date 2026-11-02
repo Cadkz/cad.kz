@@ -190,3 +190,40 @@
     transform: none;
   }
 }
+
+/* «Прожектор» (этап 4 анимаций, 02.11.2026; Spotlight на главной): под указателем на карточке
+   проступает мягкое голубое пятно, пока мышь над блоком. Только мышь; на телефоне — нет. */
+.spot {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .spot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-below);
+    background: radial-gradient(
+      var(--spot-size) circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      var(--color-spot),
+      transparent 70%
+    );
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-base) var(--ease);
+  }
+
+  .dark.spot::after {
+    background: radial-gradient(
+      var(--spot-size) circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      var(--color-spot-dark),
+      transparent 70%
+    );
+  }
+
+  .stack:hover .spot::after {
+    opacity: 1;
+  }
+}

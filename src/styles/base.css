@@ -212,6 +212,52 @@ button {
   }
 }
 
+/* Этап 2 (02.11.2026): смена условий каталога (FlowItem) — оставшиеся карточки переезжают на новые
+   места, ушедшие гаснут с уменьшением, новые проступают чуть позже; листание страниц (FlowPage) —
+   список уходит в сторону листания на --nav-shift, как переход вглубь сайта. */
+::view-transition-group(.grid-move) {
+  animation-duration: var(--duration-grid);
+  animation-timing-function: var(--ease-ios);
+}
+
+::view-transition-old(.grid-out) {
+  animation: var(--duration-nav-exit) var(--ease) both grid-out;
+}
+
+::view-transition-new(.grid-in) {
+  animation: var(--duration-grid) var(--ease-ios) var(--delay-nav) both grid-in;
+}
+
+::view-transition-old(.list-out-left) {
+  animation: var(--duration-nav-exit) var(--ease) both page-out-left;
+}
+
+::view-transition-new(.list-in-right) {
+  animation: var(--duration-nav) var(--ease-ios) var(--delay-nav) both page-in-right;
+}
+
+::view-transition-old(.list-out-right) {
+  animation: var(--duration-nav-exit) var(--ease) both page-out-right;
+}
+
+::view-transition-new(.list-in-left) {
+  animation: var(--duration-nav) var(--ease-ios) var(--delay-nav) both page-in-left;
+}
+
+@keyframes grid-out {
+  to {
+    opacity: 0;
+    transform: scale(var(--scale-menu-card));
+  }
+}
+
+@keyframes grid-in {
+  from {
+    opacity: 0;
+    transform: scale(var(--scale-menu-card));
+  }
+}
+
 /* biome-ignore-start lint/complexity/noImportantStyles: системная настройка пользователя должна перебивать любые анимации */
 @media (prefers-reduced-motion: reduce) {
   *,

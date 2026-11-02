@@ -54,11 +54,39 @@
 }
 
 .body {
+  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-5);
+}
+
+/* Этап 3 анимаций (02.11.2026): стрелка в правом нижнем углу — видна только под мышью, выезжает
+   слева; анонс чуть темнеет. В покое карточка прежняя, места стрелка не занимает. */
+.go {
+  position: absolute;
+  /* В поле карточки (отступ 20 px, стрелка 16 px): текст не перекрывает. */
+  right: var(--space-1);
+  bottom: var(--space-1);
+  display: inline-flex;
+  color: var(--color-blue);
+  opacity: 0;
+  transform: translateX(calc(-1 * var(--space-2)));
+  transition:
+    opacity var(--duration-base) var(--ease),
+    transform var(--duration-base) var(--ease-ios);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover .go {
+    opacity: 1;
+    transform: none;
+  }
+
+  .card:hover .excerpt {
+    color: var(--color-text);
+  }
 }
 
 .meta {
@@ -109,6 +137,7 @@
 .excerpt {
   color: var(--color-text-muted);
   font-size: var(--text-sm);
+  transition: color var(--duration-base) var(--ease);
 }
 
 /* Крупная карточка: на компьютере обложка тянется на всю высоту колонки рядом. */

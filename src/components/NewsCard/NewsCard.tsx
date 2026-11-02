@@ -1,4 +1,4 @@
-import { Newspaper } from 'lucide-react'
+import { ArrowRight, Newspaper } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { NAV_FORWARD } from '@/domain/motion.mjs'
@@ -78,6 +78,9 @@ export function NewsCard({
           </Link>
         </Heading>
         {withExcerpt && news.excerpt && <p className={styles.excerpt}>{news.excerpt}</p>}
+        <span className={styles.go} aria-hidden="true">
+          <ArrowRight size={16} strokeWidth={1.75} />
+        </span>
       </div>
     </article>
   )

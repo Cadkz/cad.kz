@@ -2,8 +2,17 @@
 
 import { SlidersHorizontal } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  addTransitionType,
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { familyTaskHref } from '@/domain/familyGroups.mjs'
+import { CATALOG_FILTER, FLOW_LIMIT, pageMotion } from '@/domain/motion.mjs'
 import { startNote } from '@/domain/trainingFilter.mjs'
 import type { CatalogItem, CatalogLine, Facet } from '@/lib/catalog'
 import {
@@ -34,6 +43,8 @@ import { CatalogSteps } from '../CatalogSteps/CatalogSteps'
 import { CatalogTabs } from '../CatalogTabs/CatalogTabs'
 import { Drawer } from '../Drawer/Drawer'
 import { FilterPanel } from '../FilterPanel/FilterPanel'
+import { FlowItem } from '../FlowItem/FlowItem'
+import { FlowPage } from '../FlowPage/FlowPage'
 import { Mascot } from '../Mascot/Mascot'
 import { Pagination } from '../Pagination/Pagination'
 import { ProductCard } from '../ProductCard/ProductCard'
@@ -100,8 +111,13 @@ export function CatalogFilter({
   // Каждый шаг — запись в истории браузера: «Назад» (кнопка мыши, жест) возвращает на шаг
   // назад в каталоге, а не уводит со страницы (замечание владельца 22.10.2026).
   const commit = useCallback(
-    (next: FilterState, scroll = false) => {
-      setState(next)
+    (next: FilterState, scroll = false, motion: string = CATALOG_FILTER) => {
+      // Переход с типом: карточки переезжают на новые места, страницы листаются в сторону
+      // (FlowItem, FlowPage — этап 2 анимаций, 02.11.2026).
+      startTransition(() => {
+        addTransitionType(motion)
+        setState(next)
+      })
       // На главной шаги в адрес не пишутся: «Назад» уводит со страницы, а не по витрине.
       if (compact) return
       const query = toQuery(next)
@@ -242,13 +258,17 @@ export function CatalogFilter({
             limit={compact ? SHOWCASE : undefined}
           />
         ) : found.items.length ? (
-          <ul className={styles.grid}>
-            {shownItems.map((item, index) => (
-              <Reveal as="li" key={item.id} step={index % 3}>
-                <ProductCard product={item} morph />
-              </Reveal>
-            ))}
-          </ul>
+          <FlowPage page={found.page}>
+            <ul className={styles.grid}>
+              {shownItems.map((item, index) => (
+                <FlowItem key={item.id} still={shownItems.length > FLOW_LIMIT}>
+                  <Reveal as="li" step={index % 3}>
+                    <ProductCard product={item} morph />
+                  </Reveal>
+                </FlowItem>
+              ))}
+            </ul>
+          </FlowPage>
         ) : (
           <div className={styles.empty}>
             <div className={styles.emptyBody}>
@@ -269,7 +289,7 @@ export function CatalogFilter({
             <Pagination
               page={found.page}
               pages={found.pages}
-              onPage={(page) => commit({ ...state, page }, true)}
+              onPage={(page) => commit({ ...state, page }, true, pageMotion(state.page, page))}
             />
           )
         )}

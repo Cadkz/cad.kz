@@ -106,7 +106,9 @@ export function ProductCard({
                 height={product.picture.height}
                 sizes="64px"
                 unoptimized={product.picture.local}
-                className={styles.image}
+                className={
+                  product.picture.fit === 'photo' ? `${styles.image} ${styles.photo}` : styles.image
+                }
               />
             ) : product.topic ? (
               <SectionIcon name={product.icon} size={24} />
