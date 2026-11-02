@@ -122,11 +122,9 @@ export function ProductCard({
         <div className={styles.name}>
           {product.manufacturer && <p className={styles.vendor}>{product.manufacturer}</p>}
           <h3 className={styles.title}>
-            <Morph id={morphId} part="title">
-              <Link href={product.href} className={styles.titleLink} transitionTypes={NAV_FORWARD}>
-                {info.title}
-              </Link>
-            </Morph>
+            <Link href={product.href} className={styles.titleLink} transitionTypes={NAV_FORWARD}>
+              {info.title}
+            </Link>
           </h3>
         </div>
       </div>

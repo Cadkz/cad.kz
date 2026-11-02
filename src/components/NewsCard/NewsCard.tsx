@@ -3,7 +3,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { NAV_FORWARD } from '@/domain/motion.mjs'
 import { Badge } from '../Badge/Badge'
-import { Morph } from '../Morph/Morph'
 import styles from './NewsCard.module.css'
 
 export type NewsCardData = {
@@ -28,8 +27,6 @@ type Props = {
    *  text — без обложки: дата, тема и заголовок («Новости и акции» рядом со слайдером).
    *  plain — без обложки, заголовок и анонс целиком (список новостей, решение владельца 02.11.2026). */
   size?: 'default' | 'large' | 'text' | 'plain'
-  /** Карточка в списке: заголовок перелетает на страницу публикации (имя на странице одно). */
-  morph?: boolean
 }
 
 /** Карточка новости или статьи: обложка, дата, тематика, заголовок, анонс. */
@@ -39,7 +36,6 @@ export function NewsCard({
   withExcerpt = false,
   level = 3,
   size = 'default',
-  morph = false,
 }: Props) {
   const Heading = level === 2 ? 'h2' : 'h3'
   return (
@@ -77,11 +73,9 @@ export function NewsCard({
           {news.topic && <Badge>{news.topic}</Badge>}
         </div>
         <Heading className={styles.title}>
-          <Morph id={morph ? `news-${news.id}` : null} part="title">
-            <Link href={news.href} className={styles.link} transitionTypes={NAV_FORWARD}>
-              {news.title}
-            </Link>
-          </Morph>
+          <Link href={news.href} className={styles.link} transitionTypes={NAV_FORWARD}>
+            {news.title}
+          </Link>
         </Heading>
         {withExcerpt && news.excerpt && <p className={styles.excerpt}>{news.excerpt}</p>}
       </div>
