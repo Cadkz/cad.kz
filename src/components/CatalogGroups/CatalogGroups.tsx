@@ -24,31 +24,16 @@ const TAIL = 3
  */
 type Props = {
   groups: ResultGroup[]
-  /**
-   * Витрина на главной: всего карточек на все группы, без «Показать все» — дальше ведёт ссылка
-   * в полный каталог (CatalogShowcaseMore).
-   */
-  limit?: number
+  /** Каталог на главной без колонки фильтра: три карточки в ряд уже от 960 px. */
+  wide?: boolean
 }
 
-/** Карточки витрины по группам по порядку, пока не набрался предел. */
-function capped(groups: ResultGroup[], limit: number) {
-  let left = limit
-  return groups.flatMap((group) => {
-    if (left <= 0) return []
-    const items = group.items.slice(0, left)
-    left -= items.length
-    return [{ ...group, items }]
-  })
-}
-
-export function CatalogGroups({ groups, limit }: Props) {
+export function CatalogGroups({ groups, wide = false }: Props) {
   const [open, setOpen] = useState<string[]>([])
-  const list = limit ? capped(groups, limit) : groups
   return (
-    <div className={limit ? `${styles.root} ${styles.wide}` : styles.root}>
-      {list.map((group) => {
-        const all = Boolean(limit) || open.includes(group.key) || group.items.length <= FIRST + TAIL
+    <div className={wide ? `${styles.root} ${styles.wide}` : styles.root}>
+      {groups.map((group) => {
+        const all = open.includes(group.key) || group.items.length <= FIRST + TAIL
         const shown = all ? group.items : group.items.slice(0, FIRST)
         return (
           <section key={group.key} className={styles.group} aria-label={group.title || undefined}>

@@ -148,7 +148,8 @@
     width: var(--sidebar);
   }
 
-  .compact .grid {
+  /* Колонка спрятана — три в ряд уже от 960 px; открыта — как на /catalog (2, от 1200 px 3). */
+  .compact:not([data-side="open"]) .grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

@@ -1,13 +1,12 @@
-/* Плитка-папка каталога: телефон — картинка слева квадратом, как значок у карточки товара;
-   от 640 px — картинка сверху 16:10. Типографика и низ — как у ProductCard. */
+/* Плитка-папка каталога в виде карточки товара (ProductCard): сверху строка — миниатюра
+   --thumb-size и рядом надпись с названием, ниже фраза, итог и «Смотреть» (02.11.2026, вечер). */
 .tile {
-  display: grid;
-  grid-template-columns: var(--card-thumb) minmax(0, 1fr);
-  column-gap: var(--space-4);
-  row-gap: var(--space-1);
-  align-content: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   width: 100%;
-  padding: var(--space-4);
+  height: 100%;
+  padding: var(--space-5);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
@@ -24,22 +23,23 @@
   border-color: var(--color-blue);
 }
 
-.tile > * {
-  grid-column: 2;
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
 }
 
+/* Чертёж направления или фото типа — на миллиметровке, как у услуги в карточке товара. */
 .media {
   display: flex;
-  grid-row: 1 / span 5;
-  grid-column: 1;
-  align-self: start;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
   overflow: hidden;
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background-color: var(--color-surface);
+  background-color: var(--color-bg);
   background-image: var(--blueprint-light);
   background-size: var(--blueprint-size);
   color: var(--color-blue);
@@ -49,14 +49,22 @@
   transition: transform var(--duration-base) var(--ease);
 }
 
-.tile:hover .media > * {
-  transform: scale(1.03);
+@media (hover: hover) {
+  .tile:hover .media > * {
+    transform: scale(var(--scale-settle));
+  }
 }
 
-/* Логотип производителя: без сетки, с полями, целиком. */
+/* Логотип производителя: без сетки и подложки, целиком. */
 .logo {
-  padding: var(--space-3);
-  background-image: none;
+  background: none;
+}
+
+.name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
 }
 
 .overline {
@@ -78,8 +86,9 @@
   line-height: var(--leading-snug);
 }
 
+/* Итог и кнопка прижаты к низу: в ряду плиток на одной линии. */
 .meta {
-  margin-top: var(--space-2);
+  margin-top: auto;
   color: var(--color-navy);
   font-size: var(--text-body);
   font-weight: var(--weight-bold);
@@ -92,7 +101,6 @@
   justify-content: center;
   gap: var(--space-1);
   height: var(--control-height-sm);
-  margin-top: var(--space-2);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
   color: var(--color-navy);
@@ -114,35 +122,6 @@
 
 .tile:hover .more svg {
   transform: translateX(var(--space-1));
-}
-
-@media (min-width: 640px) {
-  .tile {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    padding: var(--space-5);
-  }
-
-  .media {
-    align-self: stretch;
-    aspect-ratio: var(--ratio-card);
-    margin-bottom: var(--space-3);
-  }
-
-  .logo {
-    padding: var(--space-6);
-  }
-
-  /* Итог и кнопка прижаты к низу: в ряду плиток на одной линии. */
-  .meta {
-    margin-top: auto;
-    padding-top: var(--space-3);
-  }
-
-  .more {
-    margin-top: var(--space-3);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

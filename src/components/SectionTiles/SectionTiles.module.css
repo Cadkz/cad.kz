@@ -22,7 +22,7 @@
 .image {
   width: 100%;
   height: 100%;
-  padding: var(--space-2);
+  padding: var(--space-1);
   object-fit: contain;
 }
 
@@ -32,18 +32,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-auto-rows: 1fr;
   }
-
-  .image {
-    padding: var(--space-3);
-  }
 }
 
 @media (min-width: 1200px) {
   .grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .grid.four {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

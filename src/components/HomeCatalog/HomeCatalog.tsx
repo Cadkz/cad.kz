@@ -8,6 +8,7 @@ import type { Picture } from '@/lib/pictures'
 import type { PopularCardData } from '@/lib/popular'
 import { ButtonLink } from '../Button/Button'
 import { CatalogFilter } from '../CatalogFilter/CatalogFilter'
+import { HomeFold } from '../HomeFold/HomeFold'
 import styles from './HomeCatalog.module.css'
 
 type Data = {
@@ -84,15 +85,17 @@ export function HomeCatalog() {
   // появления его не замечает).
   return (
     <div key="ready" className={styles.appear} data-reveal="">
-      <CatalogFilter
-        items={state.items}
-        facets={state.facets}
-        lines={state.lines}
-        vendorLogos={state.vendorLogos}
-        initial={emptyFilter}
-        popular={state.popular}
-        compact
-      />
+      <HomeFold>
+        <CatalogFilter
+          items={state.items}
+          facets={state.facets}
+          lines={state.lines}
+          vendorLogos={state.vendorLogos}
+          initial={emptyFilter}
+          popular={state.popular}
+          compact
+        />
+      </HomeFold>
     </div>
   )
 }

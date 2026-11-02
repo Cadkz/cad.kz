@@ -30,7 +30,6 @@ import {
   update,
 } from '@/lib/catalogFilter'
 import { vendorStepOn, vendorTiles } from '@/lib/catalogVendors'
-import { CATALOG_PATH } from '@/lib/navigationHrefs'
 import type { Picture } from '@/lib/pictures'
 import { positions } from '@/lib/plural'
 import type { PopularCardData } from '@/lib/popular'
@@ -38,7 +37,6 @@ import { Button } from '../Button/Button'
 import { CatalogGroups } from '../CatalogGroups/CatalogGroups'
 import { CatalogPopular } from '../CatalogPopular/CatalogPopular'
 import { CatalogSelection } from '../CatalogSelection/CatalogSelection'
-import { CatalogShowcaseMore } from '../CatalogShowcaseMore/CatalogShowcaseMore'
 import { CatalogSteps } from '../CatalogSteps/CatalogSteps'
 import { CatalogTabs } from '../CatalogTabs/CatalogTabs'
 import { Drawer } from '../Drawer/Drawer'
@@ -63,15 +61,12 @@ type Props = {
   /** Плитки «Популярных решений» — те же, что в меню «Каталог». */
   popular?: PopularCardData[]
   /**
-   * Витрина на главной (правка владельца 02.11.2026): вкладки над карточками, остальные условия —
-   * по кнопке «Фильтры», не больше SHOWCASE карточек, вместо номеров страниц — кнопка в полный
-   * каталог с теми же условиями. Адрес главной не меняется.
+   * Каталог на главной (правка владельца 02.11.2026, вечер): тот же каталог, что на /catalog
+   * (шаги в адресе, «Назад» мышью — шаг назад, страницы), но вкладки строкой над блоком, а
+   * колонка фильтра выезжает по кнопке «Фильтры».
    */
   compact?: boolean
 }
-
-/** Сколько карточек в витрине на главной: три ряда по три. */
-const SHOWCASE = 9
 
 /** С этой ширины фильтр на главной — колонка слева, а не выдвижная панель. */
 const WIDE = '(min-width: 960px)'
@@ -121,23 +116,20 @@ export function CatalogFilter({
         addTransitionType(motion)
         setState(next)
       })
-      // На главной шаги в адрес не пишутся: «Назад» уводит со страницы, а не по витрине.
-      if (compact) return
       const query = toQuery(next)
       const url = `${window.location.pathname}${query ? `?${query}` : ''}`
       if (url !== `${window.location.pathname}${window.location.search}`)
         window.history.pushState(null, '', url)
       if (scroll) top.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     },
-    [compact],
+    [],
   )
 
   useEffect(() => {
-    if (compact) return
     const restore = () => setState(pruneVendors(items, fromSearch(window.location.search)))
     window.addEventListener('popstate', restore)
     return () => window.removeEventListener('popstate', restore)
-  }, [items, compact])
+  }, [items])
 
   // Один производитель в разделе — сразу его товары, без шага выбора производителя.
   const view = useMemo(() => autoVendor(items, state), [items, state])
@@ -200,7 +192,7 @@ export function CatalogFilter({
       tabs={!compact}
     />
   )
-  const shownItems = compact ? found.items.slice(0, SHOWCASE) : found.items
+  const shownItems = found.items
   const paged = !popularView && !sections && !groups && !vendorStep
 
   const filtersButton = (
@@ -274,11 +266,7 @@ export function CatalogFilter({
             onPick={(vendor) => commit(update(state, { vendors: [vendor] }), true)}
           />
         ) : groups?.length ? (
-          <CatalogGroups
-            key={toQuery(view)}
-            groups={groups}
-            limit={compact ? SHOWCASE : undefined}
-          />
+          <CatalogGroups key={toQuery(view)} groups={groups} wide={compact && !sideOpen} />
         ) : found.items.length ? (
           <FlowPage page={found.page}>
             <ul className={styles.grid}>
@@ -300,20 +288,12 @@ export function CatalogFilter({
             <Mascot pose="search" size="sm" className={styles.mascot} />
           </div>
         )}
-        {compact ? (
-          <CatalogShowcaseMore
-            href={`${CATALOG_PATH}${toQuery(state) ? `?${toQuery(state)}` : ''}`}
-            total={paged || groups ? found.total : null}
-            shown={paged ? shownItems.length : Math.min(found.total, SHOWCASE)}
+        {paged && (
+          <Pagination
+            page={found.page}
+            pages={found.pages}
+            onPage={(page) => commit({ ...state, page }, true, pageMotion(state.page, page))}
           />
-        ) : (
-          paged && (
-            <Pagination
-              page={found.page}
-              pages={found.pages}
-              onPage={(page) => commit({ ...state, page }, true, pageMotion(state.page, page))}
-            />
-          )
         )}
       </div>
       <Drawer open={panelOpen} onClose={closePanel} title="Фильтр каталога" side="left">

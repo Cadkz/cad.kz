@@ -18,7 +18,7 @@
   background: var(--color-surface);
   color: var(--color-navy);
   isolation: isolate;
-  transition: border-color var(--duration-slow) var(--ease-reveal);
+  transition: border-color var(--duration-blueprint-out) var(--ease);
 }
 
 /* «Синька»: лист под содержимым, скрыт кругом нулевого радиуса в правом верхнем углу. */
@@ -30,7 +30,12 @@
   background-image: var(--blueprint-dark);
   background-size: var(--blueprint-size);
   clip-path: circle(0% at 100% 0%);
-  transition: clip-path var(--duration-blueprint) var(--ease-blueprint);
+  opacity: 0;
+  /* Уход мыши: лист не сворачивается обратно кругом, а растворяется в белый; круг сбрасывается
+     уже невидимым (правка владельца 02.11.2026, вечер). */
+  transition:
+    opacity var(--duration-blueprint-out) var(--ease),
+    clip-path 0s linear var(--duration-blueprint-out);
 }
 
 /* Крупный значок в углу — фирменный декор; на «синьке» он светлый контур с размерными линиями. */
@@ -42,8 +47,8 @@
   color: var(--color-blue);
   opacity: 0.06;
   transition:
-    color var(--duration-slow) var(--ease-reveal),
-    opacity var(--duration-slow) var(--ease-reveal);
+    color var(--duration-blueprint-out) var(--ease),
+    opacity var(--duration-blueprint-out) var(--ease);
 }
 
 .big svg {
@@ -58,7 +63,7 @@
   position: absolute;
   opacity: 0;
   content: "";
-  transition: opacity var(--duration-slow) var(--ease-reveal);
+  transition: opacity var(--duration-blueprint-out) var(--ease);
 }
 
 .big::before {
@@ -96,8 +101,8 @@
   background: var(--color-blue-soft);
   color: var(--color-blue);
   transition:
-    background-color var(--duration-slow) var(--ease-reveal),
-    color var(--duration-slow) var(--ease-reveal);
+    background-color var(--duration-blueprint-out) var(--ease),
+    color var(--duration-blueprint-out) var(--ease);
 }
 
 .title {
@@ -106,14 +111,14 @@
   font-size: var(--text-h4);
   font-weight: var(--weight-bold);
   line-height: var(--leading-snug);
-  transition: color var(--duration-slow) var(--ease-reveal);
+  transition: color var(--duration-blueprint-out) var(--ease);
 }
 
 .summary {
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
-  transition: color var(--duration-slow) var(--ease-reveal);
+  transition: color var(--duration-blueprint-out) var(--ease);
 }
 
 /* Подпись «В каталог» — только от 640 px (на телефоне строки без подписи). */
@@ -166,8 +171,8 @@
     opacity: 0;
     transform: translateY(100%);
     transition:
-      opacity var(--duration-slow) var(--ease-reveal),
-      transform var(--duration-slow) var(--ease-reveal);
+      opacity var(--duration-blueprint-out) var(--ease),
+      transform var(--duration-blueprint-out) var(--ease);
   }
 }
 
@@ -180,6 +185,10 @@
 
   .card:is(:hover, :focus-visible) .blue {
     clip-path: circle(150% at 100% 0%);
+    opacity: 1;
+    transition:
+      clip-path var(--duration-blueprint) var(--ease-blueprint),
+      opacity 0s;
   }
 
   .card:is(:hover, :focus-visible) .title {

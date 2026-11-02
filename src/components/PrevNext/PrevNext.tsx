@@ -1,32 +1,49 @@
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { NAV_BACK, NAV_FORWARD } from '@/domain/motion.mjs'
 import styles from './PrevNext.module.css'
 
 type LinkData = { title: string; href: string } | null
 
-/** Переход к предыдущему и следующему материалу. */
+/**
+ * Листание материалов: «Предыдущая» и «Следующая» (правка владельца 02.11.2026, вечер).
+ * Выглядят как навигация — стрелка в кружке, при наведении синий контур и стрелка сдвигается;
+ * новая статья приходит с той стороны, куда листают.
+ */
 export function PrevNext({ previous, next }: { previous: LinkData; next: LinkData }) {
   if (!previous && !next) return null
   return (
     <nav className={styles.nav} aria-label="Другие материалы">
       {previous ? (
-        <Link href={previous.href} className={styles.link}>
-          <span className={styles.label}>
-            <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-            Предыдущая
+        <Link
+          href={previous.href}
+          className={`${styles.link} ${styles.prev}`}
+          transitionTypes={NAV_BACK}
+        >
+          <span className={styles.arrow} aria-hidden="true">
+            <ArrowLeft size={20} strokeWidth={1.75} />
           </span>
-          {previous.title}
+          <span className={styles.text}>
+            <span className={styles.label}>Предыдущая</span>
+            <span className={styles.title}>{previous.title}</span>
+          </span>
         </Link>
       ) : (
         <span />
       )}
       {next && (
-        <Link href={next.href} className={`${styles.link} ${styles.next}`}>
-          <span className={styles.label}>
-            Следующая
-            <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
+        <Link
+          href={next.href}
+          className={`${styles.link} ${styles.next}`}
+          transitionTypes={NAV_FORWARD}
+        >
+          <span className={styles.text}>
+            <span className={styles.label}>Следующая</span>
+            <span className={styles.title}>{next.title}</span>
           </span>
-          {next.title}
+          <span className={styles.arrow} aria-hidden="true">
+            <ArrowRight size={20} strokeWidth={1.75} />
+          </span>
         </Link>
       )}
     </nav>

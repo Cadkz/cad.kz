@@ -34,8 +34,8 @@ function text(tile: SectionTile) {
  */
 export function SectionTiles({ tiles, overline, onPick }: Props) {
   return (
-    // Четыре типа оборудования — одним рядом от 1200 px, а не 3 + 1.
-    <ul className={tiles.length === 4 ? `${styles.grid} ${styles.four}` : styles.grid}>
+    // Сетка одна на весь каталог — по 3 в ряд, и у типов оборудования (правка владельца 02.11.2026).
+    <ul className={styles.grid}>
       {tiles.map((tile, index) => (
         <Reveal as="li" key={tile.slug} step={index % 3}>
           <CatalogTile
@@ -48,7 +48,7 @@ export function SectionTiles({ tiles, overline, onPick }: Props) {
                   alt=""
                   width={tile.picture.width}
                   height={tile.picture.height}
-                  sizes="(min-width: 1200px) 300px, (min-width: 960px) 25vw, (min-width: 640px) 50vw, 80px"
+                  sizes="64px"
                   unoptimized={tile.picture.local}
                   className={styles.image}
                 />

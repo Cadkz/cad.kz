@@ -60,7 +60,11 @@
   color: var(--color-text-inverse);
 }
 
+/* Значок рядом с подписью (крестик у выбранного условия) — в одной строке с текстом. */
 .label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   min-width: 0;
 }
 

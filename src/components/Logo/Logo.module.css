@@ -36,3 +36,20 @@
   left: calc(50% - var(--touch-target) / 2);
   content: "";
 }
+
+/* Шапка: до 640 px — знак, от 640 px — знак с надписью, по высоте как кнопки шапки. */
+.header .headerFull {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .header .headerMark {
+    display: none;
+  }
+
+  .header .headerFull {
+    display: block;
+    width: var(--logo-header-width);
+    height: var(--logo-header-height);
+  }
+}

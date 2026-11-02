@@ -1,0 +1,39 @@
+/* Свёрнутый каталог: блок не выше --home-catalog-height, нижний край — белая дымка с рамкой
+   и скруглением карточки каталога, чтобы обрезанный блок выглядел законченным. */
+.root {
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
+}
+
+.box {
+  position: relative;
+  max-height: var(--home-catalog-height);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.box[data-open="true"] {
+  max-height: none;
+  overflow: visible;
+}
+
+.fade {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: var(--home-catalog-fade);
+  padding-bottom: var(--space-8);
+  border: 1px solid var(--color-border);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: linear-gradient(to bottom, transparent, var(--color-surface) 70%);
+}
+
+.less {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-6);
+}

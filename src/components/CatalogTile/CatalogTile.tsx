@@ -22,8 +22,9 @@ export type CatalogTileProps = {
 /**
  * Плитка-папка каталога: направление, тип оборудования, производитель (просьба владельца
  * 27.10.2026 — единая система). Те же части и порядок, что у карточки товара (ProductCard):
- * надпись, название, фраза, итог жирным, внизу контурная кнопка «Смотреть». Отличие одно:
- * у папки картинка сверху, у товара значок слева. Белая, при наведении синяя рамка.
+ * миниатюра слева от надписи и названия, ниже фраза, итог жирным, внизу контурная кнопка
+ * «Смотреть» (правка владельца 02.11.2026, вечер: большая картинка сверху выбивалась из общего
+ * вида карточек). Белая, при наведении синяя рамка.
  */
 export function CatalogTile({
   media,
@@ -37,14 +38,18 @@ export function CatalogTile({
 }: CatalogTileProps) {
   const body = (
     <>
-      <span
-        className={mediaFit === 'logo' ? `${styles.media} ${styles.logo}` : styles.media}
-        aria-hidden="true"
-      >
-        {media}
+      <span className={styles.head}>
+        <span
+          className={mediaFit === 'logo' ? `${styles.media} ${styles.logo}` : styles.media}
+          aria-hidden="true"
+        >
+          {media}
+        </span>
+        <span className={styles.name}>
+          <span className={styles.overline}>{overline}</span>
+          <span className={styles.title}>{title}</span>
+        </span>
       </span>
-      <span className={styles.overline}>{overline}</span>
-      <span className={styles.title}>{title}</span>
       <span className={styles.text}>{text}</span>
       <span className={styles.meta}>{meta}</span>
       <span className={styles.more}>
