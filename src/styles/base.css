@@ -136,51 +136,60 @@ button {
   white-space: nowrap;
 }
 
-/* Переходы между страницами (React <ViewTransition>, этап 1 анимаций 02.11.2026).
-   .morph — картинка и заголовок карточки перелетают на новую страницу (Morph);
-   .nav-forward / .nav-back — содержимое страницы сдвигается по направлению (PageTransition).
+/* Переходы между страницами (React <ViewTransition>, анимации 02.11.2026).
+   Как стопка экранов в iOS (референс владельца — Stack Navigator, правка 02.11.2026, вечер):
+   вглубь (.nav-forward) — новая страница въезжает справа на всю ширину поверх старой, старая
+   отъезжает влево на треть и темнеет; назад (.nav-back) — верхняя страница уезжает вправо,
+   под ней проступает прежняя. Перелёт картинки карточки убран — увеличение выглядело дёргано.
    Браузер без View Transitions просто открывает страницу. */
-::view-transition-group(.morph) {
-  animation-duration: var(--duration-morph);
-  animation-timing-function: var(--ease-ios);
-}
-
-::view-transition-image-pair(.morph) {
-  animation: var(--duration-morph) var(--ease-ios) both morph-soften;
-}
-
-::view-transition-old(.morph),
-::view-transition-new(.morph) {
-  height: 100%;
-  object-fit: contain;
-  animation-duration: var(--duration-morph);
-}
-
 ::view-transition-group(.nav-forward),
 ::view-transition-group(.nav-back) {
-  animation-duration: var(--duration-nav);
+  animation-duration: var(--duration-stack);
   animation-timing-function: var(--ease-ios);
 }
 
-::view-transition-old(.nav-forward) {
-  animation: var(--duration-nav-exit) var(--ease) both page-out-left;
+::view-transition-old(.nav-forward),
+::view-transition-new(.nav-back) {
+  animation: var(--duration-stack) var(--ease-ios) both stack-under;
+}
+
+::view-transition-new(.nav-forward),
+::view-transition-old(.nav-back) {
+  background: var(--color-bg);
+  box-shadow: var(--shadow-stack);
 }
 
 ::view-transition-new(.nav-forward) {
-  animation: var(--duration-nav) var(--ease-ios) var(--delay-nav) both page-in-right;
+  animation: var(--duration-stack) var(--ease-ios) both stack-in;
 }
 
+/* Назад уходящая страница — сверху, под ней прежняя. */
 ::view-transition-old(.nav-back) {
-  animation: var(--duration-nav-exit) var(--ease) both page-out-right;
+  z-index: var(--z-raised);
+  animation: var(--duration-stack) var(--ease-ios) both stack-out;
 }
 
 ::view-transition-new(.nav-back) {
-  animation: var(--duration-nav) var(--ease-ios) var(--delay-nav) both page-in-left;
+  animation-direction: reverse;
 }
 
-@keyframes morph-soften {
-  40% {
-    filter: blur(calc(var(--space-1) / 2));
+@keyframes stack-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes stack-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Страница под верхней: на треть влево и темнее. */
+@keyframes stack-under {
+  to {
+    transform: translateX(var(--stack-shift));
+    filter: brightness(var(--stack-dim));
   }
 }
 

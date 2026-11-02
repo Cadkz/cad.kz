@@ -13,8 +13,8 @@ type Props = {
 }
 
 /**
- * Низ каталога на главной вместо номеров страниц (правка владельца 02.11.2026): одна заметная
- * кнопка в полный каталог с теми же условиями и подпись, сколько там товаров.
+ * Низ каталога на главной вместо номеров страниц (правка владельца 02.11.2026): тёмно-синяя
+ * кнопка «Перейти в каталог» с теми же условиями и подпись, сколько там товаров.
  */
 export function CatalogShowcaseMore({ href, total, shown }: Props) {
   const rest = total !== null && total > shown
@@ -25,8 +25,8 @@ export function CatalogShowcaseMore({ href, total, shown }: Props) {
           Показано {shown} из {positions(total)}
         </p>
       )}
-      <ButtonLink href={href} variant="outline">
-        {rest ? 'Все товары в каталоге' : 'Перейти в каталог'}
+      <ButtonLink href={href}>
+        Перейти в каталог
         <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
       </ButtonLink>
     </div>

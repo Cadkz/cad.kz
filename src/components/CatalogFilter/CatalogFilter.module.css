@@ -111,18 +111,44 @@
   }
 }
 
-/* Витрина на главной (02.11.2026): без колонки фильтра — вкладки и «Фильтры» над карточками,
-   три карточки в ряд уже от 960 px. */
+/* Каталог на главной (правка владельца 02.11.2026, вечер): вкладки направлений строкой над
+   всем блоком, справа «Фильтры». По нажатию колонка фильтра плавно выезжает слева, карточки
+   сужаются на месте — без затемнения экрана; повторное нажатие прячет колонку. */
 @media (min-width: 960px) {
   .compact {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 0 minmax(0, 1fr);
+    gap: 0;
+    transition:
+      grid-template-columns var(--duration-sidebar) var(--ease-ios),
+      column-gap var(--duration-sidebar) var(--ease-ios);
+  }
+
+  .compact[data-side="open"] {
+    grid-template-columns: var(--sidebar) minmax(0, 1fr);
+    column-gap: var(--space-8);
+  }
+
+  .compact .head {
+    grid-column: 1 / -1;
+    flex-wrap: nowrap;
+  }
+
+  .compact .sidebar {
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity var(--duration-sidebar) var(--ease-ios);
+  }
+
+  .compact[data-side="open"] .sidebar {
+    opacity: 1;
+  }
+
+  /* Содержимое колонки своей ширины: пока колонка выезжает, фильтр не переверстывается. */
+  .compact .sideInner {
+    width: var(--sidebar);
   }
 
   .compact .grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .compact .head {
-    flex-wrap: nowrap;
   }
 }

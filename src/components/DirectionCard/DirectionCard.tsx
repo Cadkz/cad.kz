@@ -6,10 +6,9 @@ import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './DirectionCard.module.css'
 
 /**
- * Карточка направления: открывает каталог, отфильтрованный по этому направлению. Все карточки
- * одного тёмно-синего вида (аудит 21.10.2026): цвет из админки («Тёмно-синий / Синий / Графит»)
- * был только для разнообразия и выглядел случайным. При наведении карточка не прыгает: подпись
- * «В каталог» выезжает из-под маски, проступает тонкая рамка, крупный значок медленно смещается.
+ * Карточка направления: открывает каталог, отфильтрованный по этому направлению. Белая; при
+ * наведении из правого верхнего угла раскрывается тёмно-синий лист с чертёжной сеткой, выезжает
+ * «В каталог» (выбор владельца 02.11.2026). Карточка не прыгает.
  */
 export function DirectionCard({ direction }: { direction: Direction }) {
   return (
@@ -17,6 +16,7 @@ export function DirectionCard({ direction }: { direction: Direction }) {
       href={direction.href ?? catalogHref({ direction: direction.slug })}
       className={styles.card}
     >
+      <span className={styles.blue} aria-hidden="true" />
       <span className={styles.big} aria-hidden="true">
         <SectionIcon name={direction.icon} size={24} />
       </span>

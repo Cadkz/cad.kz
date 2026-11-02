@@ -59,6 +59,24 @@ test('оборудование: сначала четыре типа плитк�
   assert.deepEqual(step.tiles[0].vendors, ['Artec 3D'])
 })
 
+test('плитка типа — фото флагмана линейки, а не первой по алфавиту модели', () => {
+  const cheap = { ...photo, url: '/cheap.png' }
+  const top = { ...photo, url: '/top.png' }
+  const scanners = [
+    {
+      ...item(7, 'Планшетный сканер WideTEK 12', ['wide-scanners'], 'WideTEK', cheap),
+      lineOrder: 220,
+    },
+    {
+      ...item(8, 'Широкоформатный сканер WideTEK 60CL', ['wide-scanners'], 'WideTEK', top),
+      lineOrder: 120,
+    },
+    item(9, 'WideTEK без порядка', ['wide-scanners'], 'WideTEK', cheap),
+  ]
+  const step = sectionStep([...items.filter((i) => i.id !== 5), ...scanners], facets, hardware)
+  assert.equal(step?.tiles.find((t) => t.slug === 'wide-scanners')?.picture, top)
+})
+
 test('широкоформатные плоттеры: подразделы плитками, у подраздела шага нет', () => {
   const sub = sectionStep(items, facets, update(hardware, { type: 'wide-format' }))
   assert.equal(sub?.kind, 'sub')

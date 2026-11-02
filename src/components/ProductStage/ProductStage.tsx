@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { type PointerEvent, type ReactNode, useRef, useState } from 'react'
 import type { Picture } from '@/lib/pictures'
 import type { Fact } from '@/lib/product'
-import { Morph } from '../Morph/Morph'
 import { PictureViewer } from '../PictureViewer/PictureViewer'
 import styles from './ProductStage.module.css'
 
@@ -15,8 +14,6 @@ type Props = {
   facts: Fact[]
   /** Что показать на листе, пока картинок нет (значок раздела). */
   placeholder?: ReactNode
-  /** Ключ товара: картинка карточки каталога перелетает в лист. */
-  morphId?: number
 }
 
 /** Сдвиг пальцем, после которого лента листается. */
@@ -28,7 +25,7 @@ const SWIPE = 40
  * нажатие открывает картинку крупно (PictureViewer). Под картинкой — главные факты строкой (27.10.2026), у плоттеров пять, цветность со значком (30.10.2026). При прокрутке
  * фото отстаёт от сетки листа — глубина без JavaScript (CSS).
  */
-export function ProductStage({ title, pictures, facts, placeholder, morphId }: Props) {
+export function ProductStage({ title, pictures, facts, placeholder }: Props) {
   const [active, setActive] = useState(0)
   const [open, setOpen] = useState<number | null>(null)
   const start = useRef<number | null>(null)
@@ -49,47 +46,45 @@ export function ProductStage({ title, pictures, facts, placeholder, morphId }: P
   return (
     <div className={styles.stage}>
       <div className={styles.media}>
-        <Morph id={morphId} part="media">
-          <div className={styles.float}>
-            {count === 0 ? (
-              <div className={styles.placeholder}>{placeholder}</div>
-            ) : (
-              <button
-                type="button"
-                className={styles.open}
-                onClick={() => setOpen(active)}
-                onPointerDown={onDown}
-                onPointerUp={onUp}
-                aria-label={`Открыть картинку крупно: ${title}`}
-              >
-                {pictures.map((picture, index) => (
-                  <span
-                    key={picture.url}
-                    className={styles.slide}
-                    data-state={index === active ? 'active' : index < active ? 'before' : 'after'}
-                    aria-hidden={index !== active}
-                  >
-                    <Image
-                      src={picture.url}
-                      alt={picture.alt || title}
-                      width={picture.width}
-                      height={picture.height}
-                      sizes="(min-width: 1200px) 560px, (min-width: 960px) 46vw, 100vw"
-                      // Первая картинка — главная на первом экране: заранее и с высоким приоритетом.
-                      preload={index === 0}
-                      fetchPriority={index === 0 ? 'high' : undefined}
-                      draggable={false}
-                      className={styles.image}
-                    />
-                  </span>
-                ))}
-                <span className={styles.zoom} aria-hidden="true">
-                  <Maximize2 size={16} strokeWidth={1.75} />
+        <div className={styles.float}>
+          {count === 0 ? (
+            <div className={styles.placeholder}>{placeholder}</div>
+          ) : (
+            <button
+              type="button"
+              className={styles.open}
+              onClick={() => setOpen(active)}
+              onPointerDown={onDown}
+              onPointerUp={onUp}
+              aria-label={`Открыть картинку крупно: ${title}`}
+            >
+              {pictures.map((picture, index) => (
+                <span
+                  key={picture.url}
+                  className={styles.slide}
+                  data-state={index === active ? 'active' : index < active ? 'before' : 'after'}
+                  aria-hidden={index !== active}
+                >
+                  <Image
+                    src={picture.url}
+                    alt={picture.alt || title}
+                    width={picture.width}
+                    height={picture.height}
+                    sizes="(min-width: 1200px) 560px, (min-width: 960px) 46vw, 100vw"
+                    // Первая картинка — главная на первом экране: заранее и с высоким приоритетом.
+                    preload={index === 0}
+                    fetchPriority={index === 0 ? 'high' : undefined}
+                    draggable={false}
+                    className={styles.image}
+                  />
                 </span>
-              </button>
-            )}
-          </div>
-        </Morph>
+              ))}
+              <span className={styles.zoom} aria-hidden="true">
+                <Maximize2 size={16} strokeWidth={1.75} />
+              </span>
+            </button>
+          )}
+        </div>
         {count > 1 && (
           <div className={styles.nav}>
             <button

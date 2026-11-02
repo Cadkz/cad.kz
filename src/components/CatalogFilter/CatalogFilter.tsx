@@ -73,6 +73,9 @@ type Props = {
 /** Сколько карточек в витрине на главной: три ряда по три. */
 const SHOWCASE = 9
 
+/** С этой ширины фильтр на главной — колонка слева, а не выдвижная панель. */
+const WIDE = '(min-width: 960px)'
+
 /**
  * Каскадный фильтр каталога по данным CMS. Все товары приходят с сервера одним списком,
  * фильтрация мгновенная в браузере, выбор сохраняется в адресе страницы.
@@ -178,6 +181,13 @@ export function CatalogFilter({
   const reset = () =>
     commit({ ...emptyFilter, group: state.group, direction: state.direction, type: state.type })
   const closePanel = useCallback(() => setPanelOpen(false), [])
+  // На главной «Фильтры» на компьютере раздвигают колонку фильтра слева, карточки сужаются;
+  // без затемнения экрана (правка владельца 02.11.2026, вечер). Уже 960 px — выдвижная панель.
+  const [sideOpen, setSideOpen] = useState(false)
+  const openFilters = () => {
+    if (compact && window.matchMedia(WIDE).matches) setSideOpen((open) => !open)
+    else setPanelOpen(true)
+  }
 
   const popularView = state.group === POPULAR
   const panel = (
@@ -193,35 +203,47 @@ export function CatalogFilter({
   const shownItems = compact ? found.items.slice(0, SHOWCASE) : found.items
   const paged = !popularView && !sections && !groups && !vendorStep
 
+  const filtersButton = (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={openFilters}
+      aria-expanded={compact ? sideOpen : undefined}
+    >
+      <SlidersHorizontal size={16} strokeWidth={1.75} aria-hidden="true" />
+      {compact && sideOpen ? 'Скрыть фильтры' : 'Фильтры'}
+    </Button>
+  )
+
   return (
-    <div className={compact ? `${styles.shell} ${styles.compact}` : styles.shell}>
-      {!compact && (
-        <section className={styles.sidebar} aria-label="Фильтр каталога">
-          {panel}
-        </section>
-      )}
-      <div ref={top} className={styles.results}>
+    <div
+      className={compact ? `${styles.shell} ${styles.compact}` : styles.shell}
+      data-side={compact && sideOpen ? 'open' : undefined}
+    >
+      {compact && (
         <div className={styles.head}>
-          {compact ? (
-            <CatalogTabs
-              selected={state.group}
-              groups={options.groups}
-              hasPopular={popular.length > 0}
-              onChange={change}
-              row
-            />
-          ) : (
+          <CatalogTabs
+            selected={state.group}
+            groups={options.groups}
+            hasPopular={popular.length > 0}
+            onChange={change}
+            row
+          />
+          {filtersButton}
+        </div>
+      )}
+      <section className={styles.sidebar} aria-label="Фильтр каталога" inert={compact && !sideOpen}>
+        <div className={styles.sideInner}>{panel}</div>
+      </section>
+      <div ref={top} className={styles.results}>
+        {!compact && (
+          <div className={styles.head}>
             <p className={styles.count} aria-live="polite">
               {popularView ? 'Чаще всего выбирают' : `Найдено: ${positions(found.total)}`}
             </p>
-          )}
-          <span className={compact ? undefined : styles.mobileOnly}>
-            <Button variant="outline" size="sm" onClick={() => setPanelOpen(true)}>
-              <SlidersHorizontal size={16} strokeWidth={1.75} aria-hidden="true" />
-              Фильтры
-            </Button>
-          </span>
-        </div>
+            <span className={styles.mobileOnly}>{filtersButton}</span>
+          </div>
+        )}
         <CatalogSteps
           facets={facets}
           lines={lines}
@@ -263,7 +285,7 @@ export function CatalogFilter({
               {shownItems.map((item, index) => (
                 <FlowItem key={item.id} still={shownItems.length > FLOW_LIMIT}>
                   <Reveal as="li" step={index % 3}>
-                    <ProductCard product={item} morph />
+                    <ProductCard product={item} />
                   </Reveal>
                 </FlowItem>
               ))}

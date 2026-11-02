@@ -66,7 +66,7 @@ export function CatalogGroups({ groups, limit }: Props) {
             <ul className={styles.grid}>
               {shown.map((item, index) => (
                 <Reveal as="li" key={item.id} step={index % 3}>
-                  <ProductCard product={item} morph />
+                  <ProductCard product={item} />
                 </Reveal>
               ))}
             </ul>

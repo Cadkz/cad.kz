@@ -565,7 +565,13 @@ function sectionTile(items: CatalogItem[], facets: Facet[], facet: Facet, base: 
   // Родитель широкоформата иллюстрируется устройством, никогда расходником из дочернего раздела.
   const illustrated =
     facet.slug === 'wide-format' ? list.filter((item) => item.types.includes('plotters')) : list
-  const photo = illustrated.find((item) => item.picture && item.picture.fit !== 'logo')
+  // Плитка показывает флагман линейки, а не первую по алфавиту модель (владелец 02.11.2026: у
+  // широкоформатных сканеров стоял самый дешёвый планшетный WideTEK 12). Флагман — меньший
+  // «Порядок в линейке» (FLAGSHIP_ORDER в src/domain/equipmentSeed.mjs); без порядка — как было.
+  const byFlagship = [...illustrated].sort(
+    (x, y) => (x.lineOrder ?? Number.MAX_SAFE_INTEGER) - (y.lineOrder ?? Number.MAX_SAFE_INTEGER),
+  )
+  const photo = byFlagship.find((item) => item.picture && item.picture.fit !== 'logo')
   return {
     slug: facet.slug,
     title: facet.title,
@@ -576,7 +582,7 @@ function sectionTile(items: CatalogItem[], facets: Facet[], facet: Facet, base: 
     count: list.length,
     picture: facet.isDirection
       ? null
-      : ((photo ?? illustrated.find((item) => item.picture))?.picture ?? null),
+      : ((photo ?? byFlagship.find((item) => item.picture))?.picture ?? null),
   }
 }
 
