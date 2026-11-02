@@ -116,6 +116,7 @@ export default async function PublicationPage({ params }: Props) {
         >
           <PageIntro
             title={publication.title}
+            morphId={`news-${publication.id}`}
             lead={excerptOf(publication)}
             meta={
               publication.publishedAt ? (

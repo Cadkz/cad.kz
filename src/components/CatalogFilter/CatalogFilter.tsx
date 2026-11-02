@@ -200,7 +200,7 @@ export function CatalogFilter({ items, facets, lines, vendorLogos, initial, popu
           <ul className={styles.grid}>
             {found.items.map((item, index) => (
               <Reveal as="li" key={item.id} step={index % 3}>
-                <ProductCard product={item} />
+                <ProductCard product={item} morph />
               </Reveal>
             ))}
           </ul>

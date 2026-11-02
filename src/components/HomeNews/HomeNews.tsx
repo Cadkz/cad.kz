@@ -29,7 +29,7 @@ export function HomeNews({ slides, news, covers }: Props) {
       <ul className={styles.grid}>
         <li className={styles.main}>
           {feature ? (
-            <NewsCard news={toCard(feature, covers)} size="large" withExcerpt />
+            <NewsCard news={toCard(feature, covers)} size="large" withExcerpt morph />
           ) : (
             <HeroSlider slides={slides} />
           )}
@@ -39,7 +39,7 @@ export function HomeNews({ slides, news, covers }: Props) {
             <ul className={styles.list}>
               {side.map((item) => (
                 <li key={item.id} className={styles.item}>
-                  <NewsCard news={toCard(item, covers)} size="text" />
+                  <NewsCard news={toCard(item, covers)} size="text" morph />
                 </li>
               ))}
             </ul>

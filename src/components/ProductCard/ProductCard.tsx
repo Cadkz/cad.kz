@@ -2,11 +2,13 @@ import { ArrowRight, CalendarDays } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { cardInfo } from '@/domain/cardTexts.mjs'
+import { NAV_FORWARD } from '@/domain/motion.mjs'
 import type { Lifecycle } from '@/lib/equipmentResearch'
 import type { Picture } from '@/lib/pictures'
 import { AddToCartButton } from '../AddToCartButton/AddToCartButton'
 import { Badge } from '../Badge/Badge'
 import { DirectionArt, hasDirectionArt } from '../DirectionArt/DirectionArt'
+import { Morph } from '../Morph/Morph'
 import { ProductLifecycle } from '../ProductLifecycle/ProductLifecycle'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './ProductCard.module.css'
@@ -63,7 +65,18 @@ export type ProductCardData = {
  * контуром и, если у товара одна комплектация с ценой, синий квадрат «корзина +».
  * Цена — только серверная.
  */
-export function ProductCard({ product }: { product: ProductCardData }) {
+/**
+ * morph — карточка в основной сетке: картинка и название перелетают на страницу товара. Только
+ * там, где товар на странице один раз (имя перехода должно быть уникальным).
+ */
+export function ProductCard({
+  product,
+  morph = false,
+}: {
+  product: ProductCardData
+  morph?: boolean
+}) {
+  const morphId = morph && !product.linkOnly ? product.id : null
   const cartKey = product.linkOnly ? null : (product.cartOfferId ?? product.requestKey ?? null)
   const info = cardInfo({
     title: product.title,
@@ -83,33 +96,37 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <article className={styles.card}>
       <div className={styles.head}>
-        <span className={mediaClass} aria-hidden="true">
-          {product.picture ? (
-            <Image
-              src={product.picture.url}
-              alt=""
-              width={product.picture.width}
-              height={product.picture.height}
-              sizes="64px"
-              unoptimized={product.picture.local}
-              className={styles.image}
-            />
-          ) : product.topic ? (
-            <SectionIcon name={product.icon} size={24} />
-          ) : product.logoFallback ? (
-            <span className={styles.logoFallback}>{product.logoFallback}</span>
-          ) : product.art && hasDirectionArt(product.art) ? (
-            <DirectionArt slug={product.art} className={styles.art} />
-          ) : (
-            <SectionIcon name={product.icon} size={24} />
-          )}
-        </span>
+        <Morph id={morphId} part="media">
+          <span className={mediaClass} aria-hidden="true">
+            {product.picture ? (
+              <Image
+                src={product.picture.url}
+                alt=""
+                width={product.picture.width}
+                height={product.picture.height}
+                sizes="64px"
+                unoptimized={product.picture.local}
+                className={styles.image}
+              />
+            ) : product.topic ? (
+              <SectionIcon name={product.icon} size={24} />
+            ) : product.logoFallback ? (
+              <span className={styles.logoFallback}>{product.logoFallback}</span>
+            ) : product.art && hasDirectionArt(product.art) ? (
+              <DirectionArt slug={product.art} className={styles.art} />
+            ) : (
+              <SectionIcon name={product.icon} size={24} />
+            )}
+          </span>
+        </Morph>
         <div className={styles.name}>
           {product.manufacturer && <p className={styles.vendor}>{product.manufacturer}</p>}
           <h3 className={styles.title}>
-            <Link href={product.href} className={styles.titleLink}>
-              {info.title}
-            </Link>
+            <Morph id={morphId} part="title">
+              <Link href={product.href} className={styles.titleLink} transitionTypes={NAV_FORWARD}>
+                {info.title}
+              </Link>
+            </Morph>
           </h3>
         </div>
       </div>

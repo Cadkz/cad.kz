@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Badge } from '../Badge/Badge'
+import { Morph } from '../Morph/Morph'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './ProductHeader.module.css'
 
@@ -12,13 +13,24 @@ type Props = {
   requires: string[]
   /** Сцена с крупным фото под заголовком (оборудование с фото, пробная ветка 23.10.2026). */
   media?: ReactNode
+  /** Ключ товара: заголовок перелетает сюда из карточки каталога. */
+  morphId?: number
 }
 
 /**
  * Шапка страницы товара: производитель, название, коротко, задачи и зависимости от базового ПО.
  * У оборудования с фото под текстом — крупная сцена с фото и главными фактами.
  */
-export function ProductHeader({ title, vendor, summary, icon, tasks, requires, media }: Props) {
+export function ProductHeader({
+  title,
+  vendor,
+  summary,
+  icon,
+  tasks,
+  requires,
+  media,
+  morphId,
+}: Props) {
   return (
     <header className={styles.header}>
       <div className={styles.top}>
@@ -29,7 +41,9 @@ export function ProductHeader({ title, vendor, summary, icon, tasks, requires, m
         )}
         <div className={styles.text}>
           {vendor && <p className={styles.vendor}>{vendor}</p>}
-          <h1>{title}</h1>
+          <Morph id={morphId} part="title">
+            <h1>{title}</h1>
+          </Morph>
           {summary && <p className={styles.summary}>{summary}</p>}
           {requires.length > 0 && (
             <p className={styles.requires}>

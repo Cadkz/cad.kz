@@ -1,5 +1,6 @@
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { NAV_BACK } from '@/domain/motion.mjs'
 import { breadcrumbLd } from '@/domain/structuredData.mjs'
 import { siteUrl } from '@/lib/seo'
 import { JsonLd } from '../JsonLd/JsonLd'
@@ -27,7 +28,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
               />
             )}
             {item.href ? (
-              <Link href={item.href} className={styles.link}>
+              <Link href={item.href} className={styles.link} transitionTypes={NAV_BACK}>
                 {item.title}
               </Link>
             ) : (

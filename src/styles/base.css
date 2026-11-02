@@ -136,6 +136,82 @@ button {
   white-space: nowrap;
 }
 
+/* Переходы между страницами (React <ViewTransition>, этап 1 анимаций 02.11.2026).
+   .morph — картинка и заголовок карточки перелетают на новую страницу (Morph);
+   .nav-forward / .nav-back — содержимое страницы сдвигается по направлению (PageTransition).
+   Браузер без View Transitions просто открывает страницу. */
+::view-transition-group(.morph) {
+  animation-duration: var(--duration-morph);
+  animation-timing-function: var(--ease-ios);
+}
+
+::view-transition-image-pair(.morph) {
+  animation: var(--duration-morph) var(--ease-ios) both morph-soften;
+}
+
+::view-transition-old(.morph),
+::view-transition-new(.morph) {
+  height: 100%;
+  object-fit: contain;
+  animation-duration: var(--duration-morph);
+}
+
+::view-transition-group(.nav-forward),
+::view-transition-group(.nav-back) {
+  animation-duration: var(--duration-nav);
+  animation-timing-function: var(--ease-ios);
+}
+
+::view-transition-old(.nav-forward) {
+  animation: var(--duration-nav-exit) var(--ease) both page-out-left;
+}
+
+::view-transition-new(.nav-forward) {
+  animation: var(--duration-nav) var(--ease-ios) var(--delay-nav) both page-in-right;
+}
+
+::view-transition-old(.nav-back) {
+  animation: var(--duration-nav-exit) var(--ease) both page-out-right;
+}
+
+::view-transition-new(.nav-back) {
+  animation: var(--duration-nav) var(--ease-ios) var(--delay-nav) both page-in-left;
+}
+
+@keyframes morph-soften {
+  40% {
+    filter: blur(calc(var(--space-1) / 2));
+  }
+}
+
+@keyframes page-out-left {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--nav-shift) * -1));
+  }
+}
+
+@keyframes page-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(var(--nav-shift));
+  }
+}
+
+@keyframes page-out-right {
+  to {
+    opacity: 0;
+    transform: translateX(var(--nav-shift));
+  }
+}
+
+@keyframes page-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--nav-shift) * -1));
+  }
+}
+
 /* biome-ignore-start lint/complexity/noImportantStyles: системная настройка пользователя должна перебивать любые анимации */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -146,6 +222,13 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
 /* biome-ignore-end lint/complexity/noImportantStyles: конец блока reduced-motion */

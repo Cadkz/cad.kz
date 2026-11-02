@@ -106,6 +106,7 @@ export async function PublicationIndex({ path, title, lead, kind, params }: Prop
                   withExcerpt
                   level={2}
                   size={kind === 'news' ? 'plain' : 'default'}
+                  morph
                 />
               </li>
             ))}

@@ -175,6 +175,7 @@ export async function ProductView({
       icon={null}
       tasks={product.tasks}
       requires={product.requires.map((r) => r.title)}
+      morphId={product.id}
       media={
         // У курсов картинок нет (замечание владельца 27.10.2026): вместо сцены — факты строкой.
         product.kind === 'course' ? (
@@ -184,6 +185,7 @@ export async function ProductView({
             title={product.title}
             pictures={product.stagePictures}
             facts={product.facts}
+            morphId={product.id}
             placeholder={
               <span>
                 <SectionIcon name={product.sections[0]?.icon ?? 'building'} size={24} />
