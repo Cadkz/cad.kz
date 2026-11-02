@@ -50,6 +50,30 @@ const groupKeys = {
   service: 'service',
 }
 
+/** Тип оборудования для хлебных крошек: у сканера — «3D-сканеры», а не «Машиностроение». */
+const EQUIPMENT_TYPES = [
+  'scanners',
+  'wide-scanners',
+  'workstations',
+  'plotters',
+  'consumables',
+  'wide-format',
+]
+
+function breadcrumbSection(product: ProductPage) {
+  if (product.kind === 'hardware') {
+    const type = EQUIPMENT_TYPES.map((slug) => product.sections.find((s) => s.slug === slug)).find(
+      Boolean,
+    )
+    if (type)
+      return { title: type.title, href: catalogHref({ group: 'hardware', type: type.slug }) }
+  }
+  const direction = product.sections.find((s) => s.isDirection)
+  return direction
+    ? { title: direction.title, href: catalogHref({ direction: direction.slug }) }
+    : null
+}
+
 /** Строки подборки с картинкой, ценой и корзиной — из того же набора, что каталог. */
 function toPicks(items: RelatedProduct[], byHref: Map<string, PickItem>): PickItem[] {
   return items.map((item) => {
@@ -93,6 +117,7 @@ export async function ProductView({
   ])
   const byHref = new Map<string, PickItem>(catalog.items.map((item) => [item.href, item]))
   const direction = product.sections.find((s) => s.isDirection)
+  const crumb = breadcrumbSection(product)
   const guided = product.pageView === 'picker'
   const profile = kindProfile(product.kind)
   const about = product.description ? (
@@ -254,9 +279,7 @@ export async function ProductView({
               title: groupLabels[product.kind],
               href: catalogHref({ group: groupKeys[product.kind] }),
             },
-            ...(direction
-              ? [{ title: direction.title, href: catalogHref({ direction: direction.slug }) }]
-              : []),
+            ...(crumb ? [crumb] : []),
             { title: product.title },
           ]}
         />
