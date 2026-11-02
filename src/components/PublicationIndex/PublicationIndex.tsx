@@ -105,6 +105,7 @@ export async function PublicationIndex({ path, title, lead, kind, params }: Prop
                   tone={tones[i % tones.length]}
                   withExcerpt
                   level={2}
+                  size={kind === 'news' ? 'plain' : 'default'}
                 />
               </li>
             ))}

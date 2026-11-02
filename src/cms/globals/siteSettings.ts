@@ -1,6 +1,11 @@
-import type { GlobalConfig } from 'payload'
+import type { Field, GlobalConfig } from 'payload'
 import { everyone, isEditor } from '../access'
 import { textField } from '../fields'
+
+const termFields: Field[] = [
+  textField('title', 'Заголовок (например, Сроки поставки)', true),
+  { name: 'text', label: 'Текст', type: 'textarea', required: true },
+]
 
 /** Контакты и тексты шапки и подвала. Маркетолог меняет их в админке, а не в коде. */
 export const siteSettings: GlobalConfig = {
@@ -51,5 +56,18 @@ export const siteSettings: GlobalConfig = {
       ],
     },
     { name: 'footerText', label: 'Текст в подвале', type: 'textarea' },
+    {
+      name: 'purchaseTerms',
+      label: 'Условия покупки на странице товара',
+      type: 'group',
+      admin: {
+        description:
+          'Блок «Условия покупки» под описанием товара: сроки, оплата, тендеры. Свой список для программ и для оборудования. Пустой список — блока нет.',
+      },
+      fields: [
+        { name: 'software', label: 'Программы', type: 'array', fields: termFields },
+        { name: 'hardware', label: 'Оборудование', type: 'array', fields: termFields },
+      ],
+    },
   ],
 }

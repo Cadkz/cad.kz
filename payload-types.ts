@@ -2004,6 +2004,25 @@ export interface SiteSetting {
     | null;
   footerText?: string | null;
   /**
+   * Блок «Условия покупки» под описанием товара: сроки, оплата, тендеры. Свой список для программ и для оборудования. Пустой список — блока нет.
+   */
+  purchaseTerms?: {
+    software?:
+      | {
+          title: string;
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    hardware?:
+      | {
+          title: string;
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
    * Все прошлые сохранения и откат к любому из них — вкладка «Версии» вверху.
    */
   updatedBy?: (number | null) | User;
@@ -2175,6 +2194,24 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         id?: T;
       };
   footerText?: T;
+  purchaseTerms?:
+    | T
+    | {
+        software?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              id?: T;
+            };
+        hardware?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              id?: T;
+            };
+      };
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;

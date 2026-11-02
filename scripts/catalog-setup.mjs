@@ -13,7 +13,7 @@
 // каталог как в Битриксе: САПР в «Архитектуре и BIM», АВС — лицензия или обновление (22.10.2026);
 // оборудование как в Битриксе: четыре типа, плоттеры и комплектующие, WideTEK (22.10.2026);
 // тексты сканеров WideTEK (26.10.2026); девять направлений — визуализация и трубопроводы влиты (27.10.2026);
-// каталог Autodesk — только коллекции AEC, PDMC, M&E и их программы, Autodesk Forma и линейки, названия Fusion, Navisworks Manage и Simulate, прайс-лист Autodesk для Кадди (29.10.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
+// каталог Autodesk — только коллекции AEC, PDMC, M&E и их программы, Autodesk Forma и линейки, названия Fusion, Navisworks Manage и Simulate, прайс-лист Autodesk для Кадди (29.10.2026); правки к презентации 03.11.2026 (демопубликации скрыты, SCAD, подборки Artec, страницы, условия покупки); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -61,6 +61,7 @@ import { setupOwnerCatalog } from '../src/lib/ownerCatalogSetup.ts'
 import { setupPicker, setupPickerV2 } from '../src/lib/pickerSetup.ts'
 import { setupPickerV3 } from '../src/lib/pickerSetupV3.ts'
 import { setupPickerV4 } from '../src/lib/pickerSetupV4.ts'
+import { setupPresentation } from '../src/lib/presentationSetup.ts'
 import { setupPresets, setupQuality } from '../src/lib/presetsSetup.ts'
 import { setupPriorities, setupPrioritiesV2, setupPrioritiesV3 } from '../src/lib/prioritySetup.ts'
 import { setupPrivacyPage } from '../src/lib/privacySetup.ts'
@@ -312,6 +313,9 @@ try {
   const faq2 = await setupKaddiFaq2(payload)
   if (!faq2) console.log('Справка Кадди, второй прогон 30.10.2026, уже загружена.')
   else for (const line of faq2) console.log(`Справка Кадди (2) — ${line}`)
+  const presentation = await setupPresentation(payload)
+  if (!presentation) console.log('Правки к презентации 03.11.2026 уже внесены.')
+  else for (const line of presentation) console.log(`Презентация — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

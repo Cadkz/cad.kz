@@ -19,6 +19,7 @@ import { ProductSection } from '@/components/ProductSection/ProductSection'
 import { ProductSpecs } from '@/components/ProductSpecs/ProductSpecs'
 import { ProductStage } from '@/components/ProductStage/ProductStage'
 import { ProductTabs } from '@/components/ProductTabs/ProductTabs'
+import { PurchaseTerms } from '@/components/PurchaseTerms/PurchaseTerms'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { SectionIcon } from '@/components/SectionIcon/SectionIcon'
 import { kindProfile } from '@/domain/productKind.mjs'
@@ -30,6 +31,7 @@ import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
 import type { PickTarget, ProductPage, RelatedProduct } from '@/lib/product'
+import { getPurchaseTerms } from '@/lib/purchaseTerms'
 import { getRecommendations } from '@/lib/recommendations'
 import { parseBody } from '@/lib/richText'
 import { shortDescription, siteUrl } from '@/lib/seo'
@@ -82,11 +84,12 @@ export async function ProductView({
   product: ProductPage
   pick: PickTarget | null
 }) {
-  const [{ cross, similar, limit }, contacts, catalog, schedule] = await Promise.all([
+  const [{ cross, similar, limit }, contacts, catalog, schedule, allTerms] = await Promise.all([
     cms().then((payload) => getRecommendations(payload, product.id)),
     getContacts(),
     getCatalog(),
     courseGroups(product),
+    getPurchaseTerms(),
   ])
   const byHref = new Map<string, PickItem>(catalog.items.map((item) => [item.href, item]))
   const direction = product.sections.find((s) => s.isDirection)
@@ -222,6 +225,21 @@ export async function ProductView({
         </ProductSection>
       </Reveal>
     ) : null
+  // Условия покупки (просьба владельца 02.11.2026): у программ и оборудования свои, у курсов нет.
+  const termsList =
+    product.kind === 'software'
+      ? allTerms.software
+      : product.kind === 'hardware'
+        ? allTerms.hardware
+        : []
+  const terms =
+    termsList.length > 0 ? (
+      <Reveal>
+        <ProductSection title="Условия покупки" id="terms">
+          <PurchaseTerms terms={termsList} />
+        </ProductSection>
+      </Reveal>
+    ) : null
   const scans =
     product.scans.length > 0 ? <ProductScans title={product.title} scans={product.scans} /> : null
 
@@ -247,6 +265,7 @@ export async function ProductView({
             {groups}
             {config}
             {overview}
+            {terms}
             {faq}
           </ProductLayout>
           <PickerBar />

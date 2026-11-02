@@ -32,6 +32,7 @@ import * as migration_20261022_125849_equipment_research from './20261022_125849
 import * as migration_20261023_114952_manufacturer_order from './20261023_114952_manufacturer_order'
 import * as migration_20261024_000240_product_scans from './20261024_000240_product_scans'
 import * as migration_20261030_100913_search_queries from './20261030_100913_search_queries'
+import * as migration_20261102_075759_purchase_terms from './20261102_075759_purchase_terms'
 
 export const migrations = [
   {
@@ -203,5 +204,10 @@ export const migrations = [
     up: migration_20261030_100913_search_queries.up,
     down: migration_20261030_100913_search_queries.down,
     name: '20261030_100913_search_queries',
+  },
+  {
+    up: migration_20261102_075759_purchase_terms.up,
+    down: migration_20261102_075759_purchase_terms.down,
+    name: '20261102_075759_purchase_terms',
   },
 ]

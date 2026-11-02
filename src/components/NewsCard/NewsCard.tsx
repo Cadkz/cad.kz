@@ -23,8 +23,9 @@ type Props = {
   /** Уровень заголовка: h2 в списке под h1 страницы, h3 в секции главной под её h2. */
   level?: 2 | 3
   /** large — крупная карточка (главная, «Статьи и новости»): обложка тянется на высоту блока.
-   *  text — без обложки: дата, тема и заголовок («Новости и акции» рядом со слайдером). */
-  size?: 'default' | 'large' | 'text'
+   *  text — без обложки: дата, тема и заголовок («Новости и акции» рядом со слайдером).
+   *  plain — без обложки, заголовок и анонс целиком (список новостей, решение владельца 02.11.2026). */
+  size?: 'default' | 'large' | 'text' | 'plain'
 }
 
 /** Карточка новости или статьи: обложка, дата, тематика, заголовок, анонс. */
@@ -38,7 +39,7 @@ export function NewsCard({
   const Heading = level === 2 ? 'h2' : 'h3'
   return (
     <article className={size === 'default' ? styles.card : `${styles.card} ${styles[size]}`}>
-      {size !== 'text' && (
+      {size !== 'text' && size !== 'plain' && (
         <div className={`${styles.thumb} ${styles[tone]}`}>
           {news.cover ? (
             <Image

@@ -28,7 +28,7 @@
   font-weight: var(--weight-semibold);
 }
 
-.pill:hover:not(:disabled) {
+.pill:hover:not(:disabled):not([aria-pressed="true"]) {
   background: var(--color-blue-mid);
 }
 

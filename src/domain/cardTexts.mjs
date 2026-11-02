@@ -311,6 +311,54 @@ export const CARD_TEXTS = {
     'Углублённо: железные дороги в Civil 3D и Dynamo',
   autodesk_revit_mep_slabotochnye_seti: 'Слаботочные сети в Revit по технологии BIM',
   autodesk_advance_steel_bazovyy_kurs: 'Основы: модели металлоконструкций в Advance Steel',
+  // Курсы из таблицы УЦ (аудит к презентации 02.11.2026): вместо обрывков «Вы научитесь:»,
+  // «Чему вы научитесь на курсе:» и запасной фразы — одна мысль, для чего курс.
+  'scad-office': 'Расчёт конструкций в SCAD Office для разделов КЖ и КМ',
+  'seminar-vozmozhnosti-vlozhennyh-semeystv-revit-dekompoziciya':
+    'Вложенные семейства Revit: собираем сложное из готовых частей',
+  'praktikum-autodesk-revit-ov-vk': 'Модель внутренних сетей ОВ и ВК в Revit',
+  'praktikum-autodesk-revit-arhitektura':
+    'Архитектурная модель в Revit: повторяем за преподавателем',
+  'seminar-sozdanie-sistemy-ventilyacii': 'Создание и расчёт системы вентиляции в Revit',
+  'razrabotka-smet-ispolzovaniem-bim': 'Сметы по BIM-модели: для руководителей, ГИПов и ГАПов',
+  'vizualnoe-instrumentalnoe-obsledovanie-zdaniy-sooruzheniy':
+    'Методы обследования зданий, дефекты и их причины',
+  'podhody-k-parametrizacii-rabota-osnovnym-funkcionalom':
+    'Параметрические модели по 3D-сканам в Geomagic Design X',
+  'elektrosnabzhenie-osveschenie-molniezaschita-slabotochnye':
+    'Электрика, освещение, молниезащита и слаботочка в модели Revit',
+  'osnovy-proektirovaniya-stalnyh-konstrukciy-sp-rk-en-1993-1-1':
+    'Сечения, устойчивость и соединения по СП РК EN 1993 (Еврокод 3)',
+  'seminar-dynamo-proektirovschikov-avtomatizaciya-zadach':
+    'Автоматизация рутинных задач в Revit с помощью Dynamo',
+  'praktikum-revit-arhitektora': 'Упражнения: модель АР/АИ, спецификации и документация в Revit',
+  'autodesk-revit-structure-2027': 'Конструкции КЖ и КМ в Revit',
+  'effektivnoe-3d-proektirovanie-solidworks-ot-eskiza-do-sborki':
+    'Детали, сборки и чертежи по ЕСКД в SolidWorks',
+  'autodesk-civil-3d-proektirovanie-vneshnih-setey-uglublennyy':
+    'Углублённо: проектирование наружных сетей в Civil 3D',
+  'raschet-pk-lira-fem-soglasno-eurocodes-sp-rk-en-uroven':
+    'Для начинающих: расчёт в ЛИРА-FEM по СП РК EN',
+  'autodesk-revit-mep-ov-vk-osnovy': 'Основы: внутренние инженерные системы в Revit',
+  'praktikum-autodesk-revit-structure': 'Конструктивная модель здания в Revit',
+  'praktika-sozdaniya-cifrovyh-modeley-zdaniy-sooruzheniy':
+    'Цифровая модель здания в LIRA-CAD (САПФИР) для расчёта',
+  '1s-buhgalteriya': 'Бухгалтерский и налоговый учёт в 1С',
+  'kompleksnyy-autocad-p-id-autocad-plant-3d':
+    'Схемы P&ID и 3D-модели трубопроводов в AutoCAD Plant 3D',
+  'polnyy-bim-menedzher': 'Внедрение BIM и управление BIM-проектом в компании',
+  'autocad-3d-modelirovanie-vizualizaciya': '3D-модели и проектная документация по ним в AutoCAD',
+  'autodesk-civil-3d-proektirovanie-generalnyh-planov':
+    'Раздел ГП в Civil 3D: повышение квалификации',
+  'autodesk-revit-arhitektora': 'Архитектурная модель здания в Revit, разделы АИ и ТХ',
+  'autocad-rasshirennye-vozmozhnosti': 'Ускоряем и автоматизируем работу в AutoCAD',
+  'osnovy-smetnogo-dela-ispolzovaniem-smetnoy-sistemy-avs': 'Основы сметного дела в программе АВС',
+  'osnovy-proektirovaniya-zhelezobetonnyh-konstrukciy-sp-rk-en':
+    'Железобетон по СП РК EN 1992 (Еврокод 2)',
+  'raschet-pk-lira-fem-soglasno-evronormam-sp-rk-en-prodvinutyh':
+    'Для практиков: сложные модели в ЛИРА-FEM по СП РК EN',
+  'tekla-structures-km-kzh': 'Модели и чертежи КМ и КЖ в Tekla Structures',
+  'autocad-osnovy-raboty': 'Основы черчения в AutoCAD с нуля',
 
   // Услуги
   CAD_consulting: 'Аудит и настройка проектных процессов под ваши задачи',
