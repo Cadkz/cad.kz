@@ -53,6 +53,7 @@ import {
   setupHomeTrust,
 } from '../src/lib/homeSetup.ts'
 import { setupKaddiFaq, setupKaddiFaq2 } from '../src/lib/kaddiFaqSetup.ts'
+import { setupLegacyCovers } from '../src/lib/legacyCoversSetup.ts'
 import { setupNewsCovers } from '../src/lib/newsCoversSetup.ts'
 import { clearOldPictures } from '../src/lib/oldPicturesSetup.ts'
 import { setupOwnerCatalogFixes } from '../src/lib/ownerCatalogFixes.ts'
@@ -316,6 +317,9 @@ try {
   const presentation = await setupPresentation(payload)
   if (!presentation) console.log('Правки к презентации 03.11.2026 уже внесены.')
   else for (const line of presentation) console.log(`Презентация — ${line}`)
+  const legacyCovers = await setupLegacyCovers(payload)
+  if (!legacyCovers) console.log('Обложки публикаций со старого сайта уже поставлены.')
+  else for (const line of legacyCovers) console.log(`Обложки — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)

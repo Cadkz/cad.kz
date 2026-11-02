@@ -1,0 +1,14 @@
+/* Копия карточки, которая раскрывается на весь экран: над всем сайтом, нажатия не ловит.
+   Положение и размер задаёт анимация (NewsCardLink). */
+.overlay {
+  position: fixed;
+  z-index: var(--z-modal);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.copy {
+  width: 100%;
+  height: 100%;
+  border-color: transparent;
+}
