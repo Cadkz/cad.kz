@@ -129,11 +129,16 @@ export function menuColumns(
         if (!inChild.length) return []
         const childFilter = { group: section.menuGroup, type: child.slug }
         const cards = vendorCards(inChild, childFilter)
+        // Миниатюра подраздела — фото его флагмана (меньший «Порядок в линейке»), как плитки
+        // каталога, а не значок (правка владельца 03.11.2026).
+        const cover = [...inChild]
+          .filter((product) => product.picture)
+          .sort((a, b) => (a.lineOrder ?? Infinity) - (b.lineOrder ?? Infinity))[0]
         return [
           {
             key: `section:${child.slug}`,
             title: child.title,
-            logo: null,
+            logo: cover?.picture ?? null,
             icon: child.icon ?? null,
             allHref: hrefFor(childFilter),
             // Один производитель — его линейки; несколько — по линейке на производителя.

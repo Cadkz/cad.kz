@@ -1,6 +1,7 @@
 import { ArrowRight, Newspaper } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { NAV_FORWARD } from '@/domain/motion.mjs'
 import { Badge } from '../Badge/Badge'
 import styles from './NewsCard.module.css'
 
@@ -72,7 +73,7 @@ export function NewsCard({
           {news.topic && <Badge>{news.topic}</Badge>}
         </div>
         <Heading className={styles.title}>
-          <Link href={news.href} className={styles.link}>
+          <Link href={news.href} className={styles.link} transitionTypes={NAV_FORWARD}>
             {news.title}
           </Link>
         </Heading>

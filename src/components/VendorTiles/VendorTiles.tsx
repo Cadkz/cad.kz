@@ -22,7 +22,7 @@ type Props = {
  */
 export function VendorTiles({ tiles, logos, onPick }: Props) {
   return (
-    <ul className={styles.grid}>
+    <ul data-grid="" className={styles.grid}>
       {tiles.map((tile, index) => {
         const logo = logos[tile.title]
         return (

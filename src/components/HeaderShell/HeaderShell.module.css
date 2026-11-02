@@ -3,6 +3,8 @@
   top: 0;
   z-index: var(--z-header);
   background: var(--color-bg);
+  /* При переходе между страницами шапка стоит, экран под ней свайпается (base.css «Переходы»). */
+  view-transition-name: site-header;
   transition:
     background-color var(--duration-base) var(--ease),
     box-shadow var(--duration-base) var(--ease),

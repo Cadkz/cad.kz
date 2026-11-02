@@ -72,6 +72,7 @@ export default async function Home({ searchParams }: Props) {
       </Section>
       <Section
         id="home-catalog"
+        tone="tint"
         title="Каталог"
         action={{ href: catalogHref(), label: 'Открыть каталог' }}
         desktopOnly

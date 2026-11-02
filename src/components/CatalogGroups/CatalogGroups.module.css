@@ -65,10 +65,3 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
-
-/* Витрина на главной без колонки фильтра: три карточки в ряд уже от 960 px. */
-@media (min-width: 960px) {
-  .wide .grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}

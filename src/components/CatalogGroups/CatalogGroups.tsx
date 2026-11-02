@@ -24,14 +24,12 @@ const TAIL = 3
  */
 type Props = {
   groups: ResultGroup[]
-  /** Каталог на главной без колонки фильтра: три карточки в ряд уже от 960 px. */
-  wide?: boolean
 }
 
-export function CatalogGroups({ groups, wide = false }: Props) {
+export function CatalogGroups({ groups }: Props) {
   const [open, setOpen] = useState<string[]>([])
   return (
-    <div className={wide ? `${styles.root} ${styles.wide}` : styles.root}>
+    <div className={styles.root}>
       {groups.map((group) => {
         const all = open.includes(group.key) || group.items.length <= FIRST + TAIL
         const shown = all ? group.items : group.items.slice(0, FIRST)
@@ -48,7 +46,7 @@ export function CatalogGroups({ groups, wide = false }: Props) {
                 )}
               </div>
             )}
-            <ul className={styles.grid}>
+            <ul data-grid="" className={styles.grid}>
               {shown.map((item, index) => (
                 <Reveal as="li" key={item.id} step={index % 3}>
                   <ProductCard product={item} />

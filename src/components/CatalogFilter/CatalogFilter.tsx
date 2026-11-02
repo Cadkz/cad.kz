@@ -266,10 +266,10 @@ export function CatalogFilter({
             onPick={(vendor) => commit(update(state, { vendors: [vendor] }), true)}
           />
         ) : groups?.length ? (
-          <CatalogGroups key={toQuery(view)} groups={groups} wide={compact && !sideOpen} />
+          <CatalogGroups key={toQuery(view)} groups={groups} />
         ) : found.items.length ? (
           <FlowPage page={found.page}>
-            <ul className={styles.grid}>
+            <ul data-grid="" className={styles.grid}>
               {shownItems.map((item, index) => (
                 <FlowItem key={item.id} still={shownItems.length > FLOW_LIMIT}>
                   <Reveal as="li" step={index % 3}>

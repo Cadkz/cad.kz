@@ -1,16 +1,30 @@
-import { type ReactNode, ViewTransition } from 'react'
+'use client'
 
-const DIRECTION = { 'nav-forward': 'nav-forward', 'nav-back': 'nav-back', default: 'none' }
+import { usePathname } from 'next/navigation'
+import { type ReactNode, ViewTransition } from 'react'
+import styles from './PageTransition.module.css'
+
+/** Метка запускает переход только у ссылок с направлением; остальные переходы — без анимации. */
+const DIRECTION = { 'nav-forward': 'nav-mark', 'nav-back': 'nav-mark', default: 'none' }
 
 /**
- * Содержимое страницы между шапкой и подвалом. Переход вглубь (карточка → товар, статья) —
- * старая страница уходит чуть влево, новая приходит справа; назад (хлебные крошки) — наоборот.
- * Шапка и подвал не двигаются. Остальные переходы — без анимации (src/domain/motion.mjs).
+ * Переход между страницами — свайп всего экрана (правка владельца 03.11.2026): вперёд новая
+ * страница приходит справа, назад — слева. Двигается снимок экрана целиком (root), а не
+ * содержимое страницы: снимок длинной страницы при прокрутке показывал её верх (баннер главной)
+ * и открывал новую с середины. Шапка стоит на месте (своё имя перехода в HeaderShell).
+ *
+ * Сама анимация — в src/styles/base.css «Переходы» по типу перехода. React запускает переход,
+ * только если есть что анимировать, поэтому в углу экрана — невидимая метка, которая меняется
+ * с адресом страницы.
  */
 export function PageTransition({ children }: { children: ReactNode }) {
+  const pathname = usePathname()
   return (
-    <ViewTransition default={DIRECTION} name="page">
+    <>
+      <ViewTransition key={pathname} enter={DIRECTION} exit={DIRECTION} default="none">
+        <span className={styles.mark} aria-hidden="true" />
+      </ViewTransition>
       {children}
-    </ViewTransition>
+    </>
   )
 }

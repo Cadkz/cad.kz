@@ -133,13 +133,17 @@
     flex-wrap: nowrap;
   }
 
+  /* Спрятанная колонка не задаёт высоту блока: иначе фильтр в нулевой ширине растягивал каталог
+     пустым местом (на главной было 1418 px вместо 960). */
   .compact .sidebar {
+    max-height: 0;
     overflow: hidden;
     opacity: 0;
     transition: opacity var(--duration-sidebar) var(--ease-ios);
   }
 
   .compact[data-side="open"] .sidebar {
+    max-height: none;
     opacity: 1;
   }
 
@@ -148,8 +152,16 @@
     width: var(--sidebar);
   }
 
-  /* Колонка спрятана — три в ряд уже от 960 px; открыта — как на /catalog (2, от 1200 px 3). */
-  .compact:not([data-side="open"]) .grid {
+  /* Колонка спрятана — все сетки шага (карточки, плитки разделов и производителей, популярные)
+     по 3 в ряд от 960 px и по 4 от 1200 px (правка владельца 03.11.2026); открыта — как на
+     /catalog. data-grid стоит у каждой такой сетки. */
+  .compact:not([data-side="open"]) [data-grid] {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .compact:not([data-side="open"]) [data-grid] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

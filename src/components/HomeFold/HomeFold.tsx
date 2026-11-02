@@ -20,12 +20,19 @@ export function HomeFold({ children }: { children: ReactNode }) {
     const el = box.current
     const content = inner.current
     if (!el || !content) return
-    const measure = () => setTall(content.offsetHeight > el.clientHeight + 1 || open)
+    // Предел — из того же токена, что ограничивает блок в CSS.
+    const measure = () => {
+      const limit = Number.parseFloat(
+        getComputedStyle(el).getPropertyValue('--home-catalog-height'),
+      )
+      setTall(content.offsetHeight > limit + 1)
+    }
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(content)
+    observer.observe(el)
     return () => observer.disconnect()
-  }, [open])
+  }, [])
 
   const close = () => {
     setOpen(false)
@@ -34,7 +41,7 @@ export function HomeFold({ children }: { children: ReactNode }) {
 
   return (
     <div className={styles.root}>
-      <div ref={box} className={styles.box} data-open={open || !tall ? 'true' : undefined}>
+      <div ref={box} className={styles.box} data-open={open ? 'true' : undefined}>
         <div ref={inner}>{children}</div>
         {tall && !open && (
           <div className={styles.fade}>

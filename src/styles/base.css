@@ -136,50 +136,50 @@ button {
   white-space: nowrap;
 }
 
-/* Переходы между страницами (React <ViewTransition>, правка владельца 02.11.2026, вечер (2)).
-   Вглубь (.nav-forward: карточка каталога → товар) и «следующая» статья (.nav-next): старая
-   страница спокойно гаснет со сдвигом влево, новая с наложением приходит справа и мягко садится.
-   Назад (.nav-back: хлебные крошки) и «предыдущая» статья (.nav-prev) — зеркально.
-   Размер области не анимируется: высота страниц разная, иначе картинка «тянется» и дёргается.
-   Открытие статьи из списка — без анимации (решение владельца). Стопку как в iOS и перелёт
-   картинки пробовали и убрали: медленно и дёргано. Браузер без View Transitions — без анимации. */
-/* Телефон и планшет: без анимации. Длинная страница — огромный снимок, сдвиг шёл рывками и
-   оставлял полупрозрачный след (замечание владельца 02.11.2026, 20:40). Старый снимок скрыт,
-   новая страница сразу на месте. */
-::view-transition-group(.nav-forward),
-::view-transition-group(.nav-back),
-::view-transition-new(.nav-forward),
-::view-transition-new(.nav-back) {
-  animation: none;
+/* Переходы между страницами (правка владельца 03.11.2026): свайп всего экрана, как по хлебной
+   крошке со страницы товара в каталог (владельцу понравилось). Вперёд (.nav-forward: карточка
+   → товар или статья, «Следующая», пункт меню правее текущего) — старый экран гаснет со сдвигом
+   влево, новый приходит справа; назад (хлебные крошки, «Предыдущая», пункт левее) — зеркально.
+   Двигается снимок экрана (root), шапка стоит (site-header). Без типа (меню каталога, фильтры,
+   «Назад» браузера) — без анимации. Браузер без View Transitions — без анимации. */
+::view-transition {
+  background: var(--color-bg);
 }
 
-::view-transition-old(.nav-forward),
-::view-transition-old(.nav-back) {
+::view-transition-group(.nav-mark) {
   display: none;
 }
 
-/* Компьютер, от 960 px: старая гаснет быстро, новая проявляется, когда старой почти нет. */
-@media (min-width: 960px) {
-  ::view-transition-old(.nav-forward),
-  ::view-transition-old(.nav-back) {
-    display: block;
-  }
+::view-transition-group(site-header) {
+  animation: none;
+}
 
-  ::view-transition-old(.nav-forward) {
-    animation: var(--duration-page-out) var(--ease-page-out) both page-out-left;
-  }
+::view-transition-image-pair(site-header) {
+  isolation: auto;
+}
 
-  ::view-transition-new(.nav-forward) {
-    animation: var(--duration-page-in) var(--ease-page-in) var(--delay-page-in) both page-in-right;
-  }
+::view-transition-old(site-header) {
+  display: none;
+}
 
-  ::view-transition-old(.nav-back) {
-    animation: var(--duration-page-out) var(--ease-page-out) both page-out-right;
-  }
+::view-transition-new(site-header) {
+  animation: none;
+}
 
-  ::view-transition-new(.nav-back) {
-    animation: var(--duration-page-in) var(--ease-page-in) var(--delay-page-in) both page-in-left;
-  }
+html:active-view-transition-type(nav-forward)::view-transition-old(root) {
+  animation: var(--duration-page-out) var(--ease-page-out) both page-out-left;
+}
+
+html:active-view-transition-type(nav-forward)::view-transition-new(root) {
+  animation: var(--duration-page-in) var(--ease-page-in) var(--delay-page-in) both page-in-right;
+}
+
+html:active-view-transition-type(nav-back)::view-transition-old(root) {
+  animation: var(--duration-page-out) var(--ease-page-out) both page-out-right;
+}
+
+html:active-view-transition-type(nav-back)::view-transition-new(root) {
+  animation: var(--duration-page-in) var(--ease-page-in) var(--delay-page-in) both page-in-left;
 }
 
 @keyframes page-out-left {

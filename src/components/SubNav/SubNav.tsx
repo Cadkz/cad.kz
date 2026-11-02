@@ -10,6 +10,7 @@ import {
   useEffect,
   useState,
 } from 'react'
+import { NAV_BACK, NAV_FORWARD } from '@/domain/motion.mjs'
 import { activeLinkIndex, markMotion } from '@/domain/navMark.mjs'
 import { aboutColumns, sectionLinks } from '@/lib/siteNav'
 import { Container } from '../Container/Container'
@@ -106,6 +107,8 @@ export function SubNav({ phone, contacts }: Props) {
               href={link.href}
               className={styles.item}
               aria-current={active === index ? 'page' : undefined}
+              // Пункт правее открытого — новая страница приходит справа, левее — слева.
+              transitionTypes={active !== null && index < active ? NAV_BACK : NAV_FORWARD}
               {...attrs(index)}
             >
               {link.title}

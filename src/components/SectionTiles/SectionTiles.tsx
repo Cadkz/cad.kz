@@ -35,7 +35,7 @@ function text(tile: SectionTile) {
 export function SectionTiles({ tiles, overline, onPick }: Props) {
   return (
     // Сетка одна на весь каталог — по 3 в ряд, и у типов оборудования (правка владельца 02.11.2026).
-    <ul className={styles.grid}>
+    <ul data-grid="" className={styles.grid}>
       {tiles.map((tile, index) => (
         <Reveal as="li" key={tile.slug} step={index % 3}>
           <CatalogTile

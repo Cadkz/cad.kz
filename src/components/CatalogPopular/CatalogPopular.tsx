@@ -49,7 +49,7 @@ export function CatalogPopular({
   const byId = new Map(items.filter((item) => item.id > 0).map((item) => [item.id, item]))
   const byHref = new Map(items.map((item) => [item.href, item]))
   return (
-    <ul className={styles.grid} aria-label="Популярные решения">
+    <ul data-grid="" className={styles.grid} aria-label="Популярные решения">
       {cards.map((card) => (
         <li key={card.key}>
           <ProductCard product={toCard(card, byId, byHref)} />
