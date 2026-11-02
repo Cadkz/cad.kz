@@ -1,4 +1,8 @@
-/* Телефон: строка — значок слева, заголовок и описание справа (вернули 21.10.2026 по решению
+/* Спокойный тёмный вариант (02.11.2026, ТЗ владельца: BIM-баннер — главный акцент, карточки
+   под ним тише): ровная заливка --color-navy-deep вместо градиента и затемнения, постоянная
+   тонкая рамка, декоративный значок бледнее. При наведении фон светлеет до --color-navy, рамка
+   заметнее, выезжает «В каталог» — без подъёма, свечения и теней.
+   Телефон: строка — значок слева, заголовок и описание справа (вернули 21.10.2026 по решению
    владельца: красивее, чем две плитки в ряд или узкие строки без описания). Цвет у всех один
    тёмно-синий (аудит 21.10.2026, пакет 0). От 640 px — плитка (компактнее с 12.10.2026: 4 в ряд от 960 px,
    сетка 4 × 3): значок, под ним заголовок и описание;
@@ -12,10 +16,14 @@
   height: 100%;
   padding: var(--space-5);
   overflow: hidden;
+  border: 1px solid var(--color-on-dark-hairline);
   border-radius: var(--radius-lg);
-  background: var(--gradient-deep);
+  background: var(--color-navy-deep);
   color: var(--color-text-inverse);
   isolation: isolate;
+  transition:
+    background-color var(--duration-slow) var(--ease-reveal),
+    border-color var(--duration-slow) var(--ease-reveal);
 }
 
 /* Тонкая светлая рамка — проступает при наведении (поверх затемнения, клики не ловит). */
@@ -30,21 +38,13 @@
   transition: opacity var(--duration-slow) var(--ease-reveal);
 }
 
-.card::before {
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-below);
-  background: var(--gradient-card-shade);
-  content: "";
-}
-
 /* Крупная полупрозрачная иконка в углу — фирменный декор карточек направлений. */
 .big {
   position: absolute;
   right: calc(-1 * var(--space-4));
   bottom: calc(-1 * var(--space-4));
   z-index: var(--z-below);
-  opacity: 0.1;
+  opacity: 0.06;
   transition:
     opacity var(--duration-slow) var(--ease-reveal),
     transform var(--duration-slow) var(--ease-reveal);
@@ -97,7 +97,7 @@
   }
 
   .big {
-    opacity: 0.14;
+    opacity: 0.08;
   }
 
   .big svg {
@@ -145,12 +145,13 @@
 /* Наведение мышью и фокус с клавиатуры: подпись, тонкая рамка, значок и описание светлеют.
    Карточка на месте — без подъёма и тени (пожелание владельца 23.10.2026: без «прыжков»). */
 @media (hover: hover) {
-  .card:hover::after {
-    opacity: 1;
+  .card:hover {
+    border-color: var(--color-on-dark-line);
+    background: var(--color-navy);
   }
 
   .card:hover .big {
-    opacity: 0.24;
+    opacity: 0.14;
     transform: translate(calc(-1 * var(--space-2)), calc(-1 * var(--space-2)));
   }
 
