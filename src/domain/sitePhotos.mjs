@@ -182,11 +182,11 @@ export const SITE_PHOTOS = {
   ],
   // 3ds-max
   '3ds_max': [{ url: '/images/software/3ds-max-1.webp', width: 1600, height: 900 }],
-  // aec-collection
+  // aec-collection: первой не Revit — иначе на соседних страницах одна и та же картинка (аудит 02.11.2026)
   'architecture_engineering_construction_collection-1107088405': [
-    { url: '/images/software/revit-1.webp', width: 1600, height: 900 },
     { url: '/images/software/civil-3d-1.webp', width: 1600, height: 900 },
     { url: '/images/software/navisworks-1.webp', width: 1600, height: 900 },
+    { url: '/images/software/revit-1.webp', width: 1600, height: 900 },
   ],
   // fusion
   fusion_360_team: [{ url: '/images/software/fusion-1.webp', width: 937, height: 531 }],

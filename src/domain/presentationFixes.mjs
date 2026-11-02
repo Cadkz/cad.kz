@@ -115,3 +115,17 @@ export function fixPageBody(slug, body) {
     if (page === slug && result.includes(from)) result = result.replace(from, to)
   return result
 }
+
+/**
+ * Публикации старого сайта без даты (на cad.kz у них нет даты на странице, а в списках сайт
+ * ставит публикации без даты первыми). Даты примерные, владелец поправит в админке, поле
+ * «Начало показа» (аудит 02.11.2026, пакет 3). nanoCAD Электро 8.5 — между новостями о версии 8.2
+ * (28.06.2017) и об интеграции с BIM-системами (28.06.2018), платформа 8.5 вышла в конце 2017;
+ * статья Autodesk считает по курсам на конец 2024 года.
+ * @type {Record<string, string>}
+ */
+export const UNDATED_PUBLICATIONS = {
+  'vykhod-versii-8-5-nanocad-elektro': '2017-12-15T07:00:00.000Z',
+  'vygodno-kupit-programmy-autodesk-kak-zafiksirovat-tsenu-i-ne-poteryat-na-kurse':
+    '2025-01-15T07:00:00.000Z',
+}

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { keyFacts, objectSize } from '../src/domain/keyFacts.mjs'
+import { keyFacts, objectSize, withDpi } from '../src/domain/keyFacts.mjs'
 import { cleanSpecs } from '../src/domain/specs.mjs'
 
 const list = (facts) => facts.map((f) => `${f.name}: ${f.value}`)
@@ -79,7 +79,27 @@ test('главные факты широкоформатного сканера:
     'Ширина сканирования: 25"',
     'Скорость: менее 3 с',
     'Конструкция: Планшетный, CCD',
+    'Разрешение: 1200 × 600 dpi',
   ])
+})
+
+test('WideTEK: формат и скорость из исследования, разрешение с dpi', () => {
+  const filters = {
+    format: ['A0 (36″)'],
+    speed: ['до 10 дюймов в секунду'],
+    form: ['Протяжный'],
+    sensor: ['CIS'],
+    resolution: ['1200 × 1200'],
+  }
+  assert.deepEqual(list(keyFacts({ category: 'wide-scanners', filters }, [])), [
+    'Ширина сканирования: A0 (36″)',
+    'Скорость: до 10 дюймов в секунду',
+    'Конструкция: Протяжный, CIS',
+    'Разрешение: 1200 × 1200 dpi',
+  ])
+  assert.equal(withDpi('1200 × 600'), '1200 × 600 dpi')
+  assert.equal(withDpi('1200 x 600 dpi'), '1200 x 600 dpi')
+  assert.equal(withDpi(null), null)
 })
 
 test('без исследования — первые короткие характеристики', () => {

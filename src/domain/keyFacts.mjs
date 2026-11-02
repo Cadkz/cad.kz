@@ -12,8 +12,8 @@ import { normalizeSpecValue } from './specs.mjs'
 /** Подпись у фото читается одной-двумя строками: длиннее — не показываем. */
 export const FACT_MAX_LENGTH = 32
 const LIMIT = 3
-/** У плоттеров пять фактов, как у Canon (владелец 30.10.2026). */
-const LIMITS = { plotters: 5 }
+/** У плоттеров пять фактов, как у Canon (владелец 30.10.2026); у широкоформатных сканеров четыре — с разрешением. */
+const LIMITS = { plotters: 5, 'wide-scanners': 4 }
 
 /** @param {Filters} filters @param {string} key */
 function filter(filters, key) {
@@ -156,14 +156,16 @@ const BY_CATEGORY = {
     fact('Разрешение', printResolution(specs)),
     fact('Подача', rolls(filter(filters, 'rolls'))),
   ],
+  // У WideTEK в исследовании «format» и «speed» вместо «width» и скорости в характеристиках —
+  // без запаса фактов было два, а разрешение без dpi (аудит 02.11.2026).
   'wide-scanners': (filters, specs) => [
-    fact('Ширина сканирования', filter(filters, 'width')),
-    fact('Скорость', scanSpeed(specs)),
+    fact('Ширина сканирования', filter(filters, 'width') ?? filter(filters, 'format')),
+    fact('Скорость', scanSpeed(specs) ?? filter(filters, 'speed')),
     fact(
       'Конструкция',
       [filter(filters, 'form'), filter(filters, 'sensor')].filter(Boolean).join(', '),
     ),
-    fact('Разрешение', filter(filters, 'resolution')),
+    fact('Разрешение', withDpi(filter(filters, 'resolution'))),
   ],
   // Третьим — для каких по размеру предметов (владелец 30.10.2026), технология — если размера нет.
   '3d-scanners': (filters) => [
@@ -182,6 +184,11 @@ const BY_CATEGORY = {
 /** @param {string} name @param {string | null | undefined} value @returns {Fact | null} */
 function fact(name, value) {
   return value ? { name, value: normalizeSpecValue(value) } : null
+}
+
+/** «1200 × 600» → «1200 × 600 dpi»; где единица уже есть — как есть. */
+export function withDpi(/** @type {string | null} */ value) {
+  return value && /\d\s*$/.test(value) ? `${value} dpi` : value
 }
 
 /** @param {string | null} value */

@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Picture } from '@/lib/pictures'
 import { AddToCartButton } from '../AddToCartButton/AddToCartButton'
+import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './PickRow.module.css'
 
 export type PickItem = {
@@ -17,17 +18,35 @@ export type PickItem = {
   requestKey?: string | null
   /** Подпись вместо цены: у линейки «6 программ». */
   note?: string
+  /** Значок раздела или темы курса — как в карточке каталога, если картинки нет. */
+  icon?: string | null
+  /** Программа без логотипа — название производителя, как в карточке каталога. */
+  logoFallback?: string | null
+  /** Тема курса: у курсов значок темы важнее производителя. */
+  topic?: string
 }
 
-const initials = (title: string) =>
-  title
-    .replace(/[«»"()]/g, '')
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join('')
-    .toUpperCase()
+/**
+ * Миниатюра без картинки — как в карточке каталога (аудит 02.11.2026: вместо логотипов были
+ * буквы «AS», «AC»): производитель программы словом, иначе значок раздела.
+ */
+function Thumb({ item }: { item: PickItem }) {
+  if (item.picture)
+    return (
+      <Image
+        src={item.picture.url}
+        alt=""
+        width={item.picture.width}
+        height={item.picture.height}
+        sizes="64px"
+        unoptimized={item.picture.local}
+        className={styles.image}
+      />
+    )
+  if (item.logoFallback && !item.topic)
+    return <span className={styles.vendor}>{item.logoFallback}</span>
+  return <SectionIcon name={item.icon ?? null} size={24} />
+}
 
 /**
  * Строка подборки на странице товара: миниатюра, название, производитель и цена; справа —
@@ -42,18 +61,7 @@ export function PickRow({ item }: { item: PickItem }) {
   return (
     <div className={styles.row}>
       <span className={styles.thumb} aria-hidden="true">
-        {item.picture ? (
-          <Image
-            src={item.picture.url}
-            alt=""
-            width={item.picture.width}
-            height={item.picture.height}
-            sizes="64px"
-            className={styles.image}
-          />
-        ) : (
-          initials(item.title)
-        )}
+        <Thumb item={item} />
       </span>
       <span className={styles.text}>
         <Link href={item.href} className={styles.title}>

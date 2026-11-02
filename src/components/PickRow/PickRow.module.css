@@ -108,3 +108,14 @@
     transform: none;
   }
 }
+
+/* Программа без логотипа — производитель словом, как в карточке каталога. */
+.vendor {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-snug);
+  text-align: center;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}

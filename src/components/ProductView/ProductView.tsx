@@ -80,7 +80,14 @@ function toPicks(items: RelatedProduct[], byHref: Map<string, PickItem>): PickIt
     const listed = byHref.get(item.href)
     // Подпись подборки (у курса — «Старт 1 декабря») важнее цены из каталога.
     if (listed) return item.note ? { ...listed, note: item.note } : listed
-    return { ...item, picture: null, priceFrom: null, offersCount: 0, cartOfferId: null }
+    return {
+      ...item,
+      picture: null,
+      logoFallback: item.vendor,
+      priceFrom: null,
+      offersCount: 0,
+      cartOfferId: null,
+    }
   })
 }
 

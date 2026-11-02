@@ -13,7 +13,7 @@
 // каталог как в Битриксе: САПР в «Архитектуре и BIM», АВС — лицензия или обновление (22.10.2026);
 // оборудование как в Битриксе: четыре типа, плоттеры и комплектующие, WideTEK (22.10.2026);
 // тексты сканеров WideTEK (26.10.2026); девять направлений — визуализация и трубопроводы влиты (27.10.2026);
-// каталог Autodesk — только коллекции AEC, PDMC, M&E и их программы, Autodesk Forma и линейки, названия Fusion, Navisworks Manage и Simulate, прайс-лист Autodesk для Кадди (29.10.2026); правки к презентации 03.11.2026 (демопубликации скрыты, SCAD, подборки Artec, страницы, условия покупки); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
+// каталог Autodesk — только коллекции AEC, PDMC, M&E и их программы, Autodesk Forma и линейки, названия Fusion, Navisworks Manage и Simulate, прайс-лист Autodesk для Кадди (29.10.2026); правки к презентации 03.11.2026 (демопубликации скрыты, SCAD, подборки Artec, страницы, условия покупки); даты двум публикациям старого сайта без даты (02.11.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -73,6 +73,7 @@ import { setupSearchAliases } from '../src/lib/searchSetup.ts'
 import { setupSoftwareTexts } from '../src/lib/softwareTextsSetup.ts'
 import { setupMepTasks } from '../src/lib/tasksSetup.ts'
 import { setupTextsAudit } from '../src/lib/textsSetup.ts'
+import { setupUndatedPublications } from '../src/lib/undatedSetup.ts'
 import { setupVendorList } from '../src/lib/vendorListSetup.ts'
 import { setupVendors } from '../src/lib/vendorsSetup.ts'
 import { setupVersions } from '../src/lib/versionsSetup.ts'
@@ -320,6 +321,9 @@ try {
   const legacyCovers = await setupLegacyCovers(payload)
   if (!legacyCovers) console.log('Обложки публикаций со старого сайта уже поставлены.')
   else for (const line of legacyCovers) console.log(`Обложки — ${line}`)
+  const undated = await setupUndatedPublications(payload)
+  if (!undated) console.log('Даты публикаций без даты (02.11.2026) уже поставлены.')
+  else for (const line of undated) console.log(`Публикации без даты — ${line}`)
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)
