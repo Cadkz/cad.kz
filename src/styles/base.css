@@ -143,25 +143,43 @@ button {
    Размер области не анимируется: высота страниц разная, иначе картинка «тянется» и дёргается.
    Открытие статьи из списка — без анимации (решение владельца). Стопку как в iOS и перелёт
    картинки пробовали и убрали: медленно и дёргано. Браузер без View Transitions — без анимации. */
+/* Телефон и планшет: без анимации. Длинная страница — огромный снимок, сдвиг шёл рывками и
+   оставлял полупрозрачный след (замечание владельца 02.11.2026, 20:40). Старый снимок скрыт,
+   новая страница сразу на месте. */
 ::view-transition-group(.nav-forward),
-::view-transition-group(.nav-back) {
+::view-transition-group(.nav-back),
+::view-transition-new(.nav-forward),
+::view-transition-new(.nav-back) {
   animation: none;
 }
 
-::view-transition-old(.nav-forward) {
-  animation: var(--duration-page-out) var(--ease-page-out) both page-out-left;
-}
-
-::view-transition-new(.nav-forward) {
-  animation: var(--duration-page-in) var(--ease-page-in) var(--delay-page-in) both page-in-right;
-}
-
+::view-transition-old(.nav-forward),
 ::view-transition-old(.nav-back) {
-  animation: var(--duration-page-out) var(--ease-page-out) both page-out-right;
+  display: none;
 }
 
-::view-transition-new(.nav-back) {
-  animation: var(--duration-page-in) var(--ease-page-in) var(--delay-page-in) both page-in-left;
+/* Компьютер, от 960 px: старая гаснет быстро, новая проявляется, когда старой почти нет. */
+@media (min-width: 960px) {
+  ::view-transition-old(.nav-forward),
+  ::view-transition-old(.nav-back) {
+    display: block;
+  }
+
+  ::view-transition-old(.nav-forward) {
+    animation: var(--duration-page-out) var(--ease-page-out) both page-out-left;
+  }
+
+  ::view-transition-new(.nav-forward) {
+    animation: var(--duration-page-in) var(--ease-page-in) var(--delay-page-in) both page-in-right;
+  }
+
+  ::view-transition-old(.nav-back) {
+    animation: var(--duration-page-out) var(--ease-page-out) both page-out-right;
+  }
+
+  ::view-transition-new(.nav-back) {
+    animation: var(--duration-page-in) var(--ease-page-in) var(--delay-page-in) both page-in-left;
+  }
 }
 
 @keyframes page-out-left {
