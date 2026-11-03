@@ -14,6 +14,8 @@ type Props = {
   facts: Fact[]
   /** Что показать на листе, пока картинок нет (значок раздела). */
   placeholder?: ReactNode
+  /** Логотип программы или производителя: на листе вместо значка, если картинок нет. */
+  logo?: { url: string; width: number; height: number } | null
 }
 
 /** Сдвиг пальцем, после которого лента листается. */
@@ -25,7 +27,7 @@ const SWIPE = 40
  * нажатие открывает картинку крупно (PictureViewer). Под картинкой — главные факты строкой (27.10.2026), у плоттеров пять, цветность со значком (30.10.2026). При прокрутке
  * фото отстаёт от сетки листа — глубина без JavaScript (CSS).
  */
-export function ProductStage({ title, pictures, facts, placeholder }: Props) {
+export function ProductStage({ title, pictures, facts, placeholder, logo }: Props) {
   const [active, setActive] = useState(0)
   const [open, setOpen] = useState<number | null>(null)
   const start = useRef<number | null>(null)
@@ -48,7 +50,21 @@ export function ProductStage({ title, pictures, facts, placeholder }: Props) {
       <div className={styles.media}>
         <div className={styles.float}>
           {count === 0 ? (
-            <div className={styles.placeholder}>{placeholder}</div>
+            <div className={styles.placeholder}>
+              {logo ? (
+                <span className={styles.logo}>
+                  <Image
+                    src={logo.url}
+                    width={logo.width}
+                    height={logo.height}
+                    alt={title}
+                    unoptimized
+                  />
+                </span>
+              ) : (
+                placeholder
+              )}
+            </div>
           ) : (
             <button
               type="button"

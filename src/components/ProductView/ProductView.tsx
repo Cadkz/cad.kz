@@ -198,6 +198,7 @@ export async function ProductView({
             title={product.title}
             pictures={product.stagePictures}
             facts={product.facts}
+            logo={programLogo(product) ?? vendorLogo(product.vendor)}
             placeholder={
               <span>
                 <SectionIcon name={product.sections[0]?.icon ?? 'building'} size={24} />

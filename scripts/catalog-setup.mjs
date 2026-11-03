@@ -69,6 +69,7 @@ import { setupPriorities, setupPrioritiesV2, setupPrioritiesV3 } from '../src/li
 import { setupPrivacyPage } from '../src/lib/privacySetup.ts'
 import { setupProductTables } from '../src/lib/productTablesSetup.ts'
 import { setupProductTexts } from '../src/lib/productTextsSetup.ts'
+import { setupProductTexts2 } from '../src/lib/productTextsSetup2.ts'
 import { setupProgramTexts } from '../src/lib/programTextsSetup.ts'
 import { setupFamilyRenew } from '../src/lib/renewSetup.ts'
 import { setupSearchAliases } from '../src/lib/searchSetup.ts'
@@ -326,6 +327,9 @@ try {
   const productTexts = await setupProductTexts(payload)
   if (!productTexts) console.log('Сверка текстов товаров 03.11.2026 уже внесена.')
   else for (const line of productTexts) console.log(`Тексты товаров — ${line}`)
+  const productTexts2 = await setupProductTexts2(payload)
+  if (!productTexts2) console.log('Сверка текстов, этап 2 (03.11.2026), уже внесена.')
+  else for (const line of productTexts2) console.log(`Тексты товаров (2) — ${line}`)
   const homeBim = await setupHomeBim(payload)
   if (!homeBim) console.log('Баннер BIM на главной уже сокращён.')
   else for (const line of homeBim) console.log(`Баннер BIM — ${line}`)

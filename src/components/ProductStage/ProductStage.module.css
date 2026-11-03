@@ -135,6 +135,22 @@
   color: var(--color-navy);
 }
 
+/* Логотип вместо фото (товар без картинок): белая плашка, логотип целиком. */
+.placeholder > .logo {
+  width: auto;
+  height: auto;
+  padding: var(--space-6);
+  border-radius: var(--radius-panel);
+}
+
+.logo img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: var(--placeholder-logo);
+  max-height: var(--placeholder-logo);
+}
+
 /* Стрелки и номер картинки — под фото справа, на листе. */
 .nav {
   position: absolute;

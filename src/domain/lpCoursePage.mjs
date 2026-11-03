@@ -91,6 +91,8 @@ export function courseSummary(markup) {
     (block) =>
       block &&
       !/^(#|- |\d+\.|\||>|!\[)/.test(block) &&
+      // Подводка к списку («Вы научитесь:») и вопрос-зацепка («Неужели…?») — не анонс (03.11.2026).
+      !/[:?]$/.test(block) &&
       !NAMED_MODULE.test(block.split('\n')[0] ?? ''),
   )
   if (!first) return ''
@@ -120,12 +122,14 @@ export function academicHours(/** @type {number} */ count) {
 }
 
 /**
- * Неудачная «Коротко для карточки» от прошлого разбора («Тема 1.»): её можно заменить.
+ * Неудачная «Коротко для карточки» от прошлого разбора («Тема 1.», «Вы научитесь:», вопрос): её можно заменить.
  * @param {string | null | undefined} summary
  */
 export function isModuleSummary(summary) {
-  return /^(?:тема|модуль|раздел|занятие|урок|день|блок|часть)\s*\d{1,2}\.?$/i.test(
-    (summary ?? '').trim(),
+  const text = (summary ?? '').trim()
+  return (
+    /^(?:тема|модуль|раздел|занятие|урок|день|блок|часть)\s*\d{1,2}\.?$/i.test(text) ||
+    /[:?]$/.test(text)
   )
 }
 
