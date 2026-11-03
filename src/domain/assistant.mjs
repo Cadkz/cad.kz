@@ -160,7 +160,15 @@ export function pageGreeting(page) {
       .split(/\s[—–-]\s/)[0]
       ?.trim()
       .slice(0, 60) ?? ''
-  if (page && title && page.path.startsWith('/products/'))
+  const path = page?.path.split('?')[0] ?? ''
+  // Товары живут и по новым адресам /products/<товар>, и по старым /catalog/<раздел>/<товар>/.
+  const product = path.startsWith('/products/') || /^\/catalog\/[^/]+\/[^/]+/.test(path)
+  // Раздел каталога: /catalog с условиями отбора или старый адрес раздела /catalog/<раздел>/.
+  const section =
+    !product &&
+    (/^\/catalog\/[^/]+\/?$/.test(path) ||
+      (path === '/catalog' && Boolean(page?.path.includes('?'))))
+  if (page && title && product)
     return {
       greeting: `Здравствуйте! Я Кадди, консультант CAD.kz. Вижу, вы смотрите ${title} — подскажу цену, комплект и сроки или подберу аналог.`,
       actions: [
