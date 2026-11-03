@@ -8,7 +8,6 @@ import { AssistantComposer } from '../AssistantComposer/AssistantComposer'
 import { AssistantHandoff } from '../AssistantHandoff/AssistantHandoff'
 import { AssistantHeader } from '../AssistantHeader/AssistantHeader'
 import { AssistantMessages } from '../AssistantMessages/AssistantMessages'
-import { ChatExport } from '../ChatExport/ChatExport'
 import { PanelResize } from '../PanelResize/PanelResize'
 import styles from './AssistantPanel.module.css'
 
@@ -196,7 +195,6 @@ export function AssistantPanel({
         <div className={styles.head}>
           <AssistantHeader titleId={titleId} />
           <div className={styles.tools}>
-            {!handoff && <ChatExport messages={chat.messages} className={styles.icon} />}
             {chat.messages.length > 0 && !handoff && (
               <button
                 type="button"
