@@ -110,7 +110,12 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         <div className={styles.name}>
           {product.manufacturer && <p className={styles.vendor}>{product.manufacturer}</p>}
           <h3 className={styles.title}>
-            <Link href={product.href} className={styles.titleLink} transitionTypes={NAV_FORWARD}>
+            <Link
+              href={product.href}
+              className={styles.titleLink}
+              title={info.title}
+              transitionTypes={NAV_FORWARD}
+            >
               {info.title}
             </Link>
           </h3>

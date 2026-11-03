@@ -46,6 +46,7 @@ import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
 import { setupFooterAudit } from '../src/lib/footerSetup.ts'
 import { setupFormaCatalog } from '../src/lib/formaCatalogSetup.ts'
 import { setupGeo5Catalog } from '../src/lib/geoSetup.ts'
+import { setupHomeBim } from '../src/lib/homeBimSetup.ts'
 import {
   setupHomeHero,
   setupHomeHeroV2,
@@ -321,6 +322,9 @@ try {
   const presentation = await setupPresentation(payload)
   if (!presentation) console.log('Правки к презентации 03.11.2026 уже внесены.')
   else for (const line of presentation) console.log(`Презентация — ${line}`)
+  const homeBim = await setupHomeBim(payload)
+  if (!homeBim) console.log('Баннер BIM на главной уже сокращён.')
+  else for (const line of homeBim) console.log(`Баннер BIM — ${line}`)
   const legacyCovers = await setupLegacyCovers(payload)
   if (!legacyCovers) console.log('Обложки публикаций со старого сайта уже поставлены.')
   else for (const line of legacyCovers) console.log(`Обложки — ${line}`)

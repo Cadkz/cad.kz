@@ -115,9 +115,15 @@
 }
 
 .title {
+  display: -webkit-box;
+  overflow: hidden;
   font-size: var(--text-body);
   line-height: var(--leading-snug);
   overflow-wrap: break-word;
+  /* Не больше трёх строк (замечание владельца 03.11.2026: длинное название курса раздувало
+     карточку, и строки «Старт» и описания в ряду съезжали). Полное название — в подсказке. */
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 /* Растянутая ссылка: нажатие в любом месте карточки ведёт на товар. */
@@ -140,10 +146,16 @@
 /* Фраза карточки (cardInfo в src/domain/cardTexts.mjs) — законченная и целиком, без обрезки
    и «…» (просьба владельца 27.10.2026). */
 .summary {
+  display: -webkit-box;
+  min-height: var(--card-summary-height);
+  overflow: hidden;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   font-weight: var(--weight-regular);
   line-height: var(--leading-snug);
+  /* Ровно две строки места: описание любой длины не сдвигает «Старт» и цену в ряду. */
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .start {
