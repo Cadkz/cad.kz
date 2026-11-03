@@ -36,3 +36,28 @@ test('логотип производителя из кода', () => {
   assert.equal(vendorLogo('Autodesk'), null)
   assert.equal(vendorLogo(null), null)
 })
+
+test('логотипы владельца 03.11.2026: Chaos, MagiCAD, НТП, АРС-ПС, Base', () => {
+  const logo = (title, vendor) => programLogo({ title, vendor })?.url
+  assert.equal(logo('V-Ray для 3ds Max', 'Chaos Group'), '/images/brands/chaos/vray-3ds-max.webp')
+  assert.equal(
+    logo('V-Ray Next для SketchUp', 'Chaos Group'),
+    '/images/brands/chaos/vray-sketchup.webp',
+  )
+  assert.equal(
+    logo('Phoenix FD для 3ds Max', 'Chaos Group'),
+    '/images/brands/chaos/phoenix-3ds-max.webp',
+  )
+  assert.equal(logo('Phoenix FD 3.0 для Maya', 'Chaos Group'), undefined)
+  assert.equal(
+    logo('MagiCAD Вентиляция для Revit', 'MagiCAD'),
+    '/images/brands/magicad/magicad-revit.webp',
+  )
+  assert.equal(
+    logo('MagiCAD для AutoCAD', 'MagiCAD'),
+    '/images/brands/magicad/magicad-autocad.webp',
+  )
+  for (const vendor of ['Chaos Group', 'MagiCAD', 'НТП Трубопровод', 'АРС-ПС', 'Base']) {
+    assert.ok(vendorLogo(vendor), vendor)
+  }
+})
