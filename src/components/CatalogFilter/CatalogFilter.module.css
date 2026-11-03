@@ -105,6 +105,17 @@
   }
 }
 
+/* Строка вкладок и «Скрыть фильтры» на /catalog — только от 960 px; на телефоне вкладки в панели. */
+.wideOnly {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .wideOnly {
+    display: flex;
+  }
+}
+
 @media (min-width: 1200px) {
   .grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));

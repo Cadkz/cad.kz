@@ -66,6 +66,11 @@ type Props = {
    * колонка фильтра выезжает по кнопке «Фильтры».
    */
   compact?: boolean
+  /**
+   * Страница /catalog (правка владельца 03.11.2026): от 960 px как на главной — вкладки строкой
+   * сверху и кнопка «Скрыть фильтры», но колонка фильтра сразу открыта. На телефоне — как было.
+   */
+  collapsible?: boolean
 }
 
 /** С этой ширины фильтр на главной — колонка слева, а не выдвижная панель. */
@@ -94,6 +99,7 @@ export function CatalogFilter({
   initial,
   popular = [],
   compact = false,
+  collapsible = false,
 }: Props) {
   // Условия берутся из адреса, а не только с сервера: при «Назад» из товара Next.js показывает
   // сохранённую страницу каталога со старым стартом (пустым), а в адресе — нужный шаг
@@ -175,45 +181,48 @@ export function CatalogFilter({
   const closePanel = useCallback(() => setPanelOpen(false), [])
   // На главной «Фильтры» на компьютере раздвигают колонку фильтра слева, карточки сужаются;
   // без затемнения экрана (правка владельца 02.11.2026, вечер). Уже 960 px — выдвижная панель.
-  const [sideOpen, setSideOpen] = useState(false)
+  const wide = compact || collapsible
+  const [sideOpen, setSideOpen] = useState(collapsible)
   const openFilters = () => {
-    if (compact && window.matchMedia(WIDE).matches) setSideOpen((open) => !open)
+    if (wide && window.matchMedia(WIDE).matches) setSideOpen((open) => !open)
     else setPanelOpen(true)
   }
 
   const popularView = state.group === POPULAR
-  const panel = (
+  // Вкладки групп в колонке не нужны, когда они строкой сверху; в панели телефона на /catalog — нужны.
+  const panel = (tabs: boolean) => (
     <FilterPanel
       state={state}
       options={options}
       onChange={change}
       onReset={reset}
       hasPopular={popular.length > 0}
-      tabs={!compact}
+      tabs={tabs}
     />
   )
   const shownItems = found.items
   const paged = !popularView && !sections && !groups && !vendorStep
 
-  const filtersButton = (
+  // toggle — кнопка над блоком (раздвигает колонку), иначе — кнопка телефона (открывает панель).
+  const filtersButton = (toggle: boolean) => (
     <Button
       variant="outline"
       size="sm"
       onClick={openFilters}
-      aria-expanded={compact ? sideOpen : undefined}
+      aria-expanded={toggle ? sideOpen : undefined}
     >
       <SlidersHorizontal size={16} strokeWidth={1.75} aria-hidden="true" />
-      {compact && sideOpen ? 'Скрыть фильтры' : 'Фильтры'}
+      {toggle && sideOpen ? 'Скрыть фильтры' : 'Фильтры'}
     </Button>
   )
 
   return (
     <div
-      className={compact ? `${styles.shell} ${styles.compact}` : styles.shell}
-      data-side={compact && sideOpen ? 'open' : undefined}
+      className={wide ? `${styles.shell} ${styles.compact}` : styles.shell}
+      data-side={wide && sideOpen ? 'open' : undefined}
     >
-      {compact && (
-        <div className={styles.head}>
+      {wide && (
+        <div className={collapsible ? `${styles.head} ${styles.wideOnly}` : styles.head}>
           <CatalogTabs
             selected={state.group}
             groups={options.groups}
@@ -221,11 +230,11 @@ export function CatalogFilter({
             onChange={change}
             row
           />
-          {filtersButton}
+          {filtersButton(true)}
         </div>
       )}
-      <section className={styles.sidebar} aria-label="Фильтр каталога" inert={compact && !sideOpen}>
-        <div className={styles.sideInner}>{panel}</div>
+      <section className={styles.sidebar} aria-label="Фильтр каталога" inert={wide && !sideOpen}>
+        <div className={styles.sideInner}>{panel(!wide)}</div>
       </section>
       <div ref={top} className={styles.results}>
         {!compact && (
@@ -233,7 +242,7 @@ export function CatalogFilter({
             <p className={styles.count} aria-live="polite">
               {popularView ? 'Чаще всего выбирают' : `Найдено: ${positions(found.total)}`}
             </p>
-            <span className={styles.mobileOnly}>{filtersButton}</span>
+            <span className={styles.mobileOnly}>{filtersButton(false)}</span>
           </div>
         )}
         <CatalogSteps
@@ -297,7 +306,7 @@ export function CatalogFilter({
         )}
       </div>
       <Drawer open={panelOpen} onClose={closePanel} title="Фильтр каталога" side="left">
-        {panel}
+        {panel(!compact)}
         <div className={styles.drawerFoot}>
           <Button block onClick={closePanel}>
             Показать: {positions(found.total)}

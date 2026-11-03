@@ -42,6 +42,7 @@ export default async function CatalogPage({ searchParams }: Props) {
           vendorLogos={catalog.vendorLogos}
           initial={initial}
           popular={popular}
+          collapsible
         />
       </Container>
     </main>

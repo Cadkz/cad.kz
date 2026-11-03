@@ -45,10 +45,11 @@
   bottom: calc(-1 * var(--space-4));
   z-index: var(--z-below);
   color: var(--color-blue);
-  opacity: 0.06;
+  opacity: 0.1;
   transition:
     color var(--duration-blueprint-out) var(--ease),
-    opacity var(--duration-blueprint-out) var(--ease);
+    opacity var(--duration-blueprint-out) var(--ease),
+    transform var(--duration-blueprint-out) var(--ease);
 }
 
 .big svg {
@@ -135,8 +136,9 @@
     padding: var(--space-5);
   }
 
+  /* Контрастнее, чем было (правка владельца 03.11.2026): значок-декор читается и без наведения. */
   .big {
-    opacity: 0.08;
+    opacity: 0.14;
   }
 
   .title {
@@ -177,7 +179,7 @@
 }
 
 /* Наведение мышью и фокус с клавиатуры: карточка остаётся белой — рамка синеет, выезжает
-   «В каталог», значок-декор заметнее (решение владельца 03.11.2026). */
+   «В каталог», значок-декор заметнее и выезжает из угла (решение владельца 03.11.2026). */
 .card:focus-visible {
   border-color: var(--color-blue);
 }
@@ -192,8 +194,10 @@
     border-color: var(--color-blue);
   }
 
+  /* Значок чуть выезжает из угла к центру — как было на тёмных карточках (03.11.2026). */
   .card:hover .big {
-    opacity: 0.14;
+    opacity: 0.26;
+    transform: translate(calc(-1 * var(--space-2)), calc(-1 * var(--space-2)));
   }
 
   .card:hover .ctaInner {

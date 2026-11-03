@@ -29,13 +29,16 @@ function toggle(list: string[], value: string) {
  */
 const VENDORS_SHOWN = 8
 
+/** Сколько задач видно сразу, остальные — по «Ещё». */
+const TASKS_SHOWN = 6
+
 /** Сколько групп характеристик открыто сразу: формат, технология, цвет, разрешение. */
 const FEATURES_OPEN = 4
 
 /**
  * Панель условий фильтра: группа, направление или тип, производитель, задачи.
  * Когда выбрано направление или тип, производителя выбирают карточками над товарами
- * (CatalogSteps), поэтому здесь его списка нет. Задачи свёрнуты: это уточнение, а не основной путь.
+ * (CatalogSteps), поэтому здесь его списка нет. Задачи открыты, длинный список — по «Ещё».
  */
 export function FilterPanel({ state, options, onChange, onReset, hasPopular, tabs = true }: Props) {
   return (
@@ -108,16 +111,15 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
             limit={VENDORS_SHOWN}
           />
         )}
+      {/* Задачи открыты сразу (правка владельца 03.11.2026), длинный список — по «Ещё». */}
       {options.tasks.length > 0 && (
-        <details className={styles.more} open={state.tasks.length > 0}>
-          <summary className={styles.summary}>Уточнить по задачам</summary>
-          <FilterChecks
-            title="Задачи"
-            options={options.tasks}
-            selected={state.tasks}
-            onToggle={(value) => onChange({ tasks: toggle(state.tasks, value) })}
-          />
-        </details>
+        <FilterChecks
+          title="Задачи"
+          options={options.tasks}
+          selected={state.tasks}
+          onToggle={(value) => onChange({ tasks: toggle(state.tasks, value) })}
+          limit={TASKS_SHOWN}
+        />
       )}
       {/* Характеристики: первые группы открыты, остальные свёрнуты (образец владельца 23.10.2026). */}
       {options.features.map((group, index) => (
