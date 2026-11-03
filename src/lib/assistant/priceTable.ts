@@ -142,7 +142,8 @@ export async function loadKnowledge(payload: Payload): Promise<KnowledgeEntry[]>
     collection: 'assistant-knowledge',
     where: { active: { equals: true } },
     sort: 'position',
-    limit: 500,
+    // 03.11.2026 база выросла на 347 фактов от ChatGPT: прежних 500 могло не хватить.
+    limit: 1500,
     depth: 0,
     select: { product: true, text: true },
     ...options,

@@ -52,7 +52,7 @@ import {
   setupHomeTextsAudit,
   setupHomeTrust,
 } from '../src/lib/homeSetup.ts'
-import { setupKaddiFaq, setupKaddiFaq2 } from '../src/lib/kaddiFaqSetup.ts'
+import { setupKaddiFaq, setupKaddiFaq2, setupKaddiFaqChatgpt } from '../src/lib/kaddiFaqSetup.ts'
 import { setupLegacyCovers } from '../src/lib/legacyCoversSetup.ts'
 import { setupNewsCovers } from '../src/lib/newsCoversSetup.ts'
 import { clearOldPictures } from '../src/lib/oldPicturesSetup.ts'
@@ -315,6 +315,9 @@ try {
   const faq2 = await setupKaddiFaq2(payload)
   if (!faq2) console.log('Справка Кадди, второй прогон 30.10.2026, уже загружена.')
   else for (const line of faq2) console.log(`Справка Кадди (2) — ${line}`)
+  const faqChatgpt = await setupKaddiFaqChatgpt(payload)
+  if (!faqChatgpt) console.log('Справка Кадди от ChatGPT (03.11.2026) уже загружена.')
+  else for (const line of faqChatgpt) console.log(`Справка Кадди (ChatGPT) — ${line}`)
   const presentation = await setupPresentation(payload)
   if (!presentation) console.log('Правки к презентации 03.11.2026 уже внесены.')
   else for (const line of presentation) console.log(`Презентация — ${line}`)

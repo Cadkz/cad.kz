@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 import { KADDI_FAQ, KADDI_FAQ_2 } from '../domain/kaddiFaq.mjs'
+import chatgptFaq from '../domain/kaddiFaqChatgpt.json' with { type: 'json' }
 
 /**
  * Справка Кадди по отчёту «Проверки Кадди» 30.10.2026, разово при сборке: записи базы знаний
@@ -53,6 +54,49 @@ async function setupFaq(
   await payload.create({
     collection: 'import-runs',
     data: { idempotencyKey: key, state: 'done', snapshot: { report } },
+    ...opts,
+  })
+  return report
+}
+
+/**
+ * Справка Кадди от ChatGPT по официальным сайтам производителей (файл владельца 03.11.2026,
+ * `src/domain/kaddiFaqChatgpt.json`, 347 фактов с источниками): плоттеры Canon, WideTEK, Artec,
+ * Autodesk, SCAD, ЛИРА, GEO5, АВС, CSoft, Chaos, инженерные сети, рабочие станции. Проверено:
+ * без цен, сроков и контактов, без дублей. Добавляется к базе, ничего не стирая; запись с тем же
+ * текстом не повторяется. Разово при сборке.
+ */
+export const KADDI_FAQ_CHATGPT_KEY = 'catalog-setup:kaddi-faq-chatgpt-2026-11-03'
+
+export async function setupKaddiFaqChatgpt(payload: Payload): Promise<string[] | null> {
+  const done = await payload.find({
+    collection: 'import-runs',
+    where: { idempotencyKey: { equals: KADDI_FAQ_CHATGPT_KEY } },
+    limit: 1,
+    ...opts,
+  })
+  if (done.docs.length) return null
+  const { docs } = await payload.find({
+    collection: 'assistant-knowledge',
+    limit: 2000,
+    select: { text: true },
+    ...opts,
+  })
+  const known = new Set(docs.map((doc) => doc.text.trim()))
+  let added = 0
+  for (const [index, entry] of chatgptFaq.entries()) {
+    if (known.has(entry.text)) continue
+    await payload.create({
+      collection: 'assistant-knowledge',
+      data: { product: entry.product, text: entry.text, active: true, position: 2000 + index },
+      ...opts,
+    })
+    added += 1
+  }
+  const report = [`добавлено ${added} из ${chatgptFaq.length}`]
+  await payload.create({
+    collection: 'import-runs',
+    data: { idempotencyKey: KADDI_FAQ_CHATGPT_KEY, state: 'done', snapshot: { report } },
     ...opts,
   })
   return report
