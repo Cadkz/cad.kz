@@ -727,3 +727,18 @@ test('clampReply: длинный ответ — до 5 предложений и
   )
   assert.ok(priced.endsWith('Итого: 21 ₸.'))
 })
+
+test('pageGreeting и chatPage: Кадди здоровается про страницу товара и раздела', async () => {
+  const { pageGreeting, chatPage, ASSISTANT_GREETING } = await import('../src/domain/assistant.mjs')
+  const product = pageGreeting({ path: '/products/artec_eva', title: 'Artec Eva — ручной сканер' })
+  assert.match(product.greeting, /Artec Eva/)
+  assert.equal(product.actions[0].text, 'Сколько стоит Artec Eva?')
+  const section = pageGreeting({ path: '/catalog?type=scanners', title: '3D-сканеры' })
+  assert.match(section.greeting, /3D-сканеры/)
+  assert.equal(pageGreeting(null).greeting, ASSISTANT_GREETING)
+  assert.equal(chatPage({ path: 'https://evil.example', title: 'x' }), null)
+  assert.deepEqual(chatPage({ path: '/products/a', title: ' A  b ' }), {
+    path: '/products/a',
+    title: 'A b',
+  })
+})

@@ -146,6 +146,48 @@ export const QUICK_ACTIONS = [
 ]
 
 /**
+ * Приветствие и кнопки по странице, где открыт чат (замечание владельца 03.11.2026: на Artec Eva
+ * Кадди здоровался общим шаблоном). Товар — про цену, комплект и задачу; раздел каталога — про
+ * выбор в разделе; остальные страницы — общее приветствие и QUICK_ACTIONS.
+ * @param {ChatPage | null} page
+ * @returns {{ greeting: string, actions: readonly { id: string, label: string, text?: string, handoff?: true }[] }}
+ */
+export function pageGreeting(page) {
+  const manager = QUICK_ACTIONS.find((action) => action.id === 'manager')
+  const tail = manager ? [manager] : []
+  const title =
+    page?.title
+      .split(/\s[—–-]\s/)[0]
+      ?.trim()
+      .slice(0, 60) ?? ''
+  if (page && title && page.path.startsWith('/products/'))
+    return {
+      greeting: `Здравствуйте! Я Кадди, консультант CAD.kz. Вижу, вы смотрите ${title} — подскажу цену, комплект и сроки или подберу аналог.`,
+      actions: [
+        { id: 'page-price', label: 'Узнать цену', text: `Сколько стоит ${title}?` },
+        { id: 'page-kit', label: 'Что входит', text: `Что входит в ${title}?` },
+        { id: 'page-fit', label: 'Подойдёт ли мне', text: `Подойдёт ли ${title} под мою задачу?` },
+        ...tail,
+      ],
+    }
+  if (page && title && page.path.startsWith('/catalog') && page.path.includes('?'))
+    return {
+      greeting: `Здравствуйте! Я Кадди, консультант CAD.kz. Вы в разделе «${title}» — помогу выбрать и назову цену.`,
+      actions: [
+        { id: 'page-pick', label: 'Помочь с выбором', text: `Помогите выбрать: ${title}` },
+        {
+          id: 'page-popular',
+          label: 'Что чаще берут',
+          text: `Что чаще всего берут в разделе «${title}»?`,
+        },
+        ...QUICK_ACTIONS.filter((action) => action.id === 'price'),
+        ...tail,
+      ],
+    }
+  return { greeting: ASSISTANT_GREETING, actions: QUICK_ACTIONS }
+}
+
+/**
  * Клиент просит связать с менеджером или позвонить (аудит 21.10.2026, Ка3): сразу форма «имя +
  * телефон», без трёх обменов сообщениями. Только короткая просьба (до 80 знаков): жалобу и возврат
  * ведёт модель по правилам. Подробности из сообщения не теряются — менеджер видит переписку.
@@ -204,7 +246,8 @@ function hasControl(/** @type {string} */ value) {
  * Запрос к консультанту: ключ разговора (UUID из браузера) и новое сообщение клиента.
  * Историю присылать нельзя: она хранится на сервере, клиент не может подставить «ответы Кадди».
  * @param {unknown} raw
- * @returns {{ ok: true, value: { conversationId: string, message: string } } | { ok: false, error: string }}
+ * page — страница сайта, с которой открыт чат (адрес и заголовок): Кадди отвечает про неё.
+ * @returns {{ ok: true, value: { conversationId: string, message: string, page?: ChatPage } } | { ok: false, error: string }}
  */
 export function validateChat(raw) {
   const input = raw && typeof raw === 'object' ? /** @type {Record<string, unknown>} */ (raw) : {}
@@ -225,7 +268,31 @@ export function validateChat(raw) {
       error: `Сообщение длиннее ${ASSISTANT_LIMITS.messageChars} знаков — сократите его`,
     }
   if (hasControl(message)) return { ok: false, error: 'В сообщении есть недопустимые символы' }
-  return { ok: true, value: { conversationId: conversationId.toLowerCase(), message } }
+  const page = chatPage(input.page)
+  return {
+    ok: true,
+    value: { conversationId: conversationId.toLowerCase(), message, ...(page ? { page } : {}) },
+  }
+}
+
+/**
+ * @typedef {{ path: string, title: string }} ChatPage  Страница сайта, где открыт чат.
+ */
+
+/**
+ * Страница из браузера — только путь этого сайта и короткий заголовок; иначе null.
+ * @param {unknown} raw
+ * @returns {ChatPage | null}
+ */
+export function chatPage(raw) {
+  if (!raw || typeof raw !== 'object') return null
+  const { path, title } = /** @type {Record<string, unknown>} */ (raw)
+  if (typeof path !== 'string' || typeof title !== 'string') return null
+  const cleanPath = path.trim()
+  const cleanTitle = title.replace(/\s+/g, ' ').trim()
+  if (!/^\/[\w\-./%~?=&]*$/.test(cleanPath) || cleanPath.length > 200) return null
+  if (!cleanTitle || cleanTitle.length > 120 || hasControl(cleanTitle)) return null
+  return { path: cleanPath, title: cleanTitle }
 }
 
 /**
@@ -985,6 +1052,7 @@ export function checkHandoff(raw, normalizePhone) {
  * @property {{ updated: string, vat: 'included' | 'excluded' | 'unknown' } | null} price  Действующий прайс.
  * @property {HandoffState} handoff
  * @property {{ state: 'work' | 'lunch' | 'off', text: string }} time  src/domain/priceTable.mjs workTime.
+ * @property {ChatPage | null} [page]  Страница, с которой открыт чат.
  */
 
 /**
@@ -1260,7 +1328,15 @@ const FACT_STOP = new Set([
  * @param {PromptContext} context
  * @returns {[string, string]}
  */
-export function systemPrompt({ knowledge, topical = [], vendorList = null, price, handoff, time }) {
+export function systemPrompt({
+  knowledge,
+  topical = [],
+  vendorList = null,
+  price,
+  handoff,
+  time,
+  page = null,
+}) {
   const facts = knowledge.length
     ? knowledge
         .map((entry) => `— [${entry.product}] ${entry.text.replace(/\s*\n\s*/g, ' ')}`)
@@ -1282,6 +1358,11 @@ ${facts}${vendorListText(vendorList)}`
 — Сейчас ${time.text} — ${timeLine}.
 — ${priceLine}
 — ${handoffText(handoff)}${
+    page
+      ? `
+— Клиент открыл чат на странице сайта «${page.title}» (${page.path}). Вопрос без названия товара или раздела — скорее всего про эту страницу.`
+      : ''
+  }${
     topical.length
       ? `
 

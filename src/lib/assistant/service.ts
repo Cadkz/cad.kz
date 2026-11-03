@@ -4,6 +4,7 @@ import {
   ASSISTANT_LIMITS,
   ASSISTANT_TOOLS,
   type AssistantCard,
+  type ChatPage,
   clampReply,
   cleanReply,
   countTurns,
@@ -39,6 +40,9 @@ import {
 import { loadKnowledge, loadVendorList, priceSummary } from './priceTable'
 import { type AssistantMode, leadsReachManagers, modelSettings } from './provider'
 import { createTools, findCards, toCard } from './tools'
+
+/** Свои записи базы о продуктах целиком в промпт, пока их текст не длиннее этого (≈ 4 тыс. токенов). */
+const OWN_WHOLE_CHARS = 12_000
 
 /** Сколько ждём модель, прежде чем честно сказать, что ответа нет. */
 const MODEL_TIMEOUT_MS = 30_000
@@ -109,6 +113,7 @@ async function modelAnswer(
   messages: StoredMessage[],
   handoff: HandoffState,
   onTool?: (call: ToolCall) => void,
+  page?: ChatPage,
 ): Promise<Answer> {
   const tools = createTools(payload)
   const [knowledge, price, vendorList] = await Promise.all([
@@ -122,23 +127,34 @@ async function modelAnswer(
     onTool?.({ name, input, result })
     return result
   }
-  // Справка ChatGPT (позиции от 2000, setupKaddiFaqChatgpt) — только по теме разговора и вне
-  // кэша промпта; своя база компании — целиком, как раньше (03.11.2026: со всей справкой Кадди
-  // отвечал заметно медленнее).
-  const talk = messages
-    .filter((message) => message.role === 'user')
-    .slice(-4)
-    .map((message) => message.content)
-    .join(' ')
+  // База знаний растёт (03.11.2026: +347 фактов ChatGPT, правки «Поправить»), поэтому в запрос
+  // модели идёт не всё. Общие записи компании («Все») — всегда, в кэшируемой части промпта.
+  // Записи о продуктах — отбором по теме разговора (pickFacts): последние реплики клиента,
+  // последний ответ Кадди и страница, с которой открыт чат. Пока своих записей о продуктах мало
+  // (до OWN_WHOLE_CHARS), они идут целиком, как раньше, — ответы не меняются.
+  const recent = messages.slice(-6)
+  const talk = [
+    ...recent.filter((message) => message.role === 'user').map((message) => message.content),
+    recent.filter((message) => message.role === 'assistant').at(-1)?.content ?? '',
+    page ? `${page.title} ${page.path}` : '',
+  ].join(' ')
   const own = knowledge.filter((entry) => entry.position < CHATGPT_FAQ_POSITION)
-  const topical = pickFacts(
-    knowledge.filter((entry) => entry.position >= CHATGPT_FAQ_POSITION),
-    talk,
-  )
+  const general = own.filter((entry) => entry.product === 'Все')
+  const ownProducts = own.filter((entry) => entry.product !== 'Все')
+  const ownWhole = ownProducts.reduce((sum, entry) => sum + entry.text.length, 0) <= OWN_WHOLE_CHARS
+  const topical = [
+    ...(ownWhole ? [] : pickFacts(ownProducts, talk, 16)),
+    ...pickFacts(
+      knowledge.filter((entry) => entry.position >= CHATGPT_FAQ_POSITION),
+      talk,
+      ownWhole ? 24 : 12,
+    ),
+  ]
   const system = systemPrompt({
     now: new Date(),
-    knowledge: own,
+    knowledge: ownWhole ? own : general,
     topical,
+    page,
     vendorList,
     price,
     handoff,
@@ -181,7 +197,7 @@ export async function answerMessages(
   payload: Payload,
   mode: AssistantMode,
   messages: StoredMessage[],
-  options: { onTool?: (call: ToolCall) => void; handoff?: HandoffState } = {},
+  options: { onTool?: (call: ToolCall) => void; handoff?: HandoffState; page?: ChatPage } = {},
 ): Promise<Answer> {
   const message = messages[messages.length - 1]?.content ?? ''
   let answer: Answer
@@ -211,6 +227,7 @@ export async function answerMessages(
       messages,
       options.handoff ?? { state: 'none' },
       options.onTool,
+      options.page,
     )
   // Про продление — под ответом форма продления (настоящая заявка, менеджер найдёт лицензию).
   // Программа из разговора уже выбрана в форме (аудит 21.10.2026, Ка5): «Нужно продлить Revit».
@@ -272,7 +289,7 @@ async function saveTurn(
 export async function askAssistant(
   payload: Payload,
   mode: AssistantMode,
-  input: { conversationId: string; message: string },
+  input: { conversationId: string; message: string; page?: ChatPage },
   clientHash: string,
   live = false,
 ): Promise<AssistantAnswer> {
@@ -306,6 +323,7 @@ export async function askAssistant(
   try {
     answer = await answerMessages(payload, mode, [...previous, question], {
       handoff: handoffState(stored?.snapshot),
+      page: input.page,
     })
   } catch (error) {
     // В журнал — только вид ошибки и код ответа, без текста запроса и ключа.

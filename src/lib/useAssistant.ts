@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ASSISTANT_LIMITS, type AssistantCard } from '@/domain/assistant.mjs'
+import { readPage } from './pageContext'
 
 /** Кадди подготовил передачу менеджеру: имя и телефон — в форму, остальное — списком. */
 export type HandoffPrefill = {
@@ -122,7 +123,7 @@ async function postQuestion(conversationId: string, message: string) {
     const response = await fetch('/api/assistant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conversationId, message }),
+      body: JSON.stringify({ conversationId, message, page: readPage() }),
     })
     return readAnswer(response.ok, await response.json())
   } catch {

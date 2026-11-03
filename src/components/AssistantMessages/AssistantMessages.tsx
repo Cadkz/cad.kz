@@ -4,12 +4,12 @@ import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import {
-  ASSISTANT_GREETING,
   ASSISTANT_GREETING_GRUMPY,
   type AssistantCard,
   hasPrice,
-  QUICK_ACTIONS,
+  pageGreeting,
 } from '@/domain/assistant.mjs'
+import { usePageContext } from '@/lib/pageContext'
 import type { HandoffPrefill, useAssistant } from '@/lib/useAssistant'
 import { AssistantReplyActions } from '../AssistantReplyActions/AssistantReplyActions'
 import { Button } from '../Button/Button'
@@ -81,6 +81,8 @@ export function AssistantMessages({ chat, grumpy, onHandoff, whatsapp }: Props) 
   const sulky = grumpy && !count
   // Кнопка передачи — только у последнего ответа, где Кадди её подготовил: данные там самые свежие.
   const lastHandoff = chat.messages.findLastIndex((m) => m.handoff)
+  // Приветствие и кнопки — про страницу, где открыт чат (товар, раздел каталога).
+  const intro = pageGreeting(usePageContext())
   // «Прислать расчёт в WhatsApp» — под последним ответом Кадди с суммой: текст берёт её оттуда.
   const lastPriced = chat.messages.findLastIndex(
     (m) => m.role === 'assistant' && hasPrice(m.content),
@@ -98,10 +100,10 @@ export function AssistantMessages({ chat, grumpy, onHandoff, whatsapp }: Props) 
       <div className={styles.intro}>
         {!count && <Mascot pose={sulky ? 'grumpy' : 'laptop'} size="sm" eager stage={false} />}
         <div className={styles.introText}>
-          <p className={styles.bot}>{sulky ? ASSISTANT_GREETING_GRUMPY : ASSISTANT_GREETING}</p>
+          <p className={styles.bot}>{sulky ? ASSISTANT_GREETING_GRUMPY : intro.greeting}</p>
           {!count && (
             <div className={styles.actions}>
-              {QUICK_ACTIONS.map((action) => (
+              {intro.actions.map((action) => (
                 <Button
                   key={action.id}
                   variant="outline"
