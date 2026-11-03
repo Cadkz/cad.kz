@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { AdminButton } from '@/components/AdminButton/AdminButton'
+import { KnowledgeNote } from '@/components/KnowledgeNote/KnowledgeNote'
 import {
   CHECK_LIMIT,
   CHECK_QUESTIONS,
@@ -242,6 +243,7 @@ export function AssistantCheck() {
                   {row.ms !== undefined && (
                     <p className={styles.meta}>{(row.ms / 1000).toFixed(1)} с</p>
                   )}
+                  <KnowledgeNote question={row.question} />
                 </>
               )}
             </li>

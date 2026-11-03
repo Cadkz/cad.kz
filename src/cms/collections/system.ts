@@ -16,7 +16,31 @@ function journal(slug: CollectionSlug, plural: string): CollectionConfig {
   }
 }
 
-export const conversations = journal('conversations', 'Диалоги Кадди')
+/**
+ * Диалоги Кадди: сверху переписка чатом с «Поправить» под ответами (ConversationView), служебные
+ * поля спрятаны, снимок кодом — свёрнут ниже (просьба владельца 03.11.2026).
+ */
+const journalConversations = journal('conversations', 'Диалоги Кадди')
+export const conversations: CollectionConfig = {
+  ...journalConversations,
+  admin: { defaultColumns: ['createdAt', 'state'] },
+  defaultSort: '-createdAt',
+  fields: [
+    {
+      name: 'chatView',
+      type: 'ui',
+      admin: {
+        components: { Field: '/components/ConversationView/ConversationView#ConversationView' },
+      },
+    },
+    {
+      type: 'collapsible',
+      label: 'Снимок (код)',
+      admin: { initCollapsed: true },
+      fields: journalConversations.fields,
+    },
+  ],
+}
 export const importRuns = journal('import-runs', 'Запуски импорта')
 
 /**
