@@ -61,3 +61,19 @@ test('бессмыслица не находит товары с союзом «
     ['Revit'],
   )
 })
+
+test('английские слова названий по-русски: «билдинг дизайн» → Forma Building Design', () => {
+  const forma = [
+    { title: 'Forma Building Design', vendor: 'Autodesk', summary: 'Проектирование зданий' },
+    { title: 'Forma Site Design', vendor: 'Autodesk', summary: 'Генплан и площадка' },
+    { title: 'Advance Steel', vendor: 'Autodesk', summary: 'Металлоконструкции' },
+    ...items,
+  ]
+  const find = (query) => searchItems(forma, query).map((item) => item.title)
+  assert.equal(find('Билдинг дизайн')[0], 'Forma Building Design')
+  assert.equal(find('сайт дизайн')[0], 'Forma Site Design')
+  assert.equal(find('адванс стил')[0], 'Advance Steel')
+  assert.ok(find('дизай').includes('Forma Building Design'))
+  // Русские слова по-прежнему ищутся по-русски.
+  assert.equal(find('архитектуры')[0], 'Revit')
+})

@@ -311,9 +311,61 @@ const indexWords = (text) => [...new Set(normalize(text).split(' ').filter(Boole
 /** @param {string} word */
 const isRenew = (word) => RENEW.some((root) => word.startsWith(root))
 
+/**
+ * Английские слова из названий программ, которые по-русски пишут по звучанию, а побуквенно и на
+ * слух они не сходятся: «дизайн» → design, «билдинг» → building (замечание владельца 03.11.2026:
+ * «билдинг дизайн» не находил Forma Building Design).
+ */
+const ENGLISH = {
+  дизайн: 'design',
+  билдинг: 'building',
+  сайт: 'site',
+  дата: 'data',
+  менеджмент: 'management',
+  мэнеджмент: 'management',
+  коллекция: 'collection',
+  коллекшн: 'collection',
+  продакт: 'product',
+  мануфакчуринг: 'manufacturing',
+  мануфактуринг: 'manufacturing',
+  структурал: 'structural',
+  анализ: 'analysis',
+  энализис: 'analysis',
+  профессионал: 'professional',
+  симулейт: 'simulate',
+  симулэйт: 'simulate',
+  манаж: 'manage',
+  менедж: 'manage',
+  стил: 'steel',
+  адванс: 'advance',
+  клауд: 'cloud',
+  облако: 'cloud',
+  энтертейнмент: 'entertainment',
+  медиа: 'media',
+  архитектура: 'architecture',
+  инжиниринг: 'engineering',
+  констракшн: 'construction',
+  студио: 'studio',
+  студия: 'studio',
+}
+
+/**
+ * Английское слово для русского: целиком, с окончанием («дизайна») или началом от четырёх букв,
+ * пока его набирают («дизай»).
+ * @param {string} text
+ */
+function english(text) {
+  if (Object.hasOwn(ENGLISH, text)) return ENGLISH[text]
+  for (const [ru, en] of Object.entries(ENGLISH)) {
+    if (text.length >= 4 && ru.startsWith(text)) return en
+    if (ru.length >= 4 && text.startsWith(ru) && text.length - ru.length <= 2) return en
+  }
+  return null
+}
+
 /** @param {string} text @returns {QueryWord} */
 function queryWord(text) {
-  const latin = translit(text)
+  const latin = english(text) ?? translit(text)
   const swapped = swapLayout(text)
   return {
     text,
