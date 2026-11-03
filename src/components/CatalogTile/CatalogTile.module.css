@@ -86,6 +86,10 @@
   font-size: var(--text-body);
   font-weight: var(--weight-bold);
   line-height: var(--leading-snug);
+  /* Длинное слово («Широкоформатные») рядом с фото 96 px не помещается — перенос по слогам,
+     в крайнем случае разрыв, но не за край карточки (замечание владельца 03.11.2026). */
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .text {
