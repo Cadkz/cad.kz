@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import { KADDI_FAQ, KADDI_FAQ_2 } from '../domain/kaddiFaq.mjs'
+import { CHATGPT_FAQ_POSITION, KADDI_FAQ, KADDI_FAQ_2 } from '../domain/kaddiFaq.mjs'
 import chatgptFaq from '../domain/kaddiFaqChatgpt.json' with { type: 'json' }
 
 /**
@@ -88,7 +88,12 @@ export async function setupKaddiFaqChatgpt(payload: Payload): Promise<string[] |
     if (known.has(entry.text)) continue
     await payload.create({
       collection: 'assistant-knowledge',
-      data: { product: entry.product, text: entry.text, active: true, position: 2000 + index },
+      data: {
+        product: entry.product,
+        text: entry.text,
+        active: true,
+        position: CHATGPT_FAQ_POSITION + index,
+      },
       ...opts,
     })
     added += 1

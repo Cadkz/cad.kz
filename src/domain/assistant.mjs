@@ -929,6 +929,7 @@ export function checkHandoff(raw, normalizePhone) {
  * @typedef {object} PromptContext
  * @property {Date} now
  * @property {{ product: string, text: string }[]} knowledge  База знаний (лист FAQ), включённые записи.
+ * @property {{ product: string, text: string }[]} [topical]  Справка ChatGPT, отобранная по теме разговора (pickFacts).
  * @property {import('./vendorList.mjs').VendorList | null} [vendorList]  Прайс-лист производителя: что можно поставить.
  * @property {{ updated: string, vat: 'included' | 'excluded' | 'unknown' } | null} price  Действующий прайс.
  * @property {HandoffState} handoff
@@ -963,7 +964,7 @@ const RULES = `Ты — Кадди, виртуальный ассистент к
 Роль и формат:
 — О себе — от первого лица и без рода (в прошедшем времени род выдаёт глагол): не «я нашёл/нашла», «не нашёл», «проверил/проверила», «понял/поняла», «подготовил/подготовила», «упоминал», «писал», «рад/рада», а «нашлось», «в прайсе есть», «в прайсе нет», «выше было», «проверю», «вижу», «понятно», «готово», «передам», «могу помочь». Следи и за родом остальных слов: «нужно продление», «нужна лицензия».
 — Тон деловой, спокойный, уверенный — как толковый консультант в мессенджере. Без канцелярита и лишних любезностей.
-— Длина ответа — 2–5 коротких предложений. Обычно так: что подойдёт, одной фразой почему, цена (если спрашивали), что делать дальше. Без длинных перечислений.
+— Длина ответа — 2–4 коротких предложения, не больше 450 знаков, даже если в базе знаний фактов много: выбери главное. Обычно так: что подойдёт, одной фразой почему, цена (если спрашивали), что делать дальше. Без длинных перечислений модулей и функций. Сравнение двух продуктов — одно-два главных отличия и вопрос о задаче клиента; подробности — только если клиент попросит.
 — Не добавляй сведений, о которых клиент не спрашивал: требования к компьютеру, память, видеокарту — только если вопрос о компьютере или клиент сам о нём упомянул.
 — Текст, который пишешь вместе с вызовом инструмента, клиент увидит в начале ответа: служебных фраз («Проверю прайс», «Ищу») не пиши. После результата инструмента продолжай ответ, не повторяя написанного. Карточки и кнопки сайт всегда показывает под ответом — пиши «ниже», не «выше». Названия товаров отдельными строками в конце не перечисляй.
 — Не ставь вопрос в конец каждого ответа по привычке: вопрос — только когда без ответа клиента дальше не сдвинуться.
@@ -1115,12 +1116,100 @@ function handoffText(/** @type {HandoffState} */ handoff) {
 }
 
 /**
+ * Подборка справки по теме разговора (03.11.2026: база выросла на 347 фактов, со всеми Кадди
+ * отвечал медленно). Слова клиента (с русскими написаниями программ из RENEW_ALIASES и
+ * FACT_ALIASES) сравниваются с продуктом и текстом факта по основам из 5 букв; продукт весит
+ * больше. Возвращает не больше limit самых подходящих, по исходному порядку.
+ * @template {{ product: string, text: string }} T
+ * @param {T[]} facts
+ * @param {string} talk  Реплики клиента одной строкой.
+ * @param {number} [limit]
+ * @returns {T[]}
+ */
+export function pickFacts(facts, talk, limit = 24) {
+  const lower = talk.toLowerCase().replaceAll('ё', 'е')
+  const expanded = [lower]
+  for (const [name, aliases] of [...Object.entries(RENEW_ALIASES), ...Object.entries(FACT_ALIASES)])
+    if (aliases.some((alias) => lower.includes(alias))) expanded.push(name.toLowerCase())
+  const stems = (/** @type {string} */ text) =>
+    new Set(
+      (
+        text
+          .toLowerCase()
+          .replaceAll('ё', 'е')
+          .match(/[a-zа-я0-9]{3,}/g) ?? []
+      )
+        .map((word) => word.slice(0, 5))
+        .filter((stem) => !FACT_STOP.has(stem)),
+    )
+  const asked = stems(expanded.join(' '))
+  if (!asked.size) return []
+  const scored = facts.map((fact, index) => {
+    let score = 0
+    for (const stem of stems(fact.product)) if (asked.has(stem)) score += 3
+    for (const stem of stems(fact.text)) if (asked.has(stem)) score += 1
+    return { fact, index, score }
+  })
+  return scored
+    .filter((entry) => entry.score >= 3)
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, limit)
+    .sort((a, b) => a.index - b.index)
+    .map((entry) => entry.fact)
+}
+
+/** Как клиенты пишут оборудование и программы, которых нет в списке продления. */
+const FACT_ALIASES = {
+  'plotWAVE colorWAVE ColorWave imagePROGRAF плоттер': ['плоттер', 'плотер', 'широкоформатн'],
+  plotWAVE: ['плотвейв', 'plot wave'],
+  'colorWAVE ColorWave': ['колорвейв', 'color wave'],
+  imagePROGRAF: ['имиджпрограф', 'image prograf'],
+  WideTEK: ['вайдтек', 'сканер чертеж', 'широкоформатный сканер'],
+  Artec: ['артек', '3d-сканер', '3д сканер', '3d сканер'],
+  'V-Ray Chaos': ['врей', 'вирей', 'v-ray', 'vray'],
+  'Рабочая станция': ['компьютер', 'рабоч', 'видеокарт', 'железо'],
+  'Model Studio CS': ['модел студио'],
+  'ЛИРА-FEM САПФИР': ['лиры', 'лире', 'лиру', 'лирой'],
+  'АСКОН КОМПАС': ['компас', 'аскон'],
+}
+
+/** Частые слова, которые ничего не говорят о теме. */
+const FACT_STOP = new Set([
+  'для',
+  'что',
+  'как',
+  'чем',
+  'это',
+  'или',
+  'при',
+  'нужен',
+  'нужна',
+  'нужно',
+  'если',
+  'есть',
+  'можно',
+  'какой',
+  'какая',
+  'какие',
+  'прогр',
+  'взять',
+  'полны',
+  'фулл',
+  'разли',
+  'отлич',
+  'пакет',
+  'лучше',
+  'подск',
+  'помог',
+])
+
+/**
  * Правила для модели двумя частями: постоянная (правила компании, характер Кадди, база знаний —
  * кешируется у поставщика модели) и состояние разговора (время, прайс, передача менеджеру).
  * @param {PromptContext} context
  * @returns {[string, string]}
  */
-export function systemPrompt({ knowledge, vendorList = null, price, handoff, time }) {
+export function systemPrompt({ knowledge, topical = [], vendorList = null, price, handoff, time }) {
   const facts = knowledge.length
     ? knowledge
         .map((entry) => `— [${entry.product}] ${entry.text.replace(/\s*\n\s*/g, ' ')}`)
@@ -1141,7 +1230,14 @@ ${facts}${vendorListText(vendorList)}`
   const state = `Состояние разговора:
 — Сейчас ${time.text} — ${timeLine}.
 — ${priceLine}
-— ${handoffText(handoff)}`
+— ${handoffText(handoff)}${
+    topical.length
+      ? `
+
+Справка по теме вопроса (официальные сайты производителей; выбери главное, не пересказывай всё):
+${topical.map((entry) => `— [${entry.product}] ${entry.text}`).join('\n')}`
+      : ''
+  }`
   return [stable, state]
 }
 

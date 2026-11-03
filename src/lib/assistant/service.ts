@@ -13,6 +13,7 @@ import {
   managerFormReply,
   mentionedCards,
   modelHistory,
+  pickFacts,
   promptLinks,
   quickAction,
   RENEW_CARD,
@@ -23,6 +24,7 @@ import {
   wantsManager,
   wantsRenewal,
 } from '@/domain/assistant.mjs'
+import { CHATGPT_FAQ_POSITION } from '@/domain/kaddiFaq.mjs'
 import { normalizePhone } from '@/domain/order.mjs'
 import { workTime } from '@/domain/priceTable.mjs'
 import { splitQuickReplies } from '@/domain/quickReplies.mjs'
@@ -117,9 +119,23 @@ async function modelAnswer(
     onTool?.({ name, input, result })
     return result
   }
+  // Справка ChatGPT (позиции от 2000, setupKaddiFaqChatgpt) — только по теме разговора и вне
+  // кэша промпта; своя база компании — целиком, как раньше (03.11.2026: со всей справкой Кадди
+  // отвечал заметно медленнее).
+  const talk = messages
+    .filter((message) => message.role === 'user')
+    .slice(-4)
+    .map((message) => message.content)
+    .join(' ')
+  const own = knowledge.filter((entry) => entry.position < CHATGPT_FAQ_POSITION)
+  const topical = pickFacts(
+    knowledge.filter((entry) => entry.position >= CHATGPT_FAQ_POSITION),
+    talk,
+  )
   const system = systemPrompt({
     now: new Date(),
-    knowledge,
+    knowledge: own,
+    topical,
     vendorList,
     price,
     handoff,

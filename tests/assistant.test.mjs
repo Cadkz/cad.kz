@@ -226,7 +226,7 @@ test('правила владельца и характер Кадди: роль
   assert.match(rules, /Ты — Кадди, виртуальный ассистент компании CAD\.kz/)
   assert.match(rules, /без рода/)
   assert.doesNotMatch(rules, /Зафиксировал|Я передал|гендер мужской/)
-  assert.match(rules, /2–5 коротких предложений/)
+  assert.match(rules, /2–4 коротких предложения, не больше 450 знаков/)
   assert.match(rules, /довести его до следующего шага покупки/)
   assert.match(rules, /Имя, телефон и другие контакты в чате не спрашивай вовсе/)
   assert.match(rules, /кнопку «Прислать расчёт в WhatsApp»/)
@@ -692,5 +692,21 @@ test('отчёт 16.10 (2): название внутри другого наз�
   assert.equal(
     cleanReply('Стоимость уточнит менеджер.\n\n[ЛИРА - FEM (ЛИРА САПР) Грунт]'),
     'Стоимость уточнит менеджер.',
+  )
+})
+
+test('Справка ChatGPT отбирается по теме разговора (03.11.2026)', async () => {
+  const { pickFacts } = await import('../src/domain/assistant.mjs')
+  const facts = [
+    { product: 'SCAD Office', text: 'SCAD Office — расчёт конструкций.' },
+    { product: 'ЛИРА-FEM', text: 'ЛИРА-FEM — МКЭ.' },
+    { product: 'plotWAVE T75', text: 'Монохромный плоттер.' },
+  ]
+  const picked = pickFacts(facts, 'в чем различия скада и лиры?').map((f) => f.product)
+  assert.deepEqual(picked, ['SCAD Office', 'ЛИРА-FEM'])
+  assert.deepEqual(pickFacts(facts, 'привет'), [])
+  assert.deepEqual(
+    pickFacts(facts, 'нужен плоттер').map((f) => f.product),
+    ['plotWAVE T75'],
   )
 })
