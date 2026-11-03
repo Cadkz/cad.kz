@@ -1,0 +1,42 @@
+/* Невидимые полосы по верхнему и левому краю окна Кадди и угол между ними: потянуть мышью —
+   изменить размер. На телефоне и планшете окно на весь экран — полос нет. */
+.top,
+.left,
+.corner {
+  display: none;
+}
+
+@media (min-width: 640px) and (hover: hover) {
+  .top,
+  .left,
+  .corner {
+    display: block;
+    position: absolute;
+    z-index: var(--z-dropdown);
+    touch-action: none;
+  }
+
+  .top {
+    top: 0;
+    right: var(--space-6);
+    left: var(--space-6);
+    height: var(--space-2);
+    cursor: ns-resize;
+  }
+
+  .left {
+    top: var(--space-6);
+    bottom: var(--space-6);
+    left: 0;
+    width: var(--space-2);
+    cursor: ew-resize;
+  }
+
+  .corner {
+    top: 0;
+    left: 0;
+    width: var(--space-6);
+    height: var(--space-6);
+    cursor: nwse-resize;
+  }
+}

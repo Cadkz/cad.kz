@@ -58,9 +58,10 @@
     bottom: var(--space-6);
     left: auto;
     z-index: var(--z-dropdown);
-    width: var(--assistant-width);
+    /* --panel-width/--panel-height — размер, растянутый мышью (PanelResize). */
+    width: var(--panel-width, var(--assistant-width));
     height: min(
-      var(--assistant-height),
+      var(--panel-height, var(--assistant-height)),
       calc(100dvh - var(--header-height) - var(--space-2) - var(--space-6))
     );
     overflow: hidden;
@@ -180,4 +181,9 @@
   from {
     opacity: 0;
   }
+}
+
+/* Пока тянут край: текст в окне не выделяется. */
+.panel[data-resizing="true"] {
+  user-select: none;
 }

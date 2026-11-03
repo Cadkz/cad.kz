@@ -8,6 +8,7 @@ import { AssistantComposer } from '../AssistantComposer/AssistantComposer'
 import { AssistantHandoff } from '../AssistantHandoff/AssistantHandoff'
 import { AssistantHeader } from '../AssistantHeader/AssistantHeader'
 import { AssistantMessages } from '../AssistantMessages/AssistantMessages'
+import { PanelResize } from '../PanelResize/PanelResize'
 import styles from './AssistantPanel.module.css'
 
 const focusable = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled])'
@@ -187,6 +188,7 @@ export function AssistantPanel({
         aria-labelledby={titleId}
         tabIndex={-1}
       >
+        <PanelResize target={panel} />
         <div className={styles.head}>
           <AssistantHeader titleId={titleId} />
           <div className={styles.tools}>
