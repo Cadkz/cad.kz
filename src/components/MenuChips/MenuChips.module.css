@@ -1,5 +1,6 @@
 /* Производители в мегаменю тегами (03.11.2026, 12:40: голубые «таблетки» владельцу показались
-   дешёвыми): белые с тонкой рамкой, как фильтр каталога; выбранный — тёмно-синий с белым текстом и галочкой (12:45). */
+   дешёвыми): белые с тонкой рамкой, как фильтр каталога; выбранный — тёмно-синий с белым текстом (12:45); ширина не меняется — без галочки и смены жирности, цвет
+   перетекает плавно. */
 .root {
   display: flex;
   flex-direction: column;
@@ -40,8 +41,9 @@
   white-space: nowrap;
   cursor: pointer;
   transition:
-    border-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
+    border-color var(--duration-base) var(--ease),
+    background-color var(--duration-base) var(--ease),
+    color var(--duration-base) var(--ease);
 }
 
 .chip:hover {
@@ -53,7 +55,6 @@
   border-color: var(--color-navy);
   background: var(--color-navy);
   color: var(--color-text-inverse);
-  font-weight: var(--weight-semibold);
 }
 
 @media (prefers-reduced-motion: reduce) {

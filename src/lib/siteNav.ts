@@ -132,4 +132,10 @@ export const searchHints = [
  * Только запросы, которые находят товар: длинные фразы («GEO5 для расчёта оснований») обычный
  * поиск по словам пока не понимает — это работа будущего ИИ-помощника.
  */
-export const typingHints = ['SCAD Office', 'GEO5', '3D-сканеры Artec', 'Курсы Revit']
+export const typingHints = [
+  'Revit',
+  'Плоттер A0',
+  'SCAD Office',
+  '3D-сканер Artec',
+  'Курсы AutoCAD',
+]

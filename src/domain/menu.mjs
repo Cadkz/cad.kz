@@ -175,15 +175,35 @@ export function menuColumns(
           : children.length > 1
             ? [...children, ...vendorCards(inSection.filter((p) => !inChildren.has(p.id)))]
             : vendorCards(inSection)
-      // Только направления программ: у оборудования первым шагом фото подразделов, у курсов — темы.
+      const toLink = (/** @type {(typeof inSection)[number]} */ product) => ({
+        title: menuTitle(product.title),
+        href: familyTaskHref(product.href, filter.direction),
+        logo: product.picture ?? null,
+      })
+      // Направления программ — «Популярное» под производителями. Оборудование с подразделами
+      // («Плоттеры», «Комплектующие») — так же (правка владельца 03.11.2026): подразделы чипами,
+      // ниже устройства разных линеек (не больше двух от линейки) и хотя бы один расходник.
+      // У курсов — темы, у оборудования без подразделов — производители и линейки.
+      const childLists = (section.children ?? [])
+        .map((child) => inSection.filter((product) => product.sections.includes(child.id)))
+        .filter((list) => list.length)
+      const [devices = [], ...accessories] = childLists
       const popular =
         section.isDirection && section.slug !== TRAINING
-          ? pickVaried(inSection, MENU_POPULAR, MENU_POPULAR_PER_VENDOR).map((product) => ({
-              title: menuTitle(product.title),
-              href: familyTaskHref(product.href, filter.direction),
-              logo: product.picture ?? null,
-            }))
-          : []
+          ? pickVaried(inSection, MENU_POPULAR, MENU_POPULAR_PER_VENDOR).map(toLink)
+          : childLists.length > 1
+            ? [
+                ...pickVaried(
+                  devices.map((product) => ({
+                    ...product,
+                    vendor: product.line ?? product.vendor,
+                  })),
+                  MENU_POPULAR - accessories.length,
+                  2,
+                ),
+                ...accessories.flatMap((list) => list.slice(0, 1)),
+              ].map(toLink)
+            : []
       return {
         title: section.title,
         icon: section.icon ?? null,

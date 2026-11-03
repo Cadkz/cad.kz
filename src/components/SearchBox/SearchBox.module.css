@@ -77,7 +77,8 @@
   position: absolute;
   inset-inline: var(--space-10) var(--space-3);
   overflow: hidden;
-  color: var(--color-text-muted);
+  /* Светлее обычного серого: «печать» не должна спорить с остальной шапкой (03.11.2026). */
+  color: var(--color-gray-500);
   font-size: var(--text-body);
   white-space: nowrap;
   text-overflow: ellipsis;

@@ -12,7 +12,7 @@ const PAUSE_MS = 400
  * Пишет прямо в текст элемента, без перерисовки React: размер поля не меняется, ввод не трогается.
  * active = false (поле в фокусе, в нём есть текст, поле скрыто) — сразу стоп.
  * Пользователь просил меньше движения — один пример без анимации.
- * После rounds кругов печать останавливается на первом примере: постоянно меняющийся текст
+ * После rounds кругов печать останавливается на общем тексте: постоянно меняющийся текст
  * не должен отвлекать от работы с сайтом.
  */
 export function useTypingHint(
@@ -30,8 +30,10 @@ export function useTypingHint(
       delete element.dataset.fading
       return
     }
+    // После кругов — общий текст, а не первый пример: иначе поле надолго «застревает» на
+    // SCAD Office (замечание владельца 03.11.2026).
     const still = () => {
-      element.textContent = `Например, ${first}`
+      element.textContent = 'Программа, оборудование или курс'
     }
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return still()
     let timer: ReturnType<typeof setTimeout>
