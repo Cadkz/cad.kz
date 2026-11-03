@@ -146,15 +146,46 @@ const trainingKey = (key: string) => key.slice('training:'.length) as TrainingKe
  * 23.10.2026): данные исследования есть у 11 программ из сотен, галочка «Локальная» прятала бы
  * все остальные.
  */
-function featureCategory(state: Pick<FilterState, 'type'>) {
+function featureCategory(
+  state: Pick<FilterState, 'type'> & { features?: FilterState['features'] },
+) {
+  if (!state.type) {
+    // Тип не выбран, но галочка характеристики уже стоит (выбрали Canon, затем «A0»): категория
+    // — из ключа галочки «категория.фильтр».
+    const key = Object.keys(state.features ?? {})[0]
+    const category = key?.slice(0, key.indexOf('.'))
+    if (category === 'software') return undefined
+    return catalogFeatures.find((entry) => entry.category === category)
+  }
   const category = state.type === 'scanners' ? '3d-scanners' : state.type
-  if (!category || category === 'software') return undefined
+  if (category === 'software') return undefined
+  return catalogFeatures.find((entry) => entry.category === category)
+}
+
+/**
+ * Тип не выбран, но все найденные устройства с характеристиками — одной категории (выбран
+ * производитель Canon — только плоттеры): фильтры этой категории подтягиваются сами
+ * (замечание владельца 03.11.2026). Смешанный выбор (Canon и Artec) — без фильтров.
+ */
+function inferredCategory(items: CatalogItem[], state: FilterState) {
+  if (state.type) return undefined
+  const found = new Set(
+    items.flatMap((item) =>
+      item.research?.category &&
+      item.research.category !== 'software' &&
+      matches(item, { ...state, features: {} })
+        ? [item.research.category]
+        : [],
+    ),
+  )
+  if (found.size !== 1) return undefined
+  const [category] = [...found]
   return catalogFeatures.find((entry) => entry.category === category)
 }
 
 /** Внутри группы — ИЛИ, между группами — И; счётчик игнорирует только свою группу. */
 export function featureOptions(items: CatalogItem[], state: FilterState) {
-  const category = featureCategory(state)
+  const category = featureCategory(state) ?? inferredCategory(items, state)
   return (category?.filters ?? [])
     .map((filter) => {
       const key = `${category?.category}.${filter.key}`
@@ -482,7 +513,13 @@ export function fromParams(params: Record<string, string | string[] | undefined>
   const group = one('group')
   const page = Number(one('page'))
   const features: Record<string, string[]> = {}
-  const category = featureCategory({ type: one('type') })
+  // Без типа категория — по первой галочке в адресе (spec.plotters.format=…).
+  const specKey = Object.keys(params).find((key) => key.startsWith('spec.'))
+  const category = one('type')
+    ? featureCategory({ type: one('type') })
+    : catalogFeatures.find(
+        (entry) => entry.category !== 'software' && specKey?.startsWith(`spec.${entry.category}.`),
+      )
   for (const filter of category?.filters ?? []) {
     const key = `${category?.category}.${filter.key}`
     const selected = [
@@ -551,6 +588,12 @@ export type SectionTile = {
 /** Какой шаг «плитками разделов» сейчас: типы оборудования или подразделы типа. */
 export type SectionStep = { kind: 'type' | 'sub' | 'direction'; tiles: SectionTile[] }
 
+/** Плитка раздела с фото выбранной владельцем модели, а не флагмана по порядку. */
+const TILE_PHOTO: Record<string, RegExp> = {
+  'wide-format': /TZ-32000/i,
+  plotters: /TZ-32000/i,
+}
+
 function sectionTile(items: CatalogItem[], facets: Facet[], facet: Facet, base: FilterState) {
   const list = items
     .filter((item) =>
@@ -571,7 +614,14 @@ function sectionTile(items: CatalogItem[], facets: Facet[], facet: Facet, base: 
   const byFlagship = [...illustrated].sort(
     (x, y) => (x.lineOrder ?? Number.MAX_SAFE_INTEGER) - (y.lineOrder ?? Number.MAX_SAFE_INTEGER),
   )
-  const photo = byFlagship.find((item) => item.picture && item.picture.fit !== 'logo')
+  // Широкоформатные плоттеры — фото imagePROGRAF TZ-32000 (выбор владельца 03.11.2026).
+  const chosen = TILE_PHOTO[facet.slug]
+  const photo =
+    (chosen &&
+      byFlagship.find(
+        (item) => chosen.test(item.title) && item.picture && item.picture.fit !== 'logo',
+      )) ||
+    byFlagship.find((item) => item.picture && item.picture.fit !== 'logo')
   return {
     slug: facet.slug,
     title: facet.title,

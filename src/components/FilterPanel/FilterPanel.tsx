@@ -107,7 +107,14 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
             title="Производитель"
             options={options.vendors}
             selected={state.vendors}
-            onToggle={(value) => onChange({ vendors: toggle(state.vendors, value) })}
+            onToggle={(value) =>
+              // Без типа характеристики подтянуты по производителю — при смене производителя
+              // сбрасываются, иначе галочка плоттера оставила бы пустой список у Artec.
+              onChange({
+                vendors: toggle(state.vendors, value),
+                ...(state.type ? {} : { features: {} }),
+              })
+            }
             limit={VENDORS_SHOWN}
           />
         )}

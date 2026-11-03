@@ -362,3 +362,19 @@ test('Сканеры: формат, разрешение, скорость и ц
     { rolls: '2', color: 'Цветная' },
   )
 })
+
+test('Выбран производитель без типа: характеристики подтягиваются, если устройства одной категории', () => {
+  const canon = items.map((item) =>
+    item.research.category === 'plotters' ? { ...item, vendor: 'Canon' } : item,
+  )
+  const byVendor = { ...emptyFilter, group: 'hardware', vendors: ['Canon'] }
+  const options = featureOptions(canon, byVendor)
+  assert.ok(options.some((entry) => entry.key === 'plotters.color'))
+  // Галочка без типа фильтрует и переживает адрес страницы.
+  const mono = features(byVendor, { 'plotters.color': ['Монохромная'] })
+  const found = canon.filter((item) => matches(item, mono))
+  assert.ok(found.length > 0 && found.length < 11)
+  assert.deepEqual(fromSearch(toQuery(mono)).features, { 'plotters.color': ['Монохромная'] })
+  // Разные категории (все производители) — без характеристик.
+  assert.deepEqual(featureOptions(canon, { ...emptyFilter, group: 'hardware' }), [])
+})
