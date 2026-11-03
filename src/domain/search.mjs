@@ -315,6 +315,7 @@ const isRenew = (word) => RENEW.some((root) => word.startsWith(root))
  * Английские слова из названий программ, которые по-русски пишут по звучанию, а побуквенно и на
  * слух они не сходятся: «дизайн» → design, «билдинг» → building (замечание владельца 03.11.2026:
  * «билдинг дизайн» не находил Forma Building Design).
+ * @type {Readonly<Record<string, string>>}
  */
 const ENGLISH = {
   дизайн: 'design',
