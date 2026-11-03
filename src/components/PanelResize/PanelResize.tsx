@@ -1,6 +1,6 @@
 'use client'
 
-import { type PointerEvent as ReactPointerEvent, type RefObject, useEffect } from 'react'
+import { type PointerEvent as ReactPointerEvent, type RefObject, useEffect, useState } from 'react'
 import styles from './PanelResize.module.css'
 
 type Edge = 'top' | 'left' | 'corner'
@@ -18,6 +18,8 @@ const MIN_HEIGHT = 480
 const EDGE = 24
 const TOP = 80
 const STORAGE_KEY = 'cadkz-kaddi-size'
+/** Размер уже меняли — подсказка уголком больше не мигает. */
+const SEEN_KEY = 'cadkz-kaddi-resized'
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
 
@@ -35,6 +37,14 @@ function apply(element: HTMLElement, width: number, height: number) {
  * мышью; размер запоминается в этом браузере. Двойной щелчок по краю — прежний размер.
  */
 export function PanelResize({ target }: Props) {
+  const [hint, setHint] = useState(false)
+  useEffect(() => {
+    try {
+      setHint(!localStorage.getItem(SEEN_KEY))
+    } catch {
+      // Хранилище недоступно — подсказку не показываем.
+    }
+  }, [])
   useEffect(() => {
     const element = target.current
     if (!element) return
@@ -67,7 +77,9 @@ export function PanelResize({ target }: Props) {
       delete element.dataset.resizing
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', end)
+      setHint(false)
       try {
+        localStorage.setItem(SEEN_KEY, '1')
         localStorage.setItem(STORAGE_KEY, JSON.stringify(size))
       } catch {
         // Не запомнили — не страшно.
@@ -105,6 +117,8 @@ export function PanelResize({ target }: Props) {
       />
       <div
         className={styles.corner}
+        data-hint={hint || undefined}
+        title="Потяните, чтобы изменить размер окна"
         onPointerDown={start('corner')}
         onDoubleClick={reset}
         aria-hidden="true"

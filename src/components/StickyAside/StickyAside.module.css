@@ -1,0 +1,10 @@
+/* От 960 px: под шапкой, а если колонка выше экрана — низом у края экрана (top отрицательный). */
+@media (min-width: 960px) {
+  .sticky {
+    position: sticky;
+    top: min(
+      calc(var(--header-height) + var(--space-4)),
+      calc(100dvh - var(--aside-height) - var(--space-4))
+    );
+  }
+}

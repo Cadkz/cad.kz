@@ -40,3 +40,83 @@
     cursor: nwse-resize;
   }
 }
+
+/* Подсказка, что окно растягивается (просьба владельца 03.11.2026): в левом верхнем углу — тонкая
+   уголок-скобка, как у окна Windows; при наведении на край — синяя линия вдоль него. Пока клиент
+   ни разу не менял размер, при открытии окна уголок дважды мягко «подмигивает» синим и
+   выдвигается наружу — заметно, но не отвлекает. */
+@media (min-width: 640px) and (hover: hover) {
+  .corner::before {
+    content: "";
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    width: var(--space-3);
+    height: var(--space-3);
+    border-top: 2px solid var(--color-border-strong);
+    border-left: 2px solid var(--color-border-strong);
+    border-top-left-radius: var(--radius-sm);
+    transition:
+      border-color var(--duration-fast) var(--ease),
+      transform var(--duration-fast) var(--ease);
+  }
+
+  .corner:hover::before,
+  [data-resizing] .corner::before {
+    border-color: var(--color-blue);
+    transform: translate(calc(var(--space-1) * -0.5), calc(var(--space-1) * -0.5));
+  }
+
+  .corner[data-hint]::before {
+    animation: resizeHint var(--duration-draw) var(--ease) var(--duration-kaddi-open) 2;
+  }
+
+  .top::after,
+  .left::after {
+    content: "";
+    position: absolute;
+    border-radius: var(--radius-pill);
+    background: var(--color-blue);
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease);
+  }
+
+  .top::after {
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 2px;
+  }
+
+  .left::after {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+  }
+
+  .top:hover::after,
+  .left:hover::after {
+    opacity: 1;
+  }
+}
+
+@keyframes resizeHint {
+  0%,
+  100% {
+    border-color: var(--color-border-strong);
+    transform: none;
+  }
+
+  40%,
+  60% {
+    border-color: var(--color-blue);
+    transform: translate(calc(var(--space-1) * -0.5), calc(var(--space-1) * -0.5));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .corner[data-hint]::before {
+    animation: none;
+  }
+}

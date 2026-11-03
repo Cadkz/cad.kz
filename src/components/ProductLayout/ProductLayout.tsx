@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { StickyAside } from '../StickyAside/StickyAside'
 import styles from './ProductLayout.module.css'
 
 type Props = {
@@ -22,7 +23,7 @@ export function ProductLayout({ header, aside, children, wide, asideLast = false
     <div className={styles.layout} data-aside-last={asideLast}>
       <div className={styles.header}>{header}</div>
       <aside className={styles.aside} aria-label="Покупка">
-        <div className={styles.sticky}>{aside}</div>
+        <StickyAside className={styles.sticky}>{aside}</StickyAside>
       </aside>
       <div className={styles.body}>{children}</div>
       {wide && <div className={styles.wide}>{wide}</div>}
