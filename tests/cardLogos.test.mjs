@@ -69,3 +69,23 @@ test('логотипы владельца 03.11.2026: Chaos, MagiCAD, НТП, А
     assert.ok(vendorLogo(vendor), vendor)
   }
 })
+
+test('фото тонеров Canon по названию: серия и цвет (03.11.2026)', async () => {
+  const { tonerPhotos } = await import('../src/domain/sitePhotos.mjs')
+  const url = (title) => tonerPhotos(title)[0]?.url
+  assert.equal(
+    url('Тонер Canon/6692C001AA/colorWAVE T60 Toner C'),
+    '/images/equipment/toner-t60-cyan.webp',
+  )
+  assert.equal(
+    url('Тонер Canon/6692C004AA/colorWAVE T60 Toner BK'),
+    '/images/equipment/toner-t60-black.webp',
+  )
+  assert.equal(
+    url('Тонер Canon/6692C003AA/colorWAVE T60 Toner Y'),
+    '/images/equipment/toner-t60-yellow.webp',
+  )
+  assert.equal(url('Тонер Océ ColorWave 650 Magenta'), '/images/equipment/toner-650-magenta.webp')
+  assert.equal(url('Тонер Océ ColorWave 700 Yellow'), '/images/equipment/toner-700.webp')
+  assert.equal(url('Плоттер Canon colorWAVE T60'), undefined)
+})

@@ -6,8 +6,8 @@ import styles from './CatalogTile.module.css'
 export type CatalogTileProps = {
   /** Картинка сверху: чертёж направления, фото типа или логотип производителя. */
   media: ReactNode
-  /** Логотип производителя — с полями, чертёж — во всю рамку. */
-  mediaFit?: 'fill' | 'logo'
+  /** Логотип производителя — с полями, чертёж — во всю рамку, фото оборудования — крупнее, без сетки. */
+  mediaFit?: 'fill' | 'logo' | 'photo'
   /** Надпись над названием: «Направление», «Тип оборудования», «Производитель». */
   overline: string
   title: string
@@ -40,7 +40,7 @@ export function CatalogTile({
     <>
       <span className={styles.head}>
         <span
-          className={mediaFit === 'logo' ? `${styles.media} ${styles.logo}` : styles.media}
+          className={mediaFit === 'fill' ? styles.media : `${styles.media} ${styles[mediaFit]}`}
           aria-hidden="true"
         >
           {media}

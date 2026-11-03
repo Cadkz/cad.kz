@@ -213,6 +213,65 @@ export const SITE_PHOTOS = {
 }
 
 /** @param {string} slug @returns {SitePhoto[]} */
-export function sitePhotos(slug) {
-  return Object.hasOwn(SITE_PHOTOS, slug) ? SITE_PHOTOS[slug] : []
+/**
+ * Фото расходников Canon по названию (пачка владельца 03.11.2026, источники — sources.csv пачки:
+ * фото реселлеров, у ColorWave 700 одно общее фото серии). Адреса тонеров на сайте не по шаблону,
+ * поэтому правило — серия и цвет в названии; цвет берётся из названия (Toner C, Black, голубой),
+ * а не из артикула: у тонеров T60 в названиях артикулы не совпадают с артикулами Canon.
+ * @type {{ series: RegExp, photos: Record<'black' | 'cyan' | 'magenta' | 'yellow' | 'all', SitePhoto> }[]}
+ */
+const TONERS = [
+  {
+    series: /colorwave\s*t60/i,
+    photos: {
+      black: { url: '/images/equipment/toner-t60-black.webp', width: 716, height: 510 },
+      cyan: { url: '/images/equipment/toner-t60-cyan.webp', width: 716, height: 510 },
+      magenta: { url: '/images/equipment/toner-t60-magenta.webp', width: 716, height: 510 },
+      yellow: { url: '/images/equipment/toner-t60-yellow.webp', width: 716, height: 510 },
+      all: { url: '/images/equipment/toner-t60-black.webp', width: 716, height: 510 },
+    },
+  },
+  {
+    series: /colorwave\s*650/i,
+    photos: {
+      black: { url: '/images/equipment/toner-650-black.webp', width: 497, height: 747 },
+      cyan: { url: '/images/equipment/toner-650-cyan.webp', width: 505, height: 746 },
+      magenta: { url: '/images/equipment/toner-650-magenta.webp', width: 411, height: 587 },
+      yellow: { url: '/images/equipment/toner-650-yellow.webp', width: 519, height: 513 },
+      all: { url: '/images/equipment/toner-650-black.webp', width: 497, height: 747 },
+    },
+  },
+]
+const COLORWAVE_700 = { url: '/images/equipment/toner-700.webp', width: 663, height: 714 }
+
+/** @param {string} title */
+function tonerColor(title) {
+  if (/\b(black|bk|mbk)\b|ч[её]рн/i.test(title)) return 'black'
+  if (/\b(yellow|y)\b|ж[её]лт/i.test(title)) return 'yellow'
+  if (/\b(magenta|m)\b|пурпур/i.test(title)) return 'magenta'
+  if (/\b(cyan|c)\b|голуб/i.test(title)) return 'cyan'
+  return 'all'
+}
+
+/**
+ * Фото тонера по названию или пусто.
+ * @param {string} title
+ * @returns {SitePhoto[]}
+ */
+export function tonerPhotos(title) {
+  if (!/тонер|toner/i.test(title)) return []
+  if (/colorwave\s*700/i.test(title)) return [COLORWAVE_700]
+  const series = TONERS.find((item) => item.series.test(title))
+  return series ? [series.photos[tonerColor(title)]] : []
+}
+
+/**
+ * Фото товара файлами сайта: по адресу товара, иначе по названию (тонеры Canon).
+ * @param {string} slug
+ * @param {string} [title]
+ * @returns {SitePhoto[]}
+ */
+export function sitePhotos(slug, title = '') {
+  if (Object.hasOwn(SITE_PHOTOS, slug)) return SITE_PHOTOS[slug]
+  return tonerPhotos(title)
 }

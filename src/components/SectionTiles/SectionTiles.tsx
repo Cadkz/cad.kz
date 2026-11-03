@@ -48,7 +48,7 @@ export function SectionTiles({ tiles, overline, onPick }: Props) {
                   alt=""
                   width={tile.picture.width}
                   height={tile.picture.height}
-                  sizes="64px"
+                  sizes="96px"
                   unoptimized={tile.picture.local}
                   className={styles.image}
                 />
@@ -56,6 +56,7 @@ export function SectionTiles({ tiles, overline, onPick }: Props) {
                 <SectionIcon name={tile.icon} size={24} />
               )
             }
+            mediaFit={tile.picture && tile.picture.fit !== 'logo' ? 'photo' : 'fill'}
             overline={overline}
             title={tile.title}
             text={text(tile)}
