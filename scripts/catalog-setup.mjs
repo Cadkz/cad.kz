@@ -13,7 +13,7 @@
 // каталог как в Битриксе: САПР в «Архитектуре и BIM», АВС — лицензия или обновление (22.10.2026);
 // оборудование как в Битриксе: четыре типа, плоттеры и комплектующие, WideTEK (22.10.2026);
 // тексты сканеров WideTEK (26.10.2026); девять направлений — визуализация и трубопроводы влиты (27.10.2026);
-// каталог Autodesk — только коллекции AEC, PDMC, M&E и их программы, Autodesk Forma и линейки, названия Fusion, Navisworks Manage и Simulate, прайс-лист Autodesk для Кадди (29.10.2026); правки к презентации 03.11.2026 (демопубликации скрыты, SCAD, подборки Artec, страницы, условия покупки); даты двум публикациям старого сайта без даты (02.11.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
+// каталог Autodesk — только коллекции AEC, PDMC, M&E и их программы, Autodesk Forma и линейки, названия Fusion, Navisworks Manage и Simulate, прайс-лист Autodesk для Кадди (29.10.2026); правки к презентации 03.11.2026 (демопубликации скрыты, SCAD, подборки Artec, страницы, условия покупки); сверка текстов товаров после презентации — AutoCAD с отраслевыми наборами, LT, Fusion, InfraWorks, коллекции, комплектации SCAD, АВС-KZ, GEO5 (03.11.2026); даты двум публикациям старого сайта без даты (02.11.2026); отметка заполненности товаров (при каждом запуске). Выполняется один раз (отметка в журнале
 // «Запуски импорта»), при сборке на Vercel вызывается из demo-setup.
 // Запуск: pnpm payload run scripts/catalog-setup.mjs
 
@@ -68,6 +68,7 @@ import { setupPresets, setupQuality } from '../src/lib/presetsSetup.ts'
 import { setupPriorities, setupPrioritiesV2, setupPrioritiesV3 } from '../src/lib/prioritySetup.ts'
 import { setupPrivacyPage } from '../src/lib/privacySetup.ts'
 import { setupProductTables } from '../src/lib/productTablesSetup.ts'
+import { setupProductTexts } from '../src/lib/productTextsSetup.ts'
 import { setupProgramTexts } from '../src/lib/programTextsSetup.ts'
 import { setupFamilyRenew } from '../src/lib/renewSetup.ts'
 import { setupSearchAliases } from '../src/lib/searchSetup.ts'
@@ -322,6 +323,9 @@ try {
   const presentation = await setupPresentation(payload)
   if (!presentation) console.log('Правки к презентации 03.11.2026 уже внесены.')
   else for (const line of presentation) console.log(`Презентация — ${line}`)
+  const productTexts = await setupProductTexts(payload)
+  if (!productTexts) console.log('Сверка текстов товаров 03.11.2026 уже внесена.')
+  else for (const line of productTexts) console.log(`Тексты товаров — ${line}`)
   const homeBim = await setupHomeBim(payload)
   if (!homeBim) console.log('Баннер BIM на главной уже сокращён.')
   else for (const line of homeBim) console.log(`Баннер BIM — ${line}`)

@@ -387,10 +387,14 @@ export function cheapestTotal(view, unitOf) {
           parts++
         }
       if (step.mode === 'one') {
-        const units = step.items
-          .filter((i) => !itemUnavailable(i, view.switches, sel))
-          .map((i) => priceOf(i, sel))
-          .filter((u) => u != null)
+        const available = step.items.filter((i) => !itemUnavailable(i, view.switches, sel))
+        // Выбранный сразу вариант — главный: «от» у AutoCAD по полному AutoCAD, а не по LT
+        // (решение владельца 03.11.2026). Нет такого или у него нет цены — самый дешёвый.
+        const main = available.find((i) => i.preselect)
+        const mainUnit = main ? priceOf(main, sel) : null
+        const units = (
+          mainUnit != null ? [mainUnit] : available.map((i) => priceOf(i, sel))
+        ).filter((u) => u != null)
         if (!units.length || manual == null) manual = null
         else {
           manual = manual + units.reduce((a, b) => (b < a ? b : a))

@@ -299,3 +299,22 @@ test('цена «от» не берёт значение «Обновление�
   const unit = (id) => (id === 'new' ? 135720n : 71920n)
   assert.equal(cheapest(view, unit), 135720n)
 })
+
+test('цена «от» у выбора одного варианта — по варианту «Выбран сразу»: AutoCAD, а не AutoCAD LT', () => {
+  const full = item('acad', 82, [offer('acad-1', [])], { preselect: true })
+  const lt = item('lt', 83, [offer('lt-1', [])])
+  const view = {
+    switches: [],
+    steps: [{ key: 'p', title: 'Продукт', mode: 'one', items: [full, lt] }],
+  }
+  const prices = { 'acad-1': 1089000n, 'lt-1': 313000n }
+  assert.equal(
+    cheapestTotal(view, (id) => prices[id] ?? null),
+    1089000n,
+  )
+  // У главного варианта нет цены — «от» по самому дешёвому из остальных.
+  assert.equal(
+    cheapestTotal(view, (id) => (id === 'acad-1' ? null : (prices[id] ?? null))),
+    313000n,
+  )
+})
