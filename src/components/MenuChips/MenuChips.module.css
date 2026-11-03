@@ -1,5 +1,5 @@
 /* Производители в мегаменю тегами (03.11.2026, 12:40: голубые «таблетки» владельцу показались
-   дешёвыми): белые с тонкой рамкой, как фильтр каталога; выбранный — синяя рамка и галочка. */
+   дешёвыми): белые с тонкой рамкой, как фильтр каталога; выбранный — тёмно-синий с белым текстом и галочкой (12:45). */
 .root {
   display: flex;
   flex-direction: column;
@@ -50,8 +50,9 @@
 }
 
 .chip[aria-pressed="true"] {
-  border-color: var(--color-blue);
-  color: var(--color-blue);
+  border-color: var(--color-navy);
+  background: var(--color-navy);
+  color: var(--color-text-inverse);
   font-weight: var(--weight-semibold);
 }
 

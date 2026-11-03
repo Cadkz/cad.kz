@@ -2,7 +2,7 @@
 
 import { ArrowRight, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { titleDash } from '@/domain/titleDash.mjs'
 import type { MenuColumn } from '@/lib/navigation'
 import { MenuChips } from '../MenuChips/MenuChips'
@@ -42,6 +42,33 @@ export function MenuDrill({ column, allLabel, onNavigate }: Props) {
     setVendorKey(key)
     setLineKey(null)
   }
+
+  // Шаг назад внутри меню: сначала линейка, потом производитель. null — шагать некуда.
+  const stepBack =
+    line && !singleLine
+      ? () => setLineKey(null)
+      : vendor && !singleVendor
+        ? () => openVendor(null)
+        : null
+
+  // Кнопка «Назад» на мыши (правка владельца 03.11.2026): пока в меню выбран производитель или
+  // линейка, она шагает назад по меню и снимает выбор, а не уводит браузер на прошлую страницу.
+  // Браузер листает историю по отпусканию четвёртой кнопки — гасим и нажатие, и отпускание.
+  useEffect(() => {
+    if (!stepBack) return
+    const onMouse = (event: MouseEvent) => {
+      if (event.button !== 3) return
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.type === 'mouseup') stepBack()
+    }
+    window.addEventListener('mousedown', onMouse, true)
+    window.addEventListener('mouseup', onMouse, true)
+    return () => {
+      window.removeEventListener('mousedown', onMouse, true)
+      window.removeEventListener('mouseup', onMouse, true)
+    }
+  }, [stepBack])
 
   const crumbs = [
     { title: column.title, back: vendor && !singleVendor ? () => openVendor(null) : null },
