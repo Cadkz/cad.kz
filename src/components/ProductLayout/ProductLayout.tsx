@@ -16,8 +16,7 @@ type Props = {
 
 /**
  * Шаблон «Товар»: от 960 px — заголовок и содержимое на 8 колонок, блок покупки на 4, липкий
- * рядом с ними; условия покупки (asideFooter) — сразу под карточкой, не липкие: при прокрутке
- * уходят под закреплённую карточку (замечание владельца 03.11.2026: колонка целиком застревала, верх уходил под шапку). Широкий блок — под ними во всю рамку: карточка покупки до него не доходит.
+ * рядом с ними; условия покупки (asideFooter) — сразу под карточкой и едут вниз вместе с ней (замечание владельца 03.11.2026: колонка целиком застревала, верх уходил под шапку). Широкий блок — под ними во всю рамку: карточка покупки до него не доходит.
  * На телефоне блок покупки идёт сразу после заголовка (или после содержимого — `asideLast`),
  * широкий блок — последним.
  */
@@ -33,8 +32,10 @@ export function ProductLayout({
     <div className={styles.layout} data-aside-last={asideLast}>
       <div className={styles.header}>{header}</div>
       <aside className={styles.aside} aria-label="Покупка">
-        <StickyAside>{aside}</StickyAside>
-        {asideFooter}
+        <StickyAside>
+          {aside}
+          {asideFooter}
+        </StickyAside>
       </aside>
       <div className={styles.body}>{children}</div>
       {wide && <div className={styles.wide}>{wide}</div>}

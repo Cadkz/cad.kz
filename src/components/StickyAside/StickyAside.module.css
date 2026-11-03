@@ -1,12 +1,7 @@
-/* От 960 px: под шапкой, а если колонка выше экрана — низом у края экрана (top отрицательный). */
+/* От 960 px: колонка целиком стоит под шапкой при прокрутке. */
 @media (min-width: 960px) {
   .sticky {
     position: sticky;
-    /* Над условиями покупки: они уходят под карточку при прокрутке. */
-    z-index: var(--z-raised);
-    top: min(
-      calc(var(--header-height) + var(--space-4)),
-      calc(100dvh - var(--aside-height) - var(--space-4))
-    );
+    top: calc(var(--header-height) + var(--space-4));
   }
 }
