@@ -558,7 +558,7 @@ test('передача менеджеру из чата: заявка «Конс
   assert.match(dialog, /\[b\]Кадди:\[\/b\] Подойдёт AutoCAD, 1 год\./)
 })
 
-test('текст для WhatsApp: вопрос клиента и итог Кадди, коротко', async () => {
+test('текст для WhatsApp: что нужно, товары со ссылками, итог расчёта', async () => {
   const { whatsappMessage } = await import('../src/domain/assistant.mjs')
   const messages = [
     { role: 'user', content: 'Нужны АВС и РСНБ на год, сколько?' },
@@ -570,7 +570,7 @@ test('текст для WhatsApp: вопрос клиента и итог Кад
   ]
   assert.equal(
     whatsappMessage(messages),
-    'Здравствуйте! Пишу с сайта cad.kz после чата с Кадди.\nВопрос: Нужны АВС и РСНБ на год, сколько?\nКадди посчитал: Итого 325 680 ₸, с НДС.',
+    'Здравствуйте! Пишу с сайта cad.kz после чата с Кадди.\nНужно: Нужны АВС и РСНБ на год, сколько?\n\nИтог расчёта: 325 680 ₸, с НДС',
   )
   // Что собрал Кадди для передачи — вместо вопроса; без итога — до двух цен.
   const priced = [
@@ -582,10 +582,45 @@ test('текст для WhatsApp: вопрос клиента и итог Кад
       name: 'Ирина',
       details: [{ title: 'Продукт', value: 'АВС и РСНБ, по 1 лицензии' }],
     }),
-    'Здравствуйте! Пишу с сайта cad.kz после чата с Кадди.\nМеня зовут Ирина.\nИнтересует: АВС и РСНБ, по 1 лицензии.\nКадди посчитал: АВС — 258 680 ₸. РСНБ — 67 000 ₸.',
+    'Здравствуйте! Пишу с сайта cad.kz после чата с Кадди.\nМеня зовут Ирина.\nНужно: АВС и РСНБ, по 1 лицензии.\n\nРасчёт Кадди: АВС — 258 680 ₸. РСНБ — 67 000 ₸.',
+  )
+  // Товары — ссылками на сайт.
+  const withCards = [
+    messages[0],
+    {
+      role: 'assistant',
+      content: 'Итого 325 680 ₸.',
+      cards: [{ id: 3, title: 'АВС', href: '/products/avs' }],
+    },
+  ]
+  assert.match(
+    whatsappMessage(withCards, undefined, 'https://cad.kz'),
+    /— АВС: https:\/\/cad\.kz\/products\/avs/,
   )
   // Пустой разговор — только приветствие.
   assert.equal(whatsappMessage([]), 'Здравствуйте! Пишу с сайта cad.kz после чата с Кадди.')
+})
+
+test('экспорт переписки: роли, текст и ссылки на товары', async () => {
+  const { conversationText } = await import('../src/domain/assistant.mjs')
+  const text = conversationText(
+    [
+      { role: 'user', content: 'Сколько стоит Artec Eva?' },
+      {
+        role: 'assistant',
+        content: 'Цена по запросу.',
+        cards: [{ id: 1, title: 'Artec Eva', href: '/products/artec_eva' }],
+      },
+      { role: 'manager', name: 'Айбол', content: 'Пришлю КП.' },
+    ],
+    { origin: 'https://cad.kz', date: new Date('2026-11-03T10:00:00Z') },
+  )
+  assert.match(text, /Клиент:\nСколько стоит Artec Eva\?/)
+  assert.match(
+    text,
+    /Кадди:\nЦена по запросу\.\nСсылки:\n— Artec Eva: https:\/\/cad\.kz\/products\/artec_eva/,
+  )
+  assert.match(text, /Менеджер Айбол:\nПришлю КП\./)
 })
 
 test('отчёт 16.10: служебная разметка убирается, оборванный ответ — до целого предложения', () => {

@@ -1,4 +1,5 @@
 import type { UIFieldServerComponent } from 'payload'
+import { ChatExport } from '@/components/ChatExport/ChatExport'
 import { KnowledgeNote } from '@/components/KnowledgeNote/KnowledgeNote'
 import { formatDateTime } from '@/lib/format'
 import styles from './ConversationView.module.css'
@@ -39,7 +40,10 @@ export const ConversationView: UIFieldServerComponent = async ({ id, payload, us
 
   return (
     <section className={styles.root} aria-label="Переписка">
-      <h3 className={styles.title}>Переписка</h3>
+      <div className={styles.top}>
+        <h3 className={styles.title}>Переписка</h3>
+        <ChatExport messages={messages} look="text" />
+      </div>
       <ol className={styles.list}>
         {messages.map((message, index) => {
           const mine = message.role === 'user'

@@ -369,37 +369,108 @@ function clip(/** @type {string} */ text, /** @type {number} */ max) {
 }
 
 /**
- * Готовый текст для WhatsApp из чата с Кадди (решение владельца 13.10): менеджер сразу видит
- * суть, а не «здравствуйте». Коротко и по-человечески: что собрал Кадди (продукт, задача), вопрос
- * клиента и посчитанные Кадди суммы — итог, если он был, иначе до двух цен. Цены берутся только
- * из ответов Кадди (а он называет их только из прайса).
- * @param {{ role: 'user' | 'assistant' | 'manager', content: string }[]} messages
- * @param {{ name?: string, details?: { title: string, value: string }[] }} [prefill]
+ * Сообщение разговора для текстов наружу (WhatsApp, экспорт).
+ * @typedef {{ role: string, content?: string, name?: string, at?: string,
+ *   cards?: { title: string, href: string, id?: number }[] }} ChatLine
  */
-export function whatsappMessage(messages, prefill) {
+
+/** Абсолютная ссылка на страницу сайта. */
+function siteUrl(/** @type {string} */ href, /** @type {string} */ origin) {
+  return /^https?:\/\//.test(href) ? href : `${origin.replace(/\/+$/, '')}${href}`
+}
+
+/** Товары разговора для менеджера: из ответа с расчётом, иначе из последнего ответа с карточками. */
+function chatProducts(/** @type {ChatLine[]} */ messages) {
+  const answers = messages.filter((m) => m.role === 'assistant')
+  const source =
+    [...answers].reverse().find((m) => hasPrice(m.content ?? '') && m.cards?.length) ??
+    [...answers].reverse().find((m) => m.cards?.some((card) => card.id !== 0))
+  const seen = new Set()
+  return (source?.cards ?? [])
+    .filter((card) => card.id !== 0 && !seen.has(card.href) && seen.add(card.href))
+    .slice(0, 5)
+}
+
+/** Итог расчёта Кадди: сумма из строки «Итого», иначе первая фраза с ценой. */
+function chatTotal(/** @type {ChatLine[]} */ messages) {
+  const priced = [...messages]
+    .reverse()
+    .find((m) => m.role === 'assistant' && hasPrice(m.content ?? ''))
+  if (!priced) return null
+  const sentences = priceSentences(priced.content ?? '')
+  const total = sentences.find((sentence) => /итого/i.test(sentence))
+  if (total)
+    return `Итог расчёта: ${clip(total.replace(/^.*?итого[\s:—–-]*/i, ''), 120).replace(/[.!]$/, '')}`
+  const shown = sentences.slice(0, 2).map((sentence) => clip(sentence, 120))
+  return shown.length ? `Расчёт Кадди: ${shown.join(' ')}` : null
+}
+
+/**
+ * Готовый текст для WhatsApp из чата с Кадди (решение владельца 13.10, переделано 03.11.2026:
+ * склейка реплик и «Кадди посчитал: Итого…» были непонятны). Коротко: что нужно клиенту, какие
+ * товары — со ссылками, итог расчёта. Цены — только из ответов Кадди (он берёт их из прайса).
+ * @param {ChatLine[]} messages
+ * @param {{ name?: string, details?: { title: string, value: string }[] }} [prefill]
+ * @param {string} [origin]  Адрес сайта для ссылок на товары.
+ */
+export function whatsappMessage(messages, prefill, origin = 'https://cad.kz') {
   const lines = ['Здравствуйте! Пишу с сайта cad.kz после чата с Кадди.']
   const name = prefill?.name?.trim()
   if (name) lines.push(`Меня зовут ${clip(name, 60)}.`)
   const detail = (/** @type {string} */ title) =>
     prefill?.details?.find((item) => item.title === title)?.value
-  const product = detail('Продукт')
-  const task = detail('Задача')
-  if (product) lines.push(`Интересует: ${clip(product, 160)}.`)
-  if (task) lines.push(`Задача: ${clip(task, 160)}.`)
-  if (!product && !task) {
-    const question = [...messages].reverse().find((m) => m.role === 'user')?.content
-    if (question) lines.push(`Вопрос: ${clip(question, 200)}`)
+  const task = detail('Задача') ?? detail('Продукт')
+  const asked = messages.find((m) => m.role === 'user' && !isQuickAction(m.content ?? ''))?.content
+  const need = task ?? asked
+  if (need) {
+    const short = clip(need, 160)
+    lines.push(`Нужно: ${/[.!?…]$/.test(short) ? short : `${short}.`}`)
   }
-  const priced = [...messages]
-    .reverse()
-    .find((m) => m.role === 'assistant' && /\d\s*₸/.test(m.content))
-  if (priced) {
-    const sentences = priceSentences(priced.content)
-    const total = sentences.filter((s) => /итого/i.test(s))
-    const shown = (total.length ? total : sentences).slice(0, 2).map((s) => clip(s, 160))
-    if (shown.length) lines.push(`Кадди посчитал: ${shown.join(' ')}`)
+  const products = chatProducts(messages)
+  if (products.length) {
+    lines.push('', 'Товары:')
+    for (const card of products) lines.push(`— ${card.title}: ${siteUrl(card.href, origin)}`)
   }
+  const total = chatTotal(messages)
+  if (total) lines.push('', total)
   return lines.join('\n')
+}
+
+/**
+ * Переписка с Кадди одним текстом (кнопка «Скачать переписку» в окне чата и в админке, 03.11.2026):
+ * кто что написал, под ответами — товары со ссылками.
+ * @param {ChatLine[]} messages
+ * @param {{ origin?: string, date?: Date }} [options]
+ */
+export function conversationText(messages, { origin = 'https://cad.kz', date = new Date() } = {}) {
+  const when = (/** @type {Date} */ value) =>
+    value.toLocaleString('ru-RU', {
+      timeZone: 'Asia/Almaty',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  const lines = [`Переписка с Кадди, консультантом CAD.kz — ${origin.replace(/^https?:\/\//, '')}`]
+  lines.push(`Сохранено: ${when(date)}`, '')
+  for (const message of messages) {
+    const who =
+      message.role === 'user'
+        ? 'Клиент'
+        : message.role === 'manager'
+          ? `Менеджер${message.name ? ` ${message.name}` : ''}`
+          : 'Кадди'
+    const at = message.at ? ` (${when(new Date(message.at))})` : ''
+    lines.push(`${who}${at}:`, (message.content ?? '').trim())
+    const cards = (message.cards ?? []).filter((card) => card.href)
+    if (cards.length) {
+      lines.push('Ссылки:')
+      for (const card of cards) lines.push(`— ${card.title}: ${siteUrl(card.href, origin)}`)
+    }
+    lines.push('')
+  }
+  return lines.join('\n').trimEnd() + '\n'
 }
 
 /**

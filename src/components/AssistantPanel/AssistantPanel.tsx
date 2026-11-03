@@ -8,6 +8,7 @@ import { AssistantComposer } from '../AssistantComposer/AssistantComposer'
 import { AssistantHandoff } from '../AssistantHandoff/AssistantHandoff'
 import { AssistantHeader } from '../AssistantHeader/AssistantHeader'
 import { AssistantMessages } from '../AssistantMessages/AssistantMessages'
+import { ChatExport } from '../ChatExport/ChatExport'
 import { PanelResize } from '../PanelResize/PanelResize'
 import styles from './AssistantPanel.module.css'
 
@@ -40,6 +41,9 @@ type Props = {
 
 /** Запас на случай, если конец анимации не пришёл (вкладка в фоне): окно всё равно уберётся. */
 const CLOSE_FALLBACK_MS = 600
+
+/** Адрес сайта для ссылок на товары в тексте WhatsApp (на сервере — основной домен). */
+const siteOrigin = () => (typeof window === 'undefined' ? undefined : window.location.origin)
 
 /**
  * Окно чата с Кадди. От 640 px — окно в правом нижнем углу, на месте Кадди: страницу можно листать,
@@ -192,6 +196,7 @@ export function AssistantPanel({
         <div className={styles.head}>
           <AssistantHeader titleId={titleId} />
           <div className={styles.tools}>
+            {!handoff && <ChatExport messages={chat.messages} className={styles.icon} />}
             {chat.messages.length > 0 && !handoff && (
               <button
                 type="button"
@@ -233,7 +238,7 @@ export function AssistantPanel({
             prefill={handoff.prefill}
             whatsappHref={
               whatsappHref &&
-              `${whatsappHref}?text=${encodeURIComponent(whatsappMessage(chat.messages, handoff.prefill))}`
+              `${whatsappHref}?text=${encodeURIComponent(whatsappMessage(chat.messages, handoff.prefill, siteOrigin()))}`
             }
             onBack={() => setHandoff(false)}
           />
@@ -245,7 +250,7 @@ export function AssistantPanel({
               onHandoff={(prefill) => setHandoff({ prefill })}
               whatsapp={
                 whatsappHref &&
-                `${whatsappHref}?text=${encodeURIComponent(whatsappMessage(chat.messages))}`
+                `${whatsappHref}?text=${encodeURIComponent(whatsappMessage(chat.messages, undefined, siteOrigin()))}`
               }
             />
             <AssistantComposer
