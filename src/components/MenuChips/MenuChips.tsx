@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react'
 import type { MenuVendor } from '@/lib/navigation'
 import styles from './MenuChips.module.css'
 
@@ -11,7 +12,7 @@ type Props = {
 /**
  * Производители направления облачками в строку (правка владельца 03.11.2026, 12:00): без
  * логотипов — в 20 px их не разобрать, — по алфавиту, чтобы порядок читался сам. Выбранный
- * залит синим. Нажатие выбирает производителя, повторное — снимает выбор.
+ * — синей рамкой с галочкой. Нажатие выбирает производителя, повторное — снимает выбор.
  */
 export function MenuChips({ vendors, selected, onSelect }: Props) {
   const sorted = [...vendors].sort((a, b) => a.title.localeCompare(b.title, 'ru'))
@@ -29,6 +30,7 @@ export function MenuChips({ vendors, selected, onSelect }: Props) {
                 aria-pressed={active}
                 onClick={() => onSelect(active ? null : vendor.key)}
               >
+                {active && <Check size={16} strokeWidth={1.75} aria-hidden="true" />}
                 {vendor.title}
               </button>
             </li>
