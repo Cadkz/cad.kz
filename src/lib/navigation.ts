@@ -39,6 +39,7 @@ export type MenuVendor = {
 /** Раздел в мегаменю: производители раздела по порядку и адрес каталога с этим разделом. */
 export type MenuColumn = {
   title: string
+  slug: string
   icon: string | null
   allHref: string
   vendors: MenuVendor[]

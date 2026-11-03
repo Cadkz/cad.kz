@@ -14,7 +14,7 @@ import { HeaderAction } from '../HeaderAction/HeaderAction'
 import { WhatsappIcon } from '../icons/icons'
 import { MenuPopular } from '../MenuPopular/MenuPopular'
 import { MobileVendors } from '../MobileVendors/MobileVendors'
-import { SectionIcon } from '../SectionIcon/SectionIcon'
+import { SectionArt } from '../SectionArt/SectionArt'
 import styles from './MobileMenu.module.css'
 
 type Props = {
@@ -91,7 +91,13 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
               {tab.columns.map((column) => (
                 <details key={column.title} className={styles.section} name={`menu-${tab.key}`}>
                   <summary className={styles.sectionSummary}>
-                    <SectionIcon name={column.icon} size={16} className={styles.sectionIcon} />
+                    <SectionArt
+                      slug={column.slug}
+                      icon={column.icon}
+                      size={48}
+                      iconSize={16}
+                      className={styles.sectionIcon}
+                    />
                     <span className={styles.sectionTitle}>{column.title}</span>
                   </summary>
                   <div className={styles.sectionBody}>

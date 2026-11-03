@@ -47,7 +47,8 @@ export function menuTitle(title) {
  * @typedef {{ key: string, title: string, links: MenuLinkData[], more: boolean, allHref: string }} MenuLineData
  * @typedef {{ key: string, title: string, allHref: string, lines: MenuLineData[],
  *   logo: MenuLogo | null, icon: string | null }} MenuVendorData
- * @typedef {{ title: string, icon: string | null, allHref: string, vendors: MenuVendorData[],
+ * @typedef {{ title: string, slug: string, icon: string | null, allHref: string,
+ *   vendors: MenuVendorData[],
  *   popular: MenuLinkData[] }} MenuColumnData
  */
 
@@ -206,6 +207,7 @@ export function menuColumns(
             : []
       return {
         title: section.title,
+        slug: section.slug,
         icon: section.icon ?? null,
         allHref: hrefFor(filter),
         vendors,

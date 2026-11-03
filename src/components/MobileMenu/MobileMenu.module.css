@@ -74,7 +74,7 @@
 
 .sectionSummary {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: var(--section-art) minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3);
   min-height: var(--control-height);
@@ -90,7 +90,14 @@
 }
 
 .sectionIcon {
+  justify-self: center;
   color: var(--color-text-muted);
+}
+
+/* Иллюстрация раздела (SectionArt); значок без иллюстрации — по центру той же клетки. */
+img.sectionIcon {
+  width: var(--section-art);
+  height: var(--section-art);
 }
 
 .sectionTitle {

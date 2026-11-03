@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { groupAllLabel, sectionAllLabel } from '@/domain/catalogNavigation.mjs'
 import type { MenuTab } from '@/lib/navigation'
 import { MenuDrill } from '../MenuDrill/MenuDrill'
-import { SectionIcon } from '../SectionIcon/SectionIcon'
+import { SectionArt } from '../SectionArt/SectionArt'
 import styles from './MenuSections.module.css'
 
 type Props = { tab: MenuTab; onNavigate: () => void }
@@ -49,7 +49,7 @@ export function MenuSections({ tab, onNavigate }: Props) {
               onPointerLeave={() => clearTimeout(timer.current)}
             >
               <span className={styles.icon}>
-                <SectionIcon name={item.icon} size={16} />
+                <SectionArt slug={item.slug} icon={item.icon} size={48} iconSize={16} />
               </span>
               <span className={styles.sectionTitle}>{item.title}</span>
             </Link>

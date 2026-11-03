@@ -2,11 +2,13 @@
 
 import Image from 'next/image'
 import { summaryPhrase } from '@/domain/cardTexts.mjs'
+import { sectionArtUrl } from '@/domain/sectionArt.mjs'
 import type { SectionTile } from '@/lib/catalogFilter'
 import { positions } from '@/lib/plural'
 import { CatalogTile } from '../CatalogTile/CatalogTile'
 import { DirectionArt, hasDirectionArt } from '../DirectionArt/DirectionArt'
 import { Reveal } from '../Reveal/Reveal'
+import { SectionArt } from '../SectionArt/SectionArt'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './SectionTiles.module.css'
 
@@ -40,7 +42,9 @@ export function SectionTiles({ tiles, overline, onPick }: Props) {
         <Reveal as="li" key={tile.slug} step={index % 3}>
           <CatalogTile
             media={
-              !tile.picture && hasDirectionArt(tile.slug) ? (
+              !tile.picture && sectionArtUrl(tile.slug) ? (
+                <SectionArt slug={tile.slug} size={96} className={styles.drawing} />
+              ) : !tile.picture && hasDirectionArt(tile.slug) ? (
                 <DirectionArt slug={tile.slug} className={styles.drawing} />
               ) : tile.picture ? (
                 <Image
@@ -56,7 +60,12 @@ export function SectionTiles({ tiles, overline, onPick }: Props) {
                 <SectionIcon name={tile.icon} size={24} />
               )
             }
-            mediaFit={tile.picture && tile.picture.fit !== 'logo' ? 'photo' : 'fill'}
+            mediaFit={
+              (tile.picture && tile.picture.fit !== 'logo') ||
+              (!tile.picture && sectionArtUrl(tile.slug))
+                ? 'photo'
+                : 'fill'
+            }
             overline={overline}
             title={tile.title}
             text={text(tile)}
