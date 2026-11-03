@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { NEW_SCANNERS } from '../src/domain/artecNewScanners.mjs'
 import artecSoftware from '../src/domain/artecSoftwareTexts.json' with { type: 'json' }
+import { AUTODESK_NEW } from '../src/domain/autodeskCatalogSeed.mjs'
 import { NAVISWORKS_SIMULATE } from '../src/domain/autodeskNamesSeed.mjs'
 import research from '../src/domain/equipmentResearch.json' with { type: 'json' }
 import legacy from '../src/domain/legacyCatalog.json' with { type: 'json' }
@@ -25,6 +26,7 @@ const slugs = new Set([
   ...Object.keys(legacy.products),
   // Товары, созданные разовыми настройками.
   NAVISWORKS_SIMULATE.slug,
+  ...AUTODESK_NEW.map((entry) => entry.slug),
 ])
 
 test('фото файлами сайта: файлы на месте, товары существуют, размеры заданы', () => {
@@ -38,6 +40,9 @@ test('фото файлами сайта: файлы на месте, товар
     }
   }
   assert.deepEqual(sitePhotos('нет-такого'), [])
+  // Картриджи ColorWave называются «картридж…», без слова «тонер».
+  assert.match(sitePhotos('x', 'картридж Océ ColorWave 700 Yellow')[0]?.url ?? '', /toner-700/)
+  assert.match(sitePhotos('x', 'картридж Océ ColorWave 650 Cyan')[0]?.url ?? '', /toner-650-cyan/)
 })
 
 test('тексты WideTEK: все 11 товаров, без оговорок исследователя', () => {
@@ -89,7 +94,8 @@ test('пачка программ: скриншоты у 12, тексты у 7 �
     'navisworks',
     '3ds_max',
     'architecture_engineering_construction_collection-1107088405',
-    'fusion_360_team',
+    'fusion_360_cloud',
+    'fusion_for_design',
     'the_software_package_avs_4',
     'scad_v23',
     'lira_sapr',

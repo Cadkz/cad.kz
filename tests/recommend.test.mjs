@@ -118,6 +118,24 @@ test('по названию: курс по другой программе не 
   assert.ok(!crossFor([revit], [revit, civilAutodesk], sections).includes(civilAutodesk.id))
 })
 
+test('по названию: курс без программы — только к своему направлению, АВС — к АВС', () => {
+  const sections = new Map([
+    [9, { isDirection: true, cross: [3] }],
+    [2, { isDirection: true, cross: [3] }],
+    [3, { isDirection: false, cross: [], match: 'name' }],
+  ])
+  const course = { kind: 'course' }
+  const avs = item(41, 'Программный комплекс АВС-KZ (АВС-4)', 'АВС', 9)
+  const scadOffice = item(42, 'SCAD Office', 'SCAD', 2)
+  const electro = item(43, 'Онлайн курс «Электроснабжение, освещение»', null, 3, [], course)
+  const accounting = item(44, 'Онлайн курс «1С:Бухгалтерия»', null, 3, [], course)
+  const estimates = item(45, 'Основы сметного дела в сметной системе АВС', null, 3, [], course)
+  const steel = item(46, 'Онлайн курс «Основы стальных конструкций»', null, 3, [2], course)
+  const pool = [avs, scadOffice, electro, accounting, estimates, steel]
+  assert.deepEqual(crossFor([avs], pool, sections), [estimates.id])
+  assert.deepEqual(crossFor([scadOffice], pool, sections), [steel.id])
+})
+
 test('по модели: тонер только к своему плоттеру, сканер — к любому', () => {
   const sections = new Map([
     [5, { isDirection: false, cross: [6, 7] }],

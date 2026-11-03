@@ -17,6 +17,8 @@
 
 /** @typedef {{ url: string, width: number, height: number }} SitePhoto */
 
+const FUSION_SHOT = { url: '/images/software/fusion-1.webp', width: 937, height: 531 }
+
 /** slug товара → фото. @type {Record<string, SitePhoto[]>} */
 export const SITE_PHOTOS = {
   // widetek-60cl
@@ -188,8 +190,12 @@ export const SITE_PHOTOS = {
     { url: '/images/software/navisworks-1.webp', width: 1600, height: 900 },
     { url: '/images/software/revit-1.webp', width: 1600, height: 900 },
   ],
-  // fusion
-  fusion_360_team: [{ url: '/images/software/fusion-1.webp', width: 937, height: 531 }],
+  // fusion: на сайте товар Fusion Cloud (адрес fusion_360_cloud, а не fusion_360_team из старого
+  // каталога — из-за этого у Fusion не было картинки, замечание владельца 03.11.2026); у Fusion
+  // for Design и for Manufacturing та же программа — тот же кадр.
+  fusion_360_cloud: [FUSION_SHOT],
+  fusion_for_design: [FUSION_SHOT],
+  fusion_for_manufacturing: [FUSION_SHOT],
   // abc-kz
   the_software_package_avs_4: [
     { url: '/images/software/abc-kz-1.webp', width: 1508, height: 743 },
@@ -259,7 +265,8 @@ function tonerColor(title) {
  * @returns {SitePhoto[]}
  */
 export function tonerPhotos(title) {
-  if (!/тонер|toner/i.test(title)) return []
+  // Картриджи Océ ColorWave 650/700 называются «картридж…», без слова «тонер».
+  if (!/тонер|toner|картридж/i.test(title)) return []
   if (/colorwave\s*700/i.test(title)) return [COLORWAVE_700]
   const series = TONERS.find((item) => item.series.test(title))
   return series ? [series.photos[tonerColor(title)]] : []

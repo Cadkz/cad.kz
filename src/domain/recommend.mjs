@@ -20,7 +20,8 @@
 /**
  * Разделы, товары которых в «С этим покупают» сверяются по названию с товаром страницы.
  * name — курс по Civil 3D не предлагаем к GEO5, а курс по LIRA-FEM к SCAD: если в названии курса
- * есть программа, она должна быть и в названии товара. Курс без программы в названии — общий.
+ * есть программа, она должна быть и в названии товара. Курс без программы в названии — только
+ * к товарам своего направления (см. matchesByName).
  * model — тонер для colorWAVE T60 предлагаем только к T60: модель из названия расходника должна
  * быть в названии устройства. Расходник без модели в названии — общий.
  * Ручной список и плагины (поле «Требуется базовое ПО») эту проверку не проходят — им верим.
@@ -35,12 +36,22 @@ const GENERIC_WORDS = new Set(
   ),
 )
 
-/** Латинские слова названия (там названия программ и моделей), без общих слов. */
+/** Русские аббревиатуры, которые не указывают на конкретную программу. */
+const GENERIC_ACRONYMS = new Set('сапр гост ескд кип пто бим снип'.split(' '))
+
+/**
+ * Слова названия, в которых названия программ и моделей: латинские слова и русские
+ * аббревиатуры от трёх заглавных букв (АВС, ЛИРА, СПДС, САПФИР), без общих слов.
+ */
 function latinWords(text) {
   const words = (text ?? '').toLowerCase().match(/[a-z0-9][a-z0-9-]*/g) ?? []
-  return words
+  const latin = words
     .map((word) => word.replace(/-+$/, ''))
     .filter((word) => word.length >= 3 && /[a-z]/.test(word) && !GENERIC_WORDS.has(word))
+  const acronyms = ((text ?? '').match(/(?<![А-ЯЁа-яё])[А-ЯЁ]{3,}(?![а-яё])/g) ?? [])
+    .map((word) => word.toLowerCase())
+    .filter((word) => !GENERIC_ACRONYMS.has(word))
+  return [...latin, ...acronyms]
 }
 
 /**
@@ -55,19 +66,23 @@ function modelWords(text) {
 }
 
 /**
- * Подходит ли кандидат товару по названию.
+ * Подходит ли кандидат товару по названию. Курс без программы в названии («Электроснабжение…»,
+ * «1С:Бухгалтерия») — не общий: предлагаем только к товарам его направления (замечание владельца
+ * 03.11.2026: к АВС-KZ предлагались курсы по электроснабжению и бухгалтерии). Общими остаются
+ * услуги обучения («Корпоративное обучение»).
  * @param {MatchMode} mode
  * @param {RecItem} target
  * @param {RecItem} item
+ * @param {boolean} [sameDirection] у кандидата и товара общее направление
  */
-export function matchesByName(mode, target, item) {
+export function matchesByName(mode, target, item, sameDirection = false) {
   if (mode === 'model') {
     const models = modelWords(item.title)
     return !models.length || intersects(models, modelWords(target.title))
   }
   const vendor = new Set(latinWords(target.vendor))
   const mentioned = latinWords(item.title)
-  if (!mentioned.length) return true
+  if (!mentioned.length) return item.kind !== 'course' || sameDirection
   const programs = mentioned.filter((word) => !vendor.has(word))
   // «Курс Autodesk» без программы — к любому товару этого производителя.
   if (!programs.length) return true
@@ -156,7 +171,7 @@ function crossScore(target, item, { crossSections, targetDirections, info }) {
   if (!plugin) {
     for (const id of item.sections) {
       const mode = info.get(id)?.match
-      if (mode && !matchesByName(mode, target, item)) return null
+      if (mode && !matchesByName(mode, target, item, sameDirection)) return null
     }
   }
   return (

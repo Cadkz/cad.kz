@@ -50,3 +50,15 @@ test('коды SCAD латиницей, склейки и индекс Евро�
     'Урок 1. (4 ак.часа) Программа курса. Введение в Advance Steel',
   )
 })
+
+test('этап 2: АВС-KZ — документы, модули и требования по лендингу, Fusion — что добавляется', () => {
+  const avs = PRODUCT_TEXTS.find((item) => item.slug === 'the_software_package_avs_4')
+  for (const part of ['Локальные, объектные и сводные сметы', 'Экспертиза', 'Guardant', 'РСНБ РК'])
+    assert.ok(avs?.description?.to.includes(part), part)
+  assert.ok(!avs?.description?.to.includes('Сметчик сохраняет ответственность'))
+  for (const slug of ['fusion_for_design', 'fusion_for_manufacturing']) {
+    const fusion = PRODUCT_TEXTS.find((item) => item.slug === slug)
+    assert.ok(fusion?.description?.to.includes('## Что добавляется к Fusion'), slug)
+    assert.ok(!fusion?.description?.to.includes('${'), slug)
+  }
+})

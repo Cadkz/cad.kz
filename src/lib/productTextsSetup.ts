@@ -10,7 +10,7 @@ import { fixMixedScripts } from '../domain/textCleanup.mjs'
 import { cleanedProduct } from './cardsSetup'
 
 /** Ключ записи в журнале «Запуски импорта»: настройка выполняется один раз. */
-export const PRODUCT_TEXTS_SETUP_KEY = 'catalog-setup:product-texts-2026-11-03'
+export const PRODUCT_TEXTS_SETUP_KEY = 'catalog-setup:product-texts-2026-11-03-2'
 const opts = { overrideAccess: true, depth: 0 } as const
 
 /** Новые тексты по списку PRODUCT_TEXTS: только поля, где в базе ещё старый текст. */
