@@ -397,6 +397,8 @@ test('модель вызывает инструмент, сервер отда�
     type: 'tool_result',
     tool_use_id: 't1',
     content: '{"total":"200 000 ₸"}',
+    // Последнее сообщение помечено для кэша Anthropic (скорость, 03.11.2026).
+    cache_control: { type: 'ephemeral' },
   })
 })
 
@@ -709,4 +711,19 @@ test('Справка ChatGPT отбирается по теме разговор
     pickFacts(facts, 'нужен плоттер').map((f) => f.product),
     ['plotWAVE T75'],
   )
+})
+
+test('clampReply: длинный ответ — до 5 предложений и 600 знаков, вопрос в конце остаётся', async () => {
+  const { clampReply } = await import('../src/domain/assistant.mjs')
+  const long =
+    'Первое. Второе предложение. Третье предложение. Четвёртое. Пятое. Шестое. Седьмое.\n\nКакие конструкции считаете?'
+  const cut = clampReply(long)
+  assert.ok(cut.endsWith('Какие конструкции считаете?'))
+  assert.ok(!cut.includes('Шестое'))
+  assert.ok(cut.length <= 600)
+  assert.equal(clampReply('Коротко. Да.'), 'Коротко. Да.')
+  const priced = clampReply(
+    'A — 1 ₸.\n— B — 2 ₸.\n— C — 3 ₸.\n— D — 4 ₸.\n— E — 5 ₸.\n— F — 6 ₸.\nИтого: 21 ₸.',
+  )
+  assert.ok(priced.endsWith('Итого: 21 ₸.'))
 })

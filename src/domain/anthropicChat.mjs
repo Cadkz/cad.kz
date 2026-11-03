@@ -45,7 +45,7 @@ export class ModelError extends Error {
  * @returns {Promise<{ text: string, toolCalls: number }>}
  */
 export async function anthropicReply(options) {
-  const { fetchImpl, apiKey, model, tools, runTool, signal, maxTokens = 1500 } = options
+  const { fetchImpl, apiKey, model, tools, runTool, signal, maxTokens = 700 } = options
   // Правила частями: первая (постоянная) кешируется у Anthropic — дешевле и быстрее повторные
   // запросы; вторая — состояние разговора, меняется каждый раз.
   const system = Array.isArray(options.system)
@@ -75,7 +75,7 @@ export async function anthropicReply(options) {
       model,
       max_tokens: maxTokens,
       system,
-      messages,
+      messages: withCacheMark(messages),
       tools,
       ...(last ? { tool_choice: { type: 'none' } } : {}),
     }
@@ -114,26 +114,49 @@ export async function anthropicReply(options) {
     const said = withoutPreamble(textOf(content))
     if (said) earlier.push(said)
     messages.push({ role: 'assistant', content })
-    /** @type {object[]} */
-    const results = []
-    for (const use of uses) {
-      toolCalls++
-      let result
-      try {
-        result = await runTool(use.name, use.input)
-      } catch {
-        result = { error: 'Инструмент недоступен, попробуйте без него' }
-      }
-      const json = JSON.stringify(result) ?? 'null'
-      results.push({
-        type: 'tool_result',
-        tool_use_id: use.id,
-        content: json.length > MAX_TOOL_RESULT ? `${json.slice(0, MAX_TOOL_RESULT)}…` : json,
-      })
-    }
+    // Несколько инструментов одного хода — одновременно, а не по очереди (скорость, 03.11.2026).
+    toolCalls += uses.length
+    const results = await Promise.all(
+      uses.map(async (use) => {
+        let result
+        try {
+          result = await runTool(use.name, use.input)
+        } catch {
+          result = { error: 'Инструмент недоступен, попробуйте без него' }
+        }
+        const json = JSON.stringify(result) ?? 'null'
+        return {
+          type: 'tool_result',
+          tool_use_id: use.id,
+          content: json.length > MAX_TOOL_RESULT ? `${json.slice(0, MAX_TOOL_RESULT)}…` : json,
+        }
+      }),
+    )
     messages.push({ role: 'user', content: results })
   }
   throw new ModelError('Модель не закончила ответ')
+}
+
+/**
+ * Метка кэша на последнем сообщении: следующий круг с инструментами (и следующий вопрос того же
+ * разговора) читает всю историю из кэша Anthropic, а не обрабатывает заново (скорость, 03.11.2026).
+ * Исходный список не меняется.
+ * @param {{ role: 'user' | 'assistant', content: string | object[] }[]} messages
+ */
+export function withCacheMark(messages) {
+  const last = messages.at(-1)
+  if (!last) return messages
+  const blocks =
+    typeof last.content === 'string' ? [{ type: 'text', text: last.content }] : last.content
+  const tail = blocks.at(-1)
+  if (!tail) return messages
+  return [
+    ...messages.slice(0, -1),
+    {
+      role: last.role,
+      content: [...blocks.slice(0, -1), { ...tail, cache_control: { type: 'ephemeral' } }],
+    },
+  ]
 }
 
 /** Текст блоков хода модели одной строкой. @param {ContentBlock[]} content */

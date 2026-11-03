@@ -4,12 +4,14 @@ import {
   ASSISTANT_LIMITS,
   ASSISTANT_TOOLS,
   type AssistantCard,
+  clampReply,
   cleanReply,
   countTurns,
   demoReply,
   type HandoffDraft,
   type HandoffState,
   handoffDetails,
+  hasPrice,
   managerFormReply,
   mentionedCards,
   modelHistory,
@@ -95,10 +97,11 @@ export function handoffPrefill(draft: HandoffDraft): HandoffPrefill {
   }
 }
 
-/** Разделы сайта после карточек товаров, без повторов; всего под ответом не больше шести. */
+/** Разделы сайта после карточек товаров, без повторов; под ответом не больше четырёх карточек
+ * и одного раздела (03.11.2026: «рандомно не кидать ссылки»). */
 function withPages(cards: AssistantCard[], pages: AssistantCard[]) {
   const extra = pages.filter((page) => !cards.some((card) => card.href === page.href))
-  return [...cards, ...extra.slice(0, 2)].slice(0, 6)
+  return [...cards, ...extra.slice(0, 1)].slice(0, 4)
 }
 
 async function modelAnswer(
@@ -154,13 +157,18 @@ async function modelAnswer(
   // Строка «Кнопки: …» — варианты ответа кнопками под вопросом, в тексте её нет.
   const quick = splitQuickReplies(text)
   // Ссылки — только cad.kz и адреса из правил и базы знаний; остальное сайт показывает карточками.
-  const reply = cleanReply(quick.text, promptLinks(system[0]))
+  // Жёсткий предел длины (03.11.2026): правило в промпте модель нарушала.
+  const reply = clampReply(cleanReply(quick.text, promptLinks(system[0])))
+  // Карточки — только когда они помогают: Кадди ещё уточняет задачу (вопрос без цены) и назвал
+  // несколько товаров для сравнения — карточки ни к чему (замечание владельца 03.11.2026).
+  const named = mentionedCards(reply, tools.found, { variants: tools.variants, limit: 3 })
+  const asking = /\?\s*$/.test(reply) && !hasPrice(reply)
   return {
     reply,
     // Передача менеджеру подготовлена — под ответом кнопка подтверждения, вариантов не нужно.
     replies: tools.handoff() ? [] : quick.replies,
     // Товары и варианты, названные в ответе, затем разделы сайта, которые модель попросила показать.
-    cards: withPages(mentionedCards(reply, tools.found, { variants: tools.variants }), tools.pages),
+    cards: withPages(asking && named.length > 1 ? [] : named, tools.pages),
     handoff: tools.handoff(),
   }
 }
