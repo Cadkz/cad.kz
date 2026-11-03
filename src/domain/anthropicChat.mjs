@@ -45,7 +45,7 @@ export class ModelError extends Error {
  * @returns {Promise<{ text: string, toolCalls: number }>}
  */
 export async function anthropicReply(options) {
-  const { fetchImpl, apiKey, model, tools, runTool, signal, maxTokens = 700 } = options
+  const { fetchImpl, apiKey, model, tools, runTool, signal, maxTokens = 1500 } = options
   // Правила частями: первая (постоянная) кешируется у Anthropic — дешевле и быстрее повторные
   // запросы; вторая — состояние разговора, меняется каждый раз.
   const system = Array.isArray(options.system)
