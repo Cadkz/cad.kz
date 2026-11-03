@@ -1,5 +1,5 @@
-/* Карточки направлений (выбор владельца 02.11.2026, вечер): белые, как вариант B, но при наведении
-   из правого верхнего угла кругом раскрывается «синька» — тёмно-синий лист с чертёжной сеткой,
+/* Карточки направлений (решение владельца 03.11.2026): белые; при наведении только синеет рамка
+   и выезжает «В каталог», а по нажатию из правого верхнего угла кругом раскрывается «синька» — тёмно-синий лист с чертёжной сеткой,
    текст становится светлым, крупный значок — светлым контуром с пунктирными размерными линиями
    (референс владельца — codefronts «Blueprint Reveal»). Карточка на месте, без подъёма.
    Телефон: строка — значок слева, заголовок и описание справа. От 640 px — плитка (4 в ряд от
@@ -159,7 +159,7 @@
     right: var(--space-5);
     display: inline-flex;
     overflow: clip;
-    color: var(--color-sky);
+    color: var(--color-blue);
     font-size: var(--text-xs);
     font-weight: var(--weight-semibold);
   }
@@ -176,48 +176,80 @@
   }
 }
 
-/* Наведение мышью и фокус с клавиатуры: «синька» раскрывается, текст и значки светлеют.
-   Только где есть мышь: на телефоне от касания лист не раскрывается и не залипает. */
+/* Наведение мышью и фокус с клавиатуры: карточка остаётся белой — рамка синеет, выезжает
+   «В каталог», значок-декор заметнее (решение владельца 03.11.2026). */
+.card:focus-visible {
+  border-color: var(--color-blue);
+}
+
+.card:focus-visible .ctaInner {
+  opacity: 1;
+  transform: none;
+}
+
 @media (hover: hover) {
-  .card:is(:hover, :focus-visible) {
-    border-color: var(--color-navy-deep);
+  .card:hover {
+    border-color: var(--color-blue);
   }
 
-  .card:is(:hover, :focus-visible) .blue {
-    clip-path: circle(150% at 100% 0%);
-    opacity: 1;
-    transition:
-      clip-path var(--duration-blueprint) var(--ease-blueprint),
-      opacity 0s;
+  .card:hover .big {
+    opacity: 0.14;
   }
 
-  .card:is(:hover, :focus-visible) .title {
-    color: var(--color-text-inverse);
-  }
-
-  .card:is(:hover, :focus-visible) .summary {
-    color: var(--color-text-on-dark);
-  }
-
-  .card:is(:hover, :focus-visible) .icon {
-    background: var(--color-on-dark-soft);
-    color: var(--color-sky);
-  }
-
-  .card:is(:hover, :focus-visible) .big {
-    color: var(--color-sky);
-    opacity: 0.5;
-  }
-
-  .card:is(:hover, :focus-visible) .big::before,
-  .card:is(:hover, :focus-visible) .big::after {
-    opacity: 0.6;
-  }
-
-  .card:is(:hover, :focus-visible) .ctaInner {
+  .card:hover .ctaInner {
     opacity: 1;
     transform: none;
   }
+}
+
+/* Нажатие (и мышью, и пальцем): из правого верхнего угла кругом заливается «синька», текст
+   светлеет — пока открывается каталог. data-pressed ставит DirectionCard по нажатию. */
+.card:active .blue,
+.card[data-pressed] .blue {
+  clip-path: circle(150% at 100% 0%);
+  opacity: 1;
+  transition:
+    clip-path var(--duration-blueprint) var(--ease-blueprint),
+    opacity 0s;
+}
+
+.card:active,
+.card[data-pressed] {
+  border-color: var(--color-navy-deep);
+}
+
+.card:active .title,
+.card[data-pressed] .title {
+  color: var(--color-text-inverse);
+}
+
+.card:active .summary,
+.card[data-pressed] .summary {
+  color: var(--color-text-on-dark);
+}
+
+.card:active .icon,
+.card[data-pressed] .icon {
+  background: var(--color-on-dark-soft);
+  color: var(--color-sky);
+}
+
+.card:active .big,
+.card[data-pressed] .big {
+  color: var(--color-sky);
+  opacity: 0.5;
+}
+
+.card:active .big::before,
+.card:active .big::after,
+.card[data-pressed] .big::before,
+.card[data-pressed] .big::after {
+  opacity: 0.6;
+}
+
+.card:active .cta,
+.card[data-pressed] .cta {
+  color: var(--color-sky);
 }
 
 /* Глубина: крупный значок в углу плывёт медленнее карточки, пока она проходит экран. */

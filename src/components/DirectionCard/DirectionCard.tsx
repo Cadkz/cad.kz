@@ -1,18 +1,32 @@
+'use client'
+
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import type { Direction } from '@/lib/catalog'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './DirectionCard.module.css'
 
+/** Сколько держится заливка после нажатия: хватает на переход, а при «Назад» карточка снова белая. */
+const PRESSED_MS = 1500
+
 /**
- * Карточка направления: открывает каталог, отфильтрованный по этому направлению. Белая; при
- * наведении из правого верхнего угла раскрывается тёмно-синий лист с чертёжной сеткой, выезжает
- * «В каталог» (выбор владельца 02.11.2026). Карточка не прыгает.
+ * Карточка направления: открывает каталог, отфильтрованный по этому направлению. Белая, при
+ * наведении синеет рамка; по нажатию из правого верхнего угла заливается тёмно-синий лист с
+ * чертёжной сеткой и держится, пока открывается каталог (решение владельца 03.11.2026).
  */
 export function DirectionCard({ direction }: { direction: Direction }) {
+  const [pressed, setPressed] = useState(false)
+  useEffect(() => {
+    if (!pressed) return
+    const timer = setTimeout(() => setPressed(false), PRESSED_MS)
+    return () => clearTimeout(timer)
+  }, [pressed])
   return (
     <Link
+      onClick={() => setPressed(true)}
+      data-pressed={pressed || undefined}
       href={direction.href ?? catalogHref({ direction: direction.slug })}
       className={styles.card}
     >
