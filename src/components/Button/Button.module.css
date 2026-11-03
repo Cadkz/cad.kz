@@ -108,3 +108,44 @@
   left: 0;
   content: "";
 }
+
+/* Кнопка-инструмент (03.11.2026: «Фильтры», «Собрать комплект самому», PDF характеристик):
+   фирменный градиент и редкий мягкий блик — заметна среди белых кнопок, но не мигает. */
+.tool {
+  background-color: var(--color-navy);
+  background-image: var(--gradient-sheen), var(--gradient-navy);
+  background-position:
+    150% 0,
+    0 0;
+  background-size:
+    250% 100%,
+    100% 100%;
+  background-repeat: no-repeat;
+  color: var(--color-text-inverse);
+}
+
+.tool:hover:not(:disabled) {
+  background-image: none;
+  background-color: var(--color-blue);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tool {
+    animation: sheen var(--duration-sheen) var(--ease) var(--duration-slow) infinite;
+  }
+}
+
+@keyframes sheen {
+  0% {
+    background-position:
+      150% 0,
+      0 0;
+  }
+
+  15%,
+  100% {
+    background-position:
+      -50% 0,
+      0 0;
+  }
+}

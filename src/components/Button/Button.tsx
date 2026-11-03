@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import styles from './Button.module.css'
 
-type Variant = 'primary' | 'secondary' | 'outline' | 'light' | 'ghostDark' | 'text'
+type Variant = 'primary' | 'secondary' | 'outline' | 'light' | 'ghostDark' | 'text' | 'tool'
 type Size = 'md' | 'sm'
 type Common = { variant?: Variant; size?: Size; block?: boolean; children: ReactNode }
 

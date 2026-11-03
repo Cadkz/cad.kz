@@ -55,7 +55,7 @@ export function PickerSteps() {
         <PickerStep step={bundles} number={null} titled />
         <div className={styles.manual}>
           <p className={styles.manualText}>Нужен другой состав? Отметьте программы по одной.</p>
-          <Button variant="outline" size="sm" onClick={() => chooseBundle(null)}>
+          <Button variant="tool" size="sm" onClick={() => chooseBundle(null)}>
             <Wrench size={16} strokeWidth={1.75} aria-hidden="true" />
             Собрать комплект самому
           </Button>

@@ -8,7 +8,7 @@
  * Это поиск по словам: «программа для вентиляции» он находит по слову «вентиляции» (служебные
  * слова не мешают), но задачу своими словами не понимает — такое будет делать ИИ-помощник.
  */
-import { normalize, searchItems } from './search.mjs'
+import { normalize, searchDetailed, searchItems } from './search.mjs'
 
 /**
  * @typedef {'product' | 'family' | 'vendor' | 'section' | 'page'} SuggestType
@@ -17,51 +17,106 @@ import { normalize, searchItems } from './search.mjs'
  *   tasks?: string[], sections?: string[], parts?: string, keywords?: string }} SuggestEntry
  * @typedef {{ products: SuggestEntry[], vendors: SuggestEntry[], sections: SuggestEntry[],
  *   pages: SuggestEntry[] }} SuggestIndex
- * @typedef {{ type: SuggestType, title: string, href: string, label: string, note: string | null }} Suggestion
+ * @typedef {{ type: SuggestType, title: string, href: string, label: string, note: string | null,
+ *   group?: string }} Suggestion
  * @typedef {{ query: string, items: Suggestion[], more: boolean }} SuggestResult
  */
 
-/** Сколько строк видно под полем. Остальное — по ссылке «Все результаты». */
-export const SUGGEST_LIMIT = 7
-/** Сколько первых товаров идёт до производителя и разделов. */
-const LEAD_PRODUCTS = 2
-/** Сколько строк «не товар» (производитель, раздел, страница) не больше. */
-const MAX_OTHER = 3
+/**
+ * Сколько строк в каждой группе панели (замечание владельца 03.11.2026: «длинный тупой список» —
+ * лучше как в мегаменю: сами программы, отдельно дополнения к ним, отдельно курсы). Остальное —
+ * по ссылке «Все результаты».
+ */
+const GROUP_LIMIT = /** @type {const} */ ({ products: 4, addons: 3, courses: 2, others: 2 })
+/** Всего строк не больше (сумма групп). */
+export const SUGGEST_LIMIT =
+  GROUP_LIMIT.products + GROUP_LIMIT.addons + GROUP_LIMIT.courses + GROUP_LIMIT.others
 /** Короче — не ищем: по одной букве подходит половина каталога. */
 export const MIN_QUERY = 2
 
-/** @param {SuggestEntry} entry @returns {Suggestion} */
-const toSuggestion = ({ type, title, href, label, note }) => ({
+/**
+ * @typedef {'products' | 'addons' | 'courses' | 'vendors' | 'sections' | 'pages'} SuggestGroup
+ */
+
+/**
+ * @param {SuggestEntry} entry
+ * @param {SuggestGroup} group
+ * @returns {Suggestion}
+ */
+const toSuggestion = ({ type, title, href, label, note }, group) => ({
   type,
   title,
   href,
   label,
   note: note ?? null,
+  group,
 })
 
+/** «MagiCAD Вентиляция для AutoCAD», «… for Revit» — дополнение к названной программе. */
+const FOR_PROGRAM = /\s(?:для|for)\s+(.+)$/i
+
 /**
- * Подсказки по запросу. Порядок: два самых подходящих товара, затем производитель, раздел,
- * страница (не больше трёх), затем остальные товары — всего не больше limit.
- * more — есть ещё товары, которые не поместились.
+ * Дополнение к тому, что ищут: «для <программа из запроса>» в названии («автокад» → MagiCAD для
+ * AutoCAD) или «Требуется базовое ПО» (addons из searchDetailed).
+ * @param {SuggestEntry} entry
+ * @param {string} query
+ */
+function addonByTitle(entry, query) {
+  const tail = FOR_PROGRAM.exec(entry.title)?.[1]
+  if (!tail) return false
+  // Сама программа в начале названия совпала с запросом — это она, а не дополнение.
+  const head = entry.title.slice(0, entry.title.length - tail.length)
+  if (searchItems([{ title: head }], query, 1, true).length) return false
+  return searchItems([{ title: tail }], query, 1, true).length > 0
+}
+
+/**
+ * Подсказки по запросу группами: товары, дополнения к найденным программам, курсы, затем
+ * производитель, раздел, страница. В каждой группе — не больше своего лимита.
+ * more — что-то не поместилось.
  * @param {SuggestIndex} index
  * @param {string} rawQuery
- * @param {number} [limit]
  * @returns {SuggestResult}
  */
-export function suggest(index, rawQuery, limit = SUGGEST_LIMIT) {
+export function suggest(index, rawQuery) {
   const query = rawQuery.trim().slice(0, 100)
   if (normalize(query).length < MIN_QUERY) return { query, items: [], more: false }
-  const products = onePerPlace(searchItems(index.products, query, 60))
+  const found = searchDetailed(index.products, query, 60)
+  const addonSet = new Set(found.addons)
+  const all = onePerPlace([...found.items, ...found.addons])
+  /** @type {Record<'products' | 'addons' | 'courses', SuggestEntry[]>} */
+  const parts = { products: [], addons: [], courses: [] }
+  for (const entry of all) {
+    if (entry.label === 'Курс') parts.courses.push(entry)
+    else if (addonSet.has(entry) || addonByTitle(entry, query)) parts.addons.push(entry)
+    else parts.products.push(entry)
+  }
+  /** @type {{ entry: SuggestEntry, group: SuggestGroup }[]} */
   const others = [
-    ...searchItems(index.vendors, query, 1, true),
-    ...searchItems(index.sections, query, 2, true),
-    ...searchItems(index.pages, query, 1, true),
-  ].slice(0, MAX_OTHER)
-  const shown = products.slice(0, Math.max(0, limit - others.length))
-  const items = [...shown.slice(0, LEAD_PRODUCTS), ...others, ...shown.slice(LEAD_PRODUCTS)]
-    .slice(0, limit)
-    .map(toSuggestion)
-  return { query, items, more: products.length > shown.length }
+    ...searchItems(index.vendors, query, 1, true).map((entry) => ({
+      entry,
+      group: /** @type {SuggestGroup} */ ('vendors'),
+    })),
+    ...searchItems(index.sections, query, 2, true).map((entry) => ({
+      entry,
+      group: /** @type {SuggestGroup} */ ('sections'),
+    })),
+    ...searchItems(index.pages, query, 1, true).map((entry) => ({
+      entry,
+      group: /** @type {SuggestGroup} */ ('pages'),
+    })),
+  ]
+  const items = [
+    ...parts.products.slice(0, GROUP_LIMIT.products).map((e) => toSuggestion(e, 'products')),
+    ...parts.addons.slice(0, GROUP_LIMIT.addons).map((e) => toSuggestion(e, 'addons')),
+    ...parts.courses.slice(0, GROUP_LIMIT.courses).map((e) => toSuggestion(e, 'courses')),
+    ...others.slice(0, GROUP_LIMIT.others).map(({ entry, group }) => toSuggestion(entry, group)),
+  ]
+  const more =
+    parts.products.length > GROUP_LIMIT.products ||
+    parts.addons.length > GROUP_LIMIT.addons ||
+    parts.courses.length > GROUP_LIMIT.courses
+  return { query, items, more }
 }
 
 /**
@@ -82,23 +137,29 @@ function onePerPlace(entries) {
 /** Группы панели подсказок в порядке показа. Пустые группы не показываются. */
 const GROUPS = /** @type {const} */ ([
   { key: 'products', title: 'Товары', types: ['product', 'family'] },
+  { key: 'addons', title: 'Дополнения и плагины', types: [] },
+  { key: 'courses', title: 'Обучение', types: [] },
   { key: 'vendors', title: 'Производители', types: ['vendor'] },
   { key: 'sections', title: 'Разделы каталога', types: ['section'] },
   { key: 'pages', title: 'Страницы сайта', types: ['page'] },
 ])
 
 /**
- * Подсказки по группам: товары и семейства, производители, разделы, страницы.
- * Внутри группы — порядок ответа (самое подходящее выше).
- * @template {{ type: SuggestType }} T
+ * Подсказки по группам: товары, дополнения, курсы, производители, разделы, страницы. Группа —
+ * из ответа (group), без неё — по типу. Внутри группы — порядок ответа.
+ * @template {{ type: SuggestType, group?: string }} T
  * @param {T[]} items
  * @returns {{ key: string, title: string, items: T[] }[]}
  */
 export function groupSuggestions(items) {
-  return GROUPS.map(({ key, title, types }) => ({
+  /** @param {T} item */
+  const groupOf = (item) =>
+    item.group ??
+    GROUPS.find((g) => /** @type {readonly string[]} */ (g.types).includes(item.type))?.key
+  return GROUPS.map(({ key, title }) => ({
     key,
     title,
-    items: items.filter((item) => /** @type {readonly string[]} */ (types).includes(item.type)),
+    items: items.filter((item) => groupOf(item) === key),
   })).filter((group) => group.items.length > 0)
 }
 

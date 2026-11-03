@@ -20,7 +20,7 @@
     top: 0;
     right: var(--space-6);
     left: var(--space-6);
-    height: var(--space-2);
+    height: var(--space-3);
     cursor: ns-resize;
   }
 
@@ -28,7 +28,7 @@
     top: var(--space-6);
     bottom: var(--space-6);
     left: 0;
-    width: var(--space-2);
+    width: var(--space-3);
     cursor: ew-resize;
   }
 
@@ -41,82 +41,153 @@
   }
 }
 
-/* Подсказка, что окно растягивается (просьба владельца 03.11.2026): в левом верхнем углу — тонкая
-   уголок-скобка, как у окна Windows; при наведении на край — синяя линия вдоль него. Пока клиент
-   ни разу не менял размер, при открытии окна уголок дважды мягко «подмигивает» синим и
-   выдвигается наружу — заметно, но не отвлекает. */
+/* Подсказка, что окно растягивается (просьба владельца 03.11.2026, вечер): у каждой из трёх
+   граней — по две метки. Внешняя — прямо на рамке окна: посередине верхнего и левого края
+   короткая черта, в углу — синее скругление по радиусу окна. Внутренняя — чуть глубже (в углу —
+   прежний уголок-скобка). Пока размер ни разу не меняли, метки по очереди загораются синим и
+   гаснут в серый — внутренняя, затем внешняя, по кругу: «тяните наружу». Наведение и
+   перетаскивание — обе синие. */
 @media (min-width: 640px) and (hover: hover) {
-  .corner::before {
-    content: "";
+  .inner,
+  .outer {
     position: absolute;
+    border-color: var(--color-gray-500);
+    background: var(--color-gray-500);
+    transition:
+      background-color var(--duration-fast) var(--ease),
+      border-color var(--duration-fast) var(--ease);
+  }
+
+  /* Верхний край: две горизонтальные черты посередине. */
+  .top .outer,
+  .top .inner {
+    left: 50%;
+    width: var(--space-6);
+    height: 2px;
+    border-radius: var(--radius-pill);
+    transform: translateX(-50%);
+  }
+
+  .top .outer {
+    top: 0;
+  }
+
+  .top .inner {
+    top: var(--space-2);
+  }
+
+  /* Левый край: две вертикальные черты посередине. */
+  .left .outer,
+  .left .inner {
+    top: 50%;
+    width: 2px;
+    height: var(--space-6);
+    border-radius: var(--radius-pill);
+    transform: translateY(-50%);
+  }
+
+  .left .outer {
+    left: 0;
+  }
+
+  .left .inner {
+    left: var(--space-2);
+  }
+
+  /* Угол: снаружи — дуга по скруглению окна, внутри — уголок-скобка. */
+  .corner .outer,
+  .corner .inner {
+    background: none;
+    border-top: 2px solid var(--color-gray-500);
+    border-left: 2px solid var(--color-gray-500);
+  }
+
+  .corner .outer {
+    top: 0;
+    left: 0;
+    width: var(--space-5);
+    height: var(--space-5);
+    border-top-left-radius: var(--radius-panel);
+  }
+
+  .corner .inner {
     top: var(--space-2);
     left: var(--space-2);
     width: var(--space-3);
     height: var(--space-3);
-    border-top: 2px solid var(--color-border-strong);
-    border-left: 2px solid var(--color-border-strong);
     border-top-left-radius: var(--radius-sm);
-    transition:
-      border-color var(--duration-fast) var(--ease),
-      transform var(--duration-fast) var(--ease);
   }
 
-  .corner:hover::before,
-  [data-resizing] .corner::before {
+  .top:hover > *,
+  .left:hover > *,
+  [data-resizing] .top > *,
+  [data-resizing] .left > * {
+    background-color: var(--color-blue);
+  }
+
+  .corner:hover > *,
+  [data-resizing] .corner > * {
     border-color: var(--color-blue);
-    transform: translate(calc(var(--space-1) * -0.5), calc(var(--space-1) * -0.5));
   }
 
-  .corner[data-hint]::before {
-    animation: resizeHint var(--duration-draw) var(--ease) var(--duration-kaddi-open) 2;
+  .top[data-hint] .inner,
+  .left[data-hint] .inner {
+    animation: hintLine var(--duration-draw) var(--ease) var(--duration-kaddi-open) infinite;
   }
 
-  .top::after,
-  .left::after {
-    content: "";
-    position: absolute;
-    border-radius: var(--radius-pill);
-    background: var(--color-blue);
-    opacity: 0;
-    transition: opacity var(--duration-fast) var(--ease);
+  .top[data-hint] .outer,
+  .left[data-hint] .outer {
+    animation: hintLine var(--duration-draw) var(--ease)
+      calc(var(--duration-kaddi-open) + var(--duration-draw) / 2) infinite;
   }
 
-  .top::after {
-    top: 0;
-    right: 0;
-    left: 0;
-    height: 2px;
+  .corner[data-hint] .inner {
+    animation: hintCorner var(--duration-draw) var(--ease) var(--duration-kaddi-open) infinite;
   }
 
-  .left::after {
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 2px;
-  }
-
-  .top:hover::after,
-  .left:hover::after {
-    opacity: 1;
+  .corner[data-hint] .outer {
+    animation: hintCorner var(--duration-draw) var(--ease)
+      calc(var(--duration-kaddi-open) + var(--duration-draw) / 2) infinite;
   }
 }
 
-@keyframes resizeHint {
+/* Половину круга метка синяя, половину серая; у внешней сдвиг на полкруга — горят по очереди. */
+@keyframes hintLine {
   0%,
   100% {
-    border-color: var(--color-border-strong);
-    transform: none;
+    background-color: var(--color-gray-500);
   }
 
-  40%,
+  20%,
+  40% {
+    background-color: var(--color-blue);
+  }
+
   60% {
+    background-color: var(--color-gray-500);
+  }
+}
+
+@keyframes hintCorner {
+  0%,
+  100% {
+    border-color: var(--color-gray-500);
+  }
+
+  20%,
+  40% {
     border-color: var(--color-blue);
-    transform: translate(calc(var(--space-1) * -0.5), calc(var(--space-1) * -0.5));
+  }
+
+  60% {
+    border-color: var(--color-gray-500);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .corner[data-hint]::before {
+  .top[data-hint] > *,
+  .left[data-hint] > *,
+  .corner[data-hint] > * {
     animation: none;
   }
 }

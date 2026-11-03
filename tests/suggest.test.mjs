@@ -53,13 +53,36 @@ const index = {
 }
 const titles = (query) => suggest(index, query).items.map((item) => item.title)
 
-test('SCAD: сначала программы, потом производитель, потом остальные программы', () => {
+test('SCAD: сначала программы, потом производитель', () => {
   assert.deepEqual(titles('scad'), [
     'SCAD Office',
     'SCAD++ Железобетон',
-    'SCAD Soft',
     'Программы-сателлиты SCAD Office',
+    'SCAD Soft',
   ])
+})
+
+test('группы как в мегаменю: программы, дополнения «для …», курсы (03.11.2026)', () => {
+  const own = {
+    ...index,
+    products: [
+      product('AutoCAD', 'Autodesk'),
+      product('AutoCAD LT', 'Autodesk'),
+      product('MagiCAD Вентиляция для AutoCAD', 'MagiCAD'),
+      { ...product('Онлайн курс AutoCAD', 'CAD.kz'), label: 'Курс' },
+    ],
+  }
+  const groups = groupSuggestions(suggest(own, 'автокад').items).map((group) => [
+    group.key,
+    group.items.map((item) => item.title),
+  ])
+  assert.deepEqual(groups, [
+    ['products', ['AutoCAD', 'AutoCAD LT']],
+    ['addons', ['MagiCAD Вентиляция для AutoCAD']],
+    ['courses', ['Онлайн курс AutoCAD']],
+  ])
+  // Сама MagiCAD по запросу «магикад» — программа, а не дополнение.
+  assert.equal(groupSuggestions(suggest(own, 'магикад').items)[0]?.key, 'products')
 })
 
 test('регистр, кириллица и опечатки', () => {
@@ -68,9 +91,9 @@ test('регистр, кириллица и опечатки', () => {
   assert.equal(titles('скад')[0], 'SCAD Office')
 })
 
-test('не больше семи строк, остальное — флаг «ещё»', () => {
+test('в группе товаров не больше четырёх строк, остальное — флаг «ещё»', () => {
   const result = suggest(index, 'geo5')
-  assert.equal(result.items.length, 7)
+  assert.equal(result.items.filter((item) => item.group === 'products').length, 4)
   assert.equal(result.more, true)
   assert.equal(suggest(index, 'artec').more, false)
 })

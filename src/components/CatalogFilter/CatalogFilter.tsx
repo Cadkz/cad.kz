@@ -206,7 +206,7 @@ export function CatalogFilter({
   // toggle — кнопка над блоком (раздвигает колонку), иначе — кнопка телефона (открывает панель).
   const filtersButton = (toggle: boolean) => (
     <Button
-      variant="outline"
+      variant="tool"
       size="sm"
       onClick={openFilters}
       aria-expanded={toggle ? sideOpen : undefined}

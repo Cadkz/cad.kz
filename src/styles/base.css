@@ -276,3 +276,9 @@ html:active-view-transition-type(nav-back)::view-transition-new(root) {
   }
 }
 /* biome-ignore-end lint/complexity/noImportantStyles: конец блока reduced-motion */
+
+/* Пока набирают в поиске шапки, отступа под шапку нет: браузер на каждую букву «докручивал»
+   поле ниже шапки, и сайт уезжал вверх (замечание владельца 03.11.2026). Ставит SearchBox. */
+html[data-search-typing] {
+  scroll-padding-top: 0;
+}

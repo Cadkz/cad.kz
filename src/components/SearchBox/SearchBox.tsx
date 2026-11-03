@@ -168,6 +168,7 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
       className={`${styles.root} ${styles[variant]}`}
       onBlur={(event) => {
         if (root.current?.contains(event.relatedTarget as Node | null)) return
+        delete document.documentElement.dataset.searchTyping
         setFocused(false)
         if (variant === 'inline') {
           track(null)
@@ -202,6 +203,8 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
               setOpen(true)
             }}
             onFocus={() => {
+              // Поле в закреплённой шапке: без отступа прокрутки страница не уезжает при наборе (base.css).
+              if (variant === 'inline') document.documentElement.dataset.searchTyping = ''
               setFocused(true)
               setTouched(true)
               setOpen(true)

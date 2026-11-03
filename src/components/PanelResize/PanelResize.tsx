@@ -18,7 +18,7 @@ const MIN_HEIGHT = 480
 const EDGE = 24
 const TOP = 80
 const STORAGE_KEY = 'cadkz-kaddi-size'
-/** Размер уже меняли — подсказка уголком больше не мигает. */
+/** Размер уже меняли — подсказка чёрточками больше не мигает. */
 const SEEN_KEY = 'cadkz-kaddi-resized'
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
@@ -101,20 +101,34 @@ export function PanelResize({ target }: Props) {
     }
   }
 
+  // Две чёрточки у каждой грани: внешняя прямо на рамке окна, внутренняя чуть глубже. Пока
+  // размер ни разу не меняли, они по очереди загораются синим — «окно тянется наружу».
+  const marks = (
+    <>
+      <span className={styles.inner} />
+      <span className={styles.outer} />
+    </>
+  )
   return (
     <>
       <div
         className={styles.top}
+        data-hint={hint || undefined}
         onPointerDown={start('top')}
         onDoubleClick={reset}
         aria-hidden="true"
-      />
+      >
+        {marks}
+      </div>
       <div
         className={styles.left}
+        data-hint={hint || undefined}
         onPointerDown={start('left')}
         onDoubleClick={reset}
         aria-hidden="true"
-      />
+      >
+        {marks}
+      </div>
       <div
         className={styles.corner}
         data-hint={hint || undefined}
@@ -122,7 +136,9 @@ export function PanelResize({ target }: Props) {
         onPointerDown={start('corner')}
         onDoubleClick={reset}
         aria-hidden="true"
-      />
+      >
+        {marks}
+      </div>
     </>
   )
 }

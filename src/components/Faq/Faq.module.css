@@ -1,7 +1,29 @@
-.list {
+/* Список и невидимая копия под ним — в одной ячейке: высота блока — по копии (все вопросы
+   закрыты плюс самый длинный ответ), открытие вопроса ничего ниже не сдвигает. */
+.frame {
+  display: grid;
+}
+
+.list,
+.reserve {
   display: flex;
+  grid-area: 1 / 1;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.reserve {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Все ответы друг на друге: высота — по самому длинному. */
+.answers {
+  display: grid;
+}
+
+.answers > .answer {
+  grid-area: 1 / 1;
 }
 
 .item {
