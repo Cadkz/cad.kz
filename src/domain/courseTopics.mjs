@@ -97,3 +97,13 @@ export function topicOrder(key) {
   const index = COURSE_TOPICS.findIndex((topic) => topic.key === key)
   return index === -1 ? COURSE_TOPICS.length : index
 }
+
+/**
+ * Иллюстрация категории курса (пачка владельца 03.11.2026, «CAD-kz-education-services»): файл
+ * public/images/courses/<key>.webp, 256 × 256. Неизвестная категория — «Другие курсы».
+ * @param {string} key
+ */
+export function courseArtUrl(key) {
+  const known = COURSE_TOPICS.some((topic) => topic.key === key)
+  return `/images/courses/${known ? key : OTHER_TOPIC.key}.webp`
+}

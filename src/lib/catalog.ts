@@ -6,7 +6,7 @@ import { productRequestKey } from '@/domain/cart.mjs'
 import { plainTitle, withTitleAlias } from '@/domain/productTitle.mjs'
 import type { Manufacturer, Offer, Product, Section } from '../../payload-types'
 import { cardAction, resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
-import { courseTopic } from '../domain/courseTopics.mjs'
+import { courseArtUrl, courseTopic } from '../domain/courseTopics.mjs'
 import { cheapestTotal } from '../domain/picker.mjs'
 import { compareInSection, priorityRank } from '../domain/priority.mjs'
 import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
@@ -335,7 +335,17 @@ async function loadCatalog(): Promise<{
       research: readResearch(product.researchData),
       lifecycle: lifecycle(readResearch(product.researchData), replacements),
       icon: topic?.icon ?? productSections[0]?.icon ?? null,
-      picture: topic ? null : (pictures.get(product.id) ?? null),
+      // У курса — иллюстрация его категории (пачка владельца 03.11.2026).
+      picture: topic
+        ? {
+            url: courseArtUrl(topic.key),
+            alt: product.title,
+            width: 256,
+            height: 256,
+            fit: 'logo',
+            local: true,
+          }
+        : (pictures.get(product.id) ?? null),
       logoFallback: group === 'software' ? vendor : null,
       // Услуги без картинки — тематический чертёж раздела (внедрение, обучение), а не ключ.
       art: group === 'service' && !topic ? (productSections[0]?.slug ?? null) : null,

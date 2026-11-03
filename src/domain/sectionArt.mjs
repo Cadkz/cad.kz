@@ -21,6 +21,11 @@ const ART = {
   'wide-format': 'wide-plotters',
   plotters: 'wide-plotters',
   'wide-scanners': 'wide-scanners',
+  // Вторая пачка владельца (03.11.2026, «CAD-kz-education-services»).
+  consulting: 'consulting',
+  workstations: 'workstations',
+  services: 'services',
+  service: 'services',
 }
 
 /**
