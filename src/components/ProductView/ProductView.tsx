@@ -304,13 +304,9 @@ export async function ProductView({
             aside={<PickerSummary />}
             asideFooter={terms}
             wide={scans}
-            top={
-              <>
-                {groups}
-                {config}
-              </>
-            }
           >
+            {groups}
+            {config}
             {overview}
             {faq}
           </ProductLayout>

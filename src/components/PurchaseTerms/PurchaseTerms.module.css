@@ -1,9 +1,9 @@
 .box {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
   margin-top: var(--space-4);
-  padding: var(--space-6);
+  padding: var(--space-5);
   border-radius: var(--radius-lg);
   background: var(--gradient-navy);
   color: var(--color-text-inverse);
@@ -11,7 +11,7 @@
 
 .heading {
   color: var(--color-text-inverse);
-  font-size: var(--text-h4);
+  font-size: var(--text-body);
   font-weight: var(--weight-bold);
   line-height: var(--leading-snug);
 }
@@ -19,7 +19,7 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -27,37 +27,24 @@
 
 .item {
   display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
+  gap: var(--space-2);
+  align-items: center;
 }
 
+/* Значок 16 px по центру строки: тексты короткие, обычно в одну строку. */
 .icon {
   display: inline-flex;
   flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: var(--control-height-sm);
-  height: var(--control-height-sm);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-navy);
-}
-
-.copy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
+  color: var(--color-text-inverse);
 }
 
 .title {
   color: var(--color-text-inverse);
-  font-size: var(--text-sm);
   font-weight: var(--weight-bold);
-  line-height: var(--leading-snug);
 }
 
 .text {
+  min-width: 0;
   color: var(--color-text-on-dark);
   font-size: var(--text-sm);
   line-height: var(--leading-normal);

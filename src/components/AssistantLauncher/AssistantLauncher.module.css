@@ -105,13 +105,16 @@
   transition: opacity var(--duration-fast) var(--ease);
 }
 
-/* Недовольный стоит у правого края, на месте Кадди с чертежами. */
-.grumpy {
+/* Недовольный стоит у правого края, на месте Кадди с чертежами. Без анимации появления Mascot:
+   она ведёт прозрачность от 0 до 1 и на полсекунды показывала его поверх основной позы при
+   загрузке страницы (замечание владельца 03.11.2026). */
+.cat .grumpy {
   position: absolute;
   right: 0;
   bottom: 0;
   opacity: 0;
   pointer-events: none;
+  animation: none;
 }
 
 /* Реплика слева от Кадди, на уровне морды. */
@@ -149,7 +152,7 @@
 }
 
 /* Недовольный важнее наведения и подсказки. */
-.launcher[data-grumpy="true"] .grumpy {
+.launcher[data-grumpy="true"] .cat .grumpy {
   opacity: 1;
 }
 

@@ -62,3 +62,12 @@ test('этап 2: АВС-KZ — документы, модули и требов
     assert.ok(!fusion?.description?.to.includes('${'), slug)
   }
 })
+
+test('условия покупки короче: новые тексты по умолчанию совпадают с заменами', async () => {
+  const { TERM_SHORTER } = await import('../src/domain/productTextFixes.mjs')
+  const { PURCHASE_TERMS } = await import('../src/domain/presentationFixes.mjs')
+  const short = new Set(TERM_SHORTER.map(([, to]) => to))
+  for (const row of [...PURCHASE_TERMS.software, ...PURCHASE_TERMS.hardware])
+    assert.ok(short.has(row.text), row.text)
+  for (const [, to] of TERM_SHORTER) assert.ok(to.length <= 52, to)
+})

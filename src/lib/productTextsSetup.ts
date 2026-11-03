@@ -5,12 +5,13 @@ import {
   nextText,
   OFFER_RENAMES,
   PRODUCT_TEXTS,
+  TERM_SHORTER,
 } from '../domain/productTextFixes.mjs'
 import { fixMixedScripts } from '../domain/textCleanup.mjs'
 import { cleanedProduct } from './cardsSetup'
 
 /** Ключ записи в журнале «Запуски импорта»: настройка выполняется один раз. */
-export const PRODUCT_TEXTS_SETUP_KEY = 'catalog-setup:product-texts-2026-11-03-2'
+export const PRODUCT_TEXTS_SETUP_KEY = 'catalog-setup:product-texts-2026-11-03-3'
 const opts = { overrideAccess: true, depth: 0 } as const
 
 /** Новые тексты по списку PRODUCT_TEXTS: только поля, где в базе ещё старый текст. */
@@ -87,6 +88,25 @@ async function fixOffers(payload: Payload, report: string[]) {
   }
 }
 
+/** Условия покупки короче (TERM_SHORTER): только строки, где в «Контакты и подвал» ещё старый текст. */
+async function shortenTerms(payload: Payload, report: string[]) {
+  const settings = await payload.findGlobal({ slug: 'site-settings', ...opts })
+  const terms = settings.purchaseTerms
+  if (!terms) return
+  let changed = 0
+  const shorten = (rows: typeof terms.software) =>
+    (rows ?? []).map((row) => {
+      const pair = TERM_SHORTER.find(([from]) => from === row.text)
+      if (!pair) return row
+      changed += 1
+      return { ...row, text: pair[1] }
+    })
+  const data = { software: shorten(terms.software), hardware: shorten(terms.hardware) }
+  if (!changed) return
+  await payload.updateGlobal({ slug: 'site-settings', data: { purchaseTerms: data }, ...opts })
+  report.push(`Условия покупки: короче ${changed} строк`)
+}
+
 /**
  * Сверка текстов товаров после презентации 03.11.2026 (src/domain/productTextFixes.mjs).
  * Один раз (отметка в журнале «Запуски импорта»), отчёт — в той же записи.
@@ -102,6 +122,7 @@ export async function setupProductTexts(payload: Payload): Promise<string[] | nu
   const report: string[] = []
   await fixProducts(payload, report)
   await fixOffers(payload, report)
+  await shortenTerms(payload, report)
   await payload.create({
     collection: 'import-runs',
     data: { idempotencyKey: PRODUCT_TEXTS_SETUP_KEY, state: 'done', snapshot: { report } },
