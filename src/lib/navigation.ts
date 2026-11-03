@@ -4,6 +4,7 @@ import { GROUP_LABELS } from '../domain/catalogNavigation.mjs'
 import { courseTopic } from '../domain/courseTopics.mjs'
 import { menuColumns } from '../domain/menu.mjs'
 import { priorityRank } from '../domain/priority.mjs'
+import { sectionIconKey } from '../domain/sectionArt.mjs'
 import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
 import { catalogAvailable } from './equipmentResearch'
 import { familyLines } from './families'
@@ -68,7 +69,7 @@ const menuSection = ({
   icon,
 }: Section) => ({
   id,
-  icon: icon ?? null,
+  icon: sectionIconKey(slug, icon),
   slug,
   title,
   menuGroup,

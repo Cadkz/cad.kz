@@ -2,8 +2,8 @@
 /**
  * Обучение по категориям (замечание владельца 27.10.2026: «курсы вперемешку — много букв
  * и ничего непонятно»). Категория курса — по программе в названии, если программы нет — по
- * направлению курса в админке. От категории — значок курса (у курсов нет картинок: в карточке
- * каталога и в меню — векторный значок направления). Одно правило для каталога и меню.
+ * направлению курса в админке. От категории — иллюстрация курса (public/images/courses, ключ
+ * «course-<категория>», src/domain/sectionArt.mjs). Одно правило для каталога и меню.
  * Чистые функции без базы.
  */
 
@@ -18,42 +18,42 @@ export const COURSE_TOPICS = [
   {
     key: 'bim',
     title: 'BIM и архитектура',
-    icon: 'building',
+    icon: 'course-bim',
     match: /revit|bim|archicad|autocad|navisworks|nanocad|спдс/i,
     directions: ['arch'],
   },
   {
     key: 'structural',
     title: 'Расчёт конструкций',
-    icon: 'columns',
+    icon: 'course-structural',
     match: /lira|лира|scad|скад|robot|advance steel|еврокод|сп рк en|мономах/i,
     directions: ['structural', 'geotech'],
   },
   {
     key: 'infra',
     title: 'Дороги, генплан и изыскания',
-    icon: 'route',
+    icon: 'course-infra',
     match: /civil\s*3d|subassembly|infraworks|генплан|дорог|изыскан|геодез/i,
     directions: ['infra'],
   },
   {
     key: 'mep',
     title: 'Инженерные сети',
-    icon: 'wrench',
+    icon: 'course-mep',
     match: /\bmep\b|magicad|model studio|трубопровод|вентиляц|слаботоч|электро/i,
     directions: ['mep'],
   },
   {
     key: 'viz',
     title: 'Визуализация',
-    icon: 'image',
+    icon: 'course-viz',
     match: /3ds\s*max|v-?ray|unreal|визуализ|corona/i,
     directions: [],
   },
   {
     key: 'corporate',
     title: 'Корпоративное обучение',
-    icon: 'graduation',
+    icon: 'course-corporate',
     match: /корпоратив/i,
     directions: [],
   },
@@ -63,7 +63,7 @@ export const COURSE_TOPICS = [
 export const OTHER_TOPIC = /** @type {const} */ ({
   key: 'other',
   title: 'Другие курсы',
-  icon: 'graduation',
+  icon: 'course-other',
 })
 
 /** Порядок проверки названия: частные случаи раньше общих. */

@@ -33,6 +33,13 @@
   list-style: none;
 }
 
+/* Тонкая линия между товарами: видно, где кончается один и начинается другой
+   (замечание владельца 03.11.2026). */
+.list > li + li {
+  padding-top: var(--space-1);
+  border-top: 1px solid var(--color-border);
+}
+
 @media (min-width: 640px) {
   .panel {
     padding: var(--space-6) var(--space-4) var(--space-4);
@@ -41,5 +48,11 @@
   .twoCols {
     grid-template-columns: 1fr 1fr;
     column-gap: var(--space-4);
+  }
+
+  /* В две колонки линия только между рядами: у второго товара первого ряда её нет. */
+  .twoCols > li:nth-child(2) {
+    padding-top: 0;
+    border-top: 0;
   }
 }

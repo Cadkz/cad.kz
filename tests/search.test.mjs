@@ -77,3 +77,16 @@ test('английские слова названий по-русски: «би
   // Русские слова по-прежнему ищутся по-русски.
   assert.equal(find('архитектуры')[0], 'Revit')
 })
+
+test('короткое название с опечаткой в каждом слове: «арк пк» → АРС-ПС (03.11.2026)', () => {
+  const list = [
+    { title: 'APC Windows интерфейс, локальный', vendor: 'АРС-ПС' },
+    { title: 'ПК ЭСПРИ PRO', vendor: 'ЭСПРИ' },
+    { title: 'Онлайн курс «Расчет в ПК LIRA-FEM»' },
+  ]
+  assert.deepEqual(
+    searchItems(list, 'Арк ПК').map((item) => item.title),
+    ['APC Windows интерфейс, локальный'],
+  )
+  assert.equal(searchItems(list, 'apc')[0]?.title, 'APC Windows интерфейс, локальный')
+})

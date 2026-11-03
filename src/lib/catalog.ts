@@ -9,6 +9,7 @@ import { cardAction, resolveScenario, type Scenario } from '../domain/buyScenari
 import { courseArtUrl, courseTopic } from '../domain/courseTopics.mjs'
 import { cheapestTotal } from '../domain/picker.mjs'
 import { compareInSection, priorityRank } from '../domain/priority.mjs'
+import { sectionIconKey } from '../domain/sectionArt.mjs'
 import { itemGroup, topSections, withTopSections } from '../domain/sectionTree.mjs'
 import { catalogExtras } from './catalogExtras'
 import { type CatalogVariant, catalogVariants } from './catalogVariants'
@@ -207,7 +208,7 @@ export async function getDirections(): Promise<Direction[]> {
     slug: section.slug,
     title: section.title,
     summary: section.summary ?? null,
-    icon: section.icon ?? null,
+    icon: sectionIconKey(section.slug, section.icon),
     tone: section.tone ?? 'navy',
   }))
 }
@@ -334,7 +335,7 @@ async function loadCatalog(): Promise<{
       cardText: ownCardText(product.slug),
       research: readResearch(product.researchData),
       lifecycle: lifecycle(readResearch(product.researchData), replacements),
-      icon: topic?.icon ?? productSections[0]?.icon ?? null,
+      icon: topic?.icon ?? sectionIconKey(productSections[0]?.slug, productSections[0]?.icon),
       // У курса — иллюстрация его категории (пачка владельца 03.11.2026).
       picture: topic
         ? {
@@ -417,7 +418,7 @@ async function loadCatalog(): Promise<{
         .filter((title): title is string => Boolean(title)),
       ...(parent ? { parent: parent.slug } : {}),
       ...(section.summary ? { summary: section.summary } : {}),
-      ...(section.icon ? { icon: section.icon } : {}),
+      ...(section.icon ? { icon: sectionIconKey(section.slug, section.icon) ?? section.icon } : {}),
     }
   })
   const lines = productLines.docs.flatMap((line) => {

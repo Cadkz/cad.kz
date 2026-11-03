@@ -27,7 +27,7 @@ const initials = (title: string) =>
 
 /**
  * Карточка мегаменю одного размера для всех шагов (замечание владельца 27.10.2026: «карточки
- * разного размера — лучше миниатюрное лого и заголовок»): слева знак 32 px, справа название
+ * разного размера — лучше миниатюрное лого и заголовок»): слева знак 32 px (иллюстрация раздела — 40 px), справа название
  * не длиннее двух строк. Без перечисления того, что внутри.
  */
 export function MenuTile({ title, logo, icon, href, onClick }: Props) {
@@ -42,13 +42,16 @@ export function MenuTile({ title, logo, icon, href, onClick }: Props) {
       className={styles.logo}
     />
   ) : icon ? (
-    <SectionIcon name={icon} size={16} />
+    <SectionIcon name={icon} size={40} />
   ) : (
     initials(title)
   )
   const body = (
     <>
-      <span className={logo ? styles.mark : `${styles.mark} ${styles.plain}`} aria-hidden="true">
+      <span
+        className={`${styles.mark} ${logo ? '' : icon ? styles.art : styles.plain}`}
+        aria-hidden="true"
+      >
         {mark}
       </span>
       <span className={styles.title}>{title}</span>

@@ -1,26 +1,22 @@
 import Image from 'next/image'
-import { sectionArtUrl } from '@/domain/sectionArt.mjs'
-import { SectionIcon } from '../SectionIcon/SectionIcon'
+import { iconArtUrl, sectionArtUrl } from '@/domain/sectionArt.mjs'
 import styles from './SectionArt.module.css'
 
 type Props = {
   /** Адрес раздела: по нему выбирается иллюстрация. */
   slug?: string | null
-  /** Значок lucide, если иллюстрации у раздела нет. */
+  /** Ключ значка из админки, если у раздела своей иллюстрации нет. */
   icon?: string | null
   /** Размер иллюстрации в px (картинка квадратная). */
   size: 48 | 96
-  iconSize?: 16 | 20 | 24
   className?: string
 }
 
-/** Иллюстрация раздела из одобренного концепта; без неё — прежний значок. */
-export function SectionArt({ slug, icon, size, iconSize = 20, className }: Props) {
-  const url = sectionArtUrl(slug)
-  if (!url) return <SectionIcon name={icon} size={iconSize} className={className} />
+/** Иллюстрация раздела: своя по адресу раздела, иначе по ключу значка (src/domain/sectionArt.mjs). */
+export function SectionArt({ slug, icon, size, className }: Props) {
   return (
     <Image
-      src={url}
+      src={sectionArtUrl(slug) ?? iconArtUrl(icon)}
       alt=""
       width={size}
       height={size}

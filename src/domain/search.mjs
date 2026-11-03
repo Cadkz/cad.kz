@@ -547,6 +547,60 @@ export function queryWords(query) {
   return required.length ? { required, optional: soft } : { required: soft, optional: [] }
 }
 
+/** Латинские буквы, похожие на русские: «APC» в названии читается как «АРС». */
+const LOOKALIKE = {
+  a: 'а',
+  b: 'в',
+  c: 'с',
+  e: 'е',
+  h: 'н',
+  k: 'к',
+  m: 'м',
+  o: 'о',
+  p: 'р',
+  t: 'т',
+  x: 'х',
+  y: 'у',
+}
+
+/**
+ * Слитно и одним алфавитом: «АРС-ПС» и «APC» → «арспс», «арс».
+ * @param {string} text
+ */
+const compact = (text) =>
+  normalize(text)
+    .replace(/[a-z]/g, (ch) => LOOKALIKE[/** @type {keyof typeof LOOKALIKE} */ (ch)] ?? ch)
+    .replace(/ /g, '')
+
+/**
+ * Запасной путь для коротких названий с опечаткой в каждом слове: «арк пк» → АРС-ПС (замечание
+ * владельца 03.11.2026). Запрос слитно сравнивается с началом названия, производителя и других
+ * названий слитно: от 4 букв — одна опечатка, от 5 — две; запрос длиннее 8 букв сюда не идёт. Только когда обычный поиск не нашёл
+ * товара со всеми словами.
+ * @template {Searchable} T
+ * @param {T[]} items
+ * @param {string} query
+ * @returns {T[]}
+ */
+function lookalikes(items, query) {
+  const q = compact(query)
+  const allowed = q.length >= 5 ? 2 : q.length >= 4 ? 1 : 0
+  if (!allowed || q.length > 8) return []
+  /** @type {{ item: T, cost: number, index: number }[]} */
+  const found = []
+  items.forEach((item, index) => {
+    const names = [item.title, item.vendor ?? '', ...(item.aliases ?? '').split(/[,;]/)]
+    let cost = allowed + 1
+    for (const name of names) {
+      const whole = compact(name)
+      if (whole.length < 3) continue
+      cost = Math.min(cost, distance(q, whole.slice(0, q.length), allowed))
+    }
+    if (cost <= allowed) found.push({ item, cost, index })
+  })
+  return found.sort((a, b) => a.cost - b.cost || a.index - b.index).map((entry) => entry.item)
+}
+
 /**
  * Найти товары с пометкой partial — показаны товары, у которых нашлись не все слова запроса.
  * Каждое обязательное слово должно найтись в названии, разделе, анонсе или описании. Совпадения
@@ -595,6 +649,11 @@ export function searchDetailed(items, query, limit = 60, exactOnly = false) {
     found.push({ item, score, exact, strong, missed, index })
   })
   const full = found.filter((entry) => entry.missed === 0)
+  if (!full.length && !exactOnly) {
+    const similar = lookalikes(items, query)
+    if (similar.length)
+      return { items: similar.slice(0, limit), partial: true, addons: [], bases: [] }
+  }
   // Без одного слова — только если запрос из двух и больше слов и полных находок нет.
   const partial = !full.length && must.length >= 2 && !exactOnly
   const pool = partial ? found.filter((entry) => entry.score > 0) : full

@@ -40,6 +40,12 @@
   font-weight: var(--weight-bold);
 }
 
+/* Иллюстрация категории (значки владельца 03.11.2026): крупнее, без плашки — мельче 40 px не различить. */
+.art {
+  width: var(--icon-box);
+  height: var(--icon-box);
+}
+
 .logo {
   width: 100%;
   height: 100%;

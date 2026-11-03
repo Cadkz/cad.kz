@@ -3,18 +3,18 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { cardInfo } from '@/domain/cardTexts.mjs'
 import { NAV_FORWARD } from '@/domain/motion.mjs'
+import { sectionIconKey } from '@/domain/sectionArt.mjs'
 import type { Lifecycle } from '@/lib/equipmentResearch'
 import type { Picture } from '@/lib/pictures'
 import { AddToCartButton } from '../AddToCartButton/AddToCartButton'
 import { Badge } from '../Badge/Badge'
-import { DirectionArt, hasDirectionArt } from '../DirectionArt/DirectionArt'
 import { ProductLifecycle } from '../ProductLifecycle/ProductLifecycle'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './ProductCard.module.css'
 
 export type ProductCardData = {
   logoFallback?: string | null
-  /** Раздел услуги: без картинки в карточке — его чертёж (DirectionArt), а не значок. */
+  /** Раздел услуги: без картинки в карточке — иллюстрация этого раздела. */
   art?: string | null
   lifecycle?: Lifecycle | null
   id: number
@@ -72,15 +72,10 @@ export function ProductCard({ product }: { product: ProductCardData }) {
     summary: product.summary,
     fallback: 'Описание и комплектации — на странице товара',
   })
+  const textLogo = !product.picture && !product.topic && product.logoFallback
   const mediaClass = product.picture
     ? styles.media
-    : `${styles.media} ${
-        product.topic
-          ? styles.course
-          : product.art && hasDirectionArt(product.art)
-            ? styles.blueprint
-            : styles.placeholder
-      }`
+    : `${styles.media} ${textLogo ? styles.placeholder : styles.artBox}`
   return (
     <article className={styles.card}>
       <div className={styles.head}>
@@ -97,14 +92,10 @@ export function ProductCard({ product }: { product: ProductCardData }) {
                 product.picture.fit === 'photo' ? `${styles.image} ${styles.photo}` : styles.image
               }
             />
-          ) : product.topic ? (
-            <SectionIcon name={product.icon} size={24} />
-          ) : product.logoFallback ? (
+          ) : textLogo ? (
             <span className={styles.logoFallback}>{product.logoFallback}</span>
-          ) : product.art && hasDirectionArt(product.art) ? (
-            <DirectionArt slug={product.art} className={styles.art} />
           ) : (
-            <SectionIcon name={product.icon} size={24} />
+            <SectionIcon name={sectionIconKey(product.art, product.icon)} size={64} />
           )}
         </span>
         <div className={styles.name}>

@@ -75,7 +75,7 @@ export function PickerStep({ step, number, titled = false }: Props) {
         {number != null && <span className={styles.number}>{number}</span>}
         {number == null && step.icon && (
           <span className={styles.groupIcon}>
-            <SectionIcon name={step.icon} size={20} />
+            <SectionIcon name={step.icon} size={40} />
           </span>
         )}
         {step.title}

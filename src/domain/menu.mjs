@@ -9,6 +9,7 @@ import { OTHER, vendorTree } from './catalogTree.mjs'
 import { COURSE_TOPICS, OTHER_TOPIC, topicOrder } from './courseTopics.mjs'
 import { familyTaskHref } from './familyGroups.mjs'
 import { compareInSection, pickVaried } from './priority.mjs'
+import { sectionIconKey } from './sectionArt.mjs'
 
 /** Товаров линейки в меню, дальше — «Смотреть все» в каталоге. */
 export const MENU_LINKS = 12
@@ -149,7 +150,7 @@ export function menuColumns(
             key: `section:${child.slug}`,
             title: child.title,
             logo: cover?.picture ?? null,
-            icon: child.icon ?? null,
+            icon: sectionIconKey(child.slug, child.icon),
             allHref: hrefFor(childFilter),
             // Один производитель — его линейки; несколько — по линейке на производителя.
             lines:

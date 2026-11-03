@@ -43,6 +43,8 @@
   position: absolute;
   right: calc(-1 * var(--space-4));
   bottom: calc(-1 * var(--space-4));
+  width: calc(var(--icon-box) * 2);
+  height: calc(var(--icon-box) * 2);
   z-index: var(--z-below);
   color: var(--color-blue);
   opacity: 0.1;
@@ -50,12 +52,6 @@
     color var(--duration-blueprint-out) var(--ease),
     opacity var(--duration-blueprint-out) var(--ease),
     transform var(--duration-blueprint-out) var(--ease);
-}
-
-.big svg {
-  width: calc(var(--icon-box) * 2);
-  height: calc(var(--icon-box) * 2);
-  stroke-width: 1;
 }
 
 /* Размерные линии через центр значка: пунктир, видны только на «синьке». */
@@ -99,11 +95,7 @@
   width: var(--icon-box);
   height: var(--icon-box);
   border-radius: var(--radius-md);
-  background: var(--color-blue-soft);
-  color: var(--color-blue);
-  transition:
-    background-color var(--duration-blueprint-out) var(--ease),
-    color var(--duration-blueprint-out) var(--ease);
+  transition: background-color var(--duration-blueprint-out) var(--ease);
 }
 
 .title {
@@ -234,8 +226,7 @@
 
 .card:active .icon,
 .card[data-pressed] .icon {
-  background: var(--color-on-dark-soft);
-  color: var(--color-sky);
+  background: var(--color-surface);
 }
 
 .card:active .big,
@@ -269,7 +260,7 @@
 
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .big svg {
+    .big img {
       animation: drift linear both;
       animation-timeline: view();
       animation-range: cover;

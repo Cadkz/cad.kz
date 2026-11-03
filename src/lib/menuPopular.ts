@@ -1,5 +1,6 @@
 import { cache } from 'react'
 import { plainTitle } from '@/domain/productTitle.mjs'
+import { sectionIconKey } from '@/domain/sectionArt.mjs'
 import type { HomePage } from '../../payload-types'
 import { cmsData } from './payload'
 import { cardPictures } from './pictures'
@@ -57,11 +58,13 @@ export const getMenuPopular = cache(
         where: { id: { in: sectionIds } },
         pagination: false,
         depth: 0,
-        select: { icon: true },
+        select: { icon: true, slug: true },
       }),
     ])
     const pictures = await cardPictures(payload, products, vendors.docs)
-    const iconById = new Map(sections.docs.map((section) => [section.id, section.icon ?? null]))
+    const iconById = new Map(
+      sections.docs.map((section) => [section.id, sectionIconKey(section.slug, section.icon)]),
+    )
     return popularCards(
       items,
       products.map((product) => ({

@@ -49,7 +49,7 @@ export function MenuSections({ tab, onNavigate }: Props) {
               onPointerLeave={() => clearTimeout(timer.current)}
             >
               <span className={styles.icon}>
-                <SectionArt slug={item.slug} icon={item.icon} size={48} iconSize={16} />
+                <SectionArt slug={item.slug} icon={item.icon} size={48} />
               </span>
               <span className={styles.sectionTitle}>{item.title}</span>
             </Link>

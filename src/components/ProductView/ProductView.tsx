@@ -24,6 +24,7 @@ import { Reveal } from '@/components/Reveal/Reveal'
 import { SectionIcon } from '@/components/SectionIcon/SectionIcon'
 import { programLogo, vendorLogo } from '@/domain/cardLogos.mjs'
 import { kindProfile } from '@/domain/productKind.mjs'
+import { sectionIconKey } from '@/domain/sectionArt.mjs'
 import { hasSpecSheet } from '@/domain/specSheet.mjs'
 import { productLd } from '@/domain/structuredData.mjs'
 import { getCatalog } from '@/lib/catalog'
@@ -201,7 +202,10 @@ export async function ProductView({
             logo={programLogo(product) ?? vendorLogo(product.vendor)}
             placeholder={
               <span>
-                <SectionIcon name={product.sections[0]?.icon ?? 'building'} size={24} />
+                <SectionIcon
+                  name={sectionIconKey(product.sections[0]?.slug, product.sections[0]?.icon)}
+                  size={96}
+                />
               </span>
             }
           />

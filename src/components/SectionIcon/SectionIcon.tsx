@@ -1,52 +1,30 @@
-import {
-  BrickWall,
-  Building2,
-  Cog,
-  Columns3,
-  DraftingCompass,
-  Droplet,
-  FileText,
-  GraduationCap,
-  Image,
-  Layers,
-  type LucideIcon,
-  Monitor,
-  Mountain,
-  Printer,
-  Route,
-  ScanLine,
-  Shapes,
-  TreePine,
-  Wind,
-  Wrench,
-} from 'lucide-react'
+import Image from 'next/image'
+import { iconArtUrl } from '@/domain/sectionArt.mjs'
+import styles from './SectionIcon.module.css'
 
-const icons: Record<string, LucideIcon> = {
-  building: Building2,
-  columns: Columns3,
-  layers: Layers,
-  route: Route,
-  wrench: Wrench,
-  droplet: Droplet,
-  cog: Cog,
-  image: Image,
-  file: FileText,
-  scan: ScanLine,
-  printer: Printer,
-  monitor: Monitor,
-  graduation: GraduationCap,
-  compass: DraftingCompass,
-  mountain: Mountain,
-  brick: BrickWall,
-  tree: TreePine,
-  wind: Wind,
-  shapes: Shapes,
+type Props = {
+  /** Ключ значка: имя иллюстрации («cad-bim») или прежний ключ из админки («building»). */
+  name?: string | null
+  /** Размер в px, под который грузится картинка; на экране она занимает всю свою плашку. */
+  size?: number
+  className?: string
 }
 
-type Props = { name?: string | null; size?: 16 | 20 | 24; className?: string }
-
-/** Иконка раздела каталога по ключу из CMS (поле «Иконка» у раздела). */
-export function SectionIcon({ name, size = 20, className }: Props) {
-  const Icon = (name && icons[name]) || Building2
-  return <Icon size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+/**
+ * Значок раздела, категории или группы — иллюстрация владельца (03.11.2026). Линейных значков
+ * старого образца больше нет: неизвестный ключ — общая иллюстрация (src/domain/sectionArt.mjs).
+ * Размер задаёт родитель: картинка заполняет его плашку.
+ */
+export function SectionIcon({ name, size = 48, className }: Props) {
+  return (
+    <Image
+      src={iconArtUrl(name)}
+      alt=""
+      width={256}
+      height={256}
+      sizes={`${size}px`}
+      aria-hidden="true"
+      className={`${styles.art} ${className ?? ''}`}
+    />
+  )
 }

@@ -302,9 +302,10 @@
   padding-bottom: calc(var(--control-height-sm) + var(--space-3));
 }
 
-/* Пока у товара нет картинки — значок раздела в круге посреди листа. */
+/* Пока у товара нет картинки — иллюстрация раздела в круге посреди листа. */
 .placeholder > * {
   display: inline-flex;
+  padding: var(--space-4);
   align-items: center;
   justify-content: center;
   width: var(--placeholder-size);

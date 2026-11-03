@@ -24,7 +24,7 @@ export function ProductHeader({ title, vendor, summary, icon, tasks, requires, m
       <div className={styles.top}>
         {icon && (
           <span className={styles.icon} aria-hidden="true">
-            <SectionIcon name={icon} size={24} />
+            <SectionIcon name={icon} size={80} />
           </span>
         )}
         <div className={styles.text}>

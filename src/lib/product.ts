@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { plainTitle } from '@/domain/productTitle.mjs'
+import { sectionIconKey } from '@/domain/sectionArt.mjs'
 import type { Product, Section } from '../../payload-types'
 import { type Scan, scanById } from '../domain/artecScans.mjs'
 import { resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
@@ -175,7 +176,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
         slug: section.slug,
         title: section.title,
         isDirection: Boolean(section.isDirection),
-        icon: section.icon ?? null,
+        icon: sectionIconKey(section.slug, section.icon),
       })),
     tasks: (product.tasks ?? []).map((task) => task.title),
     properties: specs,

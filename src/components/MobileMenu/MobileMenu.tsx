@@ -95,7 +95,6 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
                       slug={column.slug}
                       icon={column.icon}
                       size={48}
-                      iconSize={16}
                       className={styles.sectionIcon}
                     />
                     <span className={styles.sectionTitle}>{column.title}</span>

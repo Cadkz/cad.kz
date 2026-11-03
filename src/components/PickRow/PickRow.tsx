@@ -45,7 +45,7 @@ function Thumb({ item }: { item: PickItem }) {
     )
   if (item.logoFallback && !item.topic)
     return <span className={styles.vendor}>{item.logoFallback}</span>
-  return <SectionIcon name={item.icon ?? null} size={24} />
+  return <SectionIcon name={item.icon ?? null} size={64} />
 }
 
 /**

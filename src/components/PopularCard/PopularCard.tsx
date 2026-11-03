@@ -39,7 +39,7 @@ export function PopularCard({
             className={styles.image}
           />
         ) : (
-          <SectionIcon name={card.icon} size={20} />
+          <SectionIcon name={card.icon} size={24} />
         )}
       </span>
       {/* Неразрывный дефис: «3D-сканеры», «ЛИРА-FEM» не рвутся по дефису в узкой плитке. */}
