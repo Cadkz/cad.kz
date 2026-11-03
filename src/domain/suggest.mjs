@@ -8,7 +8,8 @@
  * Это поиск по словам: «программа для вентиляции» он находит по слову «вентиляции» (служебные
  * слова не мешают), но задачу своими словами не понимает — такое будет делать ИИ-помощник.
  */
-import { normalize, searchDetailed, searchItems } from './search.mjs'
+import { programLogo, vendorLogo } from './cardLogos.mjs'
+import { isRenewalTitle, normalize, searchDetailed, searchItems, wantsRenew } from './search.mjs'
 
 /**
  * @typedef {'product' | 'family' | 'vendor' | 'section' | 'page'} SuggestType
@@ -18,7 +19,8 @@ import { normalize, searchDetailed, searchItems } from './search.mjs'
  * @typedef {{ products: SuggestEntry[], vendors: SuggestEntry[], sections: SuggestEntry[],
  *   pages: SuggestEntry[] }} SuggestIndex
  * @typedef {{ type: SuggestType, title: string, href: string, label: string, note: string | null,
- *   group?: string }} Suggestion
+ *   group?: string, logo?: string | null }} Suggestion
+ * logo — логотип программы или производителя для строки (как на карточках каталога), нет — null.
  * @typedef {{ query: string, items: Suggestion[], more: boolean }} SuggestResult
  */
 
@@ -27,7 +29,7 @@ import { normalize, searchDetailed, searchItems } from './search.mjs'
  * лучше как в мегаменю: сами программы, отдельно дополнения к ним, отдельно курсы). Остальное —
  * по ссылке «Все результаты».
  */
-const GROUP_LIMIT = /** @type {const} */ ({ products: 4, addons: 3, courses: 2, others: 2 })
+const GROUP_LIMIT = /** @type {const} */ ({ products: 5, addons: 3, courses: 2, others: 2 })
 /** Всего строк не больше (сумма групп). */
 export const SUGGEST_LIMIT =
   GROUP_LIMIT.products + GROUP_LIMIT.addons + GROUP_LIMIT.courses + GROUP_LIMIT.others
@@ -43,14 +45,31 @@ export const MIN_QUERY = 2
  * @param {SuggestGroup} group
  * @returns {Suggestion}
  */
-const toSuggestion = ({ type, title, href, label, note }, group) => ({
+const toSuggestion = ({ type, title, href, label, note, vendor }, group) => ({
   type,
   title,
   href,
   label,
   note: note ?? null,
   group,
+  logo:
+    group === 'products' || group === 'addons'
+      ? ((programLogo({ title, vendor: vendor ?? null }) ?? vendorLogo(vendor ?? null))?.url ??
+        null)
+      : null,
 })
+
+/**
+ * Сама программа из запроса: название начинается с неё («AutoCAD», «AutoCAD LT» по «автокад»).
+ * Такие — первыми, ниже то, где программа в составе: LT комплект, AEC Collection.
+ * @param {SuggestEntry} entry
+ * @param {string} query
+ */
+function startsWithQuery(entry, query) {
+  const words = entry.title.split(/\s+/)
+  const head = words.slice(0, Math.max(1, normalize(query).split(' ').length)).join(' ')
+  return searchItems([{ title: head }], query, 1, true).length > 0
+}
 
 /** «MagiCAD Вентиляция для AutoCAD», «… for Revit» — дополнение к названной программе. */
 const FOR_PROGRAM = /\s(?:для|for)\s+(.+)$/i
@@ -83,7 +102,11 @@ export function suggest(index, rawQuery) {
   if (normalize(query).length < MIN_QUERY) return { query, items: [], more: false }
   const found = searchDetailed(index.products, query, 60)
   const addonSet = new Set(found.addons)
-  const all = onePerPlace([...found.items, ...found.addons])
+  // Продления и подписки — только когда о них спрашивают.
+  const renew = wantsRenew(query)
+  const all = onePerPlace(
+    [...found.items, ...found.addons].filter((entry) => renew || !isRenewalTitle(entry.title)),
+  )
   /** @type {Record<'products' | 'addons' | 'courses', SuggestEntry[]>} */
   const parts = { products: [], addons: [], courses: [] }
   for (const entry of all) {
@@ -91,6 +114,10 @@ export function suggest(index, rawQuery) {
     else if (addonSet.has(entry) || addonByTitle(entry, query)) parts.addons.push(entry)
     else parts.products.push(entry)
   }
+  // Стабильная сортировка: порядок поиска внутри обеих частей сохраняется.
+  parts.products.sort(
+    (a, b) => Number(startsWithQuery(b, query)) - Number(startsWithQuery(a, query)),
+  )
   /** @type {{ entry: SuggestEntry, group: SuggestGroup }[]} */
   const others = [
     ...searchItems(index.vendors, query, 1, true).map((entry) => ({

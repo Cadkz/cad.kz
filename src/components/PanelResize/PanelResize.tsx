@@ -18,8 +18,11 @@ const MIN_HEIGHT = 480
 const EDGE = 24
 const TOP = 80
 const STORAGE_KEY = 'cadkz-kaddi-size'
-/** Размер уже меняли — подсказка чёрточками больше не мигает. */
+/** Размер уже меняли — подсказка на метках больше не пробегает. */
 const SEEN_KEY = 'cadkz-kaddi-resized'
+
+/** Дуга угла по скруглению окна (16 px): от левого края вверх и вправо по верхнему. */
+const ARC = 'M1 20V17A16 16 0 0 1 17 1H20'
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
 
@@ -101,13 +104,16 @@ export function PanelResize({ target }: Props) {
     }
   }
 
-  // Две чёрточки у каждой грани: внешняя прямо на рамке окна, внутренняя чуть глубже. Пока
-  // размер ни разу не меняли, они по очереди загораются синим — «окно тянется наружу».
-  const marks = (
-    <>
-      <span className={styles.inner} />
-      <span className={styles.outer} />
-    </>
+  // Одна метка на рамке окна у каждой грани (решение владельца 03.11.2026, вечер): черта
+  // посередине верхнего и левого края и дуга в углу. Пока размер ни разу не меняли, по ним
+  // изредка пробегает синий «поворотник»: снизу вверх по левой черте, через угол, вправо по
+  // верхней — и гаснет.
+  const line = <span className={styles.mark} />
+  const arc = (
+    <svg className={styles.arc} viewBox="0 0 20 20" aria-hidden="true">
+      <path className={styles.arcBase} d={ARC} />
+      <path className={styles.arcFill} d={ARC} pathLength={1} />
+    </svg>
   )
   return (
     <>
@@ -118,7 +124,7 @@ export function PanelResize({ target }: Props) {
         onDoubleClick={reset}
         aria-hidden="true"
       >
-        {marks}
+        {line}
       </div>
       <div
         className={styles.left}
@@ -127,7 +133,7 @@ export function PanelResize({ target }: Props) {
         onDoubleClick={reset}
         aria-hidden="true"
       >
-        {marks}
+        {line}
       </div>
       <div
         className={styles.corner}
@@ -137,7 +143,7 @@ export function PanelResize({ target }: Props) {
         onDoubleClick={reset}
         aria-hidden="true"
       >
-        {marks}
+        {arc}
       </div>
     </>
   )

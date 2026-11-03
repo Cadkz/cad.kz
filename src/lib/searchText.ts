@@ -49,6 +49,25 @@ function plainText(text: string): string {
     .replace(/https?:\/\/\S+/g, ' ')
 }
 
+/**
+ * Состав из описания: пункты списка под заголовком «Что входит…» («## Что входит в коллекцию»
+ * у коллекций Autodesk). Поиск находит коллекцию по программе из состава: «автокад» → AEC
+ * Collection (замечание владельца 03.11.2026), как по программам подбора.
+ */
+export function contentsOf(description: string): string[] {
+  const lines = description.split('\n')
+  const start = lines.findIndex((line) => /^#{2,4}\s*Что входит/i.test(line.trim()))
+  if (start < 0) return []
+  const items: string[] = []
+  for (const line of lines.slice(start + 1)) {
+    const text = line.trim()
+    if (/^#/.test(text)) break
+    const item = /^[-*•]\s+(.+)$/.exec(text)?.[1]
+    if (item) items.push(item)
+  }
+  return items
+}
+
 async function loadExtras(): Promise<Extras> {
   const payload = await cms()
   const [products, sections] = await Promise.all([
@@ -111,7 +130,7 @@ async function loadExtras(): Promise<Extras> {
       members: [],
       addonOf,
       sections: [...new Set(titles)],
-      parts: [...new Set(parts)].join(' '),
+      parts: [...new Set([...parts, ...contentsOf(product.description ?? '')])].join(' '),
       keywords: [plainText(product.description ?? ''), ...properties, product.renewLabel ?? '']
         .join(' ')
         .trim(),

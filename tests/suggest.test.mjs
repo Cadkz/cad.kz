@@ -85,15 +85,48 @@ test('группы как в мегаменю: программы, дополн�
   assert.equal(groupSuggestions(suggest(own, 'магикад').items)[0]?.key, 'products')
 })
 
+test('«автокад»: сама программа, LT, коллекция с AutoCAD в составе; без подписок (03.11.2026)', () => {
+  const own = {
+    ...index,
+    products: [
+      product('AutoCAD', 'Autodesk'),
+      { ...product('LT комплект: AutoCAD + Revit', 'Autodesk'), parts: 'AutoCAD LT Revit LT' },
+      product('AutoCAD LT', 'Autodesk'),
+      { ...product('Подписка на обновления TDMS', 'TDMS'), parts: 'TDMS AddIns for AutoCAD' },
+      {
+        ...product('Architecture Engineering & Construction Collection', 'Autodesk'),
+        aliases: 'AEC Collection, AECC',
+        parts: 'Revit AutoCAD с отраслевыми наборами Civil 3D',
+      },
+    ],
+  }
+  const found = suggest(own, 'автокад').items
+  assert.deepEqual(
+    found.map((item) => item.title),
+    [
+      'AutoCAD',
+      'AutoCAD LT',
+      'LT комплект: AutoCAD + Revit',
+      'Architecture Engineering & Construction Collection',
+    ],
+  )
+  assert.equal(found[0]?.logo, '/images/brands/autodesk/autocad.png')
+  // О продлении спросили — подписка находится.
+  assert.ok(
+    suggest(own, 'подписка tdms').items.some((i) => i.title === 'Подписка на обновления TDMS'),
+  )
+  assert.equal(suggest(own, 'aec').items[0]?.title.startsWith('Architecture'), true)
+})
+
 test('регистр, кириллица и опечатки', () => {
   assert.equal(titles('ревит')[0], 'Revit')
   assert.equal(titles('АВТОКАД')[0], 'AutoCAD')
   assert.equal(titles('скад')[0], 'SCAD Office')
 })
 
-test('в группе товаров не больше четырёх строк, остальное — флаг «ещё»', () => {
+test('в группе товаров не больше пяти строк, остальное — флаг «ещё»', () => {
   const result = suggest(index, 'geo5')
-  assert.equal(result.items.filter((item) => item.group === 'products').length, 4)
+  assert.equal(result.items.filter((item) => item.group === 'products').length, 5)
   assert.equal(result.more, true)
   assert.equal(suggest(index, 'artec').more, false)
 })

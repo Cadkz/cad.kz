@@ -312,6 +312,26 @@ const indexWords = (text) => [...new Set(normalize(text).split(' ').filter(Boole
 const isRenew = (word) => RENEW.some((root) => word.startsWith(root))
 
 /**
+ * В запросе есть слово про продление или обновление («продлить автокад», «подписка tdms»).
+ * @param {string} query
+ */
+export const wantsRenew = (query) =>
+  normalize(query)
+    .split(' ')
+    .some((word) => word.length > 2 && isRenew(word))
+
+/**
+ * Продление, подписка на обновления, переход на новую версию — не сама программа. В подсказках
+ * они показываются, только если в запросе есть слово о продлении (замечание владельца 03.11.2026:
+ * «автокад» предлагал «Подписку на обновления TDMS»).
+ */
+const RENEWAL_TITLE =
+  /^(?:подписка|продление|обновление|переход|upgrade|subscription|renewal)(?![\p{L}\p{N}])|\s(?:->|→)\s|\b(?:subscription|upgrade)\b/iu
+
+/** @param {string} title */
+export const isRenewalTitle = (title) => RENEWAL_TITLE.test(title.trim())
+
+/**
  * Английские слова из названий программ, которые по-русски пишут по звучанию, а побуквенно и на
  * слух они не сходятся: «дизайн» → design, «билдинг» → building (замечание владельца 03.11.2026:
  * «билдинг дизайн» не находил Forma Building Design).
@@ -490,7 +510,8 @@ function matchPlace(word, item) {
   if (inName >= 2) return { score: inName * 3, exact: true, strong: true }
   const inSection = bestScore(word, item.sections, true)
   if (inSection >= 2) return { score: inSection * 3, exact: true, strong: true }
-  const inParts = bestScore(word, item.parts, true)
+  // В составе — без опечаток, но на слух: «автокад» находит AEC Collection с AutoCAD в составе.
+  const inParts = bestScore(word, item.parts)
   if (inParts >= 2) return { score: inParts * 2, exact: true, strong: true }
   const inAbout = bestScore(word, item.about)
   if (inAbout >= 2) return { score: inAbout, exact: true, strong: false }

@@ -1,16 +1,12 @@
-import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import type { ReactNode } from 'react'
-import { markMatches, type Suggestion } from '@/domain/suggest.mjs'
 import { catalogHref } from '@/lib/navigationHrefs'
 import type { SuggestState } from '@/lib/useSuggest'
 import { WhatsappIcon } from '../icons/icons'
+import { type SearchGroup, SearchGroups, type SearchOption } from '../SearchGroups/SearchGroups'
 import { SearchKaddi } from '../SearchKaddi/SearchKaddi'
 import styles from './SearchSuggestions.module.css'
 
-/** Строка списка: подсказка или «Все результаты». */
-export type SearchOption = { id: string; href: string; suggestion: Suggestion | null }
-export type SearchGroup = { key: string; title: string; options: SearchOption[] }
+export type { SearchGroup, SearchOption }
 
 type Props = {
   query: string
@@ -32,13 +28,6 @@ const whatsappText = (query: string) =>
     ? `Здравствуйте! Ищу на сайте: ${query}. Подскажите, пожалуйста.`
     : 'Здравствуйте! Подскажите, пожалуйста, что подойдёт под мою задачу: '
 
-/** Вторая строка подсказки: производитель или семейство и тип — серым, мельче. */
-function metaOf(suggestion: Suggestion) {
-  if (suggestion.type === 'product' || suggestion.type === 'family')
-    return [suggestion.note, suggestion.label].filter(Boolean).join(' · ')
-  return suggestion.note ?? ''
-}
-
 /**
  * Выпадающая область поиска: «Часто ищут» (поле пустое), подсказки по группам, «ничего не
  * нашлось». Ниже спокойная строка «Все результаты», мини-Кадди (вопрос своими словами — в чат, когда
@@ -49,27 +38,9 @@ export function SearchSuggestions(props: Props) {
   const result = state.status === 'done' || state.status === 'loading' ? state.result : null
   const nothing = state.status === 'done' && options.length === 0
   const trimmed = query.trim()
-  const all = options.find((option) => !option.suggestion)
   const whatsapp = whatsappHref
     ? `${whatsappHref}?text=${encodeURIComponent(whatsappText(trimmed))}`
     : null
-  const indexOf = (option: SearchOption) => options.indexOf(option)
-
-  const row = (option: SearchOption, className: string, children: ReactNode) => (
-    <Link
-      key={option.id}
-      id={option.id}
-      href={option.href}
-      role="option"
-      aria-selected={indexOf(option) === active}
-      tabIndex={-1}
-      className={className}
-      onClick={props.onPick}
-      onPointerMove={() => props.onHover(indexOf(option))}
-    >
-      {children}
-    </Link>
-  )
 
   return (
     <div className={styles.panel}>
@@ -92,54 +63,15 @@ export function SearchSuggestions(props: Props) {
       )}
 
       {options.length > 0 && (
-        <div id={listId} role="listbox" aria-label="Подсказки поиска" className={styles.list}>
-          {groups.map((group) => (
-            // biome-ignore lint/a11y/useSemanticElements: группа строк внутри listbox, fieldset тут не подходит
-            <div
-              key={group.key}
-              role="group"
-              aria-labelledby={`${listId}-${group.key}`}
-              className={styles.group}
-            >
-              <p id={`${listId}-${group.key}`} className={styles.caption}>
-                {group.title}
-              </p>
-              {group.options.map((option) => {
-                const suggestion = option.suggestion
-                if (!suggestion) return null
-                const meta = metaOf(suggestion)
-                return row(
-                  option,
-                  styles.option,
-                  <>
-                    <span className={styles.title}>
-                      {markMatches(suggestion.title, trimmed).map((part, i) =>
-                        part.match ? (
-                          // biome-ignore lint/suspicious/noArrayIndexKey: куски одной строки, порядок постоянный
-                          <mark key={i} className={styles.mark}>
-                            {part.text}
-                          </mark>
-                        ) : (
-                          part.text
-                        ),
-                      )}
-                    </span>
-                    {meta && <span className={styles.meta}>{meta}</span>}
-                  </>,
-                )
-              })}
-            </div>
-          ))}
-          {all &&
-            row(
-              all,
-              styles.all,
-              <>
-                <span>Все результаты по запросу «{trimmed}»</span>
-                <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
-              </>,
-            )}
-        </div>
+        <SearchGroups
+          query={query}
+          groups={groups}
+          options={options}
+          listId={listId}
+          active={active}
+          onPick={props.onPick}
+          onHover={props.onHover}
+        />
       )}
 
       {state.status === 'loading' && !result && <p className={styles.status}>Ищем…</p>}

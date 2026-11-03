@@ -143,7 +143,8 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   border-radius: var(--radius-panel);
-  background: var(--color-popover);
+  /* Непрозрачная: сквозь стекло проступала страница и мешала читать (03.11.2026). */
+  background: var(--color-surface);
   box-shadow: var(--shadow-popover);
   /* Как меню «Каталог» (23.10.2026): раскрывается шторкой сверху вниз, гаснет быстро. Край
      обрезки открытой панели — за тенью, чтобы её не резать. */
@@ -166,16 +167,16 @@
     visibility 0s;
 }
 
-@supports (backdrop-filter: blur(1px)) {
-  .inline .dropdown {
-    backdrop-filter: var(--blur-glass);
-  }
-}
-
 @media (min-width: 960px) {
   .inline .dropdown {
     right: auto;
     left: 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .inline .dropdown {
+    width: min(max(100%, var(--search-panel)), var(--search-panel-wide));
   }
 }
 

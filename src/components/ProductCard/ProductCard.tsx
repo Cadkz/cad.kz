@@ -1,6 +1,7 @@
 import { ArrowRight, CalendarDays } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { showVendorLine } from '@/domain/cardNoise.mjs'
 import { cardInfo } from '@/domain/cardTexts.mjs'
 import { NAV_FORWARD } from '@/domain/motion.mjs'
 import { sectionIconKey } from '@/domain/sectionArt.mjs'
@@ -99,7 +100,9 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           )}
         </span>
         <div className={styles.name}>
-          {product.manufacturer && <p className={styles.vendor}>{product.manufacturer}</p>}
+          {showVendorLine(product.manufacturer, info.title) && (
+            <p className={styles.vendor}>{product.manufacturer}</p>
+          )}
           <h3 className={styles.title}>
             <Link
               href={product.href}

@@ -27,6 +27,25 @@ export function plainTitle(title) {
  */
 export function withTitleAlias(aliases, title) {
   const plain = plainTitle(title)
-  if (plain === title) return aliases ?? null
-  return [aliases, title].filter(Boolean).join(', ')
+  const all = [aliases, plain === title ? null : title, ...collectionAliases(plain)].filter(Boolean)
+  return all.length ? all.join(', ') : null
+}
+
+/**
+ * Коллекции Autodesk ищут сокращением: «Architecture Engineering & Construction Collection» —
+ * AEC, «Product Design & Manufacturing Collection» — PDMC, плюс «коллекция»
+ * (замечание владельца 03.11.2026: «aec» ничего не находил).
+ * @param {string} title
+ * @returns {string[]}
+ */
+export function collectionAliases(title) {
+  const match = /^(.+?)\s+Collection$/i.exec(title.trim())
+  if (!match?.[1]) return []
+  const letters = match[1]
+    .split(/[\s&]+/)
+    .filter((word) => /^[A-Z]/.test(word))
+    .map((word) => word[0])
+    .join('')
+  if (letters.length < 2) return []
+  return [`${letters} Collection`, `${letters}C`, `коллекция ${letters}`]
 }

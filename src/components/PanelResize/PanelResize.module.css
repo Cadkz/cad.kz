@@ -41,153 +41,180 @@
   }
 }
 
-/* Подсказка, что окно растягивается (просьба владельца 03.11.2026, вечер): у каждой из трёх
-   граней — по две метки. Внешняя — прямо на рамке окна: посередине верхнего и левого края
-   короткая черта, в углу — синее скругление по радиусу окна. Внутренняя — чуть глубже (в углу —
-   прежний уголок-скобка). Пока размер ни разу не меняли, метки по очереди загораются синим и
-   гаснут в серый — внутренняя, затем внешняя, по кругу: «тяните наружу». Наведение и
-   перетаскивание — обе синие. */
+/* Подсказка, что окно растягивается (решение владельца 03.11.2026, вечер): одна метка на рамке
+   у каждой грани — короткая черта посередине верхнего и левого края, дуга по скруглению в углу.
+   Серые. Пока размер ни разу не меняли, раз в --duration-resize-hint по ним пробегает синий
+   с фирменным переливом, как поворотник современных машин: снизу вверх по левой черте, через
+   угол, слева направо по верхней; держится и гаснет. Наведение и перетаскивание — синие. */
 @media (min-width: 640px) and (hover: hover) {
-  .inner,
-  .outer {
+  .mark {
     position: absolute;
-    border-color: var(--color-gray-500);
+    overflow: hidden;
+    border-radius: var(--radius-pill);
     background: var(--color-gray-500);
-    transition:
-      background-color var(--duration-fast) var(--ease),
-      border-color var(--duration-fast) var(--ease);
   }
 
-  /* Верхний край: две горизонтальные черты посередине. */
-  .top .outer,
-  .top .inner {
+  /* Синяя заливка поверх серой: растёт от начала черты к концу (только transform и opacity). */
+  .mark::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease);
+  }
+
+  .top .mark {
+    top: 0;
     left: 50%;
     width: var(--space-6);
     height: 2px;
-    border-radius: var(--radius-pill);
     transform: translateX(-50%);
   }
 
-  .top .outer {
-    top: 0;
+  .top .mark::after {
+    background: linear-gradient(
+      90deg,
+      var(--color-navy),
+      var(--color-blue),
+      var(--color-sky-strong)
+    );
+    transform-origin: left center;
   }
 
-  .top .inner {
-    top: var(--space-2);
-  }
-
-  /* Левый край: две вертикальные черты посередине. */
-  .left .outer,
-  .left .inner {
+  .left .mark {
     top: 50%;
+    left: 0;
     width: 2px;
     height: var(--space-6);
-    border-radius: var(--radius-pill);
     transform: translateY(-50%);
   }
 
-  .left .outer {
-    left: 0;
+  .left .mark::after {
+    background: linear-gradient(
+      0deg,
+      var(--color-navy),
+      var(--color-blue),
+      var(--color-sky-strong)
+    );
+    transform-origin: center bottom;
   }
 
-  .left .inner {
-    left: var(--space-2);
-  }
-
-  /* Угол: снаружи — дуга по скруглению окна, внутри — уголок-скобка. */
-  .corner .outer,
-  .corner .inner {
-    background: none;
-    border-top: 2px solid var(--color-gray-500);
-    border-left: 2px solid var(--color-gray-500);
-  }
-
-  .corner .outer {
+  .arc {
+    position: absolute;
     top: 0;
     left: 0;
     width: var(--space-5);
     height: var(--space-5);
-    border-top-left-radius: var(--radius-panel);
+    overflow: visible;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
   }
 
-  .corner .inner {
-    top: var(--space-2);
-    left: var(--space-2);
-    width: var(--space-3);
-    height: var(--space-3);
-    border-top-left-radius: var(--radius-sm);
+  .arcBase {
+    stroke: var(--color-gray-500);
   }
 
-  .top:hover > *,
-  .left:hover > *,
-  [data-resizing] .top > *,
-  [data-resizing] .left > * {
-    background-color: var(--color-blue);
+  .arcFill {
+    stroke: var(--color-blue);
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease);
   }
 
-  .corner:hover > *,
-  [data-resizing] .corner > * {
-    border-color: var(--color-blue);
+  .top:hover .mark::after,
+  .left:hover .mark::after,
+  [data-resizing] .mark::after {
+    opacity: 1;
+    transform: none;
   }
 
-  .top[data-hint] .inner,
-  .left[data-hint] .inner {
-    animation: hintLine var(--duration-draw) var(--ease) var(--duration-kaddi-open) infinite;
+  .corner:hover .arcFill,
+  [data-resizing] .arcFill {
+    opacity: 1;
+    stroke-dashoffset: 0;
   }
 
-  .top[data-hint] .outer,
-  .left[data-hint] .outer {
-    animation: hintLine var(--duration-draw) var(--ease)
-      calc(var(--duration-kaddi-open) + var(--duration-draw) / 2) infinite;
+  .left[data-hint] .mark::after {
+    animation: signalLeft var(--duration-resize-hint) var(--ease) var(--duration-kaddi-open)
+      infinite;
   }
 
-  .corner[data-hint] .inner {
-    animation: hintCorner var(--duration-draw) var(--ease) var(--duration-kaddi-open) infinite;
+  .corner[data-hint] .arcFill {
+    animation: signalCorner var(--duration-resize-hint) linear var(--duration-kaddi-open) infinite;
   }
 
-  .corner[data-hint] .outer {
-    animation: hintCorner var(--duration-draw) var(--ease)
-      calc(var(--duration-kaddi-open) + var(--duration-draw) / 2) infinite;
-  }
-}
-
-/* Половину круга метка синяя, половину серая; у внешней сдвиг на полкруга — горят по очереди. */
-@keyframes hintLine {
-  0%,
-  100% {
-    background-color: var(--color-gray-500);
-  }
-
-  20%,
-  40% {
-    background-color: var(--color-blue);
-  }
-
-  60% {
-    background-color: var(--color-gray-500);
+  .top[data-hint] .mark::after {
+    animation: signalTop var(--duration-resize-hint) var(--ease) var(--duration-kaddi-open) infinite;
   }
 }
 
-@keyframes hintCorner {
-  0%,
+/* Один круг: левая черта 0–5 %, угол 5–9 %, верхняя 9–14 %, держится до 26 %, гаснет к 34 %,
+   дальше пауза. Все три на одном круге — бегут одной змейкой. */
+@keyframes signalLeft {
+  0% {
+    opacity: 1;
+    transform: scaleY(0);
+  }
+
+  5%,
+  26% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  34%,
   100% {
-    border-color: var(--color-gray-500);
+    opacity: 0;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes signalCorner {
+  0%,
+  5% {
+    opacity: 1;
+    stroke-dashoffset: 1;
   }
 
-  20%,
-  40% {
-    border-color: var(--color-blue);
+  9%,
+  26% {
+    opacity: 1;
+    stroke-dashoffset: 0;
   }
 
-  60% {
-    border-color: var(--color-gray-500);
+  34%,
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes signalTop {
+  0%,
+  9% {
+    opacity: 1;
+    transform: scaleX(0);
+  }
+
+  14%,
+  26% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  34%,
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .top[data-hint] > *,
-  .left[data-hint] > *,
-  .corner[data-hint] > * {
+  .top[data-hint] .mark::after,
+  .left[data-hint] .mark::after,
+  .corner[data-hint] .arcFill {
     animation: none;
   }
 }

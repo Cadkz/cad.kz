@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 import { cache } from 'react'
 import type { ProductCardData } from '@/components/ProductCard/ProductCard'
+import { pluginBadge } from '@/domain/cardNoise.mjs'
 import { ownCardText } from '@/domain/cardTexts.mjs'
 import { productRequestKey } from '@/domain/cart.mjs'
 import { plainTitle, withTitleAlias } from '@/domain/productTitle.mjs'
@@ -304,7 +305,7 @@ async function loadCatalog(): Promise<{
     const productOffers = offersByProduct.get(product.id) ?? []
     const requires = (product.requiresProducts ?? [])
       .map((item) => titleById.get(relId(item) ?? -1))
-      .filter(Boolean)
+      .filter((title): title is string => Boolean(title))
     const vendorId = relId(product.manufacturer) ?? -1
     const vendor = vendorById.get(vendorId) ?? null
     const offersCount =
@@ -360,7 +361,8 @@ async function loadCatalog(): Promise<{
       cartOfferId: action.cart ? cartId : null,
       // Без одной комплектации с ценой — в корзину запросом, комплектацию подберёт менеджер.
       requestKey: productRequestKey(product.id),
-      badge: requires.length ? `Плагин для ${requires.join(' / ')}` : null,
+      // Что уже в названии («… для AutoCAD»), плашкой не повторяется.
+      badge: pluginBadge(requires, product.title),
       group,
       scenario,
       // Направления — разделы программ: курсы и оборудование в них не показываются, их направление
