@@ -5,7 +5,9 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { titleDash } from '@/domain/titleDash.mjs'
 import type { MenuColumn } from '@/lib/navigation'
+import { MenuChips } from '../MenuChips/MenuChips'
 import { MenuTile } from '../MenuTile/MenuTile'
+import { MenuTopPicks } from '../MenuTopPicks/MenuTopPicks'
 import styles from './MenuDrill.module.css'
 
 type Props = {
@@ -22,6 +24,8 @@ const shortTitle = (title: string) => titleDash(title, Number.POSITIVE_INFINITY)
  * Раздел меню по шагам: производители карточками → линейки производителя → товары линейки.
  * Шаг с единственным вариантом пропускается (у раздела один производитель, у производителя одна
  * линейка). Назад — по хлебным крошкам сверху.
+ * У направлений программ (правка владельца 03.11.2026) производители — чипами по 3 в ряд, они
+ * остаются сверху на всех шагах, а под ними сразу «Популярное» направления.
  */
 export function MenuDrill({ column, allLabel, onNavigate }: Props) {
   const [vendorKey, setVendorKey] = useState<string | null>(null)
@@ -30,6 +34,7 @@ export function MenuDrill({ column, allLabel, onNavigate }: Props) {
   const vendor = singleVendor
     ? column.vendors[0]
     : column.vendors.find((item) => item.key === vendorKey)
+  const chips = column.popular.length > 0 && !singleVendor
   const singleLine = vendor?.lines.length === 1
   const line = singleLine ? vendor?.lines[0] : vendor?.lines.find((item) => item.key === lineKey)
 
@@ -72,7 +77,13 @@ export function MenuDrill({ column, allLabel, onNavigate }: Props) {
         )}
       </nav>
 
-      {!vendor && (
+      {chips && <MenuChips vendors={column.vendors} selected={vendorKey} onSelect={openVendor} />}
+
+      {chips && !vendor && (
+        <MenuTopPicks links={column.popular} titleOf={shortTitle} onNavigate={onNavigate} />
+      )}
+
+      {!chips && !vendor && (
         <ul className={styles.cards}>
           {column.vendors.map((item) => (
             <li key={item.key}>

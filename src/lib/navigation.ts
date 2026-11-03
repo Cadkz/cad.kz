@@ -42,6 +42,8 @@ export type MenuColumn = {
   icon: string | null
   allHref: string
   vendors: MenuVendor[]
+  /** «Популярное» направления программ под строкой производителей; у остальных разделов пусто. */
+  popular: MenuLink[]
 }
 export type MenuTab = { key: string; label: string; columns: MenuColumn[]; allHref: string }
 

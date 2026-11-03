@@ -10,13 +10,16 @@ import { connection } from 'next/server'
  */
 export const SITE_TAG = 'site-data'
 const HOUR = 3600
+const BUILD = process.env.VERCEL_GIT_COMMIT_SHA ?? 'local'
 
 /**
  * Загрузчик в общем кэше. connection() — до кэша: страница остаётся динамической (правки видны
  * сразу, без пересборки), а внутри кэша Payload берётся через cmsData().
  */
 export function siteCached<T>(key: string, load: () => Promise<T>): () => Promise<T> {
-  const cached = unstable_cache(load, [key], { tags: [SITE_TAG], revalidate: HOUR })
+  // Версия сборки в ключе: кэш Vercel переживает выкладку, а логотипы и правила из кода
+  // (src/domain) меняются только с ней — без версии новые логотипы ждали бы до часа (03.11.2026).
+  const cached = unstable_cache(load, [key, BUILD], { tags: [SITE_TAG], revalidate: HOUR })
   return async () => {
     await connection()
     return cached()

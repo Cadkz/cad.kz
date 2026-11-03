@@ -136,3 +136,17 @@ test('Раздел с подразделами: сначала подразде�
     ['Тонер'],
   )
 })
+
+test('«Популярное» только у направлений программ, не больше 3 от производителя (03.11.2026)', () => {
+  const products = [
+    ...Array.from({ length: 5 }, (_, i) => product(i + 1, `Autodesk ${i}`, 1, { rank: 3 })),
+    product(10, 'SCAD Office', 1, { vendor: 2, rank: 3 }),
+    product(11, 'SCAD ВеСТ', 1, { vendor: 2, rank: 3 }),
+    product(12, 'SCAD КРИСТАЛЛ', 1, { vendor: 2, rank: 3 }),
+    product(20, 'Плоттер', 2),
+  ]
+  const [arch, plotters] = menuColumns(sections, products, lines, vendors, href)
+  assert.equal(arch.popular.filter((link) => link.title.startsWith('Autodesk')).length, 3)
+  assert.ok(arch.popular.some((link) => link.title === 'SCAD Office'))
+  assert.deepEqual(plotters.popular, [])
+})

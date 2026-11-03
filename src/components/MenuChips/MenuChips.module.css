@@ -1,0 +1,75 @@
+/* Чипы производителей в мегаменю (03.11.2026): вдвое ниже карточки меню, по 3 в ряд от 1200 px
+   (на 960 px колонка узкая — по 2, иначе названия обрезаются). */
+.chips {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 1200px) {
+  .chips {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  height: var(--control-height-sm);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease),
+    background-color var(--duration-fast) var(--ease);
+}
+
+.chip:hover {
+  border-color: var(--color-blue-mid);
+}
+
+.chip[aria-pressed="true"] {
+  border-color: var(--color-blue);
+  background: var(--color-blue-soft);
+}
+
+.mark {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--menu-chip-mark);
+  height: var(--menu-chip-mark);
+  overflow: hidden;
+}
+
+.logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.title {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip:hover .title,
+.chip[aria-pressed="true"] .title {
+  color: var(--color-blue);
+}

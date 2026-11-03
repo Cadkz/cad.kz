@@ -10,7 +10,7 @@
 /** @typedef {{ url: string, width: number, height: number }} StaticLogo */
 
 const GEO5 = { url: '/images/brands/geo5-full.webp', width: 294, height: 400 }
-const SCAD = { url: '/images/brands/scad.webp', width: 80, height: 80 }
+const SCAD = { url: '/images/brands/scad.webp', width: 81, height: 81 }
 const LIRA = { url: '/images/brands/lira.webp', width: 80, height: 80 }
 const ABC = { url: '/images/brands/abc.webp', width: 80, height: 80 }
 const ARTEC = { url: '/images/brands/artec.svg', width: 80, height: 70 }
@@ -20,6 +20,9 @@ const MAGICAD = { url: '/images/brands/magicad/magicad.webp', width: 191, height
 const NTP = { url: '/images/brands/ntp.webp', width: 192, height: 150 }
 const ARS = { url: '/images/brands/ars-ps.webp', width: 150, height: 118 }
 const BASE = { url: '/images/brands/base.webp', width: 342, height: 119 }
+const FARVATER = { url: '/images/brands/tdms-farvater.webp', width: 400, height: 144 }
+// Знак АСКОН без надписи: читается и в чипе меню 20 px, название стоит рядом.
+const ASKON = { url: '/images/brands/askon.webp', width: 197, height: 200 }
 
 /**
  * @param {string} file
@@ -140,6 +143,8 @@ export const VENDOR_LOGOS = {
   'НТП Трубопровод': NTP,
   'АРС-ПС': ARS,
   Base: BASE,
+  'TDMS Фарватер': FARVATER,
+  АСКОН: ASKON,
 }
 
 /**

@@ -57,7 +57,15 @@ test('логотипы владельца 03.11.2026: Chaos, MagiCAD, НТП, А
     logo('MagiCAD для AutoCAD', 'MagiCAD'),
     '/images/brands/magicad/magicad-autocad.webp',
   )
-  for (const vendor of ['Chaos Group', 'MagiCAD', 'НТП Трубопровод', 'АРС-ПС', 'Base']) {
+  for (const vendor of [
+    'Chaos Group',
+    'MagiCAD',
+    'НТП Трубопровод',
+    'АРС-ПС',
+    'Base',
+    'TDMS Фарватер',
+    'АСКОН',
+  ]) {
     assert.ok(vendorLogo(vendor), vendor)
   }
 })

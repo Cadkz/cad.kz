@@ -8,10 +8,18 @@
 import { OTHER, vendorTree } from './catalogTree.mjs'
 import { COURSE_TOPICS, OTHER_TOPIC, topicOrder } from './courseTopics.mjs'
 import { familyTaskHref } from './familyGroups.mjs'
-import { compareInSection } from './priority.mjs'
+import { compareInSection, pickVaried } from './priority.mjs'
 
 /** Товаров линейки в меню, дальше — «Смотреть все» в каталоге. */
 export const MENU_LINKS = 12
+
+/**
+ * «Популярное» направления программ в мегаменю (правка владельца 03.11.2026): под строкой
+ * производителей — главные программы раздела (AutoCAD, Revit, коллекции; SCAD Office, ЛИРА-FEM;
+ * GEO5). Порядок как в каталоге, от одного производителя не больше MENU_POPULAR_PER_VENDOR.
+ */
+export const MENU_POPULAR = 6
+export const MENU_POPULAR_PER_VENDOR = 3
 
 /** Раздел «Обучение»: курсы в меню — по категориям, как в каталоге (src/domain/courseTopics.mjs). */
 export const TRAINING = 'training'
@@ -39,7 +47,8 @@ export function menuTitle(title) {
  * @typedef {{ key: string, title: string, links: MenuLinkData[], more: boolean, allHref: string }} MenuLineData
  * @typedef {{ key: string, title: string, allHref: string, lines: MenuLineData[],
  *   logo: MenuLogo | null, icon: string | null }} MenuVendorData
- * @typedef {{ title: string, icon: string | null, allHref: string, vendors: MenuVendorData[] }} MenuColumnData
+ * @typedef {{ title: string, icon: string | null, allHref: string, vendors: MenuVendorData[],
+ *   popular: MenuLinkData[] }} MenuColumnData
  */
 
 /**
@@ -166,11 +175,21 @@ export function menuColumns(
           : children.length > 1
             ? [...children, ...vendorCards(inSection.filter((p) => !inChildren.has(p.id)))]
             : vendorCards(inSection)
+      // Только направления программ: у оборудования первым шагом фото подразделов, у курсов — темы.
+      const popular =
+        section.isDirection && section.slug !== TRAINING
+          ? pickVaried(inSection, MENU_POPULAR, MENU_POPULAR_PER_VENDOR).map((product) => ({
+              title: menuTitle(product.title),
+              href: familyTaskHref(product.href, filter.direction),
+              logo: product.picture ?? null,
+            }))
+          : []
       return {
         title: section.title,
         icon: section.icon ?? null,
         allHref: hrefFor(filter),
         vendors,
+        popular,
       }
     })
     .filter((column) => column.vendors.length > 0)
