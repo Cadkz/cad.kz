@@ -768,6 +768,8 @@ test('pageGreeting и chatPage: Кадди здоровается про стр�
   const product = pageGreeting({ path: '/products/artec_eva', title: 'Artec Eva — ручной сканер' })
   assert.match(product.greeting, /Artec Eva/)
   assert.equal(product.actions[0].text, 'Сколько стоит Artec Eva?')
+  const legacy = pageGreeting({ path: '/catalog/3d_skanery/artec_eva/', title: 'Artec Eva' })
+  assert.match(legacy.greeting, /вы смотрите Artec Eva/)
   const section = pageGreeting({ path: '/catalog?type=scanners', title: '3D-сканеры' })
   assert.match(section.greeting, /3D-сканеры/)
   assert.equal(pageGreeting(null).greeting, ASSISTANT_GREETING)

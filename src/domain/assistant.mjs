@@ -170,7 +170,7 @@ export function pageGreeting(page) {
         ...tail,
       ],
     }
-  if (page && title && page.path.startsWith('/catalog') && page.path.includes('?'))
+  if (page && title && section)
     return {
       greeting: `Здравствуйте! Я Кадди, консультант CAD.kz. Вы в разделе «${title}» — помогу выбрать и назову цену.`,
       actions: [
