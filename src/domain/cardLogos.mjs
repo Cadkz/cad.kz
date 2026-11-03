@@ -123,8 +123,10 @@ export const PROGRAM_LOGOS = [
     logo: { url: '/images/brands/magicad/magicad-revit.webp', width: 177, height: 189 },
   },
   {
+    // У программ для AutoCAD слова AutoCAD в названии нет («MagiCAD Вентиляция»): всё, что
+    // не для Revit, — знак «для AutoCAD»; голое «MagiCAD» — общий логотип производителя.
     vendor: 'MagiCAD',
-    title: /autocad/i,
+    title: /^(?!.*revit)magicad\s+\S/i,
     logo: { url: '/images/brands/magicad/magicad-autocad.webp', width: 177, height: 189 },
   },
   // Программы Artec в каталоге стоят рядом со сканерами и могут быть отмечены как оборудование.

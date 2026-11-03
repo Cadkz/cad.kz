@@ -16,9 +16,16 @@ export type QuoteLine = {
   totalKzt: string
   /** Товар без выбранной комплектации (src/domain/cart.mjs, parseRequestKey). */
   request: boolean
+  /** У строки-запроса — цена «от» за единицу и за строку (самая низкая комплектация); иначе пусто. */
+  fromKzt: string
+  fromLineKzt: string
 }
 export type Quote = {
   totalKzt: string
+  /** Итог «от»: цены строк плюс «от» строк-запросов. */
+  fromTotalKzt: string
+  /** У всех строк-запросов есть цена «от». */
+  fromComplete: boolean
   lines: QuoteLine[]
   /** «С этим покупают» по всем товарам корзины. */
 }

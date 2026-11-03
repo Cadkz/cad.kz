@@ -9,6 +9,33 @@ import { productPath } from './productPath'
 /** Подпись строки-запроса в корзине, заказе и лиде: менеджеру видно, что комплектацию выбирают с ним. */
 export const REQUEST_CONFIGURATION = 'Комплектацию и цену подберёт менеджер'
 
+/**
+ * Цена «от» строки-запроса — самая низкая комплектация с ценой у товара или у программ семейства,
+ * как «от» в карточке каталога (замечание владельца 03.11.2026: в корзине было «по запросу»,
+ * хотя в каталоге цена видна). Комплектацию и окончательную цену подтверждает менеджер.
+ */
+async function cheapestUnit(payload: Payload, productIds: number[], context: PricingContext) {
+  if (!productIds.length) return ''
+  const { docs } = await payload.find({
+    collection: 'offers',
+    where: { and: [{ product: { in: productIds } }, { status: { equals: 'published' } }] },
+    limit: 500,
+    depth: 0,
+    pagination: false,
+    overrideAccess: true,
+  })
+  let best: bigint | null = null
+  for (const offer of docs) {
+    try {
+      const unit = BigInt(quoteOffer(offer, context).unitKzt)
+      if (unit > 0n && (best == null || unit < best)) best = unit
+    } catch {
+      // Комплектация без цены — пропускаем.
+    }
+  }
+  return best == null ? '' : best.toString()
+}
+
 const unavailable = () => new CartUnavailableError('Товар недоступен. Удалите его из корзины.')
 
 /**
@@ -53,7 +80,23 @@ async function quoteRequest(
       ? { slug: line.slug, href: `/families/${line.slug}`, title: line.title }
       : null
   if (!item) throw unavailable()
+  const ids = product
+    ? [product.id]
+    : line
+      ? (
+          await payload.find({
+            collection: 'products',
+            where: { and: [{ line: { equals: line.id } }, published] },
+            limit: 200,
+            depth: 0,
+            pagination: false,
+            overrideAccess: true,
+          })
+        ).docs.map((doc) => doc.id)
+      : []
+  const fromKzt = await cheapestUnit(payload, ids, context)
   return {
+    fromKzt,
     productId: item.slug,
     href: item.href,
     title: plainTitle(item.title),
@@ -83,7 +126,13 @@ export async function quoteCart(payload: Payload, items: { offerId: string; quan
   const lines = await Promise.all(
     items.map(async ({ offerId, quantity }) => {
       const request = parseRequestKey(offerId)
-      if (request) return { offerId, quantity, ...(await quoteRequest(payload, request, context)) }
+      if (request) {
+        const quoted = await quoteRequest(payload, request, context)
+        const fromLineKzt = quoted.fromKzt
+          ? (BigInt(quoted.fromKzt) * BigInt(quantity)).toString()
+          : ''
+        return { offerId, quantity, ...quoted, fromLineKzt }
+      }
       const found = await findPublicOffer(payload, offerId)
       if (!found) throw unavailable()
       return {
@@ -94,10 +143,17 @@ export async function quoteCart(payload: Payload, items: { offerId: string; quan
         configuration: found.offer.configuration,
         license: found.offer.license,
         request: false,
+        fromKzt: '',
+        fromLineKzt: '',
         ...quoteOffer(found.offer, context, quantity),
       }
     }),
   )
   const totalKzt = lines.reduce((sum, line) => sum + BigInt(line.totalKzt), 0n).toString()
-  return { lines, totalKzt, quotedAt: new Date().toISOString() }
+  // Итог «от»: цены строк плюс «от» строк-запросов; запрос без цены — fromComplete = false.
+  const fromTotalKzt = lines
+    .reduce((sum, line) => sum + BigInt(line.request ? line.fromLineKzt || '0' : line.totalKzt), 0n)
+    .toString()
+  const fromComplete = lines.every((line) => !line.request || line.fromKzt !== '')
+  return { lines, totalKzt, fromTotalKzt, fromComplete, quotedAt: new Date().toISOString() }
 }

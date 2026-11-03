@@ -22,6 +22,7 @@ import { ProductTabs } from '@/components/ProductTabs/ProductTabs'
 import { PurchaseTerms } from '@/components/PurchaseTerms/PurchaseTerms'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { SectionIcon } from '@/components/SectionIcon/SectionIcon'
+import { programLogo, vendorLogo } from '@/domain/cardLogos.mjs'
 import { kindProfile } from '@/domain/productKind.mjs'
 import { hasSpecSheet } from '@/domain/specSheet.mjs'
 import { productLd } from '@/domain/structuredData.mjs'
@@ -75,14 +76,27 @@ function breadcrumbSection(product: ProductPage) {
 }
 
 /** Строки подборки с картинкой, ценой и корзиной — из того же набора, что каталог. */
+const COURSE_ART = {
+  url: '/images/sections/training.webp',
+  alt: '',
+  width: 256,
+  height: 256,
+  fit: 'logo',
+  local: true,
+} as const
+
 function toPicks(items: RelatedProduct[], byHref: Map<string, PickItem>): PickItem[] {
   return items.map((item) => {
     const listed = byHref.get(item.href)
     // Подпись подборки (у курса — «Старт 1 декабря») важнее цены из каталога.
-    if (listed) return item.note ? { ...listed, note: item.note } : listed
+    // Курс без картинки — иллюстрация «Обучение» (замечание владельца 03.11.2026: пустая рамка).
+    const shown = listed?.topic && !listed.picture ? { ...listed, picture: COURSE_ART } : listed
+    if (shown) return item.note ? { ...shown, note: item.note } : shown
+    // Линейка (MagiCAD для AutoCAD) — не товар каталога: логотип по тем же правилам, что у карточки.
+    const logo = programLogo(item) ?? vendorLogo(item.vendor)
     return {
       ...item,
-      picture: null,
+      picture: logo ? { ...logo, alt: item.title, fit: 'logo', local: true } : null,
       logoFallback: item.vendor,
       priceFrom: null,
       offersCount: 0,
@@ -287,12 +301,8 @@ export async function ProductView({
           <ProductLayout
             asideLast
             header={header}
-            aside={
-              <>
-                <PickerSummary />
-                {terms}
-              </>
-            }
+            aside={<PickerSummary />}
+            asideFooter={terms}
             wide={scans}
           >
             {groups}

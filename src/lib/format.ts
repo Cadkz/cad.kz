@@ -44,6 +44,19 @@ export function totalKzt(value: string, withRequests: boolean) {
   return BigInt(value) > 0n ? `${formatKzt(value)} + по запросу` : 'По запросу'
 }
 
+/**
+ * Итог корзины со строками-запросами: «от …», если у каждой есть цена «от» (замечание владельца
+ * 03.11.2026), иначе «от … + по запросу». Без запросов — точная сумма.
+ */
+export function cartTotal(
+  quote: { totalKzt: string; fromTotalKzt: string; fromComplete: boolean },
+  withRequests: boolean,
+) {
+  if (!withRequests) return formatKzt(quote.totalKzt)
+  if (BigInt(quote.fromTotalKzt) === 0n) return 'По запросу'
+  return `от ${formatKzt(quote.fromTotalKzt)}${quote.fromComplete ? '' : ' + по запросу'}`
+}
+
 /** Цена строки корзины или заказа: у строки-запроса цены нет — «по запросу». */
 export function lineKzt(value: string) {
   return value ? formatKzt(value) : 'по запросу'
