@@ -28,7 +28,7 @@
 }
 
 .control:focus-visible {
-  border-color: var(--color-blue);
+  border-color: var(--color-accent-border);
   outline-offset: 0;
 }
 

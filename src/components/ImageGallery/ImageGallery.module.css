@@ -21,7 +21,7 @@
 }
 
 .thumb:hover {
-  border-color: var(--color-blue);
+  border-color: var(--color-accent-border);
   box-shadow: var(--shadow-sm);
 }
 

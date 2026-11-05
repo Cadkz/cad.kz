@@ -5,10 +5,10 @@
   gap: var(--space-2);
   width: 100%;
   height: var(--control-height-sm);
-  border: 1px solid var(--color-navy);
+  border: 1px solid var(--color-action);
   border-radius: var(--radius-md);
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  background: var(--color-action);
+  color: var(--color-on-action);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   cursor: pointer;
@@ -19,8 +19,8 @@
 }
 
 .button:hover {
-  border-color: var(--color-blue);
-  background: var(--color-blue);
+  border-color: var(--color-accent-border);
+  background: var(--color-action-bright);
 }
 
 .button:disabled {
@@ -42,7 +42,7 @@
 }
 
 .done:hover {
-  border-color: var(--color-blue);
+  border-color: var(--color-accent-border);
 }
 
 @media (prefers-reduced-motion: reduce) {

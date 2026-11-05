@@ -14,7 +14,7 @@
 }
 
 .option:target {
-  border-color: var(--color-blue);
+  border-color: var(--color-accent-border);
   box-shadow: var(--shadow-sm);
 }
 
@@ -23,7 +23,7 @@
 }
 
 .option[data-checked="true"] {
-  border-color: var(--color-navy);
+  border-color: var(--color-action);
   background: var(--color-blue-soft);
 }
 
@@ -42,7 +42,7 @@
   width: var(--space-4);
   height: var(--space-4);
   margin: 0;
-  accent-color: var(--color-navy);
+  accent-color: var(--color-action);
 }
 
 .included {
@@ -53,8 +53,8 @@
   width: var(--space-5);
   height: var(--space-5);
   border-radius: var(--radius-round);
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  background: var(--color-action);
+  color: var(--color-on-action);
 }
 
 .text {

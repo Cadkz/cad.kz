@@ -69,7 +69,7 @@
 }
 
 .form:focus-within {
-  border-color: var(--color-blue);
+  border-color: var(--color-accent-border);
   background: var(--color-surface);
 }
 
@@ -101,14 +101,14 @@
   height: var(--control-height-sm);
   border: 0;
   border-radius: var(--radius-sm);
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  background: var(--color-action);
+  color: var(--color-on-action);
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease);
 }
 
 .send:hover {
-  background: var(--color-blue);
+  background: var(--color-action-bright);
 }
 
 .tasks {

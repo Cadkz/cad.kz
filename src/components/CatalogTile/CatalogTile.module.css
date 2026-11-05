@@ -20,7 +20,7 @@
 
 .tile:hover,
 .tile:focus-visible {
-  border-color: var(--color-blue);
+  border-color: var(--color-accent-border);
 }
 
 .head {
@@ -128,7 +128,7 @@
 }
 
 .tile:hover .more {
-  border-color: var(--color-blue);
+  border-color: var(--color-accent-border);
   color: var(--color-link);
 }
 

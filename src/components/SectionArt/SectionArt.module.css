@@ -1,5 +1,7 @@
 .art {
   display: block;
   object-fit: contain;
-  filter: var(--filter-section-art);
+  background: var(--color-section-art-surface);
+  padding: var(--section-art-padding);
+  border-radius: var(--radius-sm);
 }

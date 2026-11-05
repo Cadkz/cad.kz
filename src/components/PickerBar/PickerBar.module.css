@@ -28,8 +28,8 @@
   padding: 0 var(--space-6);
   border: 0;
   border-radius: var(--radius-md);
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  background: var(--color-action);
+  color: var(--color-on-action);
   font-weight: var(--weight-semibold);
 }
 

@@ -40,12 +40,12 @@
 }
 
 .primary {
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  background: var(--color-action);
+  color: var(--color-on-action);
 }
 
 .primary:hover:not(:disabled) {
-  background: var(--color-blue);
+  background: var(--color-action-bright);
 }
 
 .secondary {
@@ -112,8 +112,8 @@
 /* Кнопка-инструмент (03.11.2026: «Фильтры», «Собрать комплект самому», PDF характеристик):
    фирменный градиент и редкий мягкий блик — заметна среди белых кнопок, но не мигает. */
 .tool {
-  background-color: var(--color-navy);
-  background-image: var(--gradient-sheen), var(--gradient-navy);
+  background-color: var(--color-action);
+  background-image: var(--gradient-sheen), var(--gradient-action);
   background-position:
     150% 0,
     0 0;
@@ -121,12 +121,12 @@
     250% 100%,
     100% 100%;
   background-repeat: no-repeat;
-  color: var(--color-text-inverse);
+  color: var(--color-on-action);
 }
 
 .tool:hover:not(:disabled) {
   background-image: none;
-  background-color: var(--color-blue);
+  background-color: var(--color-action-bright);
 }
 
 @media (prefers-reduced-motion: no-preference) {

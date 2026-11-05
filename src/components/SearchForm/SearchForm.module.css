@@ -11,7 +11,7 @@
 }
 
 .form:focus-within {
-  border-color: var(--color-blue);
+  border-color: var(--color-accent-border);
 }
 
 .form[data-pending="true"] .icon {
@@ -70,8 +70,8 @@
   padding: 0 var(--space-5);
   border: 0;
   border-radius: var(--radius-md);
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  background: var(--color-action);
+  color: var(--color-on-action);
   font: inherit;
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
@@ -79,7 +79,7 @@
 }
 
 .submit:hover {
-  background: var(--color-blue);
+  background: var(--color-action-bright);
 }
 
 @media (min-width: 640px) {

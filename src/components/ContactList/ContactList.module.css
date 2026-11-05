@@ -41,11 +41,11 @@
   width: var(--icon-box);
   height: var(--icon-box);
   border-radius: var(--radius-md);
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  background: var(--color-action);
+  color: var(--color-on-action);
   transition: background var(--duration-fast) var(--ease);
 }
 
 .social:hover {
-  background: var(--color-blue);
+  background: var(--color-action-bright);
 }

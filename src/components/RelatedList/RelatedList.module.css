@@ -59,6 +59,6 @@
   left: 0;
   width: var(--space-1);
   border-radius: var(--radius-pill);
-  background: var(--color-blue);
+  background: var(--color-action-bright);
   content: "";
 }

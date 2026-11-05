@@ -17,8 +17,8 @@
 }
 
 .navy {
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  background: var(--color-action);
+  color: var(--color-on-action);
 }
 
 .outline {

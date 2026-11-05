@@ -131,7 +131,7 @@
 
 .note {
   padding: var(--space-4) var(--space-5);
-  border-left: 3px solid var(--color-blue);
+  border-left: 3px solid var(--color-accent-border);
   border-radius: var(--radius-md);
   background: var(--color-blue-soft);
   color: var(--color-heading);

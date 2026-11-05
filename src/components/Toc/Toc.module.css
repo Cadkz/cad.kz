@@ -1,7 +1,7 @@
 .box {
   padding: var(--space-5);
   border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-blue);
+  border-left: 3px solid var(--color-accent-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
 }

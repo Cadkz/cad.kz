@@ -11,7 +11,15 @@
   --color-link-hover: var(--color-blue-hover);
   --color-image-surface: #ffffff;
   --filter-header-logo: none;
-  --filter-section-art: none;
+  --color-action: var(--color-navy);
+  --color-action-bright: var(--color-blue);
+  --color-action-hover: var(--color-blue-hover);
+  --color-on-action: var(--color-text-inverse);
+  --color-on-action-muted: var(--color-text-on-dark);
+  --color-accent-border: var(--color-blue);
+  --gradient-action: var(--gradient-navy);
+  --color-section-art-surface: transparent;
+  --section-art-padding: 0px;
   --image-blend: multiply;
 
   /* ---------- Цвета: бренд ---------- */
@@ -405,18 +413,23 @@
   }
 }
 
-/* Тема витрины: фирменные заливки и фотографии сохраняют исходные цвета. */
+/* Тёмная витрина: тёплый акцент, фирменный синий остаётся в иллюстрациях и баннерах. */
 :root[data-site-theme="dark"] {
   color-scheme: dark;
+  --color-navy: #263348;
+  --color-navy-deep: #172231;
+  --gradient-navy: linear-gradient(135deg, var(--color-navy-deep), var(--color-navy));
+  --color-sky: #f2a65a;
+  --color-sky-strong: #ffc58a;
   --color-bg: #101722;
   --color-surface: #192332;
   --color-text: #e5ebf4;
   --color-text-muted: #a7b4c8;
   --color-heading: #edf3ff;
-  --color-link: #9ccaff;
-  --color-link-hover: #c6e1ff;
-  --color-blue-soft: #233650;
-  --color-blue-mid: #304866;
+  --color-link: #f2a65a;
+  --color-link-hover: #ffc58a;
+  --color-blue-soft: #352b25;
+  --color-blue-mid: #55402f;
   --color-border: #334155;
   --color-border-strong: #64748b;
   --color-gray-300: #64748b;
@@ -425,18 +438,26 @@
   --image-blend: normal;
   --color-success: #6fdaa3;
   --color-error: #ff9b91;
-  --color-focus: #9ccaff;
+  --color-focus: #f2a65a;
   --color-header-glass: rgba(16, 23, 34, 0.94);
   --color-popover: rgba(25, 35, 50, 0.98);
   --color-hairline: rgba(190, 210, 240, 0.14);
-  --color-hover: rgba(170, 204, 255, 0.08);
-  --color-press: rgba(170, 204, 255, 0.14);
-  --color-mark: rgba(138, 196, 255, 0.18);
+  --color-hover: rgba(242, 166, 90, 0.08);
+  --color-press: rgba(242, 166, 90, 0.14);
+  --color-mark: rgba(242, 166, 90, 0.18);
   --color-spot: rgba(138, 196, 255, 0.08);
-  --ring-soft: 0 0 0 3px rgba(138, 196, 255, 0.24);
+  --ring-soft: 0 0 0 3px rgba(242, 166, 90, 0.24);
   --color-kaddi-backdrop: rgba(16, 23, 34, 0.8);
   --color-grid-light: rgba(170, 204, 255, 0.05);
   --color-grid-light-major: rgba(170, 204, 255, 0.1);
   --filter-header-logo: brightness(0) invert(1);
-  --filter-section-art: brightness(2);
+  --color-action: #f2a65a;
+  --color-action-bright: #f8b873;
+  --color-action-hover: #ffc58a;
+  --color-on-action: #182230;
+  --color-on-action-muted: #354052;
+  --color-accent-border: #f2a65a;
+  --gradient-action: linear-gradient(135deg, var(--color-action), var(--color-action-bright));
+  --color-section-art-surface: #e4ecf7;
+  --section-art-padding: var(--space-1);
 }

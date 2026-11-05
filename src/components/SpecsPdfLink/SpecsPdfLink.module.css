@@ -8,8 +8,8 @@
   height: var(--control-height-sm);
   padding: 0 var(--space-4);
   border-radius: var(--radius-md);
-  background-color: var(--color-navy);
-  background-image: var(--gradient-sheen), var(--gradient-navy);
+  background-color: var(--color-action);
+  background-image: var(--gradient-sheen), var(--gradient-action);
   background-position:
     150% 0,
     0 0;
@@ -17,7 +17,7 @@
     250% 100%,
     100% 100%;
   background-repeat: no-repeat;
-  color: var(--color-text-inverse);
+  color: var(--color-on-action);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-tight);
@@ -28,7 +28,7 @@
 
 .link:hover {
   background-image: none;
-  background-color: var(--color-blue);
+  background-color: var(--color-action-bright);
 }
 
 @media (prefers-reduced-motion: no-preference) {

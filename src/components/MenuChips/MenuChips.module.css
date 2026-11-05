@@ -52,9 +52,9 @@
 }
 
 .chip[aria-pressed="true"] {
-  border-color: var(--color-navy);
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  border-color: var(--color-action);
+  background: var(--color-action);
+  color: var(--color-on-action);
 }
 
 @media (prefers-reduced-motion: reduce) {

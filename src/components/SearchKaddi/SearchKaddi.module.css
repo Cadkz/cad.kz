@@ -51,7 +51,7 @@
 .button {
   min-height: var(--control-height-sm);
   padding: 0 var(--space-4);
-  border: 1px solid var(--color-blue);
+  border: 1px solid var(--color-accent-border);
   border-radius: var(--radius-md);
   background: none;
   color: var(--color-link);

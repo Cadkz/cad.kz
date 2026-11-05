@@ -69,13 +69,13 @@
 
 .link:hover,
 .link:focus-visible {
-  border-color: var(--color-blue);
+  border-color: var(--color-accent-border);
 }
 
 .link:hover .arrow,
 .link:focus-visible .arrow {
-  background: var(--color-blue);
-  color: var(--color-text-inverse);
+  background: var(--color-action-bright);
+  color: var(--color-on-action);
 }
 
 .prev:hover .arrow {

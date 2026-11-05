@@ -33,8 +33,8 @@
 }
 
 .pill[aria-pressed="true"] {
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  background: var(--color-action);
+  color: var(--color-on-action);
 }
 
 .option {
@@ -55,9 +55,9 @@
 }
 
 .option[aria-pressed="true"] {
-  border-color: var(--color-navy);
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  border-color: var(--color-action);
+  background: var(--color-action);
+  color: var(--color-on-action);
 }
 
 /* Значок рядом с подписью (крестик у выбранного условия) — в одной строке с текстом. */
@@ -75,5 +75,5 @@
 }
 
 .chip[aria-pressed="true"] .count {
-  color: var(--color-text-on-dark);
+  color: var(--color-on-action-muted);
 }

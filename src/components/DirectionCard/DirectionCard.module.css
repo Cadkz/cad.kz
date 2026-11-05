@@ -40,6 +40,8 @@
 
 /* Крупный значок в углу — фирменный декор; на «синьке» он светлый контур с размерными линиями. */
 .big {
+  --color-section-art-surface: transparent;
+  --section-art-padding: 0px;
   position: absolute;
   right: calc(-1 * var(--space-4));
   bottom: calc(-1 * var(--space-4));
@@ -173,7 +175,7 @@
 /* Наведение мышью и фокус с клавиатуры: карточка остаётся белой — рамка синеет, выезжает
    «В каталог», значок-декор заметнее и выезжает из угла (решение владельца 03.11.2026). */
 .card:focus-visible {
-  border-color: var(--color-blue);
+  border-color: var(--color-accent-border);
 }
 
 .card:focus-visible .ctaInner {
@@ -183,7 +185,7 @@
 
 @media (hover: hover) {
   .card:hover {
-    border-color: var(--color-blue);
+    border-color: var(--color-accent-border);
   }
 
   /* Значок чуть выезжает из угла к центру — как было на тёмных карточках (03.11.2026). */

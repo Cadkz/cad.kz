@@ -17,7 +17,7 @@
 }
 
 .tile:hover {
-  border-color: var(--color-blue);
+  border-color: var(--color-accent-border);
   background: var(--color-blue-soft);
 }
 

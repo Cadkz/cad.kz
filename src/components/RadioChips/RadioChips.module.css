@@ -48,9 +48,9 @@
 }
 
 .option input:checked + .chip {
-  border-color: var(--color-navy);
-  background: var(--color-navy);
-  color: var(--color-text-inverse);
+  border-color: var(--color-action);
+  background: var(--color-action);
+  color: var(--color-on-action);
 }
 
 .option input:focus-visible + .chip {
