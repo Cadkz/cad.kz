@@ -115,14 +115,20 @@ export function rankKnowledge(facts, query, aliases, limit = 16) {
       if (
         documentScanner(normalize(query)) &&
         (!/скан/.test(text) ||
-          /plotwave|colorwave|imageprograf|artec|плоттер/i.test(doc.fact.product))
+          /plotwave|colorwave|imageprograf|artec|плоттер|3[dд]/i.test(doc.fact.product))
       )
         return { ...doc, score: 0 }
       if (intents.length && !intents.some((intent) => intent.fact.test(text)))
         return { ...doc, score: 0 }
+      const scannerRental =
+        /аренд/.test(query) &&
+        /3[dд]|artec|артек/i.test(query) &&
+        /аренд/.test(text) &&
+        /3[dд]-?сканер/i.test(text)
       // Явно названный продукт/тип сканера не заменяем совпадением слова «интернет» у другого товара.
       if (
         scope.length &&
+        !scannerRental &&
         !scope.some((words) => [...words].some((word) => doc.title.has(word) || doc.body.has(word)))
       )
         return { ...doc, score: 0 }

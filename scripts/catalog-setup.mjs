@@ -54,6 +54,7 @@ import {
   setupHomeTrust,
 } from '../src/lib/homeSetup.ts'
 import { setupKaddiFaq, setupKaddiFaq2, setupKaddiFaqChatgpt } from '../src/lib/kaddiFaqSetup.ts'
+import { setupKaddiKnowledgeCorrections } from '../src/lib/kaddiKnowledgeCorrections.ts'
 import { setupLegacyCovers } from '../src/lib/legacyCoversSetup.ts'
 import { setupNewsCovers } from '../src/lib/newsCoversSetup.ts'
 import { clearOldPictures } from '../src/lib/oldPicturesSetup.ts'
@@ -342,6 +343,9 @@ try {
   const presets = await setupPresets(payload)
   if (!presets) console.log('Готовые виды списков уже созданы.')
   else console.log(`Готовые виды списков: ${presets.length}`)
+  const knowledgeCorrections = await setupKaddiKnowledgeCorrections(payload)
+  if (knowledgeCorrections)
+    for (const line of knowledgeCorrections) console.log(`Правки базы Кадди — ${line}`)
   console.log(`Заполненность товаров: обновлено ${await setupQuality(payload)}`)
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
