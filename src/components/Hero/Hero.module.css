@@ -4,6 +4,7 @@
 
 /* Баннер: на телефоне текст, под ним карточка задач; от 960 — сетка 7 + 5 колонок. */
 .band {
+  box-shadow: var(--shadow-banner-outline);
   position: relative;
   display: grid;
   gap: var(--space-8);

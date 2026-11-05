@@ -18,13 +18,14 @@ function firstPaint(saved, systemDark, blocked = false) {
   })
   return document.documentElement.dataset.siteTheme
 }
-test('до первого кадра тема устройства применяется только без явного выбора', () => {
-  assert.equal(firstPaint(null, true), 'dark')
+test('до первого кадра светлая тема по умолчанию даже на тёмном устройстве', () => {
+  assert.equal(firstPaint(null, true), 'light')
   assert.equal(firstPaint(null, false), 'light')
   assert.equal(firstPaint('light', true), 'light')
   assert.equal(firstPaint('dark', false), 'dark')
 })
-test('запрет хранилища и неверное значение не мешают применить системную тему', () => {
-  assert.equal(firstPaint(null, true, true), 'dark')
+test('запрет хранилища и неверное значение дают светлую тему', () => {
+  assert.equal(firstPaint(null, true, true), 'light')
   assert.equal(firstPaint('invalid', false), 'light')
+  assert.equal(firstPaint('invalid', true), 'light')
 })

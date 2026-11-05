@@ -54,7 +54,9 @@
 }
 
 .secondary:hover:not(:disabled) {
-  background: var(--color-blue-mid);
+  border-color: var(--color-control-hover-border);
+  background: var(--color-control-hover);
+  color: var(--color-on-control-hover);
 }
 
 .outline {
@@ -64,8 +66,9 @@
 }
 
 .outline:hover:not(:disabled) {
-  border-color: var(--color-blue-mid);
-  background: var(--color-blue-soft);
+  border-color: var(--color-control-hover-border);
+  background: var(--color-control-hover);
+  color: var(--color-on-control-hover);
 }
 
 .light {
@@ -74,7 +77,9 @@
 }
 
 .light:hover:not(:disabled) {
-  background: var(--color-blue-soft);
+  border-color: var(--color-control-hover-border);
+  background: var(--color-control-hover);
+  color: var(--color-on-control-hover);
 }
 
 .ghostDark {

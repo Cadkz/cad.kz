@@ -9,6 +9,7 @@
 }
 
 .banner {
+  box-shadow: var(--shadow-banner-outline);
   display: flex;
   flex-wrap: wrap;
   align-items: center;

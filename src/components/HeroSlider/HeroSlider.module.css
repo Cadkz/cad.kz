@@ -1,4 +1,5 @@
 .slider {
+  box-shadow: var(--shadow-banner-outline);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -13,7 +14,7 @@
   overflow: clip;
   border-radius: var(--radius-lg);
   isolation: isolate;
-  background: var(--gradient-navy);
+  background: var(--gradient-banner);
   color: var(--color-text-inverse);
 }
 
@@ -103,7 +104,8 @@
 }
 
 .cta:hover {
-  background: var(--color-blue-soft);
+  background: var(--color-control-hover);
+  color: var(--color-on-control-hover);
 }
 
 .controls {

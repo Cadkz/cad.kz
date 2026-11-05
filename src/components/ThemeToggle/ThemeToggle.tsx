@@ -11,23 +11,20 @@ export function ThemeToggle() {
   const [dark, setDark] = useState<boolean | null>(null)
   useEffect(() => {
     setDark(document.documentElement.dataset.siteTheme === 'dark')
-    const media = window.matchMedia('(prefers-color-scheme: dark)')
     const sync = () => {
       let preference: string | null = null
       try {
         preference = localStorage.getItem(THEME_STORAGE_KEY)
       } catch {}
-      const nextDark = preference === 'dark' || (preference !== 'light' && media.matches)
+      const nextDark = preference === 'dark'
       document.documentElement.dataset.siteTheme = nextDark ? 'dark' : 'light'
       setDark(nextDark)
     }
     const storage = (event: StorageEvent) => {
       if (event.key === THEME_STORAGE_KEY || event.key === null) sync()
     }
-    media.addEventListener('change', sync)
     window.addEventListener('storage', storage)
     return () => {
-      media.removeEventListener('change', sync)
       window.removeEventListener('storage', storage)
     }
   }, [])

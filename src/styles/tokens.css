@@ -10,6 +10,9 @@
   --color-link: var(--color-blue);
   --color-link-hover: var(--color-blue-hover);
   --color-image-surface: #ffffff;
+  --color-control-hover: var(--color-blue-soft);
+  --color-on-control-hover: var(--color-heading);
+  --color-control-hover-border: var(--color-blue-mid);
   --color-direction-heading: #112174;
   --color-direction-text: #6b7280;
   --color-direction-link: #1f3da8;
@@ -86,6 +89,11 @@
   /* ---------- Градиенты (только из цветов палитры) ---------- */
   --gradient-navy: linear-gradient(135deg, var(--color-navy), var(--color-blue));
   --gradient-deep: linear-gradient(120deg, var(--color-navy-deep), var(--color-navy));
+  /* Общая подложка баннеров: светлее фона страницы и с мягким свечением слева. */
+  --gradient-banner:
+    radial-gradient(ellipse at 0% 100%, var(--aurora-dark-violet), transparent 65%),
+    linear-gradient(120deg, var(--color-navy), var(--color-blue));
+  --shadow-banner-outline: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
   --gradient-graphite: linear-gradient(135deg, var(--color-gray-700), var(--color-gray-500));
   --gradient-liquid: linear-gradient(
     90deg,
@@ -458,6 +466,9 @@
   --color-grid-light-major: rgba(170, 204, 255, 0.1);
   --filter-header-logo: brightness(0) invert(1);
   --color-logo-mark: var(--color-sky);
+  --color-control-hover: var(--color-blue);
+  --color-on-control-hover: var(--color-text-inverse);
+  --color-control-hover-border: var(--color-sky);
   --color-action: #48d5c8;
   --color-action-bright: #48d5c8;
   --color-action-hover: #70dfd3;
