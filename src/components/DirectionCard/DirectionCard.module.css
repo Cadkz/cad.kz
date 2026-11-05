@@ -5,6 +5,14 @@
    Телефон: строка — значок слева, заголовок и описание справа. От 640 px — плитка (4 в ряд от
    960 px, сетка 4 × 3): значок, под ним заголовок и описание; заголовки одного ряда на одной высоте. */
 .card {
+  --color-surface: var(--color-image-surface);
+  --color-heading: var(--color-direction-heading);
+  --color-text-muted: var(--color-direction-text);
+  --color-link: var(--color-direction-link);
+  --color-border: var(--color-direction-border);
+  --color-accent-border: var(--color-direction-link);
+  --color-section-art-surface: transparent;
+  --section-art-padding: 0px;
   position: relative;
   display: grid;
   grid-template-columns: var(--icon-box) minmax(0, 1fr);
@@ -43,13 +51,13 @@
   --color-section-art-surface: transparent;
   --section-art-padding: 0px;
   position: absolute;
-  right: calc(-1 * var(--space-4));
-  bottom: calc(-1 * var(--space-4));
+  right: var(--space-2);
+  bottom: var(--space-2);
   width: calc(var(--icon-box) * 2);
   height: calc(var(--icon-box) * 2);
   z-index: var(--z-below);
   color: var(--color-link);
-  opacity: 0.1;
+  opacity: 0.18;
   transition:
     color var(--duration-blueprint-out) var(--ease),
     opacity var(--duration-blueprint-out) var(--ease),
@@ -132,7 +140,7 @@
 
   /* Контрастнее, чем было (правка владельца 03.11.2026): значок-декор читается и без наведения. */
   .big {
-    opacity: 0.14;
+    opacity: 0.22;
   }
 
   .title {
@@ -190,7 +198,7 @@
 
   /* Значок чуть выезжает из угла к центру — как было на тёмных карточках (03.11.2026). */
   .card:hover .big {
-    opacity: 0.26;
+    opacity: 0.4;
     transform: translate(calc(-1 * var(--space-2)), calc(-1 * var(--space-2)));
   }
 
@@ -268,4 +276,10 @@
       animation-range: cover;
     }
   }
+}
+
+/* Растровая иллюстрация не наследует color: на тёмной заливке делаем её светлой. */
+.card:active .big img,
+.card[data-pressed] .big img {
+  filter: var(--filter-direction-pressed);
 }

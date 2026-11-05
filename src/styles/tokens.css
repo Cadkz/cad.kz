@@ -10,6 +10,11 @@
   --color-link: var(--color-blue);
   --color-link-hover: var(--color-blue-hover);
   --color-image-surface: #ffffff;
+  --color-direction-heading: #112174;
+  --color-direction-text: #6b7280;
+  --color-direction-link: #1f3da8;
+  --color-direction-border: #e7e9ee;
+  --filter-direction-pressed: brightness(0) invert(1);
   --filter-header-logo: none;
   --color-logo-mark: var(--color-blue);
   --color-action: var(--color-navy);
@@ -414,7 +419,7 @@
   }
 }
 
-/* Тёмная витрина: оранжевый только для действий; холодные фоны и фирменные цвета отдельно. */
+/* Тёмная витрина: светло-синий акцент действий, холодные поверхности. */
 :root[data-site-theme="dark"] {
   color-scheme: dark;
   --color-navy: #263348;
@@ -427,8 +432,8 @@
   --color-text: #e5ebf4;
   --color-text-muted: #a7b4c8;
   --color-heading: #edf3ff;
-  --color-link: #ff7a00;
-  --color-link-hover: #ff922b;
+  --color-link: #8ac4ff;
+  --color-link-hover: #c6e1ff;
   --color-blue-soft: #233650;
   --color-blue-mid: #304866;
   --color-border: #334155;
@@ -439,7 +444,7 @@
   --image-blend: normal;
   --color-success: #6fdaa3;
   --color-error: #ff9b91;
-  --color-focus: #ff7a00;
+  --color-focus: #8ac4ff;
   --color-header-glass: rgba(16, 23, 34, 0.94);
   --color-popover: rgba(25, 35, 50, 0.98);
   --color-hairline: rgba(190, 210, 240, 0.14);
@@ -447,18 +452,18 @@
   --color-press: rgba(170, 204, 255, 0.14);
   --color-mark: rgba(170, 204, 255, 0.18);
   --color-spot: rgba(138, 196, 255, 0.08);
-  --ring-soft: 0 0 0 3px rgba(255, 122, 0, 0.24);
+  --ring-soft: 0 0 0 3px rgba(138, 196, 255, 0.24);
   --color-kaddi-backdrop: rgba(16, 23, 34, 0.8);
   --color-grid-light: rgba(170, 204, 255, 0.05);
   --color-grid-light-major: rgba(170, 204, 255, 0.1);
   --filter-header-logo: brightness(0) invert(1);
   --color-logo-mark: var(--color-sky);
-  --color-action: #ff7a00;
-  --color-action-bright: #ff8a1f;
-  --color-action-hover: #ff922b;
+  --color-action: #8ac4ff;
+  --color-action-bright: #a5d1ff;
+  --color-action-hover: #c6e1ff;
   --color-on-action: #182230;
   --color-on-action-muted: #354052;
-  --color-accent-border: #ff7a00;
+  --color-accent-border: #8ac4ff;
   --gradient-action: linear-gradient(135deg, var(--color-action), var(--color-action-hover));
   --color-section-art-surface: #e4ecf7;
   --section-art-padding: var(--space-1);
