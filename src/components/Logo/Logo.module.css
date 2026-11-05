@@ -16,7 +16,7 @@
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  color: var(--color-link);
+  color: var(--color-logo-mark);
   border-radius: var(--radius-sm);
 }
 
