@@ -10,7 +10,7 @@
 
 .heading {
   margin-top: var(--space-6);
-  color: var(--color-navy);
+  color: var(--color-heading);
   line-height: var(--leading-snug);
   font-size: var(--text-h3);
   scroll-margin-top: calc(var(--header-height) + var(--space-4));
@@ -19,7 +19,7 @@
 /* Подзаголовок внутри раздела (h3): меньше и ближе к тексту, в оглавление не попадает. */
 .subheading {
   margin-top: var(--space-2);
-  color: var(--color-navy);
+  color: var(--color-heading);
   line-height: var(--leading-snug);
   font-size: var(--text-h4);
   font-weight: var(--weight-semibold);
@@ -35,7 +35,7 @@
 }
 
 .list li::marker {
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 /* Нумерованные шаги: номер в кружке слева, текст пункта справа (правило 13.10.2026). */
@@ -68,7 +68,7 @@
   height: var(--badge-size);
   border-radius: var(--radius-round);
   background: var(--color-blue-soft);
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-family: var(--font-heading);
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
@@ -101,7 +101,7 @@
 
 .group {
   background: var(--color-blue-soft);
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-weight: var(--weight-semibold);
 }
 
@@ -134,7 +134,7 @@
   border-left: 3px solid var(--color-blue);
   border-radius: var(--radius-md);
   background: var(--color-blue-soft);
-  color: var(--color-navy);
+  color: var(--color-heading);
 }
 
 .figure {

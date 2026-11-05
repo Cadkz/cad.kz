@@ -46,7 +46,7 @@
 
 .facts dd {
   margin: 0;
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-weight: var(--weight-semibold);
 }
 

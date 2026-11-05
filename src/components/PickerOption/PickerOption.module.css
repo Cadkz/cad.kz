@@ -66,7 +66,7 @@
 }
 
 .label {
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
@@ -85,7 +85,7 @@
 
 .price {
   flex-shrink: 0;
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-family: var(--font-heading);
   font-size: var(--text-sm);
   font-weight: var(--weight-heavy);

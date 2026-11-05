@@ -12,7 +12,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--color-blue);
+  color: var(--color-link);
   font-weight: var(--weight-semibold);
   text-decoration: underline;
   cursor: pointer;
@@ -42,12 +42,12 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--color-blue);
+  color: var(--color-link);
   font: inherit;
   font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
 .back:hover {
-  color: var(--color-navy);
+  color: var(--color-heading);
 }

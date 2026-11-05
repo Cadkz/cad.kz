@@ -38,7 +38,7 @@
 .done:hover {
   border-color: var(--color-blue-mid);
   background: var(--color-blue-soft);
-  color: var(--color-navy);
+  color: var(--color-heading);
 }
 
 .done:hover {

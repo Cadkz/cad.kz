@@ -48,7 +48,7 @@
 
 .chip:hover {
   border-color: var(--color-border-strong);
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 .chip[aria-pressed="true"] {

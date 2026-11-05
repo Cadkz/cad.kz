@@ -8,7 +8,7 @@
 
 .title,
 .summary {
-  color: var(--color-blue);
+  color: var(--color-link);
   font-size: var(--text-overline);
   font-weight: var(--weight-bold);
   letter-spacing: var(--tracking-overline);
@@ -38,7 +38,7 @@
 }
 
 .link:hover {
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 .desktop {

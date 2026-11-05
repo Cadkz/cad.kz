@@ -6,6 +6,7 @@ import { PageTransition } from '@/components/PageTransition/PageTransition'
 import { RevealObserver } from '@/components/RevealObserver/RevealObserver'
 import { SiteFooter } from '@/components/SiteFooter/SiteFooter'
 import { SiteHeader } from '@/components/SiteHeader/SiteHeader'
+import { THEME_INIT_SCRIPT } from '@/domain/siteTheme.mjs'
 import { DEFAULT_SHARE_IMAGE, isProduction, siteUrl } from '@/lib/seo'
 import '@/styles/fonts.css'
 import '@/styles/tokens.css'
@@ -47,7 +48,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     preload(href, { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' })
   }
   return (
-    <html lang="ru">
+    <html lang="ru" suppressHydrationWarning>
+      <head>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: статический скрипт без пользовательских данных, до первого кадра */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>
         <CartProvider>
           <SiteHeader />

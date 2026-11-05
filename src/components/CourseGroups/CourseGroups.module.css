@@ -25,7 +25,7 @@
 
 .icon {
   flex: none;
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 .text {

@@ -10,7 +10,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1) var(--space-3);
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-size: var(--text-body);
   font-weight: var(--weight-semibold);
 }
@@ -22,11 +22,11 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--color-blue);
+  color: var(--color-link);
   font: inherit;
   cursor: pointer;
 }
 
 .back:hover {
-  color: var(--color-navy);
+  color: var(--color-heading);
 }

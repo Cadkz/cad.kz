@@ -137,7 +137,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-round);
   background: var(--color-surface);
-  color: var(--color-navy);
+  color: var(--color-heading);
   cursor: pointer;
   transition:
     border-color var(--duration-fast) var(--ease),
@@ -146,7 +146,7 @@
 
 .arrow:hover {
   border-color: var(--color-blue);
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 .arrow:focus-visible {

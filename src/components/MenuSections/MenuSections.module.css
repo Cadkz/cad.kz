@@ -32,7 +32,7 @@
   place-items: center;
   width: var(--section-art);
   height: var(--section-art);
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 /* Иллюстрация раздела (src/components/SectionArt) — во всю клетку, без плашки. */
@@ -57,13 +57,13 @@
   gap: var(--space-1);
   margin-top: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  color: var(--color-blue);
+  color: var(--color-link);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
 }
 
 .everything:hover {
-  color: var(--color-navy);
+  color: var(--color-heading);
 }
 
 /* Разделы группы проступают сверху вниз той же волной, что карточки справа (24.10.2026):

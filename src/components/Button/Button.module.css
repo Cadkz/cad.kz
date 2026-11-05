@@ -50,7 +50,7 @@
 
 .secondary {
   background: var(--color-blue-soft);
-  color: var(--color-navy);
+  color: var(--color-heading);
 }
 
 .secondary:hover:not(:disabled) {
@@ -60,7 +60,7 @@
 .outline {
   border-color: var(--color-border);
   background: var(--color-surface);
-  color: var(--color-navy);
+  color: var(--color-heading);
 }
 
 .outline:hover:not(:disabled) {
@@ -70,7 +70,7 @@
 
 .light {
   background: var(--color-surface);
-  color: var(--color-navy);
+  color: var(--color-heading);
 }
 
 .light:hover:not(:disabled) {
@@ -92,11 +92,11 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 .text:hover:not(:disabled) {
-  color: var(--color-navy);
+  color: var(--color-heading);
 }
 
 /* Зона нажатия пальцем 44 px по высоте без сдвига вёрстки (аудит 21.10.2026, М8). */

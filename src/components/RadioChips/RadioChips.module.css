@@ -34,7 +34,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-weight: var(--weight-semibold);
   transition:
     background var(--duration-fast) var(--ease),

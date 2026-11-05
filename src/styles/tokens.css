@@ -5,6 +5,15 @@
  */
 
 :root {
+  color-scheme: light;
+  --color-heading: var(--color-navy);
+  --color-link: var(--color-blue);
+  --color-link-hover: var(--color-blue-hover);
+  --color-image-surface: #ffffff;
+  --filter-header-logo: none;
+  --filter-section-art: none;
+  --image-blend: multiply;
+
   /* ---------- Цвета: бренд ---------- */
   --color-navy: #112174; /* основной фирменный: заголовки, тёмные блоки */
   --color-navy-deep: #0b154a; /* градиенты и самые тёмные поверхности */
@@ -394,4 +403,40 @@
 @media (min-width: 1200px) {
   :root {
   }
+}
+
+/* Тема витрины: фирменные заливки и фотографии сохраняют исходные цвета. */
+:root[data-site-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #101722;
+  --color-surface: #192332;
+  --color-text: #e5ebf4;
+  --color-text-muted: #a7b4c8;
+  --color-heading: #edf3ff;
+  --color-link: #9ccaff;
+  --color-link-hover: #c6e1ff;
+  --color-blue-soft: #233650;
+  --color-blue-mid: #304866;
+  --color-border: #334155;
+  --color-border-strong: #64748b;
+  --color-gray-300: #64748b;
+  --color-gray-500: #98a6bb;
+  --color-gray-700: #bec9da;
+  --image-blend: normal;
+  --color-success: #6fdaa3;
+  --color-error: #ff9b91;
+  --color-focus: #9ccaff;
+  --color-header-glass: rgba(16, 23, 34, 0.94);
+  --color-popover: rgba(25, 35, 50, 0.98);
+  --color-hairline: rgba(190, 210, 240, 0.14);
+  --color-hover: rgba(170, 204, 255, 0.08);
+  --color-press: rgba(170, 204, 255, 0.14);
+  --color-mark: rgba(138, 196, 255, 0.18);
+  --color-spot: rgba(138, 196, 255, 0.08);
+  --ring-soft: 0 0 0 3px rgba(138, 196, 255, 0.24);
+  --color-kaddi-backdrop: rgba(16, 23, 34, 0.8);
+  --color-grid-light: rgba(170, 204, 255, 0.05);
+  --color-grid-light-major: rgba(170, 204, 255, 0.1);
+  --filter-header-logo: brightness(0) invert(1);
+  --filter-section-art: brightness(2);
 }

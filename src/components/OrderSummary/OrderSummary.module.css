@@ -33,12 +33,12 @@
 }
 
 .name {
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-weight: var(--weight-semibold);
 }
 
 .name:hover {
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 .config {
@@ -51,7 +51,7 @@
 }
 
 .sum {
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-weight: var(--weight-semibold);
   white-space: nowrap;
 }
@@ -71,7 +71,7 @@
 }
 
 .total {
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-family: var(--font-heading);
   font-size: var(--text-h2);
   font-weight: var(--weight-heavy);
@@ -87,11 +87,11 @@
 }
 
 .change {
-  color: var(--color-blue);
+  color: var(--color-link);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
 }
 
 .change:hover {
-  color: var(--color-navy);
+  color: var(--color-heading);
 }

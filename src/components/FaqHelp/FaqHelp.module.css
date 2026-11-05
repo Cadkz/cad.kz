@@ -9,7 +9,7 @@
 }
 
 .title {
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-size: var(--text-h4);
   font-weight: var(--weight-bold);
   line-height: var(--leading-snug);

@@ -8,6 +8,6 @@
 }
 
 .link {
-  color: var(--color-blue);
+  color: var(--color-link);
   text-decoration: underline;
 }

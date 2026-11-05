@@ -52,7 +52,7 @@
 
 .tab:hover,
 .tab[aria-selected="true"] {
-  color: var(--color-navy);
+  color: var(--color-heading);
 }
 
 .tab:focus-visible {
@@ -69,7 +69,7 @@
   padding: 0 var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--color-blue-soft);
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-size: var(--text-overline);
   font-weight: var(--weight-semibold);
 }

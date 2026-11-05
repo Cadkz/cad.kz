@@ -16,7 +16,7 @@
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  color: var(--color-blue);
+  color: var(--color-link);
   border-radius: var(--radius-sm);
 }
 
@@ -52,4 +52,8 @@
     width: var(--logo-header-width);
     height: var(--logo-header-height);
   }
+}
+
+.headerFull {
+  filter: var(--filter-header-logo);
 }

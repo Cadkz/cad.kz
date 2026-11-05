@@ -1,0 +1,9 @@
+.sun.sun {
+  display: none;
+}
+:global(html[data-site-theme="dark"]) .sun {
+  display: block;
+}
+:global(html[data-site-theme="dark"]) .moon {
+  display: none;
+}

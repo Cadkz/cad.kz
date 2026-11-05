@@ -45,7 +45,7 @@
   position: absolute;
   top: var(--space-5);
   right: var(--space-5);
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 .title {

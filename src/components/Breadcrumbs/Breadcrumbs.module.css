@@ -20,7 +20,7 @@
 }
 
 .item [aria-current] {
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-weight: var(--weight-semibold);
 }
 
@@ -33,7 +33,7 @@
 }
 
 .link:hover {
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 /* Зона нажатия пальцем 44 px по высоте без сдвига вёрстки (аудит 21.10.2026, М8). */

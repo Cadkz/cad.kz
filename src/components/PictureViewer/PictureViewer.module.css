@@ -57,7 +57,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--image-blend);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -100,7 +100,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-family: var(--font-heading);
   font-size: var(--text-h3);
   font-weight: var(--weight-semibold);
@@ -125,7 +125,7 @@
   border-radius: var(--radius-round);
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
-  color: var(--color-navy);
+  color: var(--color-heading);
   cursor: pointer;
   pointer-events: auto;
   transition: border-color var(--duration-fast) var(--ease);

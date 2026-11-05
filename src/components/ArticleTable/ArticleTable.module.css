@@ -28,7 +28,7 @@
 
 .head {
   background: var(--color-blue-soft);
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-weight: var(--weight-semibold);
   border-top: 1px solid var(--color-border);
 }
@@ -46,6 +46,6 @@ tr:first-child > .head {
 
 /* Первая колонка — названия строк (комплектация, программа): чуть заметнее. */
 .cell:first-child {
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-weight: var(--weight-medium);
 }

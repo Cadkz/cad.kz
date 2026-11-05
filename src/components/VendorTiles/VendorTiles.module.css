@@ -22,7 +22,7 @@
 /* Производитель без логотипа — его название мелко в миниатюре, как у карточки товара. */
 .logoFallback {
   padding: var(--space-1);
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-size: var(--text-xs);
   font-weight: var(--weight-bold);
   text-align: center;
@@ -41,4 +41,9 @@
   .grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+.logo {
+  background: var(--color-image-surface);
+  border-radius: var(--radius-md);
 }

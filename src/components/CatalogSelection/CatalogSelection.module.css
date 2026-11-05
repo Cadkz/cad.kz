@@ -9,7 +9,7 @@
   border: 0;
   padding: var(--space-2);
   background: transparent;
-  color: var(--color-blue);
+  color: var(--color-link);
   font: inherit;
   font-size: var(--text-sm);
   cursor: pointer;

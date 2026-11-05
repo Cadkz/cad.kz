@@ -13,6 +13,7 @@ import { Logo } from '../Logo/Logo'
 import { MobileMenu } from '../MobileMenu/MobileMenu'
 import { SiteSearch } from '../SiteSearch/SiteSearch'
 import { SubNav } from '../SubNav/SubNav'
+import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
 import styles from './SiteHeader.module.css'
 
 /**
@@ -54,6 +55,7 @@ export async function SiteHeader() {
                 ariaLabel="Написать в WhatsApp"
               />
             )}
+            <ThemeToggle />
             <CartButton />
           </div>
         </Container>

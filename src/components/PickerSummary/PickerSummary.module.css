@@ -38,7 +38,7 @@
 
 .price {
   flex-shrink: 0;
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-weight: var(--weight-semibold);
   white-space: nowrap;
 }
@@ -68,7 +68,7 @@
   height: var(--control-height-sm);
   border: 0;
   background: none;
-  color: var(--color-navy);
+  color: var(--color-heading);
 }
 
 .stepper button:hover {
@@ -91,7 +91,7 @@
 }
 
 .sum {
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-family: var(--font-heading);
   font-size: var(--text-h3);
   font-weight: var(--weight-heavy);

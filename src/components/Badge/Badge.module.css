@@ -13,7 +13,7 @@
 
 .soft {
   background: var(--color-blue-soft);
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 .navy {
@@ -26,7 +26,7 @@
   border-color: var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  color: var(--color-blue);
+  color: var(--color-link);
   font-size: var(--text-sm);
 }
 

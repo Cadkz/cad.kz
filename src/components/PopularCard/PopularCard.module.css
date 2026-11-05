@@ -28,7 +28,7 @@
   justify-content: center;
   width: var(--space-6);
   height: var(--space-6);
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 .image {
@@ -39,7 +39,7 @@
 
 .title {
   min-width: 0;
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-family: var(--font-heading);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
@@ -47,7 +47,7 @@
 }
 
 .tile:hover .title {
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 /* От 1200 px плитки стоят в один ряд и узкие (≈130 px): поля и зазор меньше, название может
@@ -57,4 +57,9 @@
     gap: var(--space-2);
     padding: var(--space-2) var(--space-3);
   }
+}
+
+.logo:has(img) {
+  background: var(--color-image-surface);
+  border-radius: var(--radius-sm);
 }

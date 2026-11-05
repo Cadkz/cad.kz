@@ -43,7 +43,7 @@
 }
 
 .title a:hover {
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 .config {
@@ -71,7 +71,7 @@
 
 .sum {
   grid-area: sum;
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-family: var(--font-heading);
   font-size: var(--text-h4);
   font-weight: var(--weight-heavy);
@@ -116,7 +116,7 @@
 }
 
 .total {
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-family: var(--font-heading);
   font-size: var(--text-h2);
   font-weight: var(--weight-heavy);

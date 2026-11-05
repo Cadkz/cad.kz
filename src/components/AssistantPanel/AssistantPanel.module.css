@@ -110,7 +110,7 @@
   border: 0;
   border-radius: var(--radius-round);
   background: transparent;
-  color: var(--color-navy);
+  color: var(--color-heading);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease);
 }
@@ -126,7 +126,7 @@
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
   background: var(--color-blue-soft);
-  color: var(--color-navy);
+  color: var(--color-heading);
   font-size: var(--text-sm);
 }
 

@@ -17,7 +17,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
-  color: var(--color-navy);
+  color: var(--color-heading);
   transition: border-color var(--duration-fast) var(--ease);
 }
 
@@ -30,7 +30,7 @@
   height: var(--icon-box);
   border-radius: var(--radius-round);
   background: var(--color-blue-soft);
-  color: var(--color-blue);
+  color: var(--color-link);
   transition:
     background-color var(--duration-base) var(--ease),
     color var(--duration-base) var(--ease),

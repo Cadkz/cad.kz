@@ -15,7 +15,7 @@
 }
 
 .form[data-pending="true"] .icon {
-  color: var(--color-blue);
+  color: var(--color-link);
 }
 
 .icon {
@@ -60,7 +60,7 @@
 }
 
 .clear:hover {
-  color: var(--color-navy);
+  color: var(--color-heading);
 }
 
 .submit {
