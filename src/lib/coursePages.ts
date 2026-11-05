@@ -28,9 +28,9 @@ export function lpUrl(link: string) {
 }
 
 /** Страница как текст: кодировка из ответа (у Битрикса бывает windows-1251), иначе UTF-8. */
-async function download(url: string) {
+async function download(url: string, redirect: RequestRedirect = 'follow') {
   const response = await fetch(url, {
-    redirect: 'follow',
+    redirect,
     cache: 'no-store',
     signal: AbortSignal.timeout(FETCH_MS),
     headers: { 'user-agent': 'CAD.kz site (course descriptions)' },
@@ -68,6 +68,13 @@ export function courseLinks(matches: CourseMatches) {
 }
 
 type CoursePage = NonNullable<ReturnType<typeof parseCoursePage>>
+
+/** Чтение для консультанта без записи в CMS и без переходов на другие адреса. */
+export async function readCoursePage(link: string) {
+  const url = lpUrl(link)
+  if (!url) return null
+  return parseCoursePage(await download(url, 'error'))
+}
 
 /** Сохранение не дольше SAVE_MS: зависло — ответить браузеру причиной, а не ждать обрыва. */
 function inTime<T>(work: Promise<T>) {

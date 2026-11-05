@@ -26,6 +26,7 @@ import { type SiteEntry, siteBlocksPrice } from '@/domain/sitePrice.mjs'
 import { getCatalog } from '../catalog'
 import { courseMatches, groupsForCourse } from '../courseSchedule'
 import { searchCatalog } from '../search'
+import { courseDetails } from './courseDetails'
 import { type LoadedPriceTable, loadPriceTable } from './priceTable'
 
 /** Сколько товаров отдаёт поиск модели за раз. */
@@ -351,6 +352,7 @@ export function createTools(payload: Payload): ToolRunner {
           )
         return {
           title: course?.title ?? program.title,
+          id: course?.id ?? null,
           onSite: Boolean(listed),
           price: listed?.priceFrom ?? null,
           groups: groups.slice(0, 3).map((group) => groupBrief(group, matches.today)),
@@ -369,6 +371,23 @@ export function createTools(payload: Payload): ToolRunner {
   }
 
   const tools: Record<string, (input: unknown) => Promise<unknown>> = {
+    courseDetails: async (input) => {
+      const id = field(input, 'id')
+      const result = await courseDetails(
+        payload,
+        text(input, 'query'),
+        typeof id === 'number' && Number.isInteger(id) ? id : undefined,
+      )
+      if ('href' in result && result.href && !found.some((card) => card.id === result.id))
+        found.push({
+          id: result.id,
+          title: result.title,
+          href: result.href,
+          vendor: null,
+          price: null,
+        })
+      return result
+    },
     courseSchedule,
     searchProducts,
     searchPriceList: (input) => withTable((loaded, entries) => searchPrice(loaded, input, entries)),

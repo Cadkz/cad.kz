@@ -254,6 +254,7 @@ test('правила владельца и характер Кадди: роль
   assert.deepEqual(
     ASSISTANT_TOOLS.map((t) => t.name),
     [
+      'courseDetails',
       'searchProducts',
       'searchPriceList',
       'getPrice',
