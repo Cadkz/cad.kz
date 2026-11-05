@@ -217,3 +217,17 @@ test('«менеджер пришлёт счёт» — не предложени
     /Предлагает связь/,
   )
 })
+
+test('отчёт показывает факты, которые получил Кадди, а не только число записей', () => {
+  const line = describeCall({
+    name: 'knowledgeSelection',
+    input: { query: 'GEO5 без интернета' },
+    result: {
+      general: [{ product: 'Все', text: 'Общее правило.' }],
+      topical: [{ product: 'GEO5', text: 'Лицензию можно перенести для работы без интернета.' }],
+    },
+  })
+  assert.match(line, /общих записей: 1/)
+  assert.match(line, /по теме: 1/)
+  assert.match(line, /Лицензию можно перенести/)
+})

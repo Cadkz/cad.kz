@@ -13,10 +13,10 @@ import {
   type HandoffState,
   handoffDetails,
   hasPrice,
+  knowledgeForAnswer,
   managerFormReply,
   mentionedCards,
   modelHistory,
-  pickFacts,
   promptLinks,
   quickAction,
   RENEW_CARD,
@@ -27,7 +27,6 @@ import {
   wantsManager,
   wantsRenewal,
 } from '@/domain/assistant.mjs'
-import { CHATGPT_FAQ_POSITION } from '@/domain/kaddiFaq.mjs'
 import { normalizePhone } from '@/domain/order.mjs'
 import { workTime } from '@/domain/priceTable.mjs'
 import { splitQuickReplies } from '@/domain/quickReplies.mjs'
@@ -40,9 +39,6 @@ import {
 import { loadKnowledge, loadVendorList, priceSummary } from './priceTable'
 import { type AssistantMode, leadsReachManagers, modelSettings } from './provider'
 import { createTools, findCards, toCard } from './tools'
-
-/** Свои записи базы о продуктах целиком в промпт, пока их текст не длиннее этого (≈ 4 тыс. токенов). */
-const OWN_WHOLE_CHARS = 12_000
 
 /** Сколько ждём модель, прежде чем честно сказать, что ответа нет. */
 const MODEL_TIMEOUT_MS = 30_000
@@ -127,33 +123,19 @@ async function modelAnswer(
     onTool?.({ name, input, result })
     return result
   }
-  // База знаний растёт (03.11.2026: +347 фактов ChatGPT, правки «Поправить»), поэтому в запрос
-  // модели идёт не всё. Общие записи компании («Все») — всегда, в кэшируемой части промпта.
-  // Записи о продуктах — отбором по теме разговора (pickFacts): последние реплики клиента,
-  // последний ответ Кадди и страница, с которой открыт чат. Пока своих записей о продуктах мало
-  // (до OWN_WHOLE_CHARS), они идут целиком, как раньше, — ответы не меняются.
-  const recent = messages.slice(-6)
-  const talk = [
-    ...recent.filter((message) => message.role === 'user').map((message) => message.content),
-    recent.filter((message) => message.role === 'assistant').at(-1)?.content ?? '',
-    page ? `${page.title} ${page.path}` : '',
-  ].join(' ')
-  const own = knowledge.filter((entry) => entry.position < CHATGPT_FAQ_POSITION)
-  const general = own.filter((entry) => entry.product === 'Все')
-  const ownProducts = own.filter((entry) => entry.product !== 'Все')
-  const ownWhole = ownProducts.reduce((sum, entry) => sum + entry.text.length, 0) <= OWN_WHOLE_CHARS
-  const topical = [
-    ...(ownWhole ? [] : pickFacts(ownProducts, talk, 16)),
-    ...pickFacts(
-      knowledge.filter((entry) => entry.position >= CHATGPT_FAQ_POSITION),
-      talk,
-      ownWhole ? 24 : 12,
-    ),
-  ]
+  const selected = knowledgeForAnswer(knowledge, messages, page)
+  onTool?.({
+    name: 'knowledgeSelection',
+    input: { query: selected.query },
+    result: {
+      general: selected.general.map(({ product, text }) => ({ product, text })),
+      topical: selected.topical.map(({ product, text }) => ({ product, text })),
+    },
+  })
   const system = systemPrompt({
     now: new Date(),
-    knowledge: ownWhole ? own : general,
-    topical,
+    knowledge: selected.general,
+    topical: selected.topical,
     page,
     vendorList,
     price,
@@ -174,7 +156,10 @@ async function modelAnswer(
   const quick = splitQuickReplies(text)
   // Ссылки — только cad.kz и адреса из правил и базы знаний; остальное сайт показывает карточками.
   // Жёсткий предел длины (03.11.2026): правило в промпте модель нарушала.
-  const reply = clampReply(cleanReply(quick.text, promptLinks(system[0])))
+  const allowedLinks = promptLinks(
+    [system[0], ...selected.topical.map((entry) => entry.text)].join('\n'),
+  )
+  const reply = clampReply(cleanReply(quick.text, allowedLinks))
   // Карточки — только когда они помогают: Кадди ещё уточняет задачу (вопрос без цены) и назвал
   // несколько товаров для сравнения — карточки ни к чему (замечание владельца 03.11.2026).
   const named = mentionedCards(reply, tools.found, { variants: tools.variants, limit: 3 })

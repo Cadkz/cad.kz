@@ -300,7 +300,15 @@ export function describeCall({ name, input, result }) {
     result && typeof result === 'object' ? /** @type {Record<string, unknown>} */ (result) : {}
   let outcome = ''
   if (typeof data.error === 'string') outcome = `ошибка: ${data.error}`
-  else if (Array.isArray(data.lines)) outcome = totalOutcome(data)
+  else if (name === 'knowledgeSelection' && Array.isArray(data.topical)) {
+    const general = Array.isArray(data.general) ? data.general.length : 0
+    outcome = `общих записей: ${general}; по теме: ${data.topical.length}. ${data.topical
+      .map((entry) => {
+        const fact = /** @type {{product?: string, text?: string}} */ (entry)
+        return `[${fact.product ?? ''}] ${fact.text ?? ''}`
+      })
+      .join(' | ')}`
+  } else if (Array.isArray(data.lines)) outcome = totalOutcome(data)
   else if (Array.isArray(data.products))
     outcome = data.products.length
       ? data.products
