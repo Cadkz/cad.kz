@@ -51,7 +51,7 @@ export function useCartQuote(items: CartItem[], ready: boolean) {
     fetch('/api/cart', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ items, lang: t.lang }),
       signal: controller.signal,
     })
       .then(async (response) => {

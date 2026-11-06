@@ -13,6 +13,7 @@ import {
   redirects,
   searchQueries,
 } from './collections/system'
+import { terms } from './collections/terms'
 import { users } from './collections/users'
 import { bimPage } from './globals/bimPage'
 import { homePage } from './globals/homePage'
@@ -51,6 +52,7 @@ const MENU: { group: string; collections: CollectionConfig[]; globals: GlobalCon
       integrations,
       users,
       searchQueries,
+      terms,
     ],
     globals: [pricingSettings],
   },

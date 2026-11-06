@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { AdminButton } from '@/components/AdminButton/AdminButton'
 import { FileDrop } from '@/components/FileDrop/FileDrop'
 import { readSpreadsheet, SpreadsheetError } from '@/domain/spreadsheet.mjs'
+import { isTermKey, TERMS_PER_REQUEST } from '@/domain/terms.mjs'
 import {
   DOCS_PER_REQUEST,
   type IncomingRow,
@@ -16,6 +17,8 @@ import styles from './TranslationTable.module.css'
 type Problem = { key: string; lang: 'kk' | 'en'; reason: string }
 type Check = {
   docs: number
+  /** Строк словаря характеристик и комплектаций. */
+  terms: number
   texts: number
   unchanged: number
   problems: Problem[]
@@ -36,15 +39,32 @@ async function post(body: Record<string, unknown>) {
   return result
 }
 
-/** Строки по товарам: документ целиком уходит в один запрос записи. */
-function byDoc(rows: IncomingRow[]) {
+/**
+ * Запросы записи: строки товара целиком в одном запросе, по DOCS_PER_REQUEST товаров; строки
+ * словаря — по TERMS_PER_REQUEST.
+ */
+function batches(rows: IncomingRow[]) {
   const groups = new Map<string, IncomingRow[]>()
+  const terms: IncomingRow[] = []
   for (const row of rows) {
+    if (isTermKey(row.key)) {
+      terms.push(row)
+      continue
+    }
     const doc = row.key.split(':').slice(0, 2).join(':')
     groups.set(doc, [...(groups.get(doc) ?? []), row])
   }
-  return [...groups.values()]
+  const docs = [...groups.values()]
+  const result: IncomingRow[][] = []
+  for (let at = 0; at < docs.length; at += DOCS_PER_REQUEST)
+    result.push(docs.slice(at, at + DOCS_PER_REQUEST).flat())
+  for (let at = 0; at < terms.length; at += TERMS_PER_REQUEST)
+    result.push(terms.slice(at, at + TERMS_PER_REQUEST))
+  return result
 }
+
+type TableSet = 'docs' | 'terms'
+type Part = 'next' | 'big' | 'all'
 
 /**
  * Скачать часть для перевода и загрузить перевод обратно. Файл читается в браузере, на сервер
@@ -71,12 +91,12 @@ export function TranslationTable() {
     }
   }
 
-  async function download(part: 'next' | 'big' | 'all') {
+  async function download(part: Part, set: TableSet) {
     setError('')
     setDone('')
     setBusy(part === 'all' ? 'Готовим всю таблицу…' : 'Готовим часть…')
     try {
-      const response = await fetch(`${API}?part=${part}`)
+      const response = await fetch(`${API}?part=${part}${set === 'terms' ? '&set=terms' : ''}`)
       if (!response.ok) {
         setError(await response.text())
         return
@@ -133,14 +153,13 @@ export function TranslationTable() {
   }
 
   async function save() {
-    const groups = byDoc(rows)
+    const parts = batches(rows)
     let saved = 0
     const failed: string[] = []
     setError('')
     try {
-      for (let at = 0; at < groups.length; at += DOCS_PER_REQUEST) {
-        setBusy(`Записываем… ${Math.min(at + DOCS_PER_REQUEST, groups.length)} из ${groups.length}`)
-        const part = groups.slice(at, at + DOCS_PER_REQUEST).flat()
+      for (const [index, part] of parts.entries()) {
+        setBusy(`Записываем… ${index + 1} из ${parts.length}`)
         const result = await post({ action: 'apply', rows: part })
         saved += Number(result.saved) || 0
         failed.push(...(Array.isArray(result.failed) ? result.failed : []))
@@ -168,15 +187,28 @@ export function TranslationTable() {
     <section className={styles.root}>
       <div className={styles.block}>
         <h2 className={styles.title}>1. Скачать</h2>
+        <p className={styles.hint}>Тексты товаров и разделов</p>
         <div className={styles.actions}>
-          <AdminButton onClick={() => download('next')} disabled={Boolean(busy)}>
+          <AdminButton onClick={() => download('next', 'docs')} disabled={Boolean(busy)}>
             Скачать следующую часть
           </AdminButton>
-          <AdminButton secondary onClick={() => download('big')} disabled={Boolean(busy)}>
+          <AdminButton secondary onClick={() => download('big', 'docs')} disabled={Boolean(busy)}>
             Большая часть (×3)
           </AdminButton>
-          <AdminButton secondary onClick={() => download('all')} disabled={Boolean(busy)}>
+          <AdminButton secondary onClick={() => download('all', 'docs')} disabled={Boolean(busy)}>
             Вся таблица
+          </AdminButton>
+        </div>
+        <p className={styles.hint}>Характеристики и комплектации (общий словарь)</p>
+        <div className={styles.actions}>
+          <AdminButton onClick={() => download('next', 'terms')} disabled={Boolean(busy)}>
+            Скачать следующую часть
+          </AdminButton>
+          <AdminButton secondary onClick={() => download('big', 'terms')} disabled={Boolean(busy)}>
+            Большая часть (×3)
+          </AdminButton>
+          <AdminButton secondary onClick={() => download('all', 'terms')} disabled={Boolean(busy)}>
+            Весь словарь
           </AdminButton>
         </div>
         <p className={styles.hint}>
@@ -184,6 +216,10 @@ export function TranslationTable() {
           около 36 000 знаков, кругов втрое меньше, но ChatGPT может перевести не всё: пропуски
           видно на проверке после загрузки, их доберёт следующая часть. В части попадают товары, где
           не хватает хотя бы одного перевода. Вся таблица — для проверки и правки уже переведённого.
+          Словарь — короткие подписи со страниц товаров (названия и значения характеристик,
+          комплектации, условия лицензий, тексты подбора): каждый текст переводится один раз и
+          подставляется во все товары, где он встречается. Отдельные строки можно поправить в{' '}
+          <a href="/admin/collections/terms">«Словаре переводов»</a>.
         </p>
       </div>
 
@@ -222,8 +258,10 @@ export function TranslationTable() {
         <div className={styles.found}>
           <p>
             <strong>
-              Запишется переводов: {check.texts} в {check.docs}{' '}
-              {check.docs === 1 ? 'товаре или разделе' : 'товарах и разделах'}.
+              Запишется переводов: {check.texts}
+              {check.docs > 0 &&
+                ` в ${check.docs} ${check.docs === 1 ? 'товаре или разделе' : 'товарах и разделах'}`}
+              {check.terms > 0 && `${check.docs > 0 ? ',' : ''} строк словаря: ${check.terms}`}.
             </strong>
             {check.unchanged > 0 && ` Без изменений: ${check.unchanged}.`}
           </p>

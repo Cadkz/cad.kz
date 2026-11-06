@@ -90,6 +90,7 @@ export interface Config {
     integrations: Integration;
     users: User;
     'search-queries': SearchQuery;
+    terms: Term;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -121,6 +122,7 @@ export interface Config {
     integrations: IntegrationsSelect<false> | IntegrationsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'search-queries': SearchQueriesSelect<false> | SearchQueriesSelect<true>;
+    terms: TermsSelect<false> | TermsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1046,6 +1048,20 @@ export interface SearchQuery {
   createdAt: string;
 }
 /**
+ * Характеристики, комплектации, условия лицензий и тексты подбора на казахском и английском. Русский текст — точно как на сайте. Удобнее заполнять таблицей: «Переводы» → «Характеристики и комплектации».
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "terms".
+ */
+export interface Term {
+  id: number;
+  ru: string;
+  kk?: string | null;
+  en?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1160,6 +1176,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'search-queries';
         value: number | SearchQuery;
+      } | null)
+    | ({
+        relationTo: 'terms';
+        value: number | Term;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1764,6 +1784,17 @@ export interface SearchQueriesSelect<T extends boolean = true> {
   found?: T;
   source?: T;
   click?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "terms_select".
+ */
+export interface TermsSelect<T extends boolean = true> {
+  ru?: T;
+  kk?: T;
+  en?: T;
   updatedAt?: T;
   createdAt?: T;
 }

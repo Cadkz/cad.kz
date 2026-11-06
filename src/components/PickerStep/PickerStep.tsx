@@ -20,8 +20,8 @@ type Props = { step: Step; number: number | null; titled?: boolean }
 export function PickerStep({ step, number, titled = false }: Props) {
   const t = useT()
   const picker = usePickerContext()
-  const { view, state } = picker
-  const switchText = view.switches.map((sw) => state.switches[sw.key]).join(', ')
+  const { view, state, show } = picker
+  const switchText = view.switches.map((sw) => show(state.switches[sw.key] ?? '')).join(', ')
   const showTitle = number != null || titled
 
   const isChecked = (key: string) => {
@@ -45,8 +45,8 @@ export function PickerStep({ step, number, titled = false }: Props) {
         key={item.key}
         control={controls[step.mode]}
         name={step.key}
-        label={item.label}
-        note={item.note}
+        label={show(item.label)}
+        note={item.note ? show(item.note) : null}
         price={offerFor(item, view.switches, state.switches)?.price ?? null}
         checked={pack ? true : isChecked(item.key)}
         disabled={pack != null || itemUnavailable(item, view.switches, state.switches)}
@@ -80,9 +80,9 @@ export function PickerStep({ step, number, titled = false }: Props) {
             <SectionIcon name={step.icon} size={40} />
           </span>
         )}
-        {t(step.title)}
+        {show(step.title)}
       </legend>
-      {step.hint && <p className={styles.hint}>{t(step.hint)}</p>}
+      {step.hint && <p className={styles.hint}>{show(step.hint)}</p>}
       {step.collapsed ? (
         <details ref={moreRef} className={styles.more} open={openAtStart || undefined}>
           <summary className={styles.summary}>

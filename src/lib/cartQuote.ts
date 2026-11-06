@@ -3,8 +3,11 @@ import { parseRequestKey } from '@/domain/cart.mjs'
 import { CartUnavailableError } from '@/domain/checkout.mjs'
 import { PRICE_RULE } from '@/domain/pricing.mjs'
 import { plainTitle } from '@/domain/productTitle.mjs'
+import type { Lang } from '@/i18n/locales.mjs'
 import { findPublicOffer, loadPricingContext, type PricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
+import { termsFor } from './terms'
+import { getTranslations } from './translations'
 
 /** Подпись строки-запроса в корзине, заказе и лиде: менеджеру видно, что комплектацию выбирают с ним. */
 export const REQUEST_CONFIGURATION = 'Комплектацию и цену подберёт менеджер'
@@ -156,4 +159,34 @@ export async function quoteCart(payload: Payload, items: { offerId: string; quan
     .toString()
   const fromComplete = lines.every((line) => !line.request || line.fromKzt !== '')
   return { lines, totalKzt, fromTotalKzt, fromComplete, quotedAt: new Date().toISOString() }
+}
+
+/**
+ * Строки корзины на языке страницы — только для показа (/api/cart): название товара из его
+ * перевода, комплектация и подпись строки-запроса — из словаря характеристик и комплектаций
+ * (src/domain/terms.mjs) или словаря интерфейса. Заказ и заявка менеджеру считаются заново по-русски.
+ */
+export async function localizeCartLines<
+  L extends { productId: string; title: string; configuration: string },
+>(payload: Payload, lines: L[], lang: Lang): Promise<L[]> {
+  if (lang === 'ru' || !lines.length) return lines
+  const [tr, overlay] = await Promise.all([termsFor(lang), getTranslations(lang)])
+  const { docs } = await payload.find({
+    collection: 'products',
+    where: { slug: { in: [...new Set(lines.map((line) => line.productId))] } },
+    pagination: false,
+    depth: 0,
+    overrideAccess: true,
+    select: { slug: true },
+  })
+  const idOf = new Map(docs.map((doc) => [doc.slug, doc.id]))
+  return lines.map((line) => {
+    const id = idOf.get(line.productId)
+    const title = id == null ? undefined : overlay?.products.get(id)?.title
+    return {
+      ...line,
+      title: title ? plainTitle(title) : line.title,
+      configuration: tr(line.configuration),
+    }
+  })
 }

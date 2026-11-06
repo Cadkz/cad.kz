@@ -100,6 +100,20 @@ export function cleanSpecs(properties) {
   return result
 }
 
+/** Служебные характеристики: в базе нужны для прайсов и 1С, покупателю не показываются. */
+const HIDDEN_PROPERTIES = new Set(['артикул'])
+
+/**
+ * Характеристики, которые видит покупатель: без служебных, очищенные (cleanSpecs).
+ * @param {Property[]} properties
+ * @returns {Spec[]}
+ */
+export function shownSpecs(properties) {
+  return cleanSpecs(
+    properties.filter(({ name }) => !HIDDEN_PROPERTIES.has(name.trim().toLowerCase())),
+  )
+}
+
 /**
  * Характеристики по группам в порядке первого появления; без группы — в начале.
  * @param {Spec[]} specs

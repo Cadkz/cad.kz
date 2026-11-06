@@ -23,7 +23,7 @@ import styles from './PickerSummary.module.css'
 export function PickerSummary({ anchor = true }: { anchor?: boolean }) {
   const t = useT()
   const picker = usePickerContext()
-  const { lines, total, quantity, setQuantity, meta, view, state, profile } = picker
+  const { lines, total, quantity, setQuantity, meta, view, state, profile, show } = picker
   const { cartFirst } = usePickerCart()
   const actions = pickerActions(meta, cartFirst)
   const sumText =
@@ -43,13 +43,13 @@ export function PickerSummary({ anchor = true }: { anchor?: boolean }) {
         <ul className={styles.lines}>
           {view.switches.map((sw) => (
             <li key={sw.key} className={styles.line}>
-              <span>{t(sw.title)}</span>
-              <span className={styles.price}>{t(state.switches[sw.key] ?? '')}</span>
+              <span>{show(sw.title)}</span>
+              <span className={styles.price}>{show(state.switches[sw.key] ?? '')}</span>
             </li>
           ))}
           {lines.map((line) => (
             <li key={line.item.key} className={styles.line}>
-              <span>{lineLabel(line)}</span>
+              <span>{show(lineLabel(line))}</span>
               <span className={styles.price}>{line.offer?.price ?? t('по запросу')}</span>
             </li>
           ))}

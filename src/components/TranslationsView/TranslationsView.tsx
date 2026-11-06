@@ -3,6 +3,7 @@ import type { AdminViewServerProps } from 'payload'
 import { TranslationTable } from '@/components/TranslationTable/TranslationTable'
 import { progress } from '@/domain/translationTable.mjs'
 import { requireLogin } from '@/lib/adminGate'
+import { termTableGroups } from '@/lib/termTable'
 import { translationGroups } from '@/lib/translationTable'
 import styles from './TranslationsView.module.css'
 
@@ -30,7 +31,12 @@ export async function TranslationsView({
     viewActions,
   }
   const allowed = user?.role === 'admin' || user?.role === 'editor'
-  const state = allowed ? progress(await translationGroups(payload)) : null
+  const [state, terms] = allowed
+    ? await Promise.all([
+        translationGroups(payload).then(progress),
+        termTableGroups(payload).then(progress),
+      ])
+    : [null, null]
 
   return (
     <DefaultTemplate {...template}>
@@ -41,8 +47,8 @@ export async function TranslationsView({
             <p className={styles.lead}>
               Названия, описания, задачи, вопросы и SEO опубликованных товаров и разделов на
               казахском и английском. Скачайте часть, переведите в ChatGPT и загрузите файл обратно.
-              Пока перевода нет, на /kk и /en показывается русский текст. Характеристики и
-              комплектации переводятся отдельно.
+              Пока перевода нет, на /kk и /en показывается русский текст. Характеристики,
+              комплектации и тексты подбора переводятся отдельно — общим словарём.
             </p>
             <div className={styles.state}>
               <p>
@@ -55,6 +61,15 @@ export async function TranslationsView({
                   ? `Осталось: ${state.missingDocs} товаров и разделов, около ${state.missingChars.toLocaleString('ru-RU')} знаков русского текста.`
                   : 'Всё переведено.'}
               </p>
+              {terms && (
+                <p>
+                  Словарь характеристик и комплектаций: <strong>{terms.texts}</strong> текстов.
+                  Казахский: {terms.kk} ({percent(terms.kk, terms.texts)} %), английский: {terms.en}{' '}
+                  ({percent(terms.en, terms.texts)} %).
+                  {terms.missingDocs > 0 &&
+                    ` Осталось около ${terms.missingChars.toLocaleString('ru-RU')} знаков.`}
+                </p>
+              )}
             </div>
             <TranslationTable />
           </>

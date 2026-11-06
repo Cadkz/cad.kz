@@ -1,7 +1,8 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { normalizeCart } from '@/domain/cart.mjs'
-import { quoteCart } from '@/lib/cartQuote'
+import { isLang } from '@/i18n/locales.mjs'
+import { localizeCartLines, quoteCart } from '@/lib/cartQuote'
 
 export async function POST(request: Request) {
   if (process.env.APP_MODE !== 'demo')
@@ -10,10 +11,17 @@ export async function POST(request: Request) {
     const raw = await request.text()
     if (raw.length > 16000)
       return Response.json({ error: 'Слишком большой запрос' }, { status: 413 })
-    const items = normalizeCart(JSON.parse(raw).items)
+    const body = JSON.parse(raw)
+    const items = normalizeCart(body.items)
+    // Язык страницы корзины: названия и комплектации для показа (/kk/cart, /en/cart).
+    const lang = isLang(body.lang) ? body.lang : 'ru'
     const payload = await getPayload({ config })
     const quoted = await quoteCart(payload, items)
-    return Response.json({ mode: 'demo', ...quoted }, { headers: { 'Cache-Control': 'no-store' } })
+    const lines = await localizeCartLines(payload, quoted.lines, lang)
+    return Response.json(
+      { mode: 'demo', ...quoted, lines },
+      { headers: { 'Cache-Control': 'no-store' } },
+    )
   } catch (error) {
     return Response.json(
       {

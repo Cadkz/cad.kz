@@ -52,6 +52,7 @@
  * @typedef {object} PickerView
  * @property {PickerSwitch[]} switches
  * @property {PickerStep[]} steps
+ * @property {Record<string, string>} [texts]  Переводы текстов подбора на язык страницы (src/domain/terms.mjs): русский → перевод.
  *
  * @typedef {object} PickerState
  * @property {Record<string, string>} switches  Ключ переключателя → выбранное значение.

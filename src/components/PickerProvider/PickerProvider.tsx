@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, type ReactNode, useContext, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import type { Scenario } from '@/domain/buyScenario.mjs'
 import type { PickerView } from '@/domain/picker.mjs'
 import { requestLines } from '@/domain/pickerRequest.mjs'
@@ -41,6 +42,11 @@ type ContextValue = PickerApi & {
   /** Выбор для заявки и сообщения в WhatsApp: строки и переключатели (срок, редакция). */
   requestLines: RequestLine[]
   requestChoices: { title: string; value: string }[]
+  /**
+   * Текст подбора на языке страницы: перевод из словаря (view.texts, src/domain/terms.mjs), иначе
+   * словарь интерфейса. Данные подбора остаются русскими — по ним сверяется выбор и уходит заявка.
+   */
+  show: (text: string) => string
 }
 
 const Context = createContext<ContextValue | null>(null)
@@ -53,6 +59,8 @@ type Props = { view: PickerView; meta: PickerMeta; pick: PickTarget | null; chil
  */
 export function PickerProvider({ view, meta, pick, children }: Props) {
   const api = usePicker(view, pick)
+  const t = useT()
+  const show = (text: string) => view.texts?.[text] ?? t(text)
   const [request, setRequest] = useState<{
     kind: RequestKind
     button: string
@@ -86,6 +94,7 @@ export function PickerProvider({ view, meta, pick, children }: Props) {
         openRequest,
         requestLines: lines,
         requestChoices: choices,
+        show,
       }}
     >
       {children}

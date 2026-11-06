@@ -1,7 +1,6 @@
 'use client'
 
 import { Check } from 'lucide-react'
-import { useT } from '@/components/LangProvider/LangProvider'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
 import styles from './PickerSwitches.module.css'
 
@@ -10,11 +9,10 @@ import styles from './PickerSwitches.module.css'
  * Выбранный — светлый, как выбранная строка варианта ниже, с галочкой.
  */
 export function PickerSwitches() {
-  const t = useT()
-  const { view, state, chooseSwitch } = usePickerContext()
+  const { view, state, chooseSwitch, show } = usePickerContext()
   return view.switches.map((sw) => (
     <fieldset key={sw.key} className={styles.switch}>
-      <legend className={styles.legend}>{t(sw.title)}</legend>
+      <legend className={styles.legend}>{show(sw.title)}</legend>
       <div className={styles.segments}>
         {sw.options.map((option) => (
           <label
@@ -29,9 +27,9 @@ export function PickerSwitches() {
               checked={state.switches[sw.key] === option.value}
               onChange={() => chooseSwitch(sw.key, option.value)}
             />
-            <span className={styles.value}>{t(option.value)}</span>
+            <span className={styles.value}>{show(option.value)}</span>
             <Check size={16} strokeWidth={1.75} aria-hidden="true" className={styles.check} />
-            {option.note && <span className={styles.note}>{t(option.note)}</span>}
+            {option.note && <span className={styles.note}>{show(option.note)}</span>}
           </label>
         ))}
       </div>

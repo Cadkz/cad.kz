@@ -25,8 +25,14 @@ const overlay = (doc: { title?: string | null; summary?: string | null }): TextO
   return title || summary ? { ...(title && { title }), ...(summary && { summary }) } : null
 }
 
+/** Как переводы лежат в кэше: кэш Next.js хранит данные как JSON, Map там превращается в {}. */
+type Stored = {
+  products: [number, TextOverlay][]
+  sections: [string, TextOverlay][]
+}
+
 function loadTranslations(lang: Lang) {
-  return async (): Promise<Translations> => {
+  return async (): Promise<Stored> => {
     const payload = await cmsData()
     const query = { locale: lang, fallbackLocale: false, pagination: false, depth: 0 } as const
     const [products, sections] = await Promise.all([
@@ -37,20 +43,20 @@ function loadTranslations(lang: Lang) {
         select: { slug: true, title: true, summary: true },
       }),
     ])
-    const result: Translations = { products: new Map(), sections: new Map() }
+    const result: Stored = { products: [], sections: [] }
     for (const doc of products.docs) {
       const texts = overlay(doc)
-      if (texts) result.products.set(doc.id, texts)
+      if (texts) result.products.push([doc.id, texts])
     }
     for (const doc of sections.docs) {
       const texts = overlay(doc)
-      if (texts && doc.slug) result.sections.set(doc.slug, texts)
+      if (texts && doc.slug) result.sections.push([doc.slug, texts])
     }
     return result
   }
 }
 
-const cached: Partial<Record<Lang, () => Promise<Translations>>> = {
+const cached: Partial<Record<Lang, () => Promise<Stored>>> = {
   kk: siteCached('translations-kk', loadTranslations('kk')),
   en: siteCached('translations-en', loadTranslations('en')),
 }
@@ -58,7 +64,10 @@ const cached: Partial<Record<Lang, () => Promise<Translations>>> = {
 /** Переводы для языка; для русского — null (накладывать нечего). */
 export async function getTranslations(lang: Lang): Promise<Translations | null> {
   const load = lang === DEFAULT_LANG ? undefined : cached[lang]
-  return load ? load() : null
+  if (!load) return null
+  // До 06.11.2026 в кэш клали Map: со второго запроса /kk/catalog падал (Map из JSON — {}).
+  const stored = await load()
+  return { products: new Map(stored.products), sections: new Map(stored.sections) }
 }
 
 export { requestLang } from '@/i18n/server'

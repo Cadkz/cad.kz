@@ -8,7 +8,8 @@ import { type Scan, scanById } from '../domain/artecScans.mjs'
 import { resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
 import { FACT_MAX_LENGTH, keyFacts, softwareFacts } from '../domain/keyFacts.mjs'
 import type { PickerView } from '../domain/picker.mjs'
-import { cleanSpecs } from '../domain/specs.mjs'
+import { type cleanSpecs, shownSpecs } from '../domain/specs.mjs'
+import { localizeSpecs, pickerTexts } from '../domain/terms.mjs'
 import { type Lifecycle, lifecycle, readResearch } from './equipmentResearch'
 import { formatKzt } from './format'
 import { cms } from './payload'
@@ -18,10 +19,8 @@ import { loadPricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
 import { relId } from './rel'
 import { pageMetadata } from './seo'
-import { requestLang } from './translations'
-
-/** Служебные характеристики: в базе нужны для прайсов и 1С, покупателю не показываются. */
-const HIDDEN_PROPERTIES = new Set(['артикул'])
+import { termsFor } from './terms'
+import { getTranslations, requestLang } from './translations'
 
 export type ProductOffer = {
   id: string
@@ -171,12 +170,13 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
   const found = docs[0]
   if (!found) return null
   const product = await withPageTexts(payload, found)
+  const lang = await requestLang()
+  // Характеристики, комплектации и тексты подбора на /kk и /en — из общего словаря (src/domain/terms.mjs).
+  const [tr, overlay] = await Promise.all([termsFor(lang), getTranslations(lang)])
+  const sectionTitle = (section: Section) =>
+    overlay?.sections.get(section.slug)?.title ?? section.title
   const research = readResearch(product.researchData)
-  const specs = cleanSpecs(
-    (product.properties ?? []).filter(
-      ({ name }) => !HIDDEN_PROPERTIES.has(name.trim().toLowerCase()),
-    ),
-  )
+  const specs = shownSpecs(product.properties ?? [])
   const replacements = new Map<string, { title: string; href: string | null }>()
   if (research?.status === 'discontinued' && research.replacedBy) {
     const { docs } = await payload.find({
@@ -219,6 +219,20 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     })
     .sort((a, b) => Number(BigInt(a.unit ?? '0') - BigInt(b.unit ?? '0')))
 
+  const facts = fillFacts(
+    product.kind === 'software'
+      ? softwareFacts(
+          specs,
+          priced.map(({ offer }) => offer.license),
+        )
+      : keyFacts(research, specs),
+    {
+      direction: product.sections,
+      tasks: product.tasks,
+      kind: product.kind,
+      sectionTitle,
+    },
+  )
   return {
     id: product.id,
     slug: product.slug,
@@ -236,35 +250,23 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
       .filter((section): section is Section => typeof section !== 'number')
       .map((section) => ({
         slug: section.slug,
-        title: section.title,
+        title: sectionTitle(section),
         isDirection: Boolean(section.isDirection),
         icon: sectionIconKey(section.slug, section.icon),
       })),
     tasks: (product.tasks ?? []).map((task) => task.title),
-    properties: specs,
-    facts: fillFacts(
-      product.kind === 'software'
-        ? softwareFacts(
-            specs,
-            priced.map(({ offer }) => offer.license),
-          )
-        : keyFacts(research, specs),
-      {
-        direction: product.sections,
-        tasks: product.tasks,
-        kind: product.kind,
-      },
-    ),
+    properties: localizeSpecs(specs, tr),
+    facts: facts.map((fact) => ({ ...fact, name: tr(fact.name), value: tr(fact.value) })),
     faq: (product.faq ?? []).map(({ question, answer }) => ({ question, answer })),
     requires: related(product.requiresProducts),
     offers: priced.map(({ offer, unit }) => ({
       id: String(offer.id),
-      configuration: offer.configuration,
-      license: offer.license,
+      configuration: tr(offer.configuration),
+      license: tr(offer.license),
       price: unit ? formatKzt(unit) : null,
     })),
     pageView: product.pageView ?? 'standard',
-    picker,
+    picker: lang === 'ru' ? picker : { ...picker, texts: pickerTexts(picker, tr) },
     renewLabel: product.renewLabel || null,
     scenario: resolveScenario({
       own: product.scenario,
@@ -335,6 +337,8 @@ type FactSource = {
   direction: Product['sections']
   tasks: Product['tasks']
   kind: Product['kind']
+  /** Название раздела на языке страницы. */
+  sectionTitle: (section: Section) => string
 }
 
 /**
@@ -349,7 +353,7 @@ function fillFacts(facts: Fact[], source: FactSource): Fact[] {
   // «Типе лицензии» (softwareFacts), у оборудования в этом поле гарантия (владелец 26.10.2026).
   const extra: (Fact | null)[] = [
     direction && typeof direction !== 'number'
-      ? { name: 'Направление', value: direction.title }
+      ? { name: 'Направление', value: source.sectionTitle(direction) }
       : null,
     source.tasks?.[0] ? { name: 'Задача', value: source.tasks[0].title } : null,
   ]
