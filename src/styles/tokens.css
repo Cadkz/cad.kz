@@ -437,70 +437,74 @@
   }
 }
 
-/* Тёмная витрина: палитра владельца #0B154A / #1F3DA8, акцент действий #48D5C8. */
+/* Тёмная витрина: графитовая палитра владельца (06.11.2026). Фон #17191E, панели #202329,
+   карточки #2B2F37, hover #353A44; фирменный синий #263BA0 (кнопки, заливки), акцент #4262D7
+   (рамки, фокус, наведение); ссылки светлее акцента #8DA2F2 — #4262D7 текстом на графите
+   даёт контраст меньше 3:1. Текст #F1F3F7, вторичный #9CA3B3. */
 :root[data-site-theme="dark"] {
   color-scheme: dark;
-  --color-navy: #112174;
-  --color-navy-deep: #0b154a;
+  --color-navy: #263ba0; /* фирменный синий: заливки, выбранное */
+  --color-navy-deep: #1b2b78; /* самый тёмный фирменный — для градиентов */
+  --color-blue: #4262d7; /* акцент на тёмном */
   --gradient-navy: linear-gradient(135deg, var(--color-navy), var(--color-blue));
-  --color-sky: #8ac4ff;
-  --color-sky-strong: #5fa8ff;
-  --color-bg: var(--color-navy-deep);
-  /* Карточки заметно светлее фона, чтобы отделяться без яркой рамки (06.11.2026). */
-  --color-surface: var(--color-navy); /* как тёмные карточки-акции: заливка без яркой рамки */
-  /* Текст с лёгким голубым оттенком: нейтральный серый на насыщенном синем выглядел грязно. */
-  --color-text: #eef2fb;
-  --color-text-muted: #b9c6e8;
+  --gradient-deep: linear-gradient(120deg, #202329, #2b2f37);
+  --color-sky: #8da2f2;
+  --color-sky-strong: #6f88ec;
+  --color-bg: #17191e;
+  --color-surface: #202329; /* панели, фон каталога */
+  --color-text: #f1f3f7;
+  --color-text-muted: #9ca3b3;
+  --color-text-on-dark: #dbe1f5;
   --color-heading: #ffffff;
-  --color-link: #48d5c8;
-  --color-link-hover: #70dfd3;
-  /* Плашки и чипы — светлее карточек navy, чтобы читались на них (06.11.2026). */
-  --color-blue-soft: color-mix(in srgb, var(--color-navy) 55%, var(--color-blue));
-  --color-blue-mid: color-mix(in srgb, var(--color-navy) 30%, var(--color-blue));
-  --color-border: rgba(170, 204, 255, 0.08); /* почти незаметная рамка: карточки отделяет заливка */
-  --color-border-strong: rgba(170, 204, 255, 0.32);
+  --color-link: #8da2f2;
+  --color-link-hover: #b3c1f7;
+  /* Плашки и чипы: hover-графит, чтобы читались и на панели, и на карточке. */
+  --color-blue-soft: #353a44;
+  --color-blue-mid: #424854;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.2);
   --color-gray-300: #cccccc;
-  --color-gray-500: #878787;
+  --color-gray-500: #9ca3b3;
   --color-gray-700: #cccccc;
   --image-blend: normal;
   --color-success: #6fdaa3;
   --color-error: #ff9b91;
-  --color-focus: #48d5c8;
-  --color-header-glass: rgba(11, 21, 74, 0.94);
-  --color-popover: color-mix(in srgb, var(--color-surface) 98%, transparent);
-  --color-hairline: rgba(190, 210, 240, 0.14);
-  --color-hover: rgba(170, 204, 255, 0.08);
-  --color-press: rgba(170, 204, 255, 0.14);
-  --color-mark: rgba(170, 204, 255, 0.18);
-  --color-spot: rgba(138, 196, 255, 0.08);
-  --ring-soft: 0 0 0 3px rgba(72, 213, 200, 0.24);
-  --color-kaddi-backdrop: rgba(11, 21, 74, 0.8);
-  --color-grid-light: rgba(170, 204, 255, 0.05);
-  --color-grid-light-major: rgba(170, 204, 255, 0.1);
+  --color-focus: #4262d7;
+  --color-header-glass: rgba(23, 25, 30, 0.94);
+  --color-popover: color-mix(in srgb, #2b2f37 98%, transparent);
+  --color-hairline: rgba(255, 255, 255, 0.1);
+  --color-hover: rgba(255, 255, 255, 0.06); /* поверх #2B2F37 даёт примерно #353A44 */
+  --color-press: rgba(255, 255, 255, 0.1);
+  --color-mark: rgba(66, 98, 215, 0.28);
+  --color-spot: rgba(66, 98, 215, 0.1);
+  --ring-soft: 0 0 0 3px rgba(66, 98, 215, 0.4);
+  --color-kaddi-backdrop: rgba(23, 25, 30, 0.8);
+  --color-grid-light: rgba(255, 255, 255, 0.04);
+  --color-grid-light-major: rgba(255, 255, 255, 0.08);
   --filter-header-logo: brightness(0) invert(1);
   --color-logo-mark: var(--color-sky);
-  --color-step-badge: var(--color-blue);
-  /* Карточка товара светлее панели каталога и с заметной рамкой — иначе терялась (06.11.2026). */
-  --color-card: color-mix(in srgb, var(--color-navy) 72%, var(--color-blue));
-  --color-card-border: rgba(170, 204, 255, 0.24);
-  /* Баннеры начинаются не с цвета фона страницы: левый верхний угол не сливается. */
+  --color-step-badge: var(--color-navy);
+  --color-card: #2b2f37;
+  --color-card-border: rgba(255, 255, 255, 0.08);
+  /* Баннеры: фирменный синий переходит в акцент — не сливаются с графитовым фоном. */
   --gradient-banner: linear-gradient(
     120deg,
-    color-mix(in srgb, var(--color-navy) 75%, var(--color-blue)),
+    var(--color-navy-deep),
+    var(--color-navy) 45%,
     var(--color-blue)
   );
   --color-button-light: #ffffff;
   --color-on-button-light: var(--color-navy);
-  --color-control-hover: var(--color-blue);
-  --color-on-control-hover: var(--color-text-inverse);
-  --color-control-hover-border: var(--color-sky);
-  --color-action: #48d5c8;
-  --color-action-bright: #48d5c8;
-  --color-action-hover: #70dfd3;
-  --color-on-action: var(--color-navy-deep);
-  --color-on-action-muted: var(--color-navy);
-  --color-accent-border: #48d5c8;
-  --gradient-action: linear-gradient(135deg, var(--color-action), var(--color-action-hover));
+  --color-control-hover: #353a44;
+  --color-on-control-hover: var(--color-text);
+  --color-control-hover-border: var(--color-blue);
+  --color-action: var(--color-navy);
+  --color-action-bright: var(--color-navy);
+  --color-action-hover: var(--color-blue);
+  --color-on-action: #ffffff;
+  --color-on-action-muted: #dbe1f5;
+  --color-accent-border: var(--color-blue);
+  --gradient-action: linear-gradient(135deg, var(--color-navy), var(--color-blue));
   --color-section-art-surface: #e4ecf7;
   --section-art-padding: var(--space-1);
 }
