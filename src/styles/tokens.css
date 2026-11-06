@@ -10,6 +10,9 @@
   --color-link: var(--color-blue);
   --color-link-hover: var(--color-blue-hover);
   --color-image-surface: #ffffff;
+  /* Светлая кнопка на тёмных баннерах: белая в обеих темах (06.11.2026). */
+  --color-button-light: var(--color-surface);
+  --color-on-button-light: var(--color-heading);
   --color-control-hover: var(--color-blue-soft);
   --color-on-control-hover: var(--color-heading);
   --color-control-hover-border: var(--color-blue-mid);
@@ -89,11 +92,15 @@
   /* ---------- Градиенты (только из цветов палитры) ---------- */
   --gradient-navy: linear-gradient(135deg, var(--color-navy), var(--color-blue));
   --gradient-deep: linear-gradient(120deg, var(--color-navy-deep), var(--color-navy));
-  /* Общая подложка баннеров: светлее фона страницы и с мягким свечением слева. */
-  --gradient-banner:
-    radial-gradient(ellipse at 0% 100%, var(--aurora-dark-violet), transparent 65%),
-    linear-gradient(120deg, var(--color-navy), var(--color-blue));
-  --shadow-banner-outline: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  /* Общая подложка баннеров: глубокий navy слева переходит в фирменный синий справа — объём
+     без дымки и без светлой рамки (замечание владельца 06.11.2026: дымка и рамки делали плоско). */
+  --gradient-banner: linear-gradient(
+    120deg,
+    var(--color-navy-deep),
+    var(--color-navy) 45%,
+    var(--color-blue)
+  );
+  --shadow-banner-outline: none;
   --gradient-graphite: linear-gradient(135deg, var(--color-gray-700), var(--color-gray-500));
   --gradient-liquid: linear-gradient(
     90deg,
@@ -432,20 +439,22 @@
   color-scheme: dark;
   --color-navy: #112174;
   --color-navy-deep: #0b154a;
-  --gradient-navy: linear-gradient(135deg, var(--color-navy-deep), var(--color-navy));
+  --gradient-navy: linear-gradient(135deg, var(--color-navy), var(--color-blue));
   --color-sky: #8ac4ff;
   --color-sky-strong: #5fa8ff;
   --color-bg: var(--color-navy-deep);
-  --color-surface: color-mix(in srgb, var(--color-navy-deep) 85%, var(--color-blue));
-  --color-text: #f2f2f2;
-  --color-text-muted: #cccccc;
+  /* Карточки заметно светлее фона, чтобы отделяться без яркой рамки (06.11.2026). */
+  --color-surface: color-mix(in srgb, var(--color-navy-deep) 76%, var(--color-blue));
+  /* Текст с лёгким голубым оттенком: нейтральный серый на насыщенном синем выглядел грязно. */
+  --color-text: #eef2fb;
+  --color-text-muted: #b9c6e8;
   --color-heading: #ffffff;
   --color-link: #48d5c8;
   --color-link-hover: #70dfd3;
-  --color-blue-soft: color-mix(in srgb, var(--color-navy-deep) 70%, var(--color-blue));
+  --color-blue-soft: color-mix(in srgb, var(--color-navy-deep) 62%, var(--color-blue));
   --color-blue-mid: color-mix(in srgb, var(--color-navy-deep) 45%, var(--color-blue));
-  --color-border: color-mix(in srgb, var(--color-blue) 70%, var(--color-gray-300));
-  --color-border-strong: var(--color-gray-500);
+  --color-border: rgba(170, 204, 255, 0.14); /* тихая рамка: карточки отделяет фон, а не обводка */
+  --color-border-strong: rgba(170, 204, 255, 0.32);
   --color-gray-300: #cccccc;
   --color-gray-500: #878787;
   --color-gray-700: #cccccc;
@@ -466,6 +475,8 @@
   --color-grid-light-major: rgba(170, 204, 255, 0.1);
   --filter-header-logo: brightness(0) invert(1);
   --color-logo-mark: var(--color-sky);
+  --color-button-light: #ffffff;
+  --color-on-button-light: var(--color-navy);
   --color-control-hover: var(--color-blue);
   --color-on-control-hover: var(--color-text-inverse);
   --color-control-hover-border: var(--color-sky);
