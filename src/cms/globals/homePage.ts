@@ -163,7 +163,12 @@ export const homePage: GlobalConfig = {
       fields: [
         textField('eyebrow', 'Плашка'),
         textField('title', 'Заголовок'),
-        { name: 'lead', label: 'Вводный текст', type: 'textarea' },
+        {
+          name: 'lead',
+          label: 'Вводный текст',
+          type: 'textarea',
+          admin: { description: 'Если текст в две строки, первая строка станет подзаголовком.' },
+        },
         {
           name: 'stages',
           label: 'Этапы',

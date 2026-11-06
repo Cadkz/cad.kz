@@ -26,8 +26,12 @@ test('исключения владельца сохраняются; правк
   assert.ok(artec.includes('Artec Studio покупается отдельно от сканера.'))
   for (const entry of previous) {
     const corrected = fixes.correctKnowledgeText(entry.key, entry.text)
-    assert.equal(corrected, textOf(current, entry.key), entry.key)
-    assert.equal(fixes.correctKnowledgeText(entry.key, corrected), corrected)
+    const restored = fixes.restorePcSpecs(entry.key, corrected)
+    assert.equal(restored, textOf(current, entry.key), entry.key)
+    assert.equal(
+      fixes.restorePcSpecs(entry.key, fixes.correctKnowledgeText(entry.key, restored)),
+      restored,
+    )
   }
 })
 
@@ -43,6 +47,14 @@ test('подтверждённые условия аренды и BIM попад
     textOf(current, 'Справка: SCAD Office — нормы, аренда, выбор с ЛИРА'),
     /на один год для самой полной версии S Promax/,
   )
+})
+
+test('Кадди снова знает конкретные характеристики ПК', () => {
+  const facts = current.map((row) => ({ product: row.key, text: row.text }))
+  const revit = pickFacts(facts, 'Какой компьютер нужен для Revit?')
+  assert.ok(revit.some((row) => /32 ГБ/.test(row.text) && /64 ГБ/.test(row.text)))
+  const artec = pickFacts(facts, 'Какая видеокарта нужна для Artec Leo?')
+  assert.ok(artec.some((row) => /RTX 4060/.test(row.text) && /VCSEL/.test(row.text)))
 })
 
 const compiled = ts.transpileModule(
@@ -88,7 +100,12 @@ function mockPayload(fail = false) {
         rolledBack = true
       },
     },
-    find: async ({ collection }) => ({ docs: collection === 'import-runs' ? runs : docs }),
+    find: async ({ collection, where }) => ({
+      docs:
+        collection === 'import-runs'
+          ? runs.filter((run) => run.idempotencyKey === where.idempotencyKey.equals)
+          : docs,
+    }),
     findByID: async ({ id }) => docs.find((row) => row.id === id),
     update: async ({ id, data, req }) => {
       assert.equal(req.transactionID, 'tx')
@@ -122,6 +139,13 @@ test('обновление сохраняет флаги, порядок, руч
     ),
   )
   assert.equal(await exports.setupKaddiKnowledgeCorrections(payload), null)
+  const pc = await exports.setupKaddiPcSpecs(payload)
+  assert.equal(pc.length, 2)
+  assert.match(
+    state().docs.find((row) => row.product === 'Справка: компьютер для Autodesk').text,
+    /64 ГБ/,
+  )
+  assert.equal(await exports.setupKaddiPcSpecs(payload), null)
 })
 
 test('ошибка записи откатывает изменения и не оставляет отметку успеха', async () => {

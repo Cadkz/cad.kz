@@ -77,6 +77,15 @@
   color: var(--color-text-inverse);
 }
 
+.subtitle {
+  margin-top: calc(-1 * var(--space-2));
+  max-width: var(--measure);
+  color: var(--color-sky);
+  font-family: var(--font-heading);
+  font-size: var(--text-lead);
+  font-weight: var(--weight-heavy);
+}
+
 .lead {
   max-width: var(--measure);
   color: var(--color-text-on-dark);
@@ -214,6 +223,7 @@
 
   /* Заголовок и вводный текст — в левых 7 колонках, на тёмной половине. */
   .title,
+  .subtitle,
   .lead {
     max-width: min(var(--measure), calc(100% * 7 / 12));
   }

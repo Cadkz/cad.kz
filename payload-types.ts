@@ -1928,6 +1928,9 @@ export interface HomePage {
   bim?: {
     eyebrow?: string | null;
     title?: string | null;
+    /**
+     * Если текст в две строки, первая строка станет подзаголовком.
+     */
     lead?: string | null;
     stages?:
       | {

@@ -31,6 +31,9 @@ export function BimBand({
 }: Props) {
   if (!bim.title) return null
   const Heading = level === 1 ? 'h1' : 'h2'
+  // Первая строка вводного текста при переносе — подзаголовок (решение владельца 06.11.2026).
+  const [subtitle, ...rest] = (bim.lead ?? '').split('\n').filter((line) => line.trim())
+  const lead = rest.length ? rest.join(' ') : subtitle
   return (
     <section
       className={flush ? `${styles.section} ${styles.flush}` : styles.section}
@@ -52,7 +55,8 @@ export function BimBand({
           <Heading id="bim-title" className={styles.title}>
             {bim.title}
           </Heading>
-          {bim.lead && <p className={styles.lead}>{bim.lead}</p>}
+          {rest.length > 0 && <p className={styles.subtitle}>{subtitle}</p>}
+          {lead && <p className={styles.lead}>{lead}</p>}
           {bim.stages.length > 0 && (
             <ol className={styles.stages}>
               {bim.stages.map((stage, i) => (

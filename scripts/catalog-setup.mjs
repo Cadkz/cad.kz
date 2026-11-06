@@ -46,7 +46,7 @@ import { setupFamiliesV5 } from '../src/lib/familiesSetup.ts'
 import { setupFooterAudit } from '../src/lib/footerSetup.ts'
 import { setupFormaCatalog } from '../src/lib/formaCatalogSetup.ts'
 import { setupGeo5Catalog } from '../src/lib/geoSetup.ts'
-import { setupHomeBim } from '../src/lib/homeBimSetup.ts'
+import { setupHomeBim, setupHomeBimTasks } from '../src/lib/homeBimSetup.ts'
 import {
   setupHomeHero,
   setupHomeHeroV2,
@@ -54,7 +54,10 @@ import {
   setupHomeTrust,
 } from '../src/lib/homeSetup.ts'
 import { setupKaddiFaq, setupKaddiFaq2, setupKaddiFaqChatgpt } from '../src/lib/kaddiFaqSetup.ts'
-import { setupKaddiKnowledgeCorrections } from '../src/lib/kaddiKnowledgeCorrections.ts'
+import {
+  setupKaddiKnowledgeCorrections,
+  setupKaddiPcSpecs,
+} from '../src/lib/kaddiKnowledgeCorrections.ts'
 import { setupLegacyCovers } from '../src/lib/legacyCoversSetup.ts'
 import { setupNewsCovers } from '../src/lib/newsCoversSetup.ts'
 import { clearOldPictures } from '../src/lib/oldPicturesSetup.ts'
@@ -334,6 +337,8 @@ try {
   const homeBim = await setupHomeBim(payload)
   if (!homeBim) console.log('Баннер BIM на главной уже сокращён.')
   else for (const line of homeBim) console.log(`Баннер BIM — ${line}`)
+  const homeBimTasks = await setupHomeBimTasks(payload)
+  if (homeBimTasks) for (const line of homeBimTasks) console.log(`Баннер BIM (06.11) — ${line}`)
   const legacyCovers = await setupLegacyCovers(payload)
   if (!legacyCovers) console.log('Обложки публикаций со старого сайта уже поставлены.')
   else for (const line of legacyCovers) console.log(`Обложки — ${line}`)
@@ -346,6 +351,8 @@ try {
   const knowledgeCorrections = await setupKaddiKnowledgeCorrections(payload)
   if (knowledgeCorrections)
     for (const line of knowledgeCorrections) console.log(`Правки базы Кадди — ${line}`)
+  const pcSpecs = await setupKaddiPcSpecs(payload)
+  if (pcSpecs) for (const line of pcSpecs) console.log(`Характеристики ПК в базе Кадди — ${line}`)
   console.log(`Заполненность товаров: обновлено ${await setupQuality(payload)}`)
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)

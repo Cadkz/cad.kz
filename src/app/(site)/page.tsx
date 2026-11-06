@@ -49,12 +49,7 @@ export default async function Home({ searchParams }: Props) {
     <main>
       <CatalogHashRedirect />
       {home.title && <HiddenTitle>{home.title}</HiddenTitle>}
-      <BimBand
-        bim={home.bim}
-        more={{ href: '/bim', label: 'Подробнее о внедрении' }}
-        priority
-        noEyebrow
-      />
+      <BimBand bim={home.bim} more={{ href: '/bim', label: 'Все BIM-услуги' }} priority noEyebrow />
       {/* Блок «Официальный партнёр» скрыт (замечание владельца 12.10.2026: меньше шума), данные
           остались в админке — вернуть: <TrustBand trust={home.trust} />. */}
       <Section

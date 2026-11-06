@@ -2,16 +2,32 @@ import type { Payload } from 'payload'
 import {
   correctKnowledgeText,
   KNOWLEDGE_CORRECTIONS_KEY,
+  PC_SPECS_KEY,
+  restorePcSpecs,
   SCANNER_RENTAL_KEY,
   SCANNER_RENTAL_TEXT,
 } from '../domain/kaddiKnowledgeCorrections.mjs'
 
 /** Разовое обновление базы. В одной транзакции сохраняются изменения и прежние тексты в журнале. */
-export async function setupKaddiKnowledgeCorrections(payload: Payload): Promise<string[] | null> {
+export function setupKaddiKnowledgeCorrections(payload: Payload): Promise<string[] | null> {
+  return applyKnowledgeFix(payload, KNOWLEDGE_CORRECTIONS_KEY, correctKnowledgeText, true)
+}
+
+/** Возврат характеристик ПК в справку Кадди (06.11.2026), тем же безопасным способом. */
+export function setupKaddiPcSpecs(payload: Payload): Promise<string[] | null> {
+  return applyKnowledgeFix(payload, PC_SPECS_KEY, restorePcSpecs, false)
+}
+
+async function applyKnowledgeFix(
+  payload: Payload,
+  key: string,
+  correct: (product: string, text: string) => string,
+  addScannerRental: boolean,
+): Promise<string[] | null> {
   const options = { overrideAccess: true, depth: 0 } as const
   const done = await payload.find({
     collection: 'import-runs',
-    where: { idempotencyKey: { equals: KNOWLEDGE_CORRECTIONS_KEY } },
+    where: { idempotencyKey: { equals: key } },
     limit: 1,
     ...options,
   })
@@ -26,7 +42,7 @@ export async function setupKaddiKnowledgeCorrections(payload: Payload): Promise<
       ...opts,
     })
     const changes = docs.flatMap((doc) => {
-      const after = correctKnowledgeText(doc.product ?? '', doc.text)
+      const after = correct(doc.product ?? '', doc.text)
       return after === doc.text
         ? []
         : [{ id: doc.id, product: doc.product ?? '', before: doc.text, after }]
@@ -49,7 +65,7 @@ export async function setupKaddiKnowledgeCorrections(payload: Payload): Promise<
       report.push(`обновлена запись ${change.id}: ${change.product}`)
     }
     let addedId: number | null = null
-    if (!docs.some((doc) => doc.product === SCANNER_RENTAL_KEY)) {
+    if (addScannerRental && !docs.some((doc) => doc.product === SCANNER_RENTAL_KEY)) {
       const created = await payload.create({
         collection: 'assistant-knowledge',
         data: {
@@ -66,7 +82,7 @@ export async function setupKaddiKnowledgeCorrections(payload: Payload): Promise<
     await payload.create({
       collection: 'import-runs',
       data: {
-        idempotencyKey: KNOWLEDGE_CORRECTIONS_KEY,
+        idempotencyKey: key,
         state: 'done',
         snapshot: { changes, addedId, report },
       },

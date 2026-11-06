@@ -4,6 +4,16 @@ import corrections from './kaddiKnowledgeCorrections.json' with { type: 'json' }
 export const KNOWLEDGE_CORRECTIONS_KEY = 'catalog-setup:kaddi-knowledge-owner-2026-11-05'
 export const SCANNER_RENTAL_KEY = 'Справка: аренда 3D-сканеров'
 export const SCANNER_RENTAL_TEXT = corrections.scannerRental
+export const PC_SPECS_KEY = 'catalog-setup:kaddi-pc-specs-2026-11-06'
+
+/** Владелец 06.11.2026: вернуть конкретные характеристики ПК (Autodesk, Artec) — записи заменяются целиком.
+ * @param {string} product @param {string} text
+ */
+export function restorePcSpecs(product, text) {
+  /** @type {Record<string, string>} */
+  const specs = corrections.pcSpecs
+  return specs[product] ?? text
+}
 
 /** Только согласованные фрагменты; остальные тексты, в том числе исключения владельца, сохраняются.
  * @param {string} product @param {string} text

@@ -4,7 +4,7 @@
  * Цены, сроки и описания учебные: перед публикацией их проверяет редактор.
  */
 
-import { HOME_BIM } from './homeBimText.mjs'
+import { HOME_BIM_TASKS } from './homeBimText.mjs'
 import { HOME_HERO } from './homeHero'
 import { TRUST_DATA } from './homeTrust.mjs'
 
@@ -587,9 +587,8 @@ export const demoHome = {
   ],
   bim: {
     eyebrow: 'Отдельное направление',
-    // Короткий текст баннера (03.11.2026) — тот же, что ставит настройка на рабочем сайте.
-    ...HOME_BIM,
-    linkLabel: 'Обсудить внедрение',
+    // Текст баннера владельца (06.11.2026) — тот же, что ставит настройка на рабочем сайте.
+    ...HOME_BIM_TASKS,
     linkHref: 'whatsapp',
   },
   process: [
