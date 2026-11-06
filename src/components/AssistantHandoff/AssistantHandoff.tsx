@@ -2,6 +2,7 @@
 
 import { ArrowLeft } from 'lucide-react'
 import { type FormEvent, useRef, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { CONSENT_TEXT, validateContact } from '@/domain/siteRequest.mjs'
 import { type CrmState, crmDoneText } from '@/lib/crmNotice'
 import type { HandoffPrefill } from '@/lib/useAssistant'
@@ -27,6 +28,7 @@ type Props = {
  * проверяет и подтверждает сам. В демо честно говорим, что менеджерам заявка не уходит.
  */
 export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack }: Props) {
+  const t = useT()
   const key = useRef<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState('')
