@@ -41,6 +41,7 @@ import { CatalogSelection } from '../CatalogSelection/CatalogSelection'
 import { CatalogSteps } from '../CatalogSteps/CatalogSteps'
 import { CatalogTabs } from '../CatalogTabs/CatalogTabs'
 import { Drawer } from '../Drawer/Drawer'
+import { FilterFloat } from '../FilterFloat/FilterFloat'
 import { FilterPanel } from '../FilterPanel/FilterPanel'
 import { activeCount, FilterToggle } from '../FilterToggle/FilterToggle'
 import { FlowItem } from '../FlowItem/FlowItem'
@@ -117,6 +118,7 @@ export function CatalogFilter({
   )
   const [panelOpen, setPanelOpen] = useState(false)
   const top = useRef<HTMLDivElement>(null)
+  const shell = useRef<HTMLDivElement>(null)
 
   // Каждый шаг — запись в истории браузера: «Назад» (кнопка мыши, жест) возвращает на шаг
   // назад в каталоге, а не уводит со страницы (замечание владельца 22.10.2026).
@@ -193,6 +195,11 @@ export function CatalogFilter({
     if (wide && window.matchMedia(WIDE).matches) setSideOpen((open) => !open)
     else setPanelOpen(true)
   }
+  // Плавающая капсула только открывает: на компьютере колонку, уже 960 px — выдвижную панель.
+  const showFilters = () => {
+    if (wide && window.matchMedia(WIDE).matches) setSideOpen(true)
+    else setPanelOpen(true)
+  }
 
   const popularView = state.group === POPULAR
   // Вкладки групп в колонке не нужны, когда они строкой сверху; в панели телефона на /catalog — нужны.
@@ -222,6 +229,7 @@ export function CatalogFilter({
 
   return (
     <div
+      ref={shell}
       className={wide ? `${styles.shell} ${styles.compact}` : styles.shell}
       data-side={wide && sideOpen ? 'open' : undefined}
     >
@@ -243,6 +251,7 @@ export function CatalogFilter({
           />
         </div>
       )}
+      <FilterFloat target={shell} count={activeCount(state)} onOpen={showFilters} />
       <section
         className={styles.sidebar}
         aria-label={t('Фильтр каталога')}

@@ -1,5 +1,6 @@
 .shell {
   display: grid;
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-8);
   align-items: start;
@@ -193,7 +194,8 @@
   }
 }
 
-/* Вариант A (07.11.2026): полосы нет — открывает кнопка «Фильтры» над блоком. Колонка выезжает,
+/* Вариант C (07.11.2026): полосы нет — открывает кнопка «Фильтры» над блоком, ниже по каталогу —
+   плавающая капсула FilterFloat. Колонка выезжает,
    содержимое приходит слева из лёгкого размытия, группы фильтра — по очереди, волной. */
 @media (min-width: 960px) and (prefers-reduced-motion: no-preference) {
   .compact[data-side="open"] .sideInner > * > * {
