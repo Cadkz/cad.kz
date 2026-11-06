@@ -1,8 +1,8 @@
 'use client'
 
 import { ArrowRight } from 'lucide-react'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import { sectionIconKey } from '@/domain/sectionArt.mjs'
 import type { Direction } from '@/lib/catalog'
 import { catalogHref } from '@/lib/navigationHrefs'

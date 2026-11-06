@@ -5,6 +5,7 @@ import { type PointerEventHandler, useEffect, useRef, useState } from 'react'
 import { POPULAR_LABEL } from '@/domain/catalogNavigation.mjs'
 import type { MenuTab } from '@/lib/navigation'
 import type { PopularCardData } from '@/lib/popular'
+import { useT } from '../LangProvider/LangProvider'
 import { MenuPopular } from '../MenuPopular/MenuPopular'
 import { MenuSections } from '../MenuSections/MenuSections'
 import styles from './MegaMenu.module.css'
@@ -50,6 +51,7 @@ export function MegaMenu({
   onPointerEnter,
   onPointerLeave,
 }: Props) {
+  const t = useT()
   const segments = [
     ...(popular.length ? [{ key: POPULAR, label: POPULAR_LABEL }] : []),
     ...tabs.map(({ key, label }) => ({ key, label })),
@@ -92,7 +94,7 @@ export function MegaMenu({
       onPointerLeave={onPointerLeave}
     >
       <div className={styles.rail}>
-        <div className={styles.segments} role="tablist" aria-label="Группы каталога">
+        <div className={styles.segments} role="tablist" aria-label={t('Группы каталога')}>
           {segments.map((item) => (
             <button
               key={item.key}
@@ -108,16 +110,16 @@ export function MegaMenu({
               }
               onPointerLeave={() => clearTimeout(timer.current)}
             >
-              {item.label}
+              {t(item.label)}
             </button>
           ))}
         </div>
         <div className={styles.offer}>
-          <p className={styles.offerTitle}>Не знаете, что выбрать?</p>
+          <p className={styles.offerTitle}>{t('Не знаете, что выбрать?')}</p>
           {whatsappHref && (
             <a href={whatsappHref} className={styles.offerLink} target="_blank" rel="noreferrer">
               <MessageCircle size={16} strokeWidth={1.75} aria-hidden="true" />
-              Написать в WhatsApp
+              {t('Написать в WhatsApp')}
             </a>
           )}
         </div>

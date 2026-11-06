@@ -1,8 +1,6 @@
 'use client'
 
 import { Phone } from 'lucide-react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import {
   type FocusEvent,
   type ReactNode,
@@ -10,10 +8,13 @@ import {
   useEffect,
   useState,
 } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import { NAV_BACK, NAV_FORWARD } from '@/domain/motion.mjs'
 import { activeLinkIndex, markMotion } from '@/domain/navMark.mjs'
 import { aboutColumns, sectionLinks } from '@/lib/siteNav'
 import { Container } from '../Container/Container'
+import { usePagePath, useT } from '../LangProvider/LangProvider'
+import { LangSwitch } from '../LangSwitch/LangSwitch'
 import { SubNavAbout } from '../SubNavAbout/SubNavAbout'
 import styles from './SubNav.module.css'
 
@@ -41,7 +42,8 @@ function itemIndex(target: EventTarget | null): number | null {
  * только выбор пункта и направления, движение — в CSS (якоря anchor-name).
  */
 export function SubNav({ phone, contacts }: Props) {
-  const pathname = usePathname()
+  const pathname = usePagePath()
+  const t = useT()
   const [search, setSearch] = useState('')
   const [mark, setMark] = useState<Mark>({ hovered: null, line: 'still', pill: 'still' })
 
@@ -90,7 +92,7 @@ export function SubNav({ phone, contacts }: Props) {
     <div className={styles.subnav}>
       <Container className={styles.row}>
         <nav
-          aria-label="Разделы сайта"
+          aria-label={t('Разделы сайта')}
           className={styles.nav}
           data-line={mark.line}
           data-pill={mark.pill}
@@ -111,7 +113,7 @@ export function SubNav({ phone, contacts }: Props) {
               transitionTypes={active !== null && index < active ? NAV_BACK : NAV_FORWARD}
               {...attrs(index)}
             >
-              {link.title}
+              {t(link.title)}
             </Link>
           ))}
           <SubNavAbout
@@ -124,12 +126,17 @@ export function SubNav({ phone, contacts }: Props) {
           <span className={styles.pill} aria-hidden="true" />
           <span className={styles.line} aria-hidden="true" />
         </nav>
-        {phone && (
-          <a href={`tel:${phone.tel}`} className={styles.phone}>
-            <Phone size={16} strokeWidth={1.75} aria-hidden="true" />
-            {phone.label}
-          </a>
-        )}
+        {/* Справа телефон, правее — языки, под корзиной (решение владельца 06.11.2026). */}
+        <div className={styles.end}>
+          {phone && (
+            <a href={`tel:${phone.tel}`} className={styles.phone} aria-label={phone.label}>
+              <Phone size={16} strokeWidth={1.75} aria-hidden="true" />
+              {/* 960–1199 px — только значок: рядом с языками номер не помещался в строку. */}
+              <span className={styles.phoneText}>{phone.label}</span>
+            </a>
+          )}
+          <LangSwitch />
+        </div>
       </Container>
     </div>
   )

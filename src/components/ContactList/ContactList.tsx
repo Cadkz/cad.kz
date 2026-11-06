@@ -1,4 +1,5 @@
 import { Mail } from 'lucide-react'
+import { getT } from '@/i18n/server'
 import type { Contacts } from '@/lib/navigation'
 import { socialIcons, socialNames, TelegramIcon, WhatsappIcon } from '../icons/icons'
 import styles from './ContactList.module.css'
@@ -7,7 +8,8 @@ import styles from './ContactList.module.css'
 type Props = { contacts: Contacts; socials?: boolean; whatsapp?: boolean }
 
 /** Телефоны, мессенджеры и соцсети из настроек CMS. */
-export function ContactList({ contacts, socials = true, whatsapp = true }: Props) {
+export async function ContactList({ contacts, socials = true, whatsapp = true }: Props) {
+  const t = await getT()
   return (
     <div className={styles.list}>
       {contacts.phones.map((phone) => (
@@ -18,13 +20,13 @@ export function ContactList({ contacts, socials = true, whatsapp = true }: Props
       {whatsapp && contacts.whatsappHref && (
         <a href={contacts.whatsappHref} className={styles.line} target="_blank" rel="noreferrer">
           <WhatsappIcon size={16} />
-          Написать в WhatsApp
+          {t('Написать в WhatsApp')}
         </a>
       )}
       {contacts.telegramHref && (
         <a href={contacts.telegramHref} className={styles.line} target="_blank" rel="noreferrer">
           <TelegramIcon size={16} />
-          Написать в Telegram
+          {t('Написать в Telegram')}
         </a>
       )}
       {contacts.email && (

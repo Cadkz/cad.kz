@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { requestNeedsChoice } from '@/domain/pickerRequest.mjs'
 import { pickerActions } from '@/lib/pickerAction'
 import { usePickerCart } from '@/lib/usePickerCart'

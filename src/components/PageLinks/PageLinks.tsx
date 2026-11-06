@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { pageWindow } from '@/lib/pagination'
 import styles from './PageLinks.module.css'
 

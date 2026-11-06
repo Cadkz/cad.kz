@@ -1,5 +1,5 @@
 import { ArrowLeft, ArrowRight } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { NAV_BACK, NAV_FORWARD } from '@/domain/motion.mjs'
 import styles from './PrevNext.module.css'
 

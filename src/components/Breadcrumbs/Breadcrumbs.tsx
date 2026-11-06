@@ -1,5 +1,5 @@
 import { ChevronRight } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { NAV_BACK } from '@/domain/motion.mjs'
 import { breadcrumbLd } from '@/domain/structuredData.mjs'
 import { siteUrl } from '@/lib/seo'

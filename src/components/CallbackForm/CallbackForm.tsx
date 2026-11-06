@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { type FormEvent, useRef, useState } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import { isEmail } from '@/domain/order.mjs'
 import { type RequestKind, validateContact } from '@/domain/siteRequest.mjs'
 import { type CrmState, crmDoneText } from '@/lib/crmNotice'

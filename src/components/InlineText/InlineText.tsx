@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { parseInline } from '@/lib/richText'
 import styles from './InlineText.module.css'
 

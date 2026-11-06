@@ -4,6 +4,7 @@ import { Search } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useT } from '../LangProvider/LangProvider'
 import { SearchBox } from '../SearchBox/SearchBox'
 import styles from './SiteSearch.module.css'
 
@@ -20,6 +21,7 @@ type Props = {
  * Слой выносится в body: у закреплённой шапки backdrop-filter, внутри неё fixed не работает.
  */
 export function SiteSearch({ hints, typingHints, whatsappHref }: Props) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const toggle = useRef<HTMLButtonElement>(null)
@@ -57,17 +59,17 @@ export function SiteSearch({ hints, typingHints, whatsappHref }: Props) {
         ref={toggle}
         type="button"
         className={styles.toggle}
-        aria-label="Поиск по каталогу"
+        aria-label={t('Поиск по каталогу')}
         aria-expanded={open}
         onClick={() => setOpen(true)}
       >
         <Search size={20} strokeWidth={1.75} aria-hidden="true" />
-        <span className={styles.toggleText}>Поиск</span>
+        <span className={styles.toggleText}>{t('Поиск')}</span>
       </button>
       {mounted &&
         open &&
         createPortal(
-          <div className={styles.layer} role="dialog" aria-modal="true" aria-label="Поиск">
+          <div className={styles.layer} role="dialog" aria-modal="true" aria-label={t('Поиск')}>
             <SearchBox
               variant="layer"
               hints={hints}

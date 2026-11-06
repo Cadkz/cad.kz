@@ -1,4 +1,5 @@
 import { footerSocials } from '@/domain/footerContacts.mjs'
+import { getT } from '@/i18n/server'
 import type { Contacts } from '@/lib/navigation'
 import { socialIcons, socialNames, TelegramIcon, WhatsappIcon } from '../icons/icons'
 import styles from './FooterContacts.module.css'
@@ -9,7 +10,8 @@ type Props = { contacts: Contacts }
  * Контакты в подвале (аудит 21.10.2026, М5, Г9): два номера цифрами (решение владельца —
  * больше не нужно), почта, адрес и часы; WhatsApp, Telegram и соцсети — строкой значков.
  */
-export function FooterContacts({ contacts }: Props) {
+export async function FooterContacts({ contacts }: Props) {
+  const t = await getT()
   const socials = footerSocials(contacts.socials, contacts.telegramHref)
   return (
     <div className={styles.contacts}>
@@ -27,8 +29,8 @@ export function FooterContacts({ contacts }: Props) {
       </div>
       {(contacts.address || contacts.hours) && (
         <p className={styles.place}>
-          {contacts.address && <span>{contacts.address}</span>}
-          {contacts.hours && <span>{contacts.hours}</span>}
+          {contacts.address && <span>{t(contacts.address)}</span>}
+          {contacts.hours && <span>{t(contacts.hours)}</span>}
         </p>
       )}
       <div className={styles.icons}>
@@ -38,7 +40,7 @@ export function FooterContacts({ contacts }: Props) {
             className={styles.icon}
             target="_blank"
             rel="noreferrer"
-            aria-label="Написать в WhatsApp"
+            aria-label={t('Написать в WhatsApp')}
           >
             <WhatsappIcon size={20} />
           </a>
@@ -49,7 +51,7 @@ export function FooterContacts({ contacts }: Props) {
             className={styles.icon}
             target="_blank"
             rel="noreferrer"
-            aria-label="Написать в Telegram"
+            aria-label={t('Написать в Telegram')}
           >
             <TelegramIcon size={20} />
           </a>

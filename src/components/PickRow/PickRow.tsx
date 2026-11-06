@@ -1,6 +1,6 @@
 import { ChevronRight } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import type { Picture } from '@/lib/pictures'
 import { AddToCartButton } from '../AddToCartButton/AddToCartButton'
 import { SectionIcon } from '../SectionIcon/SectionIcon'

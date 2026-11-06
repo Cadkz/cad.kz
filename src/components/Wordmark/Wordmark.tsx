@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import styles from './Wordmark.module.css'
 
 const LETTERS = ['c', 'a', 'd', '.', 'k', 'z']

@@ -1,5 +1,5 @@
 import { RefreshCw } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { RENEW_PROGRAMS } from '@/domain/siteRequest.mjs'
 import { ButtonLink } from '../Button/Button'
 import { Container } from '../Container/Container'

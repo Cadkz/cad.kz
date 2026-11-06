@@ -241,6 +241,12 @@
   }
 }
 
+.end {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
 .phone {
   display: inline-flex;
   align-items: center;
@@ -249,6 +255,16 @@
   font-size: var(--text-sm);
   white-space: nowrap;
   transition: color var(--duration-fast) var(--ease);
+}
+
+.phoneText {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .phoneText {
+    display: inline;
+  }
 }
 
 .phone:hover {

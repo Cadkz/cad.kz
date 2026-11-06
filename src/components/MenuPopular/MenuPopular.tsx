@@ -1,8 +1,9 @@
 import { ArrowRight } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import type { MenuLogo } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import type { PopularCardData } from '@/lib/popular'
+import { useT } from '../LangProvider/LangProvider'
 import { MenuTile } from '../MenuTile/MenuTile'
 import { PopularCard } from '../PopularCard/PopularCard'
 import styles from './MenuPopular.module.css'
@@ -34,9 +35,10 @@ const logoOf = (card: PopularCardData): MenuLogo | null =>
  * в меню телефона — прежние плитки.
  */
 export function MenuPopular({ cards, onNavigate, compact = false }: Props) {
+  const t = useT()
   return (
     <div className={compact ? styles.compact : styles.root}>
-      {!compact && <p className={styles.lead}>Чаще всего выбирают</p>}
+      {!compact && <p className={styles.lead}>{t('Чаще всего выбирают')}</p>}
       <ul className={compact ? styles.grid : styles.tiles}>
         {cards.map((card) => (
           <li key={card.key}>
@@ -55,7 +57,7 @@ export function MenuPopular({ cards, onNavigate, compact = false }: Props) {
         ))}
       </ul>
       <Link href={catalogHref()} className={styles.all} onClick={onNavigate}>
-        Весь каталог
+        {t('Весь каталог')}
         <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
       </Link>
     </div>

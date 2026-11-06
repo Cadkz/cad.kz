@@ -1,5 +1,6 @@
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { organizationLd, websiteLd } from '@/domain/structuredData.mjs'
+import { getT } from '@/i18n/server'
 import { getContacts } from '@/lib/navigation'
 import { isProduction, siteUrl } from '@/lib/seo'
 import { footerColumns } from '@/lib/siteNav'
@@ -21,6 +22,7 @@ const LOGO = '/images/brand/cad-kz-logo.png'
  * контактов, что в подвале.
  */
 export async function SiteFooter() {
+  const t = await getT()
   const contacts = await getContacts()
   const year = new Date().getFullYear()
   const base = siteUrl()
@@ -40,27 +42,27 @@ export async function SiteFooter() {
         <div className={styles.grid}>
           {contacts.footerText && (
             <div className={styles.brand}>
-              <p className={styles.text}>{contacts.footerText}</p>
+              <p className={styles.text}>{t(contacts.footerText)}</p>
             </div>
           )}
           {footerColumns.map((column) => (
-            <nav key={column.title} className={styles.column} aria-label={column.title}>
-              <p className={styles.title}>{column.title}</p>
+            <nav key={column.title} className={styles.column} aria-label={t(column.title)}>
+              <p className={styles.title}>{t(column.title)}</p>
               {column.links.map((link) =>
                 link.href.startsWith('http') ? (
                   <a key={link.href} href={link.href} className={styles.link}>
-                    {link.title}
+                    {t(link.title)}
                   </a>
                 ) : (
                   <Link key={link.href} href={link.href} className={styles.link}>
-                    {link.title}
+                    {t(link.title)}
                   </Link>
                 ),
               )}
             </nav>
           ))}
           <div className={styles.contacts}>
-            <p className={styles.title}>Контакты</p>
+            <p className={styles.title}>{t('Контакты')}</p>
             <FooterContacts contacts={contacts} />
           </div>
         </div>
@@ -69,8 +71,8 @@ export async function SiteFooter() {
             <Wordmark />
           </div>
           <div className={styles.bottom}>
-            <span>CAD.kz © {year}. Все права защищены.</span>
-            {!isProduction() && <span>Тестовая версия сайта</span>}
+            <span>{t('CAD.kz © {year}. Все права защищены.', { year })}</span>
+            {!isProduction() && <span>{t('Тестовая версия сайта')}</span>}
           </div>
         </div>
       </Container>

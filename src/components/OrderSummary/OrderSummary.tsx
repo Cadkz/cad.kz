@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { lineKzt, totalKzt } from '@/lib/format'
 import { productHref } from '@/lib/navigationHrefs'
 import type { Quote } from '@/lib/useCartQuote'

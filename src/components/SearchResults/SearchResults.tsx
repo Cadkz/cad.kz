@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import type { CatalogItem } from '@/lib/catalog'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { positions } from '@/lib/plural'

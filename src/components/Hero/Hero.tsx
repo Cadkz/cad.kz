@@ -1,5 +1,5 @@
 import { ArrowRight, LayoutGrid } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import type { Home } from '@/lib/home'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { Aurora } from '../Aurora/Aurora'

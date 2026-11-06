@@ -1,8 +1,8 @@
 'use client'
 
 import { ArrowRight, ChevronLeft } from 'lucide-react'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import { titleDash } from '@/domain/titleDash.mjs'
 import type { MenuColumn } from '@/lib/navigation'
 import { MenuChips } from '../MenuChips/MenuChips'

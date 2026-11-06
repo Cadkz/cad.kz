@@ -1,8 +1,9 @@
 'use client'
 
 import { Search, X } from 'lucide-react'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition } from 'react'
+import { useLocalHref, usePagePath } from '../LangProvider/LangProvider'
 import styles from './SearchForm.module.css'
 
 /**
@@ -11,7 +12,9 @@ import styles from './SearchForm.module.css'
  */
 export function SearchForm({ initial }: { initial: string }) {
   const router = useRouter()
-  const pathname = usePathname()
+  const pagePath = usePagePath()
+  const localHref = useLocalHref()
+  const pathname = localHref(pagePath)
   const [value, setValue] = useState(initial)
   const [pending, startTransition] = useTransition()
   const input = useRef<HTMLInputElement>(null)

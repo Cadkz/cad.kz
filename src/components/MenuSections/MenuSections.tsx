@@ -1,8 +1,8 @@
 'use client'
 
 import { ArrowRight } from 'lucide-react'
-import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import { groupAllLabel, sectionAllLabel } from '@/domain/catalogNavigation.mjs'
 import type { MenuTab } from '@/lib/navigation'
 import { MenuDrill } from '../MenuDrill/MenuDrill'

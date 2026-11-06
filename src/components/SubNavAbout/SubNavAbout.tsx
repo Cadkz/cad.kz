@@ -1,7 +1,6 @@
 'use client'
 
 import { ChevronDown } from 'lucide-react'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   type ReactNode,
@@ -10,7 +9,9 @@ import {
   useRef,
   useState,
 } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import { aboutColumns } from '@/lib/siteNav'
+import { useT } from '../LangProvider/LangProvider'
 import styles from './SubNavAbout.module.css'
 
 type Props = {
@@ -30,6 +31,7 @@ type Props = {
  * каталога; колонки проступают по очереди.
  */
 export function SubNavAbout({ index, line, pill, itemClassName, contacts }: Props) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const root = useRef<HTMLDivElement>(null)
   const button = useRef<HTMLButtonElement>(null)
@@ -82,22 +84,22 @@ export function SubNavAbout({ index, line, pill, itemClassName, contacts }: Prop
         aria-controls="nav-about"
         onClick={() => setOpen(!open)}
       >
-        О компании
+        {t('О компании')}
         <ChevronDown size={16} strokeWidth={1.75} className={styles.chevron} aria-hidden="true" />
       </button>
       <div id="nav-about" className={styles.dropdown} data-open={open} inert={!open}>
         {aboutColumns.map((column) => (
           <div key={column.title} className={styles.column}>
-            <p className={styles.columnTitle}>{column.title}</p>
+            <p className={styles.columnTitle}>{t(column.title)}</p>
             {column.links.map((link) => (
               <Link key={link.href} href={link.href} className={styles.dropLink}>
-                {link.title}
+                {t(link.title)}
               </Link>
             ))}
           </div>
         ))}
         <div className={`${styles.column} ${styles.contacts}`}>
-          <p className={styles.columnTitle}>Связаться</p>
+          <p className={styles.columnTitle}>{t('Связаться')}</p>
           {contacts}
         </div>
       </div>

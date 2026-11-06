@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import type { Lifecycle } from '@/lib/equipmentResearch'
 import styles from './ProductLifecycle.module.css'
 

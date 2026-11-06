@@ -1,3 +1,4 @@
+import { getT } from '@/i18n/server'
 import { getMenuPopular } from '@/lib/menuPopular'
 import { getContacts, getMenu, mobilePhone } from '@/lib/navigation'
 import { searchHints, typingHints } from '@/lib/siteNav'
@@ -23,6 +24,7 @@ import styles from './SiteHeader.module.css'
  * Уже 960 px: меню, логотип, поиск, WhatsApp, корзина; разделы — в меню.
  */
 export async function SiteHeader() {
+  const t = await getT()
   const [menu, popular, contacts] = await Promise.all([getMenu(), getMenuPopular(), getContacts()])
   const contactList = <ContactList contacts={contacts} socials={false} />
   return (
@@ -52,7 +54,7 @@ export async function SiteHeader() {
                 tone="whatsapp"
                 icon={<WhatsappIcon size={20} />}
                 label="WhatsApp"
-                ariaLabel="Написать в WhatsApp"
+                ariaLabel={t('Написать в WhatsApp')}
               />
             )}
             <ThemeToggle />

@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { publicationTabs } from '@/lib/siteNav'
 import styles from './PublicationTabs.module.css'
 

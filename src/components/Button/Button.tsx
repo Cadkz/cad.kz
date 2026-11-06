@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import styles from './Button.module.css'
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'light' | 'ghostDark' | 'text' | 'tool'

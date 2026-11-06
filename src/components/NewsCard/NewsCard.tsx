@@ -1,6 +1,6 @@
 import { ArrowRight, Newspaper } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { NAV_FORWARD } from '@/domain/motion.mjs'
 import { Badge } from '../Badge/Badge'
 import styles from './NewsCard.module.css'

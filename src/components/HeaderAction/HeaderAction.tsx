@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import styles from './HeaderAction.module.css'
 
 type Common = {

@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import type { PopularCardData } from '@/lib/popular'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './PopularCard.module.css'

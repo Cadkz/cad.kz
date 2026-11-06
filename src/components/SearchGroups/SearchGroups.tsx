@@ -9,8 +9,8 @@ import {
   Puzzle,
 } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import type { ReactNode } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import { showVendorLine } from '@/domain/cardNoise.mjs'
 import { markMatches, type Suggestion } from '@/domain/suggest.mjs'
 import styles from './SearchGroups.module.css'

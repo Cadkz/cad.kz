@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import type { MenuLogo } from '@/lib/navigation'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './MenuTile.module.css'

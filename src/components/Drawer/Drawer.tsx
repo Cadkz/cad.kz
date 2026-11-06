@@ -3,6 +3,7 @@
 import { X } from 'lucide-react'
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useT } from '../LangProvider/LangProvider'
 import styles from './Drawer.module.css'
 
 type Props = {
@@ -36,6 +37,7 @@ function trapFocus(event: KeyboardEvent, container: HTMLElement) {
  * Ловушка фокуса, закрытие по Escape и по клику на затемнение, возврат фокуса на кнопку.
  */
 export function Drawer({ open, onClose, title, children, side = 'right' }: Props) {
+  const t = useT()
   const panel = useRef<HTMLDivElement>(null)
   const titleId = useId()
   // Панель выносится в body: у липкой шапки есть backdrop-filter, внутри неё fixed не работает.
@@ -67,7 +69,7 @@ export function Drawer({ open, onClose, title, children, side = 'right' }: Props
       <button
         type="button"
         className={styles.backdrop}
-        aria-label="Закрыть"
+        aria-label={t('Закрыть')}
         tabIndex={-1}
         onClick={onClose}
       />
@@ -82,7 +84,12 @@ export function Drawer({ open, onClose, title, children, side = 'right' }: Props
           <h2 id={titleId} className={styles.title}>
             {title}
           </h2>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="Закрыть">
+          <button
+            type="button"
+            className={styles.close}
+            onClick={onClose}
+            aria-label={t('Закрыть')}
+          >
             <X size={20} strokeWidth={1.75} aria-hidden="true" />
           </button>
         </div>

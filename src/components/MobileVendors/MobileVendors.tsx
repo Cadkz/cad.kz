@@ -1,5 +1,6 @@
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import type { MenuColumn, MenuLine } from '@/lib/navigation'
+import { useT } from '../LangProvider/LangProvider'
 import styles from './MobileVendors.module.css'
 
 type Props = { column: MenuColumn; onNavigate: () => void }
@@ -9,6 +10,7 @@ type Props = { column: MenuColumn; onNavigate: () => void }
  * (раскрывающиеся строки). Шаг с единственным вариантом не показывается.
  */
 export function MobileVendors({ column, onNavigate }: Props) {
+  const t = useT()
   const links = (line: MenuLine) => (
     <>
       {line.links.map((link) => (
@@ -18,7 +20,7 @@ export function MobileVendors({ column, onNavigate }: Props) {
       ))}
       {line.more && (
         <Link href={line.allHref} className={styles.all} onClick={onNavigate}>
-          Смотреть все
+          {t('Смотреть все')}
         </Link>
       )}
     </>

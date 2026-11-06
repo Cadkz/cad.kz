@@ -1,8 +1,8 @@
 'use client'
 
 import { ArrowRight } from 'lucide-react'
-import Link from 'next/link'
 import { useState } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import type { ResultGroup } from '@/lib/catalogFilter'
 import { Button } from '../Button/Button'
 import { ProductCard } from '../ProductCard/ProductCard'

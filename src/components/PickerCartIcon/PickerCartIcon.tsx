@@ -1,7 +1,7 @@
 'use client'
 
 import { Check, ShoppingCart } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { usePickerCart } from '@/lib/usePickerCart'
 import styles from './PickerCartIcon.module.css'
 

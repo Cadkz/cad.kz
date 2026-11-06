@@ -1,6 +1,6 @@
 import { ArrowRight, CalendarDays } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { showVendorLine } from '@/domain/cardNoise.mjs'
 import { cardInfo } from '@/domain/cardTexts.mjs'
 import { NAV_FORWARD } from '@/domain/motion.mjs'

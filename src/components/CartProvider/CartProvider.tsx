@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import { normalizeCart } from '@/domain/cart.mjs'
 
 export type CartItem = { offerId: string; quantity: number }

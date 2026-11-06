@@ -1,6 +1,6 @@
 import { ArrowRight } from 'lucide-react'
-import Link from 'next/link'
 import type { ReactNode } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import styles from './CatalogTile.module.css'
 
 export type CatalogTileProps = {

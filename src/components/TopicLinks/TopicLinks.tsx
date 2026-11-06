@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import styles from './TopicLinks.module.css'
 
 type Topic = { slug: string; title: string }

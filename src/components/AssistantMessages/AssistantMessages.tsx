@@ -1,8 +1,8 @@
 'use client'
 
 import { ChevronRight } from 'lucide-react'
-import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import {
   ASSISTANT_GREETING_GRUMPY,
   type AssistantCard,

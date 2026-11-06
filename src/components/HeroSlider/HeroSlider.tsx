@@ -1,8 +1,8 @@
 'use client'
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import type { Slide } from '@/lib/home'
 import { BannerArt } from '../BannerArt/BannerArt'
 import styles from './HeroSlider.module.css'

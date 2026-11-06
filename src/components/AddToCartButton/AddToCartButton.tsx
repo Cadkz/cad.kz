@@ -1,8 +1,8 @@
 'use client'
 
 import { Check, ShoppingCart, ShoppingCartPlus } from 'lucide-react'
-import Link from 'next/link'
 import { useState } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import { useCart } from '../CartProvider/CartProvider'
 import styles from './AddToCartButton.module.css'
 

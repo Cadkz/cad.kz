@@ -12,9 +12,11 @@ import {
   useState,
 } from 'react'
 import { groupSuggestions } from '@/domain/suggest.mjs'
+import { splitLangPath } from '@/i18n/locales.mjs'
 import { sendSearchEvent } from '@/lib/sendSearchEvent'
 import { useSuggest } from '@/lib/useSuggest'
 import { useTypingHint } from '@/lib/useTypingHint'
+import { useLocalHref, useT } from '../LangProvider/LangProvider'
 import {
   type SearchGroup,
   type SearchOption,
@@ -39,6 +41,8 @@ const searchHref = (query: string) => `/search?q=${encodeURIComponent(query.trim
  */
 export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }: Props) {
   const router = useRouter()
+  const localHref = useLocalHref()
+  const t = useT()
   const pathname = usePathname()
   const listId = useId()
   const root = useRef<HTMLDivElement>(null)
@@ -106,8 +110,8 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
     if (!(target instanceof HTMLAnchorElement)) return
     if (target.origin !== window.location.origin) return track('whatsapp')
     // «Все результаты» — запрос посчитает страница поиска.
-    if (target.pathname === '/search') pending.current = null
-    else track(target.pathname)
+    if (splitLangPath(target.pathname).path === '/search') pending.current = null
+    else track(splitLangPath(target.pathname).path)
   }
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: новый набор подсказок — выбор сначала
@@ -147,7 +151,7 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
         event.preventDefault()
         if (option.suggestion) track(option.href.split(/[?#]/)[0] ?? option.href)
         else pending.current = null
-        router.push(option.href)
+        router.push(localHref(option.href))
         input.current?.blur()
         close()
       }
@@ -186,7 +190,7 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
             if (!value.trim()) return
             // Запрос посчитает страница поиска.
             pending.current = null
-            router.push(searchHref(value))
+            router.push(localHref(searchHref(value)))
             input.current?.blur()
             close()
           }}
@@ -211,8 +215,8 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
             }}
             onKeyDown={onKeyDown}
             className={styles.input}
-            placeholder="Поиск по каталогу"
-            aria-label="Поиск по каталогу"
+            placeholder={t('Поиск по каталогу')}
+            aria-label={t('Поиск по каталогу')}
             role="combobox"
             aria-autocomplete="list"
             aria-expanded={showPanel && options.length > 0}
@@ -226,7 +230,7 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
             <button
               type="button"
               className={styles.clear}
-              aria-label="Очистить"
+              aria-label={t('Очистить')}
               onClick={() => {
                 setValue('')
                 input.current?.focus()
@@ -238,7 +242,7 @@ export function SearchBox({ variant, hints, typingHints, whatsappHref, onClose }
         </form>
         {variant === 'layer' && (
           <button type="button" className={styles.cancel} onClick={close}>
-            Закрыть
+            {t('Закрыть')}
           </button>
         )}
       </search>

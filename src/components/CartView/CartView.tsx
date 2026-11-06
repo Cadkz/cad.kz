@@ -1,8 +1,8 @@
 'use client'
 
 import { Copy, Trash2 } from 'lucide-react'
-import Link from 'next/link'
 import { useState } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import { cartTotal, lineKzt } from '@/lib/format'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { useCartQuote } from '@/lib/useCartQuote'

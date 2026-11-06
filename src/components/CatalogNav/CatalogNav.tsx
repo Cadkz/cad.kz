@@ -1,8 +1,6 @@
 'use client'
 
 import { ChevronDown, LayoutGrid } from 'lucide-react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import {
   type PointerEvent as ReactPointerEvent,
   useCallback,
@@ -10,9 +8,11 @@ import {
   useRef,
   useState,
 } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import type { MenuTab } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import type { PopularCardData } from '@/lib/popular'
+import { usePagePath, useT } from '../LangProvider/LangProvider'
 import { MegaMenu } from '../MegaMenu/MegaMenu'
 import styles from './CatalogNav.module.css'
 
@@ -29,6 +29,7 @@ const CLOSE_DELAY = 250
  * фокус возвращается на стрелку.
  */
 export function CatalogNav({ menu, popular, whatsappHref }: Props) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   // Меню в разметке с первого открытия: так оно и закрывается плавно. До первого открытия его
   // нет вовсе — картинки популярных решений не грузятся на каждой странице зря.
@@ -39,7 +40,7 @@ export function CatalogNav({ menu, popular, whatsappHref }: Props) {
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
   // Меню только что открылось наведением — щелчок по той же кнопке не должен его закрыть.
   const hoveredAt = useRef(0)
-  const pathname = usePathname()
+  const pathname = usePagePath()
   const close = useCallback(() => setOpen(false), [])
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: перешли на другую страницу — меню закрыто
@@ -79,7 +80,7 @@ export function CatalogNav({ menu, popular, whatsappHref }: Props) {
       <div className={styles.trigger} onPointerEnter={hover(true)} onPointerLeave={hover(false)}>
         <Link href={catalogHref()} className={styles.main} onClick={close}>
           <LayoutGrid size={16} strokeWidth={1.75} aria-hidden="true" />
-          Каталог
+          {t('Каталог')}
         </Link>
         <button
           ref={toggle}
@@ -87,7 +88,7 @@ export function CatalogNav({ menu, popular, whatsappHref }: Props) {
           className={styles.toggle}
           aria-expanded={open}
           aria-controls="nav-catalog"
-          aria-label={open ? 'Закрыть меню каталога' : 'Открыть меню каталога'}
+          aria-label={t(open ? 'Закрыть меню каталога' : 'Открыть меню каталога')}
           onClick={() => {
             // Меню только что открылось наведением — щелчок по стрелке его не закрывает.
             if (open && Date.now() - hoveredAt.current < 600) return

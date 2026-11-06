@@ -2,6 +2,7 @@
 
 import { ArrowUp } from 'lucide-react'
 import { type FormEvent, useEffect, useId, useState } from 'react'
+import { localizeHref, splitLangPath } from '@/i18n/locales.mjs'
 import {
   ASSISTANT_STATE_EVENT,
   type AssistantStateDetail,
@@ -32,7 +33,12 @@ function fallback(question: string, whatsappHref: string | null) {
     window.open(`${whatsappHref}?text=${encodeURIComponent(text)}`, '_blank', 'noopener')
     return
   }
-  window.location.assign(`/search?q=${encodeURIComponent(question)}`)
+  window.location.assign(
+    localizeHref(
+      splitLangPath(window.location.pathname).lang,
+      `/search?q=${encodeURIComponent(question)}`,
+    ),
+  )
 }
 
 /**

@@ -156,3 +156,6 @@ img.sectionIcon {
   font-size: var(--text-body);
   font-weight: var(--weight-medium);
 }
+.lang {
+  margin-bottom: var(--space-4);
+}

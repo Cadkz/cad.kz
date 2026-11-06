@@ -4,10 +4,12 @@ import { Moon, Sun } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { THEME_STORAGE_KEY } from '@/domain/siteTheme.mjs'
 import { HeaderAction } from '../HeaderAction/HeaderAction'
+import { useT } from '../LangProvider/LangProvider'
 import styles from './ThemeToggle.module.css'
 
 /** Значок выбирается CSS до гидратации; кнопка не теряет фокус при смене темы. */
 export function ThemeToggle() {
+  const t = useT()
   const [dark, setDark] = useState<boolean | null>(null)
   useEffect(() => {
     setDark(document.documentElement.dataset.siteTheme === 'dark')
@@ -37,8 +39,9 @@ export function ThemeToggle() {
       localStorage.setItem(THEME_STORAGE_KEY, next)
     } catch {}
   }
-  const label =
-    dark === null ? 'Переключить тему' : dark ? 'Включить светлую тему' : 'Включить тёмную тему'
+  const label = t(
+    dark === null ? 'Переключить тему' : dark ? 'Включить светлую тему' : 'Включить тёмную тему',
+  )
   return (
     <HeaderAction
       icon={

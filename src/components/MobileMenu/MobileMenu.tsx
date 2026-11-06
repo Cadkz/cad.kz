@@ -1,9 +1,8 @@
 'use client'
 
 import { ArrowRight, ChevronDown, LayoutGrid, Menu } from 'lucide-react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
+import Link from '@/components/LangLink/LangLink'
 import { groupAllLabel, POPULAR_LABEL } from '@/domain/catalogNavigation.mjs'
 import type { MenuTab } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
@@ -12,6 +11,8 @@ import { aboutColumns, sectionLinks } from '@/lib/siteNav'
 import { Drawer } from '../Drawer/Drawer'
 import { HeaderAction } from '../HeaderAction/HeaderAction'
 import { WhatsappIcon } from '../icons/icons'
+import { usePagePath, useT } from '../LangProvider/LangProvider'
+import { LangSwitch } from '../LangSwitch/LangSwitch'
 import { MenuPopular } from '../MenuPopular/MenuPopular'
 import { MobileVendors } from '../MobileVendors/MobileVendors'
 import { SectionArt } from '../SectionArt/SectionArt'
@@ -57,9 +58,10 @@ function Group({
  * ниже разделы сайта, «О компании», контакты и WhatsApp.
  */
 export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [])
-  const pathname = usePathname()
+  const pathname = usePagePath()
   // biome-ignore lint/correctness/useExhaustiveDependencies: панель закрывается при переходе на другую страницу
   useEffect(() => setOpen(false), [pathname])
 
@@ -70,24 +72,25 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
       <HeaderAction
         hideFrom="md"
         icon={<Menu size={24} strokeWidth={1.75} aria-hidden="true" />}
-        ariaLabel="Открыть меню"
+        ariaLabel={t('Открыть меню')}
         aria-expanded={open}
         onClick={() => setOpen(true)}
       />
-      <Drawer open={open} onClose={close} title="Меню" side="left">
-        <nav aria-label="Меню сайта" className={styles.nav}>
+      <Drawer open={open} onClose={close} title={t('Меню')} side="left">
+        <LangSwitch className={styles.lang} />
+        <nav aria-label={t('Меню сайта')} className={styles.nav}>
           <Link href={catalogHref()} className={styles.catalog} onClick={close}>
             <LayoutGrid size={20} strokeWidth={1.75} aria-hidden="true" />
-            Весь каталог
+            {t('Весь каталог')}
             <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" className={styles.arrow} />
           </Link>
           {popular.length > 0 && (
-            <Group title={POPULAR_LABEL} name="mobile-menu" open>
+            <Group title={t(POPULAR_LABEL)} name="mobile-menu" open>
               <MenuPopular cards={popular} onNavigate={close} compact />
             </Group>
           )}
           {groups.map((tab) => (
-            <Group key={tab.key} title={tab.label} name="mobile-menu">
+            <Group key={tab.key} title={t(tab.label)} name="mobile-menu">
               {tab.columns.map((column) => (
                 <details key={column.title} className={styles.section} name={`menu-${tab.key}`}>
                   <summary className={styles.sectionSummary}>
@@ -97,33 +100,33 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
                       size={48}
                       className={styles.sectionIcon}
                     />
-                    <span className={styles.sectionTitle}>{column.title}</span>
+                    <span className={styles.sectionTitle}>{t(column.title)}</span>
                   </summary>
                   <div className={styles.sectionBody}>
                     <MobileVendors column={column} onNavigate={close} />
                     <Link href={column.allHref} className={styles.all} onClick={close}>
-                      Все товары раздела
+                      {t('Все товары раздела')}
                     </Link>
                   </div>
                 </details>
               ))}
               <Link href={tab.allHref} className={styles.all} onClick={close}>
-                {groupAllLabel(tab.key)}
+                {t(groupAllLabel(tab.key))}
               </Link>
             </Group>
           ))}
           {sectionLinks.map((item) => (
             <Link key={item.href} href={item.href} className={styles.topLink} onClick={close}>
-              {item.title}
+              {t(item.title)}
             </Link>
           ))}
-          <Group title="О компании" name="mobile-menu">
+          <Group title={t('О компании')} name="mobile-menu">
             {aboutColumns.map((column) => (
               <div key={column.title} className={styles.aboutColumn}>
-                <p className={styles.caption}>{column.title}</p>
+                <p className={styles.caption}>{t(column.title)}</p>
                 {column.links.map((item) => (
                   <Link key={item.href} href={item.href} className={styles.link} onClick={close}>
-                    {item.title}
+                    {t(item.title)}
                   </Link>
                 ))}
               </div>
@@ -131,13 +134,13 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
           </Group>
         </nav>
         <div className={styles.contacts}>
-          <p className={styles.caption}>Контакты</p>
+          <p className={styles.caption}>{t('Контакты')}</p>
           {contacts}
         </div>
         {whatsappHref && (
           <a href={whatsappHref} className={styles.cta} target="_blank" rel="noreferrer">
             <WhatsappIcon size={20} />
-            Написать в WhatsApp
+            {t('Написать в WhatsApp')}
           </a>
         )}
       </Drawer>

@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/LangLink/LangLink'
 import { catalogHref } from '@/lib/navigationHrefs'
 import type { SuggestState } from '@/lib/useSuggest'
 import { WhatsappIcon } from '../icons/icons'

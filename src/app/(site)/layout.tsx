@@ -2,22 +2,28 @@ import type { Metadata } from 'next'
 import { preload } from 'react-dom'
 import { CartProvider } from '@/components/CartProvider/CartProvider'
 import { KaddiStage } from '@/components/KaddiStage/KaddiStage'
+import { LangProvider } from '@/components/LangProvider/LangProvider'
 import { PageTransition } from '@/components/PageTransition/PageTransition'
 import { RevealObserver } from '@/components/RevealObserver/RevealObserver'
 import { SiteFooter } from '@/components/SiteFooter/SiteFooter'
 import { SiteHeader } from '@/components/SiteHeader/SiteHeader'
 import { THEME_INIT_SCRIPT } from '@/domain/siteTheme.mjs'
+import { DEFAULT_LANG, INDEX_TRANSLATIONS, OG_LOCALES } from '@/i18n/locales.mjs'
+import { messagesFor } from '@/i18n/messages'
+import { getLang, getT } from '@/i18n/server'
 import { DEFAULT_SHARE_IMAGE, isProduction, siteUrl } from '@/lib/seo'
 import '@/styles/fonts.css'
 import '@/styles/tokens.css'
 import '@/styles/base.css'
 
 /** Общие метаданные. В демо поисковикам закрыто всё (и заголовком в next.config.mjs). */
-export function generateMetadata(): Metadata {
-  const title = 'CAD.kz — программы, оборудование и обучение для проектировщиков'
-  const description =
-    'Программы для проектирования, широкоформатные принтеры и сканеры, 3D-сканеры, обучение ' +
-    'и внедрение для проектных организаций в Казахстане.'
+export async function generateMetadata(): Promise<Metadata> {
+  const lang = await getLang()
+  const t = await getT()
+  const title = t('CAD.kz — программы, оборудование и обучение для проектировщиков')
+  const description = t(
+    'Программы для проектирования, широкоформатные принтеры и сканеры, 3D-сканеры, обучение и внедрение для проектных организаций в Казахстане.',
+  )
   return {
     metadataBase: new URL(siteUrl()),
     title,
@@ -27,11 +33,15 @@ export function generateMetadata(): Metadata {
       title,
       description,
       siteName: 'CAD.kz',
-      locale: 'ru_KZ',
+      locale: OG_LOCALES[lang],
       type: 'website',
       images: [{ url: DEFAULT_SHARE_IMAGE, width: 1200, height: 630 }],
     },
-    robots: isProduction() ? { index: true, follow: true } : { index: false, follow: false },
+    // Казахская и английская версии закрыты, пока не переведены товары (INDEX_TRANSLATIONS).
+    robots:
+      isProduction() && (lang === DEFAULT_LANG || INDEX_TRANSLATIONS)
+        ? { index: true, follow: true }
+        : { index: false, follow: isProduction() },
   }
 }
 
@@ -43,24 +53,27 @@ const criticalFonts = [
   '/fonts/golos-text-latin-wght-normal.woff2',
 ]
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({ children }: { children: React.ReactNode }) {
+  const lang = await getLang()
   for (const href of criticalFonts) {
     preload(href, { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' })
   }
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       <head>
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: статический скрипт без пользовательских данных, до первого кадра */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body>
-        <CartProvider>
-          <SiteHeader />
-          <PageTransition>{children}</PageTransition>
-          <SiteFooter />
-        </CartProvider>
-        <RevealObserver />
-        <KaddiStage />
+        <LangProvider lang={lang} messages={messagesFor(lang)}>
+          <CartProvider>
+            <SiteHeader />
+            <PageTransition>{children}</PageTransition>
+            <SiteFooter />
+          </CartProvider>
+          <RevealObserver />
+          <KaddiStage />
+        </LangProvider>
       </body>
     </html>
   )
