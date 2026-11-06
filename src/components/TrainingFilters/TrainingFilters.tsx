@@ -4,6 +4,7 @@ import { useT } from '@/components/LangProvider/LangProvider'
 import type { TrainingState, trainingOptions } from '@/domain/trainingFilter.mjs'
 import { Chip } from '../Chip/Chip'
 import { FilterChecks } from '../FilterChecks/FilterChecks'
+import { FilterGroup } from '../FilterGroup/FilterGroup'
 import styles from './TrainingFilters.module.css'
 
 type Props = {
@@ -20,8 +21,7 @@ export function TrainingFilters({ state, options, onChange }: Props) {
   const t = useT()
   return (
     <>
-      <fieldset className={styles.group}>
-        <legend className={styles.title}>{t('Порядок')}</legend>
+      <FilterGroup title={t('Порядок')}>
         <div className={styles.row}>
           <Chip selected={state.sort === 'topic'} onClick={() => onChange({ sort: 'topic' })}>
             {t('По направлениям')}
@@ -30,10 +30,9 @@ export function TrainingFilters({ state, options, onChange }: Props) {
             {t('Ближайший старт')}
           </Chip>
         </div>
-      </fieldset>
+      </FilterGroup>
       {options.topics.length > 0 && (
-        <fieldset className={styles.group}>
-          <legend className={styles.title}>{t('Направление')}</legend>
+        <FilterGroup title={t('Направление')} hasSelection={state.topic != null}>
           {options.topics.map((option) => (
             <Chip
               key={option.value}
@@ -46,11 +45,10 @@ export function TrainingFilters({ state, options, onChange }: Props) {
               {option.label}
             </Chip>
           ))}
-        </fieldset>
+        </FilterGroup>
       )}
       {options.months.length > 0 && (
-        <fieldset className={styles.group}>
-          <legend className={styles.title}>{t('Месяц старта')}</legend>
+        <FilterGroup title={t('Месяц старта')} hasSelection={state.month != null}>
           <div className={styles.row}>
             {options.months.map((option) => (
               <Chip
@@ -64,7 +62,7 @@ export function TrainingFilters({ state, options, onChange }: Props) {
               </Chip>
             ))}
           </div>
-        </fieldset>
+        </FilterGroup>
       )}
       {(options.open > 0 || state.open) && (
         <FilterChecks

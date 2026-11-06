@@ -5,6 +5,7 @@ import type { FilterState, facetOptions } from '@/lib/catalogFilter'
 import { CatalogTabs } from '../CatalogTabs/CatalogTabs'
 import { Chip } from '../Chip/Chip'
 import { FilterChecks } from '../FilterChecks/FilterChecks'
+import { FilterGroup } from '../FilterGroup/FilterGroup'
 import { TrainingFilters } from '../TrainingFilters/TrainingFilters'
 import styles from './FilterPanel.module.css'
 
@@ -54,8 +55,7 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
         />
       )}
       {options.directions.length > 0 && (
-        <fieldset className={styles.group}>
-          <legend className={styles.title}>{t('Направление')}</legend>
+        <FilterGroup title={t('Направление')} hasSelection={state.direction != null}>
           {options.directions.map((option) => (
             <Chip
               key={option.value}
@@ -71,13 +71,13 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
               {t(option.label)}
             </Chip>
           ))}
-        </fieldset>
+        </FilterGroup>
       )}
       {options.types.length > 0 && (
-        <fieldset className={styles.group}>
-          <legend className={styles.title}>
-            {t(options.typeGroup === 'service' ? 'Вид услуги' : 'Тип оборудования')}
-          </legend>
+        <FilterGroup
+          title={t(options.typeGroup === 'service' ? 'Вид услуги' : 'Тип оборудования')}
+          hasSelection={options.typeSelected != null}
+        >
           {options.types.map((option) => (
             <Chip
               key={option.value}
@@ -93,7 +93,7 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
               {t(option.label)}
             </Chip>
           ))}
-        </fieldset>
+        </FilterGroup>
       )}
       {options.training && (
         <TrainingFilters
@@ -137,7 +137,6 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
           title={t(group.label)}
           options={group.options}
           limit={6}
-          collapsible
           defaultOpen={index < FEATURES_OPEN}
           selected={state.features[group.key] ?? []}
           onToggle={(value) =>
