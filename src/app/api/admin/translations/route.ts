@@ -15,7 +15,7 @@ import { planTranslations, saveTranslation, translationGroups } from '@/lib/tran
 
 /**
  * «Переводы» в админке (администратор и маркетолог).
- * GET ?part=next — следующая часть непереведённого, ?part=big — втрое больше, ?part=all — вся таблица: файл Excel.
+ * GET ?part=next — следующая часть непереведённого, ?part=big — в 15 раз больше, ?part=all — вся таблица: файл Excel.
  * &set=terms — то же для словаря характеристик и комплектаций (src/domain/terms.mjs).
  * POST check — что запишется из загруженной таблицы; POST apply — запись (по нескольку товаров
  * или до TERMS_PER_REQUEST строк словаря за запрос, чтобы уложиться в минуту Vercel). В одном
