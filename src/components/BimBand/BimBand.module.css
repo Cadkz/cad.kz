@@ -87,6 +87,9 @@
 }
 
 .lead {
+  /* На телефоне баннер без описаний — только заголовки (решение владельца 06.11.2026):
+     иначе первый экран слишком длинный. Описания видны от 640 px. */
+  display: none;
   max-width: var(--measure);
   color: var(--color-text-on-dark);
   font-size: var(--text-lead);
@@ -96,9 +99,9 @@
 .stages {
   display: grid;
   grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-  gap: var(--space-6) var(--grid-gap);
+  gap: var(--space-4) var(--grid-gap);
   width: 100%;
-  margin: var(--space-6) 0 0;
+  margin: var(--space-2) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -126,6 +129,7 @@
 }
 
 .stageText {
+  display: none;
   color: var(--color-text-on-dark);
   font-size: var(--text-sm);
 }
@@ -163,6 +167,7 @@
 }
 
 .statLabel {
+  display: none;
   color: var(--color-text-on-dark);
   font-size: var(--text-xs);
 }
@@ -172,9 +177,20 @@
     padding: var(--space-12);
   }
 
+  .lead,
+  .stageText,
+  .statLabel {
+    display: block;
+  }
+
   .image {
     width: calc(100% + var(--space-12) * 2);
     margin: calc(-1 * var(--space-12)) calc(-1 * var(--space-12)) 0;
+  }
+
+  .stages {
+    gap: var(--space-6) var(--grid-gap);
+    margin-top: var(--space-6);
   }
 
   .stage {

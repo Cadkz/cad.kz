@@ -6,6 +6,8 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   count?: number
   /** pill — плашка-переключатель вкладки; option — строка списка фильтра со счётчиком. */
   look?: 'pill' | 'option'
+  /** soft — выбранная вкладка мягкой подсветкой вместо сплошной заливки (вкладки каталога). */
+  soft?: boolean
 }
 
 /** Переключатель фильтра. Выбранное состояние передаётся в aria-pressed. */
@@ -13,6 +15,7 @@ export function Chip({
   selected = false,
   count,
   look = 'pill',
+  soft = false,
   className,
   children,
   ...rest
@@ -21,7 +24,9 @@ export function Chip({
     <button
       type="button"
       aria-pressed={selected}
-      className={[styles.chip, styles[look], className].filter(Boolean).join(' ')}
+      className={[styles.chip, styles[look], soft && styles.soft, className]
+        .filter(Boolean)
+        .join(' ')}
       {...rest}
     >
       <span className={styles.label}>{children}</span>

@@ -22,11 +22,11 @@ export function CatalogTabs({ selected, groups, hasPopular, onChange, row = fals
   return (
     <fieldset className={row ? `${styles.tabs} ${styles.row}` : styles.tabs}>
       <legend className="visually-hidden">{t('Группа каталога')}</legend>
-      <Chip selected={selected === null} onClick={() => onChange({ group: null })}>
+      <Chip soft selected={selected === null} onClick={() => onChange({ group: null })}>
         {t('Все')}
       </Chip>
       {hasPopular && (
-        <Chip selected={selected === POPULAR} onClick={() => onChange({ group: POPULAR })}>
+        <Chip soft selected={selected === POPULAR} onClick={() => onChange({ group: POPULAR })}>
           {t(POPULAR_LABEL)}
         </Chip>
       )}

@@ -32,6 +32,10 @@
   --color-on-action: var(--color-text-inverse);
   --color-on-action-muted: var(--color-text-on-dark);
   --color-accent-border: var(--color-blue);
+  /* Выбранная вкладка каталога — мягкая подсветка (06.11.2026). */
+  --color-tab-selected: var(--color-blue-mid);
+  --color-tab-selected-border: var(--color-blue);
+  --color-on-tab-selected: var(--color-navy);
   --gradient-action: var(--gradient-navy);
   --color-section-art-surface: transparent;
   --section-art-padding: 0px;
@@ -504,6 +508,9 @@
   --color-on-action: #ffffff;
   --color-on-action-muted: #dbe1f5;
   --color-accent-border: var(--color-blue);
+  --color-tab-selected: rgba(66, 98, 215, 0.28);
+  --color-tab-selected-border: rgba(66, 98, 215, 0.75);
+  --color-on-tab-selected: #ffffff;
   --gradient-action: linear-gradient(135deg, var(--color-navy), var(--color-blue));
   --color-section-art-surface: #e4ecf7;
   --section-art-padding: var(--space-1);

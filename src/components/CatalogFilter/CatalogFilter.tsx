@@ -227,7 +227,14 @@ export function CatalogFilter({
       data-side={wide && sideOpen ? 'open' : undefined}
     >
       {wide && (
-        <div className={collapsible ? `${styles.head} ${styles.wideOnly}` : styles.head}>
+        <div
+          className={[styles.head, styles.headStart, collapsible && styles.wideOnly]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {/* «Фильтры» слева, над колонкой, которую они раздвигают; за ними вкладки
+              (правка владельца 06.11.2026). */}
+          {filtersButton(true)}
           <CatalogTabs
             selected={state.group}
             groups={options.groups}
@@ -235,7 +242,6 @@ export function CatalogFilter({
             onChange={change}
             row
           />
-          {filtersButton(true)}
         </div>
       )}
       <section

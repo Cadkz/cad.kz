@@ -37,6 +37,14 @@
   color: var(--color-on-action);
 }
 
+/* Мягко выбранная вкладка (вкладки каталога, правка владельца 06.11.2026): подсветка и рамка
+   вместо сплошной синей заливки — выбранное видно, но не перетягивает внимание. */
+.soft[aria-pressed="true"] {
+  border-color: var(--color-tab-selected-border);
+  background: var(--color-tab-selected);
+  color: var(--color-on-tab-selected);
+}
+
 .option {
   justify-content: space-between;
   width: 100%;
