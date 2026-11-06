@@ -12,6 +12,8 @@
   --color-image-surface: #ffffff;
   /* Светлая кнопка на тёмных баннерах: белая в обеих темах (06.11.2026). */
   --color-step-badge: var(--color-navy); /* кружок с номером шага «Как мы работаем» */
+  --color-card: var(--color-surface); /* карточка товара в каталоге */
+  --color-card-border: var(--color-border);
   --color-button-light: var(--color-surface);
   --color-on-button-light: var(--color-heading);
   --color-control-hover: var(--color-blue-soft);
@@ -478,6 +480,15 @@
   --filter-header-logo: brightness(0) invert(1);
   --color-logo-mark: var(--color-sky);
   --color-step-badge: var(--color-blue);
+  /* Карточка товара светлее панели каталога и с заметной рамкой — иначе терялась (06.11.2026). */
+  --color-card: color-mix(in srgb, var(--color-navy) 72%, var(--color-blue));
+  --color-card-border: rgba(170, 204, 255, 0.24);
+  /* Баннеры начинаются не с цвета фона страницы: левый верхний угол не сливается. */
+  --gradient-banner: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--color-navy) 75%, var(--color-blue)),
+    var(--color-blue)
+  );
   --color-button-light: #ffffff;
   --color-on-button-light: var(--color-navy);
   --color-control-hover: var(--color-blue);
