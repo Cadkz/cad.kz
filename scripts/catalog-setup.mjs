@@ -33,7 +33,7 @@ import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
-import { setupDelivery } from '../src/lib/deliverySetup.ts'
+import { setupAskonDelivery, setupDelivery } from '../src/lib/deliverySetup.ts'
 import { setupDemoCleanup } from '../src/lib/demoCleanupSetup.ts'
 import {
   setupDirectionsNine,
@@ -345,6 +345,8 @@ try {
   if (bimTexts) for (const line of bimTexts) console.log(`Страница BIM — ${line}`)
   const delivery = await setupDelivery(payload)
   if (delivery) for (const line of delivery) console.log(`Сроки поставки — ${line}`)
+  const askon = await setupAskonDelivery(payload)
+  if (askon) for (const line of askon) console.log(`Сроки поставки — ${line}`)
   const legacyCovers = await setupLegacyCovers(payload)
   if (!legacyCovers) console.log('Обложки публикаций со старого сайта уже поставлены.')
   else for (const line of legacyCovers) console.log(`Обложки — ${line}`)
