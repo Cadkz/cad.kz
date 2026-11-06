@@ -279,7 +279,11 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     redirectId: relId(product.redirectTo),
     pictures: productPictures(product),
     stagePictures: stagePictures(product),
-    scans: product.kind === 'hardware' ? productScans(product) : [],
+    // Названия примеров сканов на /kk и /en — из словаря интерфейса (src/i18n/messages).
+    scans:
+      product.kind === 'hardware'
+        ? productScans(product).map((scan) => ({ ...scan, title: tr(scan.title) }))
+        : [],
     delivery,
     seo: product.seo,
   }

@@ -21,7 +21,7 @@ export async function ProductScans({ title, scans }: { title: string; scans: Sca
       })}
     >
       <ScanGallery scans={scans} />
-      <p className={styles.credit}>{SCANS_CREDIT}</p>
+      <p className={styles.credit}>{t(SCANS_CREDIT)}</p>
     </ProductSection>
   )
 }
