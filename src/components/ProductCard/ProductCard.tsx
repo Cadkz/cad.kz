@@ -1,6 +1,10 @@
+'use client'
+
+// Клиентский: карточка стоит и в фильтре каталога, и на серверных страницах, подписи — по языку страницы.
 import { ArrowRight, CalendarDays } from 'lucide-react'
 import Image from 'next/image'
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { showVendorLine } from '@/domain/cardNoise.mjs'
 import { cardInfo } from '@/domain/cardTexts.mjs'
 import { NAV_FORWARD } from '@/domain/motion.mjs'
@@ -66,12 +70,13 @@ export type ProductCardData = {
  * Цена — только серверная.
  */
 export function ProductCard({ product }: { product: ProductCardData }) {
+  const t = useT()
   const cartKey = product.linkOnly ? null : (product.cartOfferId ?? product.requestKey ?? null)
   const info = cardInfo({
     title: product.title,
     own: product.cardText,
     summary: product.summary,
-    fallback: 'Описание и комплектации — на странице товара',
+    fallback: t('Описание и комплектации — на странице товара'),
   })
   const textLogo = !product.picture && !product.topic && product.logoFallback
   const mediaClass = product.picture
@@ -132,14 +137,16 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         {!product.linkOnly && (
           <p className={styles.price}>
             {product.priceFrom
-              ? `${product.offersCount > 1 ? 'от ' : ''}${product.priceFrom}`
-              : 'Цена по запросу'}
+              ? product.offersCount > 1
+                ? t('от {sum}', { sum: product.priceFrom })
+                : product.priceFrom
+              : t('Цена по запросу')}
           </p>
         )}
         <div className={styles.foot}>
           {/* Та же ссылка, что у названия (карточка целиком): для диктора и клавиатуры — одна. */}
           <span className={styles.more} aria-hidden="true">
-            Подробнее
+            {t('Подробнее')}
             <ArrowRight size={16} strokeWidth={1.75} />
           </span>
           {cartKey && (

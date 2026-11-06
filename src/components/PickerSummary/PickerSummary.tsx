@@ -1,6 +1,7 @@
 'use client'
 
 import { Minus, Plus } from 'lucide-react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { lineLabel } from '@/domain/picker.mjs'
 import { pickerActions } from '@/lib/pickerAction'
 import { usePickerCart } from '@/lib/usePickerCart'
@@ -20,6 +21,7 @@ import styles from './PickerSummary.module.css'
  * На странице со сканами итог стоит дважды (до сканов и у комплектации) — якорь только у первого.
  */
 export function PickerSummary({ anchor = true }: { anchor?: boolean }) {
+  const t = useT()
   const picker = usePickerContext()
   const { lines, total, quantity, setQuantity, meta, view, state, profile } = picker
   const { cartFirst } = usePickerCart()
@@ -28,27 +30,27 @@ export function PickerSummary({ anchor = true }: { anchor?: boolean }) {
     total.state === 'done' || total.state === 'error'
       ? total.text
       : total.state === 'busy'
-        ? 'Считаем…'
+        ? t('Считаем…')
         : total.state === 'request'
-          ? 'По запросу'
+          ? t('По запросу')
           : !view.steps.length
-            ? 'По запросу'
+            ? t('По запросу')
             : '—'
   return (
     <div className={styles.box} id={anchor ? 'summary' : undefined}>
-      <p className={styles.label}>Ваш выбор</p>
+      <p className={styles.label}>{t('Ваш выбор')}</p>
       {lines.length ? (
         <ul className={styles.lines}>
           {view.switches.map((sw) => (
             <li key={sw.key} className={styles.line}>
-              <span>{sw.title}</span>
-              <span className={styles.price}>{state.switches[sw.key]}</span>
+              <span>{t(sw.title)}</span>
+              <span className={styles.price}>{t(state.switches[sw.key] ?? '')}</span>
             </li>
           ))}
           {lines.map((line) => (
             <li key={line.item.key} className={styles.line}>
               <span>{lineLabel(line)}</span>
-              <span className={styles.price}>{line.offer?.price ?? 'по запросу'}</span>
+              <span className={styles.price}>{line.offer?.price ?? t('по запросу')}</span>
             </li>
           ))}
         </ul>
@@ -60,9 +62,9 @@ export function PickerSummary({ anchor = true }: { anchor?: boolean }) {
         </ul>
       )}
       <div className={styles.row}>
-        <span className={styles.label}>{profile.quantity}</span>
+        <span className={styles.label}>{t(profile.quantity)}</span>
         <div className={styles.stepper}>
-          <button type="button" onClick={() => setQuantity(quantity - 1)} aria-label="Меньше">
+          <button type="button" onClick={() => setQuantity(quantity - 1)} aria-label={t('Меньше')}>
             <Minus size={16} strokeWidth={1.75} aria-hidden="true" />
           </button>
           <input
@@ -70,16 +72,16 @@ export function PickerSummary({ anchor = true }: { anchor?: boolean }) {
             min={1}
             max={999}
             value={quantity}
-            aria-label={profile.quantityAria}
+            aria-label={t(profile.quantityAria)}
             onChange={(event) => setQuantity(Number(event.target.value))}
           />
-          <button type="button" onClick={() => setQuantity(quantity + 1)} aria-label="Больше">
+          <button type="button" onClick={() => setQuantity(quantity + 1)} aria-label={t('Больше')}>
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
           </button>
         </div>
       </div>
       <div className={styles.total}>
-        <span className={styles.label}>Итого с НДС</span>
+        <span className={styles.label}>{t('Итого с НДС')}</span>
         <output className={styles.sum} data-state={total.state} aria-live="polite">
           {/* key: при каждой новой сумме число заново проявляется — видно, что итог пересчитан. */}
           <span key={sumText} className={styles.sumValue}>
@@ -98,7 +100,7 @@ export function PickerSummary({ anchor = true }: { anchor?: boolean }) {
           <PickerAction action={action} variant="text" />
         </div>
       ))}
-      <p className={styles.note}>Точную стоимость и сроки подтвердит менеджер.</p>
+      <p className={styles.note}>{t('Точную стоимость и сроки подтвердит менеджер.')}</p>
     </div>
   )
 }

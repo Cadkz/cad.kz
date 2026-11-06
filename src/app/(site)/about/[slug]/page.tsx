@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
-import { notFound, permanentRedirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { InfoPageView, infoPageMetadata } from '@/components/InfoPageView/InfoPageView'
 import { INFO_PAGES } from '@/domain/legacyPages.mjs'
 import { LEGACY_PATH_HEADER } from '@/domain/legacyRoutes.mjs'
+import { langPermanentRedirect } from '@/i18n/server'
 import { resolveLegacy } from '@/lib/legacy'
 
 type Props = { params: Promise<{ slug: string }> }
@@ -25,6 +26,6 @@ export default async function InfoPage({ params }: Props) {
   if (allowed.has(slug)) return <InfoPageView slug={slug} />
   const original = (await headers()).get(LEGACY_PATH_HEADER) ?? `/about/${slug}`
   const resolution = await resolveLegacy(original)
-  if (resolution && 'redirect' in resolution) permanentRedirect(resolution.redirect)
+  if (resolution && 'redirect' in resolution) return langPermanentRedirect(resolution.redirect)
   notFound()
 }

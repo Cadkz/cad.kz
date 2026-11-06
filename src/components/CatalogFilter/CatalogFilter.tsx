@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { familyTaskHref } from '@/domain/familyGroups.mjs'
 import { CATALOG_FILTER, FLOW_LIMIT, pageMotion } from '@/domain/motion.mjs'
 import { startNote } from '@/domain/trainingFilter.mjs'
@@ -88,8 +89,11 @@ const withTask = (item: CatalogItem, direction: string | null) => ({
 })
 
 /** У курса с расписанием — «Старт 1 декабря» (в выбранном месяце, если месяц выбран). */
-const withStart = (item: CatalogItem, month: string | null) =>
-  item.starts?.length ? { ...item, start: startNote(item, month) } : item
+const withStart = (
+  item: CatalogItem,
+  month: string | null,
+  t: { lang: 'ru' | 'kk' | 'en' } & ((text: string) => string),
+) => (item.starts?.length ? { ...item, start: startNote(item, month, t.lang, t('Старт')) } : item)
 
 export function CatalogFilter({
   items,
@@ -101,6 +105,7 @@ export function CatalogFilter({
   compact = false,
   collapsible = false,
 }: Props) {
+  const t = useT()
   // Условия берутся из адреса, а не только с сервера: при «Назад» из товара Next.js показывает
   // сохранённую страницу каталога со старым стартом (пустым), а в адресе — нужный шаг
   // (замечание владельца 26.10.2026: «назад» из Artec вёл в пустой каталог).
@@ -147,20 +152,20 @@ export function CatalogFilter({
     return {
       ...result,
       items: result.items.map((item) =>
-        withStart(withTask(item, view.direction), view.training.month),
+        withStart(withTask(item, view.direction), view.training.month, t),
       ),
     }
-  }, [items, view, facets])
+  }, [items, view, facets, t])
   const groups = useMemo(
     () =>
       groupedResults(items, view, lines)?.map((group) => ({
         ...group,
         href: group.href && familyTaskHref(group.href, view.direction),
         items: group.items.map((item) =>
-          withStart(withTask(item, view.direction), view.training.month),
+          withStart(withTask(item, view.direction), view.training.month, t),
         ),
       })),
-    [items, view, lines],
+    [items, view, lines, t],
   )
   // В направлении сначала производители, как папки в Битриксе (решение владельца 22.10.2026).
   const tiles = useMemo(
@@ -212,7 +217,7 @@ export function CatalogFilter({
       aria-expanded={toggle ? sideOpen : undefined}
     >
       <SlidersHorizontal size={16} strokeWidth={1.75} aria-hidden="true" />
-      {toggle && sideOpen ? 'Скрыть фильтры' : 'Фильтры'}
+      {t(toggle && sideOpen ? 'Скрыть фильтры' : 'Фильтры')}
     </Button>
   )
 
@@ -233,14 +238,20 @@ export function CatalogFilter({
           {filtersButton(true)}
         </div>
       )}
-      <section className={styles.sidebar} aria-label="Фильтр каталога" inert={wide && !sideOpen}>
+      <section
+        className={styles.sidebar}
+        aria-label={t('Фильтр каталога')}
+        inert={wide && !sideOpen}
+      >
         <div className={styles.sideInner}>{panel(!wide)}</div>
       </section>
       <div ref={top} className={styles.results}>
         {!compact && (
           <div className={styles.head}>
             <p className={styles.count} aria-live="polite">
-              {popularView ? 'Чаще всего выбирают' : `Найдено: ${positions(found.total)}`}
+              {popularView
+                ? t('Чаще всего выбирают')
+                : t('Найдено: {count}', { count: positions(found.total, t) })}
             </p>
             <span className={styles.mobileOnly}>{filtersButton(false)}</span>
           </div>
@@ -260,7 +271,7 @@ export function CatalogFilter({
         ) : sections ? (
           <SectionTiles
             tiles={sections.tiles}
-            overline={sections.kind === 'direction' ? 'Направление' : 'Раздел'}
+            overline={t(sections.kind === 'direction' ? 'Направление' : 'Раздел')}
             onPick={(slug) =>
               commit(
                 update(state, sections.kind === 'direction' ? { direction: slug } : { type: slug }),
@@ -291,8 +302,8 @@ export function CatalogFilter({
         ) : (
           <div className={styles.empty}>
             <div className={styles.emptyBody}>
-              <p>По выбранным условиям товаров нет.</p>
-              <Button onClick={reset}>Очистить условия в этом разделе</Button>
+              <p>{t('По выбранным условиям товаров нет.')}</p>
+              <Button onClick={reset}>{t('Очистить условия в этом разделе')}</Button>
             </div>
             <Mascot pose="search" size="sm" className={styles.mascot} />
           </div>
@@ -305,11 +316,11 @@ export function CatalogFilter({
           />
         )}
       </div>
-      <Drawer open={panelOpen} onClose={closePanel} title="Фильтр каталога" side="left">
+      <Drawer open={panelOpen} onClose={closePanel} title={t('Фильтр каталога')} side="left">
         {panel(!compact)}
         <div className={styles.drawerFoot}>
           <Button block onClick={closePanel}>
-            Показать: {positions(found.total)}
+            {t('Показать: {count}', { count: positions(found.total, t) })}
           </Button>
         </div>
       </Drawer>

@@ -1,6 +1,7 @@
 'use client'
 
 import { Check, ShoppingCart } from 'lucide-react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import type { Action } from '@/domain/buyScenario.mjs'
 import { requestNeedsChoice } from '@/domain/pickerRequest.mjs'
 import { usePickerCart } from '@/lib/usePickerCart'
@@ -18,6 +19,7 @@ type Props = {
  * к блоку страницы.
  */
 export function PickerAction({ action, variant }: Props) {
+  const t = useT()
   const { lines, openRequest, view, meta } = usePickerContext()
   const { canAdd, added, addToCart } = usePickerCart()
   const size = variant === 'text' ? 'sm' : 'md'
@@ -25,18 +27,19 @@ export function PickerAction({ action, variant }: Props) {
   if (action.type === 'anchor')
     return (
       <ButtonLink href={action.href} variant={variant} size={size} block={block}>
-        {action.label}
+        {t(action.label)}
       </ButtonLink>
     )
   if (action.type === 'cart')
     return added ? (
       <ButtonLink href="/cart" block={block} size={size} variant="secondary">
-        <Check size={20} strokeWidth={1.75} aria-hidden="true" />В корзине — оформить
+        <Check size={20} strokeWidth={1.75} aria-hidden="true" />
+        {t('В корзине — оформить')}
       </ButtonLink>
     ) : (
       <Button block={block} size={size} variant={variant} disabled={!canAdd} onClick={addToCart}>
         <ShoppingCart size={20} strokeWidth={1.75} aria-hidden="true" />
-        {action.label}
+        {t(action.label)}
       </Button>
     )
   const needsChoice = requestNeedsChoice(
@@ -52,7 +55,7 @@ export function PickerAction({ action, variant }: Props) {
       disabled={needsChoice && !lines.length}
       onClick={() => openRequest(action.kind, action.label)}
     >
-      {action.label}
+      {t(action.label)}
     </Button>
   )
 }

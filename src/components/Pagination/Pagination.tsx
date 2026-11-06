@@ -1,6 +1,7 @@
 'use client'
 
 import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { pageWindow } from '@/lib/pagination'
 import styles from './Pagination.module.css'
 
@@ -11,14 +12,15 @@ type Props = { page: number; pages: number; onPage: (page: number) => void }
  * Текущая страница отмечена aria-current.
  */
 export function Pagination({ page, pages, onPage }: Props) {
+  const t = useT()
   if (pages < 2) return null
   return (
-    <nav className={styles.pagination} aria-label="Страницы каталога">
+    <nav className={styles.pagination} aria-label={t('Страницы каталога')}>
       {page > 1 && (
         <button
           type="button"
           className={`${styles.page} ${styles.next}`}
-          aria-label="Предыдущая страница"
+          aria-label={t('Предыдущая страница')}
           onClick={() => onPage(page - 1)}
         >
           <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -36,7 +38,7 @@ export function Pagination({ page, pages, onPage }: Props) {
             type="button"
             className={styles.page}
             aria-current={n === page ? 'page' : undefined}
-            aria-label={`Страница ${n}`}
+            aria-label={t('Страница {n}', { n })}
             onClick={() => onPage(n)}
           >
             {n}
@@ -49,7 +51,7 @@ export function Pagination({ page, pages, onPage }: Props) {
           className={`${styles.page} ${styles.next}`}
           onClick={() => onPage(page + 1)}
         >
-          Далее
+          {t('Далее')}
           <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
         </button>
       )}

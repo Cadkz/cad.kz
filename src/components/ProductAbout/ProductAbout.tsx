@@ -1,4 +1,5 @@
 import { ChevronDown } from 'lucide-react'
+import { getT } from '@/i18n/server'
 import { type Block, splitPreview } from '@/lib/richText'
 import { ArticleBody } from '../ArticleBody/ArticleBody'
 import styles from './ProductAbout.module.css'
@@ -7,7 +8,8 @@ import styles from './ProductAbout.module.css'
  * Описание товара: начало сразу, остальное свёрнуто в «Читать полностью» (нативный details:
  * работает без JavaScript, текст виден поисковикам).
  */
-export function ProductAbout({ blocks }: { blocks: Block[] }) {
+export async function ProductAbout({ blocks }: { blocks: Block[] }) {
+  const t = await getT()
   const { lead, rest } = splitPreview(blocks)
   return (
     <div className={styles.about}>
@@ -15,7 +17,7 @@ export function ProductAbout({ blocks }: { blocks: Block[] }) {
       {rest.length > 0 && (
         <details className={styles.more}>
           <summary className={styles.summary}>
-            Читать полностью
+            {t('Читать полностью')}
             <ChevronDown
               size={16}
               strokeWidth={1.75}

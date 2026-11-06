@@ -1,5 +1,6 @@
 'use client'
 
+import { useT } from '@/components/LangProvider/LangProvider'
 import type { TrainingState, trainingOptions } from '@/domain/trainingFilter.mjs'
 import { Chip } from '../Chip/Chip'
 import { FilterChecks } from '../FilterChecks/FilterChecks'
@@ -16,22 +17,23 @@ type Props = {
  * месяц старта и «Есть набор». Месяцы и набор — из расписания учебного центра.
  */
 export function TrainingFilters({ state, options, onChange }: Props) {
+  const t = useT()
   return (
     <>
       <fieldset className={styles.group}>
-        <legend className={styles.title}>Порядок</legend>
+        <legend className={styles.title}>{t('Порядок')}</legend>
         <div className={styles.row}>
           <Chip selected={state.sort === 'topic'} onClick={() => onChange({ sort: 'topic' })}>
-            По направлениям
+            {t('По направлениям')}
           </Chip>
           <Chip selected={state.sort === 'start'} onClick={() => onChange({ sort: 'start' })}>
-            Ближайший старт
+            {t('Ближайший старт')}
           </Chip>
         </div>
       </fieldset>
       {options.topics.length > 0 && (
         <fieldset className={styles.group}>
-          <legend className={styles.title}>Направление</legend>
+          <legend className={styles.title}>{t('Направление')}</legend>
           {options.topics.map((option) => (
             <Chip
               key={option.value}
@@ -48,7 +50,7 @@ export function TrainingFilters({ state, options, onChange }: Props) {
       )}
       {options.months.length > 0 && (
         <fieldset className={styles.group}>
-          <legend className={styles.title}>Месяц старта</legend>
+          <legend className={styles.title}>{t('Месяц старта')}</legend>
           <div className={styles.row}>
             {options.months.map((option) => (
               <Chip
@@ -66,8 +68,8 @@ export function TrainingFilters({ state, options, onChange }: Props) {
       )}
       {(options.open > 0 || state.open) && (
         <FilterChecks
-          title="Набор"
-          options={[{ value: 'open', label: 'Есть набор', count: options.open }]}
+          title={t('Набор')}
+          options={[{ value: 'open', label: t('Есть набор'), count: options.open }]}
           selected={state.open ? ['open'] : []}
           onToggle={() => onChange({ open: !state.open })}
         />

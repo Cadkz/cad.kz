@@ -1,4 +1,5 @@
 import { groupSpecs } from '@/domain/specs.mjs'
+import { getT } from '@/i18n/server'
 import type { Spec } from '@/lib/product'
 import styles from './PropertyList.module.css'
 
@@ -7,7 +8,8 @@ import styles from './PropertyList.module.css'
  * группы (исследование оборудования: «Печать», «Сканирование»…), группа — подзаголовком, а не
  * повтором в каждом названии («Точность — Точность 3D», замечание владельца 23.10.2026).
  */
-export function PropertyList({ items }: { items: Spec[] }) {
+export async function PropertyList({ items }: { items: Spec[] }) {
+  const t = await getT()
   const groups = groupSpecs(items)
   return (
     <div className={styles.groups}>
@@ -17,7 +19,7 @@ export function PropertyList({ items }: { items: Spec[] }) {
           <dl className={styles.list}>
             {rows.map((item) => (
               <div key={item.name} className={styles.row}>
-                <dt className={styles.name}>{item.name}</dt>
+                <dt className={styles.name}>{t(item.name)}</dt>
                 <dd className={styles.value}>{item.value}</dd>
               </div>
             ))}

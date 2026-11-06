@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { ArticleBody } from '@/components/ArticleBody/ArticleBody'
 import { AskManager } from '@/components/AskManager/AskManager'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
@@ -8,6 +7,7 @@ import { ReadingLayout } from '@/components/ReadingLayout/ReadingLayout'
 import { RelatedList } from '@/components/RelatedList/RelatedList'
 import { pagePath } from '@/domain/legacyPages.mjs'
 import { parseRequisites } from '@/domain/requisites.mjs'
+import { langRedirect } from '@/i18n/server'
 import { getContacts } from '@/lib/navigation'
 import { getInfoLinks, getPage } from '@/lib/pages'
 import { cms } from '@/lib/payload'
@@ -66,7 +66,7 @@ export async function infoPageMetadata(slug: string) {
  */
 export async function InfoPageView({ slug }: { slug: string }) {
   const page = await getPage(slug)
-  if (!page) redirect(slug === 'about' ? '/' : '/about')
+  if (!page) return langRedirect(slug === 'about' ? '/' : '/about')
   const blocks =
     slug === 'requisites'
       ? requisitesBlocks(page.body, page.title)

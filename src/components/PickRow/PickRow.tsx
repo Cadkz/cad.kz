@@ -1,6 +1,7 @@
 import { ChevronRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from '@/components/LangLink/LangLink'
+import { getT } from '@/i18n/server'
 import type { Picture } from '@/lib/pictures'
 import { AddToCartButton } from '../AddToCartButton/AddToCartButton'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
@@ -52,12 +53,15 @@ function Thumb({ item }: { item: PickItem }) {
  * Строка подборки на странице товара: миниатюра, название, производитель и цена; справа —
  * «В корзину» значком, если комплектация одна, иначе стрелка на страницу товара.
  */
-export function PickRow({ item }: { item: PickItem }) {
+export async function PickRow({ item }: { item: PickItem }) {
+  const t = await getT()
   const price = item.note
     ? item.note
     : item.priceFrom
-      ? `${item.offersCount > 1 ? 'от ' : ''}${item.priceFrom}`
-      : 'Цена по запросу'
+      ? item.offersCount > 1
+        ? t('от {sum}', { sum: item.priceFrom })
+        : item.priceFrom
+      : t('Цена по запросу')
   return (
     <div className={styles.row}>
       <span className={styles.thumb} aria-hidden="true">

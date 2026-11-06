@@ -1,5 +1,6 @@
 'use client'
 
+import { useT } from '@/components/LangProvider/LangProvider'
 import { GROUP_LABELS, POPULAR_LABEL } from '@/domain/catalogNavigation.mjs'
 import type { CatalogGroup } from '@/lib/catalog'
 import { type FilterState, POPULAR } from '@/lib/catalogFilter'
@@ -17,20 +18,21 @@ type Props = {
 
 /** Вкладки каталога в том же порядке и с теми же названиями, что в меню «Каталог». */
 export function CatalogTabs({ selected, groups, hasPopular, onChange, row = false }: Props) {
+  const t = useT()
   return (
     <fieldset className={row ? `${styles.tabs} ${styles.row}` : styles.tabs}>
-      <legend className="visually-hidden">Группа каталога</legend>
+      <legend className="visually-hidden">{t('Группа каталога')}</legend>
       <Chip selected={selected === null} onClick={() => onChange({ group: null })}>
-        Все
+        {t('Все')}
       </Chip>
       {hasPopular && (
         <Chip selected={selected === POPULAR} onClick={() => onChange({ group: POPULAR })}>
-          {POPULAR_LABEL}
+          {t(POPULAR_LABEL)}
         </Chip>
       )}
       {groups.map((group) => (
         <Chip key={group} selected={selected === group} onClick={() => onChange({ group })}>
-          {GROUP_LABELS[group]}
+          {t(GROUP_LABELS[group])}
         </Chip>
       ))}
     </fieldset>

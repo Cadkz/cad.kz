@@ -2,6 +2,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { CatalogFilter } from '@/components/CatalogFilter/CatalogFilter'
 import { Container } from '@/components/Container/Container'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
+import { getT } from '@/i18n/server'
 import { clientItems, getCatalog } from '@/lib/catalog'
 import { fromParams } from '@/lib/catalogFilter'
 import { getMenuPopular } from '@/lib/menuPopular'
@@ -11,15 +12,20 @@ import { pageMetadata } from '@/lib/seo'
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
 /** Подборки фильтра (?direction=…) — та же страница: канонический адрес один. */
-export const metadata = pageMetadata({
-  title: 'Каталог — CAD.kz',
-  description:
-    'Программы для проектирования и расчётов, оборудование и обучение: выберите направление и производителя.',
-  path: CATALOG_PATH,
-})
+export async function generateMetadata() {
+  const t = await getT()
+  return pageMetadata({
+    title: t('Каталог — CAD.kz'),
+    description: t(
+      'Программы для проектирования и расчётов, оборудование и обучение: выберите направление и производителя.',
+    ),
+    path: CATALOG_PATH,
+  })
+}
 
 /** Каталог — шаблон «Каталог»: фильтр слева, карточки справа, на телефоне фильтр в панели. */
 export default async function CatalogPage({ searchParams }: Props) {
+  const t = await getT()
   const [catalog, popular, params] = await Promise.all([
     getCatalog(),
     getMenuPopular(),
@@ -31,8 +37,10 @@ export default async function CatalogPage({ searchParams }: Props) {
       <Container>
         <Breadcrumbs items={[{ title: 'Главная', href: '/' }, { title: 'Каталог' }]} />
         <PageIntro
-          title="Каталог"
-          lead="Выберите направление, затем производителя. Не знаете, что подойдёт, — спросите Кадди или напишите в WhatsApp."
+          title={t('Каталог')}
+          lead={t(
+            'Выберите направление, затем производителя. Не знаете, что подойдёт, — спросите Кадди или напишите в WhatsApp.',
+          )}
         />
         <CatalogFilter
           key={JSON.stringify(initial)}

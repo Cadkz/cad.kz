@@ -1,9 +1,9 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { createContext, type ReactNode, useContext } from 'react'
+import { createContext, type ReactNode, useContext, useMemo } from 'react'
 import { DEFAULT_LANG, type Lang, localizeHref, splitLangPath } from '@/i18n/locales.mjs'
-import { type Messages, translate } from '@/i18n/translate.mjs'
+import { type Messages, makeT } from '@/i18n/translate.mjs'
 
 type Value = { lang: Lang; messages: Messages | null }
 
@@ -20,8 +20,8 @@ export function useLang(): Lang {
 
 /** Перевод в клиентских компонентах: const t = useT(); t('Корзина'). */
 export function useT() {
-  const { messages } = useContext(LangContext)
-  return (text: string, vars?: Record<string, string | number>) => translate(messages, text, vars)
+  const { lang, messages } = useContext(LangContext)
+  return useMemo(() => makeT(lang, messages), [lang, messages])
 }
 
 /** Адрес на языке страницы: для router.push и ссылок, собранных в коде. */

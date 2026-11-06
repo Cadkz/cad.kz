@@ -328,23 +328,64 @@ const MONTHS = [
   'декабря',
 ]
 
-/** 2026-12-01 → «1 декабря»; другой год, чем today, — «1 декабря 2027». */
-export function dayText(/** @type {string} */ day, /** @type {string} */ today = '') {
+/** Месяцы для казахской и английской версий сайта (после числа: «1 желтоқсан», «1 December»). */
+const MONTHS_BY_LANG = {
+  kk: [
+    'қаңтар',
+    'ақпан',
+    'наурыз',
+    'сәуір',
+    'мамыр',
+    'маусым',
+    'шілде',
+    'тамыз',
+    'қыркүйек',
+    'қазан',
+    'қараша',
+    'желтоқсан',
+  ],
+  en: [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ],
+}
+
+/**
+ * 2026-12-01 → «1 декабря»; другой год, чем today, — «1 декабря 2027». lang — язык страницы.
+ * @param {string} day
+ * @param {string} [today]
+ * @param {'ru' | 'kk' | 'en'} [lang]
+ */
+export function dayText(day, today = '', lang = 'ru') {
   const [year, month, date] = day.split('-')
-  const name = MONTHS[Number(month) - 1]
+  const name = (lang === 'ru' ? MONTHS : MONTHS_BY_LANG[lang])[Number(month) - 1]
   if (!name) return day
   const text = `${Number(date)} ${name}`
   return today && year !== today.slice(0, 4) ? `${text} ${year}` : text
 }
 
 /** «1–14 декабря», «27 октября – 11 ноября». */
-export function periodText(/** @type {CourseGroup} */ group, /** @type {string} */ today = '') {
-  if (!group.end || group.end === group.start) return dayText(group.start, today)
+export function periodText(
+  /** @type {CourseGroup} */ group,
+  /** @type {string} */ today = '',
+  /** @type {'ru' | 'kk' | 'en'} */ lang = 'ru',
+) {
+  if (!group.end || group.end === group.start) return dayText(group.start, today, lang)
   const [, startMonth] = group.start.split('-')
   const [, endMonth] = group.end.split('-')
   if (startMonth === endMonth && group.start.slice(0, 4) === group.end.slice(0, 4))
-    return `${Number(group.start.slice(8))}–${dayText(group.end, today)}`
-  return `${dayText(group.start, today)} – ${dayText(group.end, today)}`
+    return `${Number(group.start.slice(8))}–${dayText(group.end, today, lang)}`
+  return `${dayText(group.start, today, lang)} – ${dayText(group.end, today, lang)}`
 }
 
 /** Сегодня по Астане (UTC+5), ГГГГ-ММ-ДД. */
@@ -358,9 +399,9 @@ export function astanaToday(/** @type {Date} */ now = new Date()) {
  * @param {CourseGroup} group
  * @param {string} today
  */
-export function groupBrief(group, today) {
+export function groupBrief(group, today, lang = 'ru') {
   return {
-    dates: periodText(group, today),
+    dates: periodText(group, today, /** @type {'ru' | 'kk' | 'en'} */ (lang)),
     days: group.days,
     time: group.time,
     format: group.format || 'уточнит менеджер',

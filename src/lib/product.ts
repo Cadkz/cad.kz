@@ -221,10 +221,14 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
 }
 
 /** Заголовок, описание и канонический адрес страницы товара. Перенесённые со старого сайта — первыми. */
-export function productMetadata(product: ProductPage): Metadata {
+export function productMetadata(
+  product: ProductPage,
+  t: (text: string, vars?: Record<string, string>) => string = (text, vars) =>
+    text.replace('{name}', vars?.name ?? ''),
+): Metadata {
   return pageMetadata({
     seo: product.seo,
-    title: `${product.title} — купить в CAD.kz`,
+    title: t('{name} — купить в CAD.kz', { name: product.title }),
     description: product.summary ?? product.description,
     path: product.path,
     image: product.pictures[0]?.url,

@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronLeft } from 'lucide-react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import type { CatalogLine, Facet } from '@/lib/catalog'
 import type { FilterState, SectionStep } from '@/lib/catalogFilter'
 import styles from './CatalogSteps.module.css'
@@ -23,49 +24,54 @@ type Back = { label: string; patch: Partial<FilterState> }
 
 type Path = { back: Back | null; current: string; prompt: string | null }
 
+type Tr = ReturnType<typeof useT>
+
 /** Шаг вверх по разделам оборудования: из подраздела в тип, из типа во всё оборудование. */
-function sectionUp({ facets, state }: Props): Back | null {
-  if (state.direction) return { label: 'Все программы', patch: { group: 'software' } }
+function sectionUp({ facets, state }: Props, t: Tr): Back | null {
+  if (state.direction) return { label: t('Все программы'), patch: { group: 'software' } }
   const parent = facets.find((facet) => facet.slug === state.type)?.parent
   if (parent) {
     const title = facets.find((facet) => facet.slug === parent)?.title ?? ''
-    return { label: title, patch: { type: parent } }
+    return { label: t(title), patch: { type: parent } }
   }
   return state.type
     ? {
-        label: state.group === 'service' ? 'Обучение и услуги' : 'Всё оборудование',
+        label: t(state.group === 'service' ? 'Обучение и услуги' : 'Всё оборудование'),
         patch: { group: state.group === 'service' ? 'service' : 'hardware' },
       }
     : null
 }
 
 /** Выбран один производитель: назад к его программам из линейки или к списку производителей. */
-function vendorPath({ lines, state, auto }: Props, current: string): Path | null {
+function vendorPath({ lines, state, auto }: Props, current: string, t: Tr): Path | null {
   const vendor = state.vendors.length === 1 ? (state.vendors[0] ?? '') : null
   if (!vendor) return null
   const line = state.line ? lines.find((item) => item.id === state.line) : null
   if (line)
     return {
-      back: { label: `Все программы ${vendor}`, patch: { line: null } },
+      back: { label: t('Все программы {vendor}', { vendor }), patch: { line: null } },
       current: line.title,
       prompt: null,
     }
   if (auto) return null
   return {
-    back: { label: `${current}: все производители`, patch: { vendors: [] } },
+    back: {
+      label: t('{section}: все производители', { section: current }),
+      patch: { vendors: [] },
+    },
     current: vendor,
     prompt: null,
   }
 }
 
 /** Куда ведёт «Назад» и что написано рядом: от линейки вверх до всего оборудования. */
-function stepPath(props: Props, section: string): Path {
-  const current = props.facets.find((facet) => facet.slug === section)?.title ?? ''
+function stepPath(props: Props, section: string, t: Tr): Path {
+  const current = t(props.facets.find((facet) => facet.slug === section)?.title ?? '')
   if (props.sectionStep === 'sub' || props.vendorStep) {
-    const prompt = props.sectionStep === 'sub' ? 'выберите раздел' : 'выберите производителя'
-    return { back: sectionUp(props), current, prompt }
+    const prompt = t(props.sectionStep === 'sub' ? 'выберите раздел' : 'выберите производителя')
+    return { back: sectionUp(props, t), current, prompt }
   }
-  return vendorPath(props, current) ?? { back: sectionUp(props), current, prompt: null }
+  return vendorPath(props, current, t) ?? { back: sectionUp(props, t), current, prompt: null }
 }
 
 /**
@@ -75,23 +81,26 @@ function stepPath(props: Props, section: string): Path {
  * плоттеры · Плоттеры» (замечание владельца 22.10.2026).
  */
 export function CatalogSteps(props: Props) {
+  const t = useT()
   const { state, sectionStep, onChange } = props
   if (sectionStep === 'type' || sectionStep === 'direction') {
     return (
       <div className={styles.root}>
         <p className={styles.crumbs}>
-          {sectionStep === 'direction'
-            ? 'Программы: выберите задачу'
-            : state.group === 'service'
-              ? 'Выберите услугу'
-              : 'Оборудование: выберите тип'}
+          {t(
+            sectionStep === 'direction'
+              ? 'Программы: выберите задачу'
+              : state.group === 'service'
+                ? 'Выберите услугу'
+                : 'Оборудование: выберите тип',
+          )}
         </p>
       </div>
     )
   }
   const section = state.type ?? state.direction
   if (!section) return null
-  const { back, current, prompt } = stepPath(props, section)
+  const { back, current, prompt } = stepPath(props, section, t)
   if (!back && !prompt) return null
   return (
     <div className={styles.root}>

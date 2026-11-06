@@ -1,4 +1,5 @@
 import { Gavel, PackageCheck, ShieldCheck, Wallet } from 'lucide-react'
+import { getT } from '@/i18n/server'
 import type { PurchaseTerm } from '@/lib/purchaseTerms'
 import styles from './PurchaseTerms.module.css'
 
@@ -17,11 +18,12 @@ function TermIcon({ title }: { title: string }) {
  * строка на условие — значок, «Оплата:» и текст, чтобы карточка и условия поместились на
  * экране ноутбука.
  */
-export function PurchaseTerms({ terms }: { terms: PurchaseTerm[] }) {
+export async function PurchaseTerms({ terms }: { terms: PurchaseTerm[] }) {
+  const t = await getT()
   return (
     <section className={styles.box} aria-labelledby="terms-title">
       <h2 id="terms-title" className={styles.heading}>
-        Условия покупки
+        {t('Условия покупки')}
       </h2>
       <ul className={styles.list}>
         {terms.map((term) => (

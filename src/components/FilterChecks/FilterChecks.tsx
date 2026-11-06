@@ -2,6 +2,7 @@
 
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import styles from './FilterChecks.module.css'
 
 type Option = { value: string; label: string; count: number }
@@ -32,6 +33,7 @@ export function FilterChecks({
   /** Открыта ли сворачиваемая группа сначала. */
   defaultOpen?: boolean
 }) {
+  const t = useT()
   const [expanded, setExpanded] = useState(false)
   const [open, setOpen] = useState(defaultOpen || selected.length > 0)
   if (!options.length) return null
@@ -71,7 +73,7 @@ export function FilterChecks({
               disabled={option.count === 0 && !selected.includes(option.value)}
               onChange={() => onToggle(option.value)}
             />
-            <span className={styles.checkLabel}>{option.label}</span>
+            <span className={styles.checkLabel}>{t(option.label)}</span>
           </label>
         ))}
       {(!collapsible || open) && limit !== undefined && (folded || expanded) && (
@@ -81,7 +83,11 @@ export function FilterChecks({
           aria-expanded={expanded}
           onClick={() => setExpanded(!expanded)}
         >
-          {expanded ? 'Свернуть' : collapsible ? 'Показать ещё' : `Ещё ${hidden}`}
+          {expanded
+            ? t('Свернуть')
+            : collapsible
+              ? t('Показать ещё')
+              : t('Ещё {count}', { count: hidden })}
           <ChevronDown
             size={16}
             strokeWidth={1.75}

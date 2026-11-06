@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useT } from '@/components/LangProvider/LangProvider'
 import type { VendorTile } from '@/lib/catalogVendors'
 import type { Picture } from '@/lib/pictures'
 import { positions } from '@/lib/plural'
@@ -21,6 +22,7 @@ type Props = {
  * с одной программой — сразу её страницу.
  */
 export function VendorTiles({ tiles, logos, onPick }: Props) {
+  const t = useT()
   return (
     <ul data-grid="" className={styles.grid}>
       {tiles.map((tile, index) => {
@@ -43,10 +45,10 @@ export function VendorTiles({ tiles, logos, onPick }: Props) {
                 )
               }
               mediaFit="logo"
-              overline="Производитель"
+              overline={t('Производитель')}
               title={tile.title}
-              text={tile.text || 'Программы производителя'}
-              meta={positions(tile.count)}
+              text={tile.text || t('Программы производителя')}
+              meta={positions(tile.count, t)}
               href={tile.href}
               onPick={() => onPick(tile.title)}
             />

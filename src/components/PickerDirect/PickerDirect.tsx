@@ -1,6 +1,7 @@
 'use client'
 
 import { BadgePercent } from 'lucide-react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { requestMessage } from '@/lib/requestMessage'
 import { WhatsappIcon } from '../icons/icons'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
@@ -13,6 +14,7 @@ import styles from './PickerDirect.module.css'
  * и курсов «Нашли дешевле?» нет: сравнивать там нечего.
  */
 export function PickerDirect() {
+  const t = useT()
   const { meta, quantity, requestLines, requestChoices, openRequest } = usePickerContext()
   const whatsapp = meta.contacts.whatsappHref
   const cheaper = meta.scenario !== 'service'
@@ -41,10 +43,10 @@ export function PickerDirect() {
         <button
           type="button"
           className={styles.link}
-          onClick={() => openRequest('price', 'Нашли дешевле?', true)}
+          onClick={() => openRequest('price', t('Нашли дешевле?'), true)}
         >
           <BadgePercent size={16} strokeWidth={1.75} aria-hidden="true" />
-          Нашли дешевле?
+          {t('Нашли дешевле?')}
         </button>
       )}
     </div>

@@ -3,6 +3,7 @@
 import { ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { sectionIconKey } from '@/domain/sectionArt.mjs'
 import type { Direction } from '@/lib/catalog'
 import { catalogHref } from '@/lib/navigationHrefs'
@@ -18,6 +19,7 @@ const PRESSED_MS = 1500
  * чертёжной сеткой и держится, пока открывается каталог (решение владельца 03.11.2026).
  */
 export function DirectionCard({ direction }: { direction: Direction }) {
+  const t = useT()
   const [pressed, setPressed] = useState(false)
   useEffect(() => {
     if (!pressed) return
@@ -42,7 +44,7 @@ export function DirectionCard({ direction }: { direction: Direction }) {
       {direction.summary && <span className={styles.summary}>{direction.summary}</span>}
       <span className={styles.cta} aria-hidden="true">
         <span className={styles.ctaInner}>
-          В каталог
+          {t('В каталог')}
           <ArrowRight size={16} strokeWidth={1.75} />
         </span>
       </span>

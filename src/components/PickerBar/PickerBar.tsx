@@ -1,6 +1,7 @@
 'use client'
 
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { requestNeedsChoice } from '@/domain/pickerRequest.mjs'
 import { pickerActions } from '@/lib/pickerAction'
 import { usePickerCart } from '@/lib/usePickerCart'
@@ -14,6 +15,7 @@ import styles from './PickerBar.module.css'
  * консультация, демонстрация).
  */
 export function PickerBar() {
+  const t = useT()
   const { total, lines, openRequest, meta, view } = usePickerContext()
   const { cartFirst, canAdd, added, addToCart } = usePickerCart()
   const action = pickerActions(meta, cartFirst).main
@@ -25,24 +27,24 @@ export function PickerBar() {
     total.state === 'done'
       ? total.text
       : total.state === 'busy'
-        ? 'Считаем…'
+        ? t('Считаем…')
         : total.state === 'request' || !view.steps.length
-          ? 'Цена по запросу'
-          : 'Выберите комплект'
+          ? t('Цена по запросу')
+          : t('Выберите комплект')
   return (
     <div className={styles.bar} data-bottom-bar>
       <span className={styles.price}>{text}</span>
       {!lines.length && needsChoice ? (
         <a href="#config" className={styles.button}>
-          Выбрать
+          {t('Выбрать')}
         </a>
       ) : added ? (
         <Link href="/cart" className={styles.button}>
-          В корзине — оформить
+          {t('В корзине — оформить')}
         </Link>
       ) : action.type === 'cart' ? (
         <button type="button" className={styles.button} disabled={!canAdd} onClick={addToCart}>
-          {action.label}
+          {t(action.label)}
         </button>
       ) : action.type === 'request' ? (
         <button
@@ -50,11 +52,11 @@ export function PickerBar() {
           className={styles.button}
           onClick={() => openRequest(action.kind, action.label)}
         >
-          {action.label}
+          {t(action.label)}
         </button>
       ) : (
         <a href={action.href} className={styles.button}>
-          {action.label}
+          {t(action.label)}
         </a>
       )}
     </div>

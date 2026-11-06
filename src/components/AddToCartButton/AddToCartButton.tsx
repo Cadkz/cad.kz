@@ -3,6 +3,7 @@
 import { Check, ShoppingCart, ShoppingCartPlus } from 'lucide-react'
 import { useState } from 'react'
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { useCart } from '../CartProvider/CartProvider'
 import styles from './AddToCartButton.module.css'
 
@@ -20,6 +21,7 @@ type Props = {
  * «В корзине», чтобы было видно, что нажатие сработало. Цену считает сервер в корзине.
  */
 export function AddToCartButton({ offerId, title, look = 'block', request = false }: Props) {
+  const t = useT()
   const { items, add, ready } = useCart()
   const [error, setError] = useState(false)
   const inCart = ready && items.some((item) => item.offerId === offerId)
@@ -30,10 +32,12 @@ export function AddToCartButton({ offerId, title, look = 'block', request = fals
       <Link
         href="/cart"
         className={`${cls} ${styles.done}`}
-        aria-label={look === 'icon' ? `${title} в корзине, перейти в корзину` : undefined}
+        aria-label={
+          look === 'icon' ? t('{name} в корзине, перейти в корзину', { name: title }) : undefined
+        }
       >
         <Check size={16} strokeWidth={1.75} aria-hidden="true" />
-        {look === 'block' && 'В корзине'}
+        {look === 'block' && t('В корзине')}
       </Link>
     )
   return (
@@ -41,12 +45,12 @@ export function AddToCartButton({ offerId, title, look = 'block', request = fals
       type="button"
       className={cls}
       disabled={!ready}
-      aria-label={look === 'icon' ? `Добавить в корзину: ${title}` : undefined}
+      aria-label={look === 'icon' ? t('Добавить в корзину: {name}', { name: title }) : undefined}
       title={
         error
-          ? 'Корзина заполнена — оформите заказ или удалите лишнее'
+          ? t('Корзина заполнена — оформите заказ или удалите лишнее')
           : request
-            ? 'В корзину — комплектацию и цену подберёт менеджер'
+            ? t('В корзину — комплектацию и цену подберёт менеджер')
             : undefined
       }
       onClick={() => {
@@ -63,7 +67,7 @@ export function AddToCartButton({ offerId, title, look = 'block', request = fals
       ) : (
         <ShoppingCart size={16} strokeWidth={1.75} aria-hidden="true" />
       )}
-      {look === 'block' && 'В корзину'}
+      {look === 'block' && t('В корзину')}
     </button>
   )
 }

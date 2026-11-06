@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { getT } from '@/i18n/server'
 import { StickyAside } from '../StickyAside/StickyAside'
 import styles from './ProductLayout.module.css'
 
@@ -20,7 +21,7 @@ type Props = {
  * На телефоне блок покупки идёт сразу после заголовка (или после содержимого — `asideLast`),
  * широкий блок — последним.
  */
-export function ProductLayout({
+export async function ProductLayout({
   header,
   aside,
   asideFooter,
@@ -28,10 +29,11 @@ export function ProductLayout({
   wide,
   asideLast = false,
 }: Props) {
+  const t = await getT()
   return (
     <div className={styles.layout} data-aside-last={asideLast}>
       <div className={styles.header}>{header}</div>
-      <aside className={styles.aside} aria-label="Покупка">
+      <aside className={styles.aside} aria-label={t('Покупка')}>
         <StickyAside>
           {aside}
           {asideFooter}

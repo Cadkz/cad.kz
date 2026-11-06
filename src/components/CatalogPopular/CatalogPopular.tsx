@@ -1,3 +1,4 @@
+import { useT } from '@/components/LangProvider/LangProvider'
 import type { PopularCardData } from '@/lib/popular'
 import { ProductCard, type ProductCardData } from '../ProductCard/ProductCard'
 import styles from './CatalogPopular.module.css'
@@ -7,6 +8,7 @@ import styles from './CatalogPopular.module.css'
  * Плитка со своей ссылкой («3D-сканеры Artec» ведёт в раздел) — та же карточка без цены и корзины.
  */
 function toCard(
+  t: (text: string) => string,
   card: PopularCardData,
   byId: Map<number, ProductCardData>,
   byHref: Map<string, ProductCardData>,
@@ -21,7 +23,7 @@ function toCard(
     manufacturer: item?.manufacturer ?? null,
     summary: null,
     // Ссылка ведёт в раздел или подборку: описание одного товара сюда не подходит.
-    cardText: 'Все модели и комплектации в каталоге',
+    cardText: t('Все модели и комплектации в каталоге'),
     icon: card.icon,
     picture: card.brand
       ? { url: card.brand.logo, alt: '', width: 48, height: 48, fit: 'logo', local: true }
@@ -46,13 +48,14 @@ export function CatalogPopular({
   cards: PopularCardData[]
   items: ProductCardData[]
 }) {
+  const t = useT()
   const byId = new Map(items.filter((item) => item.id > 0).map((item) => [item.id, item]))
   const byHref = new Map(items.map((item) => [item.href, item]))
   return (
-    <ul data-grid="" className={styles.grid} aria-label="Популярные решения">
+    <ul data-grid="" className={styles.grid} aria-label={t('Популярные решения')}>
       {cards.map((card) => (
         <li key={card.key}>
-          <ProductCard product={toCard(card, byId, byHref)} />
+          <ProductCard product={toCard(t, card, byId, byHref)} />
         </li>
       ))}
     </ul>

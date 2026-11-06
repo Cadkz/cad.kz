@@ -1,6 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import type { ReactNode } from 'react'
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import styles from './CatalogTile.module.css'
 
 export type CatalogTileProps = {
@@ -36,6 +37,7 @@ export function CatalogTile({
   href,
   onPick,
 }: CatalogTileProps) {
+  const t = useT()
   const body = (
     <>
       <span className={styles.head}>
@@ -53,7 +55,7 @@ export function CatalogTile({
       <span className={styles.text}>{text}</span>
       <span className={styles.meta}>{meta}</span>
       <span className={styles.more}>
-        Смотреть
+        {t('Смотреть')}
         <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
       </span>
     </>

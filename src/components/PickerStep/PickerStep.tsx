@@ -2,6 +2,7 @@
 
 import { ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { includedBy, itemUnavailable, offerFor, type PickerStep as Step } from '@/domain/picker.mjs'
 import { PickerOption } from '../PickerOption/PickerOption'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
@@ -17,6 +18,7 @@ type Props = { step: Step; number: number | null; titled?: boolean }
  * titled — заголовок без номера (готовые комплекты над ручной сборкой).
  */
 export function PickerStep({ step, number, titled = false }: Props) {
+  const t = useT()
   const picker = usePickerContext()
   const { view, state } = picker
   const switchText = view.switches.map((sw) => state.switches[sw.key]).join(', ')
@@ -48,7 +50,7 @@ export function PickerStep({ step, number, titled = false }: Props) {
         price={offerFor(item, view.switches, state.switches)?.price ?? null}
         checked={pack ? true : isChecked(item.key)}
         disabled={pack != null || itemUnavailable(item, view.switches, state.switches)}
-        disabledNote={pack ? 'входит в пакет' : `нет в ${switchText}`}
+        disabledNote={pack ? t('входит в пакет') : t('нет в {name}', { name: switchText })}
         onChange={() => change(item.key)}
         anchor={item.anchor}
       />
@@ -78,13 +80,13 @@ export function PickerStep({ step, number, titled = false }: Props) {
             <SectionIcon name={step.icon} size={40} />
           </span>
         )}
-        {step.title}
+        {t(step.title)}
       </legend>
-      {step.hint && <p className={styles.hint}>{step.hint}</p>}
+      {step.hint && <p className={styles.hint}>{t(step.hint)}</p>}
       {step.collapsed ? (
         <details ref={moreRef} className={styles.more} open={openAtStart || undefined}>
           <summary className={styles.summary}>
-            {chosen > 0 ? `Выбрано: ${chosen}` : 'Показать варианты'}
+            {chosen > 0 ? t('Выбрано: {count}', { count: chosen }) : t('Показать варианты')}
             <ChevronDown
               size={16}
               strokeWidth={1.75}

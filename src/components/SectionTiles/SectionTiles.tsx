@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { summaryPhrase } from '@/domain/cardTexts.mjs'
 import type { SectionTile } from '@/lib/catalogFilter'
 import { positions } from '@/lib/plural'
@@ -20,11 +21,11 @@ type Props = {
  * Фраза плитки по единому правилу: описание раздела из админки одной законченной фразой, иначе —
  * что внутри (подразделы или производители, до трёх).
  */
-function text(tile: SectionTile) {
+function text(tile: SectionTile, t: (text: string) => string) {
   const own = summaryPhrase(tile.summary, tile.title)
   if (own) return own
   const names = tile.children.length ? tile.children : tile.vendors
-  return names.slice(0, 3).join(', ') || 'Программы и оборудование раздела'
+  return names.slice(0, 3).map(t).join(', ') || t('Программы и оборудование раздела')
 }
 
 /**
@@ -32,6 +33,7 @@ function text(tile: SectionTile) {
  * название, фраза, число позиций и «Смотреть».
  */
 export function SectionTiles({ tiles, overline, onPick }: Props) {
+  const t = useT()
   return (
     // Сетка одна на весь каталог — по 3 в ряд, и у типов оборудования (правка владельца 02.11.2026).
     <ul data-grid="" className={styles.grid}>
@@ -60,9 +62,9 @@ export function SectionTiles({ tiles, overline, onPick }: Props) {
             }
             mediaFit={!tile.picture || tile.picture.fit !== 'logo' ? 'photo' : 'fill'}
             overline={overline}
-            title={tile.title}
-            text={text(tile)}
-            meta={positions(tile.count)}
+            title={t(tile.title)}
+            text={text(tile, t)}
+            meta={positions(tile.count, t)}
             onPick={() => onPick(tile.slug)}
           />
         </Reveal>

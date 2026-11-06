@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { FamilyView } from '@/components/FamilyView/FamilyView'
+import { getT } from '@/i18n/server'
 import { familyMetadata, getFamily } from '@/lib/families'
 import { pickParam } from '@/lib/product'
 
@@ -11,7 +12,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const family = await getFamily((await params).slug)
-  return family ? familyMetadata(family) : {}
+  return family ? familyMetadata(family, await getT()) : {}
 }
 
 /** Семейство редких товаров: список с галочками и «Запросить цену». */

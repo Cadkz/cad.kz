@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import Link from '@/components/LangLink/LangLink'
 import { NAV_BACK, NAV_FORWARD } from '@/domain/motion.mjs'
+import { getT } from '@/i18n/server'
 import styles from './PrevNext.module.css'
 
 type LinkData = { title: string; href: string } | null
@@ -10,10 +11,11 @@ type LinkData = { title: string; href: string } | null
  * Выглядят как навигация — стрелка в кружке, при наведении синий контур и стрелка сдвигается;
  * новая статья приходит с той стороны, куда листают.
  */
-export function PrevNext({ previous, next }: { previous: LinkData; next: LinkData }) {
+export async function PrevNext({ previous, next }: { previous: LinkData; next: LinkData }) {
+  const t = await getT()
   if (!previous && !next) return null
   return (
-    <nav className={styles.nav} aria-label="Другие материалы">
+    <nav className={styles.nav} aria-label={t('Другие материалы')}>
       {previous ? (
         <Link
           href={previous.href}
@@ -24,7 +26,7 @@ export function PrevNext({ previous, next }: { previous: LinkData; next: LinkDat
             <ArrowLeft size={20} strokeWidth={1.75} />
           </span>
           <span className={styles.text}>
-            <span className={styles.label}>Предыдущая</span>
+            <span className={styles.label}>{t('Предыдущая')}</span>
             <span className={styles.title}>{previous.title}</span>
           </span>
         </Link>
@@ -38,7 +40,7 @@ export function PrevNext({ previous, next }: { previous: LinkData; next: LinkDat
           transitionTypes={NAV_FORWARD}
         >
           <span className={styles.text}>
-            <span className={styles.label}>Следующая</span>
+            <span className={styles.label}>{t('Следующая')}</span>
             <span className={styles.title}>{next.title}</span>
           </span>
           <span className={styles.arrow} aria-hidden="true">

@@ -3,6 +3,7 @@
 import { ArrowRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { groupAllLabel, sectionAllLabel } from '@/domain/catalogNavigation.mjs'
 import type { MenuTab } from '@/lib/navigation'
 import { MenuDrill } from '../MenuDrill/MenuDrill'
@@ -20,6 +21,7 @@ const HOVER_DELAY = 90
  * каталог.
  */
 export function MenuSections({ tab, onNavigate }: Props) {
+  const t = useT()
   const [active, setActive] = useState(0)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
   useEffect(() => () => clearTimeout(timer.current), [])
@@ -57,7 +59,7 @@ export function MenuSections({ tab, onNavigate }: Props) {
         ))}
         <li>
           <Link href={tab.allHref} className={styles.everything} onClick={onNavigate}>
-            {groupAllLabel(tab.key)}
+            {t(groupAllLabel(tab.key))}
             <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
           </Link>
         </li>

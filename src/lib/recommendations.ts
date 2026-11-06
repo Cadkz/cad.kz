@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 import { plainTitle } from '@/domain/productTitle.mjs'
+import { getT } from '@/i18n/server'
 import { dayText, pickCourse } from '../domain/courseSchedule.mjs'
 import { priorityRank } from '../domain/priority.mjs'
 import {
@@ -13,7 +14,6 @@ import { collectionFor, linePickFor, PICKS_LIMIT, pinPicks } from '../domain/ven
 import { courseMatches, groupsForCourse } from './courseSchedule'
 import { catalogAvailable } from './equipmentResearch'
 import { catalogHref } from './navigationHrefs'
-import { plural } from './plural'
 import type { RelatedProduct } from './product'
 import { productPath } from './productPath'
 import { relId, relIds } from './rel'
@@ -117,6 +117,7 @@ const toCards = (ids: number[], cards: Map<number, RelatedProduct>) =>
 
 /** Линейка производителя строкой подборки: ведёт в каталог на эту линейку. */
 async function lineCard(payload: Payload, title: string): Promise<RelatedProduct | null> {
+  const t = await getT()
   const { docs } = await payload.find({
     collection: 'product-lines',
     where: { and: [{ title: { equals: title } }, { status: { equals: 'published' } }] },
@@ -136,7 +137,7 @@ async function lineCard(payload: Payload, title: string): Promise<RelatedProduct
     href: catalogHref({ group: 'software', vendor: vendor.title, line: String(line.id) }),
     title: plainTitle(line.title),
     vendor: vendor.title,
-    note: `${count.totalDocs} ${plural(count.totalDocs, 'программа', 'программы', 'программ')}`,
+    note: `${count.totalDocs} ${t.plural(count.totalDocs, 'программа', 'программы', 'программ')}`,
   }
 }
 
@@ -151,6 +152,7 @@ async function scheduledCourse(
   items: RecItem[],
   cards: Map<number, RelatedProduct>,
 ): Promise<RelatedProduct | null> {
+  const t = await getT()
   if (target.kind !== 'software') return null
   try {
     const matches = await courseMatches(payload)
@@ -161,7 +163,9 @@ async function scheduledCourse(
     })
     const course = pickCourse(target.title, candidates)
     const card = course ? cards.get(course.id) : null
-    return card && course ? { ...card, note: `Старт ${dayText(course.next, matches.today)}` } : null
+    return card && course
+      ? { ...card, note: `${t('Старт')} ${dayText(course.next, matches.today, t.lang)}` }
+      : null
   } catch (error) {
     console.error('Расписание курсов: подборка без курса', error instanceof Error ? error.name : '')
     return null

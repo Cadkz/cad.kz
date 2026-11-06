@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight, Contrast, Maximize2, Palette } from 'lucide-react'
 import Image from 'next/image'
 import { type PointerEvent, type ReactNode, useRef, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import type { Picture } from '@/lib/pictures'
 import type { Fact } from '@/lib/product'
 import { PictureViewer } from '../PictureViewer/PictureViewer'
@@ -28,6 +29,7 @@ const SWIPE = 40
  * фото отстаёт от сетки листа — глубина без JavaScript (CSS).
  */
 export function ProductStage({ title, pictures, facts, placeholder, logo }: Props) {
+  const t = useT()
   const [active, setActive] = useState(0)
   const [open, setOpen] = useState<number | null>(null)
   const start = useRef<number | null>(null)
@@ -72,7 +74,7 @@ export function ProductStage({ title, pictures, facts, placeholder, logo }: Prop
               onClick={() => setOpen(active)}
               onPointerDown={onDown}
               onPointerUp={onUp}
-              aria-label={`Открыть картинку крупно: ${title}`}
+              aria-label={t('Открыть картинку крупно: {name}', { name: title })}
             >
               {pictures.map((picture, index) => (
                 <span
@@ -107,7 +109,7 @@ export function ProductStage({ title, pictures, facts, placeholder, logo }: Prop
               type="button"
               className={styles.arrow}
               onClick={() => step(-1)}
-              aria-label="Предыдущая картинка"
+              aria-label={t('Предыдущая картинка')}
             >
               <ChevronLeft size={20} strokeWidth={1.75} aria-hidden="true" />
             </button>
@@ -118,7 +120,7 @@ export function ProductStage({ title, pictures, facts, placeholder, logo }: Prop
               type="button"
               className={styles.arrow}
               onClick={() => step(1)}
-              aria-label="Следующая картинка"
+              aria-label={t('Следующая картинка')}
             >
               <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" />
             </button>
@@ -129,10 +131,10 @@ export function ProductStage({ title, pictures, facts, placeholder, logo }: Prop
         <dl className={styles.facts} data-count={facts.length}>
           {facts.map((fact) => (
             <div key={fact.name} className={styles.fact}>
-              <dt>{fact.name}</dt>
+              <dt>{t(fact.name)}</dt>
               <dd>
                 {fact.icon && <FactIcon icon={fact.icon} />}
-                {fact.value}
+                {t(fact.value)}
               </dd>
             </div>
           ))}

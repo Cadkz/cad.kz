@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronLeft, Wrench } from 'lucide-react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { itemUnavailable } from '@/domain/picker.mjs'
 import { Button } from '../Button/Button'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
@@ -16,13 +17,14 @@ import styles from './PickerSteps.module.css'
  * Без подбора и без предложений — короткая подсказка, что цену назовёт менеджер.
  */
 export function PickerSteps() {
+  const t = useT()
   const { view, state, chooseBundle, openRequest } = usePickerContext()
   if (!view.steps.length)
     return (
       <p className={styles.empty}>
-        Цена и комплектация — по запросу.{' '}
+        {t('Цена и комплектация — по запросу.')}{' '}
         <button type="button" className={styles.link} onClick={() => openRequest('price')}>
-          Запросить цену
+          {t('Запросить цену')}
         </button>
       </p>
     )
@@ -54,10 +56,12 @@ export function PickerSteps() {
         <PickerSwitches />
         <PickerStep step={bundles} number={null} titled />
         <div className={styles.manual}>
-          <p className={styles.manualText}>Нужен другой состав? Отметьте программы по одной.</p>
+          <p className={styles.manualText}>
+            {t('Нужен другой состав? Отметьте программы по одной.')}
+          </p>
           <Button variant="tool" size="sm" onClick={() => chooseBundle(null)}>
             <Wrench size={16} strokeWidth={1.75} aria-hidden="true" />
-            Собрать комплект самому
+            {t('Собрать комплект самому')}
           </Button>
         </div>
       </div>
@@ -72,7 +76,7 @@ export function PickerSteps() {
       {firstBundle && (
         <button type="button" className={styles.back} onClick={() => chooseBundle(firstBundle.key)}>
           <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-          Вернуться к готовым комплектам
+          {t('Вернуться к готовым комплектам')}
         </button>
       )}
       <PickerSwitches />

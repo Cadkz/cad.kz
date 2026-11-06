@@ -2,6 +2,7 @@
 
 import { Check, ShoppingCart } from 'lucide-react'
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { usePickerCart } from '@/lib/usePickerCart'
 import styles from './PickerCartIcon.module.css'
 
@@ -10,13 +11,14 @@ import styles from './PickerCartIcon.module.css'
  * значок корзины понятен и без слов. После добавления — галочка, ведёт в корзину.
  */
 export function PickerCartIcon({ title }: { title: string }) {
+  const t = useT()
   const { canAdd, added, addToCart } = usePickerCart()
   if (added)
     return (
       <Link
         href="/cart"
         className={`${styles.icon} ${styles.added}`}
-        aria-label="В корзине — оформить"
+        aria-label={t('В корзине — оформить')}
       >
         <Check size={20} strokeWidth={1.75} aria-hidden="true" />
       </Link>
@@ -27,8 +29,8 @@ export function PickerCartIcon({ title }: { title: string }) {
       className={styles.icon}
       disabled={!canAdd}
       onClick={addToCart}
-      aria-label={`Добавить в корзину: ${title}`}
-      title="Добавить в корзину"
+      aria-label={t('Добавить в корзину: {name}', { name: title })}
+      title={t('Добавить в корзину')}
     >
       <ShoppingCart size={20} strokeWidth={1.75} aria-hidden="true" />
     </button>

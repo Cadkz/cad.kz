@@ -77,13 +77,16 @@ export function firstStart(item, month) {
 }
 
 /**
- * Подпись на карточке курса: «Старт 1 декабря».
+ * Подпись на карточке курса: «Старт 1 декабря». На казахской и английской страницах — свой месяц
+ * и переведённое слово «Старт» (word).
  * @param {TrainingItem} item
  * @param {string | null} month
+ * @param {'ru' | 'kk' | 'en'} [lang]
+ * @param {string} [word]
  */
-export function startNote(item, month) {
+export function startNote(item, month, lang = 'ru', word = 'Старт') {
   const day = firstStart(item, month)
-  return day ? `Старт ${dayText(day, astanaToday())}` : null
+  return day ? `${word} ${dayText(day, astanaToday(), lang)}` : null
 }
 
 /**

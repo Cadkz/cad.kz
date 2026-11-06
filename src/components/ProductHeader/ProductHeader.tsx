@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { getT } from '@/i18n/server'
 import { Badge } from '../Badge/Badge'
 import { SectionIcon } from '../SectionIcon/SectionIcon'
 import styles from './ProductHeader.module.css'
@@ -18,7 +19,16 @@ type Props = {
  * Шапка страницы товара: производитель, название, коротко, задачи и зависимости от базового ПО.
  * У оборудования с фото под текстом — крупная сцена с фото и главными фактами.
  */
-export function ProductHeader({ title, vendor, summary, icon, tasks, requires, media }: Props) {
+export async function ProductHeader({
+  title,
+  vendor,
+  summary,
+  icon,
+  tasks,
+  requires,
+  media,
+}: Props) {
+  const t = await getT()
   return (
     <header className={styles.header}>
       <div className={styles.top}>
@@ -33,11 +43,13 @@ export function ProductHeader({ title, vendor, summary, icon, tasks, requires, m
           {summary && <p className={styles.summary}>{summary}</p>}
           {requires.length > 0 && (
             <p className={styles.requires}>
-              Работает с базовым ПО: {requires.join(', ')}. Его нужно приобрести отдельно.
+              {t('Работает с базовым ПО: {list}. Его нужно приобрести отдельно.', {
+                list: requires.join(', '),
+              })}
             </p>
           )}
           {tasks.length > 0 && (
-            <ul className={styles.tasks} aria-label="Задачи">
+            <ul className={styles.tasks} aria-label={t('Задачи')}>
               {tasks.map((task) => (
                 <li key={task}>
                   <Badge>{task}</Badge>

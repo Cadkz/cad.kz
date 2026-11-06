@@ -1,6 +1,7 @@
 'use client'
 
 import { Check } from 'lucide-react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import styles from './PickerOption.module.css'
 
 type Props = {
@@ -19,9 +20,10 @@ type Props = {
 
 /** Строка варианта в подборе: выбор, название с пояснением и цена, посчитанная сервером. */
 export function PickerOption(props: Props) {
+  const t = useT()
   const { control, name, label, note, price, checked, disabled, disabledNote, onChange, anchor } =
     props
-  const priceText = disabled ? disabledNote : (price ?? 'по запросу')
+  const priceText = disabled ? disabledNote : (price ?? t('по запросу'))
   const body = (
     <>
       <span className={styles.text}>
@@ -36,7 +38,7 @@ export function PickerOption(props: Props) {
   if (control === 'base')
     return (
       <div className={styles.option} id={anchor} data-checked={checked} data-disabled={disabled}>
-        <span className={styles.included} role="img" aria-label="Входит всегда">
+        <span className={styles.included} role="img" aria-label={t('Входит всегда')}>
           <Check size={16} strokeWidth={1.75} aria-hidden="true" />
         </span>
         {body}

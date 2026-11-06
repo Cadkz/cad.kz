@@ -1,5 +1,6 @@
 'use client'
 
+import { useT } from '@/components/LangProvider/LangProvider'
 import type { FilterState, facetOptions } from '@/lib/catalogFilter'
 import { CatalogTabs } from '../CatalogTabs/CatalogTabs'
 import { Chip } from '../Chip/Chip'
@@ -41,6 +42,7 @@ const FEATURES_OPEN = 4
  * (CatalogSteps), поэтому здесь его списка нет. Задачи открыты, длинный список — по «Ещё».
  */
 export function FilterPanel({ state, options, onChange, onReset, hasPopular, tabs = true }: Props) {
+  const t = useT()
   return (
     <div className={styles.panel}>
       {tabs && (
@@ -53,7 +55,7 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
       )}
       {options.directions.length > 0 && (
         <fieldset className={styles.group}>
-          <legend className={styles.title}>Направление</legend>
+          <legend className={styles.title}>{t('Направление')}</legend>
           {options.directions.map((option) => (
             <Chip
               key={option.value}
@@ -66,7 +68,7 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
                 })
               }
             >
-              {option.label}
+              {t(option.label)}
             </Chip>
           ))}
         </fieldset>
@@ -74,7 +76,7 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
       {options.types.length > 0 && (
         <fieldset className={styles.group}>
           <legend className={styles.title}>
-            {options.typeGroup === 'service' ? 'Вид услуги' : 'Тип оборудования'}
+            {t(options.typeGroup === 'service' ? 'Вид услуги' : 'Тип оборудования')}
           </legend>
           {options.types.map((option) => (
             <Chip
@@ -88,7 +90,7 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
                 })
               }
             >
-              {option.label}
+              {t(option.label)}
             </Chip>
           ))}
         </fieldset>
@@ -104,7 +106,7 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
       {(!(state.direction || state.type) || state.vendors.length > 1) &&
         options.vendors.length > 0 && (
           <FilterChecks
-            title="Производитель"
+            title={t('Производитель')}
             options={options.vendors}
             selected={state.vendors}
             onToggle={(value) =>
@@ -121,7 +123,7 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
       {/* Задачи открыты сразу (правка владельца 03.11.2026), длинный список — по «Ещё». */}
       {options.tasks.length > 0 && (
         <FilterChecks
-          title="Задачи"
+          title={t('Задачи')}
           options={options.tasks}
           selected={state.tasks}
           onToggle={(value) => onChange({ tasks: toggle(state.tasks, value) })}
@@ -132,7 +134,7 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
       {options.features.map((group, index) => (
         <FilterChecks
           key={group.key}
-          title={group.label}
+          title={t(group.label)}
           options={group.options}
           limit={6}
           collapsible
@@ -149,7 +151,7 @@ export function FilterPanel({ state, options, onChange, onReset, hasPopular, tab
         />
       ))}
       <button type="button" className={styles.reset} onClick={onReset}>
-        Очистить условия
+        {t('Очистить условия')}
       </button>
     </div>
   )

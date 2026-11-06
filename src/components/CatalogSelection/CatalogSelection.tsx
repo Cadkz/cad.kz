@@ -1,6 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import type { FilterState, featureOptions } from '@/lib/catalogFilter'
 import { Chip } from '../Chip/Chip'
 import styles from './CatalogSelection.module.css'
@@ -13,12 +14,13 @@ type Props = {
 
 /** Активные условия над выдачей: видны и на телефоне при закрытой панели фильтров. */
 export function CatalogSelection({ state, groups, onChange }: Props) {
+  const t = useT()
   const choices = groups.flatMap((group) =>
     group.options
       .filter((option) => state.features[group.key]?.includes(option.value))
       .map((option) => ({
         key: `${group.key}:${option.value}`,
-        label: `${group.label}: ${option.label}`,
+        label: `${t(group.label)}: ${t(option.label)}`,
         remove: () =>
           onChange({
             features: {
@@ -40,13 +42,13 @@ export function CatalogSelection({ state, groups, onChange }: Props) {
   }
   if (!choices.length) return null
   return (
-    <section className={styles.root} aria-label="Выбранные фильтры">
+    <section className={styles.root} aria-label={t('Выбранные фильтры')}>
       {choices.map((choice) => (
         <Chip
           key={choice.key}
           selected
           onClick={choice.remove}
-          aria-label={`Снять фильтр: ${choice.label}`}
+          aria-label={t('Снять фильтр: {name}', { name: choice.label })}
         >
           {choice.label} <X size={16} strokeWidth={1.75} aria-hidden="true" />
         </Chip>
@@ -56,7 +58,7 @@ export function CatalogSelection({ state, groups, onChange }: Props) {
         className={styles.clear}
         onClick={() => onChange({ features: {}, vendors: [], tasks: [], line: null })}
       >
-        Очистить условия
+        {t('Очистить условия')}
       </button>
     </section>
   )

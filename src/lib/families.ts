@@ -180,10 +180,16 @@ export async function familyLines() {
   )
 }
 
-export function familyMetadata(family: FamilyPage): Metadata {
+export function familyMetadata(
+  family: FamilyPage,
+  t: (text: string, vars?: Record<string, string>) => string = (text, vars) =>
+    text.replace('{name}', vars?.name ?? ''),
+): Metadata {
   return pageMetadata({
     seo: family.seo ?? undefined,
-    title: `${family.title}${family.vendor ? ` ${family.vendor}` : ''} — купить в CAD.kz`,
+    title: t('{name} — купить в CAD.kz', {
+      name: `${family.title}${family.vendor ? ` ${family.vendor}` : ''}`,
+    }),
     description: family.intro,
     path: `/families/${family.slug}`,
   })

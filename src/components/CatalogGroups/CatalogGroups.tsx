@@ -3,6 +3,7 @@
 import { ArrowRight } from 'lucide-react'
 import { useState } from 'react'
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import type { ResultGroup } from '@/lib/catalogFilter'
 import { Button } from '../Button/Button'
 import { ProductCard } from '../ProductCard/ProductCard'
@@ -27,6 +28,7 @@ type Props = {
 }
 
 export function CatalogGroups({ groups }: Props) {
+  const t = useT()
   const [open, setOpen] = useState<string[]>([])
   return (
     <div className={styles.root}>
@@ -40,7 +42,7 @@ export function CatalogGroups({ groups }: Props) {
                 {group.title && <h2 className={styles.title}>{group.title}</h2>}
                 {group.href && (
                   <Link href={group.href} className={styles.family}>
-                    Выбрать несколько на одной странице
+                    {t('Выбрать несколько на одной странице')}
                     <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
                   </Link>
                 )}
@@ -60,7 +62,7 @@ export function CatalogGroups({ groups }: Props) {
                   size="sm"
                   onClick={() => setOpen((keys) => [...keys, group.key])}
                 >
-                  Показать все ({group.items.length})
+                  {t('Показать все ({count})', { count: group.items.length })}
                 </Button>
               </div>
             )}

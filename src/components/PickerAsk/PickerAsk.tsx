@@ -1,6 +1,7 @@
 'use client'
 
 import { CircleHelp } from 'lucide-react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { openAssistant } from '@/lib/openAssistant'
 import { Button } from '../Button/Button'
 import { usePickerContext } from '../PickerProvider/PickerProvider'
@@ -10,17 +11,18 @@ import { usePickerContext } from '../PickerProvider/PickerProvider'
  * вопроса понятен и без русского. Консультант выключен — заявка «Консультация».
  */
 export function PickerAsk() {
+  const t = useT()
   const { openRequest } = usePickerContext()
   return (
     <Button
       variant="outline"
       block
       onClick={() => {
-        if (!openAssistant()) openRequest('consult', 'Задать вопрос')
+        if (!openAssistant()) openRequest('consult', t('Задать вопрос'))
       }}
     >
       <CircleHelp size={20} strokeWidth={1.75} aria-hidden="true" />
-      Задать вопрос
+      {t('Задать вопрос')}
     </Button>
   )
 }

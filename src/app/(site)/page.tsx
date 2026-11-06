@@ -1,4 +1,3 @@
-import { permanentRedirect } from 'next/navigation'
 import { BimBand } from '@/components/BimBand/BimBand'
 import { CatalogHashRedirect } from '@/components/CatalogHashRedirect/CatalogHashRedirect'
 import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
@@ -12,6 +11,7 @@ import { HomeNews } from '@/components/HomeNews/HomeNews'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { Section } from '@/components/Section/Section'
+import { langPermanentRedirect } from '@/i18n/server'
 import { getDirections } from '@/lib/catalog'
 import { fromParams, toQuery } from '@/lib/catalogFilter'
 import { getHome } from '@/lib/home'
@@ -36,7 +36,7 @@ export const metadata = { alternates: { canonical: '/' } }
 export default async function Home({ searchParams }: Props) {
   // Старые ссылки на каталог с условиями (/?direction=…#catalog) ведут на /catalog с теми же условиями.
   const query = toQuery(fromParams(await searchParams))
-  if (query) permanentRedirect(`${CATALOG_PATH}?${query}`)
+  if (query) return langPermanentRedirect(`${CATALOG_PATH}?${query}`)
 
   const [home, directions, news, contacts, topicCovers] = await Promise.all([
     getHome(),

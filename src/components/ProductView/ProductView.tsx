@@ -27,6 +27,7 @@ import { kindProfile } from '@/domain/productKind.mjs'
 import { sectionIconKey } from '@/domain/sectionArt.mjs'
 import { hasSpecSheet } from '@/domain/specSheet.mjs'
 import { productLd } from '@/domain/structuredData.mjs'
+import { getT } from '@/i18n/server'
 import { getCatalog } from '@/lib/catalog'
 import { courseMatches, groupsForCourse } from '@/lib/courseSchedule'
 import { getContacts } from '@/lib/navigation'
@@ -130,6 +131,7 @@ export async function ProductView({
   product: ProductPage
   pick: PickTarget | null
 }) {
+  const t = await getT()
   const [{ cross, similar, limit }, contacts, catalog, schedule, allTerms] = await Promise.all([
     cms().then((payload) => getRecommendations(payload, product.id)),
     getContacts(),
@@ -218,12 +220,12 @@ export async function ProductView({
   // у сканеров примеры сканов — в самом низу во всю ширину, карточка покупки липнет рядом с
   // содержимым и останавливается над сканами (без ухода в размытие).
   const tabs = [
-    ...(about ? [{ id: 'overview' as const, title: 'Обзор', content: about }] : []),
+    ...(about ? [{ id: 'overview' as const, title: t('Обзор'), content: about }] : []),
     ...(specs
       ? [
           {
             id: 'specs' as const,
-            title: 'Характеристики',
+            title: t('Характеристики'),
             count: product.properties.length,
             content: specs,
           },
@@ -235,13 +237,13 @@ export async function ProductView({
       <ProductLifecycle value={product.lifecycle} />
       {tabs.length > 1 && (
         <Reveal>
-          <ProductTabs label={`О товаре ${product.title}`} tabs={tabs} />
+          <ProductTabs label={t('О товаре {name}', { name: product.title })} tabs={tabs} />
         </Reveal>
       )}
       {tabs.length === 1 && (
         <Reveal>
           <ProductSection
-            title={about ? profile.about : profile.specs}
+            title={t(about ? profile.about : profile.specs)}
             id={about ? 'about' : 'specs'}
           >
             {about ?? specs}
@@ -253,16 +255,16 @@ export async function ProductView({
   const groups =
     schedule && schedule.groups.length > 0 ? (
       <Reveal>
-        <ProductSection title="Ближайшие группы" id="groups">
+        <ProductSection title={t('Ближайшие группы')} id="groups">
           <CourseGroups groups={schedule.groups} today={schedule.today} />
         </ProductSection>
       </Reveal>
     ) : null
   const config = (
     <ProductSection
-      title={guided ? 'Подберите комплект' : profile.configTitle}
+      title={t(guided ? 'Подберите комплект' : profile.configTitle)}
       id="config"
-      sub={guided ? 'Отметьте нужное — итог пересчитается сразу.' : undefined}
+      sub={guided ? t('Отметьте нужное — итог пересчитается сразу.') : undefined}
     >
       <PickerSteps />
       <PickerHelp />
@@ -271,7 +273,7 @@ export async function ProductView({
   const faq =
     product.faq.length > 0 ? (
       <Reveal>
-        <ProductSection title="Частые вопросы" id="faq">
+        <ProductSection title={t('Частые вопросы')} id="faq">
           <Faq items={product.faq} />
         </ProductSection>
       </Reveal>
@@ -322,14 +324,14 @@ export async function ProductView({
           panels={[
             {
               id: 'cross',
-              title: 'С этим покупают',
-              sub: 'Часто берут вместе с этим товаром.',
+              title: t('С этим покупают'),
+              sub: t('Часто берут вместе с этим товаром.'),
               items: toPicks(cross, byHref),
             },
             {
               id: 'similar',
-              title: profile.similar,
-              sub: 'Другие варианты под ту же задачу.',
+              title: t(profile.similar),
+              sub: t('Другие варианты под ту же задачу.'),
               items: toPicks(similar, byHref),
             },
           ]}

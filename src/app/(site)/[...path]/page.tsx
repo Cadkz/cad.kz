@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
-import { notFound, permanentRedirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { cache } from 'react'
 import { ProductView } from '@/components/ProductView/ProductView'
 import { LEGACY_PATH_HEADER } from '@/domain/legacyRoutes.mjs'
+import { getT, langPermanentRedirect } from '@/i18n/server'
 import { resolveLegacy } from '@/lib/legacy'
 import { noPageTarget } from '@/lib/pageTarget'
 import { cms } from '@/lib/payload'
@@ -31,7 +32,9 @@ const resolve = cache(async (path: string) => {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolution = await resolve(await requestPath(params))
-  return resolution && 'product' in resolution ? productMetadata(resolution.product) : {}
+  return resolution && 'product' in resolution
+    ? productMetadata(resolution.product, await getT())
+    : {}
 }
 
 /**
@@ -41,8 +44,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function LegacyPage({ params, searchParams }: Props) {
   const resolution = await resolve(await requestPath(params))
   if (!resolution) notFound()
-  if ('redirect' in resolution) permanentRedirect(resolution.redirect)
+  if ('redirect' in resolution) return langPermanentRedirect(resolution.redirect)
   const { product } = resolution
-  if (product.pageView === 'none') permanentRedirect(await noPageTarget(await cms(), product))
+  if (product.pageView === 'none')
+    return langPermanentRedirect(await noPageTarget(await cms(), product))
   return <ProductView product={product} pick={pickParam(await searchParams)} />
 }
