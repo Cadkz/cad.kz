@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { AdminButton } from '@/components/AdminButton/AdminButton'
 import { FileDrop } from '@/components/FileDrop/FileDrop'
@@ -51,6 +52,7 @@ function byDoc(rows: IncomingRow[]) {
  * по нескольку товаров за запрос.
  */
 export function TranslationTable() {
+  const router = useRouter()
   const [fileName, setFileName] = useState<string | null>(null)
   const [rows, setRows] = useState<IncomingRow[]>([])
   const [check, setCheck] = useState<Check | null>(null)
@@ -150,6 +152,8 @@ export function TranslationTable() {
       setCheck(null)
       setRows([])
       setFileName(null)
+      // Сводка вверху страницы считается на сервере: перечитать её после записи.
+      router.refresh()
     } catch (failure) {
       setError(
         `${failure instanceof Error ? failure.message : 'Ошибка.'} Записано до ошибки: ${saved}. ` +
