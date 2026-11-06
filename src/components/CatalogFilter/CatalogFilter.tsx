@@ -244,22 +244,29 @@ export function CatalogFilter({
           />
         </div>
       )}
-      {/* Язычок со стрелкой на левом краю блока (правка владельца 06.11.2026, вечер): видно,
-          что слева выезжает фильтр. Стрелка вправо — открыть, влево — спрятать. Только от 960 px:
-          на телефоне фильтр — выдвижная панель по кнопке «Фильтры». */}
+      {/* Свёрнутый фильтр — вертикальная полоса «Фильтры» со стрелкой (правка владельца
+          06.11.2026, вечер; образец — свёрнутые боковые панели shadcn / HeroUI): видно, что
+          слева раскрывается фильтр. Только от 960 px; открыт — полоса прячется, сворачивает
+          кнопка «Скрыть фильтры». */}
       {wide && (
-        <div className={styles.edgeRail}>
-          <button
-            type="button"
-            className={styles.edge}
-            onClick={() => setSideOpen((open) => !open)}
-            aria-expanded={sideOpen}
-            aria-label={t(sideOpen ? 'Скрыть фильтры' : 'Фильтры')}
-            title={t(sideOpen ? 'Скрыть фильтры' : 'Фильтры')}
-          >
-            <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" />
-          </button>
-        </div>
+        <button
+          type="button"
+          className={styles.rail}
+          onClick={() => setSideOpen(true)}
+          aria-expanded={false}
+          hidden={sideOpen}
+        >
+          <span className={styles.railInner}>
+            <SlidersHorizontal size={20} strokeWidth={1.75} aria-hidden="true" />
+            <span className={styles.railLabel}>{t('Фильтры')}</span>
+            <ChevronRight
+              size={16}
+              strokeWidth={1.75}
+              aria-hidden="true"
+              className={styles.railArrow}
+            />
+          </span>
+        </button>
       )}
       <section
         className={styles.sidebar}
