@@ -434,7 +434,7 @@
   }
 }
 
-/* Тёмная витрина: палитра владельца #0B154A / #1F3DA8, акцент действий #48D5C8. */
+/* Тёмная витрина: палитра владельца #0B154A / #1F3DA8, акцент действий фирменный голубой #8AC4FF. */
 :root[data-site-theme="dark"] {
   color-scheme: dark;
   --color-navy: #112174;
@@ -449,8 +449,8 @@
   --color-text: #eef2fb;
   --color-text-muted: #b9c6e8;
   --color-heading: #ffffff;
-  --color-link: #48d5c8;
-  --color-link-hover: #70dfd3;
+  --color-link: #8ac4ff;
+  --color-link-hover: #c6e1ff;
   --color-blue-soft: color-mix(in srgb, var(--color-navy-deep) 62%, var(--color-blue));
   --color-blue-mid: color-mix(in srgb, var(--color-navy-deep) 45%, var(--color-blue));
   --color-border: rgba(170, 204, 255, 0.14); /* тихая рамка: карточки отделяет фон, а не обводка */
@@ -461,7 +461,7 @@
   --image-blend: normal;
   --color-success: #6fdaa3;
   --color-error: #ff9b91;
-  --color-focus: #48d5c8;
+  --color-focus: #8ac4ff;
   --color-header-glass: rgba(11, 21, 74, 0.94);
   --color-popover: color-mix(in srgb, var(--color-surface) 98%, transparent);
   --color-hairline: rgba(190, 210, 240, 0.14);
@@ -469,7 +469,7 @@
   --color-press: rgba(170, 204, 255, 0.14);
   --color-mark: rgba(170, 204, 255, 0.18);
   --color-spot: rgba(138, 196, 255, 0.08);
-  --ring-soft: 0 0 0 3px rgba(72, 213, 200, 0.24);
+  --ring-soft: 0 0 0 3px rgba(138, 196, 255, 0.28);
   --color-kaddi-backdrop: rgba(11, 21, 74, 0.8);
   --color-grid-light: rgba(170, 204, 255, 0.05);
   --color-grid-light-major: rgba(170, 204, 255, 0.1);
@@ -480,12 +480,12 @@
   --color-control-hover: var(--color-blue);
   --color-on-control-hover: var(--color-text-inverse);
   --color-control-hover-border: var(--color-sky);
-  --color-action: #48d5c8;
-  --color-action-bright: #48d5c8;
-  --color-action-hover: #70dfd3;
+  --color-action: #8ac4ff;
+  --color-action-bright: #8ac4ff;
+  --color-action-hover: #c6e1ff;
   --color-on-action: var(--color-navy-deep);
   --color-on-action-muted: var(--color-navy);
-  --color-accent-border: #48d5c8;
+  --color-accent-border: #8ac4ff;
   --gradient-action: linear-gradient(135deg, var(--color-action), var(--color-action-hover));
   --color-section-art-surface: #e4ecf7;
   --section-art-padding: var(--space-1);
