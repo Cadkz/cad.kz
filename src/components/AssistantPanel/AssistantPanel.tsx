@@ -2,6 +2,7 @@
 
 import { Info, RotateCcw, X } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { whatsappMessage } from '@/domain/assistant.mjs'
 import type { HandoffPrefill, useAssistant } from '@/lib/useAssistant'
 import { AssistantComposer } from '../AssistantComposer/AssistantComposer'
@@ -59,6 +60,7 @@ export function AssistantPanel({
   onClose,
   onClosed,
 }: Props) {
+  const t = useT()
   const titleId = useId()
   const panel = useRef<HTMLElement>(null)
   const backdrop = useRef<HTMLDivElement>(null)
@@ -200,8 +202,8 @@ export function AssistantPanel({
                 type="button"
                 className={styles.icon}
                 onClick={chat.restart}
-                aria-label="Начать новый разговор"
-                title="Начать новый разговор"
+                aria-label={t('Начать новый разговор')}
+                title={t('Начать новый разговор')}
               >
                 <RotateCcw size={20} strokeWidth={1.75} aria-hidden="true" />
               </button>
@@ -210,7 +212,7 @@ export function AssistantPanel({
               type="button"
               className={styles.icon}
               onClick={() => onClose()}
-              aria-label="Закрыть чат"
+              aria-label={t('Закрыть чат')}
             >
               <X size={20} strokeWidth={1.75} aria-hidden="true" />
             </button>
@@ -219,15 +221,15 @@ export function AssistantPanel({
         {demo && (
           <p className={styles.note}>
             <Info size={16} strokeWidth={1.75} aria-hidden="true" />
-            Демоверсия: ИИ не подключён, Кадди ищет по каталогу.
+            {t('Демоверсия: ИИ не подключён, Кадди ищет по каталогу.')}
           </p>
         )}
         {chat.live && (
           <p className={styles.note}>
             <Info size={16} strokeWidth={1.75} aria-hidden="true" />
             {chat.manager
-              ? 'Вам отвечает менеджер CAD.kz. Кадди пока молчит.'
-              : 'Разговор видят менеджеры CAD.kz и могут подключиться.'}
+              ? t('Вам отвечает менеджер CAD.kz. Кадди пока молчит.')
+              : t('Разговор видят менеджеры CAD.kz и могут подключиться.')}
           </p>
         )}
         {handoff ? (

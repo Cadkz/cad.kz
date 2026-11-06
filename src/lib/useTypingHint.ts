@@ -1,6 +1,7 @@
 'use client'
 
 import { type RefObject, useEffect } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 
 const TYPE_MS = 70
 const HOLD_MS = 1800
@@ -21,6 +22,7 @@ export function useTypingHint(
   active: boolean,
   rounds = 2,
 ) {
+  const t = useT()
   useEffect(() => {
     const element = target.current
     const [first] = hints
@@ -33,7 +35,7 @@ export function useTypingHint(
     // После кругов — общий текст, а не первый пример: иначе поле надолго «застревает» на
     // SCAD Office (замечание владельца 03.11.2026).
     const still = () => {
-      element.textContent = 'Программа, оборудование или курс'
+      element.textContent = t('Программа, оборудование или курс')
     }
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return still()
     let timer: ReturnType<typeof setTimeout>
@@ -69,5 +71,5 @@ export function useTypingHint(
       element.textContent = ''
       delete element.dataset.fading
     }
-  }, [target, hints, active, rounds])
+  }, [target, hints, active, rounds, t])
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { useT } from '@/components/LangProvider/LangProvider'
 import type { HandoffPrefill } from '@/lib/useAssistant'
 import { Button, ButtonLink } from '../Button/Button'
 import { WhatsappIcon } from '../icons/icons'
@@ -18,19 +19,20 @@ type Props = {
  * фразы с вопросом об имени (Ка4). Обёртку с отступами даёт лента разговора.
  */
 export function AssistantReplyActions({ handoff, whatsapp, onHandoff }: Props) {
+  const t = useT()
   return (
     <>
       {handoff && (
         <Button size="sm" onClick={() => onHandoff(handoff)}>
           {handoff.name && handoff.phone
-            ? 'Проверить и передать менеджеру'
-            : 'Оставить контакты менеджеру'}
+            ? t('Проверить и передать менеджеру')
+            : t('Оставить контакты менеджеру')}
         </Button>
       )}
       {whatsapp && (
         <ButtonLink href={whatsapp} variant="outline" size="sm" external>
           <WhatsappIcon size={16} />
-          Прислать расчёт в WhatsApp
+          {t('Прислать расчёт в WhatsApp')}
         </ButtonLink>
       )}
     </>

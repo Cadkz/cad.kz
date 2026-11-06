@@ -2,6 +2,7 @@
 
 import { MessageCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { openAssistant } from '@/lib/openAssistant'
 import { Button } from '../Button/Button'
 
@@ -22,6 +23,7 @@ export function AskKaddi({
   size = 'md',
   className,
 }: Props) {
+  const t = useT()
   const [on, setOn] = useState(false)
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export function AskKaddi({
   return (
     <Button variant={variant} size={size} className={className} onClick={() => openAssistant()}>
       <MessageCircle size={16} strokeWidth={1.75} aria-hidden="true" />
-      {label}
+      {t(label)}
     </Button>
   )
 }

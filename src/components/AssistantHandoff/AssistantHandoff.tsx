@@ -68,9 +68,9 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
       const result = await response.json()
       if (response.ok) setSent({ number: result.number, crm: result.crm ?? 'demo' })
       else if (result.errors) setErrors(result.errors)
-      else setFormError(result.error || 'Не удалось отправить заявку')
+      else setFormError(t(result.error || 'Не удалось отправить заявку'))
     } catch {
-      setFormError('Нет связи с сервером. Проверьте интернет и отправьте ещё раз.')
+      setFormError(t('Нет связи с сервером. Проверьте интернет и отправьте ещё раз.'))
     } finally {
       setSending(false)
     }
@@ -80,22 +80,26 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
     <div className={styles.handoff}>
       <button type="button" className={styles.back} onClick={onBack} data-autofocus>
         <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-        Вернуться к разговору
+        {t('Вернуться к разговору')}
       </button>
       {sent ? (
         <div className={styles.done} role="status">
-          <p className={styles.doneTitle}>Заявка {sent.number} сохранена вместе с перепиской</p>
+          <p className={styles.doneTitle}>
+            {t('Заявка {number} сохранена вместе с перепиской', { number: sent.number })}
+          </p>
           <p>
             {sent.crm === 'demo'
-              ? crmDoneText(sent.crm)
-              : 'Менеджер увидит весь разговор и свяжется с вами.'}
+              ? t(crmDoneText(sent.crm))
+              : t('Менеджер увидит весь разговор и свяжется с вами.')}
           </p>
         </div>
       ) : (
         <form className={styles.form} onSubmit={submit} noValidate>
           <div>
-            <h3 className={styles.title}>Передать разговор менеджеру</h3>
-            <p className={styles.lead}>Менеджер увидит всю переписку и продолжит с этого места.</p>
+            <h3 className={styles.title}>{t('Передать разговор менеджеру')}</h3>
+            <p className={styles.lead}>
+              {t('Менеджер увидит всю переписку и продолжит с этого места.')}
+            </p>
           </div>
           {prefill && prefill.details.length > 0 && (
             <dl className={styles.details}>
@@ -108,7 +112,7 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
             </dl>
           )}
           <TextField
-            label="Имя"
+            label={t('Имя')}
             name="name"
             id="kaddi-name"
             autoComplete="name"
@@ -116,7 +120,7 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
             error={errors.name}
           />
           <TextField
-            label="Телефон"
+            label={t('Телефон')}
             name="phone"
             id="kaddi-phone"
             type="tel"
@@ -126,10 +130,10 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
             error={errors.phone}
           />
           <TextAreaField
-            label="Комментарий"
+            label={t('Комментарий')}
             name="comment"
             id="kaddi-comment"
-            hint="Необязательно. Например, когда удобно говорить."
+            hint={t('Необязательно. Например, когда удобно говорить.')}
             rows={2}
             error={errors.comment}
           />
@@ -141,18 +145,18 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
           />
           {(formError || errors.idempotencyKey) && (
             <p className={styles.error} role="alert">
-              {formError || errors.idempotencyKey}
+              {t(formError || errors.idempotencyKey || '')}
             </p>
           )}
           <Button type="submit" block disabled={sending || !conversationId}>
-            {sending ? 'Отправляем…' : 'Передать менеджеру'}
+            {sending ? t('Отправляем…') : t('Передать менеджеру')}
           </Button>
         </form>
       )}
       {whatsappHref && (
         <ButtonLink href={whatsappHref} variant="outline" block external>
           <WhatsappIcon size={20} />
-          Написать в WhatsApp
+          {t('Написать в WhatsApp')}
         </ButtonLink>
       )}
     </div>

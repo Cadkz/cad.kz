@@ -1,4 +1,5 @@
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { catalogHref } from '@/lib/navigationHrefs'
 import type { SuggestState } from '@/lib/useSuggest'
 import { WhatsappIcon } from '../icons/icons'
@@ -34,6 +35,7 @@ const whatsappText = (query: string) =>
  * консультант работает; ничего не нашлось — Кадди с лупой) и самая тихая — написать нам в WhatsApp.
  */
 export function SearchSuggestions(props: Props) {
+  const t = useT()
   const { query, state, groups, options, listId, active, hints, whatsappHref } = props
   const result = state.status === 'done' || state.status === 'loading' ? state.result : null
   const nothing = state.status === 'done' && options.length === 0
@@ -46,7 +48,7 @@ export function SearchSuggestions(props: Props) {
     <div className={styles.panel}>
       {state.status === 'idle' && (
         <div className={styles.block}>
-          <p className={styles.caption}>Часто ищут</p>
+          <p className={styles.caption}>{t('Часто ищут')}</p>
           <div className={styles.chips}>
             {hints.map((hint) => (
               <button
@@ -74,19 +76,21 @@ export function SearchSuggestions(props: Props) {
         />
       )}
 
-      {state.status === 'loading' && !result && <p className={styles.status}>Ищем…</p>}
+      {state.status === 'loading' && !result && <p className={styles.status}>{t('Ищем…')}</p>}
       {state.status === 'error' && (
         <p className={styles.status}>
-          Подсказки сейчас не загрузились. Нажмите Enter — откроется страница поиска.
+          {t('Подсказки сейчас не загрузились. Нажмите Enter — откроется страница поиска.')}
         </p>
       )}
       {nothing && (
         <div className={styles.block}>
-          <p className={styles.emptyTitle}>По запросу «{trimmed}» ничего не нашлось</p>
+          <p className={styles.emptyTitle}>
+            {t('По запросу «{query}» ничего не нашлось', { query: trimmed })}
+          </p>
           <p className={styles.emptyText}>
-            Проверьте написание или откройте{' '}
+            {t('Проверьте написание или откройте')}{' '}
             <Link href={catalogHref()} onClick={props.onPick}>
-              каталог
+              {t('каталог')}
             </Link>
             .
           </p>
@@ -96,8 +100,8 @@ export function SearchSuggestions(props: Props) {
       <p className="visually-hidden" aria-live="polite">
         {state.status === 'done'
           ? nothing
-            ? 'Ничего не нашлось'
-            : `Подсказок: ${result?.items.length ?? 0}`
+            ? t('Ничего не нашлось')
+            : t('Подсказок: {count}', { count: result?.items.length ?? 0 })
           : ''}
       </p>
 
@@ -109,7 +113,7 @@ export function SearchSuggestions(props: Props) {
         <a href={whatsapp} className={styles.engineer} target="_blank" rel="noreferrer">
           <WhatsappIcon size={16} className={styles.engineerIcon} />
           <span>
-            Не нашли нужное? <span className={styles.engineerLink}>Напишите нам</span>
+            {t('Не нашли нужное?')} <span className={styles.engineerLink}>{t('Напишите нам')}</span>
           </span>
         </a>
       )}

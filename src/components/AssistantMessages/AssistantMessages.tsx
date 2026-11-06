@@ -3,6 +3,7 @@
 import { ChevronRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import {
   ASSISTANT_GREETING_GRUMPY,
   type AssistantCard,
@@ -28,16 +29,17 @@ type Props = {
 
 /** Ссылки на товары, которые Кадди назвал в ответе. */
 function Cards({ cards }: { cards: AssistantCard[] }) {
+  const t = useT()
   return (
     <ul className={styles.cards}>
       {cards.map((card) => (
         <li key={card.href}>
           <Link href={card.href} className={styles.card}>
             <span className={styles.cardText}>
-              <span className={styles.cardTitle}>{card.title}</span>
+              <span className={styles.cardTitle}>{t(card.title)}</span>
               <span className={styles.cardMeta}>
-                {card.note ??
-                  [card.vendor, card.price ?? 'Цена по запросу'].filter(Boolean).join(' · ')}
+                {(card.note && t(card.note)) ??
+                  [card.vendor, card.price ?? t('Цена по запросу')].filter(Boolean).join(' · ')}
               </span>
             </span>
             <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -53,6 +55,7 @@ const LONG_WAIT_MS = 8000
 
 /** Ожидание ответа: Кадди думает, а если ответ задерживается — работает за ноутбуком. */
 function Waiting() {
+  const t = useT()
   const [long, setLong] = useState(false)
   useEffect(() => {
     const timer = setTimeout(() => setLong(true), LONG_WAIT_MS)
@@ -62,7 +65,7 @@ function Waiting() {
     <div className={styles.thinking} role="status">
       <Mascot pose={long ? 'laptop' : 'think'} size="avatar" stage={false} />
       <span className={styles.dots}>
-        {long ? 'Ещё немного, собираю ответ' : 'Проверю, что подойдёт для вашей задачи'}
+        {long ? t('Ещё немного, собираю ответ') : t('Проверю, что подойдёт для вашей задачи')}
       </span>
     </div>
   )
@@ -76,13 +79,14 @@ function Waiting() {
  * Новые сообщения объявляются скринридеру (role="log").
  */
 export function AssistantMessages({ chat, grumpy, onHandoff, whatsapp }: Props) {
+  const t = useT()
   const end = useRef<HTMLDivElement>(null)
   const count = chat.messages.length
   const sulky = grumpy && !count
   // Кнопка передачи — только у последнего ответа, где Кадди её подготовил: данные там самые свежие.
   const lastHandoff = chat.messages.findLastIndex((m) => m.handoff)
   // Приветствие и кнопки — про страницу, где открыт чат (товар, раздел каталога).
-  const intro = pageGreeting(usePageContext())
+  const intro = pageGreeting(usePageContext(), t)
   // «Прислать расчёт в WhatsApp» — под последним ответом Кадди с суммой: текст берёт её оттуда.
   const lastPriced = chat.messages.findLastIndex(
     (m) => m.role === 'assistant' && hasPrice(m.content),
@@ -100,7 +104,7 @@ export function AssistantMessages({ chat, grumpy, onHandoff, whatsapp }: Props) 
       <div className={styles.intro}>
         {!count && <Mascot pose={sulky ? 'grumpy' : 'laptop'} size="sm" eager stage={false} />}
         <div className={styles.introText}>
-          <p className={styles.bot}>{sulky ? ASSISTANT_GREETING_GRUMPY : intro.greeting}</p>
+          <p className={styles.bot}>{sulky ? t(ASSISTANT_GREETING_GRUMPY) : intro.greeting}</p>
           {!count && (
             <div className={styles.actions}>
               {intro.actions.map((action) => (
@@ -127,7 +131,7 @@ export function AssistantMessages({ chat, grumpy, onHandoff, whatsapp }: Props) 
         >
           {message.role === 'manager' && (
             <span className={styles.who}>
-              {message.name ? `Менеджер ${message.name}` : 'Менеджер CAD.kz'}
+              {message.name ? t('Менеджер {name}', { name: message.name }) : t('Менеджер CAD.kz')}
             </span>
           )}
           <p
@@ -171,13 +175,13 @@ export function AssistantMessages({ chat, grumpy, onHandoff, whatsapp }: Props) 
       {chat.waiting && <Waiting />}
       {chat.error && (
         <div className={styles.error} role="alert">
-          <p>{chat.error}</p>
+          <p>{t(chat.error)}</p>
           <div className={styles.actions}>
             <Button variant="outline" size="sm" onClick={chat.retry}>
-              Повторить
+              {t('Повторить')}
             </Button>
             <Button variant="text" size="sm" onClick={() => onHandoff()}>
-              Передать менеджеру
+              {t('Передать менеджеру')}
             </Button>
           </div>
         </div>

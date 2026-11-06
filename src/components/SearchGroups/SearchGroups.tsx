@@ -11,6 +11,7 @@ import {
 import Image from 'next/image'
 import type { ReactNode } from 'react'
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { showVendorLine } from '@/domain/cardNoise.mjs'
 import { markMatches, type Suggestion } from '@/domain/suggest.mjs'
 import styles from './SearchGroups.module.css'
@@ -60,6 +61,7 @@ function metaOf(suggestion: Suggestion) {
  * слева направо, сверху вниз.
  */
 export function SearchGroups({ query, groups, options, listId, active, onPick, onHover }: Props) {
+  const t = useT()
   const trimmed = query.trim()
   const all = options.find((option) => !option.suggestion)
   const main = groups.filter((group) => group.key === 'products')
@@ -135,7 +137,7 @@ export function SearchGroups({ query, groups, options, listId, active, onPick, o
   }
 
   return (
-    <div id={listId} role="listbox" aria-label="Подсказки поиска" className={styles.list}>
+    <div id={listId} role="listbox" aria-label={t('Подсказки поиска')} className={styles.list}>
       <div className={styles.columns} data-split={main.length > 0 && side.length > 0}>
         {main.length > 0 && <div className={styles.main}>{main.map(block)}</div>}
         {side.length > 0 && <div className={styles.side}>{side.map(block)}</div>}
@@ -145,7 +147,7 @@ export function SearchGroups({ query, groups, options, listId, active, onPick, o
           all,
           styles.all,
           <>
-            <span>Все результаты по запросу «{trimmed}»</span>
+            <span>{t('Все результаты по запросу «{query}»', { query: trimmed })}</span>
             <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
           </>,
         )}

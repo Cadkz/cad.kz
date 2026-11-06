@@ -3,6 +3,7 @@
 import { Search, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { useLocalHref, usePagePath } from '../LangProvider/LangProvider'
 import styles from './SearchForm.module.css'
 
@@ -11,6 +12,7 @@ import styles from './SearchForm.module.css'
  * обновляются по ходу набора, через полсекунды после последней буквы.
  */
 export function SearchForm({ initial }: { initial: string }) {
+  const t = useT()
   const router = useRouter()
   const pagePath = usePagePath()
   const localHref = useLocalHref()
@@ -45,8 +47,8 @@ export function SearchForm({ initial }: { initial: string }) {
           value={value}
           onChange={(event) => setValue(event.target.value)}
           className={styles.input}
-          placeholder="Например: Автокад, Revit, сканер, расчёт конструкций"
-          aria-label="Что ищете"
+          placeholder={t('Например: Автокад, Revit, сканер, расчёт конструкций')}
+          aria-label={t('Что ищете')}
           autoComplete="off"
           maxLength={100}
           enterKeyHint="search"
@@ -55,7 +57,7 @@ export function SearchForm({ initial }: { initial: string }) {
           <button
             type="button"
             className={styles.clear}
-            aria-label="Очистить"
+            aria-label={t('Очистить')}
             onClick={() => {
               setValue('')
               input.current?.focus()
@@ -65,7 +67,7 @@ export function SearchForm({ initial }: { initial: string }) {
           </button>
         )}
         <button type="submit" className={styles.submit}>
-          Найти
+          {t('Найти')}
         </button>
       </form>
     </search>

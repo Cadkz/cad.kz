@@ -1,4 +1,5 @@
 import Link from '@/components/LangLink/LangLink'
+import { getT } from '@/i18n/server'
 import type { CatalogItem } from '@/lib/catalog'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { positions } from '@/lib/plural'
@@ -62,16 +63,26 @@ export function SearchResults({
   )
 }
 
-function Found({ query, items, partial = false, addons = [], bases = [], whatsappHref }: Props) {
+async function Found({
+  query,
+  items,
+  partial = false,
+  addons = [],
+  bases = [],
+  whatsappHref,
+}: Props) {
+  const t = await getT()
   if (!items.length) {
     const text = `Здравствуйте! Ищу на сайте: ${query}. Подскажите, пожалуйста.`
     return (
       <div className={styles.empty}>
         <div className={styles.emptyBody}>
-          <p className={styles.emptyTitle}>Ничего не найдено</p>
+          <p className={styles.emptyTitle}>{t('Ничего не найдено')}</p>
           <p className={styles.emptyText}>
-            По запросу «{query}» товаров нет. Проверьте написание, измените запрос или напишите, что
-            ищете, — менеджер подскажет.
+            {t(
+              'По запросу «{query}» товаров нет. Проверьте написание, измените запрос или напишите, что ищете, — менеджер подскажет.',
+              { query },
+            )}
           </p>
           <div className={styles.actions}>
             {whatsappHref && (
@@ -82,11 +93,11 @@ function Found({ query, items, partial = false, addons = [], bases = [], whatsap
                 rel="noreferrer"
               >
                 <WhatsappIcon size={20} />
-                Спросить в WhatsApp
+                {t('Спросить в WhatsApp')}
               </a>
             )}
             <Link href={catalogHref()} className={styles.catalog}>
-              Перейти в каталог
+              {t('Перейти в каталог')}
             </Link>
             <span className={styles.kaddi} data-search-click="kaddi">
               <AskKaddi variant="text" />
@@ -98,16 +109,18 @@ function Found({ query, items, partial = false, addons = [], bases = [], whatsap
     )
   }
   return (
-    <section className={styles.results} aria-label="Результаты поиска">
+    <section className={styles.results} aria-label={t('Результаты поиска')}>
       <p className={styles.count} aria-live="polite">
         {partial
-          ? `Точно по запросу ничего нет — похожее: ${positions(items.length)}`
-          : `Найдено: ${positions(items.length)}`}
+          ? t('Точно по запросу ничего нет — похожее: {count}', {
+              count: positions(items.length, t),
+            })
+          : t('Найдено: {count}', { count: positions(items.length, t) })}
       </p>
       <Cards items={items} />
       {addons.length > 0 && (
         <>
-          <h2 className={styles.group}>Дополнения для {bases.join(', ')}</h2>
+          <h2 className={styles.group}>{t('Дополнения для {list}', { list: bases.join(', ') })}</h2>
           <Cards items={addons} />
         </>
       )}

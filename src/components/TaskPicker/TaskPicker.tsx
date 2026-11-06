@@ -2,6 +2,7 @@
 
 import { ArrowUp } from 'lucide-react'
 import { type FormEvent, useEffect, useId, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { localizeHref, splitLangPath } from '@/i18n/locales.mjs'
 import {
   ASSISTANT_STATE_EVENT,
@@ -49,6 +50,7 @@ function fallback(question: string, whatsappHref: string | null) {
  * в поиск по сайту.
  */
 export function TaskPicker({ title, placeholder, tasks, note, whatsappHref }: Props) {
+  const t = useT()
   const id = useId()
   const [text, setText] = useState('')
   const [chatOpen, setChatOpen] = useState(false)
@@ -80,25 +82,25 @@ export function TaskPicker({ title, placeholder, tasks, note, whatsappHref }: Pr
     <div className={styles.card}>
       <div className={styles.head}>
         <Mascot pose="head" size="icon" eager hover={false} />
-        <p className={styles.title}>{title}</p>
+        <p className={styles.title}>{t(title)}</p>
       </div>
       <div className={styles.body}>
         <div className={styles.controls} data-hidden={chatOpen || undefined} inert={chatOpen}>
           <form className={styles.form} action="/search" onSubmit={submit}>
             <label htmlFor={id} className="visually-hidden">
-              Опишите задачу
+              {t('Опишите задачу')}
             </label>
             <input
               id={id}
               name="q"
               className={styles.input}
-              placeholder={placeholder}
+              placeholder={t(placeholder)}
               autoComplete="off"
               maxLength={300}
               value={text}
               onChange={(event) => setText(event.target.value)}
             />
-            <button type="submit" className={styles.send} aria-label="Спросить Кадди">
+            <button type="submit" className={styles.send} aria-label={t('Спросить Кадди')}>
               <ArrowUp size={20} strokeWidth={1.75} aria-hidden="true" />
             </button>
           </form>
@@ -106,8 +108,12 @@ export function TaskPicker({ title, placeholder, tasks, note, whatsappHref }: Pr
             <ul className={styles.tasks}>
               {tasks.map((task) => (
                 <li key={task.label}>
-                  <button type="button" className={styles.task} onClick={() => ask(task.question)}>
-                    {task.label}
+                  <button
+                    type="button"
+                    className={styles.task}
+                    onClick={() => ask(t(task.question))}
+                  >
+                    {t(task.label)}
                   </button>
                 </li>
               ))}
@@ -116,11 +122,11 @@ export function TaskPicker({ title, placeholder, tasks, note, whatsappHref }: Pr
         </div>
         {chatOpen && (
           <p className={styles.status} role="status">
-            Разговор идёт в окне Кадди. Закройте его — и можно начать с новой задачи.
+            {t('Разговор идёт в окне Кадди. Закройте его — и можно начать с новой задачи.')}
           </p>
         )}
       </div>
-      {note && <p className={styles.note}>{note}</p>}
+      {note && <p className={styles.note}>{t(note)}</p>}
     </div>
   )
 }

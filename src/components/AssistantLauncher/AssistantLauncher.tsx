@@ -1,6 +1,7 @@
 'use client'
 
 import { type MouseEvent, useEffect, useRef, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { Mascot } from '../Mascot/Mascot'
 import styles from './AssistantLauncher.module.css'
 
@@ -45,6 +46,7 @@ type Props = {
  * Со строкой подбора внизу (до 960 px) поднимается над ней.
  */
 export function AssistantLauncher({ open, grumpy, onClick }: Props) {
+  const t = useT()
   const [hint, setHint] = useState(false)
   // Окно только что закрыли — Кадди возвращается в угол прыжком с отскоком.
   const [landing, setLanding] = useState(false)
@@ -87,7 +89,7 @@ export function AssistantLauncher({ open, grumpy, onClick }: Props) {
       data-landing={landing}
       data-hint={hint && !open && !grumpy}
       data-grumpy={grumpy}
-      aria-label="Спросить Кадди — ИИ-консультант CAD.kz"
+      aria-label={t('Спросить Кадди — ИИ-консультант CAD.kz')}
       aria-haspopup="dialog"
       aria-expanded={open}
       onClick={(event) => {
@@ -96,7 +98,7 @@ export function AssistantLauncher({ open, grumpy, onClick }: Props) {
       }}
     >
       <span className={styles.bubble} aria-hidden="true">
-        {grumpy ? 'Я никуда не убегаю' : hint ? 'Помочь с выбором?' : 'Спросить Кадди'}
+        {grumpy ? t('Я никуда не убегаю') : hint ? t('Помочь с выбором?') : t('Спросить Кадди')}
       </span>
       <span className={styles.cat}>
         <Mascot pose="blueprint" size="launcher" eager stage={false} className={styles.rest} />

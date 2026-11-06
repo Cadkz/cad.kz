@@ -2,6 +2,7 @@
 
 import { ArrowUp, Headset } from 'lucide-react'
 import { type FormEvent, type KeyboardEvent, useId, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { ASSISTANT_LIMITS } from '@/domain/assistant.mjs'
 import styles from './AssistantComposer.module.css'
 
@@ -21,6 +22,7 @@ const WARN_AT = ASSISTANT_LIMITS.messageChars - 100
  * нельзя, но печатать можно. Под полем — «Передать менеджеру».
  */
 export function AssistantComposer({ disabled, manager = false, onSend, onHandoff }: Props) {
+  const t = useT()
   const [text, setText] = useState('')
   const fieldId = useId()
   const counterId = useId()
@@ -41,14 +43,16 @@ export function AssistantComposer({ disabled, manager = false, onSend, onHandoff
     <form className={styles.composer} onSubmit={submit}>
       <div className={styles.row}>
         <label htmlFor={fieldId} className="visually-hidden">
-          {manager ? 'Сообщение менеджеру' : 'Ваш вопрос Кадди'}
+          {manager ? t('Сообщение менеджеру') : t('Ваш вопрос Кадди')}
         </label>
         <textarea
           id={fieldId}
           className={styles.field}
           rows={2}
           maxLength={ASSISTANT_LIMITS.messageChars}
-          placeholder={manager ? 'Напишите менеджеру' : 'Например, нужен расчёт металлоконструкций'}
+          placeholder={
+            manager ? t('Напишите менеджеру') : t('Например, нужен расчёт металлоконструкций')
+          }
           value={text}
           onChange={(event) => setText(event.target.value)}
           onKeyDown={onKeyDown}
@@ -58,7 +62,7 @@ export function AssistantComposer({ disabled, manager = false, onSend, onHandoff
           type="submit"
           className={styles.send}
           disabled={disabled || empty}
-          aria-label="Отправить"
+          aria-label={t('Отправить')}
         >
           <ArrowUp size={20} strokeWidth={1.75} aria-hidden="true" />
         </button>
@@ -67,12 +71,12 @@ export function AssistantComposer({ disabled, manager = false, onSend, onHandoff
         {!manager && (
           <button type="button" className={styles.handoff} onClick={onHandoff}>
             <Headset size={16} strokeWidth={1.75} aria-hidden="true" />
-            Передать менеджеру
+            {t('Передать менеджеру')}
           </button>
         )}
         {text.length > WARN_AT && (
           <span id={counterId} className={styles.counter}>
-            Осталось знаков: {ASSISTANT_LIMITS.messageChars - text.length}
+            {t('Осталось знаков: {count}', { count: ASSISTANT_LIMITS.messageChars - text.length })}
           </span>
         )}
       </div>

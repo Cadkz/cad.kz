@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useT } from '@/components/LangProvider/LangProvider'
 import {
   ASSISTANT_STATE_EVENT,
   type AssistantStateDetail,
@@ -34,6 +35,7 @@ type Props = {
  * Разговор не теряется при переходе по страницам и закрытии окна.
  */
 export function Assistant({ demo, whatsappHref }: Props) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   // Окно в разметке: после закрытия ещё доигрывает сворачивание, потом убирается.
   const [present, setPresent] = useState(false)
@@ -119,7 +121,7 @@ export function Assistant({ demo, whatsappHref }: Props) {
       <HeaderAction
         hideFrom="sm"
         icon={<Mascot pose="head" size="head" eager hover={false} />}
-        ariaLabel="Спросить Кадди — ИИ-консультант CAD.kz"
+        ariaLabel={t('Спросить Кадди — ИИ-консультант CAD.kz')}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={(event) => toggle(event.currentTarget)}

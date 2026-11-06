@@ -1,3 +1,4 @@
+import { useT } from '@/components/LangProvider/LangProvider'
 import { Mascot } from '../Mascot/Mascot'
 import styles from './AssistantHeader.module.css'
 
@@ -12,14 +13,15 @@ type Props = {
  * Шапка окна ИИ-консультанта (AssistantPanel): голова Кадди, имя и подпись.
  */
 export function AssistantHeader({ size = 'icon', titleId }: Props) {
+  const t = useT()
   return (
     <div className={styles.header}>
       <Mascot pose="head" size={size} eager />
       <div className={styles.text}>
         <p id={titleId} className={styles.name}>
-          Кадди
+          {t('Кадди')}
         </p>
-        <p className={styles.caption}>ИИ-консультант CAD.kz</p>
+        <p className={styles.caption}>{t('ИИ-консультант CAD.kz')}</p>
       </div>
     </div>
   )

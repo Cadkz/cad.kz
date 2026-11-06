@@ -3,6 +3,7 @@
 // модели, описание инструментов, история разговора и честный ответ демо-режима.
 // Файл подключается и на сервере, и в браузере (лимиты и быстрые действия — общие).
 
+import { splitLangPath } from '../i18n/locales.mjs'
 import { rankKnowledge, selectKnowledge } from './knowledgeSelection.mjs'
 import { QUICK_REPLIES_RULE } from './quickReplies.mjs'
 import { RENEW_PROGRAM_OPTIONS } from './siteRequest.mjs'
@@ -150,50 +151,96 @@ export const QUICK_ACTIONS = [
  * Приветствие и кнопки по странице, где открыт чат (замечание владельца 03.11.2026: на Artec Eva
  * Кадди здоровался общим шаблоном). Товар — про цену, комплект и задачу; раздел каталога — про
  * выбор в разделе; остальные страницы — общее приветствие и QUICK_ACTIONS.
+ * t — перевод на язык страницы (казахская и английская версии); без него — русский.
  * @param {ChatPage | null} page
+ * @param {(text: string, vars?: Record<string, string>) => string} [t]
  * @returns {{ greeting: string, actions: readonly { id: string, label: string, text?: string, handoff?: true }[] }}
  */
-export function pageGreeting(page) {
+export function pageGreeting(page, t = fillVars) {
+  // Адрес казахской или английской версии (/kk/…, /en/…) — без приставки, как русский.
+  const local = page ? { ...page, path: splitLangPath(page.path).path } : null
+  /** @param {{ id: string, label: string, text?: string, handoff?: true }} action */
+  const tr = (action) => ({
+    ...action,
+    label: t(action.label),
+    ...(action.text ? { text: t(action.text) } : {}),
+  })
   const manager = QUICK_ACTIONS.find((action) => action.id === 'manager')
-  const tail = manager ? [manager] : []
+  const tail = manager ? [tr(manager)] : []
   const title =
-    page?.title
+    local?.title
       .split(/\s[—–-]\s/)[0]
       ?.trim()
       .slice(0, 60) ?? ''
-  const path = page?.path.split('?')[0] ?? ''
+  const path = local?.path.split('?')[0] ?? ''
   // Товары живут и по новым адресам /products/<товар>, и по старым /catalog/<раздел>/<товар>/.
   const product = path.startsWith('/products/') || /^\/catalog\/[^/]+\/[^/]+/.test(path)
   // Раздел каталога: /catalog с условиями отбора или старый адрес раздела /catalog/<раздел>/.
   const section =
     !product &&
     (/^\/catalog\/[^/]+\/?$/.test(path) ||
-      (path === '/catalog' && Boolean(page?.path.includes('?'))))
+      (path === '/catalog' && Boolean(local?.path.includes('?'))))
   if (page && title && product)
     return {
-      greeting: `Здравствуйте! Я Кадди, консультант CAD.kz. Вижу, вы смотрите ${title} — подскажу цену, комплект и сроки или подберу аналог.`,
+      greeting: t(
+        'Здравствуйте! Я Кадди, консультант CAD.kz. Вижу, вы смотрите {title} — подскажу цену, комплект и сроки или подберу аналог.',
+        { title },
+      ),
       actions: [
-        { id: 'page-price', label: 'Узнать цену', text: `Сколько стоит ${title}?` },
-        { id: 'page-kit', label: 'Что входит', text: `Что входит в ${title}?` },
-        { id: 'page-fit', label: 'Подойдёт ли мне', text: `Подойдёт ли ${title} под мою задачу?` },
+        { id: 'page-price', label: t('Узнать цену'), text: t('Сколько стоит {title}?', { title }) },
+        { id: 'page-kit', label: t('Что входит'), text: t('Что входит в {title}?', { title }) },
+        {
+          id: 'page-fit',
+          label: t('Подойдёт ли мне'),
+          text: t('Подойдёт ли {title} под мою задачу?', { title }),
+        },
         ...tail,
       ],
     }
   if (page && title && section)
     return {
-      greeting: `Здравствуйте! Я Кадди, консультант CAD.kz. Вы в разделе «${title}» — помогу выбрать и назову цену.`,
+      greeting: t(
+        'Здравствуйте! Я Кадди, консультант CAD.kz. Вы в разделе «{title}» — помогу выбрать и назову цену.',
+        { title },
+      ),
       actions: [
-        { id: 'page-pick', label: 'Помочь с выбором', text: `Помогите выбрать: ${title}` },
+        {
+          id: 'page-pick',
+          label: t('Помочь с выбором'),
+          text: t('Помогите выбрать: {title}', { title }),
+        },
         {
           id: 'page-popular',
-          label: 'Что чаще берут',
-          text: `Что чаще всего берут в разделе «${title}»?`,
+          label: t('Что чаще берут'),
+          text: t('Что чаще всего берут в разделе «{title}»?', { title }),
         },
-        ...QUICK_ACTIONS.filter((action) => action.id === 'price'),
+        ...QUICK_ACTIONS.filter((action) => action.id === 'price').map(tr),
         ...tail,
       ],
     }
-  return { greeting: ASSISTANT_GREETING, actions: QUICK_ACTIONS }
+  return { greeting: t(ASSISTANT_GREETING), actions: QUICK_ACTIONS.map(tr) }
+}
+
+/**
+ * Язык ответа (06.11.2026): чат открыт на казахской или английской версии сайта — отвечать на ней.
+ * @param {string} path
+ */
+function languageLine(path) {
+  const { lang } = splitLangPath(path)
+  if (lang === 'kk')
+    return '\n— Клиент читает сайт на казахском языке: отвечай по-казахски, если он сам не пишет на другом языке. Названия программ и цены не переводи.'
+  if (lang === 'en')
+    return '\n— Клиент читает сайт на английском языке: отвечай по-английски, если он сам не пишет на другом языке. Названия программ и цены не переводи.'
+  return ''
+}
+
+/**
+ * Подстановка без перевода: «Сколько стоит {title}?» → «Сколько стоит AutoCAD?».
+ * @param {string} text
+ * @param {Record<string, string>} [vars]
+ */
+function fillVars(text, vars) {
+  return vars ? text.replace(/\{(\w+)\}/g, (whole, key) => vars[key] ?? whole) : text
 }
 
 /**
@@ -1383,7 +1430,7 @@ ${facts}${vendorListText(vendorList)}`
 — ${handoffText(handoff)}${
     page
       ? `
-— Клиент открыл чат на странице сайта «${page.title}» (${page.path}). Вопрос без названия товара или раздела — скорее всего про эту страницу.`
+— Клиент открыл чат на странице сайта «${page.title}» (${page.path}). Вопрос без названия товара или раздела — скорее всего про эту страницу.${languageLine(page.path)}`
       : ''
   }${
     topical.length

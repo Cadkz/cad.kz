@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { ASSISTANT_LIMITS, type AssistantCard } from '@/domain/assistant.mjs'
 import { readPage } from './pageContext'
 
@@ -138,6 +139,7 @@ async function postQuestion(conversationId: string, message: string) {
  * ответил ли менеджер (open — окно чата открыто, тогда чаще). Менеджер в разговоре — Кадди молчит.
  */
 export function useAssistant(open = false) {
+  const t = useT()
   const [conversationId, setConversationId] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [waiting, setWaiting] = useState(false)
@@ -186,7 +188,11 @@ export function useAssistant(open = false) {
       const message = text.trim()
       if (!message || waiting || !conversationId) return
       if (message.length > ASSISTANT_LIMITS.messageChars) {
-        setError(`Сообщение длиннее ${ASSISTANT_LIMITS.messageChars} знаков — сократите его`)
+        setError(
+          t('Сообщение длиннее {count} знаков — сократите его', {
+            count: ASSISTANT_LIMITS.messageChars,
+          }),
+        )
         return
       }
       lastQuestion.current = message
@@ -201,7 +207,7 @@ export function useAssistant(open = false) {
       if (answer) setMessages((list) => [...list, answer])
       if (outcome.error) setError(outcome.error)
     },
-    [conversationId, waiting],
+    [conversationId, waiting, t],
   )
 
   const retry = useCallback(() => send(lastQuestion.current, true), [send])

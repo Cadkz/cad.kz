@@ -1,6 +1,7 @@
 'use client'
 
 import { type PointerEvent as ReactPointerEvent, type RefObject, useEffect, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import styles from './PanelResize.module.css'
 
 type Edge = 'top' | 'left' | 'corner'
@@ -40,6 +41,7 @@ function apply(element: HTMLElement, width: number, height: number) {
  * мышью; размер запоминается в этом браузере. Двойной щелчок по краю — прежний размер.
  */
 export function PanelResize({ target }: Props) {
+  const t = useT()
   const [hint, setHint] = useState(false)
   useEffect(() => {
     try {
@@ -138,7 +140,7 @@ export function PanelResize({ target }: Props) {
       <div
         className={styles.corner}
         data-hint={hint || undefined}
-        title="Потяните, чтобы изменить размер окна"
+        title={t('Потяните, чтобы изменить размер окна')}
         onPointerDown={start('corner')}
         onDoubleClick={reset}
         aria-hidden="true"

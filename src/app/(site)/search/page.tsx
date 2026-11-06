@@ -5,19 +5,21 @@ import { Col, Grid } from '@/components/Grid/Grid'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
 import { SearchForm } from '@/components/SearchForm/SearchForm'
 import { SearchResults } from '@/components/SearchResults/SearchResults'
+import { getT } from '@/i18n/server'
 import { getContacts } from '@/lib/navigation'
 import { searchCatalog } from '@/lib/search'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
 /** Результаты поиска не индексируются: у каждого запроса свой адрес, это не страницы для поисковиков. */
-export const metadata: Metadata = {
-  title: { absolute: 'Поиск — CAD.kz' },
-  robots: { index: false, follow: true },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: { absolute: t('Поиск — CAD.kz') }, robots: { index: false, follow: true } }
 }
 
 /** Поиск по каталогу — шаблон «Каталог» без фильтра: поле сверху, карточки на всю ширину. */
 export default async function SearchPage({ searchParams }: Props) {
+  const t = await getT()
   const params = await searchParams
   const raw = Array.isArray(params.q) ? params.q[0] : params.q
   const query = (raw ?? '').slice(0, 100)
@@ -29,7 +31,7 @@ export default async function SearchPage({ searchParams }: Props) {
     <main>
       <Container>
         <Breadcrumbs items={[{ title: 'Главная', href: '/' }, { title: 'Поиск' }]} />
-        <PageIntro title="Поиск по каталогу" />
+        <PageIntro title={t('Поиск по каталогу')} />
         <Grid>
           <Col span={{ base: 12, md: 8 }}>
             <SearchForm initial={query} />

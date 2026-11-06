@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { assistantOn, openAssistant } from '@/lib/openAssistant'
 import { Mascot } from '../Mascot/Mascot'
 import styles from './SearchKaddi.module.css'
@@ -22,6 +23,7 @@ type Props = {
  * с лупой справа от кнопки, смотрит на неё (поза уже отражена, надпись на жилете ровная). Показывается, только когда консультант работает.
  */
 export function SearchKaddi({ query, empty, onPick }: Props) {
+  const t = useT()
   const [on, setOn] = useState(false)
   useEffect(() => setOn(assistantOn()), [])
   if (!on) return null
@@ -36,9 +38,11 @@ export function SearchKaddi({ query, empty, onPick }: Props) {
     return (
       <div className={styles.empty}>
         <div className={styles.text}>
-          <p className={styles.lead}>Опишите задачу своими словами — Кадди поможет подобрать.</p>
+          <p className={styles.lead}>
+            {t('Опишите задачу своими словами — Кадди поможет подобрать.')}
+          </p>
           <button type="button" className={styles.button} onClick={ask} data-search-click="kaddi">
-            Спросить Кадди
+            {t('Спросить Кадди')}
           </button>
         </div>
         <Mascot pose="search" size="avatar" eager hover={false} />
@@ -51,11 +55,12 @@ export function SearchKaddi({ query, empty, onPick }: Props) {
       <span>
         {question.length >= MIN_QUESTION ? (
           <>
-            Спросить Кадди: <span className={styles.query}>«{question}»</span>
+            {t('Спросить Кадди:')} <span className={styles.query}>«{question}»</span>
           </>
         ) : (
           <>
-            Не знаете, что искать? <span className={styles.query}>Спросить Кадди</span>
+            {t('Не знаете, что искать?')}{' '}
+            <span className={styles.query}>{t('Спросить Кадди')}</span>
           </>
         )}
       </span>
