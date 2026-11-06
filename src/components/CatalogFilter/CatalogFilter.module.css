@@ -131,8 +131,8 @@
    сужаются на месте — без затемнения экрана; повторное нажатие прячет колонку. */
 @media (min-width: 960px) {
   .compact {
-    grid-template-columns: 0 minmax(0, 1fr);
-    gap: 0;
+    grid-template-columns: var(--rail) minmax(0, 1fr);
+    gap: 0 var(--space-4);
     transition:
       grid-template-columns var(--duration-sidebar) var(--ease-ios),
       column-gap var(--duration-sidebar) var(--ease-ios);
@@ -182,7 +182,8 @@
 }
 
 @media (min-width: 960px) {
-  .compact > .sidebar {
+  .compact > .sidebar,
+  .compact > .rail {
     grid-row: 2;
     grid-column: 1;
   }
@@ -193,8 +194,7 @@
   }
 }
 
-/* Вариант A (07.11.2026): полосы нет — открывает кнопка «Фильтры» над блоком. Колонка выезжает,
-   содержимое приходит слева из лёгкого размытия, группы фильтра — по очереди, волной. */
+/* Свёрнутый фильтр — направляющая FilterRail (вариант B). Открытая колонка: содержимое приходит слева из лёгкого размытия, группы фильтра — по очереди, волной. */
 @media (min-width: 960px) and (prefers-reduced-motion: no-preference) {
   .compact[data-side="open"] .sideInner > * > * {
     animation: groupIn var(--duration-menu-card) var(--ease-reveal) backwards;

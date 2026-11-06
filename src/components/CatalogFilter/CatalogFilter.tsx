@@ -42,6 +42,7 @@ import { CatalogSteps } from '../CatalogSteps/CatalogSteps'
 import { CatalogTabs } from '../CatalogTabs/CatalogTabs'
 import { Drawer } from '../Drawer/Drawer'
 import { FilterPanel } from '../FilterPanel/FilterPanel'
+import { FilterRail } from '../FilterRail/FilterRail'
 import { activeCount, FilterToggle } from '../FilterToggle/FilterToggle'
 import { FlowItem } from '../FlowItem/FlowItem'
 import { FlowPage } from '../FlowPage/FlowPage'
@@ -242,6 +243,15 @@ export function CatalogFilter({
             row
           />
         </div>
+      )}
+      {/* Свёрнутый фильтр — направляющая слева (вариант B, 07.11.2026). */}
+      {wide && (
+        <FilterRail
+          className={styles.rail}
+          hidden={sideOpen}
+          count={activeCount(state)}
+          onOpen={() => setSideOpen(true)}
+        />
       )}
       <section
         className={styles.sidebar}
