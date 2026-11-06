@@ -87,6 +87,8 @@ export type ProductPage = {
   stagePictures: Picture[]
   /** Примеры сканов (админка: товар → «Примеры сканов»), только у оборудования. */
   scans: Scan[]
+  /** Срок поставки товара или его производителя; null — общий текст условий покупки. */
+  delivery: string | null
   seo: Product['seo']
 }
 
@@ -115,7 +117,15 @@ async function withPageTexts(payload: Payload, product: Product): Promise<Produc
     id: product.id,
     locale: lang,
     depth: 0,
-    select: { title: true, summary: true, description: true, tasks: true, faq: true, seo: true },
+    select: {
+      title: true,
+      summary: true,
+      description: true,
+      tasks: true,
+      faq: true,
+      seo: true,
+      delivery: true,
+    },
   })
   return {
     ...product,
@@ -125,7 +135,29 @@ async function withPageTexts(payload: Payload, product: Product): Promise<Produc
     tasks: texts.tasks,
     faq: texts.faq,
     seo: texts.seo,
+    delivery: texts.delivery,
   }
+}
+
+/**
+ * Срок поставки (просьба владельца 06.11.2026: сроки разные у производителей): свой у товара,
+ * иначе у производителя для программ или оборудования, на языке страницы.
+ */
+async function deliveryText(payload: Payload, product: Product): Promise<string | null> {
+  const own = product.delivery?.trim()
+  if (own) return own
+  if (product.kind !== 'software' && product.kind !== 'hardware') return null
+  const id = relId(product.manufacturer)
+  if (!id) return null
+  const vendor = await payload.findByID({
+    collection: 'manufacturers',
+    id,
+    locale: await requestLang(),
+    depth: 0,
+    select: { deliverySoftware: true, deliveryHardware: true },
+  })
+  const text = product.kind === 'software' ? vendor.deliverySoftware : vendor.deliveryHardware
+  return text?.trim() || null
 }
 
 export async function getProduct(slug: string): Promise<ProductPage | null> {
@@ -164,7 +196,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
   const main = typeof product.mainSection === 'object' ? product.mainSection : null
   // Подраздел без своих настроек берёт сценарий и демонстрацию у родителя.
   const parent = main && typeof main.parent === 'object' ? main.parent : null
-  const [offers, context, picker] = await Promise.all([
+  const [offers, context, picker, delivery] = await Promise.all([
     payload.find({
       collection: 'offers',
       where: { and: [{ status: { equals: 'published' } }, { product: { equals: product.id } }] },
@@ -173,6 +205,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     }),
     loadPricingContext(payload),
     loadPicker(payload, product),
+    deliveryText(payload, product),
   ])
   const priced = offers.docs
     .map((offer) => {
@@ -245,6 +278,7 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     pictures: productPictures(product),
     stagePictures: stagePictures(product),
     scans: product.kind === 'hardware' ? productScans(product) : [],
+    delivery,
     seo: product.seo,
   }
 }

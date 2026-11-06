@@ -61,6 +61,12 @@ export const MENU = [
         global: 'home-page',
       },
       {
+        label: 'Страница BIM',
+        href: '/admin/globals/bim-page',
+        icon: 'pages',
+        global: 'bim-page',
+      },
+      {
         label: 'Контакты и подвал',
         href: '/admin/globals/site-settings',
         icon: 'footer',

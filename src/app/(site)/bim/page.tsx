@@ -1,53 +1,44 @@
 import type { Metadata } from 'next'
-import { ArticleBody } from '@/components/ArticleBody/ArticleBody'
-import { AskManager } from '@/components/AskManager/AskManager'
 import { BimBand } from '@/components/BimBand/BimBand'
+import { BimProof } from '@/components/BimProof/BimProof'
+import { BimServices } from '@/components/BimServices/BimServices'
+import { BimSplit } from '@/components/BimSplit/BimSplit'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { Container } from '@/components/Container/Container'
+import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
 import { Grid } from '@/components/Grid/Grid'
 import { ProductCard } from '@/components/ProductCard/ProductCard'
-import { ReadingLayout } from '@/components/ReadingLayout/ReadingLayout'
 import { Section } from '@/components/Section/Section'
+import { getT } from '@/i18n/server'
+import { getBimPage } from '@/lib/bimPage'
 import { getCatalog } from '@/lib/catalog'
 import { getHome } from '@/lib/home'
-import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { getPage } from '@/lib/pages'
-import { cms } from '@/lib/payload'
-import { bodyPictures } from '@/lib/pictures'
-import { imageSources, parseBody } from '@/lib/richText'
 import { pageMetadata } from '@/lib/seo'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getPage('bim')
+  const [page, t] = await Promise.all([getPage('bim'), getT()])
   return pageMetadata({
     seo: page?.seo,
-    title: 'Внедрение BIM — CAD.kz',
-    description:
-      page?.lead ??
-      'Внедрение BIM в проектной организации: аудит, BIM-стандарт, координация моделей, архив и обучение.',
+    title: t('BIM: процессы, инструменты и команда — CAD.kz'),
+    description: t(
+      'BIM-процессы, координация проектов, шаблоны Revit и обучение команды. Практика CAD.kz в Казахстане с 2015 года.',
+    ),
     path: '/bim',
   })
 }
 
-/** Сколько услуг и курсов показать под текстом. */
+/** Сколько услуг и курсов показать перед призывом. */
 const SERVICES_LIMIT = 6
 
 /**
- * «Внедрение BIM» (пункт меню, решение владельца 13.10.2026) — подробное объяснение баннера
- * с главной. Сверху тот же баннер (этапы и цифры из «Главной страницы» в админке), ниже текст
- * из «Страниц» (код bim) по шаблону «Чтение» и справа Кадди с вопросами; внизу услуги внедрения
- * и курсы по BIM из каталога.
+ * Страница BIM (пункт меню «BIM», макет владельца 06.11.2026): сверху баннер из «Главной сайта»,
+ * под ним тексты из «Страница BIM» — опыт, зачем BIM, как мы помогаем, задачи, результат; затем
+ * услуги и курсы по BIM из каталога и баннер «С какой задачи начнём?».
  */
 export default async function BimPage() {
-  const [home, page, contacts, catalog] = await Promise.all([
-    getHome(),
-    getPage('bim'),
-    getContacts(),
-    getCatalog(),
-  ])
-  const blocks = parseBody(page?.body, page?.title)
-  const pictures = await cms().then((payload) => bodyPictures(payload, imageSources(blocks)))
+  const [home, bim, catalog, t] = await Promise.all([getHome(), getBimPage(), getCatalog(), getT()])
   const services = catalog.items
     .filter(
       (item) =>
@@ -59,31 +50,23 @@ export default async function BimPage() {
   return (
     <main>
       <Container>
-        <Breadcrumbs items={[{ title: 'Главная', href: '/' }, { title: 'Внедрение BIM' }]} />
+        <Breadcrumbs items={[{ title: 'Главная', href: '/' }, { title: 'BIM' }]} />
       </Container>
       <BimBand bim={home.bim} level={1} flush />
-      {blocks.length > 0 && (
-        <Section id="bim-details" title="Как это работает">
-          <ReadingLayout
-            aside={
-              <AskManager
-                contacts={contacts}
-                layout="aside"
-                title="Обсудим внедрение?"
-                phrase="Расскажите, сколько у вас проектировщиков и какие разделы вы делаете, — подскажу, с чего начать."
-                message="Здравствуйте! Хотим обсудить внедрение BIM."
-              />
-            }
-          >
-            <ArticleBody blocks={blocks} pictures={pictures} />
-          </ReadingLayout>
+      <BimProof items={bim.proof} label={t('Опыт CAD.kz')} />
+      <BimSplit block={bim.intro} id="bim-intro" />
+      <BimSplit block={bim.help} id="bim-help" tone="card" />
+      {bim.services.length > 0 && (
+        <Section id="bim-tasks" title={bim.servicesTitle ?? t('Какие задачи можем решить')}>
+          <BimServices items={bim.services} />
         </Section>
       )}
+      <BimSplit block={bim.outcome} id="bim-outcome" />
       {services.length > 0 && (
         <Section
           id="bim-services"
-          title="Услуги и курсы"
-          action={{ href: catalogHref({ group: 'service' }), label: 'Все услуги и обучение' }}
+          title={t('Услуги и курсы')}
+          action={{ href: catalogHref({ group: 'service' }), label: t('Все услуги и обучение') }}
         >
           <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
             {services.map((item) => (
@@ -94,6 +77,10 @@ export default async function BimPage() {
           </Grid>
         </Section>
       )}
+      <CtaBanner
+        art="layers"
+        cta={{ title: bim.cta.title, text: bim.cta.text.join(' ') || null, link: bim.cta.link }}
+      />
     </main>
   )
 }

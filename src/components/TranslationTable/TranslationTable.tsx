@@ -71,7 +71,7 @@ export function TranslationTable() {
     }
   }
 
-  async function download(part: 'next' | 'all') {
+  async function download(part: 'next' | 'big' | 'all') {
     setError('')
     setDone('')
     setBusy(part === 'all' ? 'Готовим всю таблицу…' : 'Готовим часть…')
@@ -172,14 +172,18 @@ export function TranslationTable() {
           <AdminButton onClick={() => download('next')} disabled={Boolean(busy)}>
             Скачать следующую часть
           </AdminButton>
+          <AdminButton secondary onClick={() => download('big')} disabled={Boolean(busy)}>
+            Большая часть (×3)
+          </AdminButton>
           <AdminButton secondary onClick={() => download('all')} disabled={Boolean(busy)}>
             Вся таблица
           </AdminButton>
         </div>
         <p className={styles.hint}>
-          Часть — около 12 000 знаков, столько ChatGPT переводит за раз без обрывов. В неё попадают
-          товары, где не хватает хотя бы одного перевода. Вся таблица — для проверки и правки уже
-          переведённого.
+          Часть — около 12 000 знаков, столько ChatGPT переводит за раз без обрывов. Большая часть —
+          около 36 000 знаков, кругов втрое меньше, но ChatGPT может перевести не всё: пропуски
+          видно на проверке после загрузки, их доберёт следующая часть. В части попадают товары, где
+          не хватает хотя бы одного перевода. Вся таблица — для проверки и правки уже переведённого.
         </p>
       </div>
 

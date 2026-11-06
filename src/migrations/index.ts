@@ -34,6 +34,8 @@ import * as migration_20261024_000240_product_scans from './20261024_000240_prod
 import * as migration_20261030_100913_search_queries from './20261030_100913_search_queries'
 import * as migration_20261102_075759_purchase_terms from './20261102_075759_purchase_terms'
 import * as migration_20261106_075526_languages from './20261106_075526_languages'
+import * as migration_20261106_102038_delivery_terms from './20261106_102038_delivery_terms'
+import * as migration_20261106_102416_bim_page from './20261106_102416_bim_page'
 
 export const migrations = [
   {
@@ -215,5 +217,15 @@ export const migrations = [
     up: migration_20261106_075526_languages.up,
     down: migration_20261106_075526_languages.down,
     name: '20261106_075526_languages',
+  },
+  {
+    up: migration_20261106_102038_delivery_terms.up,
+    down: migration_20261106_102038_delivery_terms.down,
+    name: '20261106_102038_delivery_terms',
+  },
+  {
+    up: migration_20261106_102416_bim_page.up,
+    down: migration_20261106_102416_bim_page.down,
+    name: '20261106_102416_bim_page',
   },
 ]

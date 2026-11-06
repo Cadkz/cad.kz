@@ -26,12 +26,14 @@ import { setupArtecTexts } from '../src/lib/artecTextsSetup.ts'
 import { setupAuditCatalog, setupRevitBack } from '../src/lib/auditCatalogSetup.ts'
 import { setupAutodeskCatalog } from '../src/lib/autodeskCatalogSetup.ts'
 import { setupAutodeskNames } from '../src/lib/autodeskNamesSetup.ts'
+import { setupBimPageTexts } from '../src/lib/bimPageSetup.ts'
 import { setupBimPage } from '../src/lib/bimSetup.ts'
 import { setupCardLogos } from '../src/lib/cardLogosSetup.ts'
 import { setupCards } from '../src/lib/cardsSetup.ts'
 import { setupCatalogSections } from '../src/lib/catalogSetup.ts'
 import { setupPopularV2, setupPopularV3 } from '../src/lib/crmHome.ts'
 import { setupCrmCatalog } from '../src/lib/crmSetup.ts'
+import { setupDelivery } from '../src/lib/deliverySetup.ts'
 import { setupDemoCleanup } from '../src/lib/demoCleanupSetup.ts'
 import {
   setupDirectionsNine,
@@ -339,6 +341,10 @@ try {
   else for (const line of homeBim) console.log(`Баннер BIM — ${line}`)
   const homeBimTasks = await setupHomeBimTasks(payload)
   if (homeBimTasks) for (const line of homeBimTasks) console.log(`Баннер BIM (06.11) — ${line}`)
+  const bimTexts = await setupBimPageTexts(payload)
+  if (bimTexts) for (const line of bimTexts) console.log(`Страница BIM — ${line}`)
+  const delivery = await setupDelivery(payload)
+  if (delivery) for (const line of delivery) console.log(`Сроки поставки — ${line}`)
   const legacyCovers = await setupLegacyCovers(payload)
   if (!legacyCovers) console.log('Обложки публикаций со старого сайта уже поставлены.')
   else for (const line of legacyCovers) console.log(`Обложки — ${line}`)

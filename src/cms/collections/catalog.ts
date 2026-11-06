@@ -130,6 +130,19 @@ const manufacturersBase = contentCollection({
     priorityField(false),
     textField('website', 'Сайт'),
     {
+      type: 'collapsible',
+      label: 'Срок поставки',
+      admin: {
+        description:
+          'Строка «Сроки поставки» в блоке «Условия покупки» на странице товара. Пусто — общий ' +
+          'текст из «Контакты и подвал». Пишите со слова «от»: «от 3 дней после оплаты».',
+      },
+      fields: [
+        translated({ name: 'deliverySoftware', label: 'Программы', type: 'textarea' }),
+        translated({ name: 'deliveryHardware', label: 'Оборудование', type: 'textarea' }),
+      ],
+    },
+    {
       name: 'logo',
       label: 'Логотип',
       type: 'upload',
@@ -412,6 +425,16 @@ const productBasicFields: Field[] = [
       },
     ],
   },
+  translated({
+    name: 'delivery',
+    label: 'Срок поставки, если не как у производителя',
+    type: 'textarea',
+    admin: {
+      description:
+        'Например, у модели в наличии — «в наличии, отгрузка от 1 дня». Пусто — срок ' +
+        'производителя, а у него пусто — общий текст из «Контакты и подвал».',
+    },
+  }),
 ]
 
 /** Вкладка «Карточка и описание», начало: что видно в карточке каталога и в шапке товара. */

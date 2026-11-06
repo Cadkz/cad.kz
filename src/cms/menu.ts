@@ -14,6 +14,7 @@ import {
   searchQueries,
 } from './collections/system'
 import { users } from './collections/users'
+import { bimPage } from './globals/bimPage'
 import { homePage } from './globals/homePage'
 import { siteSettings } from './globals/siteSettings'
 import { globalWithHistory, withHistory } from './history'
@@ -31,7 +32,7 @@ const MENU: { group: string; collections: CollectionConfig[]; globals: GlobalCon
   {
     group: 'Контент',
     collections: [publications, pages, topics, media],
-    globals: [homePage, siteSettings],
+    globals: [homePage, siteSettings, bimPage],
   },
   { group: 'Продажи', collections: [siteRequests, orders], globals: [] },
   { group: 'Кадди', collections: [conversations, assistantKnowledge, priceTables], globals: [] },

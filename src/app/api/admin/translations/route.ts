@@ -1,13 +1,19 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
-import { DOCS_PER_REQUEST, nextPart, writeTranslationXlsx } from '@/domain/translationTable.mjs'
+import {
+  BIG_PART_CHARS,
+  DOCS_PER_REQUEST,
+  nextPart,
+  PART_CHARS,
+  writeTranslationXlsx,
+} from '@/domain/translationTable.mjs'
 import { adminRequest, reply } from '@/lib/adminApi'
 import { refreshSiteData } from '@/lib/siteCache'
 import { planTranslations, saveTranslation, translationGroups } from '@/lib/translationTable'
 
 /**
  * «Переводы» в админке (администратор и маркетолог).
- * GET ?part=next — следующая часть непереведённого, ?part=all — вся таблица: файл Excel.
+ * GET ?part=next — следующая часть непереведённого, ?part=big — втрое больше, ?part=all — вся таблица: файл Excel.
  * POST check — что запишется из загруженной таблицы; POST apply — запись (по нескольку товаров
  * за запрос, чтобы уложиться в минуту Vercel).
  */
@@ -25,9 +31,10 @@ export async function GET(request: Request) {
   const { user } = await payload.auth({ headers: request.headers })
   if (!user || (user.role !== 'admin' && user.role !== 'editor'))
     return new Response('Нет доступа. Войдите в админку.', { status: 403 })
-  const all = new URL(request.url).searchParams.get('part') === 'all'
+  const part = new URL(request.url).searchParams.get('part')
+  const all = part === 'all'
   const groups = await translationGroups(payload)
-  const rows = all ? groups.flat() : nextPart(groups)
+  const rows = all ? groups.flat() : nextPart(groups, part === 'big' ? BIG_PART_CHARS : PART_CHARS)
   if (!rows.length) return new Response('Всё уже переведено.', { status: 404 })
   const name = `perevody-${all ? 'vse' : 'chast'}-${stamp()}.xlsx`
   return new Response(new Uint8Array(writeTranslationXlsx(rows)), {

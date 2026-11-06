@@ -118,7 +118,7 @@ export const SITE_PAGES = /** @type {const} */ ({
   delivery: { title: 'Доставка', href: '/about/delivery', note: 'Лицензии и оборудование' },
   guarantee: { title: 'Гарантия', href: '/about/guaranty', note: 'На программы и оборудование' },
   contacts: { title: 'Контакты', href: '/contacts', note: 'Телефон, WhatsApp, адрес офиса' },
-  bim: { title: 'Внедрение BIM', href: '/bim', note: 'Услуга внедрения под ваши задачи' },
+  bim: { title: 'BIM', href: '/bim', note: 'Услуга внедрения под ваши задачи' },
 })
 
 /** Карточка раздела сайта под ответом или null, если такого раздела нет. */

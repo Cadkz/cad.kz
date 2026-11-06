@@ -34,7 +34,7 @@ import { getContacts } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
 import type { PickTarget, ProductPage, RelatedProduct } from '@/lib/product'
-import { getPurchaseTerms } from '@/lib/purchaseTerms'
+import { getPurchaseTerms, withDelivery } from '@/lib/purchaseTerms'
 import { getRecommendations } from '@/lib/recommendations'
 import { parseBody } from '@/lib/richText'
 import { shortDescription, siteUrl } from '@/lib/seo'
@@ -285,7 +285,8 @@ export async function ProductView({
       : product.kind === 'hardware'
         ? allTerms.hardware
         : []
-  const terms = termsList.length > 0 ? <PurchaseTerms terms={termsList} /> : null
+  const shownTerms = withDelivery(termsList, product.delivery, t('Сроки поставки'))
+  const terms = shownTerms.length > 0 ? <PurchaseTerms terms={shownTerms} /> : null
   const scans =
     product.scans.length > 0 ? <ProductScans title={product.title} scans={product.scans} /> : null
 

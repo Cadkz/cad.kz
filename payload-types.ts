@@ -134,11 +134,13 @@ export interface Config {
   globals: {
     'home-page': HomePage;
     'site-settings': SiteSetting;
+    'bim-page': BimPage;
     'pricing-settings': PricingSetting;
   };
   globalsSelect: {
     'home-page': HomePageSelect<false> | HomePageSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'bim-page': BimPageSelect<false> | BimPageSelect<true>;
     'pricing-settings': PricingSettingsSelect<false> | PricingSettingsSelect<true>;
   };
   locale: 'ru' | 'kk' | 'en';
@@ -214,6 +216,10 @@ export interface Product {
    * Как «Сорт.» в Битриксе: меньше — выше у своего производителя. Основа линейки (SCAD Office) — 1, пакеты — 2, модули — 3. Топы продаж всё равно первыми.
    */
   lineOrder?: number | null;
+  /**
+   * Например, у модели в наличии — «в наличии, отгрузка от 1 дня». Пусто — срок производителя, а у него пусто — общий текст из «Контакты и подвал».
+   */
+  delivery?: string | null;
   /**
    * Разделы ставятся сами по «Правилам разделов». Если поменять разделы вручную, галочка снимется, и правила этот товар больше не трогают. Поставьте её снова, чтобы вернуть разделы по правилам.
    */
@@ -405,6 +411,8 @@ export interface Manufacturer {
    */
   priority?: ('flagship' | 'top' | 'normal' | 'low') | null;
   website?: string | null;
+  deliverySoftware?: string | null;
+  deliveryHardware?: string | null;
   /**
    * Показывается в карточках программ производителя, у которых нет своего логотипа. Лучше SVG или PNG от 400 px с прозрачным фоном.
    */
@@ -1264,6 +1272,7 @@ export interface ProductsSelect<T extends boolean = true> {
   manufacturer?: T;
   line?: T;
   lineOrder?: T;
+  delivery?: T;
   autoSections?: T;
   mainSection?: T;
   summary?: T;
@@ -1595,6 +1604,8 @@ export interface ManufacturersSelect<T extends boolean = true> {
   order?: T;
   priority?: T;
   website?: T;
+  deliverySoftware?: T;
+  deliveryHardware?: T;
   logo?: T;
   image?: T;
   legacyKey?: T;
@@ -2034,6 +2045,71 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bim-page".
+ */
+export interface BimPage {
+  id: number;
+  proof?:
+    | {
+        title: string;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  intro?: {
+    eyebrow?: string | null;
+    title?: string | null;
+    /**
+     * Каждая строка — отдельный абзац.
+     */
+    text?: string | null;
+  };
+  help?: {
+    eyebrow?: string | null;
+    title?: string | null;
+    /**
+     * Каждая строка — отдельный абзац.
+     */
+    text?: string | null;
+  };
+  servicesTitle?: string | null;
+  /**
+   * Карточка: номер, название, когда нужно; по кнопке «Что мы сделаем» — работы и результат.
+   */
+  services?:
+    | {
+        title: string;
+        problem?: string | null;
+        work?: string | null;
+        result?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  outcome?: {
+    eyebrow?: string | null;
+    title?: string | null;
+    /**
+     * Каждая строка — отдельный абзац.
+     */
+    text?: string | null;
+  };
+  cta?: {
+    title?: string | null;
+    /**
+     * Каждая строка — отдельный абзац.
+     */
+    text?: string | null;
+    linkLabel?: string | null;
+    /**
+     * Слово whatsapp — чат WhatsApp из «Контакты и подвал».
+     */
+    linkHref?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pricing-settings".
  */
 export interface PricingSetting {
@@ -2216,6 +2292,61 @@ export interface SiteSettingsSelect<T extends boolean = true> {
             };
       };
   updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bim-page_select".
+ */
+export interface BimPageSelect<T extends boolean = true> {
+  proof?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  intro?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        text?: T;
+      };
+  help?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        text?: T;
+      };
+  servicesTitle?: T;
+  services?:
+    | T
+    | {
+        title?: T;
+        problem?: T;
+        work?: T;
+        result?: T;
+        id?: T;
+      };
+  outcome?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        text?: T;
+      };
+  cta?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        linkLabel?: T;
+        linkHref?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -24,3 +24,21 @@ export const getPurchaseTerms = siteCachedByLang(
     }
   },
 )
+
+/** Строка о сроках: заголовок со словом «срок», «поставка» или «доставка» на любом из языков. */
+const DELIVERY_TITLE = /срок|постав|достав|мерзім|жеткіз|deliver|lead time/i
+
+/**
+ * Срок поставки товара или производителя вместо общего текста в строке о сроках; такой строки
+ * нет — первой строкой «Сроки поставки». Без своего срока — общие условия как есть.
+ */
+export function withDelivery(
+  terms: PurchaseTerm[],
+  delivery: string | null,
+  title: string,
+): PurchaseTerm[] {
+  if (!delivery) return terms
+  const at = terms.findIndex((term) => DELIVERY_TITLE.test(term.title))
+  if (at < 0) return [{ title, text: delivery }, ...terms]
+  return terms.map((term, index) => (index === at ? { ...term, text: delivery } : term))
+}

@@ -10,7 +10,7 @@ export type HomeLink = { label: string; href: string } | null
 export type Slide = { title: string; text: string | null; href: string }
 
 /** Ссылка из CMS. Слово whatsapp в поле ссылки подставляет номер WhatsApp из контактов. */
-function resolveLink(
+export function resolveLink(
   label: string | null | undefined,
   href: string | null | undefined,
   whatsapp: string | null,

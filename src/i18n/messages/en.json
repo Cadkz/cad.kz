@@ -195,6 +195,7 @@
   "Другие варианты под ту же задачу.": "Other options for the same task.",
   "Подберите комплект": "Choose your package",
   "Условия покупки": "Purchase terms",
+  "Сроки поставки": "Delivery time",
   "Программы и оборудование раздела": "Software and equipment in this section",
   "Скачать характеристики, PDF": "Download specifications, PDF",
   "Порядок": "Sort",
@@ -513,5 +514,13 @@
   "Материалов пока нет. Их добавляет редактор в админке.": "No articles yet.",
   "Содержание": "Contents",
   "Тема": "Topic",
-  "Все темы": "All topics"
+  "Все темы": "All topics",
+  "Услуги и курсы": "Services and courses",
+  "Все услуги и обучение": "All services and training",
+  "Результат": "Result",
+  "Что мы сделаем": "What we will do",
+  "Опыт CAD.kz": "CAD.kz experience",
+  "Какие задачи можем решить": "What tasks we can solve",
+  "BIM: процессы, инструменты и команда — CAD.kz": "BIM: processes, tools and team — CAD.kz",
+  "BIM-процессы, координация проектов, шаблоны Revit и обучение команды. Практика CAD.kz в Казахстане с 2015 года.": "BIM processes, project coordination, Revit templates and team training. CAD.kz in Kazakhstan since 2015."
 }
