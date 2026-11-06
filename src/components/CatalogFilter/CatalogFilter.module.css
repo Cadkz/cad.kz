@@ -131,8 +131,8 @@
    сужаются на месте — без затемнения экрана; повторное нажатие прячет колонку. */
 @media (min-width: 960px) {
   .compact {
-    grid-template-columns: var(--rail) minmax(0, 1fr);
-    gap: 0 var(--space-6);
+    grid-template-columns: 0 minmax(0, 1fr);
+    gap: 0;
     transition:
       grid-template-columns var(--duration-sidebar) var(--ease-ios),
       column-gap var(--duration-sidebar) var(--ease-ios);
@@ -181,17 +181,8 @@
   }
 }
 
-/* Свёрнутый фильтр (правка владельца 06.11.2026, вечер): вместо нулевой колонки — полоса
-   `--rail` во всю высоту карточек: значок, вертикальная подпись «Фильтры», стрелка. Содержимое
-   полосы держится под шапкой при прокрутке. Наведение — мягкий синий фон и синяя рамка, стрелка
-   сдвигается вправо. Открыт фильтр — полосы нет (hidden), колонка занимает её место. */
-.rail {
-  display: none;
-}
-
 @media (min-width: 960px) {
-  .compact > .sidebar,
-  .compact > .rail {
+  .compact > .sidebar {
     grid-row: 2;
     grid-column: 1;
   }
@@ -200,60 +191,36 @@
     grid-row: 2;
     grid-column: 2;
   }
+}
 
-  /* Кнопка по умолчанию ставит содержимое по центру высоты — здесь оно сверху. */
-  .rail:not([hidden]) {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-self: stretch;
-    padding: var(--space-4) 0;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    color: var(--color-heading);
-    font: inherit;
-    cursor: pointer;
-    transition:
-      background var(--duration-fast) var(--ease),
-      border-color var(--duration-fast) var(--ease),
-      color var(--duration-fast) var(--ease);
+/* Вариант A (07.11.2026): полосы нет — открывает кнопка «Фильтры» над блоком. Колонка выезжает,
+   содержимое приходит слева из лёгкого размытия, группы фильтра — по очереди, волной. */
+@media (min-width: 960px) and (prefers-reduced-motion: no-preference) {
+  .compact[data-side="open"] .sideInner > * > * {
+    animation: groupIn var(--duration-menu-card) var(--ease-reveal) backwards;
   }
 
-  .railInner {
-    position: sticky;
-    top: calc(var(--header-height) + var(--space-6));
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-3);
+  .compact[data-side="open"] .sideInner > * > :nth-child(2) {
+    animation-delay: calc(var(--delay-menu-card) * 2);
   }
 
-  .railLabel {
-    font-size: var(--text-sm);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-overline);
-    text-transform: uppercase;
-    writing-mode: vertical-rl;
+  .compact[data-side="open"] .sideInner > * > :nth-child(3) {
+    animation-delay: calc(var(--delay-menu-card) * 4);
   }
 
-  .railArrow {
-    color: var(--color-action);
-    transition: transform var(--duration-fast) var(--ease);
+  .compact[data-side="open"] .sideInner > * > :nth-child(4) {
+    animation-delay: calc(var(--delay-menu-card) * 6);
   }
 
-  .rail:hover {
-    border-color: var(--color-accent-border);
-    background: var(--color-control-hover);
-    color: var(--color-on-control-hover);
+  .compact[data-side="open"] .sideInner > * > :nth-child(n + 5) {
+    animation-delay: calc(var(--delay-menu-card) * 8);
   }
+}
 
-  .rail:hover .railArrow {
-    transform: translateX(2px);
-  }
-
-  .rail:focus-visible {
-    outline: 2px solid var(--color-focus);
-    outline-offset: 2px;
+@keyframes groupIn {
+  from {
+    opacity: 0;
+    filter: blur(var(--blur-menu-card));
+    transform: translateX(calc(-1 * var(--space-4)));
   }
 }
