@@ -1,12 +1,14 @@
 import type { NewsCardData } from '@/components/NewsCard/NewsCard'
 import { INFO_PAGES, pagePath } from '@/domain/legacyPages.mjs'
+import { requestLang } from '@/i18n/server'
 import { cms } from './payload'
 
 /** Опубликованная текстовая страница по коду или null. */
 export async function getPage(slug: string) {
-  const payload = await cms()
+  const [payload, lang] = await Promise.all([cms(), requestLang()])
   const { docs } = await payload.find({
     collection: 'pages',
+    locale: lang,
     where: { and: [{ status: { equals: 'published' } }, { slug: { equals: slug } }] },
     limit: 1,
     depth: 0,
@@ -16,10 +18,11 @@ export async function getPage(slug: string) {
 
 /** Текстовые страницы для боковой колонки: в порядке меню, только опубликованные. */
 export async function getInfoLinks(): Promise<NewsCardData[]> {
-  const payload = await cms()
+  const [payload, lang] = await Promise.all([cms(), requestLang()])
   const order = INFO_PAGES.map((page) => page.slug)
   const { docs } = await payload.find({
     collection: 'pages',
+    locale: lang,
     where: { and: [{ status: { equals: 'published' } }, { slug: { in: order } }] },
     limit: order.length,
     depth: 0,

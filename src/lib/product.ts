@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
+import type { Payload } from 'payload'
 import { plainTitle } from '@/domain/productTitle.mjs'
 import { sectionIconKey } from '@/domain/sectionArt.mjs'
+import { DEFAULT_LANG } from '@/i18n/locales.mjs'
 import type { Product, Section } from '../../payload-types'
 import { type Scan, scanById } from '../domain/artecScans.mjs'
 import { resolveScenario, type Scenario } from '../domain/buyScenario.mjs'
@@ -16,6 +18,7 @@ import { loadPricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
 import { relId } from './rel'
 import { pageMetadata } from './seo'
+import { requestLang } from './translations'
 
 /** Служебные характеристики: в базе нужны для прайсов и 1С, покупателю не показываются. */
 const HIDDEN_PROPERTIES = new Set(['артикул'])
@@ -100,6 +103,31 @@ function related(value: Product['recommended']): RelatedProduct[] {
 }
 
 /** Товар для полной страницы: предложения с серверной ценой, связи, характеристики. */
+/**
+ * Тексты товара на языке страницы: название, описания, задачи, вопросы и SEO; где перевода нет —
+ * русский (fallback Payload). Остальное (цены, разделы, картинки) — из русской записи.
+ */
+async function withPageTexts(payload: Payload, product: Product): Promise<Product> {
+  const lang = await requestLang()
+  if (lang === DEFAULT_LANG) return product
+  const texts = await payload.findByID({
+    collection: 'products',
+    id: product.id,
+    locale: lang,
+    depth: 0,
+    select: { title: true, summary: true, description: true, tasks: true, faq: true, seo: true },
+  })
+  return {
+    ...product,
+    title: texts.title,
+    summary: texts.summary,
+    description: texts.description,
+    tasks: texts.tasks,
+    faq: texts.faq,
+    seo: texts.seo,
+  }
+}
+
 export async function getProduct(slug: string): Promise<ProductPage | null> {
   const payload = await cms()
   const { docs } = await payload.find({
@@ -108,8 +136,9 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
     limit: 1,
     depth: 2,
   })
-  const product = docs[0]
-  if (!product) return null
+  const found = docs[0]
+  if (!found) return null
+  const product = await withPageTexts(payload, found)
   const research = readResearch(product.researchData)
   const specs = cleanSpecs(
     (product.properties ?? []).filter(

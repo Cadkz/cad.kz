@@ -1,4 +1,5 @@
 import { plainTitle } from '@/domain/productTitle.mjs'
+import type { Lang } from '@/i18n/locales.mjs'
 import type { Section, SiteSetting } from '../../payload-types'
 import { GROUP_LABELS } from '../domain/catalogNavigation.mjs'
 import { courseTopic } from '../domain/courseTopics.mjs'
@@ -12,7 +13,7 @@ import { catalogHref } from './navigationHrefs'
 import { cmsData } from './payload'
 import { cardPictures, type Picture, vendorPictures } from './pictures'
 import { productPath } from './productPath'
-import { siteCached } from './siteCache'
+import { siteCachedByLang } from './siteCache'
 
 export type MenuLink = { title: string; href: string; logo?: MenuLogo | null }
 /** Линейка производителя в меню: первые товары и адрес каталога с этой линейкой. */
@@ -85,13 +86,15 @@ const relId = (value: number | { id: number } | null | undefined) =>
  * в меню. Путь: раздел → производитель → линейка → товары (src/domain/menu.mjs).
  */
 /** Меню — в общем кэше сайта (src/lib/siteCache.ts): оно на каждой странице. */
-export const getMenu = siteCached('menu', loadMenu)
+// Меню и контакты — свой кэш на язык: названия разделов и товаров, адрес, часы, подвал из переводов.
+export const getMenu = siteCachedByLang('menu', loadMenu)
 
-async function loadMenu(): Promise<MenuTab[]> {
+async function loadMenu(lang: Lang): Promise<MenuTab[]> {
   const payload = await cmsData()
   const [sections, products, manufacturers, lines] = await Promise.all([
     payload.find({
       collection: 'sections',
+      locale: lang,
       where: { status: { equals: 'published' } },
       sort: ['order', 'title'],
       pagination: false,
@@ -99,6 +102,7 @@ async function loadMenu(): Promise<MenuTab[]> {
     }),
     payload.find({
       collection: 'products',
+      locale: lang,
       where: { status: { equals: 'published' } },
       sort: 'title',
       pagination: false,
@@ -275,11 +279,15 @@ export function mobilePhone(phones: Contacts['phones']): Contacts['phones'][numb
 }
 
 /** Контакты и подвал — в общем кэше сайта: они на каждой странице. */
-export const getContacts = siteCached('contacts', loadContacts)
+export const getContacts = siteCachedByLang('contacts', loadContacts)
 
-async function loadContacts(): Promise<Contacts> {
+async function loadContacts(lang: Lang): Promise<Contacts> {
   const payload = await cmsData()
-  const settings: SiteSetting = await payload.findGlobal({ slug: 'site-settings', depth: 0 })
+  const settings: SiteSetting = await payload.findGlobal({
+    slug: 'site-settings',
+    locale: lang,
+    depth: 0,
+  })
   const digits = settings.whatsapp?.replace(/\D/g, '')
   return {
     phones: (settings.phones ?? []).map(({ label, tel }) => ({ label, tel })),

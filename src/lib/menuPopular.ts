@@ -7,7 +7,7 @@ import { cardPictures } from './pictures'
 import { type PopularCardData, popularCards } from './popular'
 import { productPath } from './productPath'
 import { relId, relIds } from './rel'
-import { siteCached } from './siteCache'
+import { siteCachedByLang } from './siteCache'
 
 /**
  * «Популярные решения» для меню «Каталог» (решение владельца 16.10.2026: блок переехал с главной
@@ -15,9 +15,15 @@ import { siteCached } from './siteCache'
  * Читаются только товары плиток, а не весь каталог: меню есть на каждой странице.
  */
 export const getMenuPopular = cache(
-  siteCached('menu-popular', async (): Promise<PopularCardData[]> => {
+  // Подписи плиток — из главной на языке страницы; товары читаются по-русски (логотипы карточек
+  // узнаются по русскому названию).
+  siteCachedByLang('menu-popular', async (lang): Promise<PopularCardData[]> => {
     const payload = await cmsData()
-    const page = (await payload.findGlobal({ slug: 'home-page', depth: 0 })) as HomePage
+    const page = (await payload.findGlobal({
+      slug: 'home-page',
+      locale: lang,
+      depth: 0,
+    })) as HomePage
     const items = (page.popular?.items ?? []).map((item) => ({
       key: item.id ?? `${item.title}-${item.href}`,
       productId: relId(item.product),

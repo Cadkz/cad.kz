@@ -1,5 +1,7 @@
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { connection } from 'next/server'
+import type { Lang } from '@/i18n/locales.mjs'
+import { requestLang } from '@/i18n/server'
 
 /**
  * Общий кэш данных сайта между запросами (замечание владельца 30.10.2026: каталог грузится
@@ -22,6 +24,26 @@ export function siteCached<T>(key: string, load: () => Promise<T>): () => Promis
   const cached = unstable_cache(load, [key, BUILD], { tags: [SITE_TAG], revalidate: HOUR })
   return async () => {
     await connection()
+    return cached()
+  }
+}
+
+/**
+ * То же для данных с переводами (главная, меню, контакты): свой кэш на каждый язык, загрузчик
+ * получает язык и читает Payload с locale (пустой перевод Payload заменяет русским).
+ */
+export function siteCachedByLang<T>(
+  key: string,
+  load: (lang: Lang) => Promise<T>,
+): () => Promise<T> {
+  const byLang = new Map<Lang, () => Promise<T>>()
+  return async () => {
+    const lang = await requestLang()
+    let cached = byLang.get(lang)
+    if (!cached) {
+      cached = siteCached(`${key}:${lang}`, () => load(lang))
+      byLang.set(lang, cached)
+    }
     return cached()
   }
 }

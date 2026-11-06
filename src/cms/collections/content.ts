@@ -9,6 +9,7 @@ import {
   slugField,
   statusField,
   textField,
+  translated,
 } from '../fields'
 import { publicationDefaults } from '../hooks/publicationDefaults'
 
@@ -70,14 +71,14 @@ const legacyCollapsed: Field = {
 
 /** Поле «Текст» публикаций и страниц: визуальный редактор, таблица — кнопкой, картинки — перетаскиванием. */
 function bodyField(description: string): Field {
-  return {
+  return translated({
     name: 'body',
     label: 'Текст',
     type: 'textarea',
     // Payload по умолчанию режет текст на 40 000 знаков, а длинные статьи старого сайта больше.
     maxLength: BODY_MAX_LENGTH,
     admin: { components: { Field: BODY_EDITOR }, description },
-  }
+  })
 }
 
 /** «Показывать на сайте», как у товаров: значения в базе прежние (черновик / опубликовано). */
@@ -98,6 +99,7 @@ const publicationCollection = contentCollection({
   slug: 'publications',
   singular: 'Публикация',
   plural: 'Новости, статьи, акции',
+  translatedTitle: true,
   fields: [],
 })
 
@@ -188,7 +190,7 @@ export const publications: CollectionConfig = {
         {
           label: 'Анонс',
           fields: [
-            {
+            translated({
               name: 'excerpt',
               label: 'Анонс для карточки',
               type: 'textarea',
@@ -196,7 +198,7 @@ export const publications: CollectionConfig = {
                 description:
                   'Одно-два предложения: видны в карточке в списке новостей и на главной.',
               },
-            },
+            }),
             {
               name: 'cover',
               label: 'Обложка',
@@ -236,6 +238,7 @@ const pageCollection = contentCollection({
   slug: 'pages',
   singular: 'Страница',
   plural: 'Страницы сайта',
+  translatedTitle: true,
   fields: [],
 })
 
@@ -261,12 +264,12 @@ export const pages: CollectionConfig = {
         {
           label: 'Текст',
           fields: [
-            {
+            translated({
               name: 'lead',
               label: 'Вводный абзац',
               type: 'textarea',
               admin: { description: 'Крупный абзац под заголовком. Можно не заполнять.' },
-            },
+            }),
             bodyField(
               'Таблица — кнопкой на панели редактора, картинку можно перетащить в текст или ' +
                 'вставить из буфера.',

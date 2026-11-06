@@ -8,9 +8,11 @@ import { getMenuPopular } from '@/lib/menuPopular'
  * нужен, компьютер догружает его отсюда. Только чтение опубликованного; кэш на минуту, потом
  * отдаётся старый ответ, пока готовится новый.
  */
-export async function GET() {
+export async function GET(request: Request) {
+  // Язык страницы, с которой пришёл запрос: ?lang=kk / en, без него — русский.
+  const lang = new URL(request.url).searchParams.get('lang')
   try {
-    const [catalog, popular] = await Promise.all([getCatalog(), getMenuPopular()])
+    const [catalog, popular] = await Promise.all([getCatalog(lang), getMenuPopular()])
     return Response.json(
       {
         items: clientItems([...catalog.items, ...catalog.extras]),

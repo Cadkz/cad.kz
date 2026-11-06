@@ -130,7 +130,7 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('ru' | 'kk' | 'en') | ('ru' | 'kk' | 'en')[];
   globals: {
     'home-page': HomePage;
     'site-settings': SiteSetting;
@@ -141,7 +141,7 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'pricing-settings': PricingSettingsSelect<false> | PricingSettingsSelect<true>;
   };
-  locale: null;
+  locale: 'ru' | 'kk' | 'en';
   widgets: {
     collections: CollectionsWidget;
   };

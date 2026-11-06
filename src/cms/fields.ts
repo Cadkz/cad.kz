@@ -1,5 +1,71 @@
-import type { CollectionConfig, CollectionSlug, Field, SelectField, TextField } from 'payload'
+import type {
+  CollectionConfig,
+  CollectionSlug,
+  Field,
+  SelectField,
+  TextareaFieldValidation,
+  TextField,
+  TextFieldSingleValidation,
+} from 'payload'
+import { text, textarea } from 'payload/shared'
 import { isAdmin, isEditor, publishedOrSignedIn } from './access'
+
+/** Язык, на котором заполняется сайт; остальные — переводы (переключатель языка в админке). */
+export const DEFAULT_LOCALE = 'ru'
+
+/** Русская версия (или все языки сразу) — только она обязательна. */
+const isDefaultLocale = (locale: string | null | undefined) =>
+  !locale || locale === DEFAULT_LOCALE || locale === 'all'
+
+const textInRussian: TextFieldSingleValidation = (value, options) =>
+  text(value, { ...options, required: isDefaultLocale(options.req.locale) })
+
+const textareaInRussian: TextareaFieldValidation = (value, options) =>
+  textarea(value, { ...options, required: isDefaultLocale(options.req.locale) })
+
+/**
+ * Текст с переводом: у поля своя версия на русском, казахском и английском. Обязательно оно только
+ * по-русски — пустой перевод на сайте заменяется русским текстом (fallback), и перевод можно
+ * сохранять частями. required остаётся (звёздочка в админке, строка в типах: с fallback текст есть
+ * всегда), а проверку по языку делает validate. Колонки переводов в базе необязательные — это
+ * задано в миграции 20261106_075302_languages (Payload сам сделал бы их NOT NULL).
+ */
+export function translated(field: Field): Field {
+  if (field.type === 'text' && !field.hasMany) {
+    if (!field.required) return { ...field, localized: true }
+    return { ...field, localized: true, validate: textInRussian }
+  }
+  if (field.type === 'textarea') {
+    if (!field.required) return { ...field, localized: true }
+    return { ...field, localized: true, validate: textareaInRussian }
+  }
+  return field
+}
+
+/**
+ * Переводы во всём наборе полей (главная, контакты): каждый текст получает версии по языкам,
+ * кроме полей из skip — ссылок, телефонов, названий производителей. Группы, строки и массивы
+ * обходятся вглубь, сами они общие для всех языков (строки FAQ одни, текст в них — свой).
+ */
+export function translateTexts(fields: Field[], skip: ReadonlySet<string>): Field[] {
+  return fields.map((field) => {
+    if (field.type === 'text' || field.type === 'textarea')
+      return skip.has(field.name) ? field : translated(field)
+    if (
+      field.type === 'group' ||
+      field.type === 'array' ||
+      field.type === 'row' ||
+      field.type === 'collapsible'
+    )
+      return { ...field, fields: translateTexts(field.fields, skip) }
+    if (field.type === 'tabs')
+      return {
+        ...field,
+        tabs: field.tabs.map((tab) => ({ ...tab, fields: translateTexts(tab.fields, skip) })),
+      }
+    return field
+  })
+}
 
 export function textField(name: string, label: string, required = false): Field {
   return { name, label, type: 'text', required }
@@ -33,8 +99,8 @@ export const seoField: Field = {
       'Пусто — берутся название и короткое описание. Title до 60 знаков, description до 160.',
   },
   fields: [
-    textField('title', 'Заголовок вкладки (title)'),
-    { name: 'description', label: 'Описание в поиске (description)', type: 'textarea' },
+    translated(textField('title', 'Заголовок вкладки (title)')),
+    translated({ name: 'description', label: 'Описание в поиске (description)', type: 'textarea' }),
   ],
 }
 
@@ -63,6 +129,8 @@ type ContentCollection = {
   fields: Field[]
   /** Статус публикации справа, рядом с датами, а не под названием. */
   statusInSidebar?: boolean
+  /** Название с переводом на казахский и английский (товары, разделы, публикации, страницы). */
+  translatedTitle?: boolean
 }
 
 /** Публичная коллекция контента: заголовок, статус публикации, поля импорта. */
@@ -72,6 +140,7 @@ export function contentCollection({
   plural,
   fields,
   statusInSidebar = false,
+  translatedTitle = false,
 }: ContentCollection): CollectionConfig {
   const status: SelectField = statusInSidebar
     ? { ...statusField, admin: { position: 'sidebar' } }
@@ -81,6 +150,13 @@ export function contentCollection({
     labels: { singular, plural },
     admin: { useAsTitle: 'title', defaultColumns: ['title', 'status', 'updatedAt'] },
     access: { read: publishedOrSignedIn, create: isEditor, update: isEditor, delete: isAdmin },
-    fields: [textField('title', 'Название', true), status, ...fields, ...legacyFields],
+    fields: [
+      translatedTitle
+        ? translated(textField('title', 'Название', true))
+        : textField('title', 'Название', true),
+      status,
+      ...fields,
+      ...legacyFields,
+    ],
   }
 }

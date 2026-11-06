@@ -1,3 +1,4 @@
+import { requestLang } from '@/i18n/server'
 import type { HomePage } from '../../payload-types'
 import { getContacts } from './navigation'
 import { newsHref } from './navigationHrefs'
@@ -22,7 +23,11 @@ function resolveLink(
 export async function getHome() {
   const payload = await cms()
   const [page, contacts, promotions] = await Promise.all([
-    payload.findGlobal({ slug: 'home-page', depth: 1 }) as Promise<HomePage>,
+    payload.findGlobal({
+      slug: 'home-page',
+      locale: await requestLang(),
+      depth: 1,
+    }) as Promise<HomePage>,
     getContacts(),
     getCurrentPromotions(5),
   ])

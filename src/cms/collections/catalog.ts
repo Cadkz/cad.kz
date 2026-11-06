@@ -10,6 +10,7 @@ import {
   slugField,
   statusField,
   textField,
+  translated,
 } from '../fields'
 import { productSections } from '../hooks/productSections'
 import { offerQualityChange, offerQualityDelete, productQuality } from '../hooks/quality'
@@ -263,6 +264,7 @@ const sectionsBase = contentCollection({
   slug: 'sections',
   singular: 'Раздел',
   plural: 'Разделы',
+  translatedTitle: true,
   fields: [
     productsLinkField('section'),
     slugField(),
@@ -290,7 +292,7 @@ const sectionsBase = contentCollection({
         { label: 'Услуги и обучение', value: 'service' },
       ],
     },
-    { name: 'summary', label: 'Короткое описание для карточки', type: 'textarea' },
+    translated({ name: 'summary', label: 'Короткое описание для карточки', type: 'textarea' }),
     {
       name: 'icon',
       label: 'Иконка',
@@ -414,12 +416,12 @@ const productBasicFields: Field[] = [
 
 /** Вкладка «Карточка и описание», начало: что видно в карточке каталога и в шапке товара. */
 const productAnnounceFields: Field[] = [
-  {
+  translated({
     name: 'summary',
     label: 'Коротко для карточки (1–2 предложения)',
     type: 'textarea',
     admin: { description: 'Показывается в карточке каталога и под названием на странице товара.' },
-  },
+  }),
   {
     name: 'cardImage',
     label: 'Картинка для карточки',
@@ -440,7 +442,7 @@ const productAnnounceFields: Field[] = [
     admin: {
       description: '3–4 коротких пункта: показываются в шапке страницы товара.',
     },
-    fields: [textField('title', 'Задача', true)],
+    fields: [translated(textField('title', 'Задача', true))],
   },
 ]
 
@@ -449,12 +451,12 @@ const productAnnounceFields: Field[] = [
  * новостей). Хранится разметкой сайта: старые тексты не меняются, пока их не правили.
  */
 const productDetailFields: Field[] = [
-  {
+  translated({
     name: 'description',
     label: 'Описание',
     type: 'textarea',
     admin: { components: { Field: BODY_EDITOR } },
-  },
+  }),
 ]
 
 /** Галерея страницы товара (вкладка «Карточка и описание»): файлы перетаскиваются в поле. */
@@ -593,8 +595,8 @@ const productSpecFields: Field[] = [
     label: 'Частые вопросы',
     type: 'array',
     fields: [
-      textField('question', 'Вопрос', true),
-      { name: 'answer', label: 'Ответ', type: 'textarea', required: true },
+      translated(textField('question', 'Вопрос', true)),
+      translated({ name: 'answer', label: 'Ответ', type: 'textarea', required: true }),
     ],
   },
   relationField('requiresProducts', 'Требуется базовое ПО', 'products', true),
@@ -783,7 +785,7 @@ export const products: CollectionConfig = {
   ...productCollection,
   // Справа сверху вниз: заполненность, публикация, адрес, показ, затем свёрнутые SEO и служебное.
   fields: [
-    textField('title', 'Название', true),
+    translated(textField('title', 'Название', true)),
     ...qualityFields,
     activityField,
     { ...slugField(), admin: { position: 'sidebar' } },

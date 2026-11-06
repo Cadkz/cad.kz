@@ -1,6 +1,7 @@
 import type { Where } from 'payload'
 import { cache } from 'react'
 import type { NewsCardData } from '@/components/NewsCard/NewsCard'
+import { requestLang } from '@/i18n/server'
 import type { Media, Publication, Topic } from '../../payload-types'
 import { PROMO_FRESH_DAYS } from '../domain/adminQueue.mjs'
 import { NEWS_VENDORS, newsVendor, vendorWhere } from '../domain/newsVendors.mjs'
@@ -116,10 +117,11 @@ export async function getPublications({
   /** Акции: current — действующие, archive — прошедшие; не задано — все. */
   promo?: PromoState | null
 } = {}) {
-  const payload = await cms()
+  const [payload, lang] = await Promise.all([cms(), requestLang()])
   const byVendor = vendor ? newsVendor(vendor) : null
   const result = await payload.find({
     collection: 'publications',
+    locale: lang,
     where: {
       and: [
         visibleWhere(),
@@ -205,9 +207,10 @@ export async function getNewsVendors(kinds: PublicationKind[], promo?: PromoStat
 }
 
 export async function getPublication(slug: string) {
-  const payload = await cms()
+  const [payload, lang] = await Promise.all([cms(), requestLang()])
   const { docs } = await payload.find({
     collection: 'publications',
+    locale: lang,
     where: { and: [visibleWhere(), { slug: { equals: slug } }] },
     limit: 1,
     depth: 1,
@@ -243,11 +246,12 @@ export async function getTopics(kinds: PublicationKind[]) {
 /** Соседние материалы того же типа по дате: «предыдущая» старше, «следующая» новее. */
 export async function getNeighbors(publication: Publication) {
   if (!publication.publishedAt) return { previous: null, next: null }
-  const payload = await cms()
+  const [payload, lang] = await Promise.all([cms(), requestLang()])
   const base: Where[] = [visibleWhere(), { kind: { equals: publication.kind } }]
   const [older, newer] = await Promise.all([
     payload.find({
       collection: 'publications',
+      locale: lang,
       where: { and: [...base, { publishedAt: { less_than: publication.publishedAt } }] },
       sort: '-publishedAt',
       limit: 1,
@@ -255,6 +259,7 @@ export async function getNeighbors(publication: Publication) {
     }),
     payload.find({
       collection: 'publications',
+      locale: lang,
       where: { and: [...base, { publishedAt: { greater_than: publication.publishedAt } }] },
       sort: 'publishedAt',
       limit: 1,

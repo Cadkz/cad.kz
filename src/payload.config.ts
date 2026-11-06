@@ -23,6 +23,18 @@ if (useBlob && !process.env.BLOB_READ_WRITE_TOKEN)
 
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
+  // Языки содержимого (06.11.2026): русский — основной, казахский и английский — переводы.
+  // Переводятся только поля с translated() из src/cms/fields.ts; пустой перевод на сайте
+  // заменяется русским (fallback). Коды совпадают с приставками адресов /kk и /en.
+  localization: {
+    locales: [
+      { code: 'ru', label: 'Русский' },
+      { code: 'kk', label: 'Қазақша' },
+      { code: 'en', label: 'English' },
+    ],
+    defaultLocale: 'ru',
+    fallback: true,
+  },
   db: postgresAdapter({
     // На хостинге каждая копия сайта держит мало подключений, иначе бесплатная база быстро упрётся в лимит.
     pool: { connectionString: process.env.DATABASE_URL || '', max: process.env.VERCEL ? 3 : 10 },

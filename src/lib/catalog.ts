@@ -26,6 +26,7 @@ import { loadPricingContext, type PricingContext, quoteOffer } from './pricing'
 import { productPath } from './productPath'
 import { relId } from './rel'
 import { siteCached } from './siteCache'
+import { getTranslations, requestLang, type Translations, withTexts } from './translations'
 
 export type CatalogGroup = 'software' | 'hardware' | 'service'
 
@@ -200,11 +201,13 @@ export async function getDirections(): Promise<Direction[]> {
   const payload = await cms()
   const { docs } = await payload.find({
     collection: 'sections',
+    locale: await requestLang(),
     where: { and: [published, { isDirection: { equals: true } }] },
     sort: ['order', 'title'],
     limit: 100,
     depth: 0,
   })
+  // Направления читаются на языке страницы (с подстановкой русского, где перевода нет).
   return docs.map((section) => ({
     slug: section.slug,
     title: section.title,
@@ -219,7 +222,36 @@ export async function getDirections(): Promise<Direction[]> {
  * (src/lib/siteCache.ts) до первой правки в админке; в одном запросе повторный вызов (каталог,
  * поиск, подборки на странице товара) берёт готовое.
  */
-export const getCatalog = cache(siteCached('catalog', loadCatalog))
+const loadCatalogCached = siteCached('catalog', loadCatalog)
+
+/**
+ * lang — для API без приставки в адресе (/api/catalog?lang=kk); иначе язык страницы. Каталог
+ * собирается по-русски, переводы названий и описаний накладываются сверху (src/lib/translations.ts).
+ */
+export const getCatalog = cache(async (lang?: string | null) => {
+  const [catalog, translations] = await Promise.all([
+    loadCatalogCached(),
+    requestLang(lang).then(getTranslations),
+  ])
+  return translations ? translateCatalog(catalog, translations) : catalog
+})
+
+type Catalog = Awaited<ReturnType<typeof loadCatalog>>
+
+function translateCatalog(catalog: Catalog, translations: Translations): Catalog {
+  const item = (entry: CatalogItem): CatalogItem => {
+    const texts = translations.products.get(entry.id)
+    if (!texts) return entry
+    // Своя фраза карточки (cardTexts.mjs) русская: при переведённом описании — первая его фраза.
+    return withTexts({ ...entry, ...(texts.summary && { cardText: null }) }, texts)
+  }
+  return {
+    ...catalog,
+    items: catalog.items.map(item),
+    extras: catalog.extras.map(item),
+    facets: catalog.facets.map((facet) => withTexts(facet, translations.sections.get(facet.slug))),
+  }
+}
 
 async function loadCatalog(): Promise<{
   items: CatalogItem[]

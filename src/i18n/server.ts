@@ -10,6 +10,19 @@ export async function getLang(): Promise<Lang> {
   return isLang(value) ? value : DEFAULT_LANG
 }
 
+/**
+ * Язык запроса, если он есть: в скриптах (payload run) и вне запроса заголовков нет — русский.
+ * explicit — язык параметром, для API без приставки в адресе (/api/catalog?lang=kk).
+ */
+export async function requestLang(explicit?: string | null): Promise<Lang> {
+  if (isLang(explicit)) return explicit
+  try {
+    return await getLang()
+  } catch {
+    return DEFAULT_LANG
+  }
+}
+
 export type T = ReturnType<typeof makeT>
 
 /** Перевод для серверных компонентов: const t = await getT(); t('Каталог'). */

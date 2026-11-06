@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useLang } from '@/components/LangProvider/LangProvider'
 import type { CatalogItem, CatalogLine, Facet } from '@/lib/catalog'
 import { emptyFilter } from '@/lib/catalogFilter'
 import { catalogHref } from '@/lib/navigationHrefs'
@@ -43,6 +44,7 @@ function whenIdle(run: () => void) {
  */
 export function HomeCatalog() {
   const [state, setState] = useState<State>('loading')
+  const lang = useLang()
 
   useEffect(() => {
     const media = window.matchMedia(DESKTOP)
@@ -50,7 +52,8 @@ export function HomeCatalog() {
     const load = () => {
       if (started || !media.matches) return
       started = true
-      fetch('/api/catalog')
+      // Язык — параметром: у /api нет приставки /kk или /en, по ней язык не узнать.
+      fetch(`/api/catalog?lang=${lang}`)
         .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
         .then((data: Data) => whenIdle(() => setState(data)))
         .catch(() => setState('error'))
@@ -59,7 +62,7 @@ export function HomeCatalog() {
     // Окно расширили до компьютера — догружаем тогда.
     media.addEventListener('change', load)
     return () => media.removeEventListener('change', load)
-  }, [])
+  }, [lang])
 
   if (state === 'loading') {
     return (
