@@ -203,6 +203,11 @@
     padding: var(--space-16);
   }
 
+  /* Компактный баннер (/bim): без описаний и с меньшими полями — ниже те же темы текстом. */
+  .compact .band {
+    padding: var(--space-12);
+  }
+
   .stage {
     grid-column: span 3;
   }
@@ -243,6 +248,11 @@
   .lead {
     max-width: min(var(--measure), calc(100% * 7 / 12));
   }
+}
+
+/* Компактный баннер: подписи цифр скрыты на любой ширине, как на телефоне. */
+.compact .statLabel {
+  display: none;
 }
 
 @keyframes lag {

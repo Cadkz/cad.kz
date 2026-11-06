@@ -8,6 +8,7 @@ import { Container } from '@/components/Container/Container'
 import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
 import { Grid } from '@/components/Grid/Grid'
 import { ProductCard } from '@/components/ProductCard/ProductCard'
+import { Reveal } from '@/components/Reveal/Reveal'
 import { Section } from '@/components/Section/Section'
 import { getT } from '@/i18n/server'
 import { getBimPage } from '@/lib/bimPage'
@@ -52,7 +53,7 @@ export default async function BimPage() {
       <Container>
         <Breadcrumbs items={[{ title: 'Главная', href: '/' }, { title: 'BIM' }]} />
       </Container>
-      <BimBand bim={home.bim} level={1} flush />
+      <BimBand bim={home.bim} level={1} flush compact noEyebrow />
       <BimProof items={bim.proof} label={t('Опыт CAD.kz')} />
       <BimSplit block={bim.intro} id="bim-intro" />
       <BimSplit block={bim.help} id="bim-help" tone="card" />
@@ -69,10 +70,10 @@ export default async function BimPage() {
           action={{ href: catalogHref({ group: 'service' }), label: t('Все услуги и обучение') }}
         >
           <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
-            {services.map((item) => (
-              <li key={item.id}>
+            {services.map((item, index) => (
+              <Reveal as="li" key={item.id} step={index % 3}>
                 <ProductCard product={item} />
-              </li>
+              </Reveal>
             ))}
           </Grid>
         </Section>

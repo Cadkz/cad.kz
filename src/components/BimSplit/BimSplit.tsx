@@ -1,5 +1,6 @@
 import type { BimBlock } from '@/lib/bimPage'
 import { Container } from '../Container/Container'
+import { Reveal } from '../Reveal/Reveal'
 import styles from './BimSplit.module.css'
 
 type Props = {
@@ -9,14 +10,15 @@ type Props = {
   tone?: 'plain' | 'card'
 }
 
-/** Блок страницы BIM: слева надпись и заголовок (4 колонки), справа абзацы (8 колонок). */
+/** Блок страницы BIM: слева надпись и заголовок (4 колонки), справа абзацы (8 колонок).
+ *  Проявляется при прокрутке (Reveal). */
 export function BimSplit({ block, id, tone = 'plain' }: Props) {
   if (!block.title || !block.text.length) return null
   const titleId = `${id}-title`
   return (
     <section className={styles.section} aria-labelledby={titleId}>
       <Container>
-        <div className={`${styles.grid} ${styles[tone]}`}>
+        <Reveal className={`${styles.grid} ${styles[tone]}`}>
           <div className={styles.head}>
             {block.eyebrow && <p className={styles.eyebrow}>{block.eyebrow}</p>}
             <h2 id={titleId} className={styles.title}>
@@ -28,7 +30,7 @@ export function BimSplit({ block, id, tone = 'plain' }: Props) {
               <p key={line}>{line}</p>
             ))}
           </div>
-        </div>
+        </Reveal>
       </Container>
     </section>
   )

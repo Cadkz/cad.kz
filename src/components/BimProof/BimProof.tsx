@@ -1,4 +1,5 @@
 import { Container } from '../Container/Container'
+import { Reveal } from '../Reveal/Reveal'
 import styles from './BimProof.module.css'
 
 type Props = { items: { title: string; text: string | null }[]; label: string }
@@ -9,11 +10,11 @@ export function BimProof({ items, label }: Props) {
   return (
     <Container>
       <ul className={styles.list} aria-label={label}>
-        {items.map((item) => (
-          <li key={item.title} className={styles.item}>
+        {items.map((item, index) => (
+          <Reveal as="li" key={item.title} step={index} className={styles.item}>
             <strong className={styles.title}>{item.title}</strong>
             {item.text && <span className={styles.text}>{item.text}</span>}
-          </li>
+          </Reveal>
         ))}
       </ul>
     </Container>

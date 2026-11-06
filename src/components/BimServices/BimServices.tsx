@@ -1,18 +1,19 @@
 import { getT } from '@/i18n/server'
 import type { BimService } from '@/lib/bimPage'
+import { Reveal } from '../Reveal/Reveal'
 import styles from './BimServices.module.css'
 
 /**
  * Задачи на странице BIM: номер, название, когда нужно, что сделаем и результат. Всё открыто
  * сразу (в макете владельца карточки переворачивались): текст читается и на телефоне, и
- * поисковиками, без скриптов.
+ * поисковиками, без скриптов. Карточки проявляются при прокрутке, как в каталоге (Reveal).
  */
 export async function BimServices({ items }: { items: BimService[] }) {
   const t = await getT()
   return (
     <ol className={styles.grid}>
       {items.map((item, index) => (
-        <li key={item.title} className={styles.card}>
+        <Reveal as="li" key={item.title} step={index % 2} className={styles.card}>
           <div className={styles.head}>
             <span className={styles.number} aria-hidden="true">
               {String(index + 1).padStart(2, '0')}
@@ -34,7 +35,7 @@ export async function BimServices({ items }: { items: BimService[] }) {
               {item.result}
             </p>
           )}
-        </li>
+        </Reveal>
       ))}
     </ol>
   )

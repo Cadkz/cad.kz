@@ -18,9 +18,13 @@ type Props = {
   priority?: boolean
   /** Без плашки над заголовком: на главной она не нужна (решение владельца 21.10.2026). */
   noEyebrow?: boolean
+  /** Компактный баннер — только заголовки, без описаний на любой ширине: на /bim те же тексты
+   *  раскрываются ниже по странице (решение владельца 06.11.2026). */
+  compact?: boolean
 }
 
-/** Тёмный блок «Внедрение BIM»: вводный текст, четыре этапа, кнопки и ключевые цифры. */
+/** Тёмный блок «Внедрение BIM»: вводный текст, четыре этапа, кнопки и ключевые цифры.
+ *  compact — только заголовки (страница /bim). */
 export function BimBand({
   bim,
   level = 2,
@@ -28,6 +32,7 @@ export function BimBand({
   flush = false,
   priority = false,
   noEyebrow = false,
+  compact = false,
 }: Props) {
   if (!bim.title) return null
   const Heading = level === 1 ? 'h1' : 'h2'
@@ -36,7 +41,9 @@ export function BimBand({
   const lead = rest.length ? rest.join(' ') : subtitle
   return (
     <section
-      className={flush ? `${styles.section} ${styles.flush}` : styles.section}
+      className={[styles.section, flush && styles.flush, compact && styles.compact]
+        .filter(Boolean)
+        .join(' ')}
       aria-labelledby="bim-title"
     >
       <Container>
@@ -56,14 +63,14 @@ export function BimBand({
             {bim.title}
           </Heading>
           {rest.length > 0 && <p className={styles.subtitle}>{subtitle}</p>}
-          {lead && <p className={styles.lead}>{lead}</p>}
+          {lead && !compact && <p className={styles.lead}>{lead}</p>}
           {bim.stages.length > 0 && (
             <ol className={styles.stages}>
               {bim.stages.map((stage, i) => (
                 <li key={stage.title} className={styles.stage}>
                   <span className={styles.num}>{String(i + 1).padStart(2, '0')}</span>
                   <h3 className={styles.stageTitle}>{stage.title}</h3>
-                  {stage.text && <p className={styles.stageText}>{stage.text}</p>}
+                  {stage.text && !compact && <p className={styles.stageText}>{stage.text}</p>}
                 </li>
               ))}
             </ol>
