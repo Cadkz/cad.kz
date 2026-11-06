@@ -2,6 +2,7 @@
 
 import { type FormEvent, useRef, useState } from 'react'
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { isEmail } from '@/domain/order.mjs'
 import { type RequestKind, validateContact } from '@/domain/siteRequest.mjs'
 import { type CrmState, crmDoneText } from '@/lib/crmNotice'
@@ -41,6 +42,7 @@ const PRIVACY_HREF = '/about/privacy-policy'
  * менеджерам она не уходит.
  */
 export function CallbackForm(props: Props) {
+  const t = useT()
   const { kind, pageProductId, familySlug, quantity, choices, lines, button, note } = props
   const key = useRef<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -92,9 +94,9 @@ export function CallbackForm(props: Props) {
       const result = await response.json()
       if (response.ok) setSent({ number: result.number, crm: result.crm ?? 'demo' })
       else if (result.errors) setErrors(result.errors)
-      else setFormError(result.error || 'Не удалось отправить заявку')
+      else setFormError(t(result.error || 'Не удалось отправить заявку'))
     } catch {
-      setFormError('Нет связи с сервером. Проверьте интернет и отправьте ещё раз.')
+      setFormError(t('Нет связи с сервером. Проверьте интернет и отправьте ещё раз.'))
     } finally {
       setSending(false)
     }
@@ -103,8 +105,10 @@ export function CallbackForm(props: Props) {
   if (sent)
     return (
       <div className={styles.done} role="status">
-        <p className={styles.doneTitle}>Заявка {sent.number} сохранена</p>
-        <p>{crmDoneText(sent.crm)}</p>
+        <p className={styles.doneTitle}>
+          {t('Заявка {number} сохранена', { number: sent.number })}
+        </p>
+        <p>{t(crmDoneText(sent.crm))}</p>
       </div>
     )
 
@@ -112,7 +116,7 @@ export function CallbackForm(props: Props) {
     <form className={styles.form} onSubmit={submit} noValidate>
       <div className={styles.pair}>
         <TextField
-          label="Имя"
+          label={t('Имя')}
           name="name"
           id="callback-name"
           autoComplete="name"
@@ -120,7 +124,7 @@ export function CallbackForm(props: Props) {
           error={errors.name}
         />
         <TextField
-          label="Телефон"
+          label={t('Телефон')}
           name="phone"
           id="callback-phone"
           type="tel"
@@ -131,13 +135,13 @@ export function CallbackForm(props: Props) {
         />
       </div>
       <TextField
-        label="Почта"
+        label={t('Почта')}
         name="email"
         id="callback-email"
         type="email"
         autoComplete="email"
         placeholder="name@company.kz"
-        hint="Пришлём расчёт и счёт на почту"
+        hint={t('Пришлём расчёт и счёт на почту')}
         error={errors.email}
       />
       {props.discount && (
@@ -145,20 +149,20 @@ export function CallbackForm(props: Props) {
           name="discount"
           id="callback-discount"
           defaultChecked={props.discountChecked}
-          label="Запросить скидку — менеджер проверит акции и предложит лучшую цену"
+          label={t('Запросить скидку — менеджер проверит акции и предложит лучшую цену')}
         />
       )}
       {(formError || errors.items || errors.comment) && (
         <p className={styles.error} role="alert">
-          {formError || errors.items || errors.comment}
+          {t(formError || errors.items || errors.comment || '')}
         </p>
       )}
       <Button type="submit" block disabled={sending}>
-        {sending ? 'Отправляем…' : 'Отправить заявку'}
+        {sending ? t('Отправляем…') : t('Отправить заявку')}
       </Button>
       <p className={styles.consent}>
-        Нажимая «Отправить заявку», вы соглашаетесь на обработку персональных данных по{' '}
-        <Link href={PRIVACY_HREF}>политике конфиденциальности</Link>.
+        {t('Нажимая «Отправить заявку», вы соглашаетесь на обработку персональных данных по')}{' '}
+        <Link href={PRIVACY_HREF}>{t('политике конфиденциальности')}</Link>.
       </p>
     </form>
   )

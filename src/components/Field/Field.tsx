@@ -4,12 +4,15 @@ import type {
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from 'react'
+import { useT } from '../LangProvider/LangProvider'
 import styles from './Field.module.css'
 
 type Wrap = { label: string; hint?: string; error?: string; id: string; children: ReactNode }
 
 /** Подпись, поле и подсказка/ошибка. Ошибка связана с полем через aria-describedby. */
 function Wrapper({ label, hint, error, id, children }: Wrap) {
+  // Ошибки проверки приходят русским текстом (src/domain/order.mjs, сервер) — переводятся здесь.
+  const t = useT()
   return (
     <div className={styles.field}>
       <label htmlFor={id} className={styles.label}>
@@ -18,7 +21,7 @@ function Wrapper({ label, hint, error, id, children }: Wrap) {
       {children}
       {error ? (
         <p id={`${id}-note`} className={styles.error} role="alert">
-          {error}
+          {t(error)}
         </p>
       ) : (
         hint && (

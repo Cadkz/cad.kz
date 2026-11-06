@@ -1,4 +1,5 @@
 import type { InputHTMLAttributes, ReactNode } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import styles from './CheckboxField.module.css'
 
 type Props = { label: ReactNode; error?: string; name: string; id?: string } & Omit<
@@ -8,6 +9,7 @@ type Props = { label: ReactNode; error?: string; name: string; id?: string } & O
 
 /** Галочка с подписью и ошибкой. Ошибка связана с полем через aria-describedby. */
 export function CheckboxField({ label, error, id, ...rest }: Props) {
+  const t = useT()
   const fieldId = id ?? `field-${rest.name}`
   return (
     <div className={styles.field}>
@@ -24,7 +26,7 @@ export function CheckboxField({ label, error, id, ...rest }: Props) {
       </label>
       {error && (
         <p id={`${fieldId}-note`} className={styles.error} role="alert">
-          {error}
+          {t(error)}
         </p>
       )}
     </div>

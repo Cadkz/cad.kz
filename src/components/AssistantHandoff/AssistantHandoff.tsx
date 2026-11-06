@@ -134,7 +134,7 @@ export function AssistantHandoff({ conversationId, prefill, whatsappHref, onBack
           <CheckboxField
             name="consent"
             id="kaddi-consent"
-            label={CONSENT_TEXT}
+            label={t(CONSENT_TEXT)}
             error={errors.consent}
           />
           {(formError || errors.idempotencyKey) && (

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import type { CartItem } from '@/components/CartProvider/CartProvider'
+import { useT } from '@/components/LangProvider/LangProvider'
 
 export type QuoteLine = {
   offerId: string
@@ -35,6 +36,7 @@ export type Quote = {
  * цены приходят от сервера и каждый раз считаются заново.
  */
 export function useCartQuote(items: CartItem[], ready: boolean) {
+  const t = useT()
   const [quote, setQuote] = useState<Quote | null>(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -54,12 +56,12 @@ export function useCartQuote(items: CartItem[], ready: boolean) {
     })
       .then(async (response) => {
         const data = await response.json()
-        if (!response.ok) throw new Error(data.error || 'Не удалось пересчитать корзину')
+        if (!response.ok) throw new Error(data.error || t('Не удалось пересчитать корзину'))
         setQuote(data)
       })
       .catch((reason: unknown) => {
         if (!controller.signal.aborted)
-          setError(reason instanceof Error ? reason.message : 'Ошибка соединения')
+          setError(reason instanceof Error ? reason.message : t('Ошибка соединения'))
       })
       .finally(() => {
         if (!controller.signal.aborted) setBusy(false)

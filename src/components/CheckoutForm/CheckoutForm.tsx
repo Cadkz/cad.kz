@@ -2,6 +2,7 @@
 
 import { Info } from 'lucide-react'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { CONSENT_TEXT, validateForm } from '@/domain/order.mjs'
 import { Button } from '../Button/Button'
 import { CheckboxField } from '../CheckboxField/CheckboxField'
@@ -64,6 +65,7 @@ export function CheckoutForm({
   onSubmit,
   demo = true,
 }: Props) {
+  const t = useT()
   const form = useRef<HTMLFormElement>(null)
   const [company, setCompany] = useState(false)
   const type = company ? 'company' : 'individual'
@@ -92,16 +94,16 @@ export function CheckoutForm({
   return (
     <form ref={form} className={styles.form} noValidate onSubmit={submit} onInput={clearError}>
       <fieldset className={styles.group}>
-        <legend className={styles.legend}>Контакты</legend>
+        <legend className={styles.legend}>{t('Контакты')}</legend>
         <div className={styles.grid}>
           <div className={styles.wide}>
-            <TextField name="name" label="Имя" autoComplete="name" error={errors.name} />
+            <TextField name="name" label={t('Имя')} autoComplete="name" error={errors.name} />
           </div>
           <TextField
             name="phone"
             type="tel"
             inputMode="tel"
-            label="Телефон"
+            label={t('Телефон')}
             autoComplete="tel"
             placeholder="+7 701 123-45-67"
             error={errors.phone}
@@ -109,7 +111,7 @@ export function CheckoutForm({
           <TextField
             name="email"
             type="email"
-            label="Электронная почта (необязательно)"
+            label={t('Электронная почта (необязательно)')}
             autoComplete="email"
             placeholder="name@company.kz"
             error={errors.email}
@@ -118,10 +120,10 @@ export function CheckoutForm({
       </fieldset>
 
       <fieldset className={styles.group}>
-        <legend className="visually-hidden">Организация</legend>
+        <legend className="visually-hidden">{t('Организация')}</legend>
         <CheckboxField
           name="needInvoice"
-          label="Нужен счёт на организацию"
+          label={t('Нужен счёт на организацию')}
           checked={company}
           onChange={(event) => setCompany(event.target.checked)}
           error={errors.type}
@@ -130,15 +132,15 @@ export function CheckoutForm({
           <div className={styles.grid}>
             <TextField
               name="companyName"
-              label="Название организации"
+              label={t('Название организации')}
               autoComplete="organization"
               error={errors.companyName}
             />
             <TextField
               name="bin"
-              label="БИН (необязательно)"
+              label={t('БИН (необязательно)')}
               inputMode="numeric"
-              hint="12 цифр, для ИП — ИИН. Можно сообщить менеджеру позже"
+              hint={t('12 цифр, для ИП — ИИН. Можно сообщить менеджеру позже')}
               error={errors.bin}
             />
           </div>
@@ -147,15 +149,15 @@ export function CheckoutForm({
 
       <TextAreaField
         name="comment"
-        label="Комментарий (необязательно)"
-        hint="Например, сроки или вопросы по комплектации"
+        label={t('Комментарий (необязательно)')}
+        hint={t('Например, сроки или вопросы по комплектации')}
         error={errors.comment}
       />
-      <CheckboxField name="consent" label={CONSENT_TEXT} error={errors.consent} />
+      <CheckboxField name="consent" label={t(CONSENT_TEXT)} error={errors.consent} />
 
       {formError && (
         <p role="alert" className={styles.alert}>
-          {formError}
+          {t(formError)}
         </p>
       )}
       {priceNotice && (
@@ -167,11 +169,15 @@ export function CheckoutForm({
       {demo && (
         <p className={styles.demo}>
           <Info size={16} strokeWidth={1.75} aria-hidden="true" />
-          Демоверсия: заказ сохранится в учебной базе и менеджерам не передаётся.
+          {t('Демоверсия: заказ сохранится в учебной базе и менеджерам не передаётся.')}
         </p>
       )}
       <Button type="submit" disabled={sending || !canSubmit}>
-        {sending ? 'Отправляем…' : confirmPrice ? 'Подтвердить новую сумму' : 'Отправить заказ'}
+        {sending
+          ? t('Отправляем…')
+          : confirmPrice
+            ? t('Подтвердить новую сумму')
+            : t('Отправить заказ')}
       </Button>
     </form>
   )

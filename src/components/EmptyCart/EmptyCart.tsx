@@ -1,3 +1,4 @@
+import { useT } from '@/components/LangProvider/LangProvider'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { ButtonLink } from '../Button/Button'
 import { WhatsappIcon } from '../icons/icons'
@@ -20,14 +21,17 @@ type Props = {
  * чтобы подвал не прыгал, когда корзина окажется пустой.
  */
 export function EmptyCart({ loading = false, whatsappHref = null }: Props) {
+  const t = useT()
   const reserve = loading ? styles.reserve : undefined
   return (
     <div className={styles.empty} role={loading ? 'status' : undefined}>
       <div className={styles.text}>
-        <h2>{loading ? 'Загружаем корзину…' : 'Корзина пока пустая'}</h2>
-        <p className={reserve}>Перейдите в каталог, чтобы выбрать программы или оборудование.</p>
+        <h2>{loading ? t('Загружаем корзину…') : t('Корзина пока пустая')}</h2>
+        <p className={reserve}>
+          {t('Перейдите в каталог, чтобы выбрать программы или оборудование.')}
+        </p>
         <div className={reserve ? `${styles.actions} ${reserve}` : styles.actions}>
-          <ButtonLink href={catalogHref()}>Перейти в каталог</ButtonLink>
+          <ButtonLink href={catalogHref()}>{t('Перейти в каталог')}</ButtonLink>
           {whatsappHref && (
             <ButtonLink
               href={`${whatsappHref}?text=${encodeURIComponent(HELP_TEXT)}`}
@@ -35,7 +39,7 @@ export function EmptyCart({ loading = false, whatsappHref = null }: Props) {
               external
             >
               <WhatsappIcon size={20} />
-              Помочь с выбором
+              {t('Помочь с выбором')}
             </ButtonLink>
           )}
         </div>

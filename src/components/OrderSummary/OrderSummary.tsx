@@ -1,4 +1,5 @@
 import Link from '@/components/LangLink/LangLink'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { lineKzt, totalKzt } from '@/lib/format'
 import { productHref } from '@/lib/navigationHrefs'
 import type { Quote } from '@/lib/useCartQuote'
@@ -9,9 +10,10 @@ type Props = { quote: Quote | null; busy: boolean; error: string; onRetry: () =>
 
 /** Состав заказа и итог. Все суммы пришли с сервера, здесь они только показываются. */
 export function OrderSummary({ quote, busy, error, onRetry }: Props) {
+  const t = useT()
   return (
-    <aside className={styles.summary} aria-label="Состав заказа">
-      <h2 className={styles.title}>Ваш заказ</h2>
+    <aside className={styles.summary} aria-label={t('Состав заказа')}>
+      <h2 className={styles.title}>{t('Ваш заказ')}</h2>
       <ul className={styles.lines}>
         {quote?.lines.map((line) => (
           <li key={line.offerId} className={styles.line}>
@@ -22,19 +24,21 @@ export function OrderSummary({ quote, busy, error, onRetry }: Props) {
               <p className={styles.config}>{line.configuration}</p>
               <p className={styles.qty}>
                 {line.request
-                  ? `${line.quantity} шт.`
-                  : `${line.quantity} × ${lineKzt(line.unitKzt)}`}
+                  ? t('{count} шт.', { count: line.quantity })
+                  : `${line.quantity} × ${lineKzt(line.unitKzt, t)}`}
               </p>
             </div>
-            <p className={styles.sum}>{line.request ? 'По запросу' : lineKzt(line.totalKzt)}</p>
+            <p className={styles.sum}>
+              {line.request ? t('По запросу') : lineKzt(line.totalKzt, t)}
+            </p>
           </li>
         ))}
       </ul>
       <div className={styles.totalRow}>
-        <p className={styles.totalLabel}>Итого с НДС</p>
+        <p className={styles.totalLabel}>{t('Итого с НДС')}</p>
         <p className={styles.total} role="status">
           {busy
-            ? 'Пересчитываем…'
+            ? t('Пересчитываем…')
             : quote
               ? totalKzt(
                   quote.totalKzt,
@@ -47,12 +51,12 @@ export function OrderSummary({ quote, busy, error, onRetry }: Props) {
         <div role="alert" className={styles.error}>
           <p>{error}</p>
           <Button variant="secondary" size="sm" onClick={onRetry}>
-            Повторить расчёт
+            {t('Повторить расчёт')}
           </Button>
         </div>
       )}
       <Link href="/cart" className={styles.change}>
-        Изменить состав в корзине
+        {t('Изменить состав в корзине')}
       </Link>
     </aside>
   )

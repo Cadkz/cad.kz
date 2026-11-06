@@ -1,6 +1,7 @@
 'use client'
 
 import { type FormEvent, useRef, useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import {
   CONSENT_TEXT,
   RENEW_PROGRAM_OPTIONS,
@@ -30,6 +31,7 @@ const MORE_PROGRAMS = RENEW_PROGRAM_OPTIONS.filter((p) => !RENEW_PROGRAMS.includ
  * источник renew). В демо честно говорим, что менеджерам заявка не уходит.
  */
 export function RenewForm({ program: initial }: { program: string | null }) {
+  const t = useT()
   const known = findProgram(initial)
   // ?program=other — «Другая программа»: поле названия пустое.
   const custom = !known && initial && initial.toLowerCase() !== OTHER ? initial : ''
@@ -86,9 +88,9 @@ export function RenewForm({ program: initial }: { program: string | null }) {
       const result = await response.json()
       if (response.ok) setSent({ number: result.number, crm: result.crm ?? 'demo' })
       else if (result.errors) setErrors(result.errors)
-      else setFormError(result.error || 'Не удалось отправить заявку')
+      else setFormError(t(result.error || 'Не удалось отправить заявку'))
     } catch {
-      setFormError('Нет связи с сервером. Проверьте интернет и отправьте ещё раз.')
+      setFormError(t('Нет связи с сервером. Проверьте интернет и отправьте ещё раз.'))
     } finally {
       setSending(false)
     }
@@ -97,26 +99,28 @@ export function RenewForm({ program: initial }: { program: string | null }) {
   if (sent)
     return (
       <div className={styles.done} role="status">
-        <p className={styles.doneTitle}>Заявка {sent.number} сохранена</p>
-        <p>{crmDoneText(sent.crm)}</p>
+        <p className={styles.doneTitle}>
+          {t('Заявка {number} сохранена', { number: sent.number })}
+        </p>
+        <p>{t(crmDoneText(sent.crm))}</p>
       </div>
     )
 
   return (
     <form className={styles.form} onSubmit={submit} noValidate>
       <RadioChips
-        legend="Какую программу продлить"
+        legend={t('Какую программу продлить')}
         name="renew-program"
         value={chip}
         options={[
           ...RENEW_PROGRAMS.map((p) => ({ value: p, label: p })),
-          { value: OTHER, label: 'Другая' },
+          { value: OTHER, label: t('Другая') },
         ]}
         onChange={choose}
       />
       {chip === OTHER && (
         <SelectField
-          label="Название программы"
+          label={t('Название программы')}
           name="program-choice"
           id="renew-program-choice"
           value={program}
@@ -124,29 +128,35 @@ export function RenewForm({ program: initial }: { program: string | null }) {
           error={program !== OTHER ? errors.program : undefined}
         >
           <option value="" disabled>
-            Выберите программу
+            {t('Выберите программу')}
           </option>
           {MORE_PROGRAMS.map((p) => (
             <option key={p} value={p}>
               {p}
             </option>
           ))}
-          <option value={OTHER}>Другая программа</option>
+          <option value={OTHER}>{t('Другая программа')}</option>
         </SelectField>
       )}
       {program === OTHER && (
         <TextField
-          label="Какая программа"
+          label={t('Какая программа')}
           name="program"
           id="renew-program-name"
-          placeholder="Например, Tekla Structures"
+          placeholder={t('Например, Tekla Structures')}
           defaultValue={custom}
           error={errors.program}
         />
       )}
-      <TextField label="Имя" name="name" id="renew-name" autoComplete="name" error={errors.name} />
       <TextField
-        label="Телефон"
+        label={t('Имя')}
+        name="name"
+        id="renew-name"
+        autoComplete="name"
+        error={errors.name}
+      />
+      <TextField
+        label={t('Телефон')}
         name="phone"
         id="renew-phone"
         type="tel"
@@ -155,26 +165,28 @@ export function RenewForm({ program: initial }: { program: string | null }) {
         error={errors.phone}
       />
       <TextAreaField
-        label="Комментарий"
+        label={t('Комментарий')}
         name="comment"
         id="renew-comment"
-        hint="Если знаете номер лицензии или число мест — напишите здесь. Нет — менеджер найдёт сам."
+        hint={t(
+          'Если знаете номер лицензии или число мест — напишите здесь. Нет — менеджер найдёт сам.',
+        )}
         rows={3}
         error={errors.comment}
       />
       <CheckboxField
         name="consent"
         id="renew-consent"
-        label={CONSENT_TEXT}
+        label={t(CONSENT_TEXT)}
         error={errors.consent}
       />
       {(formError || errors.items || errors.kind) && (
         <p className={styles.error} role="alert">
-          {formError || errors.items || errors.kind}
+          {t(formError || errors.items || errors.kind || '')}
         </p>
       )}
       <Button type="submit" block disabled={sending}>
-        {sending ? 'Отправляем…' : 'Отправить заявку на продление'}
+        {sending ? t('Отправляем…') : t('Отправить заявку на продление')}
       </Button>
     </form>
   )

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useCart } from '@/components/CartProvider/CartProvider'
 import type { DoneOrder } from '@/components/CheckoutDone/CheckoutDone'
 import type { FormValues } from '@/components/CheckoutForm/CheckoutForm'
+import { useT } from '@/components/LangProvider/LangProvider'
 import { formatKzt } from './format'
 import type { Quote } from './useCartQuote'
 
@@ -49,6 +50,7 @@ function savedOrder(): DoneOrder | null {
  * нажал дважды, повторная отправка вернёт ту же заявку, а не создаст вторую.
  */
 export function useCheckout(quote: Quote | null, setQuote: (quote: Quote) => void) {
+  const t = useT()
   const { items, ready, clear } = useCart()
   const key = useRef<string | null>(null)
   const [sending, setSending] = useState(false)
@@ -90,14 +92,17 @@ export function useCheckout(quote: Quote | null, setQuote: (quote: Quote) => voi
       return finish(reply.order)
     if (reply.status === 'price_changed' && reply.quote && quote) {
       setPriceNotice(
-        `Цена изменилась: было ${formatKzt(quote.totalKzt)}, стало ${formatKzt(reply.quote.totalKzt)}. Проверьте сумму и подтвердите заказ ещё раз.`,
+        t(
+          'Цена изменилась: было {old}, стало {new}. Проверьте сумму и подтвердите заказ ещё раз.',
+          { old: formatKzt(quote.totalKzt), new: formatKzt(reply.quote.totalKzt) },
+        ),
       )
       return setQuote(reply.quote)
     }
     if (reply.status === 'invalid' && reply.errors) return showInvalid(reply.errors)
     // Ключ с другими данными больше не подходит: следующая отправка — это новый заказ.
     if (reply.status === 'key_conflict') resetKey()
-    setFormError(reply.error ?? 'Не удалось отправить заказ. Повторите отправку.')
+    setFormError(reply.error ?? t('Не удалось отправить заказ. Повторите отправку.'))
   }
 
   async function submit(values: FormValues) {
@@ -121,7 +126,9 @@ export function useCheckout(quote: Quote | null, setQuote: (quote: Quote) => voi
       })
       handle(await response.json().catch(() => ({})))
     } catch {
-      setFormError('Не удалось отправить заказ. Проверьте соединение и повторите: дубля не будет.')
+      setFormError(
+        t('Не удалось отправить заказ. Проверьте соединение и повторите: дубля не будет.'),
+      )
     } finally {
       setSending(false)
     }

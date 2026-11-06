@@ -1,3 +1,4 @@
+import { getT } from '@/i18n/server'
 import styles from './RenewSteps.module.css'
 
 const steps = [
@@ -8,17 +9,18 @@ const steps = [
 ]
 
 /** Как проходит продление: четыре шага в правой колонке страницы «Продление лицензий». */
-export function RenewSteps() {
+export async function RenewSteps() {
+  const t = await getT()
   return (
     <section className={styles.box} aria-labelledby="renew-steps-title">
       <h2 id="renew-steps-title" className={styles.title}>
-        Как проходит продление
+        {t('Как проходит продление')}
       </h2>
       <ol className={styles.list}>
         {steps.map((step) => (
           <li key={step.title} className={styles.step}>
-            <span className={styles.name}>{step.title}</span>
-            <span className={styles.text}>{step.text}</span>
+            <span className={styles.name}>{t(step.title)}</span>
+            <span className={styles.text}>{t(step.text)}</span>
           </li>
         ))}
       </ol>

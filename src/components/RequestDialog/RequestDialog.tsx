@@ -2,6 +2,7 @@
 
 import { Mail, Phone } from 'lucide-react'
 import { useState } from 'react'
+import { useT } from '@/components/LangProvider/LangProvider'
 import type { RequestKind } from '@/domain/siteRequest.mjs'
 import type { Contacts } from '@/lib/navigation'
 import { requestMessage } from '@/lib/requestMessage'
@@ -78,6 +79,7 @@ const places = [
  * WhatsApp с уже набранным составом, почта и телефоны в ряд.
  */
 export function RequestDialog(props: Props) {
+  const t = useT()
   const { kind, onClose, pageTitle, lines, choices, quantity, contacts, button, cheaper } = props
   const [place, setPlace] = useState(places[0]?.value ?? '')
   if (!kind) return null
@@ -91,11 +93,11 @@ export function RequestDialog(props: Props) {
     <Drawer
       open
       onClose={onClose}
-      title={cheaper ? CHEAPER.title : button || titles[kind]}
+      title={t(cheaper ? CHEAPER.title : button || titles[kind])}
       side="center"
     >
       <div className={styles.body}>
-        <p className={styles.intro}>{cheaper ? CHEAPER.intro : intro[kind]}</p>
+        <p className={styles.intro}>{t(cheaper ? CHEAPER.intro : intro[kind])}</p>
         {lines.length > 0 && (
           <RequestChoice title={pageTitle} lines={lines} choices={choices} quantity={quantity} />
         )}
@@ -108,15 +110,15 @@ export function RequestDialog(props: Props) {
             className={styles.whatsapp}
           >
             <WhatsappIcon size={20} />
-            Отправить КП в WhatsApp
+            {t('Отправить КП в WhatsApp')}
           </a>
         )}
         {kind === 'demo' && (
           <RadioChips
-            legend="Где показать"
+            legend={t('Где показать')}
             name="demo-place"
             value={place}
-            options={places}
+            options={places.map((option) => ({ ...option, label: t(option.label) }))}
             onChange={setPlace}
           />
         )}
@@ -128,7 +130,7 @@ export function RequestDialog(props: Props) {
           discountChecked={cheaper}
         />
         <div className={styles.direct}>
-          <p className={styles.directTitle}>Или свяжитесь сами</p>
+          <p className={styles.directTitle}>{t('Или свяжитесь сами')}</p>
           <div className={styles.directRow}>
             {whatsappLink && !cheaper && (
               <a
