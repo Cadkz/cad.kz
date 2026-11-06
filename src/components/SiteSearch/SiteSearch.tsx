@@ -1,9 +1,9 @@
 'use client'
 
-import { Search } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { OPEN_SITE_SEARCH_EVENT } from '@/lib/openSiteSearch'
 import { useT } from '../LangProvider/LangProvider'
 import { SearchBox } from '../SearchBox/SearchBox'
 import styles from './SiteSearch.module.css'
@@ -16,21 +16,23 @@ type Props = {
 
 /**
  * Поиск в шапке. От 640 px — широкое поле прямо в первой строке, забирает всё свободное место.
- * На телефоне — короткое поле «Поиск» (кнопка в виде поля, видно, что сюда пишут): открывает
- * поиск отдельным слоем на весь экран.
+ * На телефоне поля в шапке нет (решение владельца 06.11.2026): поиск — первой строкой меню,
+ * она шлёт событие OPEN_SITE_SEARCH_EVENT, и поиск открывается отдельным слоем на весь экран.
  * Слой выносится в body: у закреплённой шапки backdrop-filter, внутри неё fixed не работает.
  */
 export function SiteSearch({ hints, typingHints, whatsappHref }: Props) {
   const t = useT()
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const toggle = useRef<HTMLButtonElement>(null)
   const pathname = usePathname()
   useEffect(() => setMounted(true), [])
 
-  const close = useCallback(() => {
-    setOpen(false)
-    toggle.current?.focus()
+  const close = useCallback(() => setOpen(false), [])
+
+  useEffect(() => {
+    const show = () => setOpen(true)
+    window.addEventListener(OPEN_SITE_SEARCH_EVENT, show)
+    return () => window.removeEventListener(OPEN_SITE_SEARCH_EVENT, show)
   }, [])
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: перешли на другую страницу — слой закрыт
@@ -55,17 +57,6 @@ export function SiteSearch({ hints, typingHints, whatsappHref }: Props) {
           whatsappHref={whatsappHref}
         />
       </div>
-      <button
-        ref={toggle}
-        type="button"
-        className={styles.toggle}
-        aria-label={t('Поиск по каталогу')}
-        aria-expanded={open}
-        onClick={() => setOpen(true)}
-      >
-        <Search size={20} strokeWidth={1.75} aria-hidden="true" />
-        <span className={styles.toggleText}>{t('Поиск')}</span>
-      </button>
       {mounted &&
         open &&
         createPortal(

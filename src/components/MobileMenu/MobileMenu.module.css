@@ -1,3 +1,36 @@
+/* Поиск — как поле ввода: видно, что сюда пишут. Только телефон: от 640 px поле в шапке. */
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  height: var(--control-height);
+  margin-bottom: var(--space-3);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.search:hover {
+  border-color: var(--color-border-strong);
+}
+
+.search svg {
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .search {
+    display: none;
+  }
+}
+
 .nav {
   display: flex;
   flex-direction: column;
@@ -156,6 +189,17 @@ img.sectionIcon {
   font-size: var(--text-body);
   font-weight: var(--weight-medium);
 }
-.lang {
-  margin-bottom: var(--space-4);
+.langRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--control-height);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.langCaption {
+  color: var(--color-text);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
 }

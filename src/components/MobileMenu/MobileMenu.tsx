@@ -1,11 +1,12 @@
 'use client'
 
-import { ArrowRight, ChevronDown, LayoutGrid, Menu } from 'lucide-react'
+import { ArrowRight, ChevronDown, LayoutGrid, Menu, Search } from 'lucide-react'
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
 import Link from '@/components/LangLink/LangLink'
 import { groupAllLabel, POPULAR_LABEL } from '@/domain/catalogNavigation.mjs'
 import type { MenuTab } from '@/lib/navigation'
 import { catalogHref } from '@/lib/navigationHrefs'
+import { openSiteSearch } from '@/lib/openSiteSearch'
 import type { PopularCardData } from '@/lib/popular'
 import { aboutColumns, sectionLinks } from '@/lib/siteNav'
 import { Drawer } from '../Drawer/Drawer'
@@ -53,9 +54,10 @@ function Group({
 
 /**
  * Меню для экранов уже 960 px: кнопка слева от логотипа, панель выезжает слева.
- * Сверху «Популярные решения» (раскрыты сразу), затем «Программное обеспечение» и «Оборудование»
+ * Первой строкой — поиск (на телефоне его нет в шапке, решение владельца 06.11.2026),
+ * затем «Весь каталог», «Популярные решения» (раскрыты сразу), затем «Программное обеспечение» и «Оборудование»
  * (разделы → производители → товары),
- * ниже разделы сайта, «О компании», контакты и WhatsApp.
+ * ниже разделы сайта, «О компании», язык сайта, контакты и WhatsApp.
  */
 export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
   const t = useT()
@@ -77,7 +79,18 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
         onClick={() => setOpen(true)}
       />
       <Drawer open={open} onClose={close} title={t('Меню')} side="left">
-        <LangSwitch className={styles.lang} />
+        {/* Поле-кнопка: открывает поиск на весь экран, меню закрывается. От 640 px поле в шапке. */}
+        <button
+          type="button"
+          className={styles.search}
+          onClick={() => {
+            close()
+            openSiteSearch()
+          }}
+        >
+          <Search size={20} strokeWidth={1.75} aria-hidden="true" />
+          {t('Поиск по каталогу')}
+        </button>
         <nav aria-label={t('Меню сайта')} className={styles.nav}>
           <Link href={catalogHref()} className={styles.catalog} onClick={close}>
             <LayoutGrid size={20} strokeWidth={1.75} aria-hidden="true" />
@@ -133,6 +146,10 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
             ))}
           </Group>
         </nav>
+        <div className={styles.langRow}>
+          <p className={styles.langCaption}>{t('Язык сайта')}</p>
+          <LangSwitch />
+        </div>
         <div className={styles.contacts}>
           <p className={styles.caption}>{t('Контакты')}</p>
           {contacts}
