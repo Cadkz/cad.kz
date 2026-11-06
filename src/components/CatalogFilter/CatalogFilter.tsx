@@ -1,6 +1,6 @@
 'use client'
 
-import { SlidersHorizontal } from 'lucide-react'
+import { ChevronRight, SlidersHorizontal } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import {
   addTransitionType,
@@ -242,6 +242,23 @@ export function CatalogFilter({
             onChange={change}
             row
           />
+        </div>
+      )}
+      {/* Язычок со стрелкой на левом краю блока (правка владельца 06.11.2026, вечер): видно,
+          что слева выезжает фильтр. Стрелка вправо — открыть, влево — спрятать. Только от 960 px:
+          на телефоне фильтр — выдвижная панель по кнопке «Фильтры». */}
+      {wide && (
+        <div className={styles.edgeRail}>
+          <button
+            type="button"
+            className={styles.edge}
+            onClick={() => setSideOpen((open) => !open)}
+            aria-expanded={sideOpen}
+            aria-label={t(sideOpen ? 'Скрыть фильтры' : 'Фильтры')}
+            title={t(sideOpen ? 'Скрыть фильтры' : 'Фильтры')}
+          >
+            <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" />
+          </button>
         </div>
       )}
       <section

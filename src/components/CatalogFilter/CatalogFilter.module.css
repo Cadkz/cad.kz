@@ -180,3 +180,66 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+/* Язычок фильтра у левой рамки блока (правка владельца 06.11.2026, вечер): в левом поле блока,
+   скруглён вправо; при прокрутке держится под шапкой. Колонка открыта — стрелка влево. За рамку
+   не выступает: фон секции на главной обрезает всё, что шире контейнера. */
+.edgeRail {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .compact {
+    position: relative;
+  }
+
+  .edgeRail {
+    display: block;
+    position: absolute;
+    top: var(--space-20);
+    bottom: var(--space-8);
+    left: 0;
+    width: 0;
+    z-index: var(--z-raised);
+  }
+
+  .edge {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-20));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--space-6);
+    height: var(--space-16);
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-left: 0;
+    border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-action);
+    cursor: pointer;
+    transition:
+      background var(--duration-fast) var(--ease),
+      border-color var(--duration-fast) var(--ease);
+  }
+
+  .edge:hover {
+    border-color: var(--color-control-hover-border);
+    background: var(--color-control-hover);
+    color: var(--color-on-control-hover);
+  }
+
+  .edge:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  .edge svg {
+    transition: transform var(--duration-sidebar) var(--ease-ios);
+  }
+
+  .compact[data-side="open"] .edge svg {
+    transform: rotate(180deg);
+  }
+}
