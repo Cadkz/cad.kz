@@ -10,6 +10,7 @@ import { Container } from '../Container/Container'
 import { HeaderAction } from '../HeaderAction/HeaderAction'
 import { HeaderShell } from '../HeaderShell/HeaderShell'
 import { WhatsappIcon } from '../icons/icons'
+import { LangSwitch } from '../LangSwitch/LangSwitch'
 import { Logo } from '../Logo/Logo'
 import { MobileMenu } from '../MobileMenu/MobileMenu'
 import { SiteSearch } from '../SiteSearch/SiteSearch'
@@ -19,9 +20,9 @@ import styles from './SiteHeader.module.css'
 
 /**
  * Общая шапка сайта, ширина — рамка --container. Две строки (от 960 px):
- * 1) главное — логотип, «Каталог», широкий поиск, WhatsApp, корзина; закреплена при прокрутке;
+ * 1) главное — логотип, «Каталог», широкий поиск, WhatsApp, язык, тема, корзина; закреплена при прокрутке;
  * 2) разделы сайта и телефон — тише и уезжает вместе со страницей.
- * Уже 960 px: меню, логотип, поиск, WhatsApp, корзина; разделы — в меню.
+ * Уже 960 px: меню, логотип, WhatsApp, язык, тема, корзина; разделы и поиск — в меню.
  */
 export async function SiteHeader() {
   const t = await getT()
@@ -57,6 +58,7 @@ export async function SiteHeader() {
                 ariaLabel={t('Написать в WhatsApp')}
               />
             )}
+            <LangSwitch />
             <ThemeToggle />
             <CartButton />
           </div>

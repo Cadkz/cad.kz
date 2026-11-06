@@ -13,7 +13,6 @@ import { Drawer } from '../Drawer/Drawer'
 import { HeaderAction } from '../HeaderAction/HeaderAction'
 import { WhatsappIcon } from '../icons/icons'
 import { usePagePath, useT } from '../LangProvider/LangProvider'
-import { LangSwitch } from '../LangSwitch/LangSwitch'
 import { MenuPopular } from '../MenuPopular/MenuPopular'
 import { MobileVendors } from '../MobileVendors/MobileVendors'
 import { SectionArt } from '../SectionArt/SectionArt'
@@ -146,10 +145,6 @@ export function MobileMenu({ menu, popular, contacts, whatsappHref }: Props) {
             ))}
           </Group>
         </nav>
-        <div className={styles.langRow}>
-          <p className={styles.langCaption}>{t('Язык сайта')}</p>
-          <LangSwitch />
-        </div>
         <div className={styles.contacts}>
           <p className={styles.caption}>{t('Контакты')}</p>
           {contacts}
