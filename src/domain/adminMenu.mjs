@@ -66,6 +66,7 @@ export const MENU = [
         icon: 'footer',
         global: 'site-settings',
       },
+      { label: 'Переводы', href: '/admin/translations', icon: 'translations', access: 'staff' },
       {
         label: 'Темы новостей',
         href: '/admin/collections/topics',

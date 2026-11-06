@@ -31,6 +31,7 @@ import { KaddiDataView as KaddiDataView_e4069d6241b6244bfa3b65ac2def2f14 } from 
 import { AssistantCheckView as AssistantCheckView_ec6e0189c41c4a69611fb303565b66ab } from '../../../components/AssistantCheckView/AssistantCheckView'
 import { AnalyticsView as AnalyticsView_47205d9166363221f956bf1d82c83319 } from '../../../components/AnalyticsView/AnalyticsView'
 import { Bitrix24View as Bitrix24View_d620f679068953f3cd8065dee816312d } from '../../../components/Bitrix24View/Bitrix24View'
+import { TranslationsView as TranslationsView_9824407a9d1402bd30ede1ab6f615111 } from '../../../components/TranslationsView/TranslationsView'
 import { LegacyContentView as LegacyContentView_f30aba65b9603ebbdd7a3d9cea213479 } from '../../../components/LegacyContentView/LegacyContentView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
@@ -70,6 +71,7 @@ export const importMap = {
   "/components/AssistantCheckView/AssistantCheckView#AssistantCheckView": AssistantCheckView_ec6e0189c41c4a69611fb303565b66ab,
   "/components/AnalyticsView/AnalyticsView#AnalyticsView": AnalyticsView_47205d9166363221f956bf1d82c83319,
   "/components/Bitrix24View/Bitrix24View#Bitrix24View": Bitrix24View_d620f679068953f3cd8065dee816312d,
+  "/components/TranslationsView/TranslationsView#TranslationsView": TranslationsView_9824407a9d1402bd30ede1ab6f615111,
   "/components/LegacyContentView/LegacyContentView#LegacyContentView": LegacyContentView_f30aba65b9603ebbdd7a3d9cea213479,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e

@@ -10,6 +10,7 @@ import {
   House,
   Image,
   Inbox,
+  Languages,
   LayoutDashboard,
   ListChecks,
   type LucideIcon,
@@ -43,6 +44,7 @@ const ICONS: Record<string, LucideIcon> = {
   knowledge: BookOpen,
   check: ClipboardCheck,
   data: Database,
+  translations: Languages,
   analytics: ChartColumn,
 }
 

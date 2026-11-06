@@ -95,6 +95,11 @@ export const ADMIN_PAGES = [
     words: 'о компании доставка оплата гарантия',
   },
   {
+    label: 'Переводы',
+    href: '/admin/translations',
+    words: 'казахский английский перевод язык kk en chatgpt таблица',
+  },
+  {
     label: 'Картинки и файлы',
     href: '/admin/collections/media',
     words: 'фото изображения медиа загрузка',

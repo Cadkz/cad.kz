@@ -9,13 +9,15 @@ type Props = {
   /** Имя выбранного файла: показывается в поле, чтобы было видно, что он принят. */
   fileName: string | null
   onFile: (file: File) => void
+  /** Что за файл, в подписи поля: «файл прайса», «таблицу перевода». */
+  what?: string
 }
 
 /**
  * Поле для файла в админке: файл можно перетащить из папки прямо на страницу (в любое место)
  * или выбрать кнопкой. Пока файл тянут над окном, поле подсвечено.
  */
-export function FileDrop({ accept, fileName, onFile }: Props) {
+export function FileDrop({ accept, fileName, onFile, what = 'файл прайса' }: Props) {
   const [over, setOver] = useState(false)
   const input = useRef<HTMLInputElement>(null)
   const depth = useRef(0)
@@ -75,7 +77,7 @@ export function FileDrop({ accept, fileName, onFile }: Props) {
           </>
         ) : (
           <>
-            <strong>Перетащите файл прайса сюда</strong> или нажмите, чтобы выбрать
+            <strong>Перетащите {what} сюда</strong> или нажмите, чтобы выбрать
           </>
         )}
       </span>

@@ -119,6 +119,11 @@ export default buildConfig({
           path: '/bitrix24',
           meta: { title: 'Битрикс24' },
         },
+        translations: {
+          Component: '/components/TranslationsView/TranslationsView#TranslationsView',
+          path: '/translations',
+          meta: { title: 'Переводы' },
+        },
         legacyContent: {
           Component: '/components/LegacyContentView/LegacyContentView#LegacyContentView',
           path: '/legacy-content',
