@@ -1,5 +1,6 @@
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import type { AdminViewServerProps } from 'payload'
+import { AutoTranslate } from '@/components/AutoTranslate/AutoTranslate'
 import { TranslationTable } from '@/components/TranslationTable/TranslationTable'
 import { progress } from '@/domain/translationTable.mjs'
 import { requireLogin } from '@/lib/adminGate'
@@ -46,9 +47,10 @@ export async function TranslationsView({
           <>
             <p className={styles.lead}>
               Названия, описания, задачи, вопросы и SEO опубликованных товаров и разделов на
-              казахском и английском. Скачайте часть, переведите в ChatGPT и загрузите файл обратно.
-              Пока перевода нет, на /kk и /en показывается русский текст. Характеристики,
-              комплектации и тексты подбора переводятся отдельно — общим словарём.
+              казахском и английском. Проще всего — автоматический перевод ниже; таблица через
+              ChatGPT осталась для правки и ручного перевода. Пока перевода нет, на /kk и /en
+              показывается русский текст. Характеристики, комплектации и тексты подбора переводятся
+              отдельно — общим словарём.
             </p>
             <div className={styles.state}>
               <p>
@@ -71,6 +73,7 @@ export async function TranslationsView({
                 </p>
               )}
             </div>
+            <AutoTranslate />
             <TranslationTable />
           </>
         ) : (
