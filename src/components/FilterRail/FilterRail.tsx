@@ -6,9 +6,9 @@ import styles from './FilterRail.module.css'
 
 /**
  * Свёрнутый фильтр каталога (от 960 px), вариант B «Направляющая» (07.11.2026): вместо широкой
- * полосы — круглая кнопка со значком, под ней тонкая линия во всю высоту карточек. Наведение:
+ * полосы — небольшая круглая кнопка (32 px) по центру со значком, под ней тонкая линия во всю высоту карточек. Наведение:
  * линия прорисовывается сверху вниз синим в голубой, справа выезжает подпись «Фильтры ›».
- * Кнопка держится под шапкой при прокрутке; есть выбранные условия — точка на значке.
+ * При прокрутке кнопка держится посередине видимой части полосы; есть выбранные условия — точка на значке.
  */
 export function FilterRail({
   hidden,
@@ -33,7 +33,7 @@ export function FilterRail({
     >
       <span className={styles.stick}>
         <span className={styles.knob}>
-          <SlidersHorizontal size={20} strokeWidth={1.75} aria-hidden="true" />
+          <SlidersHorizontal size={16} strokeWidth={1.75} aria-hidden="true" />
           {count > 0 && <span className={styles.dot} />}
         </span>
         <span className={styles.tip} aria-hidden="true">
