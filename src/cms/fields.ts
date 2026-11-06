@@ -32,14 +32,33 @@ const textareaInRussian: TextareaFieldValidation = (value, options) =>
  */
 export function translated(field: Field): Field {
   if (field.type === 'text' && !field.hasMany) {
-    if (!field.required) return { ...field, localized: true }
-    return { ...field, localized: true, validate: textInRussian }
+    const admin = withRussianHint(field.admin)
+    if (!field.required) return { ...field, admin, localized: true }
+    return { ...field, admin, localized: true, validate: textInRussian }
   }
   if (field.type === 'textarea') {
-    if (!field.required) return { ...field, localized: true }
-    return { ...field, localized: true, validate: textareaInRussian }
+    const admin = withRussianHint(field.admin)
+    if (!field.required) return { ...field, admin, localized: true }
+    return { ...field, admin, localized: true, validate: textareaInRussian }
   }
   return field
+}
+
+/** Подсказка «По-русски» под пустым полем перевода (казахский, английский). */
+const RUSSIAN_HINT = '/components/RussianHint/RussianHint#RussianHint'
+
+/**
+ * Подсказка русского текста под полем. У полей со своим редактором (BodyEditor) afterInput
+ * не выводится — там подсказку ставит сам редактор.
+ */
+function withRussianHint<T extends { components?: { afterInput?: unknown[] } }>(
+  admin: T | undefined,
+): T {
+  const components = admin?.components ?? {}
+  return {
+    ...admin,
+    components: { ...components, afterInput: [...(components.afterInput ?? []), RUSSIAN_HINT] },
+  } as T
 }
 
 /**

@@ -4,6 +4,7 @@ import { FieldError, useField } from '@payloadcms/ui'
 import type { TextareaFieldClientComponent } from 'payload'
 import { useId, useState } from 'react'
 import { htmlToMarkup, markupToHtml } from '@/domain/bodyHtml.mjs'
+import { RussianHint } from '../RussianHint/RussianHint'
 import { VisualEditor } from '../VisualEditor/VisualEditor'
 import styles from './BodyEditor.module.css'
 
@@ -52,6 +53,7 @@ export const BodyEditor: TextareaFieldClientComponent = ({ path, field, readOnly
         </fieldset>
       </div>
       <FieldError path={path} showError={showError} />
+      {field.localized && <RussianHint path={path} />}
       {mode === 'visual' ? (
         <VisualEditor value={markup} onChange={setValue} readOnly={readOnly} />
       ) : (

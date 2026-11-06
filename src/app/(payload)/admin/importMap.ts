@@ -1,3 +1,4 @@
+import { RussianHint as RussianHint_08be64c61b1e66f207d025d703234713 } from '../../../components/RussianHint/RussianHint'
 import { QualityCell as QualityCell_f4234779415bb67fd9a9958587947c9f } from '../../../components/QualityMark/QualityMark'
 import { QualityField as QualityField_e6c71f4b09520f8809fe6b389d597c3b } from '../../../components/QualityField/QualityField'
 import { QualityHidden as QualityHidden_e6c71f4b09520f8809fe6b389d597c3b } from '../../../components/QualityField/QualityField'
@@ -38,6 +39,7 @@ import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/components/RussianHint/RussianHint#RussianHint": RussianHint_08be64c61b1e66f207d025d703234713,
   "/components/QualityMark/QualityMark#QualityCell": QualityCell_f4234779415bb67fd9a9958587947c9f,
   "/components/QualityField/QualityField#QualityField": QualityField_e6c71f4b09520f8809fe6b389d597c3b,
   "/components/QualityField/QualityField#QualityHidden": QualityHidden_e6c71f4b09520f8809fe6b389d597c3b,
