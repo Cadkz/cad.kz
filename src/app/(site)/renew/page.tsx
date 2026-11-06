@@ -8,7 +8,7 @@ import { RenewForm } from '@/components/RenewForm/RenewForm'
 import { RenewSteps } from '@/components/RenewSteps/RenewSteps'
 import { getT } from '@/i18n/server'
 import { getContacts } from '@/lib/navigation'
-import { pageMetadata } from '@/lib/seo'
+import { ALL_LANGS, pageMetadata } from '@/lib/seo'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
@@ -20,6 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Продление и обновление лицензий AutoCAD, Revit, АВС-KZ, ЛИРА-FEM, SCAD Office, GEO5 и других программ. Оставьте заявку — менеджер проверит лицензию и пришлёт счёт.',
     ),
     path: '/renew',
+    langs: ALL_LANGS,
   })
 }
 

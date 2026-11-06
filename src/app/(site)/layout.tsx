@@ -37,7 +37,8 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       images: [{ url: DEFAULT_SHARE_IMAGE, width: 1200, height: 630 }],
     },
-    // Казахская и английская версии закрыты, пока не переведены товары (INDEX_TRANSLATIONS).
+    // Казахская и английская версии: открыты при INDEX_TRANSLATIONS, непереведённые страницы
+    // закрывает сама страница (langMetadata в src/lib/seo.ts).
     robots:
       isProduction() && (lang === DEFAULT_LANG || INDEX_TRANSLATIONS)
         ? { index: true, follow: true }

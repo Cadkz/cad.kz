@@ -1,4 +1,13 @@
 import type { Metadata } from 'next'
+import {
+  DEFAULT_LANG,
+  INDEX_TRANSLATIONS,
+  type Lang,
+  langAlternates,
+  localizeHref,
+  OG_LOCALES,
+} from '@/i18n/locales.mjs'
+import { requestLang } from '@/i18n/server'
 
 /** Поля «Для поисковиков» из CMS. */
 type Seo = { title?: string | null; description?: string | null } | null | undefined
@@ -39,34 +48,67 @@ export function shortDescription(text: string | null | undefined, max = 160) {
 }
 
 /**
- * Метаданные страницы: заголовок и описание из «Для поисковиков», если заполнены,
- * иначе запасные; канонический адрес и картинка для соцсетей.
+ * Канонический адрес, hreflang и запрет индексации для языковых версий. langs — языки, на которых
+ * страница переведена (русский всегда). Пока казахская и английская версии закрыты
+ * (INDEX_TRANSLATIONS = false) — канонический адрес русский, как раньше. Открыты — переведённая
+ * страница ссылается сама на себя и на свои версии; непереведённая закрыта от индексации и
+ * указывает на русскую.
  */
-export function pageMetadata({
+export function langMetadata(
+  path: string,
+  lang: Lang,
+  langs: readonly Lang[],
+): Pick<Metadata, 'alternates' | 'robots'> {
+  const russian = localizeHref(DEFAULT_LANG, path)
+  if (!INDEX_TRANSLATIONS) return { alternates: { canonical: russian } }
+  const ready = lang === DEFAULT_LANG || langs.includes(lang)
+  const languages = langs.some((item) => item !== DEFAULT_LANG)
+    ? langAlternates(path, langs)
+    : undefined
+  return {
+    alternates: { canonical: ready ? localizeHref(lang, path) : russian, languages },
+    ...(ready ? {} : { robots: { index: false, follow: isProduction() } }),
+  }
+}
+
+/** Все языки: страницы, где переведён весь текст (интерфейс и настройки с переводами). */
+export const ALL_LANGS: readonly Lang[] = ['ru', 'kk', 'en']
+/** Только русский: тексты из базы пока без переводов (новости, текстовые страницы, семейства). */
+export const RU_ONLY: readonly Lang[] = ['ru']
+
+/**
+ * Метаданные страницы: заголовок и описание из «Для поисковиков», если заполнены,
+ * иначе запасные; канонический адрес, языковые версии и картинка для соцсетей.
+ */
+export async function pageMetadata({
   seo,
   title,
   description,
   path,
   image,
+  langs,
 }: {
   seo?: Seo
   title: string
   description?: string | null
   path: string
   image?: string | null
-}): Metadata {
+  /** На каких языках страница переведена — их версии открываются поисковикам. */
+  langs: readonly Lang[]
+}): Promise<Metadata> {
+  const lang = await requestLang()
   const finalTitle = seo?.title?.trim() || title
   const finalDescription = shortDescription(seo?.description || description)
   return {
     title: { absolute: finalTitle },
     description: finalDescription,
-    alternates: { canonical: path },
+    ...langMetadata(path, lang, langs),
     openGraph: {
       title: finalTitle,
       description: finalDescription,
-      url: path,
+      url: localizeHref(lang, path),
       siteName: 'CAD.kz',
-      locale: 'ru_KZ',
+      locale: OG_LOCALES[lang],
       type: 'website',
       images: [image || DEFAULT_SHARE_IMAGE],
     },

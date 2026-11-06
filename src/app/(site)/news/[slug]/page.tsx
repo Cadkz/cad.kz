@@ -28,7 +28,7 @@ import {
   toCard,
 } from '@/lib/publications'
 import { imageSources, parseBody } from '@/lib/richText'
-import { pageMetadata, siteUrl } from '@/lib/seo'
+import { pageMetadata, RU_ONLY, siteUrl } from '@/lib/seo'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -49,6 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: excerptOf(publication),
     path: newsHref(publication.slug),
     image: cover?.url,
+    langs: RU_ONLY,
   })
 }
 

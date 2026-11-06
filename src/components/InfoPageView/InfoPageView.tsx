@@ -13,7 +13,7 @@ import { getInfoLinks, getPage } from '@/lib/pages'
 import { cms } from '@/lib/payload'
 import { bodyPictures } from '@/lib/pictures'
 import { type Block, imageSources, parseBody } from '@/lib/richText'
-import { pageMetadata } from '@/lib/seo'
+import { pageMetadata, RU_ONLY } from '@/lib/seo'
 
 const PRIVACY = pagePath('privacy-policy')
 
@@ -57,6 +57,7 @@ export async function infoPageMetadata(slug: string) {
     title: `${page.title} — CAD.kz`,
     description: page.lead ?? page.body,
     path: pagePath(slug),
+    langs: RU_ONLY,
   })
 }
 

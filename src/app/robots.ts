@@ -8,7 +8,21 @@ import { isProduction, siteUrl } from '@/lib/seo'
 export default function robots(): MetadataRoute.Robots {
   if (!isProduction()) return { rules: { userAgent: '*', disallow: '/' } }
   return {
-    rules: { userAgent: '*', allow: '/', disallow: ['/admin', '/api/', '/cart', '/checkout'] },
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      disallow: [
+        '/admin',
+        '/api/',
+        '/cart',
+        '/checkout',
+        // Те же страницы на казахском и английском.
+        '/kk/cart',
+        '/kk/checkout',
+        '/en/cart',
+        '/en/checkout',
+      ],
+    },
     sitemap: `${siteUrl()}/sitemap.xml`,
     host: siteUrl(),
   }

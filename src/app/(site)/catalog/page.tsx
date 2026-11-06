@@ -8,6 +8,7 @@ import { fromParams } from '@/lib/catalogFilter'
 import { getMenuPopular } from '@/lib/menuPopular'
 import { CATALOG_PATH } from '@/lib/navigationHrefs'
 import { pageMetadata } from '@/lib/seo'
+import { catalogLangs } from '@/lib/translations'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
@@ -20,6 +21,8 @@ export async function generateMetadata() {
       'Программы для проектирования и расчётов, оборудование и обучение: выберите направление и производителя.',
     ),
     path: CATALOG_PATH,
+    // Список карточек открываем на языке, когда почти все товары переведены.
+    langs: await catalogLangs(),
   })
 }
 

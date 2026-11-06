@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { BimBand } from '@/components/BimBand/BimBand'
 import { CatalogHashRedirect } from '@/components/CatalogHashRedirect/CatalogHashRedirect'
 import { CtaBanner } from '@/components/CtaBanner/CtaBanner'
@@ -11,18 +12,22 @@ import { HomeNews } from '@/components/HomeNews/HomeNews'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { Section } from '@/components/Section/Section'
-import { langPermanentRedirect } from '@/i18n/server'
+import { getLang, langPermanentRedirect } from '@/i18n/server'
 import { getDirections } from '@/lib/catalog'
 import { fromParams, toQuery } from '@/lib/catalogFilter'
 import { getHome } from '@/lib/home'
 import { getContacts } from '@/lib/navigation'
 import { CATALOG_PATH, catalogHref } from '@/lib/navigationHrefs'
 import { getPublications, getTopicCovers } from '@/lib/publications'
+import { ALL_LANGS, langMetadata } from '@/lib/seo'
 import { directionExtras } from '@/lib/siteNav'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
-export const metadata = { alternates: { canonical: '/' } }
+/** Главная переведена целиком (интерфейс и «Главная сайта» с переводами): все языки. */
+export async function generateMetadata(): Promise<Metadata> {
+  return langMetadata('/', await getLang(), ALL_LANGS)
+}
 
 /**
  * Главная — шаблон «Витрина». Первым блоком BIM целиком (решение владельца 16.10 и 21.10.2026,

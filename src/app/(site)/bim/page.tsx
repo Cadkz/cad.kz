@@ -16,7 +16,7 @@ import { getCatalog } from '@/lib/catalog'
 import { getHome } from '@/lib/home'
 import { catalogHref } from '@/lib/navigationHrefs'
 import { getPage } from '@/lib/pages'
-import { pageMetadata } from '@/lib/seo'
+import { ALL_LANGS, pageMetadata } from '@/lib/seo'
 
 export async function generateMetadata(): Promise<Metadata> {
   const [page, t] = await Promise.all([getPage('bim'), getT()])
@@ -27,6 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'BIM-процессы, координация проектов, шаблоны Revit и обучение команды. Практика CAD.kz в Казахстане с 2015 года.',
     ),
     path: '/bim',
+    langs: ALL_LANGS,
   })
 }
 

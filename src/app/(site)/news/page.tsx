@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { PublicationIndex } from '@/components/PublicationIndex/PublicationIndex'
 import { getT } from '@/i18n/server'
-import { pageMetadata } from '@/lib/seo'
+import { pageMetadata, RU_ONLY } from '@/lib/seo'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
@@ -14,11 +14,14 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
         title: t('Акции — CAD.kz'),
         description: t('Действующие акции CAD.kz на программы, оборудование и обучение.'),
         path: '/news?kind=promotion',
+        langs: RU_ONLY,
       })
     : pageMetadata({
         title: t('Новости — CAD.kz'),
         description: t('Новости, вебинары и мероприятия CAD.kz.'),
         path: '/news',
+        // Новости владелец переводит вручную позже: пока список только по-русски.
+        langs: RU_ONLY,
       })
 }
 

@@ -11,7 +11,7 @@ import { offersOf, pickerOffers } from './picker'
 import { loadPricingContext } from './pricing'
 import { productPath } from './productPath'
 import { relId } from './rel'
-import { pageMetadata } from './seo'
+import { pageMetadata, RU_ONLY } from './seo'
 
 const published = { status: { equals: 'published' } } as const
 
@@ -184,7 +184,7 @@ export function familyMetadata(
   family: FamilyPage,
   t: (text: string, vars?: Record<string, string>) => string = (text, vars) =>
     text.replace('{name}', vars?.name ?? ''),
-): Metadata {
+): Promise<Metadata> {
   return pageMetadata({
     seo: family.seo ?? undefined,
     title: t('{name} — купить в CAD.kz', {
@@ -192,6 +192,8 @@ export function familyMetadata(
     }),
     description: family.intro,
     path: `/families/${family.slug}`,
+    // Подписи программ семейства пока по-русски.
+    langs: RU_ONLY,
   })
 }
 

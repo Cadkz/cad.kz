@@ -20,7 +20,7 @@ import { productPath } from './productPath'
 import { relId } from './rel'
 import { pageMetadata } from './seo'
 import { termsFor } from './terms'
-import { getTranslations, requestLang } from './translations'
+import { getTranslations, productLangs, requestLang } from './translations'
 
 export type ProductOffer = {
   id: string
@@ -286,17 +286,18 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
 }
 
 /** Заголовок, описание и канонический адрес страницы товара. Перенесённые со старого сайта — первыми. */
-export function productMetadata(
+export async function productMetadata(
   product: ProductPage,
   t: (text: string, vars?: Record<string, string>) => string = (text, vars) =>
     text.replace('{name}', vars?.name ?? ''),
-): Metadata {
+): Promise<Metadata> {
   return pageMetadata({
     seo: product.seo,
     title: t('{name} — купить в CAD.kz', { name: product.title }),
     description: product.summary ?? product.description,
     path: product.path,
     image: product.pictures[0]?.url,
+    langs: await productLangs(product.id),
   })
 }
 

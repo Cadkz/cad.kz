@@ -1,16 +1,18 @@
 import type { Metadata } from 'next'
 import { ContactsView } from '@/components/ContactsView/ContactsView'
+import { getT } from '@/i18n/server'
 import { getContacts } from '@/lib/navigation'
 import { getPage } from '@/lib/pages'
-import { pageMetadata } from '@/lib/seo'
+import { ALL_LANGS, pageMetadata } from '@/lib/seo'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getPage('contacts')
+  const [page, t] = await Promise.all([getPage('contacts'), getT()])
   return pageMetadata({
     seo: page?.seo,
-    title: 'Контакты — CAD.kz',
-    description: 'Телефоны, WhatsApp, почта и адрес офиса CAD.kz в Астане.',
+    title: t('Контакты — CAD.kz'),
+    description: t('Телефоны, WhatsApp, почта и адрес офиса CAD.kz в Астане.'),
     path: '/contacts',
+    langs: ALL_LANGS,
   })
 }
 
