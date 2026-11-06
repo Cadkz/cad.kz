@@ -1,4 +1,5 @@
 import Link from '@/components/LangLink/LangLink'
+import { getT } from '@/i18n/server'
 import styles from './Wordmark.module.css'
 
 const LETTERS = ['c', 'a', 'd', '.', 'k', 'z']
@@ -10,9 +11,10 @@ const LETTERS = ['c', 'a', 'd', '.', 'k', 'z']
  * по очереди поднимаются: где браузер умеет анимацию по прокрутке — вместе с прокруткой,
  * иначе по времени через RevealObserver (data-reveal). Под мышью буква подпрыгивает.
  */
-export function Wordmark() {
+export async function Wordmark() {
+  const t = await getT()
   return (
-    <Link href="/" className={styles.wordmark} aria-label="CAD.kz — на главную" data-reveal>
+    <Link href="/" className={styles.wordmark} aria-label={t('CAD.kz — на главную')} data-reveal>
       <span className={styles.row} aria-hidden="true">
         {/* Геометрия знака — как в шапке (Logo mark), диагонали под 45°. */}
         <svg className={styles.mark} viewBox="0 0 140 199" focusable="false" aria-hidden="true">

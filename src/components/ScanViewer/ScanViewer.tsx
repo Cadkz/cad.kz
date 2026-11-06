@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
 import type { Scan } from '@/domain/artecScans.mjs'
+import { useT } from '../LangProvider/LangProvider'
 import { ScanModel } from '../ScanModel/ScanModel'
 import styles from './ScanViewer.module.css'
 
@@ -18,6 +19,7 @@ const MARK = 'cadScanViewer'
  * при открытии в историю добавляется запись с тем же адресом, «назад» её снимает.
  */
 export function ScanViewer({ scans, index, onChange }: Props) {
+  const t = useT()
   const dialog = useRef<HTMLDialogElement>(null)
   const scan = index === null ? null : scans[index]
 
@@ -52,7 +54,7 @@ export function ScanViewer({ scans, index, onChange }: Props) {
     <dialog
       ref={dialog}
       className={styles.dialog}
-      aria-label={scan ? `3D-модель: ${scan.title}` : 'Просмотр скана'}
+      aria-label={scan ? t('3D-модель: {name}', { name: scan.title }) : t('Просмотр скана')}
       onCancel={(event) => {
         event.preventDefault()
         close()
@@ -73,11 +75,16 @@ export function ScanViewer({ scans, index, onChange }: Props) {
               {scan.title}
               {scans.length > 1 && (
                 <span className={styles.counter}>
-                  {(index ?? 0) + 1} из {scans.length}
+                  {t('{n} из {total}', { n: (index ?? 0) + 1, total: scans.length })}
                 </span>
               )}
             </p>
-            <button type="button" className={styles.control} onClick={close} aria-label="Закрыть">
+            <button
+              type="button"
+              className={styles.control}
+              onClick={close}
+              aria-label={t('Закрыть')}
+            >
               <X size={20} strokeWidth={1.75} aria-hidden="true" />
             </button>
           </div>
@@ -87,7 +94,7 @@ export function ScanViewer({ scans, index, onChange }: Props) {
                 type="button"
                 className={`${styles.control} ${styles.prev}`}
                 onClick={() => step(-1)}
-                aria-label="Предыдущий скан"
+                aria-label={t('Предыдущий скан')}
               >
                 <ChevronLeft size={20} strokeWidth={1.75} aria-hidden="true" />
               </button>
@@ -95,7 +102,7 @@ export function ScanViewer({ scans, index, onChange }: Props) {
                 type="button"
                 className={`${styles.control} ${styles.next}`}
                 onClick={() => step(1)}
-                aria-label="Следующий скан"
+                aria-label={t('Следующий скан')}
               >
                 <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" />
               </button>

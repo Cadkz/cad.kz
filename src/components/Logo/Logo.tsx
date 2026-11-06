@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from '@/components/LangLink/LangLink'
+import { getT } from '@/i18n/server'
 import logo from '../../../public/images/brand/cad-kz-logo.png'
 import headerLogo from '../../../public/images/brand/cad-kz-logo-header.png'
 import styles from './Logo.module.css'
@@ -10,13 +11,14 @@ import styles from './Logo.module.css'
  * full — знак с надписью cad.kz (подвал);
  * header — шапка (правка владельца 02.11.2026, вечер): от 640 px знак с надписью, уже — знак.
  */
-export function Logo({
+export async function Logo({
   variant = 'full',
   priority = false,
 }: {
   variant?: 'mark' | 'full' | 'header'
   priority?: boolean
 }) {
+  const t = await getT()
   const mark = (
     // Геометрия знака из Макеты/Cad_kz_значок_rgb: диагонали под 45°.
     <svg viewBox="0 0 140 199" aria-hidden="true" focusable="false">
@@ -27,14 +29,18 @@ export function Logo({
   )
   if (variant === 'mark') {
     return (
-      <Link href="/" className={styles.mark} aria-label="CAD.kz — на главную">
+      <Link href="/" className={styles.mark} aria-label={t('CAD.kz — на главную')}>
         {mark}
       </Link>
     )
   }
   if (variant === 'header') {
     return (
-      <Link href="/" className={`${styles.mark} ${styles.header}`} aria-label="CAD.kz — на главную">
+      <Link
+        href="/"
+        className={`${styles.mark} ${styles.header}`}
+        aria-label={t('CAD.kz — на главную')}
+      >
         <span className={styles.headerMark}>{mark}</span>
         <Image
           src={headerLogo}
@@ -48,7 +54,7 @@ export function Logo({
     )
   }
   return (
-    <Link href="/" className={styles.logo} aria-label="CAD.kz — на главную">
+    <Link href="/" className={styles.logo} aria-label={t('CAD.kz — на главную')}>
       <Image src={logo} alt="" width={89} height={28} priority={priority} />
     </Link>
   )

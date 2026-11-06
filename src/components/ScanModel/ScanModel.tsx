@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { Scan } from '@/domain/artecScans.mjs'
+import { useT } from '../LangProvider/LangProvider'
 import styles from './ScanModel.module.css'
 
 /**
@@ -12,19 +13,20 @@ import styles from './ScanModel.module.css'
  * разворачивать на весь экран — его собственными средствами.
  */
 export function ScanModel({ scan }: { scan: Scan }) {
+  const t = useT()
   const [loaded, setLoaded] = useState(false)
 
   return (
     <div className={styles.model} data-loaded={loaded}>
       {!loaded && (
         <p className={styles.loading} role="status">
-          Загружаем 3D-модель…
+          {t('Загружаем 3D-модель…')}
         </p>
       )}
       <iframe
         className={styles.viewer}
         src={scan.embed}
-        title={`3D-модель скана: ${scan.title}`}
+        title={t('3D-модель скана: {name}', { name: scan.title })}
         allow="autoplay; fullscreen; xr-spatial-tracking"
         allowFullScreen
         onLoad={() => setLoaded(true)}

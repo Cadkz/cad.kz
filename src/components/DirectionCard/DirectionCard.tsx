@@ -40,8 +40,8 @@ export function DirectionCard({ direction }: { direction: Direction }) {
       <span className={styles.icon}>
         <SectionIcon name={sectionIconKey(direction.slug, direction.icon)} size={40} />
       </span>
-      <span className={styles.title}>{direction.title}</span>
-      {direction.summary && <span className={styles.summary}>{direction.summary}</span>}
+      <span className={styles.title}>{t(direction.title)}</span>
+      {direction.summary && <span className={styles.summary}>{t(direction.summary)}</span>}
       <span className={styles.cta} aria-hidden="true">
         <span className={styles.ctaInner}>
           {t('В каталог')}

@@ -3,6 +3,7 @@
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { Button } from '../Button/Button'
+import { useT } from '../LangProvider/LangProvider'
 import styles from './HomeFold.module.css'
 
 /**
@@ -11,6 +12,7 @@ import styles from './HomeFold.module.css'
  * страницами, внизу «Свернуть каталог». Каталог короче предела — без кнопок.
  */
 export function HomeFold({ children }: { children: ReactNode }) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const [tall, setTall] = useState(false)
   const box = useRef<HTMLDivElement>(null)
@@ -46,7 +48,7 @@ export function HomeFold({ children }: { children: ReactNode }) {
         {tall && !open && (
           <div className={styles.fade}>
             <Button onClick={() => setOpen(true)} aria-expanded={false}>
-              Раскрыть каталог
+              {t('Раскрыть каталог')}
               <ChevronDown size={16} strokeWidth={1.75} aria-hidden="true" />
             </Button>
           </div>
@@ -55,7 +57,7 @@ export function HomeFold({ children }: { children: ReactNode }) {
       {open && tall && (
         <div className={styles.less}>
           <Button variant="outline" onClick={close} aria-expanded>
-            Свернуть каталог
+            {t('Свернуть каталог')}
             <ChevronUp size={16} strokeWidth={1.75} aria-hidden="true" />
           </Button>
         </div>

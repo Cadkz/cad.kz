@@ -54,14 +54,19 @@ export async function TranslationsView({
             </p>
             <div className={styles.state}>
               <p>
-                Всего текстов: <strong>{state.texts}</strong>. Казахский: {state.kk} (
-                {percent(state.kk, state.texts)} %), английский: {state.en} (
+                Товары и разделы — всего текстов: <strong>{state.texts}</strong>. Казахский:{' '}
+                {state.kk} ({percent(state.kk, state.texts)} %), английский: {state.en} (
                 {percent(state.en, state.texts)} %).
               </p>
               <p>
                 {state.missingDocs
                   ? `Осталось: ${state.missingDocs} товаров и разделов, около ${state.missingChars.toLocaleString('ru-RU')} знаков русского текста.`
-                  : 'Всё переведено.'}
+                  : 'Товары и разделы переведены.'}
+              </p>
+              <p>
+                Сюда не входят «Главная сайта», «Страница BIM», «Контакты и подвал», страницы и
+                новости: их тексты пока переводятся в самих разделах админки (язык — вверху справа).
+                Без перевода там на /kk и /en остаётся русский текст.
               </p>
               {terms && (
                 <p>

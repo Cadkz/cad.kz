@@ -12,7 +12,7 @@ import { HomeNews } from '@/components/HomeNews/HomeNews'
 import { ProcessSteps } from '@/components/ProcessSteps/ProcessSteps'
 import { Reveal } from '@/components/Reveal/Reveal'
 import { Section } from '@/components/Section/Section'
-import { getLang, langPermanentRedirect } from '@/i18n/server'
+import { getLang, getT, langPermanentRedirect } from '@/i18n/server'
 import { getDirections } from '@/lib/catalog'
 import { fromParams, toQuery } from '@/lib/catalogFilter'
 import { getHome } from '@/lib/home'
@@ -24,7 +24,7 @@ import { directionExtras } from '@/lib/siteNav'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
-/** Главная переведена целиком (интерфейс и «Главная сайта» с переводами): все языки. */
+/** Главная: интерфейс — словарём, тексты «Главной сайта» — переводами в админке. */
 export async function generateMetadata(): Promise<Metadata> {
   return langMetadata('/', await getLang(), ALL_LANGS)
 }
@@ -50,17 +50,23 @@ export default async function Home({ searchParams }: Props) {
     getContacts(),
     getTopicCovers(),
   ])
+  const t = await getT()
   return (
     <main>
       <CatalogHashRedirect />
       {home.title && <HiddenTitle>{home.title}</HiddenTitle>}
-      <BimBand bim={home.bim} more={{ href: '/bim', label: 'Все BIM-услуги' }} priority noEyebrow />
+      <BimBand
+        bim={home.bim}
+        more={{ href: '/bim', label: t('Все BIM-услуги') }}
+        priority
+        noEyebrow
+      />
       {/* Блок «Официальный партнёр» скрыт (замечание владельца 12.10.2026: меньше шума), данные
           остались в админке — вернуть: <TrustBand trust={home.trust} />. */}
       <Section
         id="directions"
-        title="Выберите направление"
-        action={{ href: catalogHref(), label: 'Весь каталог' }}
+        title={t('Выберите направление')}
+        action={{ href: catalogHref(), label: t('Весь каталог') }}
       >
         <Grid as="ul" span={{ base: 12, sm: 6, md: 4 }}>
           {[...directions, ...directionExtras].map((direction, i) => (
@@ -73,20 +79,20 @@ export default async function Home({ searchParams }: Props) {
       <Section
         id="home-catalog"
         tone="tint"
-        title="Каталог"
-        action={{ href: catalogHref(), label: 'Открыть каталог' }}
+        title={t('Каталог')}
+        action={{ href: catalogHref(), label: t('Открыть каталог') }}
         desktopOnly
       >
         <HomeCatalog />
       </Section>
       <HomeNews slides={home.slides} news={news.docs} covers={topicCovers} />
       {home.process.length > 0 && (
-        <Section id="process" tone="tint" title="Как мы работаем">
+        <Section id="process" tone="tint" title={t('Как мы работаем')}>
           <ProcessSteps steps={home.process} cards={home.sideCards} />
         </Section>
       )}
       {home.faq.length > 0 && (
-        <Section id="faq" title="Частые вопросы" still>
+        <Section id="faq" title={t('Частые вопросы')} still>
           <Grid>
             <Col span={{ base: 12, md: 8 }}>
               <Faq items={home.faq} />

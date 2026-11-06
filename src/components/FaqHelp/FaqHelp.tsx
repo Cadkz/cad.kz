@@ -1,3 +1,4 @@
+import { getT } from '@/i18n/server'
 import type { Contacts } from '@/lib/navigation'
 import { ButtonLink } from '../Button/Button'
 import { ContactList } from '../ContactList/ContactList'
@@ -12,22 +13,23 @@ const WHATSAPP_TEXT = 'Здравствуйте! У меня вопрос: '
  * На телефоне — только заголовок и кнопка WhatsApp: телефоны и почта есть в подвале сразу ниже
  * (аудит 21.10.2026: контакты шли три раза подряд).
  */
-export function FaqHelp({ contacts }: { contacts: Contacts }) {
+export async function FaqHelp({ contacts }: { contacts: Contacts }) {
+  const t = await getT()
   const whatsapp = contacts.whatsappHref
     ? `${contacts.whatsappHref}?text=${encodeURIComponent(WHATSAPP_TEXT)}`
     : null
   return (
     <aside className={styles.box} aria-labelledby="faq-help-title">
       <h3 id="faq-help-title" className={styles.title}>
-        Не нашли ответ?
+        {t('Не нашли ответ?')}
       </h3>
       <p className={`${styles.text} ${styles.wide}`}>
-        Спросите менеджера — подскажем по программам, лицензиям и поставке.
+        {t('Спросите менеджера — подскажем по программам, лицензиям и поставке.')}
       </p>
       {whatsapp && (
         <ButtonLink href={whatsapp} block>
           <WhatsappIcon size={20} />
-          Спросить в WhatsApp
+          {t('Спросить в WhatsApp')}
         </ButtonLink>
       )}
       <div className={styles.wide}>

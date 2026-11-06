@@ -21,13 +21,13 @@ export function mapLinks(address: string, mapUrl: string | null) {
  * Мини-карта офиса на странице «Контакты» (решение владельца 13.10.2026): встроенные Google
  * Карты по адресу из настроек, без ключа и без скриптов на нашей странице. Грузится лениво.
  */
-export function OfficeMap({ address }: { address: string }) {
+export function OfficeMap({ address, title }: { address: string; title: string }) {
   const src = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery(address))}&z=16&output=embed`
   return (
     <div className={styles.map}>
       <iframe
         src={src}
-        title={`Офис CAD.kz на карте: ${address}`}
+        title={title}
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
         className={styles.frame}

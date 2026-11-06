@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Rotate3d } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import type { Scan } from '@/domain/artecScans.mjs'
+import { useT } from '../LangProvider/LangProvider'
 import { Reveal } from '../Reveal/Reveal'
 import { ScanViewer } from '../ScanViewer/ScanViewer'
 import styles from './ScanGallery.module.css'
@@ -44,6 +45,7 @@ function glide(node: HTMLElement, target: number) {
  * очереди из размытия (Reveal). По нажатию скан открывается крупно в окне (ScanViewer).
  */
 export function ScanGallery({ scans }: { scans: Scan[] }) {
+  const t = useT()
   const track = useRef<HTMLUListElement>(null)
   const [open, setOpen] = useState<number | null>(null)
   // Можно ли листать назад и вперёд; до замера считаем, что вперёд можно.
@@ -86,7 +88,7 @@ export function ScanGallery({ scans }: { scans: Scan[] }) {
             className={styles.arrow}
             onClick={() => page(-1)}
             disabled={!edges.back}
-            aria-label="Предыдущие сканы"
+            aria-label={t('Предыдущие сканы')}
           >
             <ChevronLeft size={20} strokeWidth={1.75} aria-hidden="true" />
           </button>
@@ -95,7 +97,7 @@ export function ScanGallery({ scans }: { scans: Scan[] }) {
             className={styles.arrow}
             onClick={() => page(1)}
             disabled={!edges.next}
-            aria-label="Следующие сканы"
+            aria-label={t('Следующие сканы')}
           >
             <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" />
           </button>
@@ -109,7 +111,7 @@ export function ScanGallery({ scans }: { scans: Scan[] }) {
                 type="button"
                 className={styles.card}
                 onClick={() => setOpen(index)}
-                aria-label={`Открыть 3D-модель: ${scan.title}`}
+                aria-label={t('Открыть 3D-модель: {name}', { name: scan.title })}
               >
                 <span className={styles.stage}>
                   <Image

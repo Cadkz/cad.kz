@@ -5,6 +5,7 @@ import { Grid } from '@/components/Grid/Grid'
 import Link from '@/components/LangLink/LangLink'
 import { mapLinks, OfficeMap } from '@/components/OfficeMap/OfficeMap'
 import { PageIntro } from '@/components/PageIntro/PageIntro'
+import { getT } from '@/i18n/server'
 import type { Contacts } from '@/lib/navigation'
 import styles from './ContactsView.module.css'
 
@@ -15,54 +16,62 @@ type Props = { contacts: Contacts; lead: string | null }
  * Телефоны и мессенджеры — в шапке и подвале, отдельной карточки нет (решение владельца 13.10.2026).
  * Всё из настроек CMS.
  */
-export function ContactsView({ contacts, lead }: Props) {
+export async function ContactsView({ contacts, lead }: Props) {
+  const t = await getT()
   const links = contacts.address ? mapLinks(contacts.address, contacts.mapUrl) : null
   return (
     <main>
       <Container>
         <Breadcrumbs items={[{ title: 'Главная', href: '/' }, { title: 'Контакты' }]} />
         <PageIntro
-          title="Контакты"
-          lead={lead ?? 'Позвоните или напишите — подберём программы, оборудование и обучение.'}
+          title={t('Контакты')}
+          lead={lead ?? t('Позвоните или напишите — подберём программы, оборудование и обучение.')}
         />
         <Grid span={{ base: 12, md: 4 }}>
-          {contacts.address && <OfficeMap address={contacts.address} />}
+          {contacts.address && (
+            <OfficeMap
+              address={contacts.address}
+              title={t('Офис CAD.kz на карте: {address}', { address: t(contacts.address) })}
+            />
+          )}
           <section className={styles.card}>
-            <h2 className={styles.title}>Офис</h2>
+            <h2 className={styles.title}>{t('Офис')}</h2>
             {contacts.address ? (
               <p className={styles.line}>
                 <MapPin size={16} strokeWidth={1.75} aria-hidden="true" />
-                <span className={styles.address}>{contacts.address}</span>
+                <span className={styles.address}>{t(contacts.address)}</span>
               </p>
             ) : (
-              <p className={styles.muted}>Адрес уточняйте у менеджера.</p>
+              <p className={styles.muted}>{t('Адрес уточняйте у менеджера.')}</p>
             )}
             {contacts.hours && (
               <p className={styles.line}>
                 <Clock size={16} strokeWidth={1.75} aria-hidden="true" />
-                {contacts.hours}
+                {t(contacts.hours)}
               </p>
             )}
             {links && (
               <div className={styles.maps}>
                 <a href={links.twoGis} className={styles.mapLink} target="_blank" rel="noopener">
-                  Открыть в 2ГИС
+                  {t('Открыть в 2ГИС')}
                   <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
                 </a>
                 <a href={links.google} className={styles.mapLink} target="_blank" rel="noopener">
-                  Открыть в Google Картах
+                  {t('Открыть в Google Картах')}
                   <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
                 </a>
               </div>
             )}
           </section>
           <section className={styles.card}>
-            <h2 className={styles.title}>Для бухгалтерии</h2>
+            <h2 className={styles.title}>{t('Для бухгалтерии')}</h2>
             <p className={styles.muted}>
-              Реквизиты для договора и счёта, документы для госзакупок — по запросу у менеджера.
+              {t(
+                'Реквизиты для договора и счёта, документы для госзакупок — по запросу у менеджера.',
+              )}
             </p>
             <Link href="/about/requisites" className={styles.more}>
-              Реквизиты компании
+              {t('Реквизиты компании')}
               <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
             </Link>
           </section>
