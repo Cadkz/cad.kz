@@ -11,6 +11,7 @@
   --color-link-hover: var(--color-blue-hover);
   --color-image-surface: #ffffff;
   /* Светлая кнопка на тёмных баннерах: белая в обеих темах (06.11.2026). */
+  --color-step-badge: var(--color-navy); /* кружок с номером шага «Как мы работаем» */
   --color-button-light: var(--color-surface);
   --color-on-button-light: var(--color-heading);
   --color-control-hover: var(--color-blue-soft);
@@ -444,16 +445,17 @@
   --color-sky-strong: #5fa8ff;
   --color-bg: var(--color-navy-deep);
   /* Карточки заметно светлее фона, чтобы отделяться без яркой рамки (06.11.2026). */
-  --color-surface: color-mix(in srgb, var(--color-navy-deep) 76%, var(--color-blue));
+  --color-surface: var(--color-navy); /* как тёмные карточки-акции: заливка без яркой рамки */
   /* Текст с лёгким голубым оттенком: нейтральный серый на насыщенном синем выглядел грязно. */
   --color-text: #eef2fb;
   --color-text-muted: #b9c6e8;
   --color-heading: #ffffff;
   --color-link: #48d5c8;
   --color-link-hover: #70dfd3;
-  --color-blue-soft: color-mix(in srgb, var(--color-navy-deep) 62%, var(--color-blue));
-  --color-blue-mid: color-mix(in srgb, var(--color-navy-deep) 45%, var(--color-blue));
-  --color-border: rgba(170, 204, 255, 0.14); /* тихая рамка: карточки отделяет фон, а не обводка */
+  /* Плашки и чипы — светлее карточек navy, чтобы читались на них (06.11.2026). */
+  --color-blue-soft: color-mix(in srgb, var(--color-navy) 55%, var(--color-blue));
+  --color-blue-mid: color-mix(in srgb, var(--color-navy) 30%, var(--color-blue));
+  --color-border: rgba(170, 204, 255, 0.08); /* почти незаметная рамка: карточки отделяет заливка */
   --color-border-strong: rgba(170, 204, 255, 0.32);
   --color-gray-300: #cccccc;
   --color-gray-500: #878787;
@@ -475,6 +477,7 @@
   --color-grid-light-major: rgba(170, 204, 255, 0.1);
   --filter-header-logo: brightness(0) invert(1);
   --color-logo-mark: var(--color-sky);
+  --color-step-badge: var(--color-blue);
   --color-button-light: #ffffff;
   --color-on-button-light: var(--color-navy);
   --color-control-hover: var(--color-blue);

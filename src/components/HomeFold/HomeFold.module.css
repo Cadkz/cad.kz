@@ -31,6 +31,9 @@
   border-top: 0;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   background: linear-gradient(to bottom, transparent, var(--color-surface) 70%);
+  /* Градиент от внешнего края рамки: иначе под нижней рамкой повторялось его прозрачное начало,
+     и сквозь полупрозрачную рамку тёмной темы проступали логотипы следующего ряда (06.11.2026). */
+  background-origin: border-box;
 }
 
 .less {
