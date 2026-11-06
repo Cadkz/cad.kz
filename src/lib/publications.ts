@@ -4,7 +4,6 @@ import type { NewsCardData } from '@/components/NewsCard/NewsCard'
 import type { Media, Publication, Topic } from '../../payload-types'
 import { PROMO_FRESH_DAYS } from '../domain/adminQueue.mjs'
 import { NEWS_VENDORS, newsVendor, vendorWhere } from '../domain/newsVendors.mjs'
-import { formatDate } from './format'
 import { newsHref } from './navigationHrefs'
 import { cms } from './payload'
 
@@ -75,7 +74,8 @@ export function toCard(publication: Publication, topicCovers?: TopicCovers): New
     id: publication.id,
     href: newsHref(publication.slug),
     title: publication.title,
-    date: publication.publishedAt ? formatDate(publication.publishedAt) : null,
+    // Дата как есть (ISO): карточка показывает её на языке страницы.
+    date: publication.publishedAt ?? null,
     topic: themeOf(publication)?.title ?? null,
     excerpt: excerptOf(publication),
     cover: coverOf(publication, topicCovers),

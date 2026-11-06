@@ -12,6 +12,7 @@ import { ReadingLayout } from '@/components/ReadingLayout/ReadingLayout'
 import { RelatedList } from '@/components/RelatedList/RelatedList'
 import { Toc } from '@/components/Toc/Toc'
 import { articleLd } from '@/domain/structuredData.mjs'
+import { getT } from '@/i18n/server'
 import { formatDate } from '@/lib/format'
 import { newsHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
@@ -56,6 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * с оглавлением и списком «Читайте также».
  */
 export default async function PublicationPage({ params }: Props) {
+  const t = await getT()
   const publication = await getPublication((await params).slug)
   if (!publication) notFound()
   const blocks = parseBody(publication.body, publication.title)
@@ -110,7 +112,7 @@ export default async function PublicationPage({ params }: Props) {
           aside={
             <>
               <Toc items={toc} />
-              <RelatedList title="Читайте также" items={related} />
+              <RelatedList title={t('Читайте также')} items={related} />
             </>
           }
         >
@@ -121,9 +123,9 @@ export default async function PublicationPage({ params }: Props) {
               publication.publishedAt ? (
                 <>
                   <time dateTime={publication.publishedAt}>
-                    {formatDate(publication.publishedAt)}
+                    {formatDate(publication.publishedAt, t.lang)}
                   </time>
-                  <span>Редакция CAD.kz</span>
+                  <span>{t('Редакция CAD.kz')}</span>
                 </>
               ) : null
             }

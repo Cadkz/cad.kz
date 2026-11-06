@@ -1,4 +1,6 @@
 import Link from '@/components/LangLink/LangLink'
+import { getT } from '@/i18n/server'
+import { formatDate } from '@/lib/format'
 import type { NewsCardData } from '../NewsCard/NewsCard'
 import styles from './RelatedList.module.css'
 
@@ -10,11 +12,12 @@ type Props = {
 }
 
 /** Связанные материалы в правой колонке шаблона «Чтение». */
-export function RelatedList({ title, items, current }: Props) {
+export async function RelatedList({ title, items, current }: Props) {
+  const t = await getT()
   if (!items.length) return null
   return (
     <nav className={styles.box} aria-label={title}>
-      <p className={styles.title}>{title}</p>
+      <p className={styles.title}>{t(title)}</p>
       <ul className={styles.list}>
         {items.map((item) => (
           <li key={item.id}>
@@ -25,7 +28,7 @@ export function RelatedList({ title, items, current }: Props) {
             >
               {item.title}
             </Link>
-            {item.date && <span className={styles.date}>{item.date}</span>}
+            {item.date && <span className={styles.date}>{formatDate(item.date, t.lang)}</span>}
           </li>
         ))}
       </ul>

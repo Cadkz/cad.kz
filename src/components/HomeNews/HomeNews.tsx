@@ -1,3 +1,4 @@
+import { getT } from '@/i18n/server'
 import type { Slide } from '@/lib/home'
 import { type TopicCovers, toCard } from '@/lib/publications'
 import type { Publication } from '../../../payload-types'
@@ -15,15 +16,16 @@ type Props = { slides: Slide[]; news: Publication[]; covers: TopicCovers }
  * на главной больше нет (все акции — в слайдере и на /news?kind=promotion). Действующих акций
  * нет — слева крупно самая свежая новость.
  */
-export function HomeNews({ slides, news, covers }: Props) {
+export async function HomeNews({ slides, news, covers }: Props) {
+  const t = await getT()
   const feature = slides.length ? null : (news[0] ?? null)
   const side = (feature ? news.slice(1) : news).slice(0, 3)
   if (!slides.length && !feature) return null
   return (
     <Section
       id="news"
-      title="Новости и акции"
-      action={{ href: '/news', label: 'Все новости' }}
+      title={t('Новости и акции')}
+      action={{ href: '/news', label: t('Все новости') }}
       still
     >
       <ul className={styles.grid}>

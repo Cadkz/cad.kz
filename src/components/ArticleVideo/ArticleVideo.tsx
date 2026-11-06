@@ -1,3 +1,4 @@
+import { getT } from '@/i18n/server'
 import styles from './ArticleVideo.module.css'
 
 type Props = { title: string; embed: string; watch: string }
@@ -7,7 +8,8 @@ type Props = { title: string; embed: string; watch: string }
  * только когда долистали (loading="lazy"), и не мешает первому экрану. Под ним — ссылка на ролик
  * на случай, если плеер у читателя заблокирован.
  */
-export function ArticleVideo({ title, embed, watch }: Props) {
+export async function ArticleVideo({ title, embed, watch }: Props) {
+  const t = await getT()
   return (
     <figure className={styles.figure}>
       <div className={styles.frame}>
@@ -23,7 +25,7 @@ export function ArticleVideo({ title, embed, watch }: Props) {
       </div>
       <figcaption className={styles.caption}>
         <a href={watch} target="_blank" rel="noopener noreferrer">
-          {title === 'Видео' ? 'Смотреть видео на сайте видеохостинга' : title}
+          {title === 'Видео' ? t('Смотреть видео на сайте видеохостинга') : title}
         </a>
       </figcaption>
     </figure>

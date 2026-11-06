@@ -1,3 +1,4 @@
+import { getT } from '@/i18n/server'
 import { headSpans } from '../../domain/tables.mjs'
 import { InlineText } from '../InlineText/InlineText'
 import styles from './ArticleTable.module.css'
@@ -20,10 +21,11 @@ const keyed = <T,>(items: T[], name: (item: T) => string) => {
  * строк: подпись над группой колонок занимает всю группу, как на старом сайте. Широкая
  * таблица прокручивается вбок внутри своей рамки, страница вбок не едет.
  */
-export function ArticleTable({ head, rows }: Props) {
+export async function ArticleTable({ head, rows }: Props) {
+  const t = await getT()
   return (
     // biome-ignore lint/a11y/noNoninteractiveTabindex: рамку широкой таблицы прокручивают с клавиатуры
-    <section className={styles.frame} tabIndex={0} aria-label="Таблица">
+    <section className={styles.frame} tabIndex={0} aria-label={t('Таблица')}>
       <table className={styles.table}>
         {head && (
           <thead>

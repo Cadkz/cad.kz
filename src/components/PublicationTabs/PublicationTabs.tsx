@@ -1,4 +1,5 @@
 import Link from '@/components/LangLink/LangLink'
+import { getT } from '@/i18n/server'
 import { publicationTabs } from '@/lib/siteNav'
 import styles from './PublicationTabs.module.css'
 
@@ -6,7 +7,7 @@ import styles from './PublicationTabs.module.css'
  * «Новости и статьи» — один раздел с переключателем типа публикаций над заголовком.
  * Каждый тип — своя страница со своим адресом (/news, /articles), адреса не менялись.
  */
-export function PublicationTabs({
+export async function PublicationTabs({
   current,
   tabs = publicationTabs,
   label = 'Новости и статьи',
@@ -16,8 +17,9 @@ export function PublicationTabs({
   tabs?: { title: string; href: string }[]
   label?: string
 }) {
+  const t = await getT()
   return (
-    <nav aria-label={label} className={styles.tabs}>
+    <nav aria-label={t(label)} className={styles.tabs}>
       {tabs.map((tab) => (
         <Link
           key={tab.href}
@@ -25,7 +27,7 @@ export function PublicationTabs({
           className={styles.tab}
           aria-current={tab.href === current ? 'page' : undefined}
         >
-          {tab.title}
+          {t(tab.title)}
         </Link>
       ))}
     </nav>

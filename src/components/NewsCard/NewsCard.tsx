@@ -2,6 +2,8 @@ import { ArrowRight, Newspaper } from 'lucide-react'
 import Image from 'next/image'
 import Link from '@/components/LangLink/LangLink'
 import { NAV_FORWARD } from '@/domain/motion.mjs'
+import { getT } from '@/i18n/server'
+import { formatDate } from '@/lib/format'
 import { Badge } from '../Badge/Badge'
 import styles from './NewsCard.module.css'
 
@@ -30,13 +32,14 @@ type Props = {
 }
 
 /** Карточка новости или статьи: обложка, дата, тематика, заголовок, анонс. */
-export function NewsCard({
+export async function NewsCard({
   news,
   tone = 'navy',
   withExcerpt = false,
   level = 3,
   size = 'default',
 }: Props) {
+  const t = await getT()
   const Heading = level === 2 ? 'h2' : 'h3'
   return (
     <article
@@ -69,8 +72,8 @@ export function NewsCard({
       )}
       <div className={styles.body}>
         <div className={styles.meta}>
-          {news.date && <time dateTime={news.date}>{news.date}</time>}
-          {news.topic && <Badge>{news.topic}</Badge>}
+          {news.date && <time dateTime={news.date}>{formatDate(news.date, t.lang)}</time>}
+          {news.topic && <Badge>{t(news.topic)}</Badge>}
         </div>
         <Heading className={styles.title}>
           <Link href={news.href} className={styles.link} transitionTypes={NAV_FORWARD}>

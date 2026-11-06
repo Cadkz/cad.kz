@@ -1,4 +1,5 @@
 import { newsVendor } from '@/domain/newsVendors.mjs'
+import { getT } from '@/i18n/server'
 import {
   getNewsVendors,
   getPublications,
@@ -36,6 +37,7 @@ const first = (value: string | string[] | undefined) =>
  * 13.10.2026): по умолчанию только действующие.
  */
 export async function PublicationIndex({ path, title, lead, kind, params }: Props) {
+  const t = await getT()
   const topic = first(params.topic)
   const vendor = newsVendor(first(params.vendor))?.slug ?? null
   const promo: PromoState | null =
@@ -56,13 +58,13 @@ export async function PublicationIndex({ path, title, lead, kind, params }: Prop
     return `${path}${text ? `?${text}` : ''}`
   }
   const promoTabs = [
-    { title: 'Действующие', href: `${path}?kind=promotion` },
-    { title: 'Архивные', href: `${path}?kind=promotion&archive=1` },
+    { title: t('Действующие'), href: `${path}?kind=promotion` },
+    { title: t('Архивные'), href: `${path}?kind=promotion&archive=1` },
   ]
   const empty =
     promo === 'current'
-      ? 'Сейчас действующих акций нет. Загляните в архив или спросите менеджера о скидках.'
-      : 'Материалов пока нет. Их добавляет редактор в админке.'
+      ? t('Сейчас действующих акций нет. Загляните в архив или спросите менеджера о скидках.')
+      : t('Материалов пока нет. Их добавляет редактор в админке.')
 
   return (
     <main>
@@ -75,7 +77,7 @@ export async function PublicationIndex({ path, title, lead, kind, params }: Prop
                 promo === 'archive' ? (promoTabs[1]?.href ?? '') : (promoTabs[0]?.href ?? '')
               }
               tabs={promoTabs}
-              label="Акции"
+              label={t('Акции')}
             />
           ) : (
             <PublicationTabs current={path} />
@@ -86,8 +88,8 @@ export async function PublicationIndex({ path, title, lead, kind, params }: Prop
             topics={vendors}
             active={vendor}
             hrefFor={(slug) => query({ vendor: slug, topic })}
-            label="Производитель"
-            allLabel="Все"
+            label={t('Производитель')}
+            allLabel={t('Все')}
             min={1}
           />
           <TopicLinks
