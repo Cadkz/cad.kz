@@ -2,6 +2,7 @@ import type { Where } from 'payload'
 import { cache } from 'react'
 import { DEFAULT_LANG, LANGS, type Lang } from '@/i18n/locales.mjs'
 import { cms } from './payload'
+import { newPublicationsWhere } from './siteTextTable'
 import { CATALOG_READY_SHARE } from './translations'
 
 /**
@@ -59,11 +60,13 @@ export async function contentLangsMap(
 }
 
 /**
- * Языки списка новостей или статей: открываем, когда переведено столько же материалов, сколько
- * товаров нужно для каталога (CATALOG_READY_SHARE).
+ * Языки списка новостей или статей: открываем, когда из новых материалов (перенесённые со старого
+ * сайта не переводятся) переведено столько же, сколько товаров нужно для каталога
+ * (CATALOG_READY_SHARE). Новых пока нет — список только по-русски.
  */
-export async function listLangs(where: Where): Promise<Lang[]> {
+export async function listLangs(visible: Where): Promise<Lang[]> {
   const payload = await cms()
+  const where: Where = { and: [visible, await newPublicationsWhere(payload)] }
   const { totalDocs } = await payload.count({ collection: 'publications', where })
   const result: Lang[] = [DEFAULT_LANG]
   if (!totalDocs) return result

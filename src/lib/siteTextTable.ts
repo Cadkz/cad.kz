@@ -30,7 +30,27 @@ const GLOBALS = [
 
 type GlobalSlug = (typeof GLOBALS)[number]['slug']
 
-const COLLECTIONS = {
+/**
+ * Новости и статьи, перенесённые со старого сайта (ключ импорта legacy:page:…), не переводим —
+ * решение владельца 07.11.2026. Переводятся только созданные в новой админке. Условие строится
+ * через номера: оператор not_like в этой версии Payload отбор не делает.
+ */
+export async function newPublicationsWhere(payload: Payload): Promise<Where> {
+  const { docs } = await payload.find({
+    collection: 'publications',
+    depth: 0,
+    pagination: false,
+    overrideAccess: true,
+    select: {},
+    where: { legacyKey: { like: 'legacy:' } },
+  })
+  return docs.length ? { id: { not_in: docs.map((doc) => doc.id) } } : {}
+}
+
+const COLLECTIONS: Record<
+  'topics' | 'pages' | 'publications',
+  { fields: unknown; select: Record<string, true>; sort: string; onlyNew?: boolean }
+> = {
   topics: { fields: topics.fields, select: { title: true }, sort: 'id' },
   pages: {
     fields: pages.fields,
@@ -40,10 +60,10 @@ const COLLECTIONS = {
   publications: {
     fields: publications.fields,
     select: { title: true, kind: true, excerpt: true, body: true, seo: true },
-    // Свежие новости — первыми: их читают, и автоперевод дойдёт до них раньше архива.
     sort: '-publishedAt',
+    onlyNew: true,
   },
-} as const
+}
 
 type SiteCollection = keyof typeof COLLECTIONS
 
@@ -93,7 +113,8 @@ async function loadSiteDocs(payload: Payload, only?: Set<string>): Promise<SiteD
     (Object.keys(COLLECTIONS) as SiteCollection[]).map(async (collection) => {
       const chosen = ids(collection)
       if (chosen && !chosen.length) return []
-      const { fields, select, sort } = COLLECTIONS[collection]
+      const { fields, select, sort, onlyNew } = COLLECTIONS[collection]
+      const where = onlyNew ? await newPublicationsWhere(payload) : null
       const result = await payload.find({
         collection,
         locale: 'all',
@@ -103,7 +124,11 @@ async function loadSiteDocs(payload: Payload, only?: Set<string>): Promise<SiteD
         select,
         sort,
         where: {
-          and: [{ status: { equals: 'published' } }, ...(chosen ? [{ id: { in: chosen } }] : [])],
+          and: [
+            { status: { equals: 'published' } },
+            ...(where ? [where] : []),
+            ...(chosen ? [{ id: { in: chosen } }] : []),
+          ],
         },
       })
       return (result.docs as unknown as Doc[]).map((doc) => ({

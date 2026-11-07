@@ -201,7 +201,8 @@ export function TranslationTable() {
           </AdminButton>
         </div>
         <p className={styles.hint}>
-          Тексты сайта: главная, страница BIM, контакты и подвал, страницы, новости и статьи
+          Тексты сайта: главная, страница BIM, контакты и подвал, страницы, новые новости и статьи
+          (перенесённые со старого сайта не переводятся)
         </p>
         <div className={styles.actions}>
           <AdminButton onClick={() => download('next', 'site')} disabled={Boolean(busy)}>
