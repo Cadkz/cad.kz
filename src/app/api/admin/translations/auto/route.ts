@@ -2,6 +2,7 @@ import { ModelError } from '@/domain/anthropicChat.mjs'
 import { AUTO_MODEL, autoPart, translateRows } from '@/domain/autoTranslate.mjs'
 import { adminRequest, reply } from '@/lib/adminApi'
 import { refreshSiteData } from '@/lib/siteCache'
+import { planSiteTexts, saveSiteText, siteTableGroups } from '@/lib/siteTextTable'
 import { planTerms, saveTerm, termTableGroups } from '@/lib/termTable'
 import { planTranslations, saveTranslation, translationGroups } from '@/lib/translationTable'
 
@@ -12,7 +13,7 @@ import { planTranslations, saveTranslation, translationGroups } from '@/lib/tran
  * перевести или записать, возвращаются в skip — браузер передаёт их обратно, чтобы не крутить
  * одну и ту же строку. Логика части и ответа модели — src/domain/autoTranslate.mjs.
  *
- * POST { set: 'docs' | 'terms', lane, lanes, skip: string[] }
+ * POST { set: 'docs' | 'terms' | 'site', lane, lanes, skip: string[] }
  */
 export const maxDuration = 300
 
@@ -36,13 +37,18 @@ export async function POST(request: Request) {
   if (!apiKey)
     return reply({ error: 'Модель не подключена: нет ключа MODEL_API_KEY в Vercel.' }, 503)
   const terms = data.set === 'terms'
+  const site = data.set === 'site'
   const lanes = numberIn(data.lanes, 1, MAX_LANES, 1)
   const lane = numberIn(data.lane, 0, lanes - 1, 0)
   const skip = new Set(
     Array.isArray(data.skip) ? data.skip.filter((key) => typeof key === 'string') : [],
   )
 
-  const groups = terms ? await termTableGroups(payload) : await translationGroups(payload)
+  const groups = terms
+    ? await termTableGroups(payload)
+    : site
+      ? await siteTableGroups(payload)
+      : await translationGroups(payload)
   const sent = autoPart(groups, { lane, lanes, skip })
   if (!sent.length) return reply({ done: true })
 
@@ -68,12 +74,23 @@ export async function POST(request: Request) {
   let saved = 0
   if (translated.rows.length) {
     const termPlan = terms ? await planTerms(payload, translated.rows) : null
-    const docPlan = terms ? null : await planTranslations(payload, translated.rows)
-    for (const problem of termPlan?.problems ?? docPlan?.problems ?? []) {
+    const sitePlan = site ? await planSiteTexts(payload, translated.rows) : null
+    const docPlan = terms || site ? null : await planTranslations(payload, translated.rows)
+    for (const problem of termPlan?.problems ?? sitePlan?.problems ?? docPlan?.problems ?? []) {
       skipped.add(problem.key)
       problems.push(problem)
     }
-    if (termPlan) {
+    if (sitePlan) {
+      for (const update of sitePlan.updates) {
+        try {
+          await saveSiteText(payload, update)
+          saved += update.texts
+        } catch (failure) {
+          payload.logger.error({ err: failure, msg: `Автоперевод ${update.doc}` })
+          for (const row of sent) if (keyOf(row.key) === update.doc) skipped.add(row.key)
+        }
+      }
+    } else if (termPlan) {
       for (const update of termPlan.updates) {
         try {
           await saveTerm(payload, update)

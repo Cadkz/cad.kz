@@ -155,10 +155,16 @@ export function nextPart(groups, budget = PART_CHARS) {
 export function progress(groups) {
   const rows = groups.flat()
   const missing = rows.filter(needsTranslation)
+  const chars = (/** @type {TableRow[]} */ list) =>
+    list.reduce((sum, item) => sum + item.ru.length, 0)
   return {
     texts: rows.length,
     kk: rows.filter((item) => item.kk).length,
     en: rows.filter((item) => item.en).length,
+    /** Знаков русского текста всего и уже переведённого — проценты по объёму, а не по строкам. */
+    chars: chars(rows),
+    kkChars: chars(rows.filter((item) => item.kk)),
+    enChars: chars(rows.filter((item) => item.en)),
     missingChars: missing.reduce((sum, item) => sum + item.ru.length, 0),
     missingDocs: groups.filter((group) => group.some(needsTranslation)).length,
   }
@@ -276,6 +282,9 @@ export function writeTranslationXlsx(rows) {
 
 const KEY = /^(products|sections):(\d+):([\w.]+(?::[\w-]+:\w+)?)$/
 
+/** Ключ текстов сайта; точная проверка — isSiteKey в siteTexts.mjs (тот же вид). */
+const SITE_KEY = /^(globals:[a-z][\w-]*|(?:pages|publications|topics):\d+):[\w.]+(#\d+)?$/
+
 /**
  * Строки переводов из прочитанной книги (src/domain/spreadsheet.mjs): лист, где в первой
  * колонке шапки «Ключ». Колонки ищутся по заголовкам, а не по месту.
@@ -296,8 +305,9 @@ export function readTranslationRows(sheets) {
     for (const cells of sheet.rows.slice(headerAt + 1)) {
       const key = (cells[0] ?? '').trim()
       if (!key) continue
-      // terms:<русский текст> — строки словаря характеристик и комплектаций (src/domain/terms.mjs).
-      if (!KEY.test(key) && !/^terms:./.test(key)) {
+      // terms:<русский текст> — строки словаря характеристик и комплектаций (src/domain/terms.mjs),
+      // globals:/pages:/publications:/topics: — тексты сайта (src/domain/siteTexts.mjs).
+      if (!KEY.test(key) && !/^terms:./.test(key) && !SITE_KEY.test(key)) {
         skipped++
         continue
       }
@@ -501,6 +511,7 @@ export const TRANSLATION_PROMPT = `Ты профессиональный пер�
 6. Английский — нейтральный деловой (US English), короткие ясные фразы, без маркетинговых преувеличений. Тенге: KZT.
 7. Строки с пометкой «SEO title» в столбце B — не длиннее 60 знаков, «SEO description» — не длиннее 160 знаков.
 8. Строки «Характеристика», «Значение характеристики», «Комплектация», «Подбор: …» и подобные — короткие подписи из карточки товара: переводи так же коротко, как принято в спецификациях. Числа не меняй. Единицы измерения в английском — международные (мм → mm, кг → kg, ч → h, Вт → W), десятичная запятая → точка (0,1 мм → 0.1 mm); в казахском единицы и запятая как в русском. Ответы «Да» / «Нет» — Иә / Жоқ, Yes / No.
-9. Не добавляй ничего от себя, не сокращай смысл, не бери отдельные слова в кавычки для выразительности.
+9. Строки, где в столбце B написано «часть N из M», — куски одного длинного текста по порядку: переводи каждую как есть, не переноси слова между соседними частями и не дописывай начало или конец.
+10. Не добавляй ничего от себя, не сокращай смысл, не бери отдельные слова в кавычки для выразительности.
 
 В конце верни файл .xlsx с тем же устройством, имя: исходное имя + _перевод. Перед отправкой проверь сам: число строк совпадает с исходным, в D и E нет пустых ячеек там, где C заполнен, в каждой ячейке перевода те же теги, те же строки разметки и те же адреса ссылок, что в русском тексте. Напиши, сколько строк переведено.`

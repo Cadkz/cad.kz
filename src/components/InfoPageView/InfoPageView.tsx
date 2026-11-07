@@ -7,13 +7,14 @@ import { ReadingLayout } from '@/components/ReadingLayout/ReadingLayout'
 import { RelatedList } from '@/components/RelatedList/RelatedList'
 import { pagePath } from '@/domain/legacyPages.mjs'
 import { parseRequisites } from '@/domain/requisites.mjs'
-import { langRedirect } from '@/i18n/server'
+import { getT, langRedirect } from '@/i18n/server'
+import { contentLangs } from '@/lib/contentLangs'
 import { getContacts } from '@/lib/navigation'
 import { getInfoLinks, getPage } from '@/lib/pages'
 import { cms } from '@/lib/payload'
 import { bodyPictures } from '@/lib/pictures'
 import { type Block, imageSources, parseBody } from '@/lib/richText'
-import { pageMetadata, RU_ONLY } from '@/lib/seo'
+import { pageMetadata } from '@/lib/seo'
 
 const PRIVACY = pagePath('privacy-policy')
 
@@ -57,7 +58,7 @@ export async function infoPageMetadata(slug: string) {
     title: `${page.title} — CAD.kz`,
     description: page.lead ?? page.body,
     path: pagePath(slug),
-    langs: RU_ONLY,
+    langs: await contentLangs('pages', page.id),
   })
 }
 
@@ -73,10 +74,11 @@ export async function InfoPageView({ slug }: { slug: string }) {
       ? requisitesBlocks(page.body, page.title)
       : parseBody(page.body, page.title)
   const questions = QUESTIONS[slug]
-  const [links, pictures, contacts] = await Promise.all([
+  const [links, pictures, contacts, t] = await Promise.all([
     getInfoLinks(),
     cms().then((payload) => bodyPictures(payload, imageSources(blocks))),
     getContacts(),
+    getT(),
   ])
   const crumbs =
     slug === 'about'
@@ -102,7 +104,7 @@ export async function InfoPageView({ slug }: { slug: string }) {
                 {
                   id: 0,
                   href: '/contacts',
-                  title: 'Контакты',
+                  title: t('Контакты'),
                   date: null,
                   topic: null,
                   excerpt: null,
@@ -116,7 +118,15 @@ export async function InfoPageView({ slug }: { slug: string }) {
         >
           <PageIntro title={page.title} lead={page.lead} />
           <ArticleBody blocks={blocks} pictures={pictures} />
-          {questions && <AskManager contacts={contacts} {...questions} />}
+          {questions && (
+            // Сообщение в WhatsApp остаётся русским: его читает менеджер.
+            <AskManager
+              contacts={contacts}
+              {...questions}
+              title={t(questions.title)}
+              phrase={t(questions.phrase)}
+            />
+          )}
         </ReadingLayout>
       </Container>
     </main>

@@ -29,6 +29,7 @@ export const topics: CollectionConfig = {
     slug: 'topics',
     singular: 'Тема',
     plural: 'Темы новостей и статей',
+    translatedTitle: true,
     fields: [
       slugField('Адрес (латиницей, для ссылки ?topic=…)'),
       {
@@ -111,7 +112,7 @@ const publicationCollection = contentCollection({
 export const publications: CollectionConfig = {
   ...publicationCollection,
   fields: [
-    textField('title', 'Название', true),
+    translated(textField('title', 'Название', true)),
     activityField('публикация'),
     {
       name: 'kind',
@@ -249,7 +250,7 @@ const pageCollection = contentCollection({
 export const pages: CollectionConfig = {
   ...pageCollection,
   fields: [
-    textField('title', 'Название', true),
+    translated(textField('title', 'Название', true)),
     activityField('страница'),
     {
       ...slugField('Код страницы'),

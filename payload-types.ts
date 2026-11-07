@@ -91,6 +91,7 @@ export interface Config {
     users: User;
     'search-queries': SearchQuery;
     terms: Term;
+    'translation-parts': TranslationPart;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -123,6 +124,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     'search-queries': SearchQueriesSelect<false> | SearchQueriesSelect<true>;
     terms: TermsSelect<false> | TermsSelect<true>;
+    'translation-parts': TranslationPartsSelect<false> | TranslationPartsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1063,6 +1065,20 @@ export interface Term {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "translation-parts".
+ */
+export interface TranslationPart {
+  id: number;
+  key: string;
+  lang: 'kk' | 'en';
+  part: number;
+  source: string;
+  text: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1180,6 +1196,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'terms';
         value: number | Term;
+      } | null)
+    | ({
+        relationTo: 'translation-parts';
+        value: number | TranslationPart;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1795,6 +1815,19 @@ export interface TermsSelect<T extends boolean = true> {
   ru?: T;
   kk?: T;
   en?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "translation-parts_select".
+ */
+export interface TranslationPartsSelect<T extends boolean = true> {
+  key?: T;
+  lang?: T;
+  part?: T;
+  source?: T;
+  text?: T;
   updatedAt?: T;
   createdAt?: T;
 }

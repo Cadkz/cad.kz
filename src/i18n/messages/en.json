@@ -579,5 +579,9 @@
   "Просмотр скана": "Scan viewer",
   "{n} из {total}": "{n} of {total}",
   "Предыдущий скан": "Previous scan",
-  "Следующий скан": "Next scan"
+  "Следующий скан": "Next scan",
+  "Вопросы по покупке": "Questions about purchasing",
+  "Не знаете, какую редакцию взять или как оформить счёт на организацию? Спросите — подскажу или позову менеджера.": "Not sure which edition to choose or how to get an invoice for your company? Ask me — I will help or call a manager.",
+  "Вопросы по доставке": "Questions about delivery",
+  "Лицензии приходят на электронную почту после оплаты. Если что-то непонятно со сроками или получением — спросите.": "Licenses are sent by email after payment. If anything about timing or delivery is unclear, just ask."
 }

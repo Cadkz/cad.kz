@@ -63,8 +63,8 @@ function batches(rows: IncomingRow[]) {
   return result
 }
 
-type TableSet = 'docs' | 'terms'
-type Part = 'next' | 'big' | 'all'
+type TableSet = 'docs' | 'terms' | 'site' | 'everything'
+type Part = 'next' | 'big' | 'all' | 'rest'
 
 /**
  * Скачать часть для перевода и загрузить перевод обратно. Файл читается в браузере, на сервер
@@ -94,9 +94,9 @@ export function TranslationTable() {
   async function download(part: Part, set: TableSet) {
     setError('')
     setDone('')
-    setBusy(part === 'all' ? 'Готовим всю таблицу…' : 'Готовим часть…')
+    setBusy(part === 'all' || part === 'rest' ? 'Готовим таблицу…' : 'Готовим часть…')
     try {
-      const response = await fetch(`${API}?part=${part}${set === 'terms' ? '&set=terms' : ''}`)
+      const response = await fetch(`${API}?part=${part}${set === 'docs' ? '' : `&set=${set}`}`)
       if (!response.ok) {
         setError(await response.text())
         return
@@ -187,6 +187,33 @@ export function TranslationTable() {
     <section className={styles.root}>
       <div className={styles.block}>
         <h2 className={styles.title}>1. Скачать</h2>
+        <p className={styles.hint}>Весь сайт одним списком: всё, что ещё не переведено</p>
+        <div className={styles.actions}>
+          <AdminButton onClick={() => download('rest', 'everything')} disabled={Boolean(busy)}>
+            Всё, что осталось, — одним файлом
+          </AdminButton>
+          <AdminButton
+            secondary
+            onClick={() => download('big', 'everything')}
+            disabled={Boolean(busy)}
+          >
+            Большая часть из всего (×15)
+          </AdminButton>
+        </div>
+        <p className={styles.hint}>
+          Тексты сайта: главная, страница BIM, контакты и подвал, страницы, новости и статьи
+        </p>
+        <div className={styles.actions}>
+          <AdminButton onClick={() => download('next', 'site')} disabled={Boolean(busy)}>
+            Скачать следующую часть
+          </AdminButton>
+          <AdminButton secondary onClick={() => download('big', 'site')} disabled={Boolean(busy)}>
+            Большая часть (×15)
+          </AdminButton>
+          <AdminButton secondary onClick={() => download('all', 'site')} disabled={Boolean(busy)}>
+            Вся таблица
+          </AdminButton>
+        </div>
         <p className={styles.hint}>Тексты товаров и разделов</p>
         <div className={styles.actions}>
           <AdminButton onClick={() => download('next', 'docs')} disabled={Boolean(busy)}>
@@ -212,15 +239,20 @@ export function TranslationTable() {
           </AdminButton>
         </div>
         <p className={styles.hint}>
-          Часть — около 12 000 знаков, столько ChatGPT переводит за раз без обрывов. Большая часть —
-          около 180 000 знаков, кругов в 15 раз меньше, но ChatGPT может перевести не всё: пропуски
-          видно на проверке после загрузки, их доберёт следующая часть. Просите ChatGPT переводить
-          файл целиком, по листу, и вернуть Excel. В части попадают товары, где не хватает хотя бы
-          одного перевода. Вся таблица — для проверки и правки уже переведённого. Словарь — короткие
+          «Всё, что осталось» — тексты сайта, товары и словарь в одном файле, только то, где не
+          хватает перевода. Если ChatGPT не справится с таким объёмом за раз, загрузите то, что он
+          вернул: переведённое запишется, а остаток снова попадёт в следующий файл. Часть — около 12
+          000 знаков, столько ChatGPT переводит за раз без обрывов. Большая часть — около 180 000
+          знаков, кругов в 15 раз меньше, но ChatGPT может перевести не всё: пропуски видно на
+          проверке после загрузки, их доберёт следующая часть. Просите ChatGPT переводить файл
+          целиком, по листу, и вернуть Excel. В части попадают товары, где не хватает хотя бы одного
+          перевода. Вся таблица — для проверки и правки уже переведённого. Словарь — короткие
           подписи со страниц товаров (названия и значения характеристик, комплектации, условия
           лицензий, тексты подбора): каждый текст переводится один раз и подставляется во все
           товары, где он встречается. Отдельные строки можно поправить в{' '}
-          <a href="/admin/collections/terms">«Словаре переводов»</a>.
+          <a href="/admin/collections/terms">«Словаре переводов»</a>. Длинная статья идёт в таблицу
+          частями («часть 2 из 9»): на сайте перевод появится, когда загружены все части. В одном
+          файле можно загружать строки из любых наборов.
         </p>
       </div>
 
@@ -261,7 +293,7 @@ export function TranslationTable() {
             <strong>
               Запишется переводов: {check.texts}
               {check.docs > 0 &&
-                ` в ${check.docs} ${check.docs === 1 ? 'товаре или разделе' : 'товарах и разделах'}`}
+                ` в ${check.docs} ${check.docs === 1 ? 'документе' : 'документах'} (товары, разделы, страницы)`}
               {check.terms > 0 && `${check.docs > 0 ? ',' : ''} строк словаря: ${check.terms}`}.
             </strong>
             {check.unchanged > 0 && ` Без изменений: ${check.unchanged}.`}
@@ -278,7 +310,8 @@ export function TranslationTable() {
               </ul>
               <p className={styles.hint}>
                 Обычно это ChatGPT потерял тег, строку списка или изменил адрес ссылки. Такую ячейку
-                можно перевести заново или поправить вручную в карточке товара.
+                можно перевести заново или поправить вручную в карточке товара или в разделе
+                админки, где лежит текст.
               </p>
             </details>
           )}

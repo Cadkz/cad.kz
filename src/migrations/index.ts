@@ -37,6 +37,7 @@ import * as migration_20261106_075526_languages from './20261106_075526_language
 import * as migration_20261106_102038_delivery_terms from './20261106_102038_delivery_terms'
 import * as migration_20261106_102416_bim_page from './20261106_102416_bim_page'
 import * as migration_20261106_110549_terms_dictionary from './20261106_110549_terms_dictionary'
+import * as migration_20261106_234722_localized_titles_translation_parts from './20261106_234722_localized_titles_translation_parts'
 
 export const migrations = [
   {
@@ -233,5 +234,10 @@ export const migrations = [
     up: migration_20261106_110549_terms_dictionary.up,
     down: migration_20261106_110549_terms_dictionary.down,
     name: '20261106_110549_terms_dictionary',
+  },
+  {
+    up: migration_20261106_234722_localized_titles_translation_parts.up,
+    down: migration_20261106_234722_localized_titles_translation_parts.down,
+    name: '20261106_234722_localized_titles_translation_parts',
   },
 ]

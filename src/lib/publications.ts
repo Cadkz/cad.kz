@@ -220,9 +220,10 @@ export async function getPublication(slug: string) {
 
 /** Темы, в которых есть опубликованные материалы этого типа, — для ссылок над списком. */
 export async function getTopics(kinds: PublicationKind[]) {
-  const payload = await cms()
+  const [payload, lang] = await Promise.all([cms(), requestLang()])
   const topics = await payload.find({
     collection: 'topics',
+    locale: lang,
     where: { status: { equals: 'published' } },
     sort: ['order', 'title'],
     pagination: false,

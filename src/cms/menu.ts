@@ -14,6 +14,7 @@ import {
   searchQueries,
 } from './collections/system'
 import { terms } from './collections/terms'
+import { translationParts } from './collections/translationParts'
 import { users } from './collections/users'
 import { bimPage } from './globals/bimPage'
 import { homePage } from './globals/homePage'
@@ -53,6 +54,7 @@ const MENU: { group: string; collections: CollectionConfig[]; globals: GlobalCon
       users,
       searchQueries,
       terms,
+      translationParts,
     ],
     globals: [pricingSettings],
   },

@@ -13,6 +13,7 @@ import { RelatedList } from '@/components/RelatedList/RelatedList'
 import { Toc } from '@/components/Toc/Toc'
 import { articleLd } from '@/domain/structuredData.mjs'
 import { getT } from '@/i18n/server'
+import { contentLangs } from '@/lib/contentLangs'
 import { formatDate } from '@/lib/format'
 import { newsHref } from '@/lib/navigationHrefs'
 import { cms } from '@/lib/payload'
@@ -28,7 +29,7 @@ import {
   toCard,
 } from '@/lib/publications'
 import { imageSources, parseBody } from '@/lib/richText'
-import { pageMetadata, RU_ONLY, siteUrl } from '@/lib/seo'
+import { pageMetadata, siteUrl } from '@/lib/seo'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: excerptOf(publication),
     path: newsHref(publication.slug),
     image: cover?.url,
-    langs: RU_ONLY,
+    langs: await contentLangs('publications', publication.id),
   })
 }
 

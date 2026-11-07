@@ -25,3 +25,10 @@
 .state p {
   margin: 0;
 }
+
+.sets {
+  display: grid;
+  gap: calc(var(--base) / 4);
+  margin: 0;
+  padding-left: calc(var(--base) * 1.25);
+}
